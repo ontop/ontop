@@ -1,0 +1,291 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<project name="obdapluginp4" default="jar" basedir=".">
+	<property file="local.properties" />
+
+	<property name="obdaapi.dir" location="../inf.unibz.it.obda.api" />
+
+	<property name="obdaapi.owlapi.dir" location="../inf.unibz.it.obda.owlapi" />
+
+	<property environment="env" />
+	<property name="version" value="0.9.1" />
+	<!-- 
+        To run this build file set the environment variable
+        PROTEGE_HOME to point to a protege distribution and type ant
+        install or jar.
+     -->
+
+	<!-- ============================================================= -->
+	<!-- 
+        This section may need to be customized by the developer for a 
+        particular project 
+     -->
+
+	<!-- 
+        This setting defines the name of the plugin.
+        This may be the only setting that the developer needs to
+        change.
+     -->
+	<property name="plugin" value="inf.unibz.it.obda.protege4.obdaplugin" />
+
+
+	<!-- 
+        Here is the copy.resources target.  It may need modification
+        to copy the right resources into the classes directory.  By
+        default it already copies non-java files found in the source
+        directory, the libraries needed by the project and the
+        viewconfig and the plugin.xml.  This will be sufficient in
+        many cases. 
+     -->
+	<target name="copy.resources" depends="build.manifest">
+
+		<copy todir="${classes}">
+			<fileset dir="${src}">
+				<include name="**/*" />
+				<exclude name="**/*.java" />
+				<exclude name="**/MANIFEST.MF" />
+				<exclude name="**/manifest.mf" />
+			</fileset>
+		</copy>
+		<copy todir="${classes}/">
+			<fileset dir="../${dir.obdaapi}/lib" excludes="junit*.jar" />
+		</copy>
+		<copy todir="${classes}">
+			<fileset dir="./plugin" includes="viewconfig-*.xml,plugin.xml,logback-test.xml" />
+			<fileset dir="./plugin" includes="*.jar" />
+		</copy>
+		<copy todir="${classes}" flatten="true">
+			<resources>
+				<file file="${obdaapi.lib}" />
+				<file file="${obdaapiowl.lib}" />
+			</resources>
+		</copy>
+		<!-- the manifest doesn't belong here but this is good for IDE's -->
+		<mkdir dir="${classes}/META-INF" />
+		<copy todir="${classes}/META-INF" file="${manifest}" />
+	</target>
+
+
+	<!-- 
+        The following target only needs to be modified if the
+        developer needs to obtain some jar files that are contained in
+        the Protege bundles.  The contents of these jar files are
+        found when Protege 4 runs but may be needed in order to
+        compile the plugin. 
+     -->
+	<target name="buildlibs" depends="init, checkProtegeLibsAndReport">
+		<unjar dest="${build}" src="${common.lib}">
+			<patternset>
+				<include name="**/log4j.jar" />
+			</patternset>
+		</unjar>
+	</target>
+
+
+
+	<!-- 
+        The following target only needs to be modified if the user
+        needs to change the classpath.  It is preconfigured to use
+        the common protege 4 jars, the lib directory and the
+        libraries that have been uncovered in buildlibs. 
+     -->
+	<target name="checkProtegeLibs" depends="useProtegeHome">
+		<property name="owl.editor.jar" location="${plugins}/org.protege.editor.owl.jar" />
+		<condition property="libs.found">
+			<and>
+				<available file="${equinox.common}" type="file" />
+				<available file="${equinox.registry}" type="file" />
+				<available file="${owl.editor.jar}" type="file" />
+				<available file="${owl.lib}" type="file" />
+				<available file="${obdaapi.lib}" type="file" />
+				<available file="${obdaapiowl.lib}" type="file" />
+				<available file="${owleditor.lib}" type="file" />
+				<available file="${antlr-3.1.lib}" type="file" />
+				<available file="${jena.lib}" type="file" />
+				<available file="${arq.lib}" type="file" />
+			</and>
+		</condition>
+		<path id="project.classpath">
+			<pathelement location="${protege.lib}" />
+			<pathelement location="${equinox.common}" />
+			<pathelement location="${equinox.registry}" />
+			<pathelement location="${owl.editor.jar}" />
+			<pathelement location="${owl.lib}" />
+			<pathelement location="${obdaapi.lib}" />
+			<pathelement location="${obdaapiowl.lib}" />
+			<pathelement location="${owleditor.lib}" />
+			<pathelement location="${antlr-3.1.lib}" />
+			<pathelement location="${jena.lib}" />
+			<pathelement location="${arq.lib}" />
+			<fileset dir="${lib}" />
+			<fileset dir="${genlib}" />
+		</path>
+	</target>
+
+
+	<!-- 
+        It is less likely that the developer will want to make changes
+        below this line 
+        -->
+	<!-- ============================================================= -->
+
+	<property file="local.properties" />
+
+	<property name="protege.home" location="${env.PROTEGE_HOME}" />
+	<property name="src" location="./src" />
+	<property name="build" location="./build" />
+	<property name="classes" location="${build}/classes" />
+	<property name="lib" location="./lib" />
+	<property name="genlib" location="${build}/lib" />
+	<property name="manifest" location="${build}/manifest.mf" />
+
+
+	<!-- 
+        This is the section that changes for different distributions.
+        It would only need small changes for knopflerfish or felix.
+     -->
+
+	<property name="osgi" location="${protege.home}/org.eclipse.osgi.jar" />
+	<property name="equinox.common" location="${protege.home}/bundles/org.eclipse.equinox.common.jar" />
+	<property name="equinox.registry" location="${protege.home}/bundles/org.eclipse.equinox.registry.jar" />
+	<property name="protege.lib" location="${protege.home}/bundles/org.protege.editor.core.application.jar" />
+	<property name="common.lib" location="${protege.home}/bundles/org.protege.common.jar" />
+
+	<property name="plugins" location="${protege.home}/plugins" />
+
+	<property name="owl.lib" location="${protege.home}/plugins/org.semanticweb.owl.owlapi.jar" />
+
+	<property name="owleditor.lib" location="${protege.home}/plugins/org.protege.editor.owl.jar" />
+
+
+
+	<!-- OBDA Lib libraries, relative to the current project -->
+
+	<property name="obdaapi.lib" location="../${dir.obdaapi}/dist/obdaapi.jar" />
+
+	<property name="obdaapiowl.lib" location="../${dir.obdaapiowl}/dist/obda-owlapi.jar" />
+
+	<property name="antlr-3.1.lib" location="../${dir.obdaapi}/lib/antlr-3.1.jar" />
+
+	<property name="jena.lib" location="../${dir.obdaapi}/lib/jena.jar" />
+
+	<property name="arq.lib" location="../${dir.obdaapi}/lib/arq.jar" />
+
+	<!-- end of equinox specific settings -->
+
+
+	<target name="usage">
+		<echo message="To run this script set the PROTEGE_HOME environment" />
+		<echo message="variable and use one of the following targets" />
+		<echo message="jar - builds the jar (bundle) file for this project" />
+		<echo message="install - installs  the bundle into the Protege distribution" />
+		<echo message="copy.resources - copyies resources into the classes directory" />
+		<echo message="    this can  be useful for ide developers - see the wiki" />
+	</target>
+
+	<target name="init">
+		<tstamp>
+			<format property="build.time" pattern="MM/dd/yyyy hh:mm aa" />
+		</tstamp>
+		<mkdir dir="${build}" />
+		<mkdir dir="${classes}" />
+		<mkdir dir="${classes}/lib" />
+		<mkdir dir="${genlib}" />
+	</target>
+
+	<target name="checkProtegeHome">
+		<condition property="protege.home.set">
+			<available file="${protege.home}/org.protege.editor.core.application.jar" type="file" />
+		</condition>
+	</target>
+
+	<target name="useProtegeHome" depends="checkProtegeHome" if="protege.home.set">
+		<echo message="Using Protege Home = ${protege.home} to find protege jars" />
+	</target>
+
+
+	<target name="checkProtegeLibsAndReport" depends="checkProtegeLibs" unless="libs.found">
+		<echo message="Missing protege or OBDA libraries.  You need to set " />
+		<echo message="the PROTEGE_HOME environment variable to a" />
+		<echo message="protege installation directory where the" />
+		<echo message="appropriate plugins have been installed." />
+		<echo message="More over, you need to compile the OBDA API and the OWLAPI OBDA API bindings" />
+		<echo message="Alternatively set the jar libs in local.properties (protege.lib=...)" />
+		<echo message="Use the -v option to ant to see what jars are missing." />
+		<fail message="missing protege libraries" />
+	</target>
+
+
+	<target name="obda.dist">
+		<antcall target="obdaapi">
+			<param name="sub.target" value="dist" />
+		</antcall>
+		<antcall target="obdaapi.owlapi">
+			<param name="sub.target" value="dist" />
+		</antcall>
+	</target>
+
+	<target name="compile" depends="obda.dist,buildlibs, checkProtegeLibsAndReport">
+		
+		<pathconvert property="flatpath" pathsep=" ">
+			<path refid="project.classpath" />
+		</pathconvert>
+
+		<echo message="Classpath is ${flatpath}" />
+		
+		<javac srcdir="${src}" destdir="${classes}" debug="on" includeAntRuntime="false" target="1.5">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="build.manifest">
+		<copy tofile="${manifest}" file="MANIFEST_DIST.MF" overwrite="true" />
+		<exec executable="svn" output="${classes}/svn.properties">
+			<arg value="info" />
+		</exec>
+		<property prefix="svn" file="${classes}/svn.properties" />
+
+		<manifest file="${manifest}" mode="update">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Build-Date" value="${build.time}" />
+			<attribute name="Bundle-Version" value="${version}.${svn.Revision}" />
+		</manifest>
+	</target>
+
+	<target name="jar" depends="compile, copy.resources">
+		<jar jarfile="${build}/${plugin}.jar" basedir="${classes}" manifest="${build}/manifest.mf" />
+	</target>
+
+	<target name="install" depends="jar">
+		<!-- flush cache -->
+		<delete dir="${protege.home}/configuration/org.eclipse.core.runtime" />
+		<delete dir="${protege.home}/configuration/org.eclipse.osgi" />
+		<copy file="${build}/${plugin}.jar" todir="${protege.home}/plugins" overwrite="true" />
+	</target>
+
+
+	<target name="clean">
+		<antcall target="obdaapi">
+			<param name="sub.target" value="clean" />
+		</antcall>
+		<antcall target="obdaapi.owlapi">
+			<param name="sub.target" value="clean" />
+		</antcall>
+		<echo>Cleaning OBDA Plugin for P4 folders...</echo>
+		<delete dir="${build}" />
+		<echo>done.</echo>
+	</target>
+
+
+	<property name="obdaapi.build.file" location="${obdaapi.dir}/build.xml" />
+
+	<property name="obdaapi.owlapi.build.file" location="${obdaapi.owlapi.dir}/build.xml" />
+
+	<target name="obdaapi">
+		<ant antfile="${obdaapi.build.file}" target="${sub.target}" inheritRefs="false" />
+	</target>
+
+	<target name="obdaapi.owlapi">
+		<ant antfile="${obdaapi.owlapi.build.file}" target="${sub.target}" inheritRefs="false" />
+	</target>
+
+</project>

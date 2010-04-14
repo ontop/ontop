@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>inf.unibz.it.obda.protege4.obdaplugin</name>
+	<comment></comment>
+	<projects>
+		<project>inf.unibz.it.obda.protege3</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>lib_obdaapi</name>
+			<type>2</type>
+			<location>/Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/lib</location>
+		</link>
+		<link>
+			<name>src_obdaapi</name>
+			<type>2</type>
+			<location>/Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src</location>
+		</link>
+		<link>
+			<name>src_obdaowlapi</name>
+			<type>2</type>
+			<location>/Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.owlapi/src</location>
+		</link>
+	</linkedResources>
+</projectDescription>

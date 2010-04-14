@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<VSNode splits="0.25 0.75">
+		<CNode>
+			<Component label="Query manager">
+				<Property id="pluginId"
+					value="inf.unibz.it.obda.protege4.obdaplugin.QueryManagerViewComponent"/>
+			</Component>
+		</CNode>
+		<CNode>
+			<Component label="Query interface">
+				<Property id="pluginId"
+					value="inf.unibz.it.obda.protege4.obdaplugin.QueryInterfaceViewComponent"/>
+			</Component>
+		</CNode>
+	</VSNode>
+</layout>

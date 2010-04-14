@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<!-- Datasource Manager Views -->
+	
+	<extension id="DatasourcesManagerViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Datasource selector"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.DatasourcesManagerViewComponent">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension>
+	
+	<extension id="DatasourceParameterEditorViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Datasource parameter editor"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.DatasourceParametersEditorView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension>
+	
+	<extension id="MappingsManagerViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Mappings manager"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.MappingsManagerView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension>
+	
+	<extension id="RDBMSInspectorViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="RDBMS source inspector"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.RDBMSInspectorView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension>
+	
+	<extension id="SQLQueryInterfaceViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="RDBMS queries"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.SQLQueryInterfaceView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension>
+	
+	<extension id="DependencyInterfaceViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Data Source Dependencies"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.DependencyInterfaceViewComponent">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension>
+	
+	<!-- Individuals queries views -->
+	
+	<extension id="QueryManagerViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Query Manager"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.query.QueryManagerViewComponent">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ABox Query"></category>
+	</extension>
+	
+	<extension id="QueryInterfaceViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Individuals queries"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.query.QueryInterfaceViewComponent">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ABox Query"></category>
+	</extension>
+	
+	
+	<!--
+	<extension id="QueryHistoryViewComponent"
+		point="org.protege.editor.core.application.ViewComponent">
+		<label value="Query history"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.view.query.QueryHistoryViewComponent">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="OBDA"></category>
+	</extension> -->
+	
+	<!-- Tabs -->
+	
+	<extension id="DatasourcesManagerTab"
+		point="org.protege.editor.core.application.WorkspaceTab">
+		<label value="OBDA"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.tab.OBDAWorkspaceTab">
+		</class>
+		<index value="X"></index>
+		<editorKitId value="OWLEditorKit"></editorKitId>
+		<defaultViewConfigFileName value="viewconfig-obdatab.xml">
+		</defaultViewConfigFileName>
+	</extension>
+	
+	<extension id="IndividualsQueryTab"
+		point="org.protege.editor.core.application.WorkspaceTab">
+		<label value="ABox Query"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.tab.IndividualsQueriesWorkspaceTab">
+		</class>
+		<index value="X"></index>
+		<editorKitId value="OWLEditorKit"></editorKitId>
+		<defaultViewConfigFileName value="viewconfig-indqueriesTab.xml">
+		</defaultViewConfigFileName>
+	</extension>
+	
+	<!--<extension id="DependenciesTab"
+		point="org.protege.editor.core.application.WorkspaceTab">
+		<label value="Datasource Dependency Manager"></label>
+		<class
+			value="inf.unibz.it.obda.protege4.gui.tab.DependenciesTab">
+		</class>
+		<index value="X"></index>
+		<editorKitId value="OWLEditorKit"></editorKitId>
+		<defaultViewConfigFileName value="viewconfig-dependencies.xml">
+		</defaultViewConfigFileName>
+	</extension>-->
+	
+	<!--<extension id="OBDAEditorKitFactory" 
+               point="org.protege.editor.core.application.EditorKitFactory">
+        <label value="OBDA OWL ontology"/>
+        <class value="inf.unibz.it.obda.protege4.editor.obda.OBDAEditorKitFactory"/>
+    </extension>-->
+    
+
+    <extension id="OBDAIOListener" point="org.protege.editor.owl.io.listener">
+        <class value="inf.unibz.it.obda.protege4.core.OBDAIOListenerPlugin"/>
+    </extension>
+    
+    <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
+    	<class value="inf.unibz.it.obda.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
+    </extension>
+    
+
+	<!-- A type of plugin which defines a new assertion controller type which should 
+	be taken into account by the main APIController when it is setup during the 
+	creation of an OWLEditorKit -->
+    
+    <extension-point id="obda.controller" name="Assertion Controller"/>
+    
+    
+    <!-- OBDA preferences -->
+    
+    <extension id="preferences.obdaplugin"
+               point="org.protege.editor.core.application.preferencespanel">
+        <label value="OBDA Plugin"/>
+        <class value="inf.unibz.it.obda.protege4.gui.preferences.OBDAPluginPreferencesPanel"/>
+    </extension>
+    
+    <!--Dependency Assertion Factory Plugins-->
+    
+    <extension id="InclusionDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSInclusionDependencyAssertionFactoryPlugin"/>
+    </extension>
+    
+    <extension id="DisjointnessDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSDisjointnessDependencyFactoryPlugin"/>
+    </extension>
+    
+    <extension id="FunctionalDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSFunctionalDependencyAssertionFactoryPlugin"/>
+    </extension>
+    
+        <extension id="CheckConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSCheckConstraintFactoryPlugin"/>
+    </extension>
+    
+    <extension id="ForeignKeyConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSForeignKeyConstraintFactoryPlugin"/>
+    </extension>
+    
+    <extension id="PrimaryKeyConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSPrimaryKeyConstraintFactoryPlugin"/>
+    </extension>
+    
+        <extension id="UniquenessConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSUniquenessConstraintFactoryPlugin"/>
+    </extension>
+    
+	
+</plugin>
