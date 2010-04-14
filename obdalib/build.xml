@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="obdaapi" default="dist" basedir=".">
+	<description>OBDA-API build file</description>
+
+	<property environment="env" />
+
+	<!--<property name="dir.workspace" value="/Users/mariano/Documents/OBDA/OBDA Plugin/neon/neon-12-workspace" />
+	
+	<property name="dir.api" value="${dir.workspace}/inf.unibz.it.obda.api" />-->
+
+	<property file="ant.properties" />
+
+	<property name="version" value="0.5.0"/>
+
+	<property name="dir.workspace" location="${env.OBDASVN_ROOT}" />
+	<property name="dir.api" location="${dir.workspace}/inf.unibz.it.obda.api" />
+
+
+
+	<property name="api.src" location="${dir.api}/src" />
+	<property name="api.build" location="${dir.api}/build" />
+	<property name="api.dist" location="${dir.api}/dist" />
+	<property name="api.extras" location="${dir.api}/extras" />
+	<property name="api.lib" location="${dir.api}/lib" />
+
+	<!--- LOCAL VARIABLES -->
+
+	<path id="api.classpath">
+		<fileset dir="${api.lib}/">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+
+	<target name="checkOBDALibHome">
+		<condition property="obdalib.home.set">
+			<available file="${dir.api}/" type="dir" />
+		</condition>
+	</target>
+
+	<target name="useOBDALibHome" depends="checkOBDALibHome" if="obdalib.home.set">
+		<echo message="Using OBDALib Home = ${dir.api} as OBDALib's main project folder" />
+	</target>
+
+
+	<target name="checkOBDALibFolderAndReport" depends="useOBDALibHome" unless="obdalib.home.set">
+		<echo>The folder defined by $OBDASVN_ROOT doesnt exist or the variable has not been set.</echo>
+		<fail message="missing compilation folder" />
+	</target>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${api.build}" />
+	</target>
+
+	<target name="compile" depends="checkOBDALibFolderAndReport, init" description="compile the source ">
+		<pathconvert property="flatpath" pathsep=" ">
+			<path refid="api.classpath" />
+		</pathconvert>
+
+		<echo message="Compiling the OBDA-API..." />
+		<echo message="Classpath is ${flatpath}" />
+
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${api.src}" destdir="${api.build}" target="1.5">
+			<exclude name="**/domain/IDConstraint.java" />
+			<exclude name="**/domain/IDPath.java" />
+			<classpath refid="api.classpath" />
+		</javac>
+		<copy todir="${api.build}/inf/unibz/it/obda/gui/images" flatten="false">
+			<fileset dir="${api.src}/inf/unibz/it/obda/gui/images" />
+		</copy>
+		<echo>...done.</echo>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+
+		<echo message="Preparing the OBDA-API distribution...">
+		</echo>
+		<mkdir dir="${api.dist}" />
+		<mkdir dir="${api.dist}/lib" />
+
+		<!-- Making the JAR -->
+		<!--<mkdir dir="${plugin.build}/META-INF" />-->
+		<!--<copy todir="${plugin.build}/META-INF" flatten="false">-->
+		<!--	<fileset dir="${dir.plugin}/resources/META-INF/" />-->
+		<!--</copy>-->
+		<!-- Put everything in ${build} into the mastro-${DSTAMP}.jar file -->
+
+		<exec executable="/usr/bin/svn" output="${api.dist}/svn.properties">
+			<arg value="info" />
+		</exec>
+		<property prefix="svn" file="dist/svn.properties" />
+
+		
+		<!--<buildnumber file="${dir.api}/build.number" />-->
+		
+		<tstamp>
+			<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+		</tstamp>
+
+		<echo>Creating JAR file</echo>
+		<echo>OBDA API Version: ${version}.${svn.Revision}</echo>
+
+		<jar jarfile="${api.dist}/obdaapi.jar" basedir="${api.build}">
+			<manifest>
+				<attribute name="Built-By" value="${var.builder}" />
+				<attribute name="Built-Date" value="${TODAY}" />
+				<attribute name="Implementation-Title" value="OBDA API" />
+				<attribute name="Implementation-Version" value="${version}.${svn.Revision}"/>
+				<attribute name="Implementation-Vendor" value="var.institution" />
+			</manifest>
+		</jar>
+
+
+		<!-- Create the distribution zip -->
+
+		<copy todir="${api.dist}/lib" flatten="false">
+			<fileset file="${api.lib}/arq-extra.jar" />
+			<fileset file="${api.lib}/jena.jar" />
+			<fileset file="${api.lib}/arq.jar" />
+			<fileset file="${api.lib}/antlr-3.1.jar" />
+		</copy>
+		<echo>...done.</echo>
+	</target>
+
+	<target name="clean" description="clean up">
+		<echo message="Cleaning OBDA-API folders...">
+		</echo>
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${api.build}" />
+		<delete dir="${api.dist}" />
+	</target>
+</project>
