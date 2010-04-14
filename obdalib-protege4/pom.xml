@@ -1,0 +1,230 @@
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>inf.unibz.it.obda</groupId>
+	<artifactId>obdalib-protege4</artifactId>
+	<packaging>bundle</packaging>
+	<version>1.0-alpha1</version>
+	<name>OBDA Plugin for Protege 4.</name>
+
+	<repositories>
+		<repository>
+			<id>obda.inf.unibz.it</id>
+			<name>FUB OBDA Maven repository</name>
+			<url>http://obdalin.inf.unibz.it:8081/nexus/content/groups/public
+			</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<!--
+			<dependency> <groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId> <version>1.0.0</version>
+			<scope>provided</scope> </dependency>
+		-->
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>osgi</artifactId>
+			<version>3.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- OBDA libraries -->
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-owlapi</artifactId>
+			<version>1.0-alpha-1</version>
+		</dependency>
+
+		<!--
+			Dependencies from the OBDA projects to include in the jar -->
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr</artifactId>
+			<version>3.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr-runtime</artifactId>
+			<version>3.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>jena</artifactId>
+			<version>2.5.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>iri</artifactId>
+			<version>0.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>3.4.4</version>
+		</dependency>
+
+		
+		<dependency>
+			<groupId>activemq</groupId>
+			<artifactId>relaxngDatatype</artifactId>
+			<version>20050407</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.11</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>0.9.20</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>0.9.20</version>
+		</dependency>
+		<dependency>
+			<groupId>xsdlib</groupId>
+			<artifactId>xsdlib</artifactId>
+			<version>20030225</version>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.7.1</version>
+		</dependency>
+
+
+		<!-- JDBC Drivers (to be removed soon) -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.12</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>10.2.0.1.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.4-701.jdbc4</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm</groupId>
+			<artifactId>db2jcc_license</artifactId>
+			<version>1.3.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm</groupId>
+			<artifactId>db2jcc</artifactId>
+			<version>9.0</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Eclipse dependencies -->
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>common</artifactId>
+			<version>3.3.0-v20070426</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>registry</artifactId>
+			<version>3.3.0-v20070522</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Protege 4 and OWLAPI bundle dependencies -->
+		<dependency>
+			<groupId>org.protege</groupId>
+			<artifactId>org.protege.common</artifactId>
+			<version>4.0.2-031220091250</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.protege</groupId>
+			<artifactId>org.protege.editor.core.application</artifactId>
+			<version>4.0.2-031220091250</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.protege</groupId>
+			<artifactId>org.protege.editor.owl</artifactId>
+			<version>4.0.2-031220091250</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.semanticweb</groupId>
+			<artifactId>org.semanticweb.owl.owlapi</artifactId>
+			<version>4.0.2-031220091250</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>    <!-- (2) START -->
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Build-Jdk>1.6</Build-Jdk>
+						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime
+						</Embed-Dependency>
+						<Bundle-SymbolicName>inf.unibz.it.obda.protege4.obdaplugin;singleton:=true
+						</Bundle-SymbolicName>
+						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*
+						</Import-Package>
+						<Export-Package>inf.unibz.it.*</Export-Package>
+						<Bundle-Category>protege</Bundle-Category>
+						<Bundle-ContactAddress>rodriguez@inf.unibz.it
+						</Bundle-ContactAddress>
+						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
+						<Bundle-Description>The Ontology Based Data Access (OBDA) Plugin
+							for Protege 4</Bundle-Description>
+						<Bundle-Vendor>Free University of Bozen Bolzano</Bundle-Vendor>
+						<Bundle-Version>1.0.0</Bundle-Version>
+						<Eclipse-LazyStart>false</Eclipse-LazyStart>
+						<!--
+							<Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.common,org.protege.editor.core.application,org.protege.editor.owl,org.semanticweb.owl.owlapi</Require-Bundle>
+						-->
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
