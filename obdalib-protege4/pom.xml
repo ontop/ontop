@@ -4,7 +4,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0-alpha1</version>
+	<version>1.0</version>
 	<name>OBDA Plugin for Protege 4.</name>
 
 	<repositories>
@@ -13,7 +13,7 @@
 		<repository>
 			<id>obda.inf.unibz.it</id>
 			<name>FUB OBDA Maven repository</name>
-			<url>http://obdalin.inf.unibz.it:8081/nexus/content/groups/public
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public
 			</url>
 			<layout>default</layout>
 			<snapshots>
