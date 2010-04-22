@@ -4,7 +4,7 @@
 		<artifactId>parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../parent</relativePath>
+		<relativePath>../obdalib-parent</relativePath>
 	</parent>  <modelVersion>4.0.0</modelVersion>
   <artifactId>obdalib-owlapi</artifactId>
   <packaging>jar</packaging>
@@ -30,7 +30,7 @@
     <dependency>
         <groupId>inf.unibz.it.obda</groupId>
         <artifactId>obdalib</artifactId>
-        <version>1.0-alpha-1</version>
+        <version>1.0.0-SNAPSHOT</version>
     </dependency>  
     <dependency>
         <groupId>net.sourceforge.owlapi</groupId>
