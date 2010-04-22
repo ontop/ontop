@@ -11,6 +11,7 @@ import inf.unibz.it.ucq.domain.ConjunctiveQuery;
 import inf.unibz.it.ucq.domain.VariableTerm;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
+
 /**
  * A filter that receives a String str during construction and returns
  * a match if the input mapping contains str in the id field.
