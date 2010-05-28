@@ -13,6 +13,7 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.domain.SourceQuery;
@@ -23,7 +24,12 @@ import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+import inf.unibz.it.ucq.domain.BinaryQueryAtom;
+import inf.unibz.it.ucq.domain.ConceptQueryAtom;
 import inf.unibz.it.ucq.domain.ConjunctiveQuery;
+import inf.unibz.it.ucq.domain.FunctionTerm;
+import inf.unibz.it.ucq.domain.QueryAtom;
+import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
@@ -36,6 +42,10 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
@@ -165,7 +175,7 @@ public class TreeCellEditorDialog extends JDialog {
 
 					try {
 						update(input);
-					} catch (QueryParseException e1) {
+					} catch (Exception e1) {
 						return;
 					}
 					myself.setVisible(false);
@@ -195,7 +205,7 @@ public class TreeCellEditorDialog extends JDialog {
 					input = area.getText();
 					try {
 						update(input);
-					} catch (QueryParseException e) {
+					} catch (Exception e) {
 						return;
 					}
 					finally{
@@ -216,7 +226,7 @@ public class TreeCellEditorDialog extends JDialog {
 		return new Point(x, y);
 	}
 
-	private void update(String str) throws QueryParseException {
+	private void update(String str) throws Exception {
 
 		MappingController con = mapc;
 		String sourceName = dsc.getCurrentDataSource().getName();
@@ -239,8 +249,45 @@ public class TreeCellEditorDialog extends JDialog {
 			MappingNode parent = (MappingNode) node.getParent();
 
 			TargetQuery h = new ConjunctiveQuery(str, apic);
+			checkValidityOfConjunctiveQuery((ConjunctiveQuery) h);
 			con.updateMapping(sourceName, parent.getMappingID(), h);
 		}
+	}
+	
+	private void checkValidityOfConjunctiveQuery(ConjunctiveQuery cq ) throws Exception{
+		ArrayList<QueryAtom> atoms = cq.getAtoms();
+		Iterator<QueryAtom> it = atoms.iterator();
+		APICoupler coup= apic.getCoupler();
+		URI onto_uri =apic.getCurrentOntologyURI();
+		while(it.hasNext()){
+			QueryAtom atom = it.next();
+			if(atom instanceof ConceptQueryAtom){
+				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
+				String name = cqa.getName();
+				String classUri = onto_uri.toString()+"#"+name;
+				boolean isConcept =coup.isNamedConcept(new URI(classUri));
+				if(!isConcept){
+					throw new Exception("Concept "+name+" not present in ontology.");
+				}
+				
+			}else{
+				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
+				String name = bqa.getName();
+				String propUri = onto_uri.toString()+"#"+name;
+				ArrayList<QueryTerm> terms = bqa.getTerms();
+				QueryTerm t2 = terms.get(1);
+				boolean found = false;
+				if(t2 instanceof FunctionTerm){
+					found =coup.isObjectProperty(new URI(propUri));
+				}else{
+					found =coup.isDatatypeProperty(new URI(propUri));
+				}
+				if(!found){
+					throw new Exception("Property "+name+" not present in ontology.");
+				}
+			}
+		}
+		
 	}
 
 }

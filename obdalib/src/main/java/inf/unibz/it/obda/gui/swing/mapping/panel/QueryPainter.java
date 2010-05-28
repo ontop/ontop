@@ -14,6 +14,7 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.gui.swing.mapping.panel.MappingStyledDocument;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
@@ -26,6 +27,7 @@ import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.awt.Color;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
@@ -131,11 +133,11 @@ public class QueryPainter {
 		try {
 			input = doc.getText(0, doc.getLength());
 			query = new ConjunctiveQuery(input,apic);
-			
+			checkValidityOfConjunctiveQuery(query);
 
 		} catch (Exception e) {
 			
-			e.printStackTrace();
+//			e.printStackTrace();
 			invalid = true;
 		}
 		
@@ -346,6 +348,40 @@ public class QueryPainter {
 		return result;	
 	}
 	
+	private void checkValidityOfConjunctiveQuery(ConjunctiveQuery cq ) throws Exception{
+		ArrayList<QueryAtom> atoms = cq.getAtoms();
+		Iterator<QueryAtom> it = atoms.iterator();
+		APICoupler coup= apic.getCoupler();
+		URI onto_uri =apic.getCurrentOntologyURI();
+		while(it.hasNext()){
+			QueryAtom atom = it.next();
+			if(atom instanceof ConceptQueryAtom){
+				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
+				String name = cqa.getName();
+				boolean isConcept =coup.isNamedConcept(new URI(name));
+				if(!isConcept){
+					throw new Exception("Concept "+name+" not present in ontology.");
+				}
+				
+			}else{
+				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
+				String name = bqa.getName();
+				ArrayList<QueryTerm> terms = bqa.getTerms();
+				QueryTerm t2 = terms.get(1);
+				boolean found = false;
+				if(t2 instanceof FunctionTerm){
+					found =coup.isObjectProperty(new URI(name));
+				}else{
+					found =coup.isDatatypeProperty(new URI(name));
+				}
+				if(!found){
+					throw new Exception("Property "+name+" not present in ontology.");
+				}
+			}
+		}
+	}
+	
+	
 	class ColorTask {
 	
 		public String text = null;
@@ -357,4 +393,6 @@ public class QueryPainter {
 			set = sas;
 		}		
 	}
+	
+	
 }

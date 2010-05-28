@@ -15,9 +15,15 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
+import inf.unibz.it.ucq.domain.BinaryQueryAtom;
+import inf.unibz.it.ucq.domain.ConceptQueryAtom;
 import inf.unibz.it.ucq.domain.ConjunctiveQuery;
+import inf.unibz.it.ucq.domain.FunctionTerm;
+import inf.unibz.it.ucq.domain.QueryAtom;
+import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Component;
@@ -27,7 +33,10 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -117,6 +126,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 			String txt = me.getText();
 			try {
 				ConjunctiveQuery query = new ConjunctiveQuery(txt,controller);
+				checkValidityOfConjunctiveQuery(query );
 				return true;
 			} catch (Exception e) {
 				return false;
@@ -125,6 +135,39 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 			return true;
 		}
 		
+	}
+	
+	private void checkValidityOfConjunctiveQuery(ConjunctiveQuery cq ) throws Exception{
+		ArrayList<QueryAtom> atoms = cq.getAtoms();
+		Iterator<QueryAtom> it = atoms.iterator();
+		APICoupler coup= controller.getCoupler();
+		URI onto_uri =controller.getCurrentOntologyURI();
+		while(it.hasNext()){
+			QueryAtom atom = it.next();
+			if(atom instanceof ConceptQueryAtom){
+				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
+				String name = cqa.getName();
+				boolean isConcept =coup.isNamedConcept(new URI(name));
+				if(!isConcept){
+					throw new Exception("Concept "+name+" not present in ontology.");
+				}
+				
+			}else{
+				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
+				String name = bqa.getName();
+				ArrayList<QueryTerm> terms = bqa.getTerms();
+				QueryTerm t2 = terms.get(1);
+				boolean found = false;
+				if(t2 instanceof FunctionTerm){
+					found =coup.isObjectProperty(new URI(name));
+				}else{
+					found =coup.isDatatypeProperty(new URI(name));
+				}
+				if(!found){
+					throw new Exception("Property "+name+" not present in ontology.");
+				}
+			}
+		}
 	}
 
 		public void addCellEditorListener(CellEditorListener arg0) {
