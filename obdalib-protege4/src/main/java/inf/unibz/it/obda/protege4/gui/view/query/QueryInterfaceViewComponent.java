@@ -433,7 +433,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
 								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-						panel.displaySQL(result.toString());
+						panel.displaySQL(s);
 						panel.setTitle("Query Expansion");
 						panel.updateBoderTitel("Query Expansion");
 						double aux = time;
