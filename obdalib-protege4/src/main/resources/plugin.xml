@@ -193,9 +193,16 @@
     	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSPrimaryKeyConstraintFactoryPlugin"/>
     </extension>
     
-        <extension id="UniquenessConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+    <extension id="UniquenessConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
     	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSUniquenessConstraintFactoryPlugin"/>
     </extension>
-    
 	
+	<extension id="menu.tools.OBDA" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Materialize Abox"/> 
+		<toolTip value="Materializes the Abox of the currently loaded ontology"/>
+		<class value="inf.unibz.it.obda.protege4.abox.materialization.AboxMaterializationAction"/>
+		<path value="org.protege.editor.owl.menu.tools/SlotZ-Z"></path>
+		<editorKitId value="OWLEditorKit"/>
+	</extension>
+		
 </plugin>
