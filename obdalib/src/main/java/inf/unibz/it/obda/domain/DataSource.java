@@ -205,5 +205,9 @@ public class DataSource {
 	public boolean isRegistred() {
 		return registred;
 	}
+	
+	public void setName(String name){
+		this.name = name;
+	}
 
 }

@@ -37,6 +37,9 @@ public class RDBMSUniquenessConstraintController extends
 	}
 
 	@Override
+	public void datasourcParametersUpdated() {}
+	
+	@Override
 	public String getElementTag() {
 		return "RDBMSUniquenessConstraint";
 	}

@@ -21,6 +21,7 @@ public interface DatasourcesControllerListener {
 	public void datasourceDeleted(DataSource source);
 	public void datasourceUpdated(String oldname, DataSource currendata);
 	public void alldatasourcesDeleted();
+	public void datasourcParametersUpdated();
 	
 	//TODO remove this method, no more concept of "Current datasource"
 	public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource);

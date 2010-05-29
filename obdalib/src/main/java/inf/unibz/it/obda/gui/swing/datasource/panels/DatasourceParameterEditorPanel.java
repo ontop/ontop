@@ -71,7 +71,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         labelUsername = new javax.swing.JLabel();
         fieldDBUser = new javax.swing.JTextField();
         labelPassword = new javax.swing.JLabel();
-        fieldDBPassword = new javax.swing.JTextField();
+        fieldDBPassword = new javax.swing.JPasswordField();
         labelDriver = new javax.swing.JLabel();
         fieldDBDriver = new javax.swing.JTextField();
         panelPadding = new javax.swing.JPanel();
@@ -370,7 +370,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
 		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
 		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, fieldURL.getText());
-
+		
+		dscontroller.fireParametersUpdated();
+		
 		return;
     }//GEN-LAST:event_fieldChangeHandler
 
@@ -379,7 +381,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField fieldDBDriver;
     private javax.swing.JTextField fieldDBName;
-    private javax.swing.JTextField fieldDBPassword;
+    private javax.swing.JPasswordField fieldDBPassword;
     private javax.swing.JTextField fieldDBUser;
     private javax.swing.JTextField fieldURI;
     private javax.swing.JTextField fieldURL;
@@ -467,5 +469,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		
 	}
+
+	@Override
+	public void datasourcParametersUpdated() {}
     
 }

@@ -71,8 +71,10 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 					break;
 				}
 			}
-			affectedchild.setUserObject(currendata.getName());
-			nodeChanged(affectedchild);
+			if(affectedchild != null){
+				affectedchild.setUserObject(currendata.getName());
+				nodeChanged(affectedchild);
+			}
 //		}
 	}
 
@@ -98,4 +100,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	public void currentOntologyChanged(URI uri) {
 		currentOntologyURI = uri;
 	}
+
+	@Override
+	public void datasourcParametersUpdated() {}
 }

@@ -133,7 +133,7 @@ public class QueryPainter {
 		try {
 			input = doc.getText(0, doc.getLength());
 			query = new ConjunctiveQuery(input,apic);
-			checkValidityOfConjunctiveQuery(query);
+//			checkValidityOfConjunctiveQuery(query);
 
 		} catch (Exception e) {
 			
@@ -352,7 +352,6 @@ public class QueryPainter {
 		ArrayList<QueryAtom> atoms = cq.getAtoms();
 		Iterator<QueryAtom> it = atoms.iterator();
 		APICoupler coup= apic.getCoupler();
-		URI onto_uri =apic.getCurrentOntologyURI();
 		while(it.hasNext()){
 			QueryAtom atom = it.next();
 			if(atom instanceof ConceptQueryAtom){

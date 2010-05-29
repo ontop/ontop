@@ -126,7 +126,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 			String txt = me.getText();
 			try {
 				ConjunctiveQuery query = new ConjunctiveQuery(txt,controller);
-				checkValidityOfConjunctiveQuery(query );
+//				checkValidityOfConjunctiveQuery(query );
 				return true;
 			} catch (Exception e) {
 				return false;

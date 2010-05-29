@@ -40,6 +40,8 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	public String getElementTag() {
 		return "RDBMSUniquenessConstraint";
 	}
+	@Override
+	public void datasourcParametersUpdated() {}
 	
 	/**
 	 * Adds the given assertion and fires an assertion added event to all

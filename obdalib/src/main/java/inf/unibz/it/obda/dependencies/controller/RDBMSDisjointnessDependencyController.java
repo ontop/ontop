@@ -232,4 +232,7 @@ public class RDBMSDisjointnessDependencyController extends
 		// TODO Auto-generated method stub
 		return disjointnessDependencies.get(uri);
 	}
+
+	@Override
+	public void datasourcParametersUpdated() {}
 }

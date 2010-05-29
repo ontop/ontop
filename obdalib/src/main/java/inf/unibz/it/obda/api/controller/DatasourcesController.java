@@ -133,6 +133,18 @@ public class DatasourcesController implements OntologyControllerListener {
 			listener.datasourceDeleted(source);
 		}
 	}
+	
+	public void fireParametersUpdated(){
+		for (DatasourcesControllerListener listener : listeners) {
+			listener.datasourcParametersUpdated();
+		}
+	}
+	
+	public void fireDataSourceNameUpdated(String old, DataSource neu){
+		for (DatasourcesControllerListener listener : listeners) {
+			listener.datasourceUpdated(old, neu);
+		}
+	}
 
 	public HashMap<String, DataSource> getAllSources() {
 		return datasources;
@@ -241,7 +253,8 @@ public class DatasourcesController implements OntologyControllerListener {
 	public synchronized void setCurrentDataSource(String name) {
 		DataSource previous = currentdatasource;
 		if ((name != null) && (!name.equals(""))) {
-			currentdatasource = datasources.get(name);
+			DataSource ds = datasources.get(name);
+			currentdatasource = ds;
 			fireCurrentDatasourceChanged(previous, currentdatasource);
 		} else {
 			currentdatasource = null;
@@ -249,8 +262,11 @@ public class DatasourcesController implements OntologyControllerListener {
 		}
 	}
 
-	public synchronized void updateDataSource(String name, DataSource ds) {
-		// TODO: FIRE EVENT FOR MODEL UPDATE
+	public synchronized void updateDataSource(String name, DataSource dsd) {
+		DataSource oldds = datasources.remove(name);
+		datasources.put(dsd.getName(), dsd);
+		treeModel.datasourceUpdated(name, dsd);
+		fireDataSourceNameUpdated(name, dsd);
 	}
 
 	public void currentOntologyChanged(URI uri, URI oldURI) {

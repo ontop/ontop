@@ -204,7 +204,9 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	 * for all the mappings related to that source.
 	 */
 	public void datasourceUpdated(String oldname, DataSource currendata) {
-		// TODO implement
+		ArrayList<OBDAMappingAxiom> axioms =mappings.get(oldname);
+		mappings.remove(oldname);
+		mappings.put(currendata.getName(), axioms);
 	}
 
 	/***************************************************************************
@@ -710,5 +712,8 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
+
+	@Override
+	public void datasourcParametersUpdated() {}
 
 }

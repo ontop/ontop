@@ -231,5 +231,8 @@ public class RDBMSFunctionalDependencyController extends
 		
 		return functionalDependencies.get(uri);
 	}
+	
+	@Override
+	public void datasourcParametersUpdated() {}
 
 }

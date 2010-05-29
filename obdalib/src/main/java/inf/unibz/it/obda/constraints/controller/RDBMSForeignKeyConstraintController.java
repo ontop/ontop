@@ -41,6 +41,9 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 		return "RDBMSUniquenessConstraint";
 	}
 	
+	@Override
+	public void datasourcParametersUpdated() {}
+	
 	/**
 	 * Adds the given assertion and fires an assertion added event to all
 	 * listeners.

@@ -26,9 +26,13 @@ import java.net.URISyntaxException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -61,7 +65,27 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 		 * Setting up the data sources tree
 		 */
 		treeDatasourceMgr.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		treeDatasourceMgr.setCellRenderer(new DatasourceTreeCellRenderer(dscontroller));
+		DatasourceTreeCellRenderer ren = new DatasourceTreeCellRenderer(dscontroller);
+		DefaultTreeCellEditor edit = new DefaultTreeCellEditor(treeDatasourceMgr, ren);
+		treeDatasourceMgr.setCellEditor(edit);
+		treeDatasourceMgr.setCellRenderer(ren);
+		treeDatasourceMgr.setEditable(true);
+		edit.addCellEditorListener(new CellEditorListener() {
+			
+			@Override
+			public void editingStopped(ChangeEvent e) {
+				DataSource ds = dscontroller.getCurrentDataSource();
+				String old = ds.getName();
+				TreeCellEditor ed = (TreeCellEditor) e.getSource();
+				String neu = ed.getCellEditorValue().toString();
+				ds.setName(neu);
+				dscontroller.updateDataSource(old, ds);
+				
+			}
+			
+			@Override
+			public void editingCanceled(ChangeEvent e) {}
+		});
 		DatasourcesController srcontroller = dscontroller;
 		DatasourceTreeModel srctreemodel = srcontroller.getTreeModel();
 		srcontroller.addDatasourceControllerListener(srctreemodel);
@@ -221,6 +245,11 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 
+	}
+
+	@Override
+	public void datasourcParametersUpdated() {
+		
 	}
 
 }
