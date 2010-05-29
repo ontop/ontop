@@ -1,6 +1,8 @@
 package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.MappingController;
+import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.constraints.controller.RDBMSCheckConstraintController;
 import inf.unibz.it.obda.constraints.controller.RDBMSForeignKeyConstraintController;
 import inf.unibz.it.obda.constraints.controller.RDBMSPrimaryKeyConstraintController;
@@ -45,6 +47,8 @@ public class OWLAPIController extends APIController {
 
 	public OWLAPIController(OWLOntologyManager owlman, OWLOntology root) {
 		super();
+//		mapcontroller = new SynchronizedMappingController(dscontroller, this);
+//		ioManager = new DataManager(dscontroller, mapcontroller, queryController);
 		try {
 			mmger = owlman;
 			this.root = root;
