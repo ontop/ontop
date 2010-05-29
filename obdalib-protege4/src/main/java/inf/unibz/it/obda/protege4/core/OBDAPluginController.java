@@ -11,6 +11,7 @@ import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.QueryControllerListener;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
+import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
@@ -105,39 +106,39 @@ public class OBDAPluginController extends APIController implements Disposable {
 		/***
 		 * Adding standard listeners
 		 */
+		
+		this.getDatasourcesController().addDatasourceControllerListener(new DatasourcesControllerListener() {
+			
+			@Override
+			public void datasourceUpdated(String oldname, DataSource currendata) {
+				triggerOntologyChanged();				
+			}
+			
+			@Override
+			public void datasourceDeleted(DataSource source) {
+				triggerOntologyChanged();
+			}
+			
+			@Override
+			public void datasourceAdded(DataSource source) {
+				triggerOntologyChanged();				
+			}
+			@Override
+			public void currentDatasourceChange(DataSource previousdatasource,
+					DataSource currentsource) {
 
-		this.getDatasourcesController().addDatasourceControllerListener(
-				new DatasourcesControllerListener() {
+			}
+			@Override
+			public void alldatasourcesDeleted() {
+				triggerOntologyChanged();
+				
+			}
 
-					public void alldatasourcesDeleted() {
-						triggerOntologyChanged();
-
-					}
-
-					public void currentDatasourceChange(
-							inf.unibz.it.obda.domain.DataSource previousdatasource,
-							inf.unibz.it.obda.domain.DataSource currentsource) {
-					}
-
-					public void datasourceAdded(
-							inf.unibz.it.obda.domain.DataSource source) {
-						triggerOntologyChanged();
-
-					}
-
-					public void datasourceDeleted(
-							inf.unibz.it.obda.domain.DataSource source) {
-						triggerOntologyChanged();
-
-					}
-
-					public void datasourceUpdated(String oldname,
-							inf.unibz.it.obda.domain.DataSource currendata) {
-						triggerOntologyChanged();
-
-					}
-
-				});
+			@Override
+			public void datasourcParametersUpdated() {
+				triggerOntologyChanged();
+			}
+		});
 
 		this.getMappingController().addMappingControllerListener(
 				new MappingControllerListener() {
