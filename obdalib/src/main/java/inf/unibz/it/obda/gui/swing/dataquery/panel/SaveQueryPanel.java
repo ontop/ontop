@@ -33,6 +33,9 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 
 	private String NEWGROUP = "New group...";
 	private String NOGROUP = "No group...";
+	
+	 
+	
 	private JDialog parent = null;
 	private String query = null;
 	private String currentGroup = null;
@@ -290,7 +293,7 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 		} else if (group.equals(NEWGROUP)) {
 			newgroup = true;
 			group = fieldGroupNAme.getText();
-		}
+		} 
 
 		int index = qcontroller.getElementPosition(id);
 
@@ -310,6 +313,9 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 			if (id != null)
 				qcontroller.addQuery(this.query, id, group);
 
+		} else {
+			QueryControllerGroup qgroup = qcontroller.getGroup(group);
+			qcontroller.addQuery(this.query, id, group);
 		}
 
 		parent.dispose();

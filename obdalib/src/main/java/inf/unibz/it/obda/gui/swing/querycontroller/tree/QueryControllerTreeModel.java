@@ -118,8 +118,10 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 			QueryGroupTreeElement ele = new QueryGroupTreeElement(group.getID());
 			Enumeration<TreeNode> groups = root.children();
 			while (groups.hasMoreElements()) {
-				QueryGroupTreeElement groupTElement = (QueryGroupTreeElement) groups
-						.nextElement();
+				Object temporal = groups.nextElement();
+				if (!(temporal instanceof QueryGroupTreeElement))
+					continue;
+				QueryGroupTreeElement groupTElement = (QueryGroupTreeElement) temporal;
 				if (groupTElement.getID().equals(ele.getID())) {
 					removeNodeFromParent(groupTElement);
 					nodeStructureChanged(root);
@@ -160,7 +162,10 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 				.getQuery());
 		Enumeration<TreeNode> groups = root.children();
 		while (groups.hasMoreElements()) {
-			groupTElement = (QueryGroupTreeElement) groups.nextElement();
+			Object temporal = groups.nextElement();
+			if (!(temporal instanceof QueryGroupTreeElement))
+				continue;
+			groupTElement = (QueryGroupTreeElement) temporal;
 			if (groupTElement.getID().equals(group.getID())) {
 				insertNodeInto(elemQ, (DefaultMutableTreeNode) groupTElement,
 						groupTElement.getChildCount());

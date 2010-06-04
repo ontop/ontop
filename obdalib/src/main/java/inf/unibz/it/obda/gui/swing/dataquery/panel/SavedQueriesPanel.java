@@ -128,8 +128,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 					QueryTreeElement current_query = (QueryTreeElement) currentNode;
 					currentQuery = current_query.getQuery();
 					currentId = current_query;
-
-					if ((current_query.getParent().toString()).equals(""))
+					
+					
+					if ((current_query.getParent() == null) || (current_query.getParent().toString()).equals(""))
 						fireQueryChanged(null, currentQuery, currentId.getID());
 					else
 						fireQueryChanged(current_query.getParent().toString(),
