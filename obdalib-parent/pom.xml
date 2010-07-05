@@ -1,17 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>inf.unibz.it.obda</groupId>
-  <artifactId>obdalib-parent</artifactId>
-  <packaging>pom</packaging>
-  <version>1.0.0-SNAPSHOT</version>
-  <name>OBDA projects builder</name>
-  <url>http://maven.apache.org</url>
-  
-  <modules>
-  	<module>../obdalib</module>
-  	<module>../obdalib-owlapi</module>
-  	<module>../obdalib-protege4</module>
-  </modules>
-  
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>inf.unibz.it.obda</groupId>
+	<artifactId>obdalib-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>OBDA projects builder</name>
+	<url>http://maven.apache.org</url>
+
+	<modules>
+		<module>../obdalib</module>
+		<module>../obdalib-owlapi</module>
+		<module>../obdalib-protege4</module>
+	</modules>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>bolzano-obda-snapshots</id>
+			<name>Maven Bolzano OBDA snapshots repository</name>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
