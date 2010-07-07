@@ -14,6 +14,13 @@
 		<module>../obdalib-protege4</module>
 	</modules>
 
+
+	<scm>
+		<connection>scm:svn:https://babbage.inf.unibz.it/krdb/obda/obdalib/trunk/</connection>
+		<developerConnection>scm:svn:https://babbage.inf.unibz.it/krdb/obda/obdalib/trunk/</developerConnection>
+	</scm>
+
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>bolzano-obda-snapshots</id>
@@ -21,5 +28,29 @@
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<password>${release.password}</password>
+					<username>${release.username}</username>
+					<tagBase>scm:svn:http://hyper.dis.uniroma1.it/svn/quonto/tags</tagBase>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
