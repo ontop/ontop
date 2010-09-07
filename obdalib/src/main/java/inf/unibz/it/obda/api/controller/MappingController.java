@@ -27,6 +27,7 @@ import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -204,9 +205,7 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	 * for all the mappings related to that source.
 	 */
 	public void datasourceUpdated(String oldname, DataSource currendata) {
-		ArrayList<OBDAMappingAxiom> axioms =mappings.get(oldname);
-		mappings.remove(oldname);
-		mappings.put(currendata.getName(), axioms);
+		// TODO implement
 	}
 
 	/***************************************************************************
@@ -712,8 +711,10 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
+	
 
 	@Override
 	public void datasourcParametersUpdated() {}
+
 
 }

@@ -40,7 +40,7 @@ public class MappingIDLikeTextFilter implements TreeModelFilter<OBDAMappingAxiom
 	
 	public static void main(String args[]) {
 		try {
-			RDBMSOBDAMappingAxiom m = new RDBMSOBDAMappingAxiom("test id");
+			RDBMSOBDAMappingAxiom m = new RDBMSOBDAMappingAxiom("test id"); 
 			ConjunctiveQuery t = new ConjunctiveQuery();
 			t.addQueryAtom(new ConceptQueryAtom(new NamedConcept(URI.create("test")), new VariableTerm("x")));
 			m.setTargetQuery(t);
@@ -58,3 +58,6 @@ public class MappingIDLikeTextFilter implements TreeModelFilter<OBDAMappingAxiom
 	}
 
 }
+
+//Receive
+
