@@ -3,14 +3,14 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.1-SNAPSHOT</version>
 		<relativePath>../obdalib-parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
 	<name>OBDA Plugin for Protege 4.</name>
-
+	<version>${aversion}</version>
 	<repositories>
 		<!--
 			This repository holds protege 4 and obdalib related dependencies, the
@@ -46,12 +46,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib</artifactId>
-			<version>${project.version}</version>
+			<version>${aversion}</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>${project.version}</version>
+			<version>${aversion}</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->

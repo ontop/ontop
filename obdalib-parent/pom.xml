@@ -4,7 +4,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>obdalib-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>OBDA projects builder</name>
 	<url>http://maven.apache.org</url>
 
@@ -13,6 +13,10 @@
 		<module>../obdalib-owlapi</module>
 		<module>../obdalib-protege4</module>
 	</modules>
+
+	<properties>
+		<aversion>1.0.1-SNAPSHOT</aversion>
+	</properties>
 
 
 	<scm>

@@ -67,51 +67,51 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.slf4j.LoggerFactory;
+
 // import edu.stanford.smi.protege.resource.Icons;
 
 /**
  * 
  * @author mariano
  */
-public class MappingManagerPanel extends JPanel implements
-		MappingManagerPreferenceChangeListener {
+public class MappingManagerPanel extends JPanel implements MappingManagerPreferenceChangeListener {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 9105604240311706162L;
+	private static final long	serialVersionUID	= 9105604240311706162L;
 
-	Thread validatorThread = null;
+	Thread						validatorThread		= null;
 
-	SQLQueryValidator v = null;
+	SQLQueryValidator			v					= null;
 
-	boolean canceled = false;
+	boolean						canceled			= false;
 
-	boolean addToModel = false;
+	boolean						addToModel			= false;
 
-	MappingController mapc = null;
+	MappingController			mapc				= null;
 
-	DatasourcesController dsc = null;
+	DatasourcesController		dsc					= null;
 
-	protected APIController apic = null;
+	protected APIController		apic				= null;
 
-	DefaultMutableTreeNode editedNode = null;
-	MappingManagerPreferences pref = null;
-	KeyStroke addMapping = null;
-	KeyStroke editBody = null;
-	KeyStroke editHead = null;
-	KeyStroke editID = null;
+	DefaultMutableTreeNode		editedNode			= null;
+	MappingManagerPreferences	pref				= null;
+	KeyStroke					addMapping			= null;
+	KeyStroke					editBody			= null;
+	KeyStroke					editHead			= null;
+	KeyStroke					editID				= null;
 
-	final String ID = "id";
-	final String FUNCT = "funct";
-	final String PRED = "pred";
-	final String HEAD = "head";
-	final String SQL = "sql";
-	final String TEXT = "text";
+	final String				ID					= "id";
+	final String				FUNCT				= "funct";
+	final String				PRED				= "pred";
+	final String				HEAD				= "head";
+	final String				SQL					= "sql";
+	final String				TEXT				= "text";
 
 	/** Creates new form MappingManagerPanel */
-	public MappingManagerPanel(APIController apic, MappingController mapc,
-			DatasourcesController dsc) {
+	public MappingManagerPanel(APIController apic, MappingController mapc, DatasourcesController dsc) {
 		this.apic = apic;
 		this.mapc = mapc;
 		this.dsc = dsc;
@@ -130,12 +130,10 @@ public class MappingManagerPanel extends JPanel implements
 		MappingRenderer map_renderer = new MappingRenderer(apic);
 		treeMappingsTree.setCellRenderer(map_renderer);
 		treeMappingsTree.setEditable(true);
-		treeMappingsTree.setCellEditor(new MappingTreeNodeCellEditor(
-				treeMappingsTree, this, apic));
+		treeMappingsTree.setCellEditor(new MappingTreeNodeCellEditor(treeMappingsTree, this, apic));
 		treeMappingsTree.setSelectionModel(new MappingTreeSelectionModel());
 		treeMappingsTree.setRowHeight(0);
-		treeMappingsTree.setMaximumSize(new Dimension(scrollMappingsTree
-				.getWidth() - 50, 65000));
+		treeMappingsTree.setMaximumSize(new Dimension(scrollMappingsTree.getWidth() - 50, 65000));
 		treeMappingsTree.setToggleClickCount(1);
 		treeMappingsTree.setInvokesStopCellEditing(true);
 		// MouseListener[] ls = treeMappingsTree.getMouseListeners();
@@ -257,11 +255,9 @@ public class MappingManagerPanel extends JPanel implements
 		// });
 		addMappingButton.setIcon(IconLoader.getImageIcon("images/plus.png"));
 		addMappingButton.setToolTipText("Add a new mapping");
-		removeMappingButton
-				.setIcon(IconLoader.getImageIcon("images/minus.png"));
+		removeMappingButton.setIcon(IconLoader.getImageIcon("images/minus.png"));
 		removeMappingButton.setToolTipText("Remove selected mappings");
-		duplicateMappingButton.setIcon(IconLoader
-				.getImageIcon("images/duplicate.png"));
+		duplicateMappingButton.setIcon(IconLoader.getImageIcon("images/duplicate.png"));
 		duplicateMappingButton.setToolTipText("Duplicate selected mappings");
 		pref.registerPreferenceChangedListener(this);
 	}
@@ -333,8 +329,7 @@ public class MappingManagerPanel extends JPanel implements
 					return;
 				}
 				treeMappingsTree.setEditable(true);
-				editedNode = (DefaultMutableTreeNode) path
-						.getLastPathComponent();
+				editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 				treeMappingsTree.startEditingAtPath(path);
 			}
 		};
@@ -382,8 +377,7 @@ public class MappingManagerPanel extends JPanel implements
 					return;
 				}
 				treeMappingsTree.setEditable(true);
-				editedNode = (DefaultMutableTreeNode) path
-						.getLastPathComponent();
+				editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 				treeMappingsTree.startEditingAtPath(path);
 			}
 
@@ -528,8 +522,7 @@ public class MappingManagerPanel extends JPanel implements
 
 		setLayout(new java.awt.BorderLayout());
 
-		scrollMappingsManager
-				.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		scrollMappingsManager.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
 		panelMappingManager.setAutoscrolls(true);
 		panelMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
@@ -577,8 +570,7 @@ public class MappingManagerPanel extends JPanel implements
 
 		addMappingButton.setIcon(IconLoader.getImageIcon("images/plus.png"));
 		addMappingButton.setToolTipText("Add new mapping");
-		addMappingButton.setBorder(javax.swing.BorderFactory
-				.createEtchedBorder());
+		addMappingButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		addMappingButton.setContentAreaFilled(false);
 		addMappingButton.setIconTextGap(0);
 		addMappingButton.setMaximumSize(new java.awt.Dimension(25, 25));
@@ -589,46 +581,37 @@ public class MappingManagerPanel extends JPanel implements
 				addMappingButtonActionPerformed(evt);
 			}
 		});
-		panelMappingButtons.add(addMappingButton,
-				new java.awt.GridBagConstraints());
+		panelMappingButtons.add(addMappingButton, new java.awt.GridBagConstraints());
 
-		removeMappingButton
-				.setIcon(IconLoader.getImageIcon("images/minus.png"));
+		removeMappingButton.setIcon(IconLoader.getImageIcon("images/minus.png"));
 		removeMappingButton.setToolTipText("Remove mappings");
-		removeMappingButton.setBorder(javax.swing.BorderFactory
-				.createEtchedBorder());
+		removeMappingButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		removeMappingButton.setContentAreaFilled(false);
 		removeMappingButton.setIconTextGap(0);
 		removeMappingButton.setMaximumSize(new java.awt.Dimension(25, 25));
 		removeMappingButton.setMinimumSize(new java.awt.Dimension(25, 25));
 		removeMappingButton.setPreferredSize(new java.awt.Dimension(25, 25));
-		removeMappingButton
-				.addActionListener(new java.awt.event.ActionListener() {
-					public void actionPerformed(java.awt.event.ActionEvent evt) {
-						removeMappingButtonActionPerformed(evt);
-					}
-				});
-		panelMappingButtons.add(removeMappingButton,
-				new java.awt.GridBagConstraints());
+		removeMappingButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				removeMappingButtonActionPerformed(evt);
+			}
+		});
+		panelMappingButtons.add(removeMappingButton, new java.awt.GridBagConstraints());
 
-		duplicateMappingButton.setIcon(IconLoader
-				.getImageIcon("images/plus.png"));
+		duplicateMappingButton.setIcon(IconLoader.getImageIcon("images/plus.png"));
 		duplicateMappingButton.setToolTipText("Duplicate mappings");
-		duplicateMappingButton.setBorder(javax.swing.BorderFactory
-				.createEtchedBorder());
+		duplicateMappingButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		duplicateMappingButton.setContentAreaFilled(false);
 		duplicateMappingButton.setIconTextGap(0);
 		duplicateMappingButton.setMaximumSize(new java.awt.Dimension(25, 25));
 		duplicateMappingButton.setMinimumSize(new java.awt.Dimension(25, 25));
 		duplicateMappingButton.setPreferredSize(new java.awt.Dimension(25, 25));
-		duplicateMappingButton
-				.addActionListener(new java.awt.event.ActionListener() {
-					public void actionPerformed(java.awt.event.ActionEvent evt) {
-						duplicateMappingButtonActionPerformed(evt);
-					}
-				});
-		panelMappingButtons.add(duplicateMappingButton,
-				new java.awt.GridBagConstraints());
+		duplicateMappingButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				duplicateMappingButtonActionPerformed(evt);
+			}
+		});
+		panelMappingButtons.add(duplicateMappingButton, new java.awt.GridBagConstraints());
 
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
@@ -654,32 +637,55 @@ public class MappingManagerPanel extends JPanel implements
 		add(scrollMappingsManager, java.awt.BorderLayout.CENTER);
 	}// </editor-fold>//GEN-END:initComponents
 
-	private void jCheckBox1ItemStateChanged(java.awt.event.ItemEvent evt)
-			throws Exception {// GEN-FIRST:event_jCheckBox1ItemStateChanged
+	/***
+	 * The action for the search field and the search checkbox. If the checkbox
+	 * is not selected it cleans the filters. If it is selected it updates to the 
+	 * current search string.
+	 */
+	private void processFilterAction() {
 		if (!(jCheckBox1.isSelected())) {
-
-			MappingController controller = mapc;
-			MappingTreeModel model = mapc.getTreeModel();
-			model.removeAllFilters();
-			model.currentSourceChanged(apic.getDatasourcesController()
-					.getCurrentDataSource().getName(), apic
-					.getDatasourcesController().getCurrentDataSource()
-					.getName());
+			applyFilters(new ArrayList<TreeModelFilter>());
 		}
 
 		if (jCheckBox1.isSelected()) {
-
-			refreshMappings(textParse(jTextField1.getText()));
-
+			try {
+				List<TreeModelFilter> filters = parseSearchString(jTextField1.getText());
+				if (filters == null) {
+					throw new Exception("Impossible to parse search string.");
+				}
+				applyFilters(filters);
+			} catch (Exception e) {
+				LoggerFactory.getLogger(this.getClass()).debug(e.getMessage(), e);
+				JOptionPane.showMessageDialog(this, e.getMessage());
+			}
 		}
+	}
+
+	/***
+	 * Action for the filter checkbox
+	 * 
+	 * @param evt
+	 * @throws Exception
+	 */
+	private void jCheckBox1ItemStateChanged(java.awt.event.ItemEvent evt) throws Exception {// GEN-FIRST:event_jCheckBox1ItemStateChanged
+		processFilterAction();
 
 	}// GEN-LAST:event_jCheckBox1ItemStateChanged
 
+	/***
+	 * Action for key's entered in the search textbox
+	 * 
+	 * @param evt
+	 * @throws Exception
+	 */
 	private void sendFilters(java.awt.event.KeyEvent evt) throws Exception {// GEN-FIRST:event_sendFilters
-		// TODO add your handling code here:
 		int key = evt.getKeyCode();
 		if (key == java.awt.event.KeyEvent.VK_ENTER) {
-			jCheckBox1.setSelected(true);
+			if (!jCheckBox1.isSelected()) {
+				jCheckBox1.setSelected(true);
+			} else {
+				processFilterAction();
+			}
 		}
 
 	}// GEN-LAST:event_sendFilters
@@ -696,8 +702,7 @@ public class MappingManagerPanel extends JPanel implements
 	private void menuValidateAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateAllActionPerformed
 
 		// menu.setVisible(false);
-		MappingValidationDialog outputField = new MappingValidationDialog(
-				treeMappingsTree);
+		MappingValidationDialog outputField = new MappingValidationDialog(treeMappingsTree);
 		TreePath path[] = treeMappingsTree.getSelectionPaths();
 
 		if (path == null) {
@@ -715,13 +720,9 @@ public class MappingManagerPanel extends JPanel implements
 				MappingHeadNode head = node.getHeadNode();
 				RDBMSMappingValidator v;
 				try {
-					RDBMSSQLQuery rdbmssqlQuery = new RDBMSSQLQuery(body
-							.getQuery(), apic);
-					ConjunctiveQuery conjunctiveQuery = new ConjunctiveQuery(
-							head.getQuery(), apic);
-					v = new RDBMSMappingValidator(apic, dsc
-							.getCurrentDataSource(), rdbmssqlQuery,
-							conjunctiveQuery);
+					RDBMSSQLQuery rdbmssqlQuery = new RDBMSSQLQuery(body.getQuery(), apic);
+					ConjunctiveQuery conjunctiveQuery = new ConjunctiveQuery(head.getQuery(), apic);
+					v = new RDBMSMappingValidator(apic, dsc.getCurrentDataSource(), rdbmssqlQuery, conjunctiveQuery);
 					Enumeration<String> errors = v.validate();
 					if (!errors.hasMoreElements()) {
 						String output = id + ": " + "valid  \n";
@@ -733,11 +734,9 @@ public class MappingManagerPanel extends JPanel implements
 							String output = id + ": " + ele + "  \n";
 
 							if (ele.startsWith("N")) {
-								outputField.addText(output,
-										outputField.NONCRITICAL_ERROR);
+								outputField.addText(output, outputField.NONCRITICAL_ERROR);
 							} else if (ele.startsWith("C")) {
-								outputField.addText(output,
-										outputField.CRITICAL_ERROR);
+								outputField.addText(output, outputField.CRITICAL_ERROR);
 							} else {
 								outputField.addText(output, outputField.NORMAL);
 							}
@@ -745,8 +744,7 @@ public class MappingManagerPanel extends JPanel implements
 					}
 
 				} catch (QueryParseException e) {
-					outputField.addText(id + ": syntax error \n",
-							outputField.CRITICAL_ERROR);
+					outputField.addText(id + ": syntax error \n", outputField.CRITICAL_ERROR);
 				}
 
 			}
@@ -754,8 +752,7 @@ public class MappingManagerPanel extends JPanel implements
 	}// GEN-LAST:event_menuValidateAllActionPerformed
 
 	private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
-		final MappingValidationDialog outputField = new MappingValidationDialog(
-				treeMappingsTree);
+		final MappingValidationDialog outputField = new MappingValidationDialog(treeMappingsTree);
 
 		Runnable action = new Runnable() {
 			public void run() {
@@ -768,8 +765,7 @@ public class MappingManagerPanel extends JPanel implements
 				if (path == null) {
 					return;
 				}
-				outputField.addText("Validating " + path.length
-						+ " SQL queries.\n", outputField.NORMAL);
+				outputField.addText("Validating " + path.length + " SQL queries.\n", outputField.NORMAL);
 				for (int i = 0; i < path.length; i++) {
 					final int index = i;
 
@@ -778,17 +774,12 @@ public class MappingManagerPanel extends JPanel implements
 						MappingNode node = (MappingNode) o;
 						String id = node.getMappingID();
 						MappingBodyNode body = node.getBodyNode();
-						outputField.addText("  id: '" + id + "'... ",
-								outputField.NORMAL);
+						outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
 						try {
-							v = new SQLQueryValidator(dsc
-									.getCurrentDataSource(), new RDBMSSQLQuery(
-									body.getQuery(), apic));
+							v = new SQLQueryValidator(dsc.getCurrentDataSource(), new RDBMSSQLQuery(body.getQuery(), apic));
 						} catch (QueryParseException e) {
-							String output = " invalid Reason: "
-									+ v.getReason().getMessage() + " \n";
-							outputField.addText(output,
-									outputField.CRITICAL_ERROR);
+							String output = " invalid Reason: " + v.getReason().getMessage() + " \n";
+							outputField.addText(output, outputField.CRITICAL_ERROR);
 							return;
 						}
 						long timestart = System.currentTimeMillis();
@@ -799,20 +790,14 @@ public class MappingManagerPanel extends JPanel implements
 						if (v.validate()) {
 							long timestop = System.currentTimeMillis();
 							String output = " valid  \n";
-							outputField.addText("Time to query: "
-									+ ((timestop - timestart) / 1000)
-									+ " ms. Result: ", outputField.NORMAL);
+							outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
 							outputField.addText(output, outputField.VALID);
 
 						} else {
 							long timestop = System.currentTimeMillis();
-							String output = " invalid Reason: "
-									+ v.getReason().getMessage() + " \n";
-							outputField.addText("Time to query: "
-									+ ((timestop - timestart) / 1000)
-									+ " ms. Result: ", outputField.NORMAL);
-							outputField.addText(output,
-									outputField.CRITICAL_ERROR);
+							String output = " invalid Reason: " + v.getReason().getMessage() + " \n";
+							outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
+							outputField.addText(output, outputField.CRITICAL_ERROR);
 						}
 						v.dispose();
 
@@ -877,23 +862,15 @@ public class MappingManagerPanel extends JPanel implements
 		// TODO add your handling code here:
 	}// GEN-LAST:event_menuDeleteActionPerformed
 
-	private void duplicateMappingButtonActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_duplicateMappingButtonActionPerformed
+	private void duplicateMappingButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_duplicateMappingButtonActionPerformed
 
 		TreePath[] currentSelection = treeMappingsTree.getSelectionPaths();
 		if (currentSelection == null) {
-			JOptionPane.showMessageDialog(this,
-					"Please Select a Mapping first", "ERROR",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Please Select a Mapping first", "ERROR", JOptionPane.ERROR_MESSAGE);
 		} else {
-			if (JOptionPane
-					.showConfirmDialog(
-							this,
-							"This will create copies of the selected mappings. \nNumber of mappings selected = "
-									+ treeMappingsTree.getSelectionPaths().length
-									+ "\n Continue? ", "Copy confirmation",
-							JOptionPane.YES_NO_OPTION,
-							JOptionPane.QUESTION_MESSAGE) == JOptionPane.NO_OPTION) {
+			if (JOptionPane.showConfirmDialog(this, "This will create copies of the selected mappings. \nNumber of mappings selected = "
+					+ treeMappingsTree.getSelectionPaths().length + "\n Continue? ", "Copy confirmation", JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE) == JOptionPane.NO_OPTION) {
 				return;
 			}
 			MappingController controller = mapc;
@@ -902,34 +879,27 @@ public class MappingManagerPanel extends JPanel implements
 			if (currentSelection != null) {
 				for (int i = 0; i < currentSelection.length; i++) {
 					TreePath current_path = currentSelection[i];
-					MappingNode mapping = (MappingNode) current_path
-							.getLastPathComponent();
+					MappingNode mapping = (MappingNode) current_path.getLastPathComponent();
 					String id = (String) mapping.getUserObject();
-					String new_id = controller
-							.getNextAvailableDuplicateIDforMapping(
-									current_srcuri, id);
+					String new_id = controller.getNextAvailableDuplicateIDforMapping(current_srcuri, id);
 					try {
 						controller.duplicateMapping(current_srcuri, id, new_id);
 					} catch (DuplicateMappingException e) {
-						JOptionPane.showMessageDialog(this,
-								"Duplicate Mapping: " + new_id);
+						JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
 					}
 				}
 			}
 		}
 	}// GEN-LAST:event_duplicateMappingButtonActionPerformed
 
-	private void removeMappingButtonActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeMappingButtonActionPerformed
+	private void removeMappingButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeMappingButtonActionPerformed
 		removeMapping();
 	}// GEN-LAST:event_removeMappingButtonActionPerformed
 
 	private void removeMapping() {
-		if (JOptionPane.showConfirmDialog(this,
-				"This will delete ALL the selected mappings. \nNumber of mappings selected = "
-						+ treeMappingsTree.getSelectionPaths().length
-						+ "\n Continue? ", "Delete confirmation",
-				JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION) == JOptionPane.CANCEL_OPTION) {
+		if (JOptionPane.showConfirmDialog(this, "This will delete ALL the selected mappings. \nNumber of mappings selected = "
+				+ treeMappingsTree.getSelectionPaths().length + "\n Continue? ", "Delete confirmation", JOptionPane.WARNING_MESSAGE,
+				JOptionPane.YES_NO_OPTION) == JOptionPane.CANCEL_OPTION) {
 			return;
 		}
 
@@ -942,10 +912,8 @@ public class MappingManagerPanel extends JPanel implements
 		if (currentSelection != null) {
 			for (int i = 0; i < currentSelection.length; i++) {
 				TreePath current_path = currentSelection[i];
-				MappingNode mappingnode = (MappingNode) current_path
-						.getLastPathComponent();
-				controller.deleteMapping(srcuri, (String) mappingnode
-						.getMappingID());
+				MappingNode mappingnode = (MappingNode) current_path.getLastPathComponent();
+				controller.deleteMapping(srcuri, (String) mappingnode.getMappingID());
 				// model.removeNodeFromParent(mapping);
 
 			}
@@ -965,8 +933,7 @@ public class MappingManagerPanel extends JPanel implements
 		try {
 			String mappingid = controller.insertMapping();
 			MappingNode newnode = model.getMappingNode(mappingid);
-			treeMappingsTree.scrollPathToVisible(new TreePath(newnode
-					.getBodyNode().getPath()));
+			treeMappingsTree.scrollPathToVisible(new TreePath(newnode.getBodyNode().getPath()));
 			treeMappingsTree.setSelectionPath(new TreePath(newnode.getPath()));
 			if (!newnode.isLeaf()) {
 				treeMappingsTree.expandPath(new TreePath(newnode.getPath()));
@@ -976,8 +943,7 @@ public class MappingManagerPanel extends JPanel implements
 			JOptionPane.showMessageDialog(null, "Select a data source first");
 		} catch (DuplicateMappingException e) {
 			e.printStackTrace(System.err);
-			JOptionPane.showMessageDialog(this, "ERROR: duplicate mapping: "
-					+ e.getMessage());
+			JOptionPane.showMessageDialog(this, "ERROR: duplicate mapping: " + e.getMessage());
 			return;
 		}
 	}
@@ -1005,8 +971,7 @@ public class MappingManagerPanel extends JPanel implements
 		MappingBodyNode body = mapping.getBodyNode();
 		SQLQueryPanel query_panel = new SQLQueryPanel(dsc, body.toString());
 
-		resultquery.setSize(panelMappingManager.getWidth(), panelMappingManager
-				.getHeight());
+		resultquery.setSize(panelMappingManager.getWidth(), panelMappingManager.getHeight());
 		resultquery.setLocationRelativeTo(null);
 		resultquery.add(query_panel);
 		resultquery.setVisible(true);
@@ -1018,23 +983,23 @@ public class MappingManagerPanel extends JPanel implements
 	// private JDialog dialog;
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton addMappingButton;
-	private javax.swing.JButton duplicateMappingButton;
-	private javax.swing.JCheckBox jCheckBox1;
-	private javax.swing.JSeparator jSeparator1;
-	private javax.swing.JTextField jTextField1;
-	private javax.swing.JMenuItem menuExecuteQuery;
-	private javax.swing.JPopupMenu menuMappings;
-	private javax.swing.JMenuItem menuValidateAll;
-	private javax.swing.JMenuItem menuValidateBody;
-	private javax.swing.JMenuItem menuValidateHead;
-	private java.awt.Panel panel1;
-	private javax.swing.JPanel panelMappingButtons;
-	private javax.swing.JPanel panelMappingManager;
-	private javax.swing.JButton removeMappingButton;
-	private javax.swing.JScrollPane scrollMappingsManager;
-	private javax.swing.JScrollPane scrollMappingsTree;
-	private javax.swing.JTree treeMappingsTree;
+	private javax.swing.JButton		addMappingButton;
+	private javax.swing.JButton		duplicateMappingButton;
+	private javax.swing.JCheckBox	jCheckBox1;
+	private javax.swing.JSeparator	jSeparator1;
+	private javax.swing.JTextField	jTextField1;
+	private javax.swing.JMenuItem	menuExecuteQuery;
+	private javax.swing.JPopupMenu	menuMappings;
+	private javax.swing.JMenuItem	menuValidateAll;
+	private javax.swing.JMenuItem	menuValidateBody;
+	private javax.swing.JMenuItem	menuValidateHead;
+	private java.awt.Panel			panel1;
+	private javax.swing.JPanel		panelMappingButtons;
+	private javax.swing.JPanel		panelMappingManager;
+	private javax.swing.JButton		removeMappingButton;
+	private javax.swing.JScrollPane	scrollMappingsManager;
+	private javax.swing.JScrollPane	scrollMappingsTree;
+	private javax.swing.JTree		treeMappingsTree;
 
 	// End of variables declaration//GEN-END:variables
 
@@ -1143,8 +1108,7 @@ public class MappingManagerPanel extends JPanel implements
 	public void stopTreeEditing() {
 
 		if (treeMappingsTree.isEditing()) {
-			MappingTreeNodeCellEditor editor = (MappingTreeNodeCellEditor) treeMappingsTree
-					.getCellEditor();
+			MappingTreeNodeCellEditor editor = (MappingTreeNodeCellEditor) treeMappingsTree.getCellEditor();
 			if (editor.isInputValid()) {
 				if (treeMappingsTree.stopEditing()) {
 					String txt = editor.getCellEditorValue().toString();
@@ -1159,8 +1123,14 @@ public class MappingManagerPanel extends JPanel implements
 		updateNode(txt);
 	}
 
-	private List<TreeModelFilter> textParse(String textToParse)
-			throws Exception {
+	/***
+	 * Parses the string in the search field. 
+	 * 
+	 * @param textToParse
+	 * @return A list of filter objects or null if the string was empty or erroneous
+	 * @throws Exception
+	 */
+	private List<TreeModelFilter> parseSearchString(String textToParse) throws Exception {
 		String temp = "";
 		List<TreeModelFilter> ListOfFilters = new ArrayList<TreeModelFilter>();
 		// id:"company id" funct:"market"
@@ -1177,48 +1147,35 @@ public class MappingManagerPanel extends JPanel implements
 					String[] headFilter = textFilter[i].split(":");
 
 					// base case id:"bro"
-					if ((headFilter[1].endsWith("\"") || textFilter[i]
-							.endsWith("'"))
-							&& (headFilter[1].startsWith("\"") || headFilter[1]
-									.startsWith("'"))) {
-						if (createFilter(headFilter[0], (headFilter[1].replace(
-								"'", "")).replace("\"", "")) != null) {
-							ListOfFilters.add(createFilter(headFilter[0],
-									(headFilter[1].replace("'", "")).replace(
-											"\"", "")));
+					if ((headFilter[1].endsWith("\"") || textFilter[i].endsWith("'"))
+							&& (headFilter[1].startsWith("\"") || headFilter[1].startsWith("'"))) {
+						if (createFilter(headFilter[0], (headFilter[1].replace("'", "")).replace("\"", "")) != null) {
+							ListOfFilters.add(createFilter(headFilter[0], (headFilter[1].replace("'", "")).replace("\"", "")));
 							continue;
 						}
 					}
 					// Wrong format id:bro"
-					if ((headFilter[1].endsWith("\"") || headFilter[1]
-							.endsWith("'"))
-							&& (!headFilter[1].startsWith("\"") || !headFilter[1]
-									.startsWith("'"))) {
+					if ((headFilter[1].endsWith("\"") || headFilter[1].endsWith("'"))
+							&& (!headFilter[1].startsWith("\"") || !headFilter[1].startsWith("'"))) {
 						// JOptionPane.showMessageDialog(this,
 						// "The format is not correct ", "ERROR",
 						// JOptionPane.ERROR_MESSAGE);
 						// break;
-						ListOfFilters.add(null);
-						break;
+						return null;
 					}
 					// Wrong format id:bro
-					if ((!headFilter[1].endsWith("\"") || !headFilter[1]
-							.endsWith("'"))
-							&& (!headFilter[1].startsWith("\"") || !headFilter[1]
-									.startsWith("'"))) {
+					if ((!headFilter[1].endsWith("\"") || !headFilter[1].endsWith("'"))
+							&& (!headFilter[1].startsWith("\"") || !headFilter[1].startsWith("'"))) {
 						/*
 						 * JOptionPane.showMessageDialog(this,
 						 * "The format is not correct ", "ERROR",
 						 * JOptionPane.ERROR_MESSAGE);
 						 */
-						ListOfFilters.add(null);
-						break;
+						return null;
 					}
 					// part of the filter id:"bro
-					if ((!headFilter[1].endsWith("\"") || !headFilter[1]
-							.endsWith("'"))
-							&& (headFilter[1].startsWith("\"") || headFilter[1]
-									.startsWith("'"))) {
+					if ((!headFilter[1].endsWith("\"") || !headFilter[1].endsWith("'"))
+							&& (headFilter[1].startsWith("\"") || headFilter[1].startsWith("'"))) {
 						temp = headFilter[0].concat(":").concat(headFilter[1]);
 
 						// Wrong the filter is incomplete
@@ -1229,8 +1186,7 @@ public class MappingManagerPanel extends JPanel implements
 							 * "The format is not correct ", "ERROR",
 							 * JOptionPane.ERROR_MESSAGE);
 							 */
-							ListOfFilters.add(null);
-							break;
+							return null;
 						} else
 							;
 
@@ -1245,22 +1201,16 @@ public class MappingManagerPanel extends JPanel implements
 				// ----------------------------------Filter body
 				if (!textFilter[i].contains(":")) {
 					// complement of the head----> id"
-					if ((textFilter[i].endsWith("\"") || textFilter[i]
-							.endsWith("'"))) {
+					if ((textFilter[i].endsWith("\"") || textFilter[i].endsWith("'"))) {
 						temp = temp.concat(" ").concat(textFilter[i]);
 
 						if (temp.contains(":")) {
 							String[] tokens = temp.split(":");
 
-							if ((tokens[1].startsWith("\"") || tokens[1]
-									.startsWith("'"))
-									&& tokens[1].endsWith("\"")
+							if ((tokens[1].startsWith("\"") || tokens[1].startsWith("'")) && tokens[1].endsWith("\"")
 									|| tokens[1].endsWith("'")) {
-								if (createFilter(tokens[0], (tokens[1].replace(
-										"'", "")).replace("\"", "")) != null) {
-									ListOfFilters.add(createFilter(tokens[0],
-											(tokens[1].replace("'", ""))
-													.replace("\"", "")));
+								if (createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")) != null) {
+									ListOfFilters.add(createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")));
 
 									temp = "";
 									continue;
@@ -1274,51 +1224,38 @@ public class MappingManagerPanel extends JPanel implements
 						 * "The format is not correct ", "ERROR",
 						 * JOptionPane.ERROR_MESSAGE);
 						 */
-						ListOfFilters.add(null);
-						break;
+						return null;
 					}
 					// Part of the filter assigned to temp
-					if ((!textFilter[i].endsWith("\"") || !textFilter[i]
-							.endsWith("'"))
-							&& (!textFilter[i].startsWith("\"") || !textFilter[i]
-									.startsWith("'"))) {
+					if ((!textFilter[i].endsWith("\"") || !textFilter[i].endsWith("'"))
+							&& (!textFilter[i].startsWith("\"") || !textFilter[i].startsWith("'"))) {
 						temp = temp.concat(textFilter[i]);
 						continue;
 					}
 					// Wrong format "id
-					if (!textFilter[i].endsWith("\"")
-							|| !textFilter[i].endsWith("'")
-							&& (textFilter[i].startsWith("\"") || textFilter[i]
-									.startsWith("'"))) {
+					if (!textFilter[i].endsWith("\"") || !textFilter[i].endsWith("'")
+							&& (textFilter[i].startsWith("\"") || textFilter[i].startsWith("'"))) {
 						/*
 						 * JOptionPane.showMessageDialog(this,
 						 * "The format is not correct ", "ERROR",
 						 * JOptionPane.ERROR_MESSAGE);
 						 */
-						ListOfFilters.add(null);
-						break;
+						return null;
 
 					}
 					// Body base case "select"
 
-					if (textFilter[i].startsWith("\"")
-							|| textFilter[i].endsWith("'")
-							&& (textFilter[i].startsWith("\"") || textFilter[i]
-									.startsWith("'")))
+					if (textFilter[i].startsWith("\"") || textFilter[i].endsWith("'")
+							&& (textFilter[i].startsWith("\"") || textFilter[i].startsWith("'")))
 						// check this part
 						temp = temp.concat(textFilter[i]);
 					if (temp.contains(":")) {
 						String[] tokens = temp.split(":");
 
-						if ((tokens[1].startsWith("\"") || tokens[1]
-								.startsWith("'"))
-								&& tokens[1].endsWith("\"")
+						if ((tokens[1].startsWith("\"") || tokens[1].startsWith("'")) && tokens[1].endsWith("\"")
 								|| tokens[1].endsWith("'")) {
-							if (createFilter(tokens[0], (tokens[1].replace("'",
-									"")).replace("\"", "")) != null) {
-								ListOfFilters.add(createFilter(tokens[0],
-										(tokens[1].replace("'", "")).replace(
-												"\"", "")));
+							if (createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")) != null) {
+								ListOfFilters.add(createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")));
 								temp = "";
 								continue;
 							}
@@ -1333,7 +1270,7 @@ public class MappingManagerPanel extends JPanel implements
 						 * "The format is not correct ", "ERROR",
 						 * JOptionPane.ERROR_MESSAGE);
 						 */
-						ListOfFilters.add(null);
+						return null;
 					}
 
 				}
@@ -1388,22 +1325,13 @@ public class MappingManagerPanel extends JPanel implements
 	 * 
 	 * @param ListOfMappings
 	 */
-	private void refreshMappings(List<TreeModelFilter> ListOfCurrentFilters) {
-		MappingController controller = mapc;
+	private void applyFilters(List<TreeModelFilter> filters) {
 		MappingTreeModel model = mapc.getTreeModel();
-
-		if (!ListOfCurrentFilters.contains(null)) {
-			model.removeAllFilters();
-			model.addFilters(ListOfCurrentFilters);
-			model.currentSourceChanged(apic.getDatasourcesController()
-					.getCurrentDataSource().getName(), apic
-					.getDatasourcesController().getCurrentDataSource()
-					.getName());
-		} else {
-			JOptionPane.showMessageDialog(this, "The sintaxis is not correct ",
-					"ERROR", JOptionPane.ERROR_MESSAGE);
-
-		}
+		model.removeAllFilters();
+		model.addFilters(filters);
+		model.currentSourceChanged(apic.getDatasourcesController().getCurrentDataSource().getName(), apic.getDatasourcesController()
+				.getCurrentDataSource().getName());
+//		JOptionPane.showMessageDialog(this, "The sintaxis is not correct ", "ERROR", JOptionPane.ERROR_MESSAGE);
 
 	}
 

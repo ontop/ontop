@@ -1,67 +1,68 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.1-SNAPSHOT</version>
 		<relativePath>../obdalib-parent</relativePath>
-	</parent>  <modelVersion>4.0.0</modelVersion>
-  <artifactId>obdalib-owlapi</artifactId>
-  <packaging>jar</packaging>
-  <name>obdalib-owlapi</name>
-  <url>http://maven.apache.org</url>
- 
-  <repositories>
-     <repository>
-         <id>on.cs.unibas.ch</id>
-         <name>DBIS Maven Releases Repository</name>
-         <url>http://on.cs.unibas.ch/maven/repository</url>
-         <layout>default</layout>
-         <snapshots>
-             <enabled>false</enabled>
-         </snapshots>
-         <releases>
-             <enabled>true</enabled>
-         </releases>
-     </repository>
-  </repositories>
-  
-  <dependencies>
-    <dependency>
-        <groupId>inf.unibz.it.obda</groupId>
-        <artifactId>obdalib</artifactId>
-        <version>${project.version}</version>
-    </dependency>  
-    <dependency>
-        <groupId>net.sourceforge.owlapi</groupId>
-        <artifactId>owlapi</artifactId>
-        <version>2.2.0-r1317</version>
-    </dependency>    
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>obdalib-owlapi</artifactId>
+	<packaging>jar</packaging>
+	<name>obdalib-owlapi</name>
+	<url>http://maven.apache.org</url>
+	<version>${aversion}</version>
+	<repositories>
+		<repository>
+			<id>on.cs.unibas.ch</id>
+			<name>DBIS Maven Releases Repository</name>
+			<url>http://on.cs.unibas.ch/maven/repository</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib</artifactId>
+			<version>${aversion}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>2.2.0-r1317</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 
-  
-  <build>
-      <plugins>
-          <plugin>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.6</source>
-                  <target>1.6</target>
-              </configuration>
-          </plugin>
-          <plugin>
-          	<artifactId>maven-deploy-plugin</artifactId>
-          	<configuration>
-          		<skip>false</skip>
-          	</configuration>
-          </plugin>
-      </plugins>
-  </build>  
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
