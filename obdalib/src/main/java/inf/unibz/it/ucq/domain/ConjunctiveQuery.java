@@ -77,6 +77,13 @@ public class ConjunctiveQuery extends TargetQuery {
 		atoms.add(atom);
 		inputquery = toString();
 	}
+	
+	public void addQueryAtom(ArrayList<QueryAtom> a) {
+		if (atoms == null)
+			throw new IllegalArgumentException("received null");
+		atoms.addAll(a);
+		inputquery = toString();
+	}
 
 	public ArrayList<QueryAtom> getAtoms() {
 		return atoms;
@@ -175,6 +182,23 @@ public class ConjunctiveQuery extends TargetQuery {
 	private ArrayList<QueryAtom> getQueryAtomsFromString(String query, APIController apic) throws QueryParseException {
 		DatalogCQParser parser = null;
 		String input = query;
+		boolean inputModified = false;
+		if(input.contains("https://")){
+			input = input.replaceAll("https://", "https___");
+			inputModified = true;
+		}
+		if(input.contains("http://")){
+			input = input.replaceAll("http://", "http___");
+			inputModified = true;
+		}
+		if(input.contains("/")){
+			input = input.replaceAll("/", "_TT_");
+			inputModified = true;
+		}
+		if(input.contains("#")){
+			input = input.replaceAll("/", "_RR_");
+			inputModified = true;
+		}
 		byte currentBytes[] = input.getBytes();
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(currentBytes);
 		ANTLRInputStream inputst = null;

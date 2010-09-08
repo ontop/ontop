@@ -1,6 +1,7 @@
 package inf.unibz.it.dl.codec.xml;
 
 import inf.unibz.it.dl.assertion.Assertion;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.utils.codec.IOCodec;
 import inf.unibz.it.utils.codec.XMLEncodable;
 

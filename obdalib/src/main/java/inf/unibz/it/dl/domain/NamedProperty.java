@@ -15,12 +15,12 @@ package inf.unibz.it.dl.domain;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public abstract class NamedProperty extends NamedEntity implements PropertyExpression {
+public abstract class NamedProperty extends NamedPredicate implements PropertyExpression {
 
 	public NamedProperty(URI uri) {
 		super(uri);
 	}
 
-
+	
 
 }

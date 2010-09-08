@@ -19,6 +19,7 @@ import inf.unibz.it.ucq.typing.CheckOperationTerm;
 import inf.unibz.it.ucq.typing.UnknownXSDTypeException;
 import inf.unibz.it.ucq.typing.XSDTypingController;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -471,7 +472,7 @@ public class ConstraintsParser extends Parser {
 
             			MappingController con = apic.getMappingController();
             	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                       	 String source_uri = dscon.getCurrentDataSource().getName();
+            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
             	                      	 OBDAMappingAxiom map1 = con.getMapping(source_uri, id1);
             	                      	 if(map1 != null){	
             				constraint = new RDBMSCheckConstraint(id1,(RDBMSSQLQuery)map1.getSourceQuery(),  checks);
@@ -526,7 +527,7 @@ public class ConstraintsParser extends Parser {
 
             			MappingController con = apic.getMappingController();
             	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                       	 String source_uri = dscon.getCurrentDataSource().getName();
+            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
             	                      	 OBDAMappingAxiom map1 = con.getMapping(source_uri, id2);
             	                      	 if(map1 != null){	
             				constraint = new RDBMSUniquenessConstraint(id2,(RDBMSSQLQuery)map1.getSourceQuery(),  terms_ofMappingOne);
@@ -612,7 +613,7 @@ public class ConstraintsParser extends Parser {
 
             			MappingController con = apic.getMappingController();
             	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                       	 String source_uri = dscon.getCurrentDataSource().getName();
+            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
             	                      	 OBDAMappingAxiom map1 = con.getMapping(source_uri, id13);
             	                      	 OBDAMappingAxiom map2 = con.getMapping(source_uri, id24);
             	                      	 if(map1 != null && map2 != null){	
@@ -668,7 +669,7 @@ public class ConstraintsParser extends Parser {
 
             			 MappingController con = apic.getMappingController();
             	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                       	 String source_uri = dscon.getCurrentDataSource().getName();
+            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
             	                      	 OBDAMappingAxiom map = con.getMapping(source_uri, id5);
             	                      	 if(map != null){	
             				constraint = new RDBMSPrimaryKeyConstraint(id5,(RDBMSSQLQuery)map.getSourceQuery(), terms_ofMappingOne);

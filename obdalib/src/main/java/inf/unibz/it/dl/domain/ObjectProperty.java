@@ -24,12 +24,7 @@ public class ObjectProperty extends NamedProperty {
 	
 	@Override
 	public ObjectProperty clone() {
-		try {
-			return new ObjectProperty(new URI(this.getUri().toString()));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new ObjectProperty(URI.create(this.getUri().toString()));
 	}
 
 }

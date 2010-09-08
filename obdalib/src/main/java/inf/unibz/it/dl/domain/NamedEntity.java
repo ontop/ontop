@@ -17,12 +17,11 @@ import java.net.URI;
 
 public abstract class NamedEntity implements Cloneable, Entity {
 
-	private URI	uri	= null; // This should be an absolute URI in the form of prefix:name
-	
-	//TODO implement prefix:name mechanism
+	private URI	uri	= null; 
 
 	public NamedEntity(URI uri) {
-		this.setUri(uri);
+		this.setUri(uri); 
+		
 	}
 
 	public void setUri(URI uri) {
@@ -32,32 +31,27 @@ public abstract class NamedEntity implements Cloneable, Entity {
 	public URI getUri() {
 		return uri;
 	}
+
 	
-	public String getNamespacePrefix() {
-		return "";
-	}
-	
-	public String getName() {
-		String uristr = uri.toString();
-		String[] split = uristr.split("#");
-		String name = null;
-		if (split.length == 1) {
-			//No # symbol, looking for a URI of the form prefix:Name or :Name or Name
-			name = split[0];
-		} else if (split.length == 2){
-			//it is a full URI as jsdf://asdfl;kasdlkfj/asdf#name
-			name = split[1].trim();
-		} else {
-			//invalid URL
-		}
-		return name;
-	}
+//	public String getName() {
+////		String uristr = uri.toString();
+////		String[] split = uristr.split("#");
+////		String name = null;
+////		if (split.length == 1) {
+////			//No # symbol, looking for a URI of the form prefix:Name or :Name or Name
+////			name = split[0];
+////		} else if (split.length == 2){
+////			//it is a full URI as jsdf://asdfl;kasdlkfj/asdf#name
+////			name = split[1].trim();
+////		} else {
+////			//invalid URL
+////		}
+//		return uri.getFragment();
+//	}
 	
 //	public abstract Entity clone();
 	
 	
-	public String toString() {
-		return uri.toString();
-	}
+
 	
 }

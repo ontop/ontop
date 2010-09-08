@@ -67,7 +67,7 @@ public class AbstractAssertionMiner {
 		apic = con;
 		ds= apic.getDatasourcesController().getCurrentDataSource();
 		ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getName());
+		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 //		schemaPattern = schema;
 		createTableIndex();
 		retrieveTableInfo();
@@ -113,7 +113,7 @@ public class AbstractAssertionMiner {
 					makeTableMap(r, meta, con);
 				}
 			}else{
-				throw new SQLException("No connection established for id: " + source.getUri());
+				throw new SQLException("No connection established for id: " + source.getSourceID());
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();

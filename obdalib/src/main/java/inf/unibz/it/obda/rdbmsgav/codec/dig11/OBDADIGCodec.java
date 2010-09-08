@@ -1,5 +1,6 @@
 package inf.unibz.it.obda.rdbmsgav.codec.dig11;
 
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.domain.SourceQuery;
@@ -32,8 +33,9 @@ public class OBDADIGCodec {
 	private static final String	TELLS_MAPPING_ID				= "id";
 	public static final String	TELLS_MAPPING_ENABLED			= "enabled";
 	
+	private static APIController apic = null;
 
-	public static Element getDIG(OBDAMappingAxiom mapping, String datasource_uri, Document parentdoc) {
+	public static Element getDIG(OBDAMappingAxiom mapping, String datasource_uri, Document parentdoc, APIController apic) {
 		Element dig_mapping = null;
 	
 		SourceQuery source_query = mapping.getSourceQuery();
@@ -41,8 +43,8 @@ public class OBDADIGCodec {
 		TargetQuery target_query = mapping.getTargetQuery();
 		Element dig_mappinghead = null;
 	
-		dig_mappinghead = getDIG(target_query, parentdoc);
-		dig_mappingbody = getDIG(source_query, parentdoc);
+		dig_mappinghead = getDIG(target_query, parentdoc, apic);
+		dig_mappingbody = getDIG(source_query, parentdoc, apic);
 	
 		Element new_dig_mapping = parentdoc.createElement(TELLS_MAPPING_MAPPING_AXIOM);
 		new_dig_mapping.setAttribute(TELLS_MAPPING_DATA_SOURCE_URI, datasource_uri);
@@ -55,7 +57,7 @@ public class OBDADIGCodec {
 		return dig_mapping;
 	}
 
-	public static Element getDIG(Query query, Document parentdoc) {
+	public static Element getDIG(Query query, Document parentdoc, APIController apic) {
 		// TODO Move the SPARQL query translation to this method instead of its
 		// own builder
 		Element dig_query = null;
@@ -80,7 +82,7 @@ public class OBDADIGCodec {
 	
 			for (int i = 0; i < atoms.size(); i++) {
 				QueryAtom atom = atoms.get(i);
-				Element dig_atom = getDIG(atom, parentdoc);
+				Element dig_atom = getDIG(atom, parentdoc,apic);
 				if (dig_atom != null) {
 					intersection.appendChild(dig_atom);
 				} else {
@@ -107,12 +109,13 @@ public class OBDADIGCodec {
 		return dig_query;
 	}
 
-	public static Element getDIG(QueryAtom atom, Document parentdoc) {
+	public static Element getDIG(QueryAtom atom, Document parentdoc, APIController apic) {
 		Element dig_atom = null;
 	
 		if (atom instanceof ConceptQueryAtom) {
 			Element concept_query_atom = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_CQATOM);
 			ConceptQueryAtom concept_atom = (ConceptQueryAtom) atom;
+			String name = apic.getEntityNameRenderer().getPredicateName(concept_atom);
 			ArrayList<QueryTerm> terms = concept_atom.getTerms();
 			for (int i = 0; i < terms.size(); i++) {
 				QueryTerm current_term = terms.get(i);
@@ -120,12 +123,13 @@ public class OBDADIGCodec {
 				concept_query_atom.appendChild(dig_term);
 			}
 			Element concept_element = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_CATOM);
-			concept_element.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, concept_atom.getName());
+			concept_element.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, name);
 			concept_query_atom.appendChild(concept_element);
 			dig_atom = concept_query_atom;
 		} else if (atom instanceof BinaryQueryAtom) {
 			Element role_query_atom = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_RQATOM);
 			BinaryQueryAtom role_atom = (BinaryQueryAtom) atom;
+			String name = apic.getEntityNameRenderer().getPredicateName(role_atom);
 			ArrayList<QueryTerm> terms = role_atom.getTerms();
 			for (int i = 0; i < terms.size(); i++) {
 				QueryTerm current_term = terms.get(i);
@@ -138,7 +142,7 @@ public class OBDADIGCodec {
 				}
 			}
 			Element role_element = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_RATOM);
-			role_element.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, role_atom.getName());
+			role_element.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, name);
 			role_query_atom.appendChild(role_element);
 			dig_atom = role_query_atom;
 		}
@@ -151,7 +155,7 @@ public class OBDADIGCodec {
 		if (term instanceof VariableTerm) {
 	
 			Element new_term = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_INDVAR);
-			new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, term.getName());
+			new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, term.getVariableName());
 			dig_term = new_term;
 		} else if (term instanceof ConstantTerm) {
 			// throw new Exception("Contants not supported");
@@ -163,7 +167,7 @@ public class OBDADIGCodec {
 		} else if (term instanceof FunctionTerm) {
 	
 			Element new_term = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_FUNCTION);
-			new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, term.getName());
+			new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, apic.getEntityNameRenderer().getFunctionName((FunctionTerm) term));
 			FunctionTerm function_term = (FunctionTerm) term;
 			ArrayList<QueryTerm> parameters = function_term.getParameters();
 			for (int i = 0; i < parameters.size(); i++) {

@@ -220,7 +220,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 					}
 					DataSource ds = dscontroller.getCurrentDataSource();
 					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-					if(!man.isConnectionAlive(ds.getUri())){
+					if(!man.isConnectionAlive(ds.getSourceID())){
 						man.createConnection(ds);
 					}
 					ResultSet set = man.getRelationsResultSet(ds);

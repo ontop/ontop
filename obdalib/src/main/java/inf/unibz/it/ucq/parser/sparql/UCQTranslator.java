@@ -53,7 +53,7 @@ import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
 public class UCQTranslator {
-
+	
 	/***************************************************************************
 	 * Returns a conjunctive query object from a SPARQL query as long as it
 	 * follows some guidelines (specify guidelines)
@@ -142,11 +142,15 @@ public class UCQTranslator {
 					Element var_ind = null;
 					if (s instanceof Var) {
 						Var subject = (Var) s;
-						newAtom = new ConceptQueryAtom(new NamedConcept(new URI(object.getLiteralValue().toString())), new VariableTerm(
+						URI uri = new URI(object.getLiteralValue().toString());
+						String prefix = apic.getCoupler().getPrefixForUri(uri);
+						newAtom = new ConceptQueryAtom(new NamedConcept(uri), new VariableTerm(
 								subject.getName()));
 					} else if (s instanceof Node_Literal) {
 						Node_Literal subject = (Node_Literal) s;
-						newAtom = new ConceptQueryAtom(new NamedConcept(new URI(object.getLiteralValue().toString())), new ConstantTerm(
+						URI uri = new URI(object.getLiteralValue().toString());
+						String prefix = apic.getCoupler().getPrefixForUri(uri);
+						newAtom = new ConceptQueryAtom(new NamedConcept(uri), new ConstantTerm(
 								subject.getLiteralValue().toString()));
 					}
 				} else {
@@ -189,12 +193,16 @@ public class UCQTranslator {
 					} else {
 						rolename = ns_prefix + predicate.getLocalName();
 					}
-					boolean isDatatype = apic.getCoupler().isDatatypeProperty(new URI(rolename));
-					if (isDatatype)
-						role = new DataProperty(new URI(rolename));
-					else
-						role = new ObjectProperty(new URI(rolename));
-
+					boolean isDatatype = apic.getCoupler().isDatatypeProperty(apic.getCurrentOntologyURI(),new URI(rolename));
+					if (isDatatype){
+						URI uri = new URI(rolename);
+						String prefix = apic.getCoupler().getPrefixForUri(uri);
+						role = new DataProperty(uri);
+					}else{
+						URI uri = new URI(rolename);
+						String prefix = apic.getCoupler().getPrefixForUri(uri);
+						role = new ObjectProperty(uri);
+					}
 					newAtom = new BinaryQueryAtom(role, term1, term2);
 				}
 				newConjunct.addQueryAtom(newAtom);

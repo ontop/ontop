@@ -117,14 +117,14 @@ public class RDBMSMappingValidator extends MappingValidator {
 					while (para_it.hasNext()){
 						
 						QueryTerm p = (VariableTerm)para_it.next();
-						String str = p.getName();
+						String str = p.getVariableName();
 						v.add(str);
 						
 					}
 				}else if(t instanceof VariableTerm){
 					
 					VariableTerm vt = (VariableTerm) t;
-					String str = vt.getName();
+					String str= vt.getVariableName();
 					v.add(str);
 					
 				}
@@ -144,14 +144,14 @@ public class RDBMSMappingValidator extends MappingValidator {
 						while (para_it.hasNext()){
 							
 							QueryTerm p = (VariableTerm)para_it.next();
-							String str = p.getName();
+							String str = p.getVariableName();
 							v.add(str);
 							
 						}
 					}else if(t instanceof VariableTerm){
 						
 						VariableTerm vt = (VariableTerm) t;
-						String str = vt.getName();
+						String str = vt.getVariableName();
 						v.add(str);
 						
 					}

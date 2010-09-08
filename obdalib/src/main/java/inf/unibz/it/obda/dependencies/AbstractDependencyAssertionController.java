@@ -1,5 +1,6 @@
 package inf.unibz.it.obda.dependencies;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,6 +30,6 @@ public abstract class AbstractDependencyAssertionController<AssertionClass exten
 	 */
 	public abstract HashSet<AssertionClass> getDependenciesForCurrentDataSource();
 	
-	public abstract HashSet<AssertionClass> getAssertionsForDataSource(String uri);
+	public abstract HashSet<AssertionClass> getAssertionsForDataSource(URI uri);
 	
 }

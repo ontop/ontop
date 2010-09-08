@@ -1,4 +1,4 @@
-// $ANTLR 3.1.1 /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g 2009-02-13 11:21:53
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g 2010-07-07 15:25:32
 
 
 package inf.unibz.it.ucq.parser.datalog;
@@ -16,13 +16,14 @@ import inf.unibz.it.ucq.domain.FunctionTerm;
 import inf.unibz.it.ucq.domain.QueryAtom;
 import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.domain.VariableTerm;
+import inf.unibz.it.ucq.parser.datalog.DatalogCQParser;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.antlr.grammar.v3.ANTLRv3Parser.throwsSpec_return;
 import org.antlr.runtime.BaseRecognizer;
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.DFA;
@@ -34,11 +35,19 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
+
+
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
+
 public class DatalogCQParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ALPHAVAR", "ALPHA", "INT", "CHAR", "WS", "','", "'('", "')'", "'$'", "'?'", "'\\''"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ALPHAVAR", "ALPHA", "INT", "CHAR", "WS", "','", "'('", "')'", "':'", "'$'", "'?'", "'\\''"
     };
     public static final int WS=8;
+    public static final int T__15=15;
     public static final int T__12=12;
     public static final int T__11=11;
     public static final int T__14=14;
@@ -51,30 +60,21 @@ public class DatalogCQParser extends Parser {
     public static final int T__9=9;
     public static final int ALPHA=5;
 
-    
-    APIController apic = null;
-    
     // delegates
     // delegators
 
 
         public DatalogCQParser(TokenStream input) {
             this(input, new RecognizerSharedState());
-            
         }
         public DatalogCQParser(TokenStream input, RecognizerSharedState state) {
             super(input, state);
              
         }
         
-        
-    public void  setOBDAAPIController(APIController apicontroller) {
-    	this.apic = apicontroller;
-    }
-        
 
     public String[] getTokenNames() { return DatalogCQParser.tokenNames; }
-    public String getGrammarFileName() { return "/Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g"; }
+    public String getGrammarFileName() { return "C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g"; }
 
 
 
@@ -89,8 +89,11 @@ public class DatalogCQParser extends Parser {
         public List<String> getErrors() {
             return errors;
         }
-
-
+    	
+        private boolean inputModified = false;
+        public void setInputModifiedFlag(boolean b){
+        	inputModified = b;
+        }
 
     boolean error1 = false;
 
@@ -109,6 +112,13 @@ public class DatalogCQParser extends Parser {
     	public ArrayList<QueryAtom> getQueryAtoms() {
     		return query_atoms;
     	}
+    	
+    	APIController apic = null;
+    	String _prefix = ":";
+    	
+    	public void  setOBDAAPIController(APIController apicontroller) {
+        	this.apic = apicontroller;
+        }
     /*
     public void recoverFromMismatchedToken(IntStream input,
     										   RecognitionException e,
@@ -137,13 +147,13 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "parse"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:103:1: parse returns [boolean value] : prog EOF ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:130:1: parse returns [boolean value] : prog EOF ;
     public final boolean parse() throws RecognitionException {
         boolean value = false;
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:104:1: ( prog EOF )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:104:3: prog EOF
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:131:1: ( prog EOF )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:131:3: prog EOF
             {
             pushFollow(FOLLOW_prog_in_parse47);
             prog();
@@ -175,18 +185,18 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "prog"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:116:1: prog : atom ( ',' atom )* ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:143:1: prog : atom ( ',' atom )* ;
     public final void prog() throws RecognitionException {
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:117:7: ( atom ( ',' atom )* )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:117:10: atom ( ',' atom )*
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:144:7: ( atom ( ',' atom )* )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:144:10: atom ( ',' atom )*
             {
             pushFollow(FOLLOW_atom_in_prog79);
             atom();
 
             state._fsp--;
 
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:117:15: ( ',' atom )*
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:144:15: ( ',' atom )*
             loop1:
             do {
                 int alt1=2;
@@ -199,7 +209,7 @@ public class DatalogCQParser extends Parser {
 
                 switch (alt1) {
             	case 1 :
-            	    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:117:16: ',' atom
+            	    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:144:16: ',' atom
             	    {
             	    match(input,9,FOLLOW_9_in_prog82); 
             	    pushFollow(FOLLOW_atom_in_prog84);
@@ -235,7 +245,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "atom"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:126:1: atom : ( concept_query_atom | binary_query_atom );
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:153:1: atom : ( concept_query_atom | binary_query_atom );
     public final void atom() throws RecognitionException {
         ConceptQueryAtom concept_query_atom1 = null;
 
@@ -243,12 +253,12 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:127:2: ( concept_query_atom | binary_query_atom )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:154:2: ( concept_query_atom | binary_query_atom )
             int alt2=2;
             alt2 = dfa2.predict(input);
             switch (alt2) {
                 case 1 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:127:4: concept_query_atom
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:154:4: concept_query_atom
                     {
                     pushFollow(FOLLOW_concept_query_atom_in_atom110);
                     concept_query_atom1=concept_query_atom();
@@ -260,15 +270,13 @@ public class DatalogCQParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:128:5: binary_query_atom
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:155:5: binary_query_atom
                     {
                     pushFollow(FOLLOW_binary_query_atom_in_atom118);
                     binary_query_atom2=binary_query_atom();
 
                     state._fsp--;
-                    if (binary_query_atom2 == null) {
-                    	throw new IllegalArgumentException("Unrecognized query atom: " + errors.get(errors.size()-1));
-                    }
+
                      query_atoms.add(binary_query_atom2); 
 
                     }
@@ -291,7 +299,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "concept_query_atom"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:137:1: concept_query_atom returns [ConceptQueryAtom value] : function_id '(' term ')' ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:164:1: concept_query_atom returns [ConceptQueryAtom value] : function_id '(' term ')' ;
     public final ConceptQueryAtom concept_query_atom() throws RecognitionException {
         ConceptQueryAtom value = null;
 
@@ -301,8 +309,8 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:138:2: ( function_id '(' term ')' )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:138:4: function_id '(' term ')'
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:165:2: ( function_id '(' term ')' )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:165:4: function_id '(' term ')'
             {
             pushFollow(FOLLOW_function_id_in_concept_query_atom147);
             function_id3=function_id();
@@ -316,16 +324,60 @@ public class DatalogCQParser extends Parser {
             state._fsp--;
 
             match(input,11,FOLLOW_11_in_concept_query_atom153); 
-
+            			
+            			//******* Needed in order to be able to parse old files
+			            if(function_id3.contains(":") || function_id3.startsWith("http___")|| function_id3.startsWith("https___")){
+			    			_prefix = _prefix.replace(":", "");
+			    		}
+			            //********************************************************
+            			String aux = _prefix+function_id3;
             			NamedConcept concept = null;
-            			try {
-            				concept = new NamedConcept(new URI(function_id3));
-            			} catch (URISyntaxException uriex) {
-            				uriex.printStackTrace(System.err);
+            			URI uri = null;
+            			String prefix = "";
+            			String onto_uri = "";
+            			if(aux.contains(":")){
+            				String auxarray[] = aux.split(":");
+            				prefix = auxarray[0];
+            				aux = auxarray[1];
+            				onto_uri =apic.getCoupler().getUriForPrefix(prefix);
+            				if(onto_uri == null){
+            					throw new RecognitionException();
+            				}else if(onto_uri.endsWith("/")){
+            					onto_uri = onto_uri.substring(0,onto_uri.length()-1);
+            					uri = URI.create(onto_uri +"/"+aux);
+            				}else if(onto_uri.endsWith("#")){
+            					onto_uri = onto_uri.substring(0,onto_uri.length()-1);
+            					uri = URI.create(onto_uri +"#"+aux);
+            				}else{
+            					uri = URI.create(onto_uri +"#"+aux);
+            				}
+            			}else{
+            				
+            				if(aux.startsWith("https___") || aux.startsWith("http___")){
+                				aux = aux.replaceAll("https___", "https://");
+                				aux = aux.replaceAll("http___", "http://");
+                				aux = aux.replaceAll("_TT_", "/");
+                				aux = aux.replaceAll("_RR_", "/");
+                				uri = URI.create(aux);
+                				int indexOfHash = uri.toString().lastIndexOf("#");
+                				if(indexOfHash ==11){
+                					onto_uri = "";
+                				}else{
+                					onto_uri = uri.toString().substring(0,indexOfHash);
+                				}
+                			}else{
+                				uri = URI.create(apic.getCurrentOntologyURI() +"#" + aux);
+                				onto_uri = apic.getCurrentOntologyURI().toString();
+                			}
+            				
+            			}
+            			concept = new NamedConcept(uri);
+            			ConceptQueryAtom atom = new ConceptQueryAtom(concept, term4);
+            			if(!apic.getCoupler().isNamedConcept(URI.create(onto_uri),uri)){
             				throw new RecognitionException();
             			}
-            			ConceptQueryAtom atom = new ConceptQueryAtom(concept, term4);
             			value = atom;
+            			_prefix = "";
             	
 
             }
@@ -345,7 +397,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "binary_query_atom"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:155:1: binary_query_atom returns [BinaryQueryAtom value] : function_id '(' term1 ',' term2 ')' ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:194:1: binary_query_atom returns [BinaryQueryAtom value] : function_id '(' term1 ',' term2 ')' ;
     public final BinaryQueryAtom binary_query_atom() throws RecognitionException {
         BinaryQueryAtom value = null;
 
@@ -357,8 +409,8 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:156:2: ( function_id '(' term1 ',' term2 ')' )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:156:4: function_id '(' term1 ',' term2 ')'
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:195:2: ( function_id '(' term1 ',' term2 ')' )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:195:4: function_id '(' term1 ',' term2 ')'
             {
             pushFollow(FOLLOW_function_id_in_binary_query_atom178);
             function_id5=function_id();
@@ -379,23 +431,74 @@ public class DatalogCQParser extends Parser {
 
             match(input,11,FOLLOW_11_in_binary_query_atom188); 
 
-            			NamedProperty relation = null;
-            			String rolename = function_id5;
-            			APICoupler coupler = apic.getCoupler();
-            			
-            			if (coupler != null) {
-            				if ((coupler.isDatatypeProperty(URI.create(rolename)))||(coupler.isDatatypeProperty(URI.create(apic.getCurrentOntologyURI() +"#" + rolename)))) {
-            					relation = new DataProperty(URI.create(rolename));
-            				} else if ((coupler.isObjectProperty(URI.create(rolename)))||(coupler.isObjectProperty(URI.create(apic.getCurrentOntologyURI() +"#" + rolename)))) {
-            					relation = new ObjectProperty(URI.create(rolename));
-            				} else {
-            					throw new Exception(rolename + ": Impossible to detect if predicate is an ObjectProperty/DatatypeProperty. Verify that the OBDA API has a coupler and that it is able to answer for this property.");
-            				}
-            			} else {
-            				throw new Exception("No APICoupler has been defined. Define a APICoupler for the current APIController");
-            			}
-            			BinaryQueryAtom query_atom = new BinaryQueryAtom(relation, term16, term27);
-            			value = query_atom;
+					            if(function_id5.contains(":") || function_id5.startsWith("http___")|| function_id5.startsWith("https___")){
+					    			_prefix = _prefix.replace(":", "");
+					    		}
+            					String aux = _prefix+function_id5;
+            					NamedProperty relation = null;
+            					String rolename = aux;
+            					URI uri = null;
+            					String prefix = "";
+            					String onto_uri = "";
+            					if(rolename.contains(":")){
+            						String auxarray[] = rolename.split(":");
+            						prefix = auxarray[0];
+            						rolename = auxarray[1];
+            						onto_uri =apic.getCoupler().getUriForPrefix(prefix);
+            						if(onto_uri == null){
+                    					throw new RecognitionException();
+                    				}else if(onto_uri.endsWith("/")){
+                    					onto_uri = onto_uri.substring(0,onto_uri.length()-1);
+                    					uri = URI.create(onto_uri +"/"+rolename);
+                    				}else if(onto_uri.endsWith("#")){
+                    					onto_uri = onto_uri.substring(0,onto_uri.length()-1);
+                    					uri = URI.create(onto_uri +"#"+rolename);
+                    				}else{
+                    					uri = URI.create(onto_uri +"#"+rolename);
+                    				}
+            					}else{
+            						if(aux.startsWith("https___") || aux.startsWith("http___")){
+                        				aux = aux.replaceAll("https___", "https://");
+                        				aux = aux.replaceAll("http___", "http://");
+                        				aux = aux.replaceAll("_TT_", "/");
+                        				aux = aux.replaceAll("_RR_", "#");
+                        				uri = URI.create(aux);
+                        				int indexOfHash = uri.toString().lastIndexOf("#");
+                        				if(indexOfHash ==11){
+                        					onto_uri = "";
+                        				}else{
+                        					onto_uri = uri.toString().substring(0,indexOfHash);
+                        				}
+                        			}else{
+                        				uri = URI.create(apic.getCurrentOntologyURI() +"#" + aux);
+                        				onto_uri = apic.getCurrentOntologyURI().toString();
+                        			}
+            					}
+//            					if (coupler != null) {
+//            						if ((coupler.isDatatypeProperty(URI.create(rolename)))||(coupler.isDatatypeProperty(uri))) {
+//            							relation = new DataProperty(uri);
+//            						} else if ((coupler.isObjectProperty(URI.create(rolename)))||(coupler.isObjectProperty(uri))) {
+//            							relation = new ObjectProperty(uri);
+//            						} else {
+//            							throw new Exception(rolename + ": Impossible to detect if predicate is an ObjectProperty/DatatypeProperty. Verify that the OBDA API has a coupler and that it is able to answer for this property.");
+//            						}
+//            					} else {
+//            						throw new Exception("No APICoupler has been defined. Define a APICoupler for the current APIController");
+//            					}
+            					if(term27 instanceof FunctionTerm){
+            						relation = new ObjectProperty(uri);
+            						if(!apic.getCoupler().isObjectProperty(URI.create(onto_uri),uri)){
+                        				throw new RecognitionException();
+                        			}
+            					}else{
+            						relation = new DataProperty(uri);
+            						if(!apic.getCoupler().isDatatypeProperty(URI.create(onto_uri),uri)){
+                        				throw new RecognitionException();
+                        			}
+            					}
+            					BinaryQueryAtom query_atom = new BinaryQueryAtom(relation, term16, term27);
+            					value = query_atom;
+            					_prefix ="";
             	
 
             }
@@ -409,7 +512,7 @@ public class DatalogCQParser extends Parser {
             		
         }
         catch (Exception ex) {
-        			errors.add(ex.getMessage());
+
             		error1 = true; 
             		
             		
@@ -422,7 +525,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "term1"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:184:1: term1 returns [QueryTerm value] : term ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:241:1: term1 returns [QueryTerm value] : term ;
     public final QueryTerm term1() throws RecognitionException {
         QueryTerm value = null;
 
@@ -430,8 +533,8 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:185:2: ( term )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:185:4: term
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:242:2: ( term )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:242:4: term
             {
             pushFollow(FOLLOW_term_in_term1221);
             term8=term();
@@ -458,7 +561,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "term2"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:192:1: term2 returns [QueryTerm value] : term ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:249:1: term2 returns [QueryTerm value] : term ;
     public final QueryTerm term2() throws RecognitionException {
         QueryTerm value = null;
 
@@ -466,8 +569,8 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:193:2: ( term )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:193:4: term
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:250:2: ( term )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:250:4: term
             {
             pushFollow(FOLLOW_term_in_term2246);
             term9=term();
@@ -494,7 +597,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "term"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:200:1: term returns [QueryTerm value] : ( variable_term | constant_term | function_term );
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:257:1: term returns [QueryTerm value] : ( variable_term | constant_term | function_term );
     public final QueryTerm term() throws RecognitionException {
         QueryTerm value = null;
 
@@ -506,16 +609,16 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:201:2: ( variable_term | constant_term | function_term )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:258:2: ( variable_term | constant_term | function_term )
             int alt3=3;
             switch ( input.LA(1) ) {
-            case 12:
             case 13:
+            case 14:
                 {
                 alt3=1;
                 }
                 break;
-            case 14:
+            case 15:
                 {
                 alt3=2;
                 }
@@ -534,7 +637,7 @@ public class DatalogCQParser extends Parser {
 
             switch (alt3) {
                 case 1 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:201:4: variable_term
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:258:4: variable_term
                     {
                     pushFollow(FOLLOW_variable_term_in_term271);
                     variable_term10=variable_term();
@@ -546,7 +649,7 @@ public class DatalogCQParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:202:4: constant_term
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:259:4: constant_term
                     {
                     pushFollow(FOLLOW_constant_term_in_term279);
                     constant_term11=constant_term();
@@ -558,7 +661,7 @@ public class DatalogCQParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:203:4: function_term
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:260:4: function_term
                     {
                     pushFollow(FOLLOW_function_term_in_term287);
                     function_term12=function_term();
@@ -587,7 +690,7 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "function_term"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:213:1: function_term returns [FunctionTerm value] : function_id '(' function_parameter ( ',' function_parameter )* ')' ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:270:1: function_term returns [FunctionTerm value] : function_id '(' function_parameter ( ',' function_parameter )* ')' ;
     public final FunctionTerm function_term() throws RecognitionException {
         FunctionTerm value = null;
 
@@ -595,8 +698,8 @@ public class DatalogCQParser extends Parser {
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:214:2: ( function_id '(' function_parameter ( ',' function_parameter )* ')' )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:214:4: function_id '(' function_parameter ( ',' function_parameter )* ')'
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:271:2: ( function_id '(' function_parameter ( ',' function_parameter )* ')' )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:271:4: function_id '(' function_parameter ( ',' function_parameter )* ')'
             {
             pushFollow(FOLLOW_function_id_in_function_term319);
             function_id13=function_id();
@@ -609,7 +712,7 @@ public class DatalogCQParser extends Parser {
 
             state._fsp--;
 
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:214:39: ( ',' function_parameter )*
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:271:39: ( ',' function_parameter )*
             loop4:
             do {
                 int alt4=2;
@@ -622,7 +725,7 @@ public class DatalogCQParser extends Parser {
 
                 switch (alt4) {
             	case 1 :
-            	    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:214:40: ',' function_parameter
+            	    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:271:40: ',' function_parameter
             	    {
             	    match(input,9,FOLLOW_9_in_function_term326); 
             	    pushFollow(FOLLOW_function_parameter_in_function_term328);
@@ -646,9 +749,41 @@ public class DatalogCQParser extends Parser {
             		//	terms.add(function_parameter_collector.pop());
             		//}
             		
-            		FunctionTerm new_function = new FunctionTerm(function_id13, function_parameter_collector);
+            		URI uri = null;
+            		
+            		if(function_id13.contains(":") || function_id13.startsWith("http___") || function_id13.startsWith("https___")){
+            			_prefix = _prefix.replaceAll(":", "");
+            		}
+            		String aux = _prefix+function_id13;
+            		
+            		String prefix = "";
+            		if(aux.contains(":")){
+            			String auxarray[] = aux.split(":");
+            			prefix = auxarray[0];
+            			aux = auxarray[1];
+            			String url =apic.getCoupler().getUriForPrefix(prefix);
+            			if(url.endsWith("/")){
+            				uri = URI.create(url +aux);
+            			}else if(url.endsWith("#")){
+            				uri = URI.create(url +aux);
+            			}else{
+            				uri = URI.create(url +"#"+aux);
+            			}
+            		}else{
+            			if(aux.startsWith("https___") || aux.startsWith("http___")){
+            				aux = aux.replaceAll("https___", "https://");
+            				aux = aux.replaceAll("http___", "http://");
+            				aux = aux.replaceAll("_TT_", "/");
+            				aux = aux.replaceAll("_RR_", "#");
+            				uri = URI.create(aux);
+            			}else{
+            				uri = URI.create(apic.getCurrentOntologyURI() +"#" + aux);
+            			}
+            		}
+            		FunctionTerm new_function = new FunctionTerm(uri, function_parameter_collector);
             		value = new_function;
             		function_parameter_collector = new ArrayList<QueryTerm>();
+            		_prefix = "";
             		
 
             }
@@ -669,17 +804,17 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "function_parameter"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:230:1: function_parameter : ( function_variable | function_constant );
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:304:1: function_parameter : ( function_variable | function_constant );
     public final void function_parameter() throws RecognitionException {
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:231:2: ( function_variable | function_constant )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:305:2: ( function_variable | function_constant )
             int alt5=2;
             int LA5_0 = input.LA(1);
 
-            if ( ((LA5_0>=12 && LA5_0<=13)) ) {
+            if ( ((LA5_0>=13 && LA5_0<=14)) ) {
                 alt5=1;
             }
-            else if ( (LA5_0==14) ) {
+            else if ( (LA5_0==15) ) {
                 alt5=2;
             }
             else {
@@ -690,7 +825,7 @@ public class DatalogCQParser extends Parser {
             }
             switch (alt5) {
                 case 1 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:231:4: function_variable
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:305:4: function_variable
                     {
                     pushFollow(FOLLOW_function_variable_in_function_parameter354);
                     function_variable();
@@ -701,7 +836,7 @@ public class DatalogCQParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:232:4: function_constant
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:306:4: function_constant
                     {
                     pushFollow(FOLLOW_function_constant_in_function_parameter359);
                     function_constant();
@@ -729,17 +864,44 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "function_id"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:239:1: function_id returns [String value] : ALPHAVAR ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:313:1: function_id returns [String value] : ( prefix ':' )? ALPHAVAR ;
     public final String function_id() throws RecognitionException {
         String value = null;
 
         Token ALPHAVAR14=null;
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:240:2: ( ALPHAVAR )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:240:4: ALPHAVAR
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:314:2: ( ( prefix ':' )? ALPHAVAR )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:314:4: ( prefix ':' )? ALPHAVAR
             {
-            ALPHAVAR14=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_function_id381); 
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:314:4: ( prefix ':' )?
+            int alt6=2;
+            int LA6_0 = input.LA(1);
+
+            if ( (LA6_0==ALPHAVAR) ) {
+                int LA6_1 = input.LA(2);
+
+                if ( (LA6_1==12) ) {
+                    alt6=1;
+                }
+            }
+            switch (alt6) {
+                case 1 :
+                    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:314:5: prefix ':'
+                    {
+                    pushFollow(FOLLOW_prefix_in_function_id382);
+                    prefix();
+
+                    state._fsp--;
+
+                    match(input,12,FOLLOW_12_in_function_id383); 
+
+                    }
+                    break;
+
+            }
+
+            ALPHAVAR14=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_function_id386); 
             value = (ALPHAVAR14!=null?ALPHAVAR14.getText():null);
 
             }
@@ -759,19 +921,52 @@ public class DatalogCQParser extends Parser {
     // $ANTLR end "function_id"
 
 
+    // $ANTLR start "prefix"
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:320:1: prefix : ALPHAVAR ;
+    public final void prefix() throws RecognitionException {
+        Token ALPHAVAR15=null;
+
+        try {
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:321:2: ( ALPHAVAR )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:321:3: ALPHAVAR
+            {
+	            ALPHAVAR15=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_prefix405); 
+	            _prefix = (ALPHAVAR15!=null?ALPHAVAR15.getText():null);
+	            if(_prefix == null){
+	            	_prefix = ":";
+	            }else{
+	            	_prefix = _prefix + ":";
+	            }
+            }
+
+        }
+        catch (RecognitionException ex) {
+             
+            		//reportError(ex); 
+            		error1 = true; 
+            		throw ex; 
+            		
+        }
+        finally {
+        }
+        return ;
+    }
+    // $ANTLR end "prefix"
+
+
     // $ANTLR start "function_variable"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:248:1: function_variable returns [VariableTerm value] : ( '$' | '?' ) varname ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:329:1: function_variable returns [VariableTerm value] : ( '$' | '?' ) varname ;
     public final VariableTerm function_variable() throws RecognitionException {
         VariableTerm value = null;
 
-        String varname15 = null;
+        String varname16 = null;
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:249:2: ( ( '$' | '?' ) varname )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:250:2: ( '$' | '?' ) varname
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:330:2: ( ( '$' | '?' ) varname )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:331:2: ( '$' | '?' ) varname
             {
-            if ( (input.LA(1)>=12 && input.LA(1)<=13) ) {
+            if ( (input.LA(1)>=13 && input.LA(1)<=14) ) {
                 input.consume();
                 state.errorRecovery=false;
             }
@@ -780,12 +975,12 @@ public class DatalogCQParser extends Parser {
                 throw mse;
             }
 
-            pushFollow(FOLLOW_varname_in_function_variable413);
-            varname15=varname();
+            pushFollow(FOLLOW_varname_in_function_variable437);
+            varname16=varname();
 
             state._fsp--;
 
-            value = new VariableTerm(varname15); function_parameter_collector.add(value); 
+            value = new VariableTerm(varname16); function_parameter_collector.add(value); 
 
             }
 
@@ -805,20 +1000,20 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "function_constant"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:260:1: function_constant returns [ConstantTerm value] : '\\'' ALPHAVAR '\\'' ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:341:1: function_constant returns [ConstantTerm value] : '\\'' ALPHAVAR '\\'' ;
     public final ConstantTerm function_constant() throws RecognitionException {
         ConstantTerm value = null;
 
-        Token ALPHAVAR16=null;
+        Token ALPHAVAR17=null;
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:261:2: ( '\\'' ALPHAVAR '\\'' )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:262:2: '\\'' ALPHAVAR '\\''
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:342:2: ( '\\'' ALPHAVAR '\\'' )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:343:2: '\\'' ALPHAVAR '\\''
             {
-            match(input,14,FOLLOW_14_in_function_constant441); 
-            ALPHAVAR16=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_function_constant443); 
-            match(input,14,FOLLOW_14_in_function_constant445); 
-            value = new ConstantTerm((ALPHAVAR16!=null?ALPHAVAR16.getText():null)); function_parameter_collector.add(value); 
+            match(input,15,FOLLOW_15_in_function_constant465); 
+            ALPHAVAR17=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_function_constant467); 
+            match(input,15,FOLLOW_15_in_function_constant469); 
+            value = new ConstantTerm((ALPHAVAR17!=null?ALPHAVAR17.getText():null)); function_parameter_collector.add(value); 
 
             }
 
@@ -838,18 +1033,18 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "variable_term"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:270:1: variable_term returns [VariableTerm value] : ( '$' | '?' ) varname ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:351:1: variable_term returns [VariableTerm value] : ( '$' | '?' ) varname ;
     public final VariableTerm variable_term() throws RecognitionException {
         VariableTerm value = null;
 
-        String varname17 = null;
+        String varname18 = null;
 
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:271:2: ( ( '$' | '?' ) varname )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:272:2: ( '$' | '?' ) varname
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:352:2: ( ( '$' | '?' ) varname )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:353:2: ( '$' | '?' ) varname
             {
-            if ( (input.LA(1)>=12 && input.LA(1)<=13) ) {
+            if ( (input.LA(1)>=13 && input.LA(1)<=14) ) {
                 input.consume();
                 state.errorRecovery=false;
             }
@@ -858,12 +1053,12 @@ public class DatalogCQParser extends Parser {
                 throw mse;
             }
 
-            pushFollow(FOLLOW_varname_in_variable_term477);
-            varname17=varname();
+            pushFollow(FOLLOW_varname_in_variable_term501);
+            varname18=varname();
 
             state._fsp--;
 
-            value = new VariableTerm(varname17);
+            value = new VariableTerm(varname18);
 
             }
 
@@ -883,20 +1078,20 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "constant_term"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:279:1: constant_term returns [ConstantTerm value] : '\\'' ALPHAVAR '\\'' ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:360:1: constant_term returns [ConstantTerm value] : '\\'' ALPHAVAR '\\'' ;
     public final ConstantTerm constant_term() throws RecognitionException {
         ConstantTerm value = null;
 
-        Token ALPHAVAR18=null;
+        Token ALPHAVAR19=null;
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:280:2: ( '\\'' ALPHAVAR '\\'' )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:281:2: '\\'' ALPHAVAR '\\''
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:361:2: ( '\\'' ALPHAVAR '\\'' )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:362:2: '\\'' ALPHAVAR '\\''
             {
-            match(input,14,FOLLOW_14_in_constant_term503); 
-            ALPHAVAR18=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_constant_term505); 
-            match(input,14,FOLLOW_14_in_constant_term507); 
-            value = new ConstantTerm((ALPHAVAR18!=null?ALPHAVAR18.getText():null)); 
+            match(input,15,FOLLOW_15_in_constant_term527); 
+            ALPHAVAR19=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_constant_term529); 
+            match(input,15,FOLLOW_15_in_constant_term531); 
+            value = new ConstantTerm((ALPHAVAR19!=null?ALPHAVAR19.getText():null)); 
 
             }
 
@@ -916,18 +1111,18 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "relationname"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:288:1: relationname returns [String value] : ALPHAVAR ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:369:1: relationname returns [String value] : ALPHAVAR ;
     public final String relationname() throws RecognitionException {
         String value = null;
 
-        Token ALPHAVAR19=null;
+        Token ALPHAVAR20=null;
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:289:2: ( ALPHAVAR )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:289:4: ALPHAVAR
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:370:2: ( ALPHAVAR )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:370:4: ALPHAVAR
             {
-            ALPHAVAR19=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_relationname531); 
-            value = (ALPHAVAR19!=null?ALPHAVAR19.getText():null);
+            ALPHAVAR20=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_relationname555); 
+            value = (ALPHAVAR20!=null?ALPHAVAR20.getText():null);
 
             }
 
@@ -944,18 +1139,18 @@ public class DatalogCQParser extends Parser {
 
 
     // $ANTLR start "varname"
-    // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:292:1: varname returns [String value] : ALPHAVAR ;
+    // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:373:1: varname returns [String value] : ALPHAVAR ;
     public final String varname() throws RecognitionException {
         String value = null;
 
-        Token ALPHAVAR20=null;
+        Token ALPHAVAR21=null;
 
         try {
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:293:2: ( ALPHAVAR )
-            // /Users/mariano/Documents/OBDA/obda_eclipse_workspace/inf.unibz.it.obda.api/src/inf/unibz/it/obda/api/domain/ucq/DatalogCQ.g:293:4: ALPHAVAR
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:374:2: ( ALPHAVAR )
+            // C:\\Users\\obda\\workspacenew\\obdalib\\src\\main\\java\\inf\\unibz\\it\\ucq\\parser\\datalog\\DatalogCQ.g:374:4: ALPHAVAR
             {
-            ALPHAVAR20=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_varname549); 
-            value = (ALPHAVAR20!=null?ALPHAVAR20.getText():null);
+            ALPHAVAR21=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_varname573); 
+            value = (ALPHAVAR21!=null?ALPHAVAR21.getText():null);
 
             }
 
@@ -975,44 +1170,48 @@ public class DatalogCQParser extends Parser {
 
     protected DFA2 dfa2 = new DFA2(this);
     static final String DFA2_eotS =
-        "\30\uffff";
+        "\34\uffff";
     static final String DFA2_eofS =
-        "\30\uffff";
+        "\34\uffff";
     static final String DFA2_minS =
-        "\1\4\1\12\3\4\1\12\1\11\1\16\1\14\2\uffff\1\11\2\4\1\11\1\16\1\14"+
-        "\2\11\2\4\1\11\1\16\1\11";
+        "\1\4\1\12\4\4\2\12\1\11\1\17\1\15\1\4\2\uffff\1\11\2\4\1\12\1\11"+
+        "\1\17\1\15\2\11\2\4\1\11\1\17\1\11";
     static final String DFA2_maxS =
-        "\1\4\1\12\1\16\2\4\1\12\1\13\2\16\2\uffff\1\13\2\4\1\13\2\16\2\13"+
-        "\2\4\1\13\1\16\1\13";
+        "\1\4\1\14\1\17\3\4\1\14\1\12\1\13\2\17\1\4\2\uffff\1\13\2\4\1\12"+
+        "\1\13\2\17\2\13\2\4\1\13\1\17\1\13";
     static final String DFA2_acceptS =
-        "\11\uffff\1\1\1\2\15\uffff";
+        "\14\uffff\1\2\1\1\16\uffff";
     static final String DFA2_specialS =
-        "\30\uffff}>";
+        "\34\uffff}>";
     static final String[] DFA2_transitionS = {
             "\1\1",
-            "\1\2",
-            "\1\5\7\uffff\2\3\1\4",
-            "\1\6",
+            "\1\2\1\uffff\1\3",
+            "\1\6\10\uffff\2\4\1\5",
             "\1\7",
             "\1\10",
-            "\1\12\1\uffff\1\11",
-            "\1\13",
-            "\2\14\1\15",
-            "",
-            "",
-            "\1\12\1\uffff\1\11",
+            "\1\11",
+            "\1\12\1\uffff\1\13",
+            "\1\2",
+            "\1\14\1\uffff\1\15",
             "\1\16",
-            "\1\17",
-            "\1\20\1\uffff\1\21",
+            "\2\17\1\20",
+            "\1\21",
+            "",
+            "",
+            "\1\14\1\uffff\1\15",
             "\1\22",
-            "\2\23\1\24",
-            "\1\12\1\uffff\1\11",
-            "\1\20\1\uffff\1\21",
-            "\1\25",
+            "\1\23",
+            "\1\12",
+            "\1\24\1\uffff\1\25",
             "\1\26",
-            "\1\20\1\uffff\1\21",
-            "\1\27",
-            "\1\20\1\uffff\1\21"
+            "\2\27\1\30",
+            "\1\14\1\uffff\1\15",
+            "\1\24\1\uffff\1\25",
+            "\1\31",
+            "\1\32",
+            "\1\24\1\uffff\1\25",
+            "\1\33",
+            "\1\24\1\uffff\1\25"
     };
 
     static final short[] DFA2_eot = DFA.unpackEncodedString(DFA2_eotS);
@@ -1045,7 +1244,7 @@ public class DatalogCQParser extends Parser {
             this.transition = DFA2_transition;
         }
         public String getDescription() {
-            return "126:1: atom : ( concept_query_atom | binary_query_atom );";
+            return "153:1: atom : ( concept_query_atom | binary_query_atom );";
         }
     }
  
@@ -1058,13 +1257,13 @@ public class DatalogCQParser extends Parser {
     public static final BitSet FOLLOW_concept_query_atom_in_atom110 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_binary_query_atom_in_atom118 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_function_id_in_concept_query_atom147 = new BitSet(new long[]{0x0000000000000400L});
-    public static final BitSet FOLLOW_10_in_concept_query_atom149 = new BitSet(new long[]{0x0000000000007010L});
+    public static final BitSet FOLLOW_10_in_concept_query_atom149 = new BitSet(new long[]{0x000000000000E010L});
     public static final BitSet FOLLOW_term_in_concept_query_atom151 = new BitSet(new long[]{0x0000000000000800L});
     public static final BitSet FOLLOW_11_in_concept_query_atom153 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_function_id_in_binary_query_atom178 = new BitSet(new long[]{0x0000000000000400L});
-    public static final BitSet FOLLOW_10_in_binary_query_atom180 = new BitSet(new long[]{0x0000000000007010L});
+    public static final BitSet FOLLOW_10_in_binary_query_atom180 = new BitSet(new long[]{0x000000000000E010L});
     public static final BitSet FOLLOW_term1_in_binary_query_atom182 = new BitSet(new long[]{0x0000000000000200L});
-    public static final BitSet FOLLOW_9_in_binary_query_atom184 = new BitSet(new long[]{0x0000000000007010L});
+    public static final BitSet FOLLOW_9_in_binary_query_atom184 = new BitSet(new long[]{0x000000000000E010L});
     public static final BitSet FOLLOW_term2_in_binary_query_atom186 = new BitSet(new long[]{0x0000000000000800L});
     public static final BitSet FOLLOW_11_in_binary_query_atom188 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_term_in_term1221 = new BitSet(new long[]{0x0000000000000002L});
@@ -1073,25 +1272,28 @@ public class DatalogCQParser extends Parser {
     public static final BitSet FOLLOW_constant_term_in_term279 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_function_term_in_term287 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_function_id_in_function_term319 = new BitSet(new long[]{0x0000000000000400L});
-    public static final BitSet FOLLOW_10_in_function_term321 = new BitSet(new long[]{0x0000000000007000L});
+    public static final BitSet FOLLOW_10_in_function_term321 = new BitSet(new long[]{0x000000000000E000L});
     public static final BitSet FOLLOW_function_parameter_in_function_term323 = new BitSet(new long[]{0x0000000000000A00L});
-    public static final BitSet FOLLOW_9_in_function_term326 = new BitSet(new long[]{0x0000000000007000L});
+    public static final BitSet FOLLOW_9_in_function_term326 = new BitSet(new long[]{0x000000000000E000L});
     public static final BitSet FOLLOW_function_parameter_in_function_term328 = new BitSet(new long[]{0x0000000000000A00L});
     public static final BitSet FOLLOW_11_in_function_term332 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_function_variable_in_function_parameter354 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_function_constant_in_function_parameter359 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_function_id381 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_set_in_function_variable407 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_varname_in_function_variable413 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_14_in_function_constant441 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_function_constant443 = new BitSet(new long[]{0x0000000000004000L});
-    public static final BitSet FOLLOW_14_in_function_constant445 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_set_in_variable_term471 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_varname_in_variable_term477 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_14_in_constant_term503 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_constant_term505 = new BitSet(new long[]{0x0000000000004000L});
-    public static final BitSet FOLLOW_14_in_constant_term507 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_relationname531 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_varname549 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_prefix_in_function_id382 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_12_in_function_id383 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_ALPHAVAR_in_function_id386 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ALPHAVAR_in_prefix405 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_set_in_function_variable431 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_varname_in_function_variable437 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_15_in_function_constant465 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_ALPHAVAR_in_function_constant467 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_function_constant469 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_set_in_variable_term495 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_varname_in_variable_term501 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_15_in_constant_term527 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_ALPHAVAR_in_constant_term529 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_constant_term531 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ALPHAVAR_in_relationname555 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ALPHAVAR_in_varname573 = new BitSet(new long[]{0x0000000000000002L});
 
 }

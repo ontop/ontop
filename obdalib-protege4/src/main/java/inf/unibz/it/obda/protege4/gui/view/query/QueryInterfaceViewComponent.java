@@ -15,7 +15,7 @@ import inf.unibz.it.obda.protege4.gui.action.query.P4GetDefaultSPARQLPrefixActio
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.domain.UnionOfConjunctiveQueries;
 import inf.unibz.it.ucq.parser.sparql.UCQTranslator;
-import inf.unibz.it.ucq.renderer.CQDatalogStringRenderer;
+import inf.unibz.it.ucq.renderer.UCQDatalogStringRenderer;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultTableModel;
 import inf.unibz.it.utils.swing.TextMessageDialog;
 
@@ -398,7 +398,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						UnionOfConjunctiveQueries result = ((UCQReasoner) reasoner).getRewritting(ucq);
 						String s = "";
 						if(result != null){
-							CQDatalogStringRenderer ren = new CQDatalogStringRenderer();
+							UCQDatalogStringRenderer ren = new UCQDatalogStringRenderer(obdaController);
 							s = ren.encode(result);
 						}
 //						JTextArea textArea = new JTextArea("\n\nQuery expansion:\n\n" + result);

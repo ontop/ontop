@@ -8,7 +8,7 @@ import inf.unibz.it.obda.dl.codec.dependencies.xml.RDBMSDisjointnessDependencyXM
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
 
 public class RDBMSDisjointnessDependencyFactoryPlugin extends AssertionControllerFactoryPluginInstance {
-
+	
 	@Override
 	public Class<?> getAssertionClass() {
 		

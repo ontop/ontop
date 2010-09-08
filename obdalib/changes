@@ -1,0 +1,33 @@
+Changes, updates and bugfixes in obdalib
+
+New Classes:
+EntityNameRenderer: The entity name renderer is used to get the right representation of 
+atom names. It is responsable for combining the atom name respectivly functor name with the
+right prefixes.
+PrefixManager: Is responable for managing the registerd prefixes. It allows you add and delete 
+prefixes for ontolgy URI's and allows you to query them. 
+DatalogConjunctiveQueryCodec: Its a simple codec which allows to decode respectivly encode 
+conjunctive queries into XML
+MappingXMLCodec: Its a simple codec which allows to decode respectivly encode 
+obda mapping axioms into XML
+UCQDatalogStringRenderer:  Its a simple renderer which allows to represent union
+conjunctive queries into plain text.
+SourceQueryToTextCodec: Its a simple codec which allows to represent source queries
+into plain text.
+TargetQueryToTextCodec: Its a simple codec which allows to represent target queries
+into plain text.
+
+Changes in classes 
+
+All changes in existing classes are mainly due to the usage of the URI's instead of String
+for identifying atoms. 
+A few classes like the APIController, the APICoupler, the DatalogCQParser, most of
+the classes involved with mappings and a few other contain also changes due to the 
+usage of prefixes when displaying the mappings. 
+Especially the Parser has been modified quite a bit. He has now to handle atoms with no 
+prefix, with prefix or even the whole URI, dependingon what ontolgy is selected 
+and what mappings are displayed. 
+Furthermore some of the classes respeonsable for displaying mappings or 
+dumping them to XML contain changes due to some modifications of how to represent
+conjunctive queries or atom as plain text or XML. Each of this classes have now appropriate Renderer, 
+both for plain test representation and XML representation.  

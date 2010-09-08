@@ -1,6 +1,7 @@
 package inf.unibz.it.dl.codec.dig11;
 
 import inf.unibz.it.dl.assertion.Assertion;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.utils.codec.IOCodec;
 import inf.unibz.it.utils.codec.XMLEncodable;
 
@@ -25,7 +26,7 @@ public abstract class AssertionDIG11Codec<AssertionClass extends Assertion> impl
 
 	DocumentBuilder	db	= null;
 	Document		doc	= null;
-
+	
 	public AssertionDIG11Codec() {
 		try {
 			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();

@@ -40,6 +40,7 @@ import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -326,7 +327,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			throw new RuntimeException(miner.getException());
 		}
 		HashSet<DisjointnessMiningResult> results = ((RDBMSDisjointnessDependencyMiner)miner).getFoundInclusionDependencies();
-		String dsUri = apic.getDatasourcesController().getCurrentDataSource().getName();
+		URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		RDBMSDisjointnessDependencyController disCon = (RDBMSDisjointnessDependencyController) apic.getController(RDBMSDisjointnessDependency.class);
 		Iterator<DisjointnessMiningResult> it = results.iterator();
 		addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
@@ -385,7 +386,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			throw new RuntimeException(miner.getException());
 		}
 		HashSet<InclusionMiningResult> results = ((RDBMSInclusionDependencyMiner)miner).getFoundInclusionDependencies();
-		String dsUri = apic.getDatasourcesController().getCurrentDataSource().getName();
+		URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		RDBMSInclusionDependencyController incCon = (RDBMSInclusionDependencyController) apic.getController(RDBMSInclusionDependency.class);
 		Iterator<InclusionMiningResult> it = results.iterator();
 		addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
@@ -441,7 +442,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			throw new RuntimeException(miner.getException());
 		}
 		HashSet<FunctionalDependencyMiningResult> results = ((RDBMSFunctionalDependencyMiner)miner).getFoundInclusionDependencies();
-		String dsUri = apic.getDatasourcesController().getCurrentDataSource().getName();
+		URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		RDBMSFunctionalDependencyController incCon = (RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
 		Iterator<FunctionalDependencyMiningResult> it = results.iterator();
 		addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
@@ -456,7 +457,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			while(l_it.hasNext()){
 				QueryTerm t = l_it.next();
 				candidate.add(t);
-				candidateName.add(t.getName());
+				candidateName.add(t.getVariableName());
 			}
 			Vector<QueryTerm> aux = new Vector<QueryTerm>();
 			Iterator<QueryTerm> s_it = dependees.iterator();
@@ -468,12 +469,12 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 					Iterator<QueryTerm> f_it = f.getParameters().iterator();
 					while(f_it.hasNext()){
 						QueryTerm t = f_it.next();
-						if(!candidateName.contains(t.getName()) && depNames.add(t.getName())){
+						if(!candidateName.contains(t.getVariableName()) &&depNames.add(t.getVariableName())){
 							aux.add(t);
 						}
 					}
 				}else{
-					if(!candidateName.contains(term.getName()) && depNames.add(term.getName())){
+					if(!candidateName.contains(term.getVariableName()) && depNames.add(term.getVariableName())){
 						aux.add(term);
 					}
 					

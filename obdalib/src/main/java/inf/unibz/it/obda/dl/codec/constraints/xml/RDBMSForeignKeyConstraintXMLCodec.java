@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.dl.codec.constraints.xml;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
 import inf.unibz.it.obda.constraints.parser.ConstraintsRenderer;
 import inf.unibz.it.ucq.domain.QueryTerm;
@@ -15,6 +16,10 @@ import java.util.Vector;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSForeignKeyConstraint>{
+
+	public RDBMSForeignKeyConstraintXMLCodec() {
+		super();
+	}
 
 	private static final String	TAG	= "RDBMSForeignKeyConstraint";
 	private static final String	V1	= "variable";
@@ -69,7 +74,7 @@ public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSFo
 		while(it1.hasNext()){
 			QueryTerm t = it1.next();
 			Element e = createElement(V1);
-			e.setAttribute("name", t.getName());
+			e.setAttribute("name", t.getVariableName());
 			map1.appendChild(e);
 		}
 		List<QueryTerm> l2 =input.getTermsOfQueryTwo();
@@ -77,7 +82,7 @@ public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSFo
 		while(it2.hasNext()){
 			QueryTerm t = it2.next();
 			Element e = createElement(V1);
-			e.setAttribute("name", t.getName());
+			e.setAttribute("name",t.getVariableName());
 			map2.appendChild(e);
 		}
 		element.appendChild(map1);

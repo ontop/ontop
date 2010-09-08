@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.RuntimeErrorException;
@@ -42,19 +43,19 @@ public class DatasourcesController implements OntologyControllerListener {
 	// return instance;
 	// }
 
-	private HashMap<String, DataSource>					datasources			= null;
+	private HashMap<URI, DataSource>					datasources			= null;
 
 	private DatasourceTreeModel							treeModel			= null;
 
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
 
 	private DataSource									currentdatasource	= null;
-
+	
 	// private APIController obdacont = null;
 
 	public DatasourcesController() {
 
-		datasources = new HashMap<String, DataSource>();
+		datasources = new HashMap<URI, DataSource>();
 		treeModel = new DatasourceTreeModel();
 		listeners = new ArrayList<DatasourcesControllerListener>();
 		addDatasourceControllerListener(treeModel);
@@ -62,20 +63,14 @@ public class DatasourcesController implements OntologyControllerListener {
 	}
 
 	public synchronized void addDataSource(DataSource source) {
-		datasources.put(source.getName(), source);
+		datasources.put(source.getSourceID(), source);
 		fireDatasourceAdded(source);
 	}
 
-	public synchronized void addDataSource(String name, URI ontologyURI) {
-		DataSource newsource = new DataSource(name);
-		// URI ontologyURI = obdacont.getCurrentOntologyURI();
-		if (ontologyURI != null) {
-			newsource.setUri(ontologyURI.toString());
-		} else {
-			throw new IllegalArgumentException("Error: received null for ontology URI");
-		}
-
-		datasources.put(name, newsource);
+	public synchronized void addDataSource(String srcid) {
+		URI dburi = URI.create(srcid);
+		DataSource newsource = new DataSource(dburi);
+		datasources.put(dburi, newsource);
 		fireDatasourceAdded(newsource);
 	}
 
@@ -87,16 +82,16 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	@Deprecated
 	public void dumpDatasourcesToXML(Element root) {
-		Iterator<String> datasource_names = datasources.keySet().iterator();
+		Iterator<URI> datasource_names = datasources.keySet().iterator();
 		while (datasource_names.hasNext()) {
 			dumpDatasourceToXML(root, datasource_names.next());
 		}
 	}
 
 	@Deprecated
-	public void dumpDatasourceToXML(Element root, String datasource_name) {
+	public void dumpDatasourceToXML(Element root, URI datasource_uri) {
 
-		DataSource source = getDataSource(datasource_name);
+		DataSource source = getDataSource(datasources.get(datasource_uri).getSourceID());
 		Document doc = root.getOwnerDocument();
 
 		Element domDatasource = codec.encode(source);
@@ -140,13 +135,13 @@ public class DatasourcesController implements OntologyControllerListener {
 		}
 	}
 	
-	public void fireDataSourceNameUpdated(String old, DataSource neu){
+	public void fireDataSourceNameUpdated(URI old, DataSource neu){
 		for (DatasourcesControllerListener listener : listeners) {
-			listener.datasourceUpdated(old, neu);
+			listener.datasourceUpdated(old.toString(), neu);
 		}
 	}
 
-	public HashMap<String, DataSource> getAllSources() {
+	public HashMap<URI, DataSource> getAllSources() {
 		return datasources;
 	}
 
@@ -161,7 +156,7 @@ public class DatasourcesController implements OntologyControllerListener {
 		Collection<DataSource> allSources = datasources.values();
 		for (Iterator<DataSource> iterator = allSources.iterator(); iterator.hasNext();) {
 			DataSource dataSource = (DataSource) iterator.next();
-			if (dataSource.getUri().equals(ontologyURI.toString())) {
+			if (dataSource.getSourceID().equals(ontologyURI.toString())) {
 				ontoSources.add(dataSource);
 			}
 		}
@@ -174,7 +169,8 @@ public class DatasourcesController implements OntologyControllerListener {
 		return currentdatasource;
 	}
 
-	public synchronized DataSource getDataSource(String name) {
+	public synchronized DataSource getDataSource(URI name) {
+		
 		return datasources.get(name);
 	}
 
@@ -195,8 +191,8 @@ public class DatasourcesController implements OntologyControllerListener {
 	 */
 	@Deprecated
 	public void loadDatasourceFromXML(Element sourceelement) {
-		String encodedsource = sourceelement.getAttribute("string");
-		DataSource source = DataSource.getFromString(encodedsource);
+		DatasourceXMLCodec codec = new DatasourceXMLCodec();
+		DataSource source = codec.decode(sourceelement);
 		addDataSource(source);
 	}
 
@@ -232,15 +228,16 @@ public class DatasourcesController implements OntologyControllerListener {
 	public void removeAllSources() {
 		while (!datasources.values().isEmpty()) {
 			DataSource source = datasources.values().iterator().next();
-			datasources.remove(source.getName());
+			datasources.remove(source.getSourceID());
 		}
 
 		fireAllDatasourcesDeleted();
 	}
 
-	public synchronized void removeDataSource(String name) {
-		DataSource source = getDataSource(name);
-		datasources.remove(name);
+	public synchronized void removeDataSource(URI id) {
+		
+		DataSource source = getDataSource(id);
+		datasources.remove(id);
 		// MappingController mcontroller = MappingController.getInstance();
 		// mcontroller.deleteMappings(name);
 		fireDatasourceDeleted(source);
@@ -250,10 +247,10 @@ public class DatasourcesController implements OntologyControllerListener {
 		listeners.remove(listener);
 	}
 
-	public synchronized void setCurrentDataSource(String name) {
+	public synchronized void setCurrentDataSource(URI id) {
 		DataSource previous = currentdatasource;
-		if ((name != null) && (!name.equals(""))) {
-			DataSource ds = datasources.get(name);
+		if ((id != null) && (!id.equals(""))) {
+			DataSource ds = datasources.get(id);
 			currentdatasource = ds;
 			fireCurrentDatasourceChanged(previous, currentdatasource);
 		} else {
@@ -262,11 +259,12 @@ public class DatasourcesController implements OntologyControllerListener {
 		}
 	}
 
-	public synchronized void updateDataSource(String name, DataSource dsd) {
-		DataSource oldds = datasources.remove(name);
-		datasources.put(dsd.getName(), dsd);
-		treeModel.datasourceUpdated(name, dsd);
-		fireDataSourceNameUpdated(name, dsd);
+	public synchronized void updateDataSource(URI id, DataSource dsd) {
+		
+		DataSource oldds = datasources.remove(id);
+		datasources.put(dsd.getSourceID(), dsd);
+		treeModel.datasourceUpdated(id.toString(), dsd);
+		fireDataSourceNameUpdated(id, dsd);
 	}
 
 	public void currentOntologyChanged(URI uri, URI oldURI) {

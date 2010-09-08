@@ -43,7 +43,7 @@ public class MappingPredicateTreeModelFilter implements
 		for (int i = 0; i < atomscount; i++) {
 			QueryAtom atom = atoms.get(i);
 
-			if (atom.getName().indexOf(srtPredicateFilter) != -1)
+			if (atom.getNamedPredicate().getUri().toString().indexOf(srtPredicateFilter) != -1)
 				filterValue = true;
 
 		}

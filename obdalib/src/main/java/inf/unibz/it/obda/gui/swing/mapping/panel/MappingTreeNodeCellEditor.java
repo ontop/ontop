@@ -146,22 +146,22 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 			QueryAtom atom = it.next();
 			if(atom instanceof ConceptQueryAtom){
 				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
-				String name = cqa.getName();
-				boolean isConcept =coup.isNamedConcept(new URI(name));
+				String name = controller.getEntityNameRenderer().getPredicateName(cqa);
+				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(name));
 				if(!isConcept){
 					throw new Exception("Concept "+name+" not present in ontology.");
 				}
 				
 			}else{
 				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
-				String name = bqa.getName();
+				String name = controller.getEntityNameRenderer().getPredicateName(bqa);
 				ArrayList<QueryTerm> terms = bqa.getTerms();
 				QueryTerm t2 = terms.get(1);
 				boolean found = false;
 				if(t2 instanceof FunctionTerm){
-					found =coup.isObjectProperty(new URI(name));
+					found =coup.isObjectProperty(onto_uri,new URI(name));
 				}else{
-					found =coup.isDatatypeProperty(new URI(name));
+					found =coup.isDatatypeProperty(onto_uri,new URI(name));
 				}
 				if(!found){
 					throw new Exception("Property "+name+" not present in ontology.");

@@ -13,6 +13,8 @@
  */
 package inf.unibz.it.obda.api.controller;
 
+import java.net.URI;
+
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 
 
@@ -22,20 +24,20 @@ public interface MappingControllerListener {
 	 * Called when a mapping has been inserted into the currently selected datasource.
 	 * @param mapping_id
 	 */
-	public void mappingInserted(String srcuri, String mapping_id);
+	public void mappingInserted(URI srcid, String mapping_id);
 
 	/***
 	 * Called when a mapping has been deleted into the currently selected datasource.
 	 * @param mapping_id
 	 */
-	public void mappingDeleted(String srcuri, String mapping_id);
+	public void mappingDeleted(URI srcid, String mapping_id);
 	
 	//public void mappingIdUpdated(String src_uri, String mapping_id, String new_mapping_id);
 	
 	/***
 	 * Called when a mapping has been updated into the currently selected datasource.
 	 */
-	public void mappingUpdated(String srcuri, String mapping_id, OBDAMappingAxiom mapping);
+	public void mappingUpdated(URI srcid, String mapping_id, OBDAMappingAxiom mapping);
 	
 
 	/***
@@ -43,11 +45,16 @@ public interface MappingControllerListener {
 	 * @param oldsrcuri
 	 * @param newsrcuri
 	 */
-	public void currentSourceChanged(String oldsrcuri, String newsrcuri);
+	public void currentSourceChanged(URI oldsrcid, URI newsrcid);
 	
 	
 	/***
 	 * Called when all mappings were removed, for all datasources.
 	 */
 	public void allMappingsRemoved();
+	
+	/**
+	 * Called when the active ontology is changed. 
+	 */
+	public void ontologyChanged();
 }

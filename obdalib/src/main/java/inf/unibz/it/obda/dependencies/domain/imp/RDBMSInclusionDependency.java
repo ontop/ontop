@@ -5,6 +5,7 @@ import inf.unibz.it.obda.domain.SourceQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.ucq.domain.QueryTerm;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	/**
 	 * The data source to which the assertions is associated
 	 */
-	private String datasourceUri = null;
+	private URI datasourceUri = null;
 	
 	/**
 	 * Returns a new RDBMSInclusionDependency object
@@ -63,7 +64,7 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	 * @param terms1	list of terms associated to the first query
 	 * @param terms2	list of terms associated to the second query
 	 */
-	public RDBMSInclusionDependency(String uri,String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,
+	public RDBMSInclusionDependency(URI uri,String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,
 			List<QueryTerm> terms1, List<QueryTerm> terms2){
 		
 		datasourceUri = uri;
@@ -113,12 +114,12 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 		int code = s.hashCode();
 		int c = 1;
 		while(it1.hasNext()){
-			int aux1 = (int) Math.pow(it1.next().getName().hashCode(), c);
+			int aux1 = (int) Math.pow(it1.next().getVariableName().hashCode(), c);
 			code = code +aux1;
 			c++;
 		}
 		while(it2.hasNext()){
-			int aux2 = (int) Math.pow(it2.next().getName().hashCode(), c);
+			int aux2 = (int) Math.pow(it2.next().getVariableName().hashCode(), c);
 			code = code +aux2;
 			c++;
 		}
@@ -147,7 +148,7 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 			}
 			aux = aux + it1.next();
 		}
-		parameter1 = parameter1 +aux +"],";
+		parameter1 = parameter1 +aux +"];";
 		String parameter2 = "Body." + mappingTwoId +"[";
 		Iterator<QueryTerm> it2 = termsOfQueryTwo.iterator();
 		String aux2 =""; 
@@ -166,7 +167,7 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	 * Returns the associated data source URI
 	 * @return URI as String object
 	 */
-	public String getDatasourceUri() {
+	public URI getDatasourceUri() {
 		return datasourceUri;
 	}
 

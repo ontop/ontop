@@ -14,6 +14,7 @@
 
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.domain.DataSource;
@@ -34,10 +35,12 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	private static final long	serialVersionUID	= 1L;
 
 	private DatasourcesController dscontroller = null;
+	private APIController apic = null;
 
 	/** Creates new form DatasourceParameterEditorPanel */
-    public DatasourceParameterEditorPanel(DatasourcesController dscontroller) {
-    	this.dscontroller = dscontroller;
+    public DatasourceParameterEditorPanel(APIController apic) {
+    	this.apic = apic;
+    	this.dscontroller = apic.getDatasourcesController();
         initComponents();
         //TODO
         this.dscontroller.addDatasourceControllerListener(this);
@@ -193,7 +196,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         labelID.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
         labelID.setForeground(new java.awt.Color(153, 153, 153));
-        labelID.setText("  Source ID:");
+        labelID.setText("  Referenced Ontology:");
         labelID.setFocusable(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -370,7 +373,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
 		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
 		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, fieldURL.getText());
-		
+		currentsrc.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
 		dscontroller.fireParametersUpdated();
 		
 		return;
@@ -438,8 +441,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			 */
 			labelDSType.setText("RDBMS");
 			labelMapType.setText("OBDAMappings");
-			labelDatasource.setText(currentsource.getName());
-			fieldURI.setText(currentsource.getUri());
+			labelDatasource.setText(currentsource.getSourceID().toString());
+			fieldURI.setText(currentsource.getParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI));
 			fieldDBDriver.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
 			fieldDBName.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));
 			fieldDBUser.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME));

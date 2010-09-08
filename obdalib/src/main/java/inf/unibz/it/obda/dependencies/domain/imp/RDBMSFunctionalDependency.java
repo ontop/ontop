@@ -1,5 +1,6 @@
 package inf.unibz.it.obda.dependencies.domain.imp;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	/**
 	 * The data source to which the assertions is associated
 	 */
-	private String datasourceUri = null;
+	private URI datasourceUri = null;
 	
 	/**
 	 * Returns a new RDBMSFunctionalDependency object
@@ -62,7 +63,7 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	 * @param terms1	list of terms associated to the first query
 	 * @param terms2	list of terms associated to the second query
 	 */
-	public RDBMSFunctionalDependency(String uri,String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,
+	public RDBMSFunctionalDependency(URI uri,String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,
 			List<QueryTerm> terms1, List<QueryTerm> terms2){
 		
 		datasourceUri = uri;
@@ -147,7 +148,7 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 			}
 			aux = aux + it1.next();
 		}
-		parameter1 = parameter1 +aux +"],";
+		parameter1 = parameter1 +aux +"];";
 		String parameter2 = "Body." + mappingTwoId +"[";
 		Iterator<QueryTerm> it2 = termsOfQueryTwo.iterator();
 		String aux2="";
@@ -166,7 +167,7 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	 * Returns the associated data source URI
 	 * @return URI as String object
 	 */
-	public String getDatasourceUri() {
+	public URI getDatasourceUri() {
 		return datasourceUri;
 	}
 

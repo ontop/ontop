@@ -1,30 +1,20 @@
 <configuration>
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n</Pattern>
-		</layout>
-		<target>System.err</target>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
 	</appender>
 
 
-	<appender name="FILE"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>logs/obda-plugin.log</File>
-		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<FileNamePattern>tests.%i.log.zip</FileNamePattern>
-			<MinIndex>1</MinIndex>
-			<MaxIndex>10</MaxIndex>
-		</rollingPolicy>
-		<triggeringPolicy
-			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<MaxFileSize>5MB</MaxFileSize>
-		</triggeringPolicy>
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}
-				[%file:%line] - %msg%n</Pattern>
-		</layout>
-	</appender>
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>sqlgeneration.log</file>
+    <append>false</append>
+    <encoder>
+      <pattern>%date %msg%n</pattern>
+    </encoder>
+  </appender>
 
 	<logger name="it.fub.inf" level="INFO" />
 	<logger name="it.fub.inf.quonto" level="INFO" />

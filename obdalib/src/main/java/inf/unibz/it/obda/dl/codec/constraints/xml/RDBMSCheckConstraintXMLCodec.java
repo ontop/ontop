@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.dl.codec.constraints.xml;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSCheckConstraint;
 import inf.unibz.it.obda.constraints.parser.ConstraintsRenderer;
 import inf.unibz.it.ucq.domain.QueryTerm;
@@ -22,6 +23,10 @@ import org.w3c.dom.NodeList;
 import com.sun.msv.datatype.xsd.StringType;
 import com.sun.msv.datatype.xsd.XSDatatype;
 public class RDBMSCheckConstraintXMLCodec extends AssertionXMLCodec<RDBMSCheckConstraint>{
+
+	public RDBMSCheckConstraintXMLCodec() {
+		super();
+	}
 
 	private static final String	TAG	= "RDBMSCheckConstraint";
 	private static final String	CHECK	= "Check";
@@ -87,18 +92,18 @@ public class RDBMSCheckConstraintXMLCodec extends AssertionXMLCodec<RDBMSCheckCo
 			CheckOperationTerm cot = it.next();
 			Element check = createElement(CHECK);
 			Element v1 = createElement(V1);
-			v1.setAttribute("name", cot.getTerm1().getName());
+			v1.setAttribute("name", cot.getTerm1().getVariableName());
 			check.appendChild(v1);
 			QueryTerm t2 = cot.getTerm2();
 			if(t2 instanceof TypedConstantTerm){
 				TypedConstantTerm tct = (TypedConstantTerm) t2;
 				Element constant = createElement(CONSTANT);
-				constant.setAttribute("name", tct.getName());
+				constant.setAttribute("name", t2.getVariableName());
 				constant.setAttribute(TYPE, tct.getDatatype().toString());
 				check.appendChild(constant);
 			}else{
 				Element v2 = createElement(V2);
-				v2.setAttribute("name", cot.getTerm2().getName());
+				v2.setAttribute("name",t2.getVariableName());
 				check.appendChild(v2);
 			}
 			Element op = createElement(OP);

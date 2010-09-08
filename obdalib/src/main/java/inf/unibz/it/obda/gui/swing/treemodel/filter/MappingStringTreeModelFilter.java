@@ -52,7 +52,7 @@ public class MappingStringTreeModelFilter implements
 
 		for (int i = 0; i < atoms.size(); i++) {
 			QueryAtom atom = atoms.get(i);
-			if (atom.getName().indexOf(srtModelFilter) != -1) {
+			if (atom.getNamedPredicate().getUri().toString().indexOf(srtModelFilter) != -1) {
 				filterValue = true;
 			}
 			ArrayList<QueryTerm> queryTerms = atom.getTerms();

@@ -5,6 +5,7 @@ import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.domain.DataSource;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,13 +28,13 @@ public class RDBMSDisjointnessDependencyController extends
 	AbstractDependencyAssertionController<RDBMSDisjointnessDependency> {
 
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSDisjointnessDependency>> disjointnessDependencies= null;
+	private HashMap<URI, HashSet<RDBMSDisjointnessDependency>> disjointnessDependencies= null;
 //	
 	/**
 	 * Creates a new instance of the RDBMSDisjointnessDependencyController.
 	 */
 	public RDBMSDisjointnessDependencyController (){
-		disjointnessDependencies = new HashMap<String, HashSet<RDBMSDisjointnessDependency>>();
+		disjointnessDependencies = new HashMap<URI, HashSet<RDBMSDisjointnessDependency>>();
 	}
 	
 	/**
@@ -69,10 +70,10 @@ public class RDBMSDisjointnessDependencyController extends
 		if(a == null){
 			return;
 		}
-		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			aux.add(a);
-			disjointnessDependencies.put(currentDataSource.getName(), aux);
+			disjointnessDependencies.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(a);
 		}
 	}
@@ -83,10 +84,10 @@ public class RDBMSDisjointnessDependencyController extends
 	 */
 	@Override
 	public void removeAssertion(RDBMSDisjointnessDependency a) {
-		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			aux.remove(a);
-			disjointnessDependencies.put(currentDataSource.getName(), aux);
+			disjointnessDependencies.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(a);
 		}
 	}
@@ -98,14 +99,14 @@ public class RDBMSDisjointnessDependencyController extends
 	 */
 	public void alldatasourcesDeleted() {
 		
-		HashSet<RDBMSDisjointnessDependency> list = disjointnessDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSDisjointnessDependency> list = disjointnessDependencies.get(currentDataSource.getSourceID());
 		if(list != null){
 			Iterator<RDBMSDisjointnessDependency> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		disjointnessDependencies = new HashMap<String, HashSet<RDBMSDisjointnessDependency>>();
+		disjointnessDependencies = new HashMap<URI, HashSet<RDBMSDisjointnessDependency>>();
 		
 	}
 
@@ -119,14 +120,14 @@ public class RDBMSDisjointnessDependencyController extends
 		currentDataSource=currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSDisjointnessDependency> list = disjointnessDependencies.get(previousdatasource.getName());
+				HashSet<RDBMSDisjointnessDependency> list = disjointnessDependencies.get(previousdatasource.getSourceID());
 				Iterator<RDBMSDisjointnessDependency> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSDisjointnessDependency> list1 = disjointnessDependencies.get(currentsource.getName());
+				HashSet<RDBMSDisjointnessDependency> list1 = disjointnessDependencies.get(currentsource.getSourceID());
 				Iterator<RDBMSDisjointnessDependency> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -141,7 +142,7 @@ public class RDBMSDisjointnessDependencyController extends
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		disjointnessDependencies.put(source.getName(), new HashSet<RDBMSDisjointnessDependency>());
+		disjointnessDependencies.put(source.getSourceID(), new HashSet<RDBMSDisjointnessDependency>());
 	}
 
 	/**
@@ -152,13 +153,13 @@ public class RDBMSDisjointnessDependencyController extends
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSDisjointnessDependency> list = disjointnessDependencies.get(currentDataSource.getName());
+			HashSet<RDBMSDisjointnessDependency> list = disjointnessDependencies.get(currentDataSource.getSourceID());
 			Iterator<RDBMSDisjointnessDependency> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		disjointnessDependencies.remove(source.getName());
+		disjointnessDependencies.remove(source.getSourceID());
 	}
 
 	/**
@@ -169,7 +170,7 @@ public class RDBMSDisjointnessDependencyController extends
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(oldname);
 		disjointnessDependencies.remove(oldname);
-		disjointnessDependencies.put(currendata.getName(), aux);
+		disjointnessDependencies.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -182,7 +183,7 @@ public class RDBMSDisjointnessDependencyController extends
 	public HashSet<RDBMSDisjointnessDependency> getDependenciesForCurrentDataSource() {
 		// TODO Auto-generated method stub
 		if(currentDataSource !=null){
-			return disjointnessDependencies.get(currentDataSource.getName());
+			return disjointnessDependencies.get(currentDataSource.getSourceID());
 		}else{
 			return  new HashSet<RDBMSDisjointnessDependency>();
 		}	
@@ -195,8 +196,8 @@ public class RDBMSDisjointnessDependencyController extends
 	public Collection<RDBMSDisjointnessDependency> getAssertions() {
 		
 		Vector<RDBMSDisjointnessDependency> assertions = new Vector<RDBMSDisjointnessDependency>();
-		Set<String>keys = disjointnessDependencies.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = disjointnessDependencies.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(it.next());
 			assertions.addAll(aux);
@@ -212,10 +213,10 @@ public class RDBMSDisjointnessDependencyController extends
 	 * @param a the RDBMSDisjointnessDependency to add
 	 */
 	public boolean insertAssertion(RDBMSDisjointnessDependency a) {
-		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSDisjointnessDependency> aux = disjointnessDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				disjointnessDependencies.put(currentDataSource.getName(), aux);
+				disjointnessDependencies.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -228,7 +229,7 @@ public class RDBMSDisjointnessDependencyController extends
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSDisjointnessDependency> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSDisjointnessDependency> getAssertionsForDataSource(URI uri) {
 		// TODO Auto-generated method stub
 		return disjointnessDependencies.get(uri);
 	}

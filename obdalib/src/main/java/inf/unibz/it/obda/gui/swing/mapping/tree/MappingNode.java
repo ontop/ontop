@@ -27,12 +27,12 @@ public class MappingNode extends DefaultMutableTreeNode {
 		MappingBodyNode body = null;
 		MappingHeadNode head = null;
 		if (mapping.getSourceQuery() != null) {
-			body = new MappingBodyNode(mapping.getSourceQuery().getInputQuString());
+			body = new MappingBodyNode(mapping.getSourceQuery().toString());
 		} else {
 			body = new MappingBodyNode("");
 		}
 		if (mapping.getTargetQuery() != null) {
-			head = new MappingHeadNode(mapping.getTargetQuery().getInputQuString());
+			head = new MappingHeadNode(mapping.getTargetQuery().toString());
 		} else {
 			head = new MappingHeadNode("");
 		}

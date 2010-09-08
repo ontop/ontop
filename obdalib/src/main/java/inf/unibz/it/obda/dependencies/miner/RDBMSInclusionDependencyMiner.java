@@ -116,7 +116,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		
 		this.apic = apic;
 		resultOfSQLQueries = new HashMap<String, Boolean>();
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getName());
+		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		queue = new Vector<Job>();
 		sourceQueryMap = new HashMap<QueryAtom, OBDAMappingAxiom>();
 		foundInclusion = new HashSet<InclusionMiningResult>();
@@ -241,14 +241,14 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		if(tm1 instanceof VariableTerm && tm2 instanceof VariableTerm){
 			VariableTerm vt1 = (VariableTerm) tm1;
 			VariableTerm vt2 = (VariableTerm) tm2;
-			String var1 = vt1.getName();
-			String var2 = vt2.getName();
+			String var1 = vt1.getVariableName();
+			String var2 = vt2.getVariableName();
 			return produceSQL(m1, m2, var1, var2);
 			
 		}else if(tm1 instanceof FunctionTerm && tm2 instanceof FunctionTerm){
 			FunctionTerm ft1 = (FunctionTerm) tm1;
-			FunctionTerm ft2 = (FunctionTerm) tm2;
-			if(ft1.getName().equals(ft2.getName())){
+			FunctionTerm ft2 = (FunctionTerm)tm2;		
+			if(ft1.getVariableName().equals(ft2.getVariableName())){
 				return produceSQL(m1,m2,ft1,ft2);
 			}else {
 				return null;
@@ -289,7 +289,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			if(var1.length() >0){
 				var1 = var1 +", ";
 			}
-			var1 = var1 + "table1."+it.next().getName();
+			var1 = var1 + "table1."+it.next().getVariableName();
 		}
 		String var2 = "";
 		Iterator<QueryTerm> it1 = termsOfFT2.iterator();
@@ -297,7 +297,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			if(var2.length() >0){
 				var2 = var2 +", ";
 			}
-			var2 = var2 + "table2."+it1.next().getName();
+			var2 = var2 + "table2."+it1.next().getVariableName();
 		}
 		
 		String query = "SELECT " + var1 +" FROM (" + candidate + ") table1 WHERE ROW("+
@@ -601,7 +601,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 						}else{// otherwise the query gets executed and the result is added to the map
 								try {
 									DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
-									if(!man.isConnectionAlive(ds.getUri())){
+									if(!man.isConnectionAlive(ds.getSourceID())){
 										man.createConnection(ds);
 									}
 //									if (model != null) {
@@ -609,7 +609,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 //										IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) model;
 //										rstm.close();
 //									}
-									ResultSet set =  man.executeQuery(ds.getUri(), sql,ds);
+									ResultSet set =  man.executeQuery(ds.getSourceID(), sql,ds);
 									IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
 									synchronized(resultOfSQLQueries){
 									if(model.getRowCount() != 0){

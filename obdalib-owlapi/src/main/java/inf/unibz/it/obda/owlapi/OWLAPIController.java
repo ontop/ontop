@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.io.DataManager;
+import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.constraints.controller.RDBMSCheckConstraintController;
 import inf.unibz.it.obda.constraints.controller.RDBMSForeignKeyConstraintController;
 import inf.unibz.it.obda.constraints.controller.RDBMSPrimaryKeyConstraintController;
@@ -28,15 +28,14 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-//import org.apache.log4j.Logger;
 import org.semanticweb.owl.model.AddAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyChangeException;
+import org.semanticweb.owl.model.OWLOntologyChangeListener;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.RemoveAxiom;
-import org.semanticweb.owl.model.UnknownOWLOntologyException;
 
 public class OWLAPIController extends APIController {
 
@@ -47,15 +46,14 @@ public class OWLAPIController extends APIController {
 
 	public OWLAPIController(OWLOntologyManager owlman, OWLOntology root) {
 		super();
-//		mapcontroller = new SynchronizedMappingController(dscontroller, this);
-//		ioManager = new DataManager(dscontroller, mapcontroller, queryController);
+		mapcontroller = new SynchronizedMappingController(dscontroller, this);
+		ioManager = new OWLAPIDataManager(this, new PrefixManager());
+		owlman.addOntologyChangeListener((OWLOntologyChangeListener) mapcontroller);
 		try {
 			mmger = owlman;
 			this.root = root;
 			currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
 			setCurrentOntologyURI(root.getURI());	
-			
-			
 			RDBMSForeignKeyConstraintController fkc = new RDBMSForeignKeyConstraintController();
 			addAssertionController(RDBMSForeignKeyConstraint.class, fkc, new RDBMSForeignKeyConstraintXMLCodec());
 			dscontroller.addDatasourceControllerListener(fkc);
@@ -71,8 +69,7 @@ public class OWLAPIController extends APIController {
 			RDBMSUniquenessConstraintController uqc = new RDBMSUniquenessConstraintController();
 			addAssertionController(RDBMSUniquenessConstraint.class, uqc, new RDBMSUniquenessConstraintXMLCodec());
 			dscontroller.addDatasourceControllerListener(uqc);
-			
-			apicoupler = new OWLAPICoupler(this, owlman, root);
+			apicoupler = new OWLAPICoupler(this, owlman, root,(OWLAPIDataManager) ioManager);
 			setCoupler(apicoupler);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -157,6 +154,13 @@ public class OWLAPIController extends APIController {
 			uris.add(owlOntology.getURI());
 		}
 		return uris;
+	}
+
+
+
+	public URI getPhysicalURIOfOntology(URI onto) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

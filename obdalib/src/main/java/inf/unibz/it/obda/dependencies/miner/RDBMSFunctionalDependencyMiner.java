@@ -110,7 +110,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		
 		this.apic = apic;
 		resultOfSQLQueries = new HashMap<String, Boolean>();
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getName());
+		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		queue = new Vector<Job>();
 		sourceQueryMap = new HashMap<QueryAtom, OBDAMappingAxiom>();
 		foundInclusion = new HashSet<FunctionalDependencyMiningResult>();
@@ -233,7 +233,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 				selection = selection + ", ";
 				clause = clause + " AND ";
 			} 
-			String name = it.next().getName();
+			String name = it.next().getVariableName();
 			selection = selection + "alias1."+name;
 			clause = clause + "alias1." + name + " = alias2."+ name+ " ";
 		}
@@ -246,7 +246,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 			if(!qt.equals(candidate)){
 				if(qt instanceof VariableTerm){
 					VariableTerm vt = (VariableTerm) qt;
-					String name = vt.getName();
+					String name = vt.getVariableName();
 					if(test.length() > 0){
 						test = test + " OR "; 
 					}
@@ -257,7 +257,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 					Iterator<QueryTerm> l_it = list.iterator();
 					while(l_it.hasNext()){
 						QueryTerm aux = l_it.next();
-						String name = aux.getName();
+						String name = aux.getVariableName();
 						if(test.length() > 0){
 							test = test + " OR "; 
 						}
@@ -495,7 +495,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 						}else{// otherwise the query gets executed and the result is added to the map
 								try {
 									DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
-									if(!man.isConnectionAlive(ds.getUri())){
+									if(!man.isConnectionAlive(ds.getSourceID())){
 										man.createConnection(ds);
 									}
 //									if (model != null) {
@@ -503,7 +503,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 //										IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) model;
 //										rstm.close();
 //									}
-									ResultSet set =  man.executeQuery(ds.getUri(), sql, ds);
+									ResultSet set =  man.executeQuery(ds.getSourceID(), sql, ds);
 									model = new IncrementalResultSetTableModel(set);
 									synchronized(resultOfSQLQueries){
 									if(model.getRowCount() != 0){

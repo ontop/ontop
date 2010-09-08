@@ -60,14 +60,14 @@ public class RDBMSCheckConstraint extends CheckConstraint{
 			aux = aux + qt1.toString() + " "+t.getOperator() +" ";
 			String v2 = "";
 			if(qt2 instanceof ConstantTerm){
-				v2 = "'" + qt2.getName() +"'";
+				v2 = "'" + qt2.getVariableName() +"'";
 			}else if(qt2 instanceof TypedConstantTerm){
 				TypedConstantTerm tct = (TypedConstantTerm) qt2;
 				XSDatatype type = tct.getDatatype();
 				if(XSDTypingController.getInstance().isNumericType(type)){
-					v2 = qt2.getName();
+					v2 = tct.getVariableName();
 				}else{
-					v2 = "'" + qt2.getName() +"'";
+					v2="'" + qt2.getVariableName() +"'";
 				}
 			}else{
 				v2 = qt2.toString();

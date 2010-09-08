@@ -17,25 +17,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 
-public class NamedConcept extends NamedEntity implements ClassExpression {
+public class NamedConcept extends NamedPredicate implements ClassExpression {
+	
 	
 	public NamedConcept(URI uri) {
 		super(uri);
 	}
-//
-//	@Override
-//	public int getArity() {
-//		return 1;
-//	}
 
 	@Override
 	public NamedConcept clone() {
-		try {
-			return new NamedConcept(new URI(this.getUri().toString()));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new NamedConcept(URI.create(this.getUri().toString()));
 	}
 
 }

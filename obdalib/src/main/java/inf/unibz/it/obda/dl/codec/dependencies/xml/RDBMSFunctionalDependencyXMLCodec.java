@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.dl.codec.dependencies.xml;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.dependencies.parser.DependencyAssertionRenderer;
@@ -24,6 +25,11 @@ import org.w3c.dom.NodeList;
  *
  */
 public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFunctionalDependency> {
+
+	public RDBMSFunctionalDependencyXMLCodec() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * The final xml tag name of a RDBMSFunctionalDependency
@@ -85,7 +91,7 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 		Iterator<QueryTerm> it = one.iterator();
 		while(it.hasNext()){
 			Element variable = createElement(VARIABLE);
-			variable.setAttribute("name", it.next().getName());
+			variable.setAttribute("name", it.next().getVariableName());
 			parameter1.appendChild(variable);
 		}
 		element.appendChild(parameter1);
@@ -96,7 +102,7 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 		Iterator<QueryTerm> it2 = two.iterator();
 		while(it2.hasNext()){
 			Element variable = createElement(VARIABLE);
-			variable.setAttribute("name", it2.next().getName());
+			variable.setAttribute("name", it2.next().getVariableName());
 			parameter2.appendChild(variable);
 		}
 		element.appendChild(parameter2);

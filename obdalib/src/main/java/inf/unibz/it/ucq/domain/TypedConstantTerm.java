@@ -1,5 +1,7 @@
 package inf.unibz.it.ucq.domain;
 
+import inf.unibz.it.obda.api.controller.APIController;
+
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class TypedConstantTerm extends QueryTerm {
@@ -13,13 +15,8 @@ public class TypedConstantTerm extends QueryTerm {
 	}
 
 	@Override
-	public String toString() {
-		return this.getName();
-	}
-
-	@Override
 	public TypedConstantTerm clone() {
-		return new TypedConstantTerm(new String(this.getName()), datatype);
+		return new TypedConstantTerm(new String(this.getVariableName()), datatype);
 	}
 	
 	public XSDatatype getDatatype(){

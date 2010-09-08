@@ -37,7 +37,6 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingIDTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingPredicateTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingSQLStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingStringTreeModelFilter;
-import inf.unibz.it.obda.gui.swing.treemodel.filter.QueryStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.RDBMSMappingValidator;
@@ -49,6 +48,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -874,7 +874,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				return;
 			}
 			MappingController controller = mapc;
-			String current_srcuri = dsc.getCurrentDataSource().getName();
+			URI current_srcuri = dsc.getCurrentDataSource().getSourceID();
 
 			if (currentSelection != null) {
 				for (int i = 0; i < currentSelection.length; i++) {
@@ -907,7 +907,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		// DefaultTreeModel model = (DefaultTreeModel)
 		// treeMappingsTree.getModel();
 		MappingController controller = mapc;
-		String srcuri = dsc.getCurrentDataSource().getName();
+		URI srcuri = dsc.getCurrentDataSource().getSourceID();
 
 		if (currentSelection != null) {
 			for (int i = 0; i < currentSelection.length; i++) {
@@ -1032,7 +1032,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 		try {
 			MappingController con = mapc;
-			String sourceName = dsc.getCurrentDataSource().getName();
+			URI sourceName = dsc.getCurrentDataSource().getSourceID();
 			String nodeContent = (String) editedNode.getUserObject();
 			if (editedNode instanceof MappingNode) {
 
@@ -1329,8 +1329,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		MappingTreeModel model = mapc.getTreeModel();
 		model.removeAllFilters();
 		model.addFilters(filters);
-		model.currentSourceChanged(apic.getDatasourcesController().getCurrentDataSource().getName(), apic.getDatasourcesController()
-				.getCurrentDataSource().getName());
+		model.currentSourceChanged(apic.getDatasourcesController().getCurrentDataSource().getSourceID(), apic.getDatasourcesController()
+				.getCurrentDataSource().getSourceID());
 //		JOptionPane.showMessageDialog(this, "The sintaxis is not correct ", "ERROR", JOptionPane.ERROR_MESSAGE);
 
 	}

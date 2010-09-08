@@ -125,7 +125,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 			doneSignal = signal;
 			this.apic = apic;
 			resultOfSQLQueries = new HashMap<String, Boolean>();
-			mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getName());
+			mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 			queue = new Vector<Job>();
 			sourceQueryMap = new HashMap<QueryAtom, OBDAMappingAxiom>();
 			foundInclusion = new HashSet<DisjointnessMiningResult>();
@@ -305,7 +305,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 		if(tm1 instanceof FunctionTerm && tm2 instanceof FunctionTerm){
 			FunctionTerm ft1 = (FunctionTerm) tm1;
 			FunctionTerm ft2 = (FunctionTerm) tm2;
-			if(ft1.getName().equals(ft2.getName()) && ft1.getParameters().size() == ft2.getParameters().size()){
+			if(ft1.getVariableName().equals(ft2.getVariableName()) && ft1.getParameters().size() == ft2.getParameters().size()){
 				
 				if(currentDriver.equals(DB2_DRIVER)){
 					return produceSQLForDB2(m1,m2,ft1,ft2);
@@ -338,7 +338,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 			if(var1.length() >0){
 				var1 = var1 +", ";
 			}
-			var1 = var1 + "table1."+it.next().getName();
+			var1 = var1 + "table1."+it.next().getVariableName();
 		}
 		String var2 = "";
 		Iterator<QueryTerm> it1 = termsOfFT2.iterator();
@@ -346,7 +346,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 			if(var2.length() >0){
 				var2 = var2 +", ";
 			}
-			var2 = var2 + "table2."+it1.next().getName();
+			var2 = var2 +  "table2."+it1.next().getVariableName();
 		}
 		
 		String query = "SELECT " + var1 +" FROM (" + candidate + ") table1 WHERE ("+
@@ -364,7 +364,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 			if(var1.length() >0){
 				var1 = var1 +", ";
 			}
-			var1 = var1 + "table1."+it.next().getName();
+			var1 = var1 + "table1."+it.next().getVariableName();
 		}
 		String var2 = "";
 		Iterator<QueryTerm> it1 = termsOfFT2.iterator();
@@ -372,7 +372,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 			if(var2.length() >0){
 				var2 = var2 +", ";
 			}
-			var2 = var2 + "table2."+it1.next().getName();
+			var2  = var2 + "table2."+it1.next().getVariableName();
 		}
 		
 		String query = "SELECT " + var1 +" FROM (" + candidate + ") table1 WHERE ("+
@@ -389,17 +389,17 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 		Iterator<QueryTerm> it = termsOfFT1.iterator();
 		while(it.hasNext()){
 			if(var1.length() >0){
-				var1 = var1 +", ";
+				var1 = var1 +",";
 			}
-			var1 = var1 + "table1."+it.next().getName();
+			var1 = var1 + "table1."+it.next().getVariableName();
 		}
 		String var2 = "";
 		Iterator<QueryTerm> it1 = termsOfFT2.iterator();
 		while(it1.hasNext()){
 			if(var2.length() >0){
-				var2 = var2 +", ";
+				var2 =var2+",";
 			}
-			var2 = var2 + "table2."+it1.next().getName();
+			var2 = var2 + "table2."+it1.next().getVariableName();
 		}
 		
 		String query = "SELECT " + var1 +" FROM (" + candidate + ") table1 WHERE ROW("+
@@ -691,7 +691,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 						if(queries.add(sql)){
 							try {
 									DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
-									if(!man.isConnectionAlive(ds.getUri())){
+									if(!man.isConnectionAlive(ds.getSourceID())){
 										man.createConnection(ds);
 									}
 //									if (model != null) {
@@ -699,7 +699,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 //										IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) model;
 //										rstm.close();
 //									}
-									ResultSet set =  man.executeQuery(ds.getUri(), sql, ds);
+									ResultSet set =  man.executeQuery(ds.getSourceID(), sql, ds);
 									synchronized(resultOfSQLQueries){
 										if(set.next()){
 	//										System.out.print(model.getRowCount());

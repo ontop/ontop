@@ -17,6 +17,7 @@ import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.obda.validator.exception.NoConnectionException;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -45,7 +46,7 @@ public class ResultSetTableModelFactory {
 
 	HashMap<String, String>										rowcounts			= new HashMap<String, String>();
 
-	private static HashMap<String, ResultSetTableModelFactory>	resultsetfactories	= new HashMap<String, ResultSetTableModelFactory>();
+	private static HashMap<URI, ResultSetTableModelFactory>	resultsetfactories	= new HashMap<URI, ResultSetTableModelFactory>();
 	
 	/** The statement that is currently being executing to create a model **/
 	private Statement currentStatement = null;
@@ -76,14 +77,14 @@ public class ResultSetTableModelFactory {
 		String username = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 
-		ResultSetTableModelFactory rstmfactory = resultsetfactories.get(current_datasource.getUri());
+		ResultSetTableModelFactory rstmfactory = resultsetfactories.get(current_datasource.getSourceID());
 		if (rstmfactory == null) {
 			/*******************************************************************
 			 * No facotry has been created yet. Creating on
 			 * 
 			 */
 			rstmfactory = new ResultSetTableModelFactory(driver, url + dbname, username, password);
-			resultsetfactories.put(current_datasource.getUri(), rstmfactory);
+			resultsetfactories.put(current_datasource.getSourceID(), rstmfactory);
 		} else {
 			// If the datasource information changed since last connectino was
 			// stablished.
@@ -95,7 +96,7 @@ public class ResultSetTableModelFactory {
 			if (!((driverissame) && (userissame) && (passwordissame) && (dbissame))) {
 				rstmfactory.close();
 				rstmfactory = new ResultSetTableModelFactory(driver, url + dbname, username, password);
-				resultsetfactories.put(current_datasource.getUri(), rstmfactory);
+				resultsetfactories.put(current_datasource.getSourceID(), rstmfactory);
 			}
 		}
 		/***********************************************************************

@@ -145,7 +145,7 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint{
 		int c = 1;
 		Iterator<QueryTerm> it = termsOfQueryOne.iterator();
 		while(it.hasNext()){
-			int aux2 = (int) Math.pow(it.next().getName().hashCode(), c);
+			int aux2 = (int) Math.pow(it.next().getVariableName().hashCode(), c);
 			code = code + aux2;
 			c++;
 		}
@@ -154,7 +154,7 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint{
 		int d = 1;
 		Iterator<QueryTerm> it1 = termsOfQueryTwo.iterator();
 		while(it1.hasNext()){
-			int aux2 = (int) Math.pow(it1.next().getName().hashCode(), d);
+			int aux2 = (int) Math.pow(it1.next().getVariableName().hashCode(), d);
 			code = code + aux2;
 			d++;
 		}

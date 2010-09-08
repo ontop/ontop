@@ -2,6 +2,7 @@ package inf.unibz.it.obda.protege4.plugin;
 
 import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 
 /***

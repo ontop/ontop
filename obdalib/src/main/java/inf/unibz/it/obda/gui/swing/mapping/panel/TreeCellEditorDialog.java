@@ -47,6 +47,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.sound.midi.ControllerEventListener;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -229,7 +230,7 @@ public class TreeCellEditorDialog extends JDialog {
 	private void update(String str) throws Exception {
 
 		MappingController con = mapc;
-		String sourceName = dsc.getCurrentDataSource().getName();
+		URI sourceName = dsc.getCurrentDataSource().getSourceID();
 		String nodeContent = (String) editedNode.getUserObject();
 		if (editedNode instanceof MappingNode) {
 
@@ -263,24 +264,24 @@ public class TreeCellEditorDialog extends JDialog {
 			QueryAtom atom = it.next();
 			if(atom instanceof ConceptQueryAtom){
 				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
-				String name = cqa.getName();
+				String name = apic.getEntityNameRenderer().getPredicateName(cqa);
 				String classUri = onto_uri.toString()+"#"+name;
-				boolean isConcept =coup.isNamedConcept(new URI(classUri));
+				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(classUri));
 				if(!isConcept){
 					throw new Exception("Concept "+name+" not present in ontology.");
 				}
 				
 			}else{
 				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
-				String name = bqa.getName();
+				String name =apic.getEntityNameRenderer().getPredicateName(bqa);
 				String propUri = onto_uri.toString()+"#"+name;
 				ArrayList<QueryTerm> terms = bqa.getTerms();
 				QueryTerm t2 = terms.get(1);
 				boolean found = false;
 				if(t2 instanceof FunctionTerm){
-					found =coup.isObjectProperty(new URI(propUri));
+					found =coup.isObjectProperty(onto_uri,new URI(propUri));
 				}else{
-					found =coup.isDatatypeProperty(new URI(propUri));
+					found =coup.isDatatypeProperty(onto_uri,new URI(propUri));
 				}
 				if(!found){
 					throw new Exception("Property "+name+" not present in ontology.");

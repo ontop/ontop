@@ -167,7 +167,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 						try {
 							man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
 							man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-							if(!man.isConnectionAlive(current_ds.getUri())){
+							if(!man.isConnectionAlive(current_ds.getSourceID())){
 								try {
 									man.createConnection(current_ds);
 								} catch (Exception e) {
@@ -175,7 +175,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 								}
 							}
 						
-							java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), queryField.getText(),current_ds); 
+							java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), queryField.getText(),current_ds); 
 							//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), execute_query,current_ds); //EK
 							IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
 							queryTable.setModel(model);
@@ -227,7 +227,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 			try {
 				man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
 				man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-				if(!man.isConnectionAlive(current_ds.getUri())){
+				if(!man.isConnectionAlive(current_ds.getSourceID())){
 					try {
 						man.createConnection(current_ds);
 					} catch (Exception e) {
@@ -236,7 +236,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 				}
 			
 				//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), queryField.getText(),current_ds); original
-				java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), execute_Query,current_ds); //EK
+				java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), execute_Query,current_ds); //EK
 				IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
 				queryTable.setModel(model);
 			} catch (Exception e) {

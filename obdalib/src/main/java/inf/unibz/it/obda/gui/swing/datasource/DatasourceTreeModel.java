@@ -38,7 +38,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	public void datasourceAdded(DataSource source) {
 //		if (URI.create(source.getUri()).equals(currentOntologyURI)) {
 //			System.out.println("add "+ source.getName());
-			insertNodeInto(new DefaultMutableTreeNode(source.getName()), (DefaultMutableTreeNode) root, root.getChildCount());
+			insertNodeInto(new DefaultMutableTreeNode(source.getSourceID()), (DefaultMutableTreeNode) root, root.getChildCount());
 //		}
 	}
 
@@ -49,7 +49,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 			DefaultMutableTreeNode affectedchild = null;
 			while (children.hasMoreElements()) {
 				DefaultMutableTreeNode current = children.nextElement();
-				if (current.getUserObject().toString().equals(source.getName())) {
+				if (current.getUserObject().toString().equals(source.getSourceID().toString())) {
 					affectedchild = current;
 					break;
 				}
@@ -72,7 +72,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 				}
 			}
 			if(affectedchild != null){
-				affectedchild.setUserObject(currendata.getName());
+				affectedchild.setUserObject(currendata.getSourceID());
 				nodeChanged(affectedchild);
 			}
 //		}

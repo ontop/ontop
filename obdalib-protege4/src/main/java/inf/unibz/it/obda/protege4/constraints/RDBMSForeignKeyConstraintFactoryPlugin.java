@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.protege4.constraints;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.controller.RDBMSForeignKeyConstraintController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;

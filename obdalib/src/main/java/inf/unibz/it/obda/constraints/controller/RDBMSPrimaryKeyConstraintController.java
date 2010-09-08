@@ -1,10 +1,12 @@
 package inf.unibz.it.obda.constraints.controller;
 
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.domain.DataSource;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,10 +19,10 @@ public class RDBMSPrimaryKeyConstraintController extends
 AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSPrimaryKeyConstraint>> pkconstraints= null;
+	private HashMap<URI, HashSet<RDBMSPrimaryKeyConstraint>> pkconstraints= null;
 	
 	public RDBMSPrimaryKeyConstraintController (){
-		pkconstraints = new HashMap<String, HashSet<RDBMSPrimaryKeyConstraint>>();
+		pkconstraints = new HashMap<URI, HashSet<RDBMSPrimaryKeyConstraint>>();
 		
 	}
 	
@@ -52,9 +54,9 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 		if(u == null){
 			return;
 		}
-		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null && aux.add(u)){
-			pkconstraints.put(currentDataSource.getName(), aux);
+			pkconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(u);
 		}
 	}
@@ -65,9 +67,9 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	 */
 	@Override
 	public void removeAssertion(RDBMSPrimaryKeyConstraint u) {
-		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null&&aux.remove(u)){
-			pkconstraints.put(currentDataSource.getName(), aux);
+			pkconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(u);
 		}
 	}
@@ -78,12 +80,12 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	 * event to remove also the currently shown assertion from the UI.
 	 */
 	public void alldatasourcesDeleted() {
-		HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(currentDataSource.getSourceID());
 		Iterator<RDBMSPrimaryKeyConstraint> it = list.iterator();
 		while(it.hasNext()){
 			fireAssertionRemoved(it.next());
 		}
-		pkconstraints = new HashMap<String, HashSet<RDBMSPrimaryKeyConstraint>>();
+		pkconstraints = new HashMap<URI, HashSet<RDBMSPrimaryKeyConstraint>>();
 		
 	}
 
@@ -97,14 +99,14 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 		currentDataSource = currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(previousdatasource.getName());
+				HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(previousdatasource.getSourceID());
 				Iterator<RDBMSPrimaryKeyConstraint> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSPrimaryKeyConstraint> list1 = pkconstraints.get(currentsource.getName());
+				HashSet<RDBMSPrimaryKeyConstraint> list1 = pkconstraints.get(currentsource.getSourceID());
 				Iterator<RDBMSPrimaryKeyConstraint> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -119,7 +121,7 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		pkconstraints.put(source.getName(), new HashSet<RDBMSPrimaryKeyConstraint>());
+		pkconstraints.put(source.getSourceID(), new HashSet<RDBMSPrimaryKeyConstraint>());
 	}
 
 	/**
@@ -130,13 +132,13 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(currentDataSource.getName());
+			HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(currentDataSource.getSourceID());
 			Iterator<RDBMSPrimaryKeyConstraint> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		pkconstraints.remove(source.getName());
+		pkconstraints.remove(source.getSourceID());
 		
 	}
 
@@ -148,7 +150,7 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(oldname);
 		pkconstraints.remove(oldname);
-		pkconstraints.put(currendata.getName(), aux);
+		pkconstraints.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -161,7 +163,7 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	public HashSet<RDBMSPrimaryKeyConstraint> getDependenciesForCurrentDataSource() {
 		// TODO Auto-generated method stub
 		if(currentDataSource !=null){
-			return pkconstraints.get(currentDataSource.getName());
+			return pkconstraints.get(currentDataSource.getSourceID());
 		}else{
 			return new HashSet<RDBMSPrimaryKeyConstraint>();
 		}
@@ -174,8 +176,8 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	public Collection<RDBMSPrimaryKeyConstraint> getAssertions() {
 		
 		Vector<RDBMSPrimaryKeyConstraint> assertions = new Vector<RDBMSPrimaryKeyConstraint>();
-		Set<String>keys = pkconstraints.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = pkconstraints.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(it.next());
 			assertions.addAll(aux);
@@ -190,10 +192,10 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	 * @param a the RDBMSInclusionDependency to add
 	 */
 	public boolean insertAssertion(RDBMSPrimaryKeyConstraint a) {
-		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSPrimaryKeyConstraint> aux = pkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				pkconstraints.put(currentDataSource.getName(), aux);
+				pkconstraints.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -207,7 +209,7 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSPrimaryKeyConstraint> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSPrimaryKeyConstraint> getAssertionsForDataSource(URI uri) {
 	
 		 return pkconstraints.get(uri); 
 	}

@@ -1,6 +1,7 @@
 package inf.unibz.it.quonto.dl.codec.dig11;
 
 import inf.unibz.it.dl.codec.dig11.AssertionDIG11Codec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.quonto.dl.assertion.DenialConstraint;
 
 import java.util.ArrayList;

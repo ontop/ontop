@@ -13,6 +13,8 @@
  */
 package inf.unibz.it.ucq.domain;
 
+import inf.unibz.it.obda.api.controller.APIController;
+
 public class ConstantTerm extends QueryTerm {
 
 	public ConstantTerm(String name) {
@@ -21,12 +23,12 @@ public class ConstantTerm extends QueryTerm {
 
 	@Override
 	public String toString() {
-		return this.getName();
+		return this.getVariableName();
 	}
 
 	@Override
 	public ConstantTerm clone() {
-		return new ConstantTerm(new String(this.getName()));
+		return new ConstantTerm(new String(this.getVariableName()));
 	}
 
 }

@@ -109,7 +109,7 @@ public class AboxMaterializer {
 			while(a_it.hasNext()){
 				ResultSet res = jdbcMan.executeQuery(ds, sql);
 				QueryAtom atom = a_it.next();
-				String name = atom.getName();			
+				String name = atom.getNamedPredicate().getUri().getFragment();			
 				String uri = ontoUri+"#"+name;
 				if(atom instanceof ConceptQueryAtom){
 					if(classesURIs.contains(uri)){
@@ -120,7 +120,7 @@ public class AboxMaterializer {
 							while(teit.hasNext()){
 								FunctionTerm ft = (FunctionTerm) teit.next();
 								StringBuffer sb = new StringBuffer();
-								sb.append(ft.getName());
+								sb.append(ft.getVariableName());
 								sb.append("-");
 								List<QueryTerm> parameters = ft.getParameters();
 								Iterator<QueryTerm> pit = parameters.iterator();
@@ -130,7 +130,7 @@ public class AboxMaterializer {
 										aux.append("-");
 									}
 									QueryTerm qt = pit.next();
-									String s = res.getString(qt.getName());
+									String s = res.getString(qt.getVariableName());
 									aux.append(s);
 								}
 								sb.append(aux.toString());
@@ -149,10 +149,10 @@ public class AboxMaterializer {
 					BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
 					if(dataProperties.contains(uri)){
 						while(res.next()){
-							String valueVar = bqa.getTerms().get(1).getName();
+							String valueVar = bqa.getTerms().get(1).getVariableName();
 							FunctionTerm ft = (FunctionTerm) bqa.getTerms().get(0);
 							StringBuffer sb = new StringBuffer();
-							sb.append(ft.getName());
+							sb.append(ft.getVariableName());
 							sb.append("-");
 							List<QueryTerm> parameters = ft.getParameters();
 							Iterator<QueryTerm> pit = parameters.iterator();
@@ -162,7 +162,7 @@ public class AboxMaterializer {
 									aux.append("-");
 								}
 								QueryTerm qt = pit.next();
-								String s = res.getString(qt.getName());
+								String s = res.getString(qt.getVariableName());
 								aux.append(s);
 							}
 							sb.append(aux.toString());
@@ -178,7 +178,7 @@ public class AboxMaterializer {
 						while(res.next()){
 							FunctionTerm ft1 = (FunctionTerm) bqa.getTerms().get(0);
 							StringBuffer sb1 = new StringBuffer();
-							sb1.append(ft1.getName());
+							sb1.append(ft1.getVariableName());
 							sb1.append("-");
 							List<QueryTerm> parameters = ft1.getParameters();
 							Iterator<QueryTerm> pit = parameters.iterator();
@@ -188,14 +188,14 @@ public class AboxMaterializer {
 									aux.append("-");
 								}
 								QueryTerm qt = pit.next();
-								String s = res.getString(qt.getName());
+								String s = res.getString(qt.getVariableName());
 								aux.append(s);
 							}
 							sb1.append(aux.toString());
 //							System.out.println(sb1.toString());
 							FunctionTerm ft2 = (FunctionTerm) bqa.getTerms().get(1);
 							StringBuffer sb2 = new StringBuffer();
-							sb2.append(ft2.getName());
+							sb2.append(ft2.getVariableName());
 							sb2.append("-");
 							List<QueryTerm> parameters2 = ft2.getParameters();
 							Iterator<QueryTerm> pit2 = parameters2.iterator();
@@ -205,7 +205,7 @@ public class AboxMaterializer {
 									aux2.append("-");
 								}
 								QueryTerm qt = pit2.next();
-								String s = res.getString(qt.getName());
+								String s = res.getString(qt.getVariableName());
 								aux2.append(s);
 							}
 							sb2.append(aux2.toString());
@@ -235,15 +235,15 @@ public class AboxMaterializer {
 		DatasourcesController dscon = controller.getDatasourcesController();
 		DataSource ds = dscon.getCurrentDataSource();
 		if(ds == null){
-			HashMap<String, DataSource> map = dscon.getAllSources();
-			Set<String> keys = map.keySet();
+			HashMap<URI, DataSource> map = dscon.getAllSources();
+			Set<URI> keys = map.keySet();
 			if(keys.iterator().hasNext()){
-				String s = keys.iterator().next();
+				URI s = keys.iterator().next();
 				ds = map.get(s);
-				dscon.setCurrentDataSource(s);
+				dscon.setCurrentDataSource(ds.getSourceID());
 			}
 		}
-		String currentDS_uri = ds.getName();
+		URI currentDS_uri = ds.getSourceID();
 		mappings = mapcon.getMappings(currentDS_uri);
 		return mappings;
 	}

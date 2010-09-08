@@ -1,4 +1,4 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 C:\\Users\\obda\\Desktop\\DependencyAssertion.g 2010-02-04 09:54:23
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 C:\\Users\\obda\\Desktop\\DependencyAssertion.g 2010-07-12 17:32:09
 
 package inf.unibz.it.obda.dependencies.parser;
 import inf.unibz.it.obda.api.controller.APIController;
@@ -13,6 +13,7 @@ import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.domain.VariableTerm;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -271,7 +272,7 @@ public class DependencyAssertionParser extends Parser {
                         			}else{
             	                        MappingController con = apic.getMappingController();
             	                        DatasourcesController dscon = apic.getDatasourcesController();
-            	                        String source_uri = dscon.getCurrentDataSource().getName();
+            	                        URI source_uri = dscon.getCurrentDataSource().getSourceID();
             	                        OBDAMappingAxiom map1 = con.getMapping(source_uri, idForMappingOne);
             	                        OBDAMappingAxiom map2 = con.getMapping(source_uri, idForMappingTwo);
             	                        if(map1 != null && map2 != null){

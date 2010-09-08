@@ -97,7 +97,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 			} catch (Exception e) {
 			e.printStackTrace();
 		}
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getName());
+		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		createTableIndex();
 	}
 	
@@ -262,7 +262,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 		    	//id one of those vector is emtpy, this means that the
 		    	//column is not selected in the mapping therefor we dont add a dependency
 		    	if(!aux1.isEmpty() && !aux2.isEmpty()){
-	    			RDBMSFunctionalDependency func = new RDBMSFunctionalDependency(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME), ax.getId(),ax.getId(),(RDBMSSQLQuery)ax.getSourceQuery(),(RDBMSSQLQuery)ax.getSourceQuery(), aux2, aux1);
+	    			RDBMSFunctionalDependency func = new RDBMSFunctionalDependency(ds.getSourceID(), ax.getId(),ax.getId(),(RDBMSSQLQuery)ax.getSourceQuery(),(RDBMSSQLQuery)ax.getSourceQuery(), aux2, aux1);
 	    			if(depcon.insertAssertion(func)){
 	    				foundInclusions.add(func);
 	    			}

@@ -71,7 +71,7 @@ public class RDBMSUniquenessConstraint extends UniquenessConstraint{
 		int c =0;
 		Iterator<QueryTerm> it = terms.iterator();
 		while(it.hasNext()){
-			int aux2 = (int) Math.pow(it.next().getName().hashCode(), c);
+			int aux2 = (int) Math.pow(it.next().getVariableName().hashCode(), c);
 			code = code + aux2;
 			c++;
 		}

@@ -107,7 +107,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 			} catch (Exception e) {
 			e.printStackTrace();
 		}
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getName());
+		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		createTableIndex();
 	}
 	
@@ -345,7 +345,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 										   //if one of those vectors is emty his means that the column
 									       //is not selected in the mapping an therefore no dependency is created
 										   if(!aux1.isEmpty() && !aux2.isEmpty()){
-											   RDBMSInclusionDependency dep = new RDBMSInclusionDependency(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME), axiom2.getId(), axiom1.getId(),(RDBMSSQLQuery) axiom2.getSourceQuery(),(RDBMSSQLQuery)axiom1.getSourceQuery(),aux2, aux1);
+											   RDBMSInclusionDependency dep = new RDBMSInclusionDependency(ds.getSourceID(), axiom2.getId(), axiom1.getId(),(RDBMSSQLQuery) axiom2.getSourceQuery(),(RDBMSSQLQuery)axiom1.getSourceQuery(),aux2, aux1);
 											   if(depcon.insertAssertion(dep)){
 											    	foundInclusions.add(dep);
 											   }

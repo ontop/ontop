@@ -13,14 +13,19 @@
  */
 package inf.unibz.it.ucq.domain;
 
+import inf.unibz.it.obda.api.controller.APIController;
+
+import java.net.URI;
 import java.util.ArrayList;
 
 public class FunctionTerm extends QueryTerm {
 
 	private ArrayList<QueryTerm> function_terms = null;
+	private URI uri = null;
 	
-	public FunctionTerm(String name, ArrayList<QueryTerm> terms) {
-		super(name);
+	public FunctionTerm(URI uri, ArrayList<QueryTerm> terms) {
+		super(uri.getFragment());
+		this.uri = uri;
 		this.function_terms = terms;
 	}
 	
@@ -29,28 +34,21 @@ public class FunctionTerm extends QueryTerm {
 	}
 
 	@Override
-	public String toString() {
-		StringBuffer string = new StringBuffer();
-		string.append(this.getName());
-		string.append('(');
-		string.append(function_terms.get(0).toString());
-		for (int i = 1; i < function_terms.size(); i++) {
-			string.append("," + function_terms.get(i).toString());
-		}
-		string.append(')');
-		return string.toString();
-	}
-
-	@Override
 	public FunctionTerm clone() {
 		ArrayList<QueryTerm> clonedTerms = new ArrayList<QueryTerm>();
 		for (int i = 0; i < function_terms.size(); i++) {
 			clonedTerms.add(function_terms.get(i).clone());
 		}
-		return new FunctionTerm(new String(this.getName()), clonedTerms);
+		return new FunctionTerm(this.getURI(), clonedTerms);
 	}
 
+	public URI getURI(){
+		return uri;
+	}
 	
-	
-	
+	@Override
+	public String getVariableName(){
+		
+		return uri.getFragment();
+	}
 }

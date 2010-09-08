@@ -4,7 +4,11 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.protege.editor.owl.model.OWLModelManager;
@@ -12,10 +16,20 @@ import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.find.EntityFinder;
+import org.protege.editor.owl.ui.prefix.PrefixMapper;
+import org.protege.editor.owl.ui.prefix.PrefixMapperManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyChange;
+import org.semanticweb.owl.model.OWLOntologyChangeException;
+import org.semanticweb.owl.model.OWLOntologyChangeListener;
+import org.semanticweb.owl.model.OWLOntologyCreationException;
+import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owl.util.OWLOntologyImportsClosureSetProvider;
+import org.semanticweb.owl.util.OWLOntologyMerger;
 
 /***
  * 
@@ -33,40 +47,153 @@ import org.semanticweb.owl.model.OWLOntology;
 public class OWLAPICoupler implements APICoupler {
 
 	// OWLModelManager owlman = null;
-	EntityFinder			finder	= null;
+//	EntityFinder			finder	= null;
 	private APIController	apic;
 
 	// private OWLModelManager mmgr;
+	
+	private OWLOntologyManager mmgr = null;
+	
+	private OWLOntology merged = null;
 
-	public OWLAPICoupler(APIController apic, EntityFinder finder) {
+	private OWLOntology	mergedOntology;
+
+	private HashSet<String>	dataProperties;
+
+	private HashSet<String>	classesURIs;
+
+	private HashSet<String>	objectProperties;
+	
+	private PrefixMapperManager prefixManager = null;
+	
+	private HashMap<URI, OntologyEntitiyInformation> infoMap = null;
+	
+	public OWLAPICoupler(APIController apic, OWLOntologyManager mmgr, OWLOntology root) {
 		// this.mmgr = manager;
 		this.apic = apic;
-		// this.owlman = manager;
-		this.finder = finder;
-		// mmgr.addListener(this);
+		this.mmgr = mmgr;
+		this.prefixManager = PrefixMapperManager.getInstance();
+		this.infoMap = new HashMap<URI, OntologyEntitiyInformation>();
+//		synchWithOntology(root);
 	}
 
-	public boolean isDatatypeProperty(URI propertyURI) {
+	public void addNewOntologyInfo(OWLOntology root){
+		OntologyEntitiyInformation info = new OntologyEntitiyInformation(root);
+		infoMap.put(root.getURI(), info);
+	}
+	
+	public void updateOntologies(){
+		Set<URI> set = infoMap.keySet();
+		Iterator<URI> it = set.iterator();
+		while(it.hasNext()){
+			infoMap.get(it.next()).refresh();
+		}
+	}
+	
+	public void updateOntology(URI uri){
+		OntologyEntitiyInformation info = infoMap.get(uri);
+		if(info != null){
+			info.refresh();
+		}
+	}
+	
+	public boolean isDatatypeProperty(URI ontouri, URI propertyURI) {
+		if(ontouri.toString().equals("")){
+			ontouri = apic.getCurrentOntologyURI();
+		}
+		OntologyEntitiyInformation info = infoMap.get(ontouri);
+		if(info == null){
+			return false;
+		}else{
+			return info.isDatatypeProperty(propertyURI);
+		}
+	}
+
+	public boolean isNamedConcept(URI ontouri,URI propertyURI) {
+		if(ontouri.toString().equals("")){
+			ontouri = apic.getCurrentOntologyURI();
+		}
+		OntologyEntitiyInformation info = infoMap.get(ontouri);
+		if(info == null){
+			return false;
+		}else{
+			return info.isNamedConcept(propertyURI);
+		}
+	}
+
+	public boolean isObjectProperty(URI ontouri,URI propertyURI) {
+		if(ontouri.toString().equals("")){
+			ontouri = apic.getCurrentOntologyURI();
+		}
+		OntologyEntitiyInformation info = infoMap.get(ontouri);
+		if(info == null){
+			return false;
+		}else{
+			return info.isObjectProperty(propertyURI);
+		}
+	}
+
+	public OWLOntologyManager getOWLOntologyManager(){
+		return mmgr;
+	}
+	
+	public String getPrefixForUri(URI uri){
 		
-		Set<OWLDataProperty> properties = finder.getMatchingOWLDataProperties("*" + propertyURI.toString());
-		if (!properties.isEmpty())
-			return true;
-		return false;
+		if(prefixManager == null){
+			prefixManager = PrefixMapperManager.getInstance();
+		}
+		String sh =prefixManager.getMapper().getShortForm(uri);
+		if(sh!= null){
+			if(sh.contains(":")){
+				String aux[] = sh.split(":");
+				if(isCurrentOntology(aux[0])){
+					return "";
+				}
+				return aux[0];
+			}else{
+				return "";
+			}
+		}else{
+			return uri.toString();
+		}
 	}
 
-	public boolean isNamedConcept(URI propertyURI) {
-		Set<OWLClass> classes = finder.getMatchingOWLClasses("*" + propertyURI.toString());
-		if (!classes.isEmpty())
-			return true;
-		return false;
-		// return classesURIs.contains(propertyURI);
+	@Override
+	public String getUriForPrefix(String prefix) {
+		
+		if(prefix.equals("")){
+			return apic.getCurrentOntologyURI().toString();
+		}else{
+			String s = prefixManager.getMapper().getValue(prefix);
+			if(s != null){
+				return s;
+			}else{
+				try {//testing whether the prefix is a not registered uri. If so we 
+					// go on with the whole uri, otherwise the prefix is wrong.
+					URI uri = new URI(prefix);
+					return prefix;
+				} catch (URISyntaxException e) {
+					return null;
+				}
+			}
+		}
+	}
+	
+	private boolean isCurrentOntology(String pref){
+		URI currentOnto = apic.getCurrentOntologyURI();
+		String tmp = this.getUriForPrefix(pref);
+		if(tmp.endsWith("#")|| tmp.endsWith("/")){
+			tmp = tmp.substring(0,tmp.length()-1);
+		}
+		URI uri = URI.create(tmp);
+		
+		return uri.equals(currentOnto);
 	}
 
-	public boolean isObjectProperty(URI propertyURI) {
-		Set<OWLObjectProperty> properties = finder.getMatchingOWLObjectProperties("*" + propertyURI.toString());
-		if (!properties.isEmpty())
-			return true;
-		return false;
+	@Override
+	public void removeOntology(URI ontouri) {
+		
+		infoMap.remove(ontouri);
 	}
-
+	
 }

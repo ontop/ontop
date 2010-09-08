@@ -8,6 +8,7 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.dependencies.treemodel.InclusionDependencyTreeModel;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,13 +33,13 @@ public class RDBMSInclusionDependencyController extends
 	AbstractDependencyAssertionController<RDBMSInclusionDependency> {
 
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSInclusionDependency>> inclusionDependencies= null;
+	private HashMap<URI, HashSet<RDBMSInclusionDependency>> inclusionDependencies= null;
 	
 	/**
 	 * Creates a new instance of the RDBMSInclusionDependencyController.
 	 */
 	public RDBMSInclusionDependencyController (){
-		inclusionDependencies = new HashMap<String, HashSet<RDBMSInclusionDependency>>();
+		inclusionDependencies = new HashMap<URI, HashSet<RDBMSInclusionDependency>>();
 		
 	}
 	
@@ -74,9 +75,9 @@ public class RDBMSInclusionDependencyController extends
 		if(a == null){
 			return;
 		}
-		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(currentDataSource.getSourceID());
 		if(aux != null && aux.add(a)){
-			inclusionDependencies.put(currentDataSource.getName(), aux);
+			inclusionDependencies.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(a);
 		}
 	}
@@ -87,9 +88,9 @@ public class RDBMSInclusionDependencyController extends
 	 */
 	@Override
 	public void removeAssertion(RDBMSInclusionDependency a) {
-		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(currentDataSource.getSourceID());
 		if(aux != null&&aux.remove(a)){
-			inclusionDependencies.put(currentDataSource.getName(), aux);
+			inclusionDependencies.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(a);
 		}
 	}
@@ -100,12 +101,12 @@ public class RDBMSInclusionDependencyController extends
 	 * event to remove also the currently shown assertion from the UI.
 	 */
 	public void alldatasourcesDeleted() {
-		HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(currentDataSource.getSourceID());
 		Iterator<RDBMSInclusionDependency> it = list.iterator();
 		while(it.hasNext()){
 			fireAssertionRemoved(it.next());
 		}
-		inclusionDependencies = new HashMap<String, HashSet<RDBMSInclusionDependency>>();
+		inclusionDependencies = new HashMap<URI, HashSet<RDBMSInclusionDependency>>();
 		
 	}
 
@@ -119,14 +120,14 @@ public class RDBMSInclusionDependencyController extends
 		currentDataSource = currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(previousdatasource.getName());
+				HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(previousdatasource.getSourceID());
 				Iterator<RDBMSInclusionDependency> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSInclusionDependency> list1 = inclusionDependencies.get(currentsource.getName());
+				HashSet<RDBMSInclusionDependency> list1 = inclusionDependencies.get(currentsource.getSourceID());
 				Iterator<RDBMSInclusionDependency> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -141,7 +142,7 @@ public class RDBMSInclusionDependencyController extends
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		inclusionDependencies.put(source.getName(), new HashSet<RDBMSInclusionDependency>());
+		inclusionDependencies.put(source.getSourceID(), new HashSet<RDBMSInclusionDependency>());
 	}
 
 	/**
@@ -152,13 +153,13 @@ public class RDBMSInclusionDependencyController extends
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(currentDataSource.getName());
+			HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(currentDataSource.getSourceID());
 			Iterator<RDBMSInclusionDependency> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		inclusionDependencies.remove(source.getName());
+		inclusionDependencies.remove(source.getSourceID());
 		
 	}
 
@@ -170,7 +171,7 @@ public class RDBMSInclusionDependencyController extends
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(oldname);
 		inclusionDependencies.remove(oldname);
-		inclusionDependencies.put(currendata.getName(), aux);
+		inclusionDependencies.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -183,7 +184,7 @@ public class RDBMSInclusionDependencyController extends
 	public HashSet<RDBMSInclusionDependency> getDependenciesForCurrentDataSource() {
 		// TODO Auto-generated method stub
 		if(currentDataSource !=null){
-			return inclusionDependencies.get(currentDataSource.getName());
+			return inclusionDependencies.get(currentDataSource.getSourceID());
 		}else{
 			return new HashSet<RDBMSInclusionDependency>();
 		}
@@ -196,8 +197,8 @@ public class RDBMSInclusionDependencyController extends
 	public Collection<RDBMSInclusionDependency> getAssertions() {
 		
 		Vector<RDBMSInclusionDependency> assertions = new Vector<RDBMSInclusionDependency>();
-		Set<String>keys = inclusionDependencies.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = inclusionDependencies.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(it.next());
 			assertions.addAll(aux);
@@ -212,10 +213,10 @@ public class RDBMSInclusionDependencyController extends
 	 * @param a the RDBMSInclusionDependency to add
 	 */
 	public boolean insertAssertion(RDBMSInclusionDependency a) {
-		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSInclusionDependency> aux = inclusionDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				inclusionDependencies.put(currentDataSource.getName(), aux);
+				inclusionDependencies.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -229,7 +230,7 @@ public class RDBMSInclusionDependencyController extends
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSInclusionDependency> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSInclusionDependency> getAssertionsForDataSource(URI uri) {
 	
 		 return inclusionDependencies.get(uri); 
 	}

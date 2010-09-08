@@ -5,6 +5,7 @@ import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.domain.DataSource;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,10 +18,10 @@ public class RDBMSUniquenessConstraintController extends
 				AbstractConstraintAssertionController<RDBMSUniquenessConstraint> {
 
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSUniquenessConstraint>> uniquenessconstraints= null;
+	private HashMap<URI, HashSet<RDBMSUniquenessConstraint>> uniquenessconstraints= null;
 	
 	public RDBMSUniquenessConstraintController (){
-		uniquenessconstraints = new HashMap<String, HashSet<RDBMSUniquenessConstraint>>();
+		uniquenessconstraints = new HashMap<URI, HashSet<RDBMSUniquenessConstraint>>();
 		
 	}
 	
@@ -53,9 +54,9 @@ public class RDBMSUniquenessConstraintController extends
 		if(u == null){
 			return;
 		}
-		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(currentDataSource.getSourceID());
 		if(aux != null && aux.add(u)){
-			uniquenessconstraints.put(currentDataSource.getName(), aux);
+			uniquenessconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(u);
 		}
 	}
@@ -66,9 +67,9 @@ public class RDBMSUniquenessConstraintController extends
 	 */
 	@Override
 	public void removeAssertion(RDBMSUniquenessConstraint u) {
-		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(currentDataSource.getSourceID());
 		if(aux != null&&aux.remove(u)){
-			uniquenessconstraints.put(currentDataSource.getName(), aux);
+			uniquenessconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(u);
 		}
 	}
@@ -79,12 +80,12 @@ public class RDBMSUniquenessConstraintController extends
 	 * event to remove also the currently shown assertion from the UI.
 	 */
 	public void alldatasourcesDeleted() {
-		HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(currentDataSource.getSourceID());
 		Iterator<RDBMSUniquenessConstraint> it = list.iterator();
 		while(it.hasNext()){
 			fireAssertionRemoved(it.next());
 		}
-		uniquenessconstraints = new HashMap<String, HashSet<RDBMSUniquenessConstraint>>();
+		uniquenessconstraints = new HashMap<URI, HashSet<RDBMSUniquenessConstraint>>();
 		
 	}
 
@@ -98,14 +99,14 @@ public class RDBMSUniquenessConstraintController extends
 		currentDataSource = currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(previousdatasource.getName());
+				HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(previousdatasource.getSourceID());
 				Iterator<RDBMSUniquenessConstraint> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSUniquenessConstraint> list1 = uniquenessconstraints.get(currentsource.getName());
+				HashSet<RDBMSUniquenessConstraint> list1 = uniquenessconstraints.get(currentsource.getSourceID());
 				Iterator<RDBMSUniquenessConstraint> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -120,7 +121,7 @@ public class RDBMSUniquenessConstraintController extends
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		uniquenessconstraints.put(source.getName(), new HashSet<RDBMSUniquenessConstraint>());
+		uniquenessconstraints.put(source.getSourceID(), new HashSet<RDBMSUniquenessConstraint>());
 	}
 
 	/**
@@ -131,13 +132,13 @@ public class RDBMSUniquenessConstraintController extends
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(currentDataSource.getName());
+			HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(currentDataSource.getSourceID());
 			Iterator<RDBMSUniquenessConstraint> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		uniquenessconstraints.remove(source.getName());
+		uniquenessconstraints.remove(source.getSourceID());
 		
 	}
 
@@ -149,7 +150,7 @@ public class RDBMSUniquenessConstraintController extends
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(oldname);
 		uniquenessconstraints.remove(oldname);
-		uniquenessconstraints.put(currendata.getName(), aux);
+		uniquenessconstraints.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -162,7 +163,7 @@ public class RDBMSUniquenessConstraintController extends
 	public HashSet<RDBMSUniquenessConstraint> getDependenciesForCurrentDataSource() {
 		// TODO Auto-generated method stub
 		if(currentDataSource !=null){
-			return uniquenessconstraints.get(currentDataSource.getName());
+			return uniquenessconstraints.get(currentDataSource.getSourceID());
 		}else{
 			return new HashSet<RDBMSUniquenessConstraint>();
 		}
@@ -175,8 +176,8 @@ public class RDBMSUniquenessConstraintController extends
 	public Collection<RDBMSUniquenessConstraint> getAssertions() {
 		
 		Vector<RDBMSUniquenessConstraint> assertions = new Vector<RDBMSUniquenessConstraint>();
-		Set<String>keys = uniquenessconstraints.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = uniquenessconstraints.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(it.next());
 			assertions.addAll(aux);
@@ -191,10 +192,10 @@ public class RDBMSUniquenessConstraintController extends
 	 * @param a the RDBMSInclusionDependency to add
 	 */
 	public boolean insertAssertion(RDBMSUniquenessConstraint a) {
-		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSUniquenessConstraint> aux = uniquenessconstraints.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				uniquenessconstraints.put(currentDataSource.getName(), aux);
+				uniquenessconstraints.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -208,7 +209,7 @@ public class RDBMSUniquenessConstraintController extends
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSUniquenessConstraint> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSUniquenessConstraint> getAssertionsForDataSource(URI uri) {
 	
 		 return uniquenessconstraints.get(uri); 
 	}

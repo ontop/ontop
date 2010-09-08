@@ -1,10 +1,12 @@
 package inf.unibz.it.obda.constraints.controller;
 
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
 import inf.unibz.it.obda.domain.DataSource;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,10 +19,10 @@ public class RDBMSForeignKeyConstraintController extends
 AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSForeignKeyConstraint>> fkconstraints= null;
+	private HashMap<URI, HashSet<RDBMSForeignKeyConstraint>> fkconstraints= null;
 	
 	public RDBMSForeignKeyConstraintController (){
-		fkconstraints = new HashMap<String, HashSet<RDBMSForeignKeyConstraint>>();
+		fkconstraints = new HashMap<URI, HashSet<RDBMSForeignKeyConstraint>>();
 		
 	}
 	
@@ -53,9 +55,9 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 		if(u == null){
 			return;
 		}
-		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null && aux.add(u)){
-			fkconstraints.put(currentDataSource.getName(), aux);
+			fkconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(u);
 		}
 	}
@@ -66,9 +68,9 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	 */
 	@Override
 	public void removeAssertion(RDBMSForeignKeyConstraint u) {
-		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null&&aux.remove(u)){
-			fkconstraints.put(currentDataSource.getName(), aux);
+			fkconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(u);
 		}
 	}
@@ -79,12 +81,12 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	 * event to remove also the currently shown assertion from the UI.
 	 */
 	public void alldatasourcesDeleted() {
-		HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(currentDataSource.getSourceID());
 		Iterator<RDBMSForeignKeyConstraint> it = list.iterator();
 		while(it.hasNext()){
 			fireAssertionRemoved(it.next());
 		}
-		fkconstraints = new HashMap<String, HashSet<RDBMSForeignKeyConstraint>>();
+		fkconstraints = new HashMap<URI, HashSet<RDBMSForeignKeyConstraint>>();
 		
 	}
 
@@ -98,14 +100,14 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 		currentDataSource = currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(previousdatasource.getName());
+				HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(previousdatasource.getSourceID());
 				Iterator<RDBMSForeignKeyConstraint> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSForeignKeyConstraint> list1 = fkconstraints.get(currentsource.getName());
+				HashSet<RDBMSForeignKeyConstraint> list1 = fkconstraints.get(currentsource.getSourceID());
 				Iterator<RDBMSForeignKeyConstraint> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -120,7 +122,7 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		fkconstraints.put(source.getName(), new HashSet<RDBMSForeignKeyConstraint>());
+		fkconstraints.put(source.getSourceID(), new HashSet<RDBMSForeignKeyConstraint>());
 	}
 
 	/**
@@ -131,13 +133,13 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(currentDataSource.getName());
+			HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(currentDataSource.getSourceID());
 			Iterator<RDBMSForeignKeyConstraint> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		fkconstraints.remove(source.getName());
+		fkconstraints.remove(source.getSourceID());
 		
 	}
 
@@ -149,7 +151,7 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(oldname);
 		fkconstraints.remove(oldname);
-		fkconstraints.put(currendata.getName(), aux);
+		fkconstraints.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -162,7 +164,7 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	public HashSet<RDBMSForeignKeyConstraint> getDependenciesForCurrentDataSource() {
 		// TODO Auto-generated method stub
 		if(currentDataSource !=null){
-			return fkconstraints.get(currentDataSource.getName());
+			return fkconstraints.get(currentDataSource.getSourceID());
 		}else{
 			return new HashSet<RDBMSForeignKeyConstraint>();
 		}
@@ -175,8 +177,8 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	public Collection<RDBMSForeignKeyConstraint> getAssertions() {
 		
 		Vector<RDBMSForeignKeyConstraint> assertions = new Vector<RDBMSForeignKeyConstraint>();
-		Set<String>keys = fkconstraints.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = fkconstraints.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(it.next());
 			assertions.addAll(aux);
@@ -191,10 +193,10 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	 * @param a the RDBMSInclusionDependency to add
 	 */
 	public boolean insertAssertion(RDBMSForeignKeyConstraint a) {
-		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSForeignKeyConstraint> aux = fkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				fkconstraints.put(currentDataSource.getName(), aux);
+				fkconstraints.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -208,7 +210,7 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSForeignKeyConstraint> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSForeignKeyConstraint> getAssertionsForDataSource(URI uri) {
 	
 		 return fkconstraints.get(uri); 
 	}

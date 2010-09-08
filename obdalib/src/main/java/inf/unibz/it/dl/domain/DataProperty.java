@@ -23,11 +23,6 @@ public class DataProperty extends NamedProperty {
 	
 	@Override
 	public DataProperty clone() {
-		try {
-			return new DataProperty(new URI(this.getUri().toString()));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new DataProperty(URI.create(this.getUri().toString()));
 	}
 }

@@ -1,0 +1,27 @@
+Changes, updates and bugfixes in obdalib-protege4
+
+Changes in classes OBDAPluginController and OWLAPICoupler.
+The change in these classes are mainly due to the synchronization part. This includes 
+the usage of the new classes and an implementation of a few new methods especially 
+the coupler where we added some new function for the usage of the prefixes and the 
+interaction with the prefix manager. Furthermore the coupler is able to provide information
+not only about one ontology but about all loaded ontolgies. For the implementation of 
+this feature we created the class OntologyEntityInformation. Basically for each loaded ontology
+the coupler creates an new instance of this class with a reference to the ontology. So the 
+coupler can keep track of all ontolgies and process requests about all loaded ontolgies.
+The only new function in the OBDAPluginController is the setCurrentOntologyURI method. It was 
+necessary to add them, since the user now has the possibility ot switch between several ontologies.
+
+New Classes:
+Furthermore for the implemention of the synchronisation between ontology and mappings we had to
+add a few new classes. 
+The OntologyEntityInformation was already introduces in the above section.
+The OBDAPluginDataManager is only a slightly modification of the original one. The only new thing
+is that when loading an obda file it looks for some defined prefixes which then are added to the
+prefix Manager.
+The SynchronizedMappingController is responsible for appling the changes done in the onotlogy
+the mappings. The changes we are talking about are the adding, deleting and renaming entities. 
+This new controller listens to such Change Events and applies them to the mappings.
+
+Note: There might be some other classes which contain some change, but they are of minor interest and 
+are often only some changes in the imports or new lines, etc. 

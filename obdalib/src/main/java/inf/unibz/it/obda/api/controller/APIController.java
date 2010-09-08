@@ -15,8 +15,12 @@ package inf.unibz.it.obda.api.controller;
 import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.io.DataManager;
+import inf.unibz.it.obda.api.io.EntityNameRenderer;
+import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.constraints.parser.ConstraintsRenderer;
 import inf.unibz.it.obda.dependencies.parser.DependencyAssertionRenderer;
+import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +29,12 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.Vector;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import javax.swing.ProgressMonitor;
 
 public abstract class APIController {
 
@@ -56,16 +61,23 @@ public abstract class APIController {
 	//renders the Dependency assertions from the obda file
 	private DependencyAssertionRenderer dependencyRenderer = null;
 	private ConstraintsRenderer constraintsRenderer = null;
+	
+	
+	// the entity name renderer provides the name any entity which belongs to a loaded ontology.
+	protected EntityNameRenderer nameRenderer = null;
+	
+	// a set of all currently loaded ontotlogies
+	protected HashSet<String> loadedOntologies = null;
 
 	public APIController() {
 		
 		dscontroller = new DatasourcesController();
 		mapcontroller = new MappingController(dscontroller, this);
 		queryController = new QueryController();
-		
 		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
-		ioManager = new DataManager(dscontroller, mapcontroller, queryController);
+		loadedOntologies = new HashSet<String>();
+		ioManager = new DataManager(this, new PrefixManager());
 		
 		dependencyRenderer = new DependencyAssertionRenderer(this);
 		constraintsRenderer = new ConstraintsRenderer(this);
@@ -97,6 +109,8 @@ public abstract class APIController {
 	 */
 	public void setCoupler(APICoupler coupler) {
 		APIController.couplerInstance = coupler;
+		nameRenderer = new EntityNameRenderer(this);
+		nameRenderer.setCoupler(coupler);
 	}
 
 	/***************************************************************************
@@ -177,6 +191,8 @@ public abstract class APIController {
 //		}
 
 //		ioManager.loadOBDADataFromFile(ioManager.getOBDAFile(getCurrentOntologyFile()));
+		mapcontroller.activeOntologyChanged();
+		
 	}
 
 	public URI getCurrentOntologyURI() {
@@ -193,6 +209,8 @@ public abstract class APIController {
 	// }
 	// }
 
+	public abstract URI getPhysicalURIOfOntology(URI onto);
+	
 	public abstract File getCurrentOntologyFile();
 
 	public String getVersion() {
@@ -239,5 +257,54 @@ public abstract class APIController {
 	 */
 	public abstract Set<URI> getOntologyURIs();
 	
+	/**
+	 * Returns the current entity name renderer
+	 * @return the current entity name renderer
+	 */
+	public EntityNameRenderer getEntityNameRenderer(){
+		return nameRenderer;
+	}
 
+	/**
+	 * Adds the given ontology uri to the set of already 
+	 * loaded ontologies uri's.
+	 * 
+	 * @param ontoUri
+	 */
+	
+	public void markAsLoaded(URI ontoUri){
+		loadedOntologies.add(ontoUri.toString());
+	}
+	
+	
+	/**
+	 * Removes the ontolgy identified by the given URI from the set of all
+	 * currently loaded ontologies and all other objects (data sources, mappings, etc)
+	 * 
+	 * @param ontoUri the URI of the ontology to remove
+	 */
+	public void unloaded(URI ontoUri){
+		loadedOntologies.remove(ontoUri.toString());
+		HashMap<URI, DataSource> map =dscontroller.getAllSources();
+		Set<URI> set = map.keySet();
+		Iterator<URI> it = set.iterator();
+		boolean controlle = false;
+		Vector<URI> dstoDelete = new Vector<URI>();
+		while(it.hasNext()){
+			DataSource ds = map.get(it.next());
+			String dsuri = ds.getParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI);
+			if(dsuri.equals(ontoUri.toString())){
+				dstoDelete.add(ds.getSourceID());
+				controlle = true;
+			}
+		}
+		if(!controlle){
+			System.err.println("ERROR: NO data source deleted after an ontology was deleted");
+		}
+		Iterator<URI> it2 = dstoDelete.iterator();
+		while(it2.hasNext()){
+			dscontroller.removeDataSource(it2.next());
+		}		
+		couplerInstance.removeOntology(ontoUri);
+	}
 }

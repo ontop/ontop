@@ -13,6 +13,8 @@
  */
 package inf.unibz.it.ucq.domain;
 
+import inf.unibz.it.obda.api.controller.APIController;
+
 public class VariableTerm extends QueryTerm {
 
 	public VariableTerm(String name) {
@@ -21,12 +23,12 @@ public class VariableTerm extends QueryTerm {
 
 	@Override
 	public String toString() {		
-		return "$" + this.getName();
+		return "$" + this.getVariableName();
 	}
 
 	@Override
 	public VariableTerm clone() {
-		return new VariableTerm(new String(this.getName()));
+		return new VariableTerm(new String(this.getVariableName()));
 	}
 	
 	

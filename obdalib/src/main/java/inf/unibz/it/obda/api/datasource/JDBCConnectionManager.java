@@ -5,6 +5,7 @@ import inf.unibz.it.obda.gui.swing.datasource.panels.ColumnInspectorTableModel;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -27,7 +28,7 @@ public class JDBCConnectionManager {
 	private static JDBCConnectionManager instance = null;
 	
 	private HashMap<String, Object> properties = null;
-	private HashMap<String, Connection> connectionPool = null;
+	private HashMap<URI, Connection> connectionPool = null;
 	
 	private Vector<Statement> statementList = null;
 	private Statement currentStatement = null;
@@ -40,7 +41,7 @@ public class JDBCConnectionManager {
 		properties.put(JDBC_FETCHSIZE, 100);
 		properties.put(JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY);
 		properties.put(JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-		connectionPool = new HashMap<String, Connection>();
+		connectionPool = new HashMap<URI, Connection>();
 		statementList = new Vector<Statement>();
 	}
 	
@@ -55,7 +56,7 @@ public class JDBCConnectionManager {
 		String dbname = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String username = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-		String connID = ds.getUri().toString();
+		URI connID = ds.getSourceID();
 		
 		Connection con = connectionPool.get(connID);
 		if(con == null){
@@ -75,7 +76,7 @@ public class JDBCConnectionManager {
 		}
 	}
 	
-	public boolean isConnectionAlive(String connID) throws SQLException{
+	public boolean isConnectionAlive(URI connID) throws SQLException{
 		Connection con = connectionPool.get(connID);
 		if(con == null){
 			return false;
@@ -84,7 +85,7 @@ public class JDBCConnectionManager {
 		}
 	}
 	
-	public ResultSet executeQuery(String connID, String query, DataSource ds) throws SQLException{
+	public ResultSet executeQuery(URI connID, String query, DataSource ds) throws SQLException{
 		Connection con = connectionPool.get(connID);
 		if(con == null || con.isClosed()){
 			try {
@@ -94,7 +95,7 @@ public class JDBCConnectionManager {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-			con = connectionPool.get(ds.getUri());
+			con = connectionPool.get(ds.getSourceID());
 			throw new SQLException("No connection established for the given id: " + connID);
 		}else{
 			if(currentStatement != null){
@@ -113,10 +114,10 @@ public class JDBCConnectionManager {
 	}
 	
 	public ResultSet executeQuery(DataSource ds, String query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException{
-		Connection con = connectionPool.get(ds.getUri());
+		Connection con = connectionPool.get(ds.getSourceID());
 		if(con == null){
 			createConnection(ds);
-			con = connectionPool.get(ds.getUri());
+			con = connectionPool.get(ds.getSourceID());
 		}
 		if(currentStatement != null){
 			currentStatement.close();
@@ -150,7 +151,7 @@ public class JDBCConnectionManager {
 			}
 		}
 		
-		Iterator<String> it = connectionPool.keySet().iterator();
+		Iterator<URI> it = connectionPool.keySet().iterator();
 		
 		while(it.hasNext()){
 			Connection con = connectionPool.get(it.next());
@@ -165,7 +166,7 @@ public class JDBCConnectionManager {
 			}
 		
 		properties.put(key, value);
-		Iterator<String> it = connectionPool.keySet().iterator();
+		Iterator<URI> it = connectionPool.keySet().iterator();
 		while(it.hasNext()){
 			Connection c = connectionPool.get(it.next());
 			if(c != null){
@@ -177,11 +178,11 @@ public class JDBCConnectionManager {
 	}
 	
 	public String getApprimateRowCount(String name, DataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException{
-		Connection con = connectionPool.get(ds.getUri());
+		Connection con = connectionPool.get(ds.getSourceID());
 		if(con == null){
 			createConnection(ds);
 		}
-		con = connectionPool.get(ds.getUri());
+		con = connectionPool.get(ds.getSourceID());
 		
 		if (ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("org.postgresql.Driver")) {
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -199,11 +200,11 @@ public class JDBCConnectionManager {
 	
 	public String getRowCount(String name, DataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
 		
-		Connection con = connectionPool.get(ds.getUri());
+		Connection con = connectionPool.get(ds.getSourceID());
 		if(con == null){
 			createConnection(ds);
 		}
-		con = connectionPool.get(ds.getUri());
+		con = connectionPool.get(ds.getSourceID());
 		Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		// Run the query, creating a ResultSet
 		ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + name.toUpperCase());
@@ -224,11 +225,11 @@ public class JDBCConnectionManager {
 		if(source == null){
 			throw new SQLException("No data source selected.");
 		}
-		Connection con = connectionPool.get(source.getUri());
+		Connection con = connectionPool.get(source.getSourceID());
 		if(con == null){
 			createConnection(source);
 		}
-		con = connectionPool.get(source.getUri());
+		con = connectionPool.get(source.getSourceID());
 		if(con != null){
 			if (source.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
 
@@ -260,7 +261,7 @@ public class JDBCConnectionManager {
 				return r;
 			}
 		}else{
-			throw new SQLException("No connection established for id: " + source.getUri());
+			throw new SQLException("No connection established for id: " + source.getSourceID());
 		}
 	}
 	
@@ -292,11 +293,11 @@ public class JDBCConnectionManager {
 			throw new SQLException("No data source selected.");
 		}
 		
-		Connection connection = connectionPool.get(source.getUri());
+		Connection connection = connectionPool.get(source.getSourceID());
 		if(connection == null){
 			createConnection(source);
 		}
-		connection = connectionPool.get(source.getUri());
+		connection = connectionPool.get(source.getSourceID());
 		
 		String driverClassName = source.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
 		

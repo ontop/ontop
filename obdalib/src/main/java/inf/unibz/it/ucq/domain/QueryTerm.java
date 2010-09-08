@@ -13,6 +13,8 @@
  */
 package inf.unibz.it.ucq.domain;
 
+import inf.unibz.it.obda.api.controller.APIController;
+
 public abstract class QueryTerm implements Cloneable {
 	private String name;
 	
@@ -20,17 +22,16 @@ public abstract class QueryTerm implements Cloneable {
 		this.name = name;
 	}
 
-	public String getName() {
+	public String getVariableName() {
 		return name;
 	}
 	
-	public abstract String toString();
 	public abstract QueryTerm clone();
 	
 	@Override
 	public boolean equals(Object term) {
 		if (!(term instanceof QueryTerm))
 			return false;
-		return name.equals(((QueryTerm)term).getName());
+		return name.equals(((QueryTerm)term).getVariableName());
 	}
 }

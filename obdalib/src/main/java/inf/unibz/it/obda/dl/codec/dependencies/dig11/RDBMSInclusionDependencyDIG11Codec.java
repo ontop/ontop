@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import inf.unibz.it.dl.codec.dig11.AssertionDIG11Codec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.dependencies.parser.DependencyAssertionRenderer;
 import inf.unibz.it.ucq.domain.QueryTerm;
@@ -17,6 +18,10 @@ import inf.unibz.it.ucq.domain.VariableTerm;
 
 public class RDBMSInclusionDependencyDIG11Codec extends
 		AssertionDIG11Codec<RDBMSInclusionDependency> {
+
+	public RDBMSInclusionDependencyDIG11Codec() {
+		super();
+	}
 
 	private static final String	TAG	= "RDBMSInclusionDependency";
 	private static final String	PARAMETER1	= "included";
@@ -64,7 +69,7 @@ public class RDBMSInclusionDependencyDIG11Codec extends
 		Iterator<QueryTerm> it = one.iterator();
 		while(it.hasNext()){
 			Element variable = createElement(VARIABLE);
-			variable.setAttribute("name", it.next().getName());
+			variable.setAttribute("name", it.next().getVariableName());
 			parameter1.appendChild(variable);
 		}
 		element.appendChild(parameter1);
@@ -75,7 +80,7 @@ public class RDBMSInclusionDependencyDIG11Codec extends
 		Iterator<QueryTerm> it2 = two.iterator();
 		while(it2.hasNext()){
 			Element variable = createElement(VARIABLE);
-			variable.setAttribute("name", it2.next().getName());
+			variable.setAttribute("name", it2.next().getVariableName());
 			parameter2.appendChild(variable);
 		}
 		element.appendChild(parameter2);

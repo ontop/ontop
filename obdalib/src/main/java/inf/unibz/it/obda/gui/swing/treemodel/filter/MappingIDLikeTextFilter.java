@@ -37,6 +37,7 @@ public class MappingIDLikeTextFilter implements TreeModelFilter<OBDAMappingAxiom
 		}
 		return false;
 	}
+
 	
 	public static void main(String args[]) {
 		try {

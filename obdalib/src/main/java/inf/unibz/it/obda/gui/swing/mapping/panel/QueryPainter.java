@@ -15,6 +15,7 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
+import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryCodec;
 import inf.unibz.it.obda.gui.swing.mapping.panel.MappingStyledDocument;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
@@ -132,7 +133,11 @@ public class QueryPainter {
 		
 		try {
 			input = doc.getText(0, doc.getLength());
-			query = new ConjunctiveQuery(input,apic);
+			DatalogConjunctiveQueryCodec c = new DatalogConjunctiveQueryCodec(apic);
+			query = c.decode(input);
+			if(query == null){
+				invalid = true;
+			}
 //			checkValidityOfConjunctiveQuery(query);
 
 		} catch (Exception e) {
@@ -180,10 +185,15 @@ public class QueryPainter {
 							doc.setCharacterAttributes(pos, 1, black, false);
 							pos = input.indexOf(",", pos + 1);
 						}
+						pos = input.indexOf(":", 0);
+						while (pos != -1) {
+							doc.setCharacterAttributes(pos, 1, black, false);
+							pos = input.indexOf(":", pos + 1);
+						}
 
 						ArrayList<QueryAtom> atoms = current_query.getAtoms();
 						
-						Iterator it = atoms.iterator();
+						Iterator<QueryAtom> it = atoms.iterator();
 						while (it.hasNext()){
 							
 							QueryAtom at = (QueryAtom) it.next();
@@ -191,8 +201,8 @@ public class QueryPainter {
 							if (at instanceof ConceptQueryAtom){
 								
 								ConceptQueryAtom a = (ConceptQueryAtom) at;
-								String name = a.getName();
-								int in = input.indexOf(name);
+								String name = apic.getEntityNameRenderer().getPredicateName(a);
+//								int in = input.indexOf(name);
 //								setCharacterAttributes(in, name.length(), yellow, false);
 								ColorTask t1 = new ColorTask(name, clazz);
 								tasks.add(t1);
@@ -203,17 +213,15 @@ public class QueryPainter {
 									if(t instanceof FunctionTerm){
 										
 										FunctionTerm f = (FunctionTerm) t;
-										String function = f.getName();
+										String function = apic.getEntityNameRenderer().getFunctionName(f);
 										
 										ArrayList<QueryTerm> para = f.getParameters();
-										Iterator para_it = para.iterator();
+										Iterator<QueryTerm> para_it = para.iterator();
 										while (para_it.hasNext()){
 											
 											QueryTerm p = (VariableTerm)para_it.next();
-											String str = p.toString();
-											
-											
-											ColorTask task2 = new ColorTask(str, parameters);
+											String str = "$"+p.getVariableName();
+											ColorTask task2 = new ColorTask(str, variable);
 											tasks.add(task2);
 										}
 										
@@ -224,9 +232,7 @@ public class QueryPainter {
 									}else if(t instanceof VariableTerm){
 										
 										VariableTerm v = (VariableTerm) t;
-										String str = v.toString();
-										int j = input.indexOf(str);
-//										setCharacterAttributes(j, str.length(), magenta, false);
+										String str = "$"+v.getVariableName();
 										ColorTask task = new ColorTask(str, variable);
 										tasks.add(task);
 										
@@ -235,23 +241,23 @@ public class QueryPainter {
 							}else if(at instanceof BinaryQueryAtom){
 								
 								BinaryQueryAtom a = (BinaryQueryAtom) at;
-								String name = a.getName();
-								int in = input.indexOf(name);
+								String name = apic.getEntityNameRenderer().getPredicateName(a);
+//								int in = input.indexOf(name);
 							
 								ArrayList<QueryTerm> terms = a.getTerms();
 								
 								if (terms.get(0) instanceof FunctionTerm){
 									
 									FunctionTerm f = (FunctionTerm) terms.get(0);
-									String function = f.getName();
+									String function = apic.getEntityNameRenderer().getFunctionName(f);
 									ArrayList<QueryTerm> para = f.getParameters();
 									Iterator para_it = para.iterator();
 									while (para_it.hasNext()){
 										
 										QueryTerm p = (VariableTerm)para_it.next();
-										String str = p.toString();
+										String str = "$"+p.getVariableName();
 										
-										ColorTask task2 = new ColorTask(str, parameters);
+										ColorTask task2 = new ColorTask(str, variable);
 										tasks.add(task2);
 										
 									}
@@ -261,9 +267,7 @@ public class QueryPainter {
 								}else if(terms.get(0) instanceof VariableTerm){
 									
 									VariableTerm v = (VariableTerm) terms.get(0);
-									String str = v.toString();
-									int j = input.indexOf(str);
-//									setCharacterAttributes(j, str.length(), magenta, false);
+									String str = "$"+v.getVariableName();
 									ColorTask task = new ColorTask(str, variable);
 									tasks.add(task);
 								
@@ -271,16 +275,16 @@ public class QueryPainter {
 								if (terms.get(1) instanceof FunctionTerm){
 									
 									FunctionTerm f = (FunctionTerm) terms.get(1);
-									String function = f.getName();
+									String function = apic.getEntityNameRenderer().getFunctionName(f);
 //									
 									ArrayList<QueryTerm> para = f.getParameters();
-									Iterator para_it = para.iterator();
+									Iterator<QueryTerm> para_it = para.iterator();
 									while (para_it.hasNext()){
 										
 										QueryTerm p = (VariableTerm)para_it.next();
-										String str = p.toString();
+										String str = "$"+p.getVariableName();
 										
-										ColorTask task2 = new ColorTask(str, parameters);
+										ColorTask task2 = new ColorTask(str, variable);
 										tasks.add(task2);
 									}
 									
@@ -292,7 +296,7 @@ public class QueryPainter {
 								}else if(terms.get(1) instanceof VariableTerm){
 									
 									VariableTerm v = (VariableTerm) terms.get(1);
-									String str = v.toString();
+									String str = "$"+v.getVariableName();
 									ColorTask task = new ColorTask(name, dataProp);
 									tasks.add(task);
 									ColorTask task2 = new ColorTask(str, variable);
@@ -306,11 +310,12 @@ public class QueryPainter {
 						ColorTask [] taskArray = order(tasks);
 						
 						for(int i=0; i<taskArray.length; i++){
-							
-							int index = input.indexOf(taskArray[i].text, 0);
-							while (index != -1) {
-								doc.setCharacterAttributes(index, taskArray[i].text.length(), taskArray[i].set, false);
-								index = input.indexOf(taskArray[i].text, index + 1);
+							if(taskArray[i].text != null){
+								int index = input.indexOf(taskArray[i].text, 0);
+								while (index != -1) {
+									doc.setCharacterAttributes(index, taskArray[i].text.length(), taskArray[i].set, false);
+									index = input.indexOf(taskArray[i].text, index + 1);
+								}
 							}
 						}
 						
@@ -338,7 +343,7 @@ public class QueryPainter {
 			int j = i;
 			ColorTask str = result[i];
 			int B = result[i].text.length();
-			while ((j > 0) && (result[j-1].text.length() > B)) {
+			while ((j > 0) && (result[j-1].text != null) && (result[j-1].text.length() > B)) {
 				result[j] =result[j-1];
 				j--;
 			}
@@ -352,26 +357,27 @@ public class QueryPainter {
 		ArrayList<QueryAtom> atoms = cq.getAtoms();
 		Iterator<QueryAtom> it = atoms.iterator();
 		APICoupler coup= apic.getCoupler();
+		URI onto_uri = apic.getCurrentOntologyURI();
 		while(it.hasNext()){
 			QueryAtom atom = it.next();
 			if(atom instanceof ConceptQueryAtom){
 				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
-				String name = cqa.getName();
-				boolean isConcept =coup.isNamedConcept(new URI(name));
+				String name =apic.getEntityNameRenderer().getPredicateName(cqa);
+				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(name));
 				if(!isConcept){
 					throw new Exception("Concept "+name+" not present in ontology.");
 				}
 				
 			}else{
 				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
-				String name = bqa.getName();
+				String name = apic.getEntityNameRenderer().getPredicateName(bqa);
 				ArrayList<QueryTerm> terms = bqa.getTerms();
 				QueryTerm t2 = terms.get(1);
 				boolean found = false;
 				if(t2 instanceof FunctionTerm){
-					found =coup.isObjectProperty(new URI(name));
+					found =coup.isObjectProperty(onto_uri,new URI(name));
 				}else{
-					found =coup.isDatatypeProperty(new URI(name));
+					found =coup.isDatatypeProperty(onto_uri,new URI(name));
 				}
 				if(!found){
 					throw new Exception("Property "+name+" not present in ontology.");

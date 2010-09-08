@@ -24,11 +24,10 @@ import java.util.StringTokenizer;
 
 //TODO make this an entity too?
 public class DataSource {
-	// private String uri = "";
-	private String		name		= null;
+	// private String uri = ""
 	private boolean		enabled		= true;
 	private boolean		registred	= false;
-	private URI			ontologyURI	= null;
+	private URI			id = null;
 
 	private Properties	parameters	= null;
 
@@ -40,33 +39,25 @@ public class DataSource {
 	 * @param name
 	 *            A generic name for this data source
 	 */
-	public DataSource(String name) {
-		this.name = name;
+	public DataSource(URI id) {
+		this.id = id;
 		parameters = new Properties();
 	}
 
-	/****
-	 * Sets the Ontology URI to which this datasource is associated
-	 * 
-	 * @param uri
-	 */
-	public void setUri(String uri) {
-		ontologyURI = URI.create(uri);
-	}
 
 	public void setParameter(String parameter_uri, String value) {
 		this.parameters.setProperty(parameter_uri, value);
 	}
 
-	/***
-	 * Returns the Ontology URI to which this data source is associated.
-	 * 
-	 * @return
-	 */
-	public String getUri() {
-		return ontologyURI.toString();
-	}
 
+	public URI getSourceID(){
+		return id;
+	}
+	
+	public void setNewID(URI newid){
+		this.id = newid;
+	}
+	
 	public String getParameter(String parameter_uri) {
 		return parameters.getProperty(parameter_uri);
 	}
@@ -77,8 +68,7 @@ public class DataSource {
 
 	public String toString() {
 		StringBuffer buff = new StringBuffer();
-		buff.append("DatasourceName=" + name + "\n");
-		buff.append("DatasourceURI=" + ontologyURI.toString());
+		buff.append("DatasourceURI=" +  id.toString() + "\n");
 		Enumeration<Object> keys = parameters.keys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
@@ -117,8 +107,8 @@ public class DataSource {
 
 		try {
 			String name = tokenizer.nextToken().substring(15);
-			String uri = tokenizer.nextToken().substring(14);
-			new_src = new DataSource(name);
+			URI id = URI.create(name);
+			new_src = new DataSource(id);
 
 			// TODO remove this and modify all my current OBDA FILES
 			/***
@@ -127,14 +117,14 @@ public class DataSource {
 			 * check if they are the same, if the are, it means its an old file
 			 * and the URI is set to the current ontlogy's URI
 			 */
-			if (!name.equals(uri)) {
-				new_src.setUri(uri);
-			} else {
-				throw new IllegalArgumentException("ERROR: data source name = URI. Fix the URI value to point to the ontology URI to which this data sources is associated");
-//				APIController controller = APIController.getController();
-//				URI currentOntologyURI = controller.getCurrentOntologyURI();
-//				new_src.setUri(currentOntologyURI.toString());
-			}
+//			if (!name.equals(ontouri)) {
+//				new_src.setOntoUri(URI.create(ontouri));
+//			} else {
+//				throw new IllegalArgumentException("ERROR: data source name = URI. Fix the URI value to point to the ontology URI to which this data sources is associated");
+////				APIController controller = APIController.getController();
+////				URI currentOntologyURI = controller.getCurrentOntologyURI();
+////				new_src.setUri(currentOntologyURI.toString());
+//			}
 			while (tokenizer.hasMoreTokens()) {
 				StringTokenizer tok2 = new StringTokenizer(tokenizer.nextToken(), "=");
 				new_src.setParameter(tok2.nextToken(), tok2.nextToken());
@@ -145,19 +135,6 @@ public class DataSource {
 		return new_src;
 	}
 
-	public static void main(String[] args) {
-		DataSource d = new DataSource("somename");
-		d.setUri("someuri");
-		d.setParameter("uri1", "value1");
-		d.setParameter("uri2", "value2");
-		System.out.println(d);
-		DataSource b = DataSource.getFromString(d.toString());
-		System.out.println(b);
-	}
-
-	public String getName() {
-		return name;
-	}
 
 	public static String encodeDataSources(HashMap<String, DataSource> datasources) {
 		StringBuffer encoded = new StringBuffer();
@@ -175,16 +152,16 @@ public class DataSource {
 		return encoded.toString();
 	}
 
-	public static HashMap<String, DataSource> decodeDataSources(String enc_srcs) {
+	public static HashMap<URI, DataSource> decodeDataSources(String enc_srcs) {
 		if ((enc_srcs == null) || (enc_srcs.equals("")))
 			return null;
 		StringTokenizer tokenizer = new StringTokenizer(enc_srcs, "|");
-		HashMap<String, DataSource> sources = null;
+		HashMap<URI, DataSource> sources = null;
 		if (tokenizer.hasMoreElements()) {
-			sources = new HashMap<String, DataSource>();
+			sources = new HashMap<URI, DataSource>();
 			while (tokenizer.hasMoreElements()) {
 				DataSource newsource = DataSource.getFromString(tokenizer.nextToken());
-				sources.put(newsource.getName(), newsource);
+				sources.put(newsource.getSourceID(), newsource);
 			}
 		}
 		return sources;
@@ -205,9 +182,4 @@ public class DataSource {
 	public boolean isRegistred() {
 		return registred;
 	}
-	
-	public void setName(String name){
-		this.name = name;
-	}
-
 }

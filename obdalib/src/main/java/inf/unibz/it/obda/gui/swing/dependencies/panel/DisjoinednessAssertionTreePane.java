@@ -378,7 +378,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
             			if(aux1.length() > 0){
             				aux1 = aux1 + ",";
             			}
-            			aux1= aux1 + "table1." + it1.next().getName();
+            			aux1= aux1 + "table1." + it1.next().getVariableName();
             		}
             		String aux2 = "";
             		Iterator<QueryTerm> it2 = terms2.iterator();
@@ -386,7 +386,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
             			if(aux2.length() > 0){
             				aux2 = aux2 + ",";
             			}
-            			aux2= aux2 + "table2." + it2.next().getName();
+            			aux2= aux2 + "table2." + it2.next().getVariableName();
             		}
             		
             		String query = "SELECT " + aux1 +" FROM (" + query1.getInputQuString() + ") table1 WHERE ROW("+

@@ -24,6 +24,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseEvent;
+import java.net.URI;
 import java.util.EventObject;
 import java.util.Vector;
 
@@ -297,7 +298,7 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 	private AbstractConstraintAssertion parseInput(){
 	
 		String text =editor.getText();
-		String uri = apic.getDatasourcesController().getCurrentDataSource().getName();
+		URI uri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		if(constraintAssertion.equals(RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT)){
 			try {
 				return ConstraintsRenderer.getInstance().renderSingleCeckConstraint(text, uri);

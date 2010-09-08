@@ -222,7 +222,7 @@ public class ExpressionParser extends Parser {
 
             			APICoupler coupler = api.getCoupler();
             			URI uri = URI.create((ALPHAVAR3!=null?ALPHAVAR3.getText():null));
-            			if (coupler.isNamedConcept(uri)) {
+            			if (coupler.isNamedConcept(api.getCurrentOntologyURI(),uri)) {
             				value = new NamedConcept(uri);
             			} else {
             				//throw error
@@ -577,10 +577,9 @@ public class ExpressionParser extends Parser {
             			APICoupler coupler = api.getCoupler();
             			NamedProperty prop = null;
             			URI uri = URI.create((ALPHAVAR12!=null?ALPHAVAR12.getText():null));
-
-            			if (coupler.isObjectProperty(uri)) {
+            			if (coupler.isObjectProperty(api.getCurrentOntologyURI(),uri)) {
             				prop = new ObjectProperty(uri);
-            			} else if (coupler.isDatatypeProperty(uri)) {
+            			} else if (coupler.isDatatypeProperty(api.getCurrentOntologyURI(),uri)) {
             				prop = new DataProperty(uri);
             			} else {
             				//Throw exception

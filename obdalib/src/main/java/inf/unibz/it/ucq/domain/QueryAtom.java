@@ -14,11 +14,13 @@
 package inf.unibz.it.ucq.domain;
 
 
+import inf.unibz.it.dl.domain.NamedPredicate;
+
+import java.net.URI;
 import java.util.ArrayList;
 
 public abstract class QueryAtom implements Cloneable {
-	public abstract String getName();
 	public abstract ArrayList<QueryTerm> getTerms();
 	public abstract QueryAtom clone();
-	public abstract String toString();
+	public abstract NamedPredicate getNamedPredicate();
 }

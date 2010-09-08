@@ -286,18 +286,18 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 	    		 for(int j=i+1; j<selectedMappings.size(); j++){
 	    			MappingNode node2 = selectedMappings.get(j);
 	    			String id2 = node2.getUserObject().toString();
-	    			OBDAMappingAxiom map1 = mapcon.getMapping(dscon.getCurrentDataSource().getName(), id1);
-	    	        OBDAMappingAxiom map2 = mapcon.getMapping(dscon.getCurrentDataSource().getName(), id2);
+	    			OBDAMappingAxiom map1 = mapcon.getMapping(dscon.getCurrentDataSource().getSourceID(), id1);
+	    	        OBDAMappingAxiom map2 = mapcon.getMapping(dscon.getCurrentDataSource().getSourceID(), id2);
 	    	        
 	    	     	if(assertion.equals(RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY)){
 	            		AssertionController<RDBMSFunctionalDependency> con = (RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
-	            		con.addAssertion(new RDBMSFunctionalDependency(dscon.getCurrentDataSource().getName(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
+	            		con.addAssertion(new RDBMSFunctionalDependency(dscon.getCurrentDataSource().getSourceID(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
 	            	}else if (assertion.equals(RDBMSInclusionDependency.INCLUSIONDEPENDENCY)){
 	            		AssertionController<RDBMSInclusionDependency> con = (RDBMSInclusionDependencyController) apic.getController(RDBMSInclusionDependency.class);
-	            		con.addAssertion(new RDBMSInclusionDependency(dscon.getCurrentDataSource().getName(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
+	            		con.addAssertion(new RDBMSInclusionDependency(dscon.getCurrentDataSource().getSourceID(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
 	            	}else if (assertion.equals(RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION)){
 	            		AssertionController<RDBMSDisjointnessDependency> con = (RDBMSDisjointnessDependencyController) apic.getController(RDBMSDisjointnessDependency.class);
-	            		con.addAssertion(new RDBMSDisjointnessDependency(dscon.getCurrentDataSource().getName(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
+	            		con.addAssertion(new RDBMSDisjointnessDependency(dscon.getCurrentDataSource().getSourceID(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
 	            	}else{
 	            		throw new RuntimeException("Unknown assertion: " + assertion);
 	            	}

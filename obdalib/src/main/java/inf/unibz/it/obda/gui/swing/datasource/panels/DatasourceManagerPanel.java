@@ -75,10 +75,10 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 			@Override
 			public void editingStopped(ChangeEvent e) {
 				DataSource ds = dscontroller.getCurrentDataSource();
-				String old = ds.getName();
+				URI old = ds.getSourceID();
 				TreeCellEditor ed = (TreeCellEditor) e.getSource();
 				String neu = ed.getCellEditorValue().toString();
-				ds.setName(neu);
+				ds.setNewID(URI.create(neu));
 				dscontroller.updateDataSource(old, ds);
 				
 			}
@@ -101,7 +101,11 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 				if ((currentNode != null) && (currentNode.getUserObject() != null) && currentNode.getUserObject().toString().equals("")) {
 					dscontroller.setCurrentDataSource(null);
 				} else {
-					dscontroller.setCurrentDataSource(currentNode.toString());
+					if(currentNode.getUserObject() != null){
+						dscontroller.setCurrentDataSource(URI.create(currentNode.toString()));
+					}else{//means the user selected the root ie he collapsed the tree
+						dscontroller.setCurrentDataSource(null); 
+					}
 				}
 			}
 		});
@@ -190,7 +194,7 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 		TreePath currentSelection = treeDatasourceMgr.getSelectionPath();
 		if (currentSelection != null) {
 			DatasourcesController srcctrl = dscontroller;
-			srcctrl.removeDataSource(srcctrl.getCurrentDataSource().getName());
+			srcctrl.removeDataSource(srcctrl.getCurrentDataSource().getSourceID());
 		}
 	}// GEN-LAST:event_removeButtonActionPerformed
 
@@ -213,7 +217,7 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 //		}
 		
 		if ((name != null) && (!name.equals(""))) {
-			dscontroller.addDataSource(name, ontoURI);
+			dscontroller.addDataSource(name);
 		}
 	}// GEN-LAST:event_addButtonActionPerformed
 

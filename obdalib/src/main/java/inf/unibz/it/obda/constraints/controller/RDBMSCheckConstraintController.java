@@ -1,10 +1,12 @@
 package inf.unibz.it.obda.constraints.controller;
 
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSCheckConstraint;
 import inf.unibz.it.obda.domain.DataSource;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,11 +19,10 @@ public class RDBMSCheckConstraintController extends
 AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSCheckConstraint>> checkconstraints= null;
+	private HashMap<URI, HashSet<RDBMSCheckConstraint>> checkconstraints= null;
 	
 	public RDBMSCheckConstraintController (){
-		checkconstraints = new HashMap<String, HashSet<RDBMSCheckConstraint>>();
-		
+		checkconstraints = new HashMap<URI, HashSet<RDBMSCheckConstraint>>();
 	}
 	
 	@Override
@@ -50,9 +51,9 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 		if(u == null){
 			return;
 		}
-		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null && aux.add(u)){
-			checkconstraints.put(currentDataSource.getName(), aux);
+			checkconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(u);
 		}
 	}
@@ -63,9 +64,9 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	 */
 	@Override
 	public void removeAssertion(RDBMSCheckConstraint u) {
-		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null&&aux.remove(u)){
-			checkconstraints.put(currentDataSource.getName(), aux);
+			checkconstraints.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(u);
 		}
 	}
@@ -76,12 +77,12 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	 * event to remove also the currently shown assertion from the UI.
 	 */
 	public void alldatasourcesDeleted() {
-		HashSet<RDBMSCheckConstraint> list = checkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSCheckConstraint> list = checkconstraints.get(currentDataSource.getSourceID());
 		Iterator<RDBMSCheckConstraint> it = list.iterator();
 		while(it.hasNext()){
 			fireAssertionRemoved(it.next());
 		}
-		checkconstraints = new HashMap<String, HashSet<RDBMSCheckConstraint>>();
+		checkconstraints = new HashMap<URI, HashSet<RDBMSCheckConstraint>>();
 		
 	}
 
@@ -95,14 +96,14 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 		currentDataSource = currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSCheckConstraint> list = checkconstraints.get(previousdatasource.getName());
+				HashSet<RDBMSCheckConstraint> list = checkconstraints.get(previousdatasource.getSourceID());
 				Iterator<RDBMSCheckConstraint> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSCheckConstraint> list1 = checkconstraints.get(currentsource.getName());
+				HashSet<RDBMSCheckConstraint> list1 = checkconstraints.get(currentsource.getSourceID());
 				Iterator<RDBMSCheckConstraint> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -117,7 +118,7 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		checkconstraints.put(source.getName(), new HashSet<RDBMSCheckConstraint>());
+		checkconstraints.put(source.getSourceID(), new HashSet<RDBMSCheckConstraint>());
 	}
 
 	/**
@@ -128,13 +129,13 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSCheckConstraint> list = checkconstraints.get(currentDataSource.getName());
+			HashSet<RDBMSCheckConstraint> list = checkconstraints.get(currentDataSource.getSourceID());
 			Iterator<RDBMSCheckConstraint> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		checkconstraints.remove(source.getName());
+		checkconstraints.remove(source.getSourceID());
 		
 	}
 
@@ -146,7 +147,7 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(oldname);
 		checkconstraints.remove(oldname);
-		checkconstraints.put(currendata.getName(), aux);
+		checkconstraints.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -159,7 +160,7 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	public HashSet<RDBMSCheckConstraint> getDependenciesForCurrentDataSource() {
 		// TODO Auto-generated method stub
 		if(currentDataSource !=null){
-			return checkconstraints.get(currentDataSource.getName());
+			return checkconstraints.get(currentDataSource.getSourceID());
 		}else{
 			return new HashSet<RDBMSCheckConstraint>();
 		}
@@ -172,8 +173,8 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	public Collection<RDBMSCheckConstraint> getAssertions() {
 		
 		Vector<RDBMSCheckConstraint> assertions = new Vector<RDBMSCheckConstraint>();
-		Set<String>keys = checkconstraints.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = checkconstraints.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(it.next());
 			assertions.addAll(aux);
@@ -188,10 +189,10 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	 * @param a the RDBMSInclusionDependency to add
 	 */
 	public boolean insertAssertion(RDBMSCheckConstraint a) {
-		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(currentDataSource.getName());
+		HashSet<RDBMSCheckConstraint> aux = checkconstraints.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				checkconstraints.put(currentDataSource.getName(), aux);
+				checkconstraints.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -205,7 +206,7 @@ AbstractConstraintAssertionController<RDBMSCheckConstraint> {
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSCheckConstraint> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSCheckConstraint> getAssertionsForDataSource(URI uri) {
 	
 		 return checkconstraints.get(uri); 
 	}

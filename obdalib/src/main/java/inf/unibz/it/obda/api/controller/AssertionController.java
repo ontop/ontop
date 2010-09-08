@@ -12,9 +12,11 @@ public abstract class AssertionController<AssertionClass extends Assertion> impl
 	private ArrayList<AssertionClass>					assertions	= new ArrayList<AssertionClass>();
 
 	private ArrayList<AssertionControllerListener<AssertionClass>>	listeners	= new ArrayList<AssertionControllerListener<AssertionClass>>();
-
+	
 	public abstract AssertionController<AssertionClass> getInstance();
-
+	
+	public AssertionController(){
+	}
 	
 	public Collection<AssertionClass> getAssertions() {
 		return assertions;
@@ -105,5 +107,4 @@ public abstract class AssertionController<AssertionClass extends Assertion> impl
 			listener.assertionsCleared();
 		}
 	}
-
 }

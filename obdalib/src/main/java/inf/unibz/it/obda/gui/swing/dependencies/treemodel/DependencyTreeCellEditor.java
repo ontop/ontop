@@ -16,6 +16,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseEvent;
+import java.net.URI;
 import java.util.EventObject;
 import java.util.Vector;
 
@@ -309,7 +310,7 @@ public class DependencyTreeCellEditor implements TreeCellEditor {
 	private AbstractDependencyAssertion parseInput(){
 	
 		String text =editor.getText();
-		String uri = apic.getDatasourcesController().getCurrentDataSource().getName();
+		URI uri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		if(dependencyAssertion.equals(RDBMSInclusionDependency.INCLUSIONDEPENDENCY)){
 			try {
 				return DependencyAssertionRenderer.getInstance().renderSingleRBMSInclusionDependency(text, uri);

@@ -9,6 +9,7 @@ import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.dependencies.miner.exception.InvalidSyntaxException;
+import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.ucq.domain.QueryTerm;
@@ -17,6 +18,7 @@ import inf.unibz.it.ucq.typing.CheckOperationTerm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import org.antlr.runtime.ANTLRInputStream;
@@ -59,10 +61,11 @@ public static ConstraintsRenderer getInstance(){
  * @return a functional dependency assertion
  * @throws Exception if the String does not represent a valid functional dependency assertion
  */
-public RDBMSCheckConstraint renderSingleCeckConstraint(String input, String uri) throws Exception{
+public RDBMSCheckConstraint renderSingleCeckConstraint(String input, URI uri) throws Exception{
 	
 	DatasourcesController con = apic.getDatasourcesController();
-	con.setCurrentDataSource(uri);
+	DataSource ds =con.getAllSources().get(uri);
+	con.setCurrentDataSource(ds.getSourceID());
 	AbstractConstraintAssertion aux = parse(input);
 	if(aux != null){
 		if(aux instanceof RDBMSCheckConstraint){
@@ -83,9 +86,10 @@ public RDBMSCheckConstraint renderSingleCeckConstraint(String input, String uri)
  * @return a inclusion dependency assertion
  * @throws Exception if the String does not represent a valid inclusion dependency assertion
  */
-public RDBMSPrimaryKeyConstraint renderSingleRDBMSPrimaryKeyConstraint(String input, String uri) throws Exception{
+public RDBMSPrimaryKeyConstraint renderSingleRDBMSPrimaryKeyConstraint(String input, URI uri) throws Exception{
 	DatasourcesController con = apic.getDatasourcesController();
-	con.setCurrentDataSource(uri);
+	DataSource ds =con.getAllSources().get(uri);
+	con.setCurrentDataSource(ds.getSourceID());
 	AbstractConstraintAssertion aux = parse(input);
 	if(aux != null){
 		if(aux instanceof RDBMSPrimaryKeyConstraint){
@@ -106,9 +110,10 @@ public RDBMSPrimaryKeyConstraint renderSingleRDBMSPrimaryKeyConstraint(String in
  * @return a disjointness dependency assertion
  * @throws Exception if the String does not represent a valid disjointness dependency assertion
  */
-public RDBMSForeignKeyConstraint renderSingleRDBMSForeignKeyConstraint(String input, String uri) throws Exception{
+public RDBMSForeignKeyConstraint renderSingleRDBMSForeignKeyConstraint(String input, URI uri) throws Exception{
 	DatasourcesController con = apic.getDatasourcesController();
-	con.setCurrentDataSource(uri);
+	DataSource ds =con.getAllSources().get(uri);
+	con.setCurrentDataSource(ds.getSourceID());
 	AbstractConstraintAssertion aux = parse(input);
 	if(aux != null){
 		if(aux instanceof RDBMSForeignKeyConstraint){
@@ -125,7 +130,7 @@ public RDBMSForeignKeyConstraint renderSingleRDBMSForeignKeyConstraint(String in
 public RDBMSCheckConstraint createRDBMSCheckConstraint(String id, List<CheckOperationTerm> list) throws Exception{
 	
 	DatasourcesController dscon = apic.getDatasourcesController();
-	String currentds = dscon.getCurrentDataSource().getName();
+	URI currentds = dscon.getCurrentDataSource().getSourceID();
 	
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom = con.getMapping(currentds, id);
@@ -139,7 +144,7 @@ public RDBMSCheckConstraint createRDBMSCheckConstraint(String id, List<CheckOper
 public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, String id2, List<QueryTerm> l1, List<QueryTerm> l2) throws Exception{
 	
 	DatasourcesController dscon = apic.getDatasourcesController();
-	String currentds = dscon.getCurrentDataSource().getName();
+	URI currentds = dscon.getCurrentDataSource().getSourceID();
 	
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom1 = con.getMapping(currentds, id1);
@@ -153,7 +158,7 @@ public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, Str
 
 public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List<QueryTerm> list) throws Exception{
 	DatasourcesController dscon = apic.getDatasourcesController();
-	String currentds = dscon.getCurrentDataSource().getName();
+	URI currentds = dscon.getCurrentDataSource().getSourceID();
 	
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom1 = con.getMapping(currentds, id);
@@ -167,7 +172,7 @@ public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List
 
 public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List<QueryTerm> list) throws Exception{
 	DatasourcesController dscon = apic.getDatasourcesController();
-	String currentds = dscon.getCurrentDataSource().getName();
+	URI currentds = dscon.getCurrentDataSource().getSourceID();
 	
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom1 = con.getMapping(currentds, id);
@@ -187,9 +192,10 @@ public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List
  * @return a disjointness dependency assertion
  * @throws Exception if the String does not represent a valid disjointness dependency assertion
  */
-public RDBMSUniquenessConstraint renderSingleRDBMSUniquenessConstraint(String input, String uri) throws Exception{
+public RDBMSUniquenessConstraint renderSingleRDBMSUniquenessConstraint(String input, URI uri) throws Exception{
 	DatasourcesController con = apic.getDatasourcesController();
-	con.setCurrentDataSource(uri);
+	DataSource ds =con.getAllSources().get(uri);
+	con.setCurrentDataSource(ds.getSourceID());
 	AbstractConstraintAssertion aux = parse(input);
 	if(aux != null){
 		if(aux instanceof RDBMSUniquenessConstraint){

@@ -15,9 +15,13 @@ package inf.unibz.it.ucq.domain;
 
 
 import inf.unibz.it.dl.domain.DataProperty;
+import inf.unibz.it.dl.domain.NamedConcept;
+import inf.unibz.it.dl.domain.NamedPredicate;
 import inf.unibz.it.dl.domain.NamedProperty;
 import inf.unibz.it.dl.domain.ObjectProperty;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class BinaryQueryAtom extends QueryAtom {
@@ -31,10 +35,6 @@ public class BinaryQueryAtom extends QueryAtom {
 		this.term2 = term2;
 	}
 	
-	@Override
-	public String getName() {
-		return relation.getName();
-	}
 
 	@Override
 	public ArrayList<QueryTerm> getTerms() {
@@ -44,10 +44,13 @@ public class BinaryQueryAtom extends QueryAtom {
 		return terms;
 	}
 
-	@Override
-	public String toString() {
-		return relation.toString() + "(" + term1.toString()+ "," + term2.toString() + ")";
-	}
+//	@Override
+//	public String toString() {
+//		URI uri = relation.getUri();
+//		String pref = relation.getNamespacePrefix();
+//		String name = uri.getFragment();
+//		return pref+":"+ name + "(" + term1.toString()+ "," + term2.toString() + ")";
+//	}
 
 	@Override
 	public BinaryQueryAtom clone() {
@@ -57,6 +60,10 @@ public class BinaryQueryAtom extends QueryAtom {
 			return new BinaryQueryAtom(((ObjectProperty)relation).clone(), term1.clone(), term2.clone());
 		return null;
 	}
-	
 
+
+	@Override
+	public NamedPredicate getNamedPredicate() {
+		return relation;
+	}
 }

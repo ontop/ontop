@@ -5,6 +5,7 @@ import inf.unibz.it.obda.domain.SourceQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.ucq.domain.QueryTerm;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	/**
 	 * The data source to which the assertions is associated
 	 */
-	private String datasourceUri = null;
+	private URI datasourceUri = null;
 	
 	
 	/**
@@ -63,7 +64,7 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	 * @param terms1	list of terms associated to the first query
 	 * @param terms2	list of terms associated to the second query
 	 */
-	public RDBMSDisjointnessDependency(String uri,String id1, String id2, RDBMSSQLQuery q1, RDBMSSQLQuery q2,
+	public RDBMSDisjointnessDependency(URI uri,String id1, String id2, RDBMSSQLQuery q1, RDBMSSQLQuery q2,
 			List<QueryTerm> terms1, List<QueryTerm> terms2){
 		
 		datasourceUri = uri;
@@ -166,7 +167,7 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	 * Returns the associated data source URI
 	 * @return URI as String object
 	 */
-	public String getDatasourceUri() {
+	public URI getDatasourceUri() {
 		return datasourceUri;
 	}
 

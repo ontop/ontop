@@ -8,6 +8,7 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.dependencies.miner.exception.InvalidSyntaxException;
+import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.ucq.domain.QueryTerm;
@@ -15,6 +16,7 @@ import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -67,10 +69,11 @@ public class DependencyAssertionRenderer {
 	 * @return a functional dependency assertion
 	 * @throws Exception if the String does not represent a valid functional dependency assertion
 	 */
-	public RDBMSFunctionalDependency renderSingleRDBMSFunctionalDependency(String input, String uri) throws Exception{
+	public RDBMSFunctionalDependency renderSingleRDBMSFunctionalDependency(String input, URI uri) throws Exception{
 		
 		DatasourcesController con = apic.getDatasourcesController();
-		con.setCurrentDataSource(uri);
+		DataSource ds = con.getAllSources().get(uri);
+		con.setCurrentDataSource(ds.getSourceID());
 		Vector<AbstractDependencyAssertion> aux = parse(input);
 		if(aux != null){
 			AbstractDependencyAssertion ass = aux.get(0);
@@ -92,9 +95,10 @@ public class DependencyAssertionRenderer {
 	 * @return a inclusion dependency assertion
 	 * @throws Exception if the String does not represent a valid inclusion dependency assertion
 	 */
-	public RDBMSInclusionDependency renderSingleRBMSInclusionDependency(String input, String uri) throws Exception{
+	public RDBMSInclusionDependency renderSingleRBMSInclusionDependency(String input, URI uri) throws Exception{
 		DatasourcesController con = apic.getDatasourcesController();
-		con.setCurrentDataSource(uri);
+		DataSource ds = con.getAllSources().get(uri);
+		con.setCurrentDataSource(ds.getSourceID());
 		Vector<AbstractDependencyAssertion> aux = parse(input);
 		if(aux != null){
 			AbstractDependencyAssertion ass = aux.get(0);
@@ -116,9 +120,10 @@ public class DependencyAssertionRenderer {
 	 * @return a disjointness dependency assertion
 	 * @throws Exception if the String does not represent a valid disjointness dependency assertion
 	 */
-	public RDBMSDisjointnessDependency renderSingleRDBMSDisjoinednessAssertion(String input, String uri) throws Exception{
+	public RDBMSDisjointnessDependency renderSingleRDBMSDisjoinednessAssertion(String input, URI uri) throws Exception{
 		DatasourcesController con = apic.getDatasourcesController();
-		con.setCurrentDataSource(uri);
+		DataSource ds = con.getAllSources().get(uri);
+		con.setCurrentDataSource(ds.getSourceID());
 		Vector<AbstractDependencyAssertion> aux = parse(input);
 		if(aux != null){
 			AbstractDependencyAssertion ass = aux.get(0);
@@ -243,7 +248,7 @@ public class DependencyAssertionRenderer {
 	public RDBMSInclusionDependency createAndValidateRDBMSInclusionDependency(String id1, String id2, Vector<QueryTerm> t1, Vector<QueryTerm> t2){
 		
 		DatasourcesController dscon = apic.getDatasourcesController();
-		String currentds = dscon.getCurrentDataSource().getName();
+		URI currentds = dscon.getCurrentDataSource().getSourceID();
 		
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);
@@ -264,7 +269,7 @@ public class DependencyAssertionRenderer {
 	public RDBMSFunctionalDependency createAndValidateRDBMSFunctionalDependency(String id1, String id2, Vector<QueryTerm> t1, Vector<QueryTerm> t2){
 		
 		DatasourcesController dscon = apic.getDatasourcesController();
-		String currentds = dscon.getCurrentDataSource().getName();
+		URI currentds = dscon.getCurrentDataSource().getSourceID();
 		
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);
@@ -285,7 +290,7 @@ public class DependencyAssertionRenderer {
 	public RDBMSDisjointnessDependency createAndValidateRDBMSDisjointnessDependency(String id1, String id2, Vector<QueryTerm> t1, Vector<QueryTerm> t2){
 		
 		DatasourcesController dscon = apic.getDatasourcesController();
-		String currentds = dscon.getCurrentDataSource().getName();
+		URI currentds = dscon.getCurrentDataSource().getSourceID();
 		
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);

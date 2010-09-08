@@ -61,7 +61,7 @@ public class SQLQueryValidator extends QueryValidator {
 
 		try {
 			modelfactory = JDBCConnectionManager.getJDBCConnectionManager();
-			if(!modelfactory.isConnectionAlive(source.getUri())){
+			if(!modelfactory.isConnectionAlive(source.getSourceID())){
 				modelfactory.createConnection(source);
 			}
 			if (model != null) {
@@ -69,7 +69,7 @@ public class SQLQueryValidator extends QueryValidator {
 				IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) model;
 				rstm.close();
 			}
-			ResultSet set = modelfactory.executeQuery(source.getUri(), sourceQuery.getInputQuString(), source);
+			ResultSet set = modelfactory.executeQuery(source.getSourceID(), sourceQuery.getInputQuString(), source);
 			model = new IncrementalResultSetTableModel(set);
 			return true;
 

@@ -1,0 +1,24 @@
+Changes, updates and bugfixes in obdalib-owlapi
+
+Changes in classes OBDAPluginController and OWLAPICoupler.
+The change in these classes are mainly due to the synchronization part. This includes 
+the usage of the new classes and an implementation of a few new methods especially 
+the coupler where we added some new function for the usage of the prefixes and the 
+interaction with the prefix manager. 
+
+New Classes:
+Furthermore for the implemention of the synchronisation between ontology and mappings we had to
+add a few new classes. 
+The OBDAPluginDataManager is only a slightly modification of the original one. The only new thing
+is that when loading an obda file it looks for some defined prefixes which then are added to the
+prefix Manager.
+The SynchronizedMappingController is responsible for appling the changes done in the onotlogy
+the mappings. The changes we are talking about are the adding, deleting and renaming entities. 
+This new controller listens to such Change Events and applies them to the mappings.
+
+Note: 
+Since we have no running scenario, with which we could test the new implementations, the whole new 
+is untested, so the new classes have to used with care.
+
+TODO:
+Test the new classes and esure nothing is missing.

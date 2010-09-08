@@ -10,11 +10,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.constraints.parser.ConstraintsRenderer;
 import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.domain.VariableTerm;
 public class RDBMSPrimaryKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSPrimaryKeyConstraint>{
+
+	public RDBMSPrimaryKeyConstraintXMLCodec() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	private static final String	TAG	= "RDBMSPrimaryKeyConstraint";
 	private static final String	V1	= "variable";
@@ -53,7 +59,7 @@ public class RDBMSPrimaryKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSPr
 		while(it.hasNext()){
 			QueryTerm t = it.next();
 			Element e = createElement(V1);
-			e.setAttribute("name", t.getName());
+			e.setAttribute("name", t.getVariableName());
 			map.appendChild(e);
 		}
 		element.appendChild(map);

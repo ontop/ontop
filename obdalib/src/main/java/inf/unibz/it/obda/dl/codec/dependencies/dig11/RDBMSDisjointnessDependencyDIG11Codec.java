@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.dl.codec.dependencies.dig11;
 
 import inf.unibz.it.dl.codec.dig11.AssertionDIG11Codec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.dependencies.parser.DependencyAssertionRenderer;
 import inf.unibz.it.ucq.domain.QueryTerm;
@@ -17,6 +18,11 @@ import org.w3c.dom.NodeList;
 
 public class RDBMSDisjointnessDependencyDIG11Codec extends
 AssertionDIG11Codec<RDBMSDisjointnessDependency> {
+
+	public RDBMSDisjointnessDependencyDIG11Codec() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	private static final String	TAG	= "RDBMSDisjointnessDependency";
 	private static final String	PARAMETER1	= "parameter1";
@@ -66,7 +72,7 @@ AssertionDIG11Codec<RDBMSDisjointnessDependency> {
 		Iterator<QueryTerm> it = one.iterator();
 		while(it.hasNext()){
 			Element variable = createElement(VARIABLE);
-			variable.setAttribute("name", it.next().getName());
+			variable.setAttribute("name", it.next().getVariableName());
 			parameter1.appendChild(variable);
 		}
 		element.appendChild(parameter1);
@@ -77,7 +83,7 @@ AssertionDIG11Codec<RDBMSDisjointnessDependency> {
 		Iterator<QueryTerm> it2 = two.iterator();
 		while(it2.hasNext()){
 			Element variable = createElement(VARIABLE);
-			variable.setAttribute("name", it2.next().getName());
+			variable.setAttribute("name", it2.next().getVariableName());
 			parameter2.appendChild(variable);
 		}
 		element.appendChild(parameter2);

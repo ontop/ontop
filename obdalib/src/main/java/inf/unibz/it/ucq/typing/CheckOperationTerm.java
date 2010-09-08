@@ -28,6 +28,6 @@ public class CheckOperationTerm {
 	}
 	
 	public String toString(){
-		return term1.getName() + operator + term2.getName();
+		return term1.getVariableName() + operator + term2.getVariableName();
 	}
 }

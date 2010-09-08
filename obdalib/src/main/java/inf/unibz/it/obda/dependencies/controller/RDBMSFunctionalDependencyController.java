@@ -6,6 +6,7 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.domain.DataSource;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,13 +29,13 @@ public class RDBMSFunctionalDependencyController extends
 	AbstractDependencyAssertionController<RDBMSFunctionalDependency> {
 	
 	private DataSource currentDataSource = null;
-	private HashMap<String, HashSet<RDBMSFunctionalDependency>> functionalDependencies= null;
+	private HashMap<URI, HashSet<RDBMSFunctionalDependency>> functionalDependencies= null;
 	
 	/**
 	 * Creates a new instance of the RDBMSFunctionalDependencyController.
 	 */
 	public RDBMSFunctionalDependencyController (){
-		functionalDependencies = new HashMap<String, HashSet<RDBMSFunctionalDependency>>();
+		functionalDependencies = new HashMap<URI, HashSet<RDBMSFunctionalDependency>>();
 
 	}
 	
@@ -71,10 +72,10 @@ public class RDBMSFunctionalDependencyController extends
 		if(a == null){
 			return;
 		}
-		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			aux.add(a);
-			functionalDependencies.put(currentDataSource.getName(), aux);
+			functionalDependencies.put(currentDataSource.getSourceID(), aux);
 			fireAssertionAdded(a);
 		}
 	}
@@ -85,10 +86,10 @@ public class RDBMSFunctionalDependencyController extends
 	 */
 	@Override
 	public void removeAssertion(RDBMSFunctionalDependency a) {
-		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			aux.remove(a);
-			functionalDependencies.put(currentDataSource.getName(), aux);
+			functionalDependencies.put(currentDataSource.getSourceID(), aux);
 			fireAssertionRemoved(a);
 		}
 	}
@@ -99,14 +100,14 @@ public class RDBMSFunctionalDependencyController extends
 	 * event to remove also the currently shown assertion from the UI.
 	 */
 	public void alldatasourcesDeleted() {
-		HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(currentDataSource.getSourceID());
 		if(list != null){
 			Iterator<RDBMSFunctionalDependency> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		functionalDependencies = new HashMap<String, HashSet<RDBMSFunctionalDependency>>();
+		functionalDependencies = new HashMap<URI, HashSet<RDBMSFunctionalDependency>>();
 		
 	}
 
@@ -120,14 +121,14 @@ public class RDBMSFunctionalDependencyController extends
 		currentDataSource = currentsource;
 		if(previousdatasource != currentsource){
 			if(previousdatasource != null){
-				HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(previousdatasource.getName());
+				HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(previousdatasource.getSourceID());
 				Iterator<RDBMSFunctionalDependency> it = list.iterator();
 				while(it.hasNext()){
 					fireAssertionRemoved(it.next());
 				}
 			}
 			if(currentsource != null){
-				HashSet<RDBMSFunctionalDependency> list1 = functionalDependencies.get(currentsource.getName());
+				HashSet<RDBMSFunctionalDependency> list1 = functionalDependencies.get(currentsource.getSourceID());
 				Iterator<RDBMSFunctionalDependency> it1 = list1.iterator();
 				while(it1.hasNext()){
 					fireAssertionAdded(it1.next());
@@ -142,7 +143,7 @@ public class RDBMSFunctionalDependencyController extends
 	 */
 	public void datasourceAdded(DataSource source) {
 		
-		functionalDependencies.put(source.getName(), new HashSet<RDBMSFunctionalDependency>());
+		functionalDependencies.put(source.getSourceID(), new HashSet<RDBMSFunctionalDependency>());
 	}
 
 	/**
@@ -153,13 +154,13 @@ public class RDBMSFunctionalDependencyController extends
 	public void datasourceDeleted(DataSource source) {
 		
 		if(currentDataSource == source){
-			HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(currentDataSource.getName());
+			HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(currentDataSource.getSourceID());
 			Iterator<RDBMSFunctionalDependency> it = list.iterator();
 			while(it.hasNext()){
 				fireAssertionRemoved(it.next());
 			}
 		}
-		functionalDependencies.remove(source.getName());
+		functionalDependencies.remove(source.getSourceID());
 	}
 
 	/**
@@ -170,7 +171,7 @@ public class RDBMSFunctionalDependencyController extends
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(oldname);
 		functionalDependencies.remove(oldname);
-		functionalDependencies.put(currendata.getName(), aux);
+		functionalDependencies.put(currendata.getSourceID(), aux);
 		currentDataSource = currendata;
 		
 	}
@@ -182,7 +183,7 @@ public class RDBMSFunctionalDependencyController extends
 	@Override
 	public HashSet<RDBMSFunctionalDependency> getDependenciesForCurrentDataSource() {
 		if(currentDataSource !=null){
-			return functionalDependencies.get(currentDataSource.getName());
+			return functionalDependencies.get(currentDataSource.getSourceID());
 		}else{
 			return  new HashSet<RDBMSFunctionalDependency>();
 		}
@@ -195,8 +196,8 @@ public class RDBMSFunctionalDependencyController extends
 	public Collection<RDBMSFunctionalDependency> getAssertions() {
 		
 		Vector<RDBMSFunctionalDependency> assertions = new Vector<RDBMSFunctionalDependency>();
-		Set<String>keys = functionalDependencies.keySet();
-		Iterator<String> it = keys.iterator();
+		Set<URI>keys = functionalDependencies.keySet();
+		Iterator<URI> it = keys.iterator();
 		while(it.hasNext()){
 			HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(it.next());
 			assertions.addAll(aux);
@@ -211,10 +212,10 @@ public class RDBMSFunctionalDependencyController extends
 	 * @param a the RDBMSFunctionalDependency to add
 	 */
 	public boolean insertAssertion(RDBMSFunctionalDependency a) {
-		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(currentDataSource.getName());
+		HashSet<RDBMSFunctionalDependency> aux = functionalDependencies.get(currentDataSource.getSourceID());
 		if(aux != null){
 			if(aux.add(a)){
-				functionalDependencies.put(currentDataSource.getName(), aux);
+				functionalDependencies.put(currentDataSource.getSourceID(), aux);
 				return true;
 			}else{
 				return false;
@@ -227,7 +228,7 @@ public class RDBMSFunctionalDependencyController extends
 	 * Returns all RDBMSDisjointnessDependency for the given data source uri
 	 */
 	@Override
-	public HashSet<RDBMSFunctionalDependency> getAssertionsForDataSource(String uri) {
+	public HashSet<RDBMSFunctionalDependency> getAssertionsForDataSource(URI uri) {
 		
 		return functionalDependencies.get(uri);
 	}

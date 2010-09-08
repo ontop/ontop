@@ -14,6 +14,7 @@ package inf.unibz.it.obda.api.io;
 
 import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
+import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
@@ -22,6 +23,7 @@ import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.io.FileUtils;
 import inf.unibz.it.utils.xml.XMLUtils;
@@ -59,28 +61,34 @@ public class DataManager {
 	public static int													CURRENT_OBDA_FILE_VERSION_MAJOR	= 1;
 	public static int													CURRENT_OBDA_FILE_VERSION_MINOR	= 0;
 
-	private HashMap<Class<Assertion>, AssertionController<Assertion>>	assertionControllers			= null;
+	protected HashMap<Class<Assertion>, AssertionController<Assertion>>	assertionControllers			= null;
 
-	private HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>		assertionXMLCodecs				= null;
+	protected HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>		assertionXMLCodecs				= null;
 
 	/***
 	 * The XML Codec used to save/load datasources
 	 */
 	DatasourceXMLCodec													dsCodec							= new DatasourceXMLCodec();
 
-	private DatasourcesController										dscontroller					= null;
+	protected DatasourcesController										dscontroller					= null;
 
-	private MappingController											mapcontroller					= null;
+	protected MappingController											mapcontroller					= null;
 
-	private QueryController												queryController					= null;
+	protected QueryController												queryController					= null;
 
+	protected PrefixManager			prefixManager = null;
+	
+	protected APIController apic = null;
+	
 	Logger																log								= LoggerFactory
 																												.getLogger(DataManager.class);
 
-	public DataManager(DatasourcesController dscontroller, MappingController mapcontroller, QueryController queryController) {
-		this.dscontroller = dscontroller;
-		this.mapcontroller = mapcontroller;
-		this.queryController = queryController;
+	public DataManager(APIController apic, PrefixManager pref) {
+		this.apic = apic;
+		this.dscontroller = apic.getDatasourcesController();
+		this.mapcontroller = apic.getMappingController();
+		this.queryController = apic.getQueryController();
+		this.prefixManager = pref;
 		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 	}
@@ -167,7 +175,20 @@ public class DataManager {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
 		Element root = doc.createElement("OBDA");
-		root.setAttribute(FILE_VERSION_ATTRIBUTE, CURRENT_OBDA_FILE_VERSION_MAJOR + "." + CURRENT_OBDA_FILE_VERSION_MINOR);
+		Set<String> prefs = prefixManager.getPrefixMap().keySet();
+		Iterator<String> sit = prefs.iterator();
+		while(sit.hasNext()){
+			String key = sit.next();
+			if(key.equals("version")){
+				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
+			}else if(key.equals("xml:base")){
+				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
+			}else if(key.equals("xmlns")){
+				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
+			}else{
+				root.setAttribute("xmlns:"+key, prefixManager.getURIForPrefix(key).toString());
+			}
+		}
 		doc.appendChild(root);
 
 		mapcontroller.dumpMappingsToXML(root);
@@ -191,15 +212,15 @@ public class DataManager {
 			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
 			if (controller instanceof AbstractDependencyAssertionController) {
 				AbstractDependencyAssertionController depcon = (AbstractDependencyAssertionController) controller;
-				HashMap<String, DataSource> sources = dscontroller.getAllSources();
-				Set<String> ds = sources.keySet();
-				Iterator<String> it = ds.iterator();
+				HashMap<URI, DataSource> sources = dscontroller.getAllSources();
+				Set<URI> ds = sources.keySet();
+				Iterator<URI> it = ds.iterator();
 				while (it.hasNext()) {
-					String dsName = it.next();
+					URI dsName = it.next();
 					Collection<Assertion> assertions = depcon.getAssertionsForDataSource(dsName);
 					if (assertions != null && assertions.size() > 0) {
 						Element controllerElement = doc.createElement(depcon.getElementTag());
-						controllerElement.setAttribute("datasource_uri", dsName);
+						controllerElement.setAttribute("datasource_uri", dsName.toString());
 						for (Assertion assertion : assertions) {
 							Element assertionElement = xmlCodec.encode(assertion);
 							doc.adoptNode(assertionElement);
@@ -210,15 +231,15 @@ public class DataManager {
 				}
 			} else if (controller instanceof AbstractConstraintAssertionController) {
 				AbstractConstraintAssertionController constcon = (AbstractConstraintAssertionController) controller;
-				HashMap<String, DataSource> sources = dscontroller.getAllSources();
-				Set<String> ds = sources.keySet();
-				Iterator<String> it = ds.iterator();
+				HashMap<URI, DataSource> sources = dscontroller.getAllSources();
+				Set<URI> ds = sources.keySet();
+				Iterator<URI> it = ds.iterator();
 				while (it.hasNext()) {
-					String dsName = it.next();
+					URI dsName = it.next();
 					Collection<Assertion> assertions = constcon.getAssertionsForDataSource(dsName);
 					if (assertions != null && assertions.size() > 0) {
 						Element controllerElement = doc.createElement(constcon.getElementTag());
-						controllerElement.setAttribute("datasource_uri", dsName);
+						controllerElement.setAttribute("datasource_uri", dsName.toString());
 						for (Assertion assertion : assertions) {
 							Element assertionElement = xmlCodec.encode(assertion);
 							doc.adoptNode(assertionElement);
@@ -426,13 +447,20 @@ public class DataManager {
 					// FOUND Datasources BLOCK
 					System.err
 							.println("WARNING: Loading a datasource using the old deprecated method. Update your .obda file by saving it again.");
-					dscontroller.loadDatasourceFromXML(node);
+//					dscontroller.loadDatasourceFromXML(node);
+					DatasourceXMLCodec codec = new DatasourceXMLCodec();
+					DataSource source = codec.decode(node);
+					dscontroller.addDataSource(source);
 
 				}
 				if ((major > 0) && (node.getNodeName().equals(dsCodec.getElementTag()))) {
 					// FOUND Datasources BLOCK
 
 					DataSource source = dsCodec.decode(node);
+					URI uri= apic.getCurrentOntologyURI();
+					if(uri != null){
+						source.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,uri.toString());
+					}
 					dscontroller.addDataSource(source);
 				}
 
@@ -465,7 +493,7 @@ public class DataManager {
 					if (controller instanceof AbstractDependencyAssertionController) {
 						if (node.getNodeName().equals(controller.getElementTag())) {
 							String ds = node.getAttribute("datasource_uri");
-							dscontroller.setCurrentDataSource(ds);
+							dscontroller.setCurrentDataSource(URI.create(ds));
 							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
 							for (int j = 0; j < childrenAssertions.getLength(); j++) {
 								Element assertionElement = (Element) childrenAssertions.item(j);
@@ -484,7 +512,7 @@ public class DataManager {
 					} else if (controller instanceof AbstractConstraintAssertionController) {
 						if (node.getNodeName().equals(controller.getElementTag())) {
 							String ds = node.getAttribute("datasource_uri");
-							dscontroller.setCurrentDataSource(ds);
+							dscontroller.setCurrentDataSource(URI.create(ds));
 							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
 							for (int j = 0; j < childrenAssertions.getLength(); j++) {
 								Element assertionElement = (Element) childrenAssertions.item(j);

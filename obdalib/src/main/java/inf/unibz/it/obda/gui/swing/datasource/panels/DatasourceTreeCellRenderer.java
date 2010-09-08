@@ -19,10 +19,13 @@ import inf.unibz.it.obda.gui.IconLoader;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.net.URI;
 
 import javax.swing.Icon;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.MutableTreeNode;
 
 public class DatasourceTreeCellRenderer extends DefaultTreeCellRenderer {
 		Icon dbms_source_icon = null;
@@ -52,19 +55,21 @@ public class DatasourceTreeCellRenderer extends DefaultTreeCellRenderer {
                         hasFocus);
         if (leaf) {
             setIcon(dbms_source_icon);
-            DataSource ds = dsc.getDataSource(value.toString());
-            if (ds != null) {
-            	if (!ds.isRegistred()) {
-            		setForeground(Color.RED);
-            		setToolTipText("This datasource is not yet registred with the server.");
-            		          		
-            	} else if (!ds.isEnabled()) {
-            		setForeground(Color.GRAY);
-            		setToolTipText("This datasource is disabled");
-            	} else {
-            		setForeground(Color.BLACK);
-            	}
-			}
+            if(value !=null && ((DefaultMutableTreeNode)value).getUserObject() != null){
+	            DataSource ds = dsc.getDataSource(URI.create(value.toString()));
+	            if (ds != null) {
+	            	if (!ds.isRegistred()) {
+	            		setForeground(Color.RED);
+	            		setToolTipText("This datasource is not yet registred with the server.");
+	            		          		
+	            	} else if (!ds.isEnabled()) {
+	            		setForeground(Color.GRAY);
+	            		setToolTipText("This datasource is disabled");
+	            	} else {
+	            		setForeground(Color.BLACK);
+	            	}
+				}
+        	}
         } else {
         	setIcon(IconLoader.getImageIcon("images/metadata.gif"));
         }

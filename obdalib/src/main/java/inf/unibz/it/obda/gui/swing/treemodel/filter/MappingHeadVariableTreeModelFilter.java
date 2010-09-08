@@ -45,7 +45,7 @@ public class MappingHeadVariableTreeModelFilter implements
 
 		for (int i = 0; i < headAtom.size(); i++) {
 			QueryAtom atom = headAtom.get(i);
-			if (atom.getName().indexOf(srtHeadVariableFilter) != -1) {
+			if (atom.getNamedPredicate().getUri().toString().indexOf(srtHeadVariableFilter) != -1) {
 				filterValue = true;
 			}
 			ArrayList<QueryTerm> terms = atom.getTerms();
