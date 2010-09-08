@@ -3,13 +3,13 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.0.1-SNAPSHOT</version>
-		<relativePath>../obdalib-parent</relativePath>
+		<version>1.0.2-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
-	<name>OBDA Plugin for Protege 4.</name>
+	<name>obdalib-protege4</name>
 	<version>${aversion}</version>
 	<repositories>
 		<!--
@@ -45,7 +45,7 @@
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib</artifactId>
+			<artifactId>obdalib-core</artifactId>
 			<version>${aversion}</version>
 		</dependency>
 		<dependency>
