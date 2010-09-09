@@ -155,7 +155,7 @@ public class OWLAPICoupler implements APICoupler {
 
 	@Override
 	public String getUriForPrefix(String prefix) {
-		if(prefix == ""){
+		if(prefix.equals("")){
 			return apic.getCurrentOntologyURI().toString();
 		}else{
 			return datamanager.getPrefixMap().get(prefix);

@@ -46,13 +46,16 @@ public class OWLAPIController extends APIController {
 
 	public OWLAPIController(OWLOntologyManager owlman, OWLOntology root) {
 		super();
+		mmger = owlman;
+		currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
+		this.root = root;
 		mapcontroller = new SynchronizedMappingController(dscontroller, this);
 		ioManager = new OWLAPIDataManager(this, new PrefixManager());
-		owlman.addOntologyChangeListener((OWLOntologyChangeListener) mapcontroller);
+		apicoupler = new OWLAPICoupler(this, owlman, root,(OWLAPIDataManager) ioManager);
+		setCurrentOntologyURI(root.getURI());
+		setCoupler(apicoupler);
+		
 		try {
-			mmger = owlman;
-			this.root = root;
-			currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
 			setCurrentOntologyURI(root.getURI());	
 			RDBMSForeignKeyConstraintController fkc = new RDBMSForeignKeyConstraintController();
 			addAssertionController(RDBMSForeignKeyConstraint.class, fkc, new RDBMSForeignKeyConstraintXMLCodec());
@@ -69,16 +72,20 @@ public class OWLAPIController extends APIController {
 			RDBMSUniquenessConstraintController uqc = new RDBMSUniquenessConstraintController();
 			addAssertionController(RDBMSUniquenessConstraint.class, uqc, new RDBMSUniquenessConstraintXMLCodec());
 			dscontroller.addDatasourceControllerListener(uqc);
-			apicoupler = new OWLAPICoupler(this, owlman, root,(OWLAPIDataManager) ioManager);
-			setCoupler(apicoupler);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		owlman.addOntologyChangeListener((OWLOntologyChangeListener) mapcontroller);
 	}
 
-
-
+	@Override
+	public void setCurrentOntologyURI(URI uri) {
+		this.currentOntology = mmger.getOntology(uri);
+		super.setCurrentOntologyURI(uri);
+		
+	}
+	
 	@Override
 	public File getCurrentOntologyFile() {
 		currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
