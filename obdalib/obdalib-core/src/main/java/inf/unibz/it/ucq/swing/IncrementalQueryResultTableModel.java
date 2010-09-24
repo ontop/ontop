@@ -1,5 +1,6 @@
 package inf.unibz.it.ucq.swing;
 
+import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.ucq.domain.Constant;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.exception.QueryResultException;
@@ -27,7 +28,7 @@ public class IncrementalQueryResultTableModel implements TableModel{
 	private Vector<TableModelListener> listener = null;
 	
 	boolean isAfterLast = false;
-
+	
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
 	 * private because it is only intended to be used by
