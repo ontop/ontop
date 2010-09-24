@@ -2,6 +2,7 @@ package inf.unibz.it.obda.protege4.gui.view.query;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
+import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
 import inf.unibz.it.obda.api.inference.reasoner.UCQReasoner;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
@@ -12,10 +13,14 @@ import inf.unibz.it.obda.gui.swing.queryhistory.QueryhistoryController;
 import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.protege4.gui.action.query.P4GetDefaultSPARQLPrefixAction;
+import inf.unibz.it.obda.queryanswering.QueryResultSet;
+import inf.unibz.it.obda.queryanswering.Statement;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.domain.UnionOfConjunctiveQueries;
+import inf.unibz.it.ucq.exception.QueryResultException;
 import inf.unibz.it.ucq.parser.sparql.UCQTranslator;
 import inf.unibz.it.ucq.renderer.UCQDatalogStringRenderer;
+import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultTableModel;
 import inf.unibz.it.utils.swing.TextMessageDialog;
 
@@ -246,7 +251,29 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						dialog.setText(st.toString());
 						dialog.setVisible(true);
 					}
-				} else {
+				}else if(reasoner instanceof DataQueryReasoner){
+					
+					try {
+						long startTime = System.currentTimeMillis();
+						QueryhistoryController.getInstance().addQuery(query);
+						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
+								.getModelManager());
+						prefixAction.run();
+						String prefix = (String) prefixAction.getResult();
+						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(prefix + "\n" + query).getResultSet();
+						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result);
+						model.addTableModelListener(panel);
+						rows = model.getRowCount();
+//					JOptionPane.showMessageDialog(null, "Number of tuples retrieved: " + rows);
+						panel_view_results.setTableModel(model);
+						long end = System.currentTimeMillis();
+						time = end - startTime;
+					} catch (Exception e) {
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
+					}
+					
+				}else {
 					JOptionPane
 							.showMessageDialog(null,
 									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
@@ -445,6 +472,38 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
 					}
+				} else if(reasoner instanceof DataQueryReasoner){
+					
+					try {
+						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
+						long startTime = System.currentTimeMillis();
+						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
+								.getModelManager());
+						prefixAction.run();
+						String prefix = (String) prefixAction.getResult();
+//						Query sparqlQuery = QueryFactory.create();
+//						UCQTranslator translator = new UCQTranslator();
+//						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
+						Statement st =  dqr.getStatement(prefix + "\n" + query);
+						String result = st.getRewriting();
+						long end = System.currentTimeMillis();
+						time = end - startTime;
+						TextMessageFrame panel = new TextMessageFrame();
+						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
+						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
+								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+						panel.displaySQL(result);
+						panel.setTitle("Query Unfolding");
+						double aux = time;
+						aux = aux/1000;
+						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
+						panel.updateStatus(msg);
+						panel.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
+					}
+					
 				} else {
 					JOptionPane
 							.showMessageDialog(null,
@@ -523,7 +582,38 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
 					}
-				} else {
+				} else if(reasoner instanceof DataQueryReasoner){
+					DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
+					
+					try {
+						long startTime = System.currentTimeMillis();
+						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
+								.getModelManager());
+						prefixAction.run();
+						String prefix = (String) prefixAction.getResult();
+//						Query sparqlQuery = QueryFactory.create();
+//						UCQTranslator translator = new UCQTranslator();
+//						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
+						Statement st =  dqr.getStatement(prefix + "\n" + query);
+						String result = st.getUnfolding();
+						long end = System.currentTimeMillis();
+						time = end - startTime;
+						TextMessageFrame panel = new TextMessageFrame();
+						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
+						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
+								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+						panel.displaySQL(result);
+						panel.setTitle("Query Unfolding");
+						double aux = time;
+						aux = aux/1000;
+						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
+						panel.updateStatus(msg);
+						panel.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
+					}
+				}else {
 					JOptionPane
 							.showMessageDialog(null,
 									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");

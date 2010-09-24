@@ -165,7 +165,19 @@
 			<version>9.0</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+        	<groupId>com.h2database</groupId>
+        	<artifactId>h2</artifactId>
+        	<version>1.0.20070304</version>
+        	<scope>runtime</scope>
+		</dependency>
 
+		<dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.6.1.0</version>
+	</dependency>
+		
 
 		<!--
 			Note the use of "provided" scope. These are only used for compilation
