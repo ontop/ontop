@@ -33,6 +33,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		String pwd = input.getAttribute("databasePassword");
 		String dburl = input.getAttribute("databaseURL");
 		String username = input.getAttribute("databaseUsername");
+		String usage = input.getAttribute("isAboxDump");
 		URI uri = URI.create(id);
 		new_src = new DataSource(uri);
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
@@ -41,7 +42,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, dburl);
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
 		new_src.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, uristring);
-
+		new_src.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, usage);
 		/***
 		 * This if is only done because before, URI and name were used
 		 * interchangable. Since now URI stands for the ontology URI we check if
@@ -71,6 +72,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		String pwd = input.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		String dburl = input.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
 		String username = input.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
+		String usage = input.getParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
 		
 		element.setAttribute("URI", id);
 		element.setAttribute("ontouri",uristring);
@@ -79,6 +81,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		element.setAttribute("databasePassword", pwd);
 		element.setAttribute("databaseURL", dburl);
 		element.setAttribute("databaseUsername", username);
+		element.setAttribute("isAboxDump", usage);
 		return element;
 	}
 

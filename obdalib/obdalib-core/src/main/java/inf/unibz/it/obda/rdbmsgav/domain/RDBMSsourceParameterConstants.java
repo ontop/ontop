@@ -21,5 +21,6 @@ public class RDBMSsourceParameterConstants {
 	public static final String DATABASE_DRIVER = "databaseDriver";
 	public static final String DATABASE_URL = "databaseURL";
 	public static final String ONTOLOGY_URI = "ontouri";
+	public static final String USE_DATASOURCE_FOR_ABOXDUMP = "use_datasource_for_aboxdump";
 	
 }
