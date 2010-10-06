@@ -26,6 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -498,7 +499,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	// @Override
 	public void tableChanged(TableModelEvent e) {
 		Double d = Double.valueOf(execTime / 1000);
-		int rows = ((IncrementalQueryResultTableModel) e.getSource())
+		int rows = ((TableModel) e.getSource())
 				.getRowCount();
 		String s = "Execution time: " + d
 				+ " sec     Number of tuples retrieved: " + rows;

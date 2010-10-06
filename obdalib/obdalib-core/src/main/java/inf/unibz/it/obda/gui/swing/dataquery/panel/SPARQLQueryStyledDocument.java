@@ -150,6 +150,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 						int size = 14;
 						removeDocumentListener(myself);
 						String input = getText(0, getLength());
+						System.out.println();
 
 						// SimpleAttributeSet attributes = new
 						// SimpleAttributeSet();
@@ -248,9 +249,10 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 						List sel_vars = current_query.getResultVars();
 						List sel_uris = current_query.getResultURIs();
 						ArrayList<Node_URI> predicates = new ArrayList<Node_URI>();
-						ArrayList<Node_Literal> concepts = new ArrayList<Node_Literal>();
+						ArrayList<String> concepts = new ArrayList<String>();
 						ArrayList<Node_Literal> constants = new ArrayList<Node_Literal>();
-
+						
+						
 						com.hp.hpl.jena.sparql.syntax.Element pattern = current_query.getQueryPattern();
 						ElementGroup group = (ElementGroup) pattern;
 						List list = group.getElements();
@@ -259,7 +261,6 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 
 							ElementGroup current_group = null;
 							ElementTriplesBlock triplesBock = null;
-
 							if (list.get(k) instanceof ElementGroup) {
 								current_group = (ElementGroup) list.get(k);
 								triplesBock = (ElementTriplesBlock) current_group.getElements().get(0);
@@ -280,7 +281,17 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 								if (p instanceof Node_URI) {
 									Node_URI predicate = (Node_URI) p;
 									if (predicate.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
-										concepts.add((Node_Literal) o);
+										if(o instanceof Node_Literal){
+											Node_Literal lit = (Node_Literal) o;
+											concepts.add(lit.getLiteralValue().toString());
+										}else if(o instanceof Node_URI){
+											Node_URI uri = (Node_URI) o;
+											String localname = uri.getLocalName();
+											concepts.add(localname);
+										}else{
+											attributes.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.RED);
+											return;
+										}
 									} else {
 										predicates.add((Node_URI) p);
 										if (o instanceof Node_Literal) {
@@ -315,8 +326,15 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 							Node_URI pred = pred_it.next();
 							int x = input.indexOf(pred.getLocalName().toString(), 0);
 							while (x != -1) {
-								if (input.charAt(x - 1) == ':') {
-									setCharacterAttributes(x - 1, pred.getLocalName().toString().length() + 1, predicates_styles, false);
+								if(input.charAt(x - 1) == ':'){
+									setCharacterAttributes(x, pred.getLocalName().toString().length(), predicates_styles, false);
+									int b = 1;
+									char ch = input.charAt(x-b);
+									while(ch != ' '){
+										setCharacterAttributes(x-b, pred.getLocalName().toString().length()+b, predicates_styles, false);
+										b++;
+										ch = input.charAt(x-b);
+									}
 								}
 								x = input.indexOf(pred.getLocalName().toString(), x + 1);
 							}
@@ -334,16 +352,25 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 							}
 						}
 						//
-						Iterator<Node_Literal> classes_it = concepts.iterator();
+						Iterator<String> classes_it = concepts.iterator();
 						while (classes_it.hasNext()) {
-							Node_Literal concept = classes_it.next();
-							int x = input.indexOf(concept.getLiteralValue().toString(), 0);
+							String concept = classes_it.next();
+							int x = input.indexOf(concept, 0);
 							while (x != -1) {
 								try {
 									if ((input.charAt(x - 1) == '\'') || (input.charAt(x - 1) == '\"')) {
-										setCharacterAttributes(x, concept.getLiteralValue().toString().length(), classes_styles, false);
+										setCharacterAttributes(x, concept.length(), classes_styles, false);
+									}else if(input.charAt(x - 1) == ':'){
+										setCharacterAttributes(x, concept.length(), classes_styles, false);
+										int b = 1;
+										char ch = input.charAt(x-b);
+										while(ch != ' '){
+											setCharacterAttributes(x-b, concept.length()+b, classes_styles, false);
+											b++;
+											ch = input.charAt(x-b);
+										}
 									}
-									x = input.indexOf(concept.getLiteralValue().toString(), x + 1);
+									x = input.indexOf(concept, x + 1);
 								} catch (StringIndexOutOfBoundsException e) {
 									throw e;
 									//return;
