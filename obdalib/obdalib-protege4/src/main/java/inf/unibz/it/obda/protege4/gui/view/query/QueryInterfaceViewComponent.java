@@ -48,6 +48,7 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntologyChange;
@@ -159,7 +160,26 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
 						e.printStackTrace();
 					}
-				} else {
+				} else if(reasoner instanceof DataQueryReasoner){
+					
+					try {
+						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;	
+						dqr.startProgressMonitor("Counting tuples...");
+						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
+								.getModelManager());
+						prefixAction.run();
+						String prefix = (String) prefixAction.getResult();
+						Statement st =  dqr.getStatement(prefix + "\n" + query);
+						int result = st.getTupleCount();
+						panel.updateStatus(result);
+						dqr.finishProgressMonitor();
+					} catch (Exception e) {
+						JOptionPane
+						.showMessageDialog(null,
+								"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+					}
+					
+				}else {
 					JOptionPane
 							.showMessageDialog(null,
 									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
@@ -255,6 +275,8 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					
 					try {
 						long startTime = System.currentTimeMillis();
+						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
+						rea.startProgressMonitor("Process Query...");
 						QueryhistoryController.getInstance().addQuery(query);
 						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
 								.getModelManager());
@@ -266,6 +288,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						rows = model.getRowCount();
 //					JOptionPane.showMessageDialog(null, "Number of tuples retrieved: " + rows);
 						panel_view_results.setTableModel(model);
+						rea.finishProgressMonitor();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 					} catch (Exception e) {
@@ -477,6 +500,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					try {
 						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
 						long startTime = System.currentTimeMillis();
+						dqr.startProgressMonitor("Process Query...");
 						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
 								.getModelManager());
 						prefixAction.run();
@@ -486,6 +510,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 //						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
 						Statement st =  dqr.getStatement(prefix + "\n" + query);
 						String result = st.getRewriting();
+						dqr.finishProgressMonitor();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 						TextMessageFrame panel = new TextMessageFrame();
@@ -587,6 +612,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					
 					try {
 						long startTime = System.currentTimeMillis();
+						dqr.startProgressMonitor("Process Query...");
 						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
 								.getModelManager());
 						prefixAction.run();
@@ -596,6 +622,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 //						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
 						Statement st =  dqr.getStatement(prefix + "\n" + query);
 						String result = st.getUnfolding();
+						dqr.finishProgressMonitor();
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 						TextMessageFrame panel = new TextMessageFrame();
