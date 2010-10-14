@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.0.2-SNAPSHOT</version>
+		<version>1.0.3-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -11,7 +11,7 @@
 	<packaging>jar</packaging>
 	<name>obdalib-core</name>
 	<url>http://maven.apache.org</url>
-	<version>${aversion}</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
