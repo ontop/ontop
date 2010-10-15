@@ -22,26 +22,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-
-import javax.management.RuntimeErrorException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class DatasourcesController implements OntologyControllerListener {
 
-	private static DatasourcesController				instance			= null;
-
 	private DatasourceXMLCodec							codec				= new DatasourceXMLCodec();
-
-	// public synchronized static DatasourcesController getInstance() {
-	// if (instance == null) {
-	// instance = new DatasourcesController();
-	// }
-	// return instance;
-	// }
 
 	private HashMap<URI, DataSource>					datasources			= null;
 
@@ -50,8 +38,6 @@ public class DatasourcesController implements OntologyControllerListener {
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
 
 	private DataSource									currentdatasource	= null;
-	
-	// private APIController obdacont = null;
 
 	public DatasourcesController() {
 
@@ -97,12 +83,6 @@ public class DatasourcesController implements OntologyControllerListener {
 		Element domDatasource = codec.encode(source);
 		doc.adoptNode(domDatasource);
 		root.appendChild(domDatasource);
-
-		// Element datasourceelement = doc.createElement("datasource");
-		// datasourceelement.setAttribute("sourcename", datasource_name);
-		// datasourceelement.setAttribute("string", source.toString());
-
-		// root.appendChild(domDatasource);
 	}
 
 	public void fireAllDatasourcesDeleted() {
@@ -210,19 +190,6 @@ public class DatasourcesController implements OntologyControllerListener {
 			System.err.println("WARNING: Error parsing datasources");
 			throw e;
 		}
-
-		// // TODO: Remove when saving and loading is ok
-		// if (datasources == null) {
-		// // System.out.println("Sources NULL, creating new source");
-		// DataSource new_src = new DataSource("name1");
-		// new_src.setUri("src_uri");
-		// new_src.setParameter("parmuri1", "value1");
-		// datasources = new HashMap<String, DataSource>();
-		// datasources.put("name1", new_src);
-		// } else {
-		// // System.out.println("Sources NOT NULL, printing");
-		// // System.out.print(datasources.toString());
-		// }
 	}
 
 	public void removeAllSources() {
@@ -238,8 +205,6 @@ public class DatasourcesController implements OntologyControllerListener {
 		
 		DataSource source = getDataSource(id);
 		datasources.remove(id);
-		// MappingController mcontroller = MappingController.getInstance();
-		// mcontroller.deleteMappings(name);
 		fireDatasourceDeleted(source);
 	}
 
@@ -261,7 +226,6 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	public synchronized void updateDataSource(URI id, DataSource dsd) {
 		
-		DataSource oldds = datasources.remove(id);
 		datasources.put(dsd.getSourceID(), dsd);
 		treeModel.datasourceUpdated(id.toString(), dsd);
 		fireDataSourceNameUpdated(id, dsd);
@@ -269,11 +233,6 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	public void currentOntologyChanged(URI uri, URI oldURI) {
 		treeModel.currentOntologyChanged(uri);
-		// fireAllDatasourcesDeleted();
-		// Collection<DataSource> sources = getAllSources().values();
-		// for (DataSource dataSource : sources) {
-		// fireDatasourceAdded(dataSource);
-		// }
 	}
 
 }
