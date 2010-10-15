@@ -42,7 +42,7 @@ import javax.swing.tree.TreeSelectionModel;
  * 
  * @author mariano
  */
-public class DatasourceManagerPanel extends javax.swing.JPanel implements DatasourcesControllerListener {
+public class DatasourceManagerPanel extends javax.swing.JPanel {
 
 	/**
 	 * 
@@ -109,7 +109,6 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 				}
 			}
 		});
-		dscontroller.addDatasourceControllerListener(this);
 	}
 
 	/**
@@ -213,31 +212,4 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
     private javax.swing.JScrollPane scrollDatasourceTree;
     private javax.swing.JTree treeDatasourceMgr;
     // End of variables declaration//GEN-END:variables
-	public void alldatasourcesDeleted() {
-	}
-
-	public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
-		
-	}
-
-	/***************************************************************************
-	 * Does nothing. Implemented to comply with DatasourcesControllerListener
-	 */
-	public void datasourceAdded(DataSource source) {
-	}
-
-	public void datasourceDeleted(DataSource source) {
-		TreePath currentSelection = treeDatasourceMgr.getSelectionPath();
-		treeDatasourceMgr.getModel();
-	}
-
-	public void datasourceUpdated(String oldname, DataSource currendata) {
-
-	}
-
-	@Override
-	public void datasourcParametersUpdated() {
-		
-	}
-
 }
