@@ -200,22 +200,6 @@ public class DatasourceManagerPanel extends javax.swing.JPanel implements Dataso
 
 	private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addButtonActionPerformed
 		String name = (String) JOptionPane.showInputDialog("Indicate the ID of the new data source", null);
-		Object[] ouris = apiController.getOntologyURIs().toArray();
-		ImageIcon imageIcon = IconLoader.getImageIcon("images/obda_icon_small.png");
-		String message = "Indicate the URI of the ontology \nto which this source is associated";
-		String title = "Ontology selection";
-		String defaultValue = apiController.getCurrentOntologyURI().toString();
-		URI stringOntoURI = (URI)JOptionPane.showInputDialog(this,
-				message, title,
-				JOptionPane.QUESTION_MESSAGE, imageIcon, ouris,
-				defaultValue);
-		URI ontoURI;
-//		try {
-			ontoURI = stringOntoURI;
-//		} catch (URISyntaxException e) {
-//			throw new IllegalArgumentException("ERROR: Invalid URI");
-//		}
-		
 		if ((name != null) && (!name.equals(""))) {
 			dscontroller.addDataSource(name);
 		}
