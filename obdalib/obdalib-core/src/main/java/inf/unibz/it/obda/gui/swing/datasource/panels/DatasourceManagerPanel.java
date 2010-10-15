@@ -11,20 +11,16 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceTreeModel;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -36,27 +32,19 @@ import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-//import edu.stanford.smi.protege.resource.Icons;
-
 /**
  * 
  * @author mariano
  */
 public class DatasourceManagerPanel extends javax.swing.JPanel {
 
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 1L;
 	
 	private DatasourcesController dscontroller = null;
-	
-	private APIController apiController = null;
-	
+		
 	/** Creates new form DatasourceManagerPanel */
 	public DatasourceManagerPanel(APIController apiController) {
 		
-		this.apiController = apiController;
 		this.dscontroller = apiController.getDatasourcesController();
 		initComponents();
 		
