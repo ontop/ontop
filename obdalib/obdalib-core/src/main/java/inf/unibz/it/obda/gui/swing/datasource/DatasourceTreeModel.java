@@ -24,48 +24,48 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class DatasourceTreeModel extends DefaultTreeModel implements DatasourcesControllerListener {
 
-	private static final long	serialVersionUID	= 6283495101253307672L;
+	private static final long	serialVersionUID = 6283495101253307672L;
 
-	private URI					currentOntologyURI	= null;
+	private URI	currentOntologyURI = null;
 
 	public DatasourceTreeModel() {
 		super(new DefaultMutableTreeNode());
 	}
 
 	public void datasourceAdded(DataSource source) {
-			insertNodeInto(new DefaultMutableTreeNode(source.getSourceID()), (DefaultMutableTreeNode) root, root.getChildCount());
+		insertNodeInto(new DefaultMutableTreeNode(source.getSourceID()), (DefaultMutableTreeNode) root, root.getChildCount());
 	}
 
 	public void datasourceDeleted(DataSource source) {
-			DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
-			Enumeration<DefaultMutableTreeNode> children = root.children();
-			DefaultMutableTreeNode affectedchild = null;
-			while (children.hasMoreElements()) {
-				DefaultMutableTreeNode current = children.nextElement();
-				if (current.getUserObject().toString().equals(source.getSourceID().toString())) {
-					affectedchild = current;
-					break;
-				}
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
+		Enumeration<DefaultMutableTreeNode> children = root.children();
+		DefaultMutableTreeNode affectedchild = null;
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode current = children.nextElement();
+			if (current.getUserObject().toString().equals(source.getSourceID().toString())) {
+				affectedchild = current;
+				break;
 			}
-			removeNodeFromParent(affectedchild);
-			nodeStructureChanged(root);
+		}
+		removeNodeFromParent(affectedchild);
+		nodeStructureChanged(root);
 	}
 
 	public void datasourceUpdated(String oldname, DataSource currendata) {
-			DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
-			Enumeration<DefaultMutableTreeNode> children = root.children();
-			DefaultMutableTreeNode affectedchild = null;
-			while (children.hasMoreElements()) {
-				DefaultMutableTreeNode current = children.nextElement();
-				if (current.getUserObject().toString().equals(oldname)) {
-					affectedchild = current;
-					break;
-				}
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
+		Enumeration<DefaultMutableTreeNode> children = root.children();
+		DefaultMutableTreeNode affectedchild = null;
+		while (children.hasMoreElements()) {
+			DefaultMutableTreeNode current = children.nextElement();
+			if (current.getUserObject().toString().equals(oldname)) {
+				affectedchild = current;
+				break;
 			}
-			if(affectedchild != null){
-				affectedchild.setUserObject(currendata.getSourceID());
-				nodeChanged(affectedchild);
-			}
+		}
+		if(affectedchild != null){
+			affectedchild.setUserObject(currendata.getSourceID());
+			nodeChanged(affectedchild);
+		}
 	}
 
 	public void alldatasourcesDeleted() {
