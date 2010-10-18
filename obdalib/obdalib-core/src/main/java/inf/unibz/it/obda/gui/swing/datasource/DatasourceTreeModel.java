@@ -24,9 +24,6 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class DatasourceTreeModel extends DefaultTreeModel implements DatasourcesControllerListener {
 
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 6283495101253307672L;
 
 	private URI					currentOntologyURI	= null;
@@ -36,14 +33,10 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	}
 
 	public void datasourceAdded(DataSource source) {
-//		if (URI.create(source.getUri()).equals(currentOntologyURI)) {
-//			System.out.println("add "+ source.getName());
 			insertNodeInto(new DefaultMutableTreeNode(source.getSourceID()), (DefaultMutableTreeNode) root, root.getChildCount());
-//		}
 	}
 
 	public void datasourceDeleted(DataSource source) {
-//		if (URI.create(source.getUri()).equals(currentOntologyURI)) {
 			DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
 			Enumeration<DefaultMutableTreeNode> children = root.children();
 			DefaultMutableTreeNode affectedchild = null;
@@ -56,11 +49,9 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 			}
 			removeNodeFromParent(affectedchild);
 			nodeStructureChanged(root);
-//		}
 	}
 
 	public void datasourceUpdated(String oldname, DataSource currendata) {
-//		if (URI.create(currendata.getUri()).equals(currentOntologyURI)) {
 			DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
 			Enumeration<DefaultMutableTreeNode> children = root.children();
 			DefaultMutableTreeNode affectedchild = null;
@@ -75,7 +66,6 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 				affectedchild.setUserObject(currendata.getSourceID());
 				nodeChanged(affectedchild);
 			}
-//		}
 	}
 
 	public void alldatasourcesDeleted() {
@@ -84,9 +74,6 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 		nodeStructureChanged(root);
 	}
 
-	/***************************************************************************
-	 * Does nothing.
-	 */
 	public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
 
 	}
