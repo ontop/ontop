@@ -21,8 +21,6 @@ import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.net.URI;
@@ -40,16 +38,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.hp.hpl.jena.db.test.Data;
-
 public class MappingController implements TreeModelListener, DatasourcesControllerListener {
-
-	private static MappingController						instance				= null;
 
 	private ArrayList<MappingControllerListener>			listeners				= null;
 	private Hashtable<URI, ArrayList<OBDAMappingAxiom>>	mappings				= null;
-
-	// private String currentsourceuri = null;
 
 	private Hashtable<URI, Boolean>						needsSyncwithReasoner	= null;
 
@@ -62,94 +54,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	private MappingXMLCodec									codec = null;
 	
 	Logger													log						= LoggerFactory.getLogger(MappingController.class);
-
-	// /***************************************************************************
-	// * get the global instance of the mapping controller for the currently
-	// open
-	// * project
-	// *
-	// * @return
-	// */
-	// public static MappingController getInstance() {
-	// if (instance == null) {
-	// instance = new MappingController();
-	// }
-	// return instance;
-	// }
-
-	public static void main(String args[]) {
-		// String head = "HEAD1";
-		// String body = "BODY1";
-		// String mappingId = null;
-		// String sourceuri = "sourceuri";
-		//
-		// // DataSourceMapping mapping1 = new
-		// RDBMSDataSourceMapping(mappingId);
-		//
-		// DatasourcesController srcController = new DatasourcesController();
-		// MappingController controller = new MappingController(srcController);
-		//		
-		// URI uri;
-		// try {
-		// uri = new URI("http://www.testuri.com");
-		// } catch (URISyntaxException e2) {
-		// return;
-		// }
-		//		
-		// srcController.addDataSource(sourceuri, uri);
-		// srcController.setCurrentDataSource(sourceuri);
-		//
-		// MappingTreeModel model = controller.getTreeModel();
-		// model.addTreeModelListener(new TreeModelListener() {
-		//
-		// public void treeNodesChanged(TreeModelEvent e) {
-		// System.out.println("Nodes change:" + e.toString());
-		//
-		// }
-		//
-		// public void treeNodesInserted(TreeModelEvent e) {
-		// System.out.println("Nodes inserted:" + e.toString());
-		//
-		// }
-		//
-		// public void treeNodesRemoved(TreeModelEvent e) {
-		// System.out.println("Nodes removed:" + e.toString());
-		// }
-		//
-		// public void treeStructureChanged(TreeModelEvent e) {
-		// System.out.println("Structure change:" + e.toString());
-		//
-		// }
-		// });
-		//
-		// try {
-		// mappingId = controller.insertMapping();
-		// } catch (NoDatasourceSelectedException e1) {
-		// e1.printStackTrace();
-		// return;
-		// } catch (DuplicateMappingException e1) {
-		// e1.printStackTrace();
-		// return;
-		// }
-		//
-		// TargetQuery h = null;
-		// try {
-		// h = new ConjunctiveQuery(head, apic);
-		// } catch (QueryParseException e1) {
-		// e1.printStackTrace();
-		// }
-		// SourceQuery b = null;
-		// try {
-		// b = new RDBMSSQLQuery(body);
-		// } catch (QueryParseException e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
-		// }
-		// controller.updateMapping(sourceuri, mappingId, h);
-		// controller.updateMapping(sourceuri, mappingId, b);
-		// controller.updateMapping(sourceuri, mappingId, "newid");
-
-	}
 
 	public MappingController(DatasourcesController dscontroller, APIController apic) {
 		this.apic = apic;
@@ -202,7 +106,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	 */
 	public void datasourceDeleted(DataSource source) {
 		deleteMappings(source.getSourceID());
-
 	}
 
 	/***************************************************************************
@@ -232,7 +135,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		}
 		DataSource ds = dscontroller.getCurrentDataSource();
 		setNeedsSyncWithReasoner(ds.getSourceID(), true);
-
 		fireMappingDeleted(datasource_uri, mapping_id);
 	}
 
@@ -263,54 +165,19 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	// TODO modify to allow modularization and independence from what type of
 	// source it is
 	public void dumpMappingsToXML(Element root, URI datasource_uri) {
-		// DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		// DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = root.getOwnerDocument();
 
 		Element mappingsgroup = doc.createElement("mappings");
-
 		mappingsgroup.setAttribute("sourceuri", datasource_uri.toString());
 		mappingsgroup.setAttribute("headclass", inf.unibz.it.ucq.domain.ConjunctiveQuery.class.toString());
 		mappingsgroup.setAttribute("bodyclass", inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery.class.toString());
-
 		root.appendChild(mappingsgroup);
 
 		ArrayList<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
-
 		int mappingcount = mappings.size();
 		for (int i = 0; i < mappingcount; i++) {
 			try {
 				OBDAMappingAxiom mapping = mappings.get(i);
-//				Element mappingelement = doc.createElement("mapping");
-//				// the new XML mapping
-//				mappingelement.setAttribute("id", mapping.getId());
-//				ConjunctiveQuery headquery = (ConjunctiveQuery) mapping.getTargetQuery();
-//				RDBMSSQLQuery bodyquery = (RDBMSSQLQuery) mapping.getSourceQuery();
-//				// the head XML child
-//				Element mappingheadelement = doc.createElement("CQ");
-//				if (headquery != null) {
-//					if (headquery.isInputQueryValid(apic)) {
-//						mappingheadelement.setAttribute("string", headquery.toString());
-//					} else {
-//						mappingheadelement.setAttribute("string", headquery.getInputQuString());
-//					}
-//				} else {
-//					mappingheadelement.setAttribute("string", "");
-//				}
-//				// the body XML child
-//				Element mappingbodyelement = doc.createElement("SQLQuery");
-//				if (bodyquery != null) {
-//					if (bodyquery.isInputQueryValid(apic)) {
-//						mappingbodyelement.setAttribute("string", bodyquery.toString());
-//					} else {
-//						mappingbodyelement.setAttribute("string", bodyquery.getInputQuString());
-//					}
-//				} else {
-//					mappingbodyelement.setAttribute("string", "");
-//				}
-//
-//				mappingelement.appendChild(mappingheadelement);
-//				mappingelement.appendChild(mappingbodyelement);
 				Element mappingelement = codec.encode(mapping);
 				doc.adoptNode(mappingelement);
 				mappingsgroup.appendChild(mappingelement);
@@ -318,11 +185,9 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 				log.warn(e.getMessage(), e);
 			}
 		}
-
 	}
 
 	public void duplicateMapping(URI srcuri, String id, String new_id) throws DuplicateMappingException {
-
 		OBDAMappingAxiom oldmapping = getMapping(srcuri, id);
 		OBDAMappingAxiom newmapping = null;
 		try {
@@ -331,9 +196,7 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 			throw new RuntimeException(e);
 		}
 		newmapping.setId(new_id);
-
 		insertMapping(srcuri, newmapping);
-
 	}
 
 	private void fireAllMappingsRemoved() {
@@ -381,7 +244,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		for (MappingControllerListener listener : listeners) {
 			listener.mappingInserted(srcuri, mapping_id);
 		}
-
 	}
 
 	/***************************************************************************
@@ -459,10 +321,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		return "M:" + Integer.toHexString(index);
 	}
 
-	// public void setCurrentDataSource(String srcuri) {
-	// currentsourceuri = srcuri;
-	// }
-
 	public MappingTreeModel getTreeModel() {
 		return treemodel;
 	}
@@ -470,11 +328,7 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	// TODO modify to allow modularization and independence from what type of
 	// source it is
 	public void importMappingsFromXML(Element mappings) throws QueryParseException {
-
 		URI source = URI.create(mappings.getAttribute("sourceuri"));
-//		String headclass = mappings.getAttribute("headclass");
-//		String bodyclass = mappings.getAttribute("bodyclass");
-
 		NodeList childs = mappings.getChildNodes();
 
 		for (int i = 0; i < childs.getLength(); i++) {
@@ -486,48 +340,9 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 				Element mapping = (Element) child;
 				RDBMSOBDAMappingAxiom newmapping = (RDBMSOBDAMappingAxiom) codec.decode(mapping);
 				if(newmapping == null){
-//					deleteMappings(source);
 					throw new Exception("Error while parsing the conjunctive query of the mapping "+mapping.getAttribute("id"));
 				}
-//				String id = mapping.getAttribute("id");
-//				Element head = null;
-//				Element body = null;
-//				NodeList mappingchilds = mapping.getChildNodes();
-//				// Retrieving the child nodes avoiding empty nodes
-//				for (int j = 0; j < mappingchilds.getLength(); j++) {
-//					Node mappingchild = mappingchilds.item(j);
-//					if (!(mappingchild instanceof Element)) {
-//						continue;
-//					}
-//					if (head == null) {
-//						head = (Element) mappingchild;
-//						continue;
-//					}
-//
-//					if (body == null) {
-//						body = (Element) mappingchild;
-//						continue;
-//					}
-//				}
-//
-//				String CQstring = head.getAttribute("string");
-//				String SQLstring = body.getAttribute("string");
-//
-//				ConjunctiveQuery headquery = null;
-//				try {
-//					headquery = new ConjunctiveQuery(CQstring, apic);
-//				} catch (QueryParseException e1) {
-//					// In case of error, reset the mapping controller to 0 rise
-//					// event
-//					deleteMappings(source);
-//					throw e1;
-//
-//				}
-//				RDBMSSQLQuery bodyquery = new RDBMSSQLQuery(SQLstring, apic);
-//				RDBMSOBDAMappingAxiom newmapping = new RDBMSOBDAMappingAxiom(id);
-//				newmapping.setSourceQuery(bodyquery);
-//				newmapping.setTargetQuery(headquery);
-//
+				
 				try {
 					insertMapping(source, newmapping);
 				} catch (DuplicateMappingException e) {
@@ -543,7 +358,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 					log.debug(e.getMessage(), e);
 				}
 			}
-
 		}
 	}
 
@@ -588,13 +402,12 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 	 * 
 	 */
 	public String insertMapping() throws NoDatasourceSelectedException, DuplicateMappingException {
-
 		DataSource currentsrc = dscontroller.getCurrentDataSource();
-
 		if ((currentsrc == null)) {
 			throw new NoDatasourceSelectedException("No datasource was selected");
 		}
 		String new_mapping_name = getNextAvailableMappingID(currentsrc.getSourceID());
+		
 		try {
 			insertMapping(currentsrc.getSourceID(), new RDBMSOBDAMappingAxiom(new_mapping_name));
 		} catch (QueryParseException e) {
@@ -620,7 +433,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		if(ds != null){
 			setNeedsSyncWithReasoner(ds.getSourceID(), true);
 		}
-
 		fireMappingInserted(datasource_uri, mapping.getId());
 	}
 
@@ -640,7 +452,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
 		needsSyncwithReasoner = new Hashtable<URI, Boolean>();
 		fireAllMappingsRemoved();
-
 	}
 
 	public void removeMappingControllerListener(MappingControllerListener listener) {
@@ -653,28 +464,23 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 
 	private void setNeedsSyncWithReasoner(URI src_uri, boolean changed) {
 		setNeedsSyncwithReasoner(src_uri, Boolean.valueOf(changed));
-
 	}
 
 	public void treeNodesChanged(TreeModelEvent e) {
 		e.getSource();
 		// TODO remove?
-
 	}
 
 	public void treeNodesInserted(TreeModelEvent e) {
 		// TODO remove?
-
 	}
 
 	public void treeNodesRemoved(TreeModelEvent e) {
 		// TODO remove?
-
 	}
 
 	public void treeStructureChanged(TreeModelEvent e) {
 		// TODO remove?
-
 	}
 
 	/***************************************************************************
@@ -691,7 +497,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		if(ds != null){
 			setNeedsSyncWithReasoner(ds.getSourceID(), true);
 		}
-
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
 
@@ -710,7 +515,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		if(ds !=null){
 			setNeedsSyncWithReasoner(ds.getSourceID(), true);
 		}
-
 		fireMappigUpdated(datasource_uri, mapping_id, mapping);
 	}
 
@@ -732,7 +536,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 		if(ds != null){
 			setNeedsSyncWithReasoner(ds.getSourceID(), true);
 		}
-
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
 
@@ -746,8 +549,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 			} catch (Exception e) {
 				log.warn("Error while notifying listeners about an active ontology change.");
 			}
-
 		}
 	}
-
 }
