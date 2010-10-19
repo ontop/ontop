@@ -75,8 +75,9 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 			public void editingCanceled(ChangeEvent e) {}
 		});
 		DatasourcesController srcontroller = dscontroller;
-		DatasourceTreeModel srctreemodel = srcontroller.getTreeModel();
+		DatasourceTreeModel srctreemodel = new DatasourceTreeModel();
 		srcontroller.addDatasourceControllerListener(srctreemodel);
+		srctreemodel.synchronize(srcontroller.getAllSources());
 		treeDatasourceMgr.setModel(srctreemodel);
 		treeDatasourceMgr.invalidate();
 		treeDatasourceMgr.addTreeSelectionListener(new TreeSelectionListener() {

@@ -14,7 +14,6 @@ package inf.unibz.it.obda.api.controller;
 
 import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.swing.datasource.DatasourceTreeModel;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -33,19 +32,13 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	private HashMap<URI, DataSource>					datasources			= null;
 
-	private DatasourceTreeModel							treeModel			= null;
-
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
 
 	private DataSource									currentdatasource	= null;
 
 	public DatasourcesController() {
-
 		datasources = new HashMap<URI, DataSource>();
-		treeModel = new DatasourceTreeModel();
 		listeners = new ArrayList<DatasourcesControllerListener>();
-		addDatasourceControllerListener(treeModel);
-
 	}
 
 	public synchronized void addDataSource(DataSource source) {
@@ -154,16 +147,6 @@ public class DatasourcesController implements OntologyControllerListener {
 		return datasources.get(name);
 	}
 
-	/***************************************************************************
-	 * Returns the tree model for the data sources loaded
-	 * 
-	 * @return a DataSource object with the current data source, NULL if no data
-	 *         sources is currently active.
-	 */
-	public synchronized DatasourceTreeModel getTreeModel() {
-		return treeModel;
-	}
-
 	/***
 	 * Use a DatasourceXML codec instead
 	 * 
@@ -225,14 +208,12 @@ public class DatasourcesController implements OntologyControllerListener {
 	}
 
 	public synchronized void updateDataSource(URI id, DataSource dsd) {
-		
 		datasources.put(dsd.getSourceID(), dsd);
-		treeModel.datasourceUpdated(id.toString(), dsd);
 		fireDataSourceNameUpdated(id, dsd);
 	}
 
 	public void currentOntologyChanged(URI uri, URI oldURI) {
-		treeModel.currentOntologyChanged(uri);
+	  // TODO Try to do a different implementation.
 	}
 
 }

@@ -18,6 +18,7 @@ import inf.unibz.it.obda.domain.DataSource;
 
 import java.net.URI;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -77,7 +78,31 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
 
 	}
-
+	
+	/**
+	 * Synchronize the current hash map of {@link DataSource} to the tree model.
+	 * 
+	 * @param datasources the hash map of data sources.
+	 */
+	public void synchronize(HashMap<URI, DataSource> datasources) {
+	  DataSource[] datasourcesArray = 
+	      datasources.values().toArray(new DataSource[datasources.size()]);
+	  synchronize(datasourcesArray);
+	}
+	
+	/**
+   * Synchronize the current array of {@link DataSource} to the tree model.
+   * 
+   * @param datasources the array of data sources.
+   */
+	public void synchronize(DataSource[] datasources) {
+	  alldatasourcesDeleted();
+	  int size = datasources.length;
+	  for (int i = 0; i < size; i++) {
+	    datasourceAdded(datasources[i]);
+	  }
+	}
+	
 	/***
 	 * 
 	 * @param uri
