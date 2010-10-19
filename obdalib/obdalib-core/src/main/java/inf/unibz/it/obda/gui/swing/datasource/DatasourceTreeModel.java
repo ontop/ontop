@@ -80,7 +80,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	}
 	
 	/**
-	 * Synchronize the current hash map of {@link DataSource} to the tree model.
+	 * Synchronize a hash map of <code>DataSource</code> objects to the tree model.
 	 * 
 	 * @param datasources the hash map of data sources.
 	 */
@@ -91,7 +91,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	}
 	
 	/**
-   * Synchronize the current array of {@link DataSource} to the tree model.
+   * Synchronize an array of <code>DataSource</code> objects to the tree model.
    * 
    * @param datasources the array of data sources.
    */
