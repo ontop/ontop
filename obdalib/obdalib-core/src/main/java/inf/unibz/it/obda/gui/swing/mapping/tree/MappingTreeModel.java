@@ -224,7 +224,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 								.add(getMappingNodeFromMapping((OBDAMappingAxiom) mappingTest));
 				}
 			}
-			
 			root.removeAllChildren();
 			for (MappingNode newnode : newnodes) {
 				root.insert(newnode, root.getChildCount());
@@ -283,6 +282,26 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		return mappingnode;
 	}
 
+	/**
+	 * Synchronizes an array of mapping axioms to the tree node structure 
+	 * following a particular data source URI. Each data source has a collection 
+	 * of mapping axioms in which each axiom contains a source query and a target 
+	 * query.
+	 * 
+	 * @param datasourceUri a data source uri.
+	 * @param mappings an array of mapping axioms.
+	 * @see OBDAMappingAxiom
+	 * @see SourceQuery
+	 * @see TargetQuery
+	 */
+	public void synchronize(URI datasourceUri, ArrayList<OBDAMappingAxiom> mappings) {
+	  int size = mappings.size();
+	  for(int i = 0; i < size; i++) {
+	    String mappingId = mappings.get(i).getId();
+	    mappingInserted(datasourceUri, mappingId);
+	  }
+	}
+	
 	/*
 	 * @see
 	 * inf.unibz.it.obda.api.controller.MappingControllerListener#allMappingsRemoved
