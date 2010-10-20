@@ -208,6 +208,7 @@ public class DatasourcesController implements OntologyControllerListener {
 	}
 
 	public synchronized void updateDataSource(URI id, DataSource dsd) {
+	  datasources.remove(id);
 		datasources.put(dsd.getSourceID(), dsd);
 		fireDataSourceNameUpdated(id, dsd);
 	}
