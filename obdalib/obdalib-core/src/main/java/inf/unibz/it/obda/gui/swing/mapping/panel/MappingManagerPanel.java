@@ -116,7 +116,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		/***********************************************************************
 		 * Setting up the mappings tree
 		 */
-		MappingTreeModel maptreemodel = mapc.getTreeModel();
+		MappingTreeModel maptreemodel = new MappingTreeModel(apic, dsc, mapc);
+		mapc.addMappingControllerListener(maptreemodel);
 		treeMappingsTree.setRootVisible(false);
 		treeMappingsTree.setModel(maptreemodel);
 		MappingRenderer map_renderer = new MappingRenderer(apic);

@@ -49,19 +49,14 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 
 	private DatasourcesController							dscontroller			= null;
 
-	private APIController									apic;
-
 	private MappingXMLCodec									codec = null;
 	
 	Logger													log						= LoggerFactory.getLogger(MappingController.class);
 
 	public MappingController(DatasourcesController dscontroller, APIController apic) {
-		this.apic = apic;
 		this.dscontroller = dscontroller;
 		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
 		listeners = new ArrayList<MappingControllerListener>();
-		treemodel = new MappingTreeModel(apic, dscontroller, this);
-		addMappingControllerListener(treemodel);
 		codec = new MappingXMLCodec(apic);
 		needsSyncwithReasoner = new Hashtable<URI, Boolean>();
 		dscontroller.addDatasourceControllerListener(this);
