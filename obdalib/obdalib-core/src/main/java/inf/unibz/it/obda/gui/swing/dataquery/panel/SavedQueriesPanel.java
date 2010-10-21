@@ -11,7 +11,6 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
 import inf.unibz.it.obda.api.controller.QueryController;
@@ -57,11 +56,8 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-//import edu.stanford.smi.protege.resource.Icons;
-
 /**
  * GUI for Managing queries.
- * 
  * 
  * @author mariano
  */
@@ -84,17 +80,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 				DnDConstants.ACTION_COPY_OR_MOVE);
 		TreeDropTarget dt = new TreeDropTarget(treeSavedQueries);
 		listeners = new Vector<SavedQueriesPanelListener>();
-
-		// OBDAPluginController obdac =
-		// OBDAPluginController.getCurrentInstance();
-		// DefaultMutableTreeNode root = null;
-		// if (obdac.getCurrentProject() != null)
-		// root = new
-		// DefaultMutableTreeNode(obdac.getCurrentProject().getName());
-		// else
-		// root = new DefaultMutableTreeNode("");
-		// QueryControllerTreeModel savedqueriesmodel = new
-		// QueryControllerTreeModel(root, qc);
+		
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.queryController
 				.getTreeModel().getRoot();
 		DefaultTreeModel obj = new DefaultTreeModel(root);
@@ -103,7 +89,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 				.getTreeModel();
 
 		treeSavedQueries.setModel(queryControllerModel);
-
 		treeSavedQueries.setCellRenderer(new SavedQueriesTreeCellRenderer());
 		treeSavedQueries.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -116,11 +101,8 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		this.queryController.addListener(this);
 
 		treeSavedQueries.addTreeSelectionListener(new TreeSelectionListener() {
-
 			public void valueChanged(TreeSelectionEvent e) {
-
 				TreePath currentSelection = e.getPath();
-
 				DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) (currentSelection
 						.getLastPathComponent());
 
@@ -128,8 +110,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 					QueryTreeElement current_query = (QueryTreeElement) currentNode;
 					currentQuery = current_query.getQuery();
 					currentId = current_query;
-					
-					
 					if ((current_query.getParent() == null) || (current_query.getParent().toString()).equals(""))
 						fireQueryChanged(null, currentQuery, currentId.getID());
 					else
@@ -143,13 +123,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 				} else if (currentNode == null) {
 					currentId = null;
 					currentQuery = null;
-
 				}
-
 			}
-
 		});
-
 	}
 
 	public void addQueryManagerListener(SavedQueriesPanelListener listener) {
@@ -165,7 +141,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 			return;
 		if (listeners.contains(listener))
 			listeners.remove(listener);
-
 	}
 
 	/**
@@ -261,11 +236,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 			QueryController qc = this.queryController;
 			if (node instanceof QueryTreeElement) {
 				qc.removeQuery(element.getID());
-
 			} else if (node instanceof QueryGroupTreeElement) {
 				qc.removeGroup(element.getID());
 			}
-
 		}
 	}// GEN-LAST:event_removeQueryButtonActionPerformed
 
@@ -283,7 +256,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		for (SavedQueriesPanelListener listener : listeners) {
 			listener.selectedQuerychanged(newgroup, newquery, newid);
 		}
-
 	}
 
 	/**
@@ -319,7 +291,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 			treeSavedQueries.scrollPathToVisible(new TreePath(
 					((DefaultMutableTreeNode) node).getPath()));
 		}
-
 	}
 
 	/**
@@ -339,16 +310,13 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		treeSavedQueries.setSelectionPath(new TreePath(node.getPath()));
 		treeSavedQueries.expandPath(new TreePath(node.getPath()));
 		treeSavedQueries.scrollPathToVisible(new TreePath(node.getPath()));
-
 	}
 
 	public void elementRemoved(QueryControllerEntity element) {
-
 	}
 
 	public void elementRemoved(QueryControllerQuery query,
 			QueryControllerGroup group) {
-
 	}
 
 	/**
@@ -387,7 +355,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 				((DefaultMutableTreeNode) node).getPath()));
 		treeSavedQueries.scrollPathToVisible(new TreePath(
 				((DefaultMutableTreeNode) node).getPath()));
-
 	}
 
 	/**
@@ -395,7 +362,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 	 * TransferableTreeNode class as the transfer data type.
 	 */
 	class TreeDragSource implements DragSourceListener, DragGestureListener {
-
 		DragSource source;
 		DragGestureRecognizer recognizer;
 		TransferableTreeNode transferable;
@@ -417,12 +383,10 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 			if ((path == null) || (path.getPathCount() <= 1)) {
 				return;
 			}
-
 			oldNode = (DefaultMutableTreeNode) path.getLastPathComponent();
 			transferable = new TransferableTreeNode(path);
 			source.startDrag(dge, DragSource.DefaultCopyDrop, transferable,
 					this);
-
 		}
 
 		/**
@@ -438,7 +402,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		}
 
 		public void dropActionChanged(DragSourceDragEvent dsde) {
-
 		}
 
 		public void dragDropEnd(DragSourceDropEvent dsde) {
@@ -465,20 +428,17 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 			DropTargetContext dtc = dtde.getDropTargetContext();
 			JTree tree = (JTree) dtc.getComponent();
 			TreePath path = tree.getClosestPathForLocation(p.x, p.y);
-			return (TreeNode) path.getLastPathComponent(); 
-															
+			return (TreeNode) path.getLastPathComponent();
 		}
 
 		public void dragEnter(DropTargetDragEvent dtde) {
 			TreeNode node = getNodeForEvent(dtde);
 			dtde.acceptDrag(dtde.getDropAction());
-
 		}
 
 		public void dragOver(DropTargetDragEvent dtde) {
 			TreeNode node = getNodeForEvent(dtde);
 			dtde.acceptDrag(dtde.getDropAction());
-
 		}
 
 		public void dragExit(DropTargetEvent dte) {
@@ -509,7 +469,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 					if (tr.isDataFlavorSupported(flavors[i])) {
 						dtde.acceptDrop(dtde.getDropAction());
 						TreePath p = (TreePath) tr.getTransferData(flavors[i]);
-
 						DefaultMutableTreeNode node = (DefaultMutableTreeNode) p
 								.getLastPathComponent();
 						QueryTreeElement queryNode = (QueryTreeElement) node;
@@ -578,9 +537,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 				// Add a lock to register any exception
 				dtde.rejectDrop();
 			}
-
 		}
-
 	}
 
 	/**
@@ -588,7 +545,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 	 * Drop applications.
 	 */
 	class TransferableTreeNode implements Transferable {
-
 		public DataFlavor TREE_PATH_FLAVOR = new DataFlavor(TreePath.class,
 				"Tree Path");
 		DataFlavor flavors[] = { TREE_PATH_FLAVOR };
@@ -614,7 +570,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 				throw new UnsupportedFlavorException(flavor);
 			}
 		}
-
 	}
 
 	/**
@@ -628,5 +583,4 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		queryCTreeM.reload();
 		treeSavedQueries.setModel(queryCTreeM);
 	}
-
 }

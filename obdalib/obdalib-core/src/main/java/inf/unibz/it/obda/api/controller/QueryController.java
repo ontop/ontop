@@ -26,8 +26,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-// import edu.stanford.smi.protegex.owl.model.OWLModel;
-
 /***
  * Controller for the query manager
  */
@@ -60,35 +58,15 @@ public class QueryController {
 		listeners.remove(listener);
 	}
 
-	// TODO remove static method, no more static Controllers
-	/***
-	 * @deprecated
-	 */
-	// public static QueryController getInstance() {
-	// // if (model==null)
-	// // return new QueryController();
-	// // if (instances == null) {
-	// // instances = new HashMap<OWLModel, QueryController>();
-	// // }
-	// // QueryController cinstance = instances.get(model);
-	// if (instance == null) {
-	// instance = new QueryController();
-	// // instances.put(model, cinstance);
-	// }
-	// return instance;
-	// }
 	/**
 	 * Creates a new group and adds it to the vector QueryControllerEntity
 	 */
 	public void createGroup(String group_name) {
-
 		if (getElementPosition(group_name) == -1) {
 			QueryControllerGroup group = new QueryControllerGroup(group_name);
 			collection.add(group);
 			fireElementAdded(group);
-
 		} else {
-
 			System.out.println("Group already exists!");
 		}
 	}
@@ -111,7 +89,6 @@ public class QueryController {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -125,7 +102,6 @@ public class QueryController {
 			collection.add(query);
 			fireElementAdded(query);
 		} else {
-
 			System.out.println("Query already exists!");
 		}
 		return query;
@@ -155,7 +131,6 @@ public class QueryController {
 			group.addQuery(query);
 			fireElementAdded(query, group);
 		} else {
-
 			System.out.println("Query already exists!");
 		}
 		return query;
@@ -166,7 +141,6 @@ public class QueryController {
 	 */
 	public void removeQuery(String id) {
 		int index = getElementPosition(id);
-
 		QueryControllerEntity element = (QueryControllerEntity) collection.get(index);
 
 		if (element instanceof QueryControllerQuery) {
@@ -183,7 +157,6 @@ public class QueryController {
 				}
 			}
 		}
-
 	}
 
 	public void fromDOM(Element idconstraints) {
@@ -241,7 +214,6 @@ public class QueryController {
 	 */
 	public int getElementPosition(String element_id) {
 		int index = -1;
-
 		for (int i = 0; i < collection.size(); i++) {
 			QueryControllerEntity element = (QueryControllerEntity) collection.get(i);
 
@@ -347,12 +319,9 @@ public class QueryController {
 	public void setEventsDisabled(boolean value) {
 		eventDisabled = value;
 		return;
-
 	}
 
 	public boolean getEventsDisabled() {
 		return eventDisabled;
-
 	}
-
 }

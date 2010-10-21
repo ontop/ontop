@@ -28,16 +28,12 @@ import javax.swing.tree.TreeNode;
 public class QueryControllerTreeModel extends DefaultTreeModel implements
 		QueryControllerListener {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -5182895959682699380L;
 	private QueryController qc = null;
 
 	public QueryControllerTreeModel(QueryController qc) {
 		super(new DefaultMutableTreeNode(""));
 		this.qc = qc;
-
 	}
 
 	/**
@@ -59,21 +55,17 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 						insertNodeInto(queryTreeEle,
 								(DefaultMutableTreeNode) queryGroupEle,
 								queryGroupEle.getChildCount());
-
 					}
 					insertNodeInto(queryGroupEle,
 							(DefaultMutableTreeNode) root, root.getChildCount());
-
 				} else {
 					QueryControllerQuery query = (QueryControllerQuery) treeElement;
 					QueryTreeElement queryTreeEle = new QueryTreeElement(query
 							.getID(), query.getQuery());
 					insertNodeInto(queryTreeEle, (DefaultMutableTreeNode) root,
 							root.getChildCount());
-
 				}
 			}
-
 		}
 	}
 
@@ -99,7 +91,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 					.getChildCount());
 			nodeStructureChanged(root);
 		} else if (element instanceof QueryControllerQuery) {
-
 			QueryControllerQuery query = (QueryControllerQuery) element;
 			QueryTreeElement ele = new QueryTreeElement(query.getID(), query
 					.getQuery());
@@ -201,7 +192,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 					}
 				}
 			}
-
 		}
 	}
 
@@ -213,7 +203,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 	public void elementChanged(QueryControllerQuery query,
 			QueryControllerGroup group) {
 		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -242,7 +231,6 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 					break;
 				}
 			}
-
 		}
 		return node;
 	}
@@ -276,5 +264,4 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 		}
 		return node;
 	}
-
 }
