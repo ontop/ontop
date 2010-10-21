@@ -32,6 +32,7 @@ import inf.unibz.it.utils.codec.TargetQeryToTextCodec;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -109,25 +110,22 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * the model to include the corresponding node. Only if the current source
 	 * is srcuri.
 	 */
-	public void mappingDeleted(URI srcuri, String mapping_id) {
+	public void mappingDeleted(URI srcuri, String mappingId) {
 		if (dsc.getCurrentDataSource()== null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
 			return;
 		}
-		try {
-			DataSource currentsource = dsc.getCurrentDataSource();
-			if ((currentsource == null)
-					|| !srcuri.equals(currentsource.getSourceID())) {
-				return;
-			}
-			URI src_uri = dsc.getCurrentDataSource().getSourceID();
-			RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller
-					.getMapping(src_uri, mapping_id);
-
-			MappingNode mappingNode = MappingNode
-					.getMappingNodeFromMapping(mapping);
-	} catch (Exception e) {
-			e.printStackTrace(System.err);
+		Enumeration<MappingNode> mappingNodes = root.children();
+		MappingNode affectedNode = null;
+		while (mappingNodes.hasMoreElements()) {
+		  MappingNode currentNode = mappingNodes.nextElement();
+		  String currentNodeId = currentNode.getUserObject().toString();
+		  if (currentNodeId.equals(mappingId)) {
+		    affectedNode = currentNode;
+		    break;
+		  }
 		}
+		removeNodeFromParent(affectedNode);
+		nodeStructureChanged(root);
 	}
 	
 	/***************************************************************************
