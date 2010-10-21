@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class MappingController implements TreeModelListener, DatasourcesControllerListener {
+public class MappingController implements DatasourcesControllerListener {
 
 	private ArrayList<MappingControllerListener>			listeners				= null;
 	private Hashtable<URI, ArrayList<OBDAMappingAxiom>>	mappings				= null;
@@ -459,23 +459,6 @@ public class MappingController implements TreeModelListener, DatasourcesControll
 
 	private void setNeedsSyncWithReasoner(URI src_uri, boolean changed) {
 		setNeedsSyncwithReasoner(src_uri, Boolean.valueOf(changed));
-	}
-
-	public void treeNodesChanged(TreeModelEvent e) {
-		e.getSource();
-		// TODO remove?
-	}
-
-	public void treeNodesInserted(TreeModelEvent e) {
-		// TODO remove?
-	}
-
-	public void treeNodesRemoved(TreeModelEvent e) {
-		// TODO remove?
-	}
-
-	public void treeStructureChanged(TreeModelEvent e) {
-		// TODO remove?
 	}
 
 	/***************************************************************************

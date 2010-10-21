@@ -127,8 +127,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 					.getMappingNodeFromMapping(mapping);
 	} catch (Exception e) {
 			e.printStackTrace(System.err);
-		} finally {
-			addTreeModelListener(controller);
 		}
 	}
 	
@@ -147,13 +145,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller.getMapping(src_uri, mapping_id);
 		MappingNode mappingNode = MappingNode.getMappingNodeFromMapping(mapping);
 
-			removeTreeModelListener(controller);
 			insertNodeInto(mappingNode, (DefaultMutableTreeNode) root, root
 					.getChildCount());
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-		} finally {
-			addTreeModelListener(controller);
 		}
 	}
 
@@ -169,8 +164,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			return;
 		}
 		try {
-			removeTreeModelListener(controller);
-
 			MappingNode mappingnode = getMappingNode(mapping_id);
 			if (mappingnode == null) {
 				return;
@@ -191,8 +184,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			nodeStructureChanged(mappingnode);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-		} finally {
-			addTreeModelListener(controller);
 		}
 	}
 
@@ -205,8 +196,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		// SYNCWITH EVERYBODY EXCEPT WITH THE CONTROLLER SINCE IT WAS THE SOURCE
 		// OF THIS EVENT
 		try {
-			removeTreeModelListener(controller);
-
 			if (newsrcuri != null) {
 				root.setUserObject("Mappings for: " + newsrcuri);
 			} else {
@@ -231,8 +220,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			nodeStructureChanged(root);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-		} finally {
-			addTreeModelListener(controller);
 		}
 	}
 
@@ -309,20 +296,16 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 */
 	public void allMappingsRemoved() {
 		try {
-			removeTreeModelListener(controller);
 			root.removeAllChildren();
 			nodeStructureChanged(root);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-		} finally {
-			addTreeModelListener(controller);
 		}
 	}
 
 	@Override
 	public void ontologyChanged() {		
 		try {
-			removeTreeModelListener(controller);
 			DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
 			if(ds!=null){
 				ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
@@ -340,8 +323,6 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-		} finally {
-			addTreeModelListener(controller);
 		}
 	}
 	
