@@ -707,7 +707,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				JOptionPane.YES_NO_OPTION) == JOptionPane.CANCEL_OPTION) {
 			return;
 		}
-
+		// The manager panel can handle multiple deletions.
 		TreePath[] currentSelection = treeMappingsTree.getSelectionPaths();
 		MappingController controller = mapc;
 		URI srcuri = dsc.getCurrentDataSource().getSourceID();
@@ -719,7 +719,6 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				controller.deleteMapping(srcuri, (String) mappingnode.getMappingID());
 			}
 		}
-		registerAction();
 	}
 
 	private void addMappingButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addMappingButtonActionPerformed
