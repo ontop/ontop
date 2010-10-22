@@ -15,7 +15,6 @@ package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
 import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.api.controller.QueryControllerListener;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
@@ -51,7 +50,6 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -61,12 +59,12 @@ import javax.swing.tree.TreeSelectionModel;
  * 
  * @author mariano
  */
-public class SavedQueriesPanel extends javax.swing.JPanel implements
-		QueryControllerListener {
+public class SavedQueriesPanel extends javax.swing.JPanel {
 
 	// private static final long serialVersionUID = 6920100822784727963L;
 	public Vector<SavedQueriesPanelListener> listeners;
 	private QueryController queryController = null;
+	private QueryControllerTreeModel queryControllerModel;
 	private String currentQuery = null;
 	private QueryTreeElement currentId = null;
 
@@ -81,24 +79,14 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		TreeDropTarget dt = new TreeDropTarget(treeSavedQueries);
 		listeners = new Vector<SavedQueriesPanelListener>();
 		
-		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.queryController
-				.getTreeModel().getRoot();
-		DefaultTreeModel obj = new DefaultTreeModel(root);
-
-		QueryControllerTreeModel queryControllerModel = this.queryController
-				.getTreeModel();
-
+		queryControllerModel =  new QueryControllerTreeModel();
+		queryControllerModel.synchronize(queryController.getElements());
 		treeSavedQueries.setModel(queryControllerModel);
 		treeSavedQueries.setCellRenderer(new SavedQueriesTreeCellRenderer());
 		treeSavedQueries.getSelectionModel().setSelectionMode(
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
-		treeSavedQueries.expandPath(new TreePath(root.getPath()));
 
-		/**
-		 * Keep this in this position to guarantee the proper order for calling
-		 * of the listeners
-		 */
-		this.queryController.addListener(this);
+   	queryController.addListener(queryControllerModel);
 
 		treeSavedQueries.addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
@@ -264,10 +252,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 	public void elementAdded(QueryControllerEntity element) {
 		if (element instanceof QueryControllerGroup) {
 			QueryControllerGroup elementGroup = (QueryControllerGroup) element;
-			QueryControllerTreeModel queryControllerT = this.queryController
-					.getTreeModel();
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerT
-					.getNode(elementGroup.getID());
+			String nodeId = elementGroup.getID();
+			DefaultMutableTreeNode node = 
+					(DefaultMutableTreeNode) queryControllerModel.getNode(nodeId);
 
 			treeSavedQueries.requestFocus();
 			treeSavedQueries.expandPath(new TreePath(node.getPath()));
@@ -278,10 +265,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 		}
 		if (element instanceof QueryControllerQuery) {
 			QueryControllerQuery elementQuery = (QueryControllerQuery) element;
-			QueryControllerTreeModel queryControllerT = this.queryController
-					.getTreeModel();
-
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerT
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel
 					.getNode(elementQuery.getID());
 
 			treeSavedQueries.requestFocus();
@@ -300,9 +284,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 			QueryControllerGroup group) {
 		QueryControllerQuery elementTreeQuery = (QueryControllerQuery) query;
 		QueryControllerGroup elementTreeGroup = (QueryControllerGroup) group;
-		QueryControllerTreeModel queryControllerT = this.queryController
-				.getTreeModel();
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerT
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel
 				.getElementQuery(elementTreeQuery.getID(), elementTreeGroup
 						.getID());
 
@@ -324,11 +306,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 	 */
 	public void elementChanged(QueryControllerQuery query,
 			QueryControllerGroup group) {
-		QueryControllerTreeModel queryControllerT = this.queryController
-				.getTreeModel();
 		QueryControllerQuery elementTreeQuery = (QueryControllerQuery) query;
 		QueryControllerGroup elementTreeGroup = (QueryControllerGroup) group;
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerT
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel
 				.getElementQuery(elementTreeQuery.getID(), elementTreeGroup
 						.getID());
 
@@ -343,11 +323,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 	 */
 	public void elementChanged(QueryControllerQuery query) {
 		QueryControllerQuery elementQuery = (QueryControllerQuery) query;
-		QueryControllerTreeModel queryControllerT = this.queryController
-				.getTreeModel();
-
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerT
-				.getNode(elementQuery.getID());
+    String nodeId = elementQuery.getID();
+    DefaultMutableTreeNode node = 
+        (DefaultMutableTreeNode) queryControllerModel.getNode(nodeId);
 
 		treeSavedQueries.requestFocus();
 		treeSavedQueries.expandPath(new TreePath(node.getPath()));
@@ -576,11 +554,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel implements
 	 * Reset and reload the content of the tree
 	 */
 	public void refreshQueryControllerTreeM() {
-		QueryControllerTreeModel queryCTreeM = (QueryControllerTreeModel) queryController
-				.getTreeModel();
-		queryCTreeM.reset();
-		queryCTreeM.init();
-		queryCTreeM.reload();
-		treeSavedQueries.setModel(queryCTreeM);
+		queryControllerModel.reset();
+		queryControllerModel.synchronize(queryController.getElements());
+    queryControllerModel.reload();
+		treeSavedQueries.setModel(queryControllerModel);
 	}
 }

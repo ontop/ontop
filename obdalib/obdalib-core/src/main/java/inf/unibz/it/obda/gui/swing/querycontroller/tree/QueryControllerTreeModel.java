@@ -13,7 +13,6 @@
  */
 package inf.unibz.it.obda.gui.swing.querycontroller.tree;
 
-import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.QueryControllerListener;
 
@@ -29,22 +28,19 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 		QueryControllerListener {
 
 	private static final long serialVersionUID = -5182895959682699380L;
-	private QueryController qc = null;
 
-	public QueryControllerTreeModel(QueryController qc) {
+	public QueryControllerTreeModel() {
 		super(new DefaultMutableTreeNode(""));
-		this.qc = qc;
 	}
 
 	/**
 	 * Takes all the existing nodes and constructs the tree.
 	 */
-	public void init() {
-		Vector<QueryControllerEntity> elements = qc.getElements();
-		if (elements.size() > 0) {
-			for (QueryControllerEntity treeElement : elements) {
-				if (treeElement instanceof QueryControllerGroup) {
-					QueryControllerGroup group = (QueryControllerGroup) treeElement;
+	public void synchronize(Vector<QueryControllerEntity> queryEntities) {
+	  if (queryEntities.size() > 0) {
+			for (QueryControllerEntity queryEntity : queryEntities) {
+				if (queryEntity instanceof QueryControllerGroup) {
+					QueryControllerGroup group = (QueryControllerGroup) queryEntity;
 					QueryGroupTreeElement queryGroupEle = new QueryGroupTreeElement(
 							group.getID());
 					Vector<QueryControllerQuery> queries = group.getQueries();
@@ -59,7 +55,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 					insertNodeInto(queryGroupEle,
 							(DefaultMutableTreeNode) root, root.getChildCount());
 				} else {
-					QueryControllerQuery query = (QueryControllerQuery) treeElement;
+					QueryControllerQuery query = (QueryControllerQuery) queryEntity;
 					QueryTreeElement queryTreeEle = new QueryTreeElement(query
 							.getID(), query.getQuery());
 					insertNodeInto(queryTreeEle, (DefaultMutableTreeNode) root,

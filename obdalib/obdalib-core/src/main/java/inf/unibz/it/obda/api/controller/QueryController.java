@@ -16,7 +16,6 @@ import inf.unibz.it.obda.codec.xml.query.XMLReader;
 import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerTreeModel;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -31,21 +30,13 @@ import org.w3c.dom.NodeList;
  */
 public class QueryController {
 
-	private static QueryController			instance		= null;
 	private Vector<QueryControllerEntity>	collection		= null;
 	private Vector<QueryControllerListener>	listeners		= null;
-	private QueryControllerTreeModel		treemodel		= null;
 	private boolean							eventDisabled	= false;
 
 	public QueryController() {
 		collection = new Vector<QueryControllerEntity>();
 		listeners = new Vector<QueryControllerListener>();
-		this.treemodel = new QueryControllerTreeModel(this);
-		addListener(treemodel);
-	}
-
-	public QueryControllerTreeModel getTreeModel() {
-		return treemodel;
 	}
 
 	public void addListener(QueryControllerListener listener) {
