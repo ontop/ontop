@@ -4,14 +4,13 @@ import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.api.controller.QueryController;
+import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.utils.io.FileUtils;
 import inf.unibz.it.utils.xml.XMLUtils;
 
@@ -19,11 +18,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,7 +43,6 @@ import org.w3c.dom.Node;
  * prefixes and if so they are loaded and administrated by the prefix manager. 
  * 
  * @author Manfred Gerstgrasser
- *
  */
 
 public class OWLAPIDataManager extends DataManager {
@@ -51,7 +52,6 @@ public class OWLAPIDataManager extends DataManager {
 	 */
 	private Map<String,String> prefixMap = null;
 	
-	
 	/**
 	 * The constructor. Creates a new instance of the OBDAPluginDataManager
 	 * @param apic the current api controller
@@ -60,7 +60,6 @@ public class OWLAPIDataManager extends DataManager {
 		super(apic, man);
 		prefixMap = new HashMap<String, String>();
 	}
-	
 	
 	/**
 	 * Load the given obda file. In contrast to the original it looks whether the obda
@@ -81,7 +80,6 @@ public class OWLAPIDataManager extends DataManager {
 		}
 		Document doc = null;
 		try {
-
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			doc = db.parse(obdaFile);
@@ -131,7 +129,6 @@ public class OWLAPIDataManager extends DataManager {
 	 * the data to the file.
 	 */
 	public void saveOBDAData(URI obdaFileURI, boolean useTempFile) throws IOException, ParserConfigurationException {
-
 		File tempFile = null;
 		File obdaFile = new File(obdaFileURI);
 
@@ -177,7 +174,6 @@ public class OWLAPIDataManager extends DataManager {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
 		Element root = doc.createElement("OBDA");
-//		root.setAttribute("version", prefixMap.get("version"));
 		Set<String> set = prefixMap.keySet();
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
@@ -186,16 +182,24 @@ public class OWLAPIDataManager extends DataManager {
 		}
 		doc.appendChild(root);
 
-		mapcontroller.dumpMappingsToXML(root);
-		dscontroller.dumpDatasourcesToXML(root);
+    // Create the Mapping element
+    Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = 
+        apic.getMappingController().getMappings();
+    dumpMappingsToXML(mappings);
 
-		Element dom_queries = queryController.toDOM(root);
-		root.appendChild(dom_queries);
+    // Create the Data Source element
+    HashMap<URI, DataSource> datasources = 
+        apic.getDatasourcesController().getAllSources();
+    dumpDatasourcesToXML(datasources);
+
+    // Create the Query element
+    Vector<QueryControllerEntity> queries =
+        apic.getQueryController().getElements();
+    dumpQueriesToXML(queries);
 
 		/***********************************************************************
 		 * Appending data of the registred controllers
 		 */
-
 		Set<Class<Assertion>> assertionClasses = assertionControllers.keySet();
 		for (Iterator<Class<Assertion>> assClassIt = assertionClasses.iterator(); assClassIt.hasNext();) {
 			Class<Assertion> assertionClass = assClassIt.next();
@@ -203,8 +207,7 @@ public class OWLAPIDataManager extends DataManager {
 			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
 			if (controller instanceof AbstractDependencyAssertionController) {
 				AbstractDependencyAssertionController depcon = (AbstractDependencyAssertionController) controller;
-				HashMap<URI, DataSource> sources = dscontroller.getAllSources();
-				Set<URI> ds = sources.keySet();
+				Set<URI> ds = datasources.keySet();
 				Iterator<URI> it = ds.iterator();
 				while (it.hasNext()) {
 					URI dsName = it.next();
@@ -222,8 +225,7 @@ public class OWLAPIDataManager extends DataManager {
 				}
 			} else if (controller instanceof AbstractConstraintAssertionController) {
 				AbstractConstraintAssertionController constcon = (AbstractConstraintAssertionController) controller;
-				HashMap<URI, DataSource> sources = dscontroller.getAllSources();
-				Set<URI> ds = sources.keySet();
+				Set<URI> ds = datasources.keySet();
 				Iterator<URI> it = ds.iterator();
 				while (it.hasNext()) {
 					URI dsName = it.next();
@@ -239,7 +241,6 @@ public class OWLAPIDataManager extends DataManager {
 						root.appendChild(controllerElement);
 					}
 				}
-
 			} else {
 				Collection<Assertion> assertions = controller.getAssertions();
 				if (assertions.isEmpty())
@@ -253,12 +254,6 @@ public class OWLAPIDataManager extends DataManager {
 				root.appendChild(controllerElement);
 			}
 		}
-
-		// if (doc.getDocumentElement() == null) {
-		// System.err.println("WARNING: there was no OBDA data to save");
-		// return;
-		// }
-
 		XMLUtils.saveDocumentToXMLFile(doc, file.toString());
 	}
 	
@@ -266,7 +261,6 @@ public class OWLAPIDataManager extends DataManager {
 	 * Returns the Map containing for each prefix the corresponding onotlogy URI
 	 * @return the prefix map
 	 */
-	
 	public Map<String,String> getPrefixMap(){
 		return prefixMap;
 	}
