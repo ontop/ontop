@@ -111,15 +111,12 @@ public class DataManager {
 	}
 
 	public void saveMappingsToFile(File file) throws ParserConfigurationException {
-		// MappingController mmanager = MappingController.getInstance();
-
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
 		Element root = doc.createElement("OBDA");
 		doc.appendChild(root);
 		mapcontroller.dumpMappingsToXML(root);
-
 	}
 
 	/***************************************************************************
@@ -132,7 +129,6 @@ public class DataManager {
 	 * the data to the file.
 	 */
 	public void saveOBDAData(URI obdaFileURI, boolean useTempFile) throws IOException, ParserConfigurationException {
-
 		File tempFile = null;
 		File obdaFile = new File(obdaFileURI);
 
@@ -193,10 +189,6 @@ public class DataManager {
 
 		mapcontroller.dumpMappingsToXML(root);
 		dscontroller.dumpDatasourcesToXML(root);
-		// IDConstraintController constraints_controller =
-		// IDConstraintController.getInstance();
-		// Element domconstraints = constraints_controller.toDOM(root);
-		// root.appendChild(domconstraints);
 
 		Element dom_queries = queryController.toDOM(root);
 		root.appendChild(dom_queries);
@@ -204,7 +196,6 @@ public class DataManager {
 		/***********************************************************************
 		 * Appending data of the registred controllers
 		 */
-
 		Set<Class<Assertion>> assertionClasses = assertionControllers.keySet();
 		for (Iterator<Class<Assertion>> assClassIt = assertionClasses.iterator(); assClassIt.hasNext();) {
 			Class<Assertion> assertionClass = assClassIt.next();
@@ -248,7 +239,6 @@ public class DataManager {
 						root.appendChild(controllerElement);
 					}
 				}
-
 			} else {
 				Collection<Assertion> assertions = controller.getAssertions();
 				if (assertions.isEmpty())
@@ -262,86 +252,18 @@ public class DataManager {
 				root.appendChild(controllerElement);
 			}
 		}
-
-		// if (doc.getDocumentElement() == null) {
-		// System.err.println("WARNING: there was no OBDA data to save");
-		// return;
-		// }
-
 		XMLUtils.saveDocumentToXMLFile(doc, file.toString());
 	}
-
-	// /***************************************************************************
-	// * Loads the mappings stored in the default file for all datasources
-	// */
-	// public static void loadMappingsFromFile(File file) {
-	// OBDAPluginController controller =
-	// OBDAPluginController.getCurrentInstance();
-	// Project project = controller.getCurrentProject();
-	// String projectname = project.getName();
-	// // TODO update to use URIs
-	// String projectpath = project.getProjectDirectoryFile().toString();
-	//
-	// // TODO update to use the default systems folder separator
-	// File file = new File(projectpath + File.separator + projectname +
-	// ".obda");
-	//
-	// if (!file.exists()) {
-	// return;
-	// }
-	// if (!file.canRead()) {
-	// System.err.print("WARNING: can't read the OBDA file for project " +
-	// projectname);
-	// }
-	// Document doc = null;
-	// try {
-	//
-	// DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	// DocumentBuilder db = dbf.newDocumentBuilder();
-	// doc = db.parse(file);
-	// doc.getDocumentElement().normalize();
-	//
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// return;
-	// }
-	//		
-	// Element root = doc.getDocumentElement(); //OBDA
-	// if (root.getNodeName() != "OBDA") {
-	// System.err.println("WARNING: obda info file should start with tag
-	// <OBDA>");
-	// return;
-	// }
-	//		
-	// NodeList children = root.getChildNodes();
-	// for (int i = 0; i < children.getLength(); i++) {
-	// if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
-	// Element node = (Element) children.item(i);
-	//
-	// if (node.getNodeName().equals("mappings")) {
-	// // FOUND MAPPINGS BLOCK
-	// MappingController manager = MappingController.getInstance();
-	// manager.importMappingsFromXML(node);
-	// }
-	// }
-	// }
-	//		
-	// System.out.println("OBDAPlugin DataManager: loading data finished.");
-	//
-	// }
 
 	/***************************************************************************
 	 * Returns the path to an file which has the same name as the given file but
 	 * .obda extension. Example For input /path1/file.cclk The output is
 	 * /path1/file.obda
-	 * 
 	 */
 	public URI getOBDAFile(URI urifile) {
-		// File file = new File(urifile);
 		if (urifile == null)
 			return null;
 
-		// String path = urifile.getParent();
 		String fileName = urifile.toString();
 		int extensionPos = fileName.lastIndexOf(".");
 		URI obdaFileName = null;
@@ -351,8 +273,7 @@ public class DataManager {
 		} else {
 			obdaFileName = URI.create(fileName.substring(0, extensionPos) + ".obda");
 		}
-		// String obdaFullPath = path + File.separator + obdaFileName;
-
+		
 		return obdaFileName;
 	}
 
@@ -360,7 +281,6 @@ public class DataManager {
 	 * Returns the path to an file which has the same name as the given file but
 	 * .owl extension. Example For input /path1/file.cclk The output is
 	 * /path1/file.owl
-	 * 
 	 */
 	public File getOWLFile(File file) {
 		if (file == null)
@@ -375,6 +295,7 @@ public class DataManager {
 		} else {
 			obdaFileName = fileName.substring(0, extensionPos) + ".owl";
 		}
+		
 		String obdaFullPath = path + File.separator + obdaFileName;
 		return new File(obdaFullPath);
 	}
@@ -383,15 +304,11 @@ public class DataManager {
 	 * loads ALL OBDA data from a file
 	 */
 	public void loadOBDADataFromURI(URI obdaFileURI) {
-//		System.out.println(obdaFileURI);
 		File obdaFile = new File(obdaFileURI);
 		if (obdaFile == null) {
 			System.err.println("OBDAPluging. OBDA file not found.");
 			return;
 		}
-
-		// File file = new File(projectpath + File.separator + projectname +
-		// ".obda");
 
 		if (!obdaFile.exists()) {
 			return;
@@ -401,12 +318,10 @@ public class DataManager {
 		}
 		Document doc = null;
 		try {
-
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			doc = db.parse(obdaFile);
 			doc.getDocumentElement().normalize();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -431,31 +346,24 @@ public class DataManager {
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element node = (Element) children.item(i);
-
 				if (node.getNodeName().equals("mappings")) {
 					// FOUND MAPPINGS BLOCK
-
 					try {
 						mapcontroller.importMappingsFromXML(node);
 					} catch (QueryParseException e) {
 						log.warn(e.getMessage(), e);
-
 					}
 				}
-
 				if ((major < 0) && (node.getNodeName().equals("datasource"))) {
 					// FOUND Datasources BLOCK
 					System.err
 							.println("WARNING: Loading a datasource using the old deprecated method. Update your .obda file by saving it again.");
-//					dscontroller.loadDatasourceFromXML(node);
 					DatasourceXMLCodec codec = new DatasourceXMLCodec();
 					DataSource source = codec.decode(node);
 					dscontroller.addDataSource(source);
-
 				}
 				if ((major > 0) && (node.getNodeName().equals(dsCodec.getElementTag()))) {
 					// FOUND Datasources BLOCK
-
 					DataSource source = dsCodec.decode(node);
 					URI uri= apic.getCurrentOntologyURI();
 					if(uri != null){
@@ -463,20 +371,10 @@ public class DataManager {
 					}
 					dscontroller.addDataSource(source);
 				}
-
 				if (node.getNodeName().equals("IDConstraints")) {
-					// System.err.println("WARNING: Ignoring IDConstraints tag");
-					// 
-					// IDConstraintController idcontroller =
-					// IDConstraintController.getInstance();
-					// idcontroller.fromDOM(node);
 				}
-
 				if (node.getNodeName().equals("SavedQueries")) {
 					// FOUND IDConstraints BLOCK
-					// OWLModel model =
-					// OBDAPluginController.getCurrentInstance().getCurrentOWLModel();
-
 					queryController.fromDOM(node);
 				}
 
@@ -484,7 +382,6 @@ public class DataManager {
 				 * Appending data to the registred controllers based on the XML
 				 * tags for them.
 				 */
-
 				Set<Class<Assertion>> assertionClasses = assertionControllers.keySet();
 				for (Iterator<Class<Assertion>> assClassIt = assertionClasses.iterator(); assClassIt.hasNext();) {
 					Class<Assertion> assertionClass = assClassIt.next();
@@ -508,7 +405,6 @@ public class DataManager {
 								}
 							}
 						}
-
 					} else if (controller instanceof AbstractConstraintAssertionController) {
 						if (node.getNodeName().equals(controller.getElementTag())) {
 							String ds = node.getAttribute("datasource_uri");
@@ -545,6 +441,5 @@ public class DataManager {
 				}
 			}
 		}
-//		System.out.println("OBDAPlugin DataManager: loading data finished.");
 	}
 }
