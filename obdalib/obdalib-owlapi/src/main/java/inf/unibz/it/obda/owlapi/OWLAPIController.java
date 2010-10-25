@@ -128,16 +128,16 @@ public class OWLAPIController extends APIController {
 
 
 
-	public void loadData(URI owlFile) {
+	public boolean loadData(URI owlFile) {
 		loadingData = true;
 		try {
 			URI obdafile = getIOManager().getOBDAFile(owlFile);
 			getIOManager().loadOBDADataFromURI(obdafile);
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
 			loadingData = false;
 		}
+		return loadingData;
 	}
 
 	public void saveData(URI owlFile) throws FileNotFoundException, ParserConfigurationException, IOException {
