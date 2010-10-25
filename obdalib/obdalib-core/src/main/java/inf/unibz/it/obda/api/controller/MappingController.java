@@ -150,38 +150,6 @@ public class MappingController implements DatasourcesControllerListener {
 		fireAllMappingsRemoved();
 	}
 
-	public void dumpMappingsToXML(Element root) {
-		Enumeration<URI> datasource_uris = mappings.keys();
-		while (datasource_uris.hasMoreElements()) {
-			dumpMappingsToXML(root, datasource_uris.nextElement());
-		}
-	}
-
-	// TODO modify to allow modularization and independence from what type of
-	// source it is
-	public void dumpMappingsToXML(Element root, URI datasource_uri) {
-		Document doc = root.getOwnerDocument();
-
-		Element mappingsgroup = doc.createElement("mappings");
-		mappingsgroup.setAttribute("sourceuri", datasource_uri.toString());
-		mappingsgroup.setAttribute("headclass", inf.unibz.it.ucq.domain.ConjunctiveQuery.class.toString());
-		mappingsgroup.setAttribute("bodyclass", inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery.class.toString());
-		root.appendChild(mappingsgroup);
-
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
-		int mappingcount = mappings.size();
-		for (int i = 0; i < mappingcount; i++) {
-			try {
-				OBDAMappingAxiom mapping = mappings.get(i);
-				Element mappingelement = codec.encode(mapping);
-				doc.adoptNode(mappingelement);
-				mappingsgroup.appendChild(mappingelement);
-			} catch (Exception e) {
-				log.warn(e.getMessage(), e);
-			}
-		}
-	}
-
 	public void duplicateMapping(URI srcuri, String id, String new_id) throws DuplicateMappingException {
 		OBDAMappingAxiom oldmapping = getMapping(srcuri, id);
 		OBDAMappingAxiom newmapping = null;

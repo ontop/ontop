@@ -59,25 +59,6 @@ public class DatasourcesController implements OntologyControllerListener {
 		listeners.add(listener);
 	}
 
-	@Deprecated
-	public void dumpDatasourcesToXML(Element root) {
-		Iterator<URI> datasource_names = datasources.keySet().iterator();
-		while (datasource_names.hasNext()) {
-			dumpDatasourceToXML(root, datasource_names.next());
-		}
-	}
-
-	@Deprecated
-	public void dumpDatasourceToXML(Element root, URI datasource_uri) {
-
-		DataSource source = getDataSource(datasources.get(datasource_uri).getSourceID());
-		Document doc = root.getOwnerDocument();
-
-		Element domDatasource = codec.encode(source);
-		doc.adoptNode(domDatasource);
-		root.appendChild(domDatasource);
-	}
-
 	public void fireAllDatasourcesDeleted() {
 		for (DatasourcesControllerListener listener : listeners) {
 			listener.alldatasourcesDeleted();

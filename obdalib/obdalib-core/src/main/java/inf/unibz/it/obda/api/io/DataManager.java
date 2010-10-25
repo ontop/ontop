@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -16,13 +16,14 @@ import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.api.controller.QueryController;
+import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
+import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
+import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.io.FileUtils;
@@ -32,10 +33,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,9 +55,9 @@ import org.w3c.dom.NodeList;
 
 /*******************************************************************************
  * Coordinates the saving/loading of the data for the plugin
- * 
+ *
  * @author Mariano Rodriguez
- * 
+ *
  */
 public class DataManager {
 
@@ -65,30 +70,30 @@ public class DataManager {
 
 	protected HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>		assertionXMLCodecs				= null;
 
-	/***
-	 * The XML Codec used to save/load datasources
-	 */
-	DatasourceXMLCodec													dsCodec							= new DatasourceXMLCodec();
+	/** The XML codec to save/load data sources. */
+	protected DatasourceXMLCodec dsCodec;
 
-	protected DatasourcesController										dscontroller					= null;
+	/** The XML codec to save/load mappings. */
+	protected MappingXMLCodec mapCodec;
 
-	protected MappingController											mapcontroller					= null;
-
-	protected QueryController												queryController					= null;
+	/** The XML codec to save/load queries. */
+	protected XMLRenderer xmlRenderer;
 
 	protected PrefixManager			prefixManager = null;
-	
+
 	protected APIController apic = null;
-	
+
+	protected Element root;
+
 	Logger																log								= LoggerFactory
 																												.getLogger(DataManager.class);
 
 	public DataManager(APIController apic, PrefixManager pref) {
 		this.apic = apic;
-		this.dscontroller = apic.getDatasourcesController();
-		this.mapcontroller = apic.getMappingController();
-		this.queryController = apic.getQueryController();
-		this.prefixManager = pref;
+    this.prefixManager = pref;
+		dsCodec = new DatasourceXMLCodec();
+		mapCodec = new MappingXMLCodec(apic);
+		xmlRenderer = new XMLRenderer();
 		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 	}
@@ -102,7 +107,7 @@ public class DataManager {
 	/***************************************************************************
 	 * Removes the assertion controller which is currently linked to the given
 	 * assertionClass
-	 * 
+	 *
 	 * @param assertionClass
 	 */
 	public void removeAssertionController(Class<Assertion> assertionClass) {
@@ -116,7 +121,7 @@ public class DataManager {
 		Document doc = db.newDocument();
 		Element root = doc.createElement("OBDA");
 		doc.appendChild(root);
-		mapcontroller.dumpMappingsToXML(root);
+		dumpMappingsToXML(apic.getMappingController().getMappings());
 	}
 
 	/***************************************************************************
@@ -124,7 +129,7 @@ public class DataManager {
 	 * useTempFile is true, the mechanism will first attempt to save the data
 	 * into a temporary file. If this is successful it will attempt to replace
 	 * the specified file with the newly created temporarely file.
-	 * 
+	 *
 	 * If useTempFile is false, the procedure will attempt to directly save all
 	 * the data to the file.
 	 */
@@ -170,7 +175,9 @@ public class DataManager {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
-		Element root = doc.createElement("OBDA");
+
+		// Create the document root
+		root = doc.createElement("OBDA");
 		Set<String> prefs = prefixManager.getPrefixMap().keySet();
 		Iterator<String> sit = prefs.iterator();
 		while(sit.hasNext()){
@@ -187,11 +194,20 @@ public class DataManager {
 		}
 		doc.appendChild(root);
 
-		mapcontroller.dumpMappingsToXML(root);
-		dscontroller.dumpDatasourcesToXML(root);
+		// Create the Mapping element
+		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings =
+		    apic.getMappingController().getMappings();
+		dumpMappingsToXML(mappings);
 
-		Element dom_queries = queryController.toDOM(root);
-		root.appendChild(dom_queries);
+		// Create the Data Source element
+		HashMap<URI, DataSource> datasources =
+		    apic.getDatasourcesController().getAllSources();
+		dumpDatasourcesToXML(datasources);
+
+		// Create the Query element
+		Vector<QueryControllerEntity> queries =
+		    apic.getQueryController().getElements();
+		dumpQueriesToXML(queries);
 
 		/***********************************************************************
 		 * Appending data of the registred controllers
@@ -203,8 +219,7 @@ public class DataManager {
 			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
 			if (controller instanceof AbstractDependencyAssertionController) {
 				AbstractDependencyAssertionController depcon = (AbstractDependencyAssertionController) controller;
-				HashMap<URI, DataSource> sources = dscontroller.getAllSources();
-				Set<URI> ds = sources.keySet();
+				Set<URI> ds = datasources.keySet();
 				Iterator<URI> it = ds.iterator();
 				while (it.hasNext()) {
 					URI dsName = it.next();
@@ -222,8 +237,7 @@ public class DataManager {
 				}
 			} else if (controller instanceof AbstractConstraintAssertionController) {
 				AbstractConstraintAssertionController constcon = (AbstractConstraintAssertionController) controller;
-				HashMap<URI, DataSource> sources = dscontroller.getAllSources();
-				Set<URI> ds = sources.keySet();
+				Set<URI> ds = datasources.keySet();
 				Iterator<URI> it = ds.iterator();
 				while (it.hasNext()) {
 					URI dsName = it.next();
@@ -273,7 +287,7 @@ public class DataManager {
 		} else {
 			obdaFileName = URI.create(fileName.substring(0, extensionPos) + ".obda");
 		}
-		
+
 		return obdaFileName;
 	}
 
@@ -295,7 +309,7 @@ public class DataManager {
 		} else {
 			obdaFileName = fileName.substring(0, extensionPos) + ".owl";
 		}
-		
+
 		String obdaFullPath = path + File.separator + obdaFileName;
 		return new File(obdaFullPath);
 	}
@@ -349,7 +363,7 @@ public class DataManager {
 				if (node.getNodeName().equals("mappings")) {
 					// FOUND MAPPINGS BLOCK
 					try {
-						mapcontroller.importMappingsFromXML(node);
+						apic.getMappingController().importMappingsFromXML(node);
 					} catch (QueryParseException e) {
 						log.warn(e.getMessage(), e);
 					}
@@ -360,7 +374,7 @@ public class DataManager {
 							.println("WARNING: Loading a datasource using the old deprecated method. Update your .obda file by saving it again.");
 					DatasourceXMLCodec codec = new DatasourceXMLCodec();
 					DataSource source = codec.decode(node);
-					dscontroller.addDataSource(source);
+					apic.getDatasourcesController().addDataSource(source);
 				}
 				if ((major > 0) && (node.getNodeName().equals(dsCodec.getElementTag()))) {
 					// FOUND Datasources BLOCK
@@ -369,13 +383,13 @@ public class DataManager {
 					if(uri != null){
 						source.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,uri.toString());
 					}
-					dscontroller.addDataSource(source);
+					apic.getDatasourcesController().addDataSource(source);
 				}
 				if (node.getNodeName().equals("IDConstraints")) {
 				}
 				if (node.getNodeName().equals("SavedQueries")) {
 					// FOUND IDConstraints BLOCK
-					queryController.fromDOM(node);
+					apic.getQueryController().fromDOM(node);
 				}
 
 				/***************************************************************
@@ -390,7 +404,7 @@ public class DataManager {
 					if (controller instanceof AbstractDependencyAssertionController) {
 						if (node.getNodeName().equals(controller.getElementTag())) {
 							String ds = node.getAttribute("datasource_uri");
-							dscontroller.setCurrentDataSource(URI.create(ds));
+							apic.getDatasourcesController().setCurrentDataSource(URI.create(ds));
 							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
 							for (int j = 0; j < childrenAssertions.getLength(); j++) {
 								Element assertionElement = (Element) childrenAssertions.item(j);
@@ -408,7 +422,7 @@ public class DataManager {
 					} else if (controller instanceof AbstractConstraintAssertionController) {
 						if (node.getNodeName().equals(controller.getElementTag())) {
 							String ds = node.getAttribute("datasource_uri");
-							dscontroller.setCurrentDataSource(URI.create(ds));
+							apic.getDatasourcesController().setCurrentDataSource(URI.create(ds));
 							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
 							for (int j = 0; j < childrenAssertions.getLength(); j++) {
 								Element assertionElement = (Element) childrenAssertions.item(j);
@@ -442,4 +456,107 @@ public class DataManager {
 			}
 		}
 	}
+
+	/**
+	 * Save the mapping data as XML elements. The structure of the XML elements 
+	 * from the mapping data follows this construction:
+	 * <pre>
+	 * {@code
+	 * <mappings bodyclass=""
+	 *           headclass=""
+	 *           sourceuri="">
+	 *   <mapping id="">
+	 *     <CQ string="">
+	 *     <SQLQuery string="">
+	 *   </mapping>
+	 * </mappings>
+	 * }
+	 * </pre>
+	 *
+	 * @param mappings the hash table of the mapping data
+	 */
+	protected void dumpMappingsToXML(
+	    Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings) {
+	  Document doc = root.getOwnerDocument();
+	  Enumeration<URI> datasourceUris = mappings.keys();
+    URI datasourceUri = null;
+    while (datasourceUris.hasMoreElements()) {
+	    datasourceUri = datasourceUris.nextElement();
+
+      Element mappingGroup = doc.createElement("mappings");
+      mappingGroup.setAttribute("sourceuri", datasourceUri.toString());
+      mappingGroup.setAttribute("headclass", inf.unibz.it.ucq.domain.ConjunctiveQuery.class.toString());
+      mappingGroup.setAttribute("bodyclass", inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery.class.toString());
+      root.appendChild(mappingGroup);
+
+      ArrayList<OBDAMappingAxiom> axioms = mappings.get(datasourceUri);
+      int size = axioms.size();
+      for (int i = 0; i < size; i++) {
+        try {
+          OBDAMappingAxiom axiom = axioms.get(i);
+  	      Element axiomElement = mapCodec.encode(axiom);
+  	      doc.adoptNode(axiomElement);
+  	      mappingGroup.appendChild(axiomElement);
+        } catch (Exception e) {
+          log.warn(e.getMessage(), e);
+        }
+      }
+	  }
+  }
+
+	/**
+	 * Save the data-source data as XML elements. The structure of the XML 
+	 * elements from the data-source data follows this construction:
+   * <pre>
+   * {@code
+   * <dataSource databaseDriver=""
+   *             databaseName=""
+   *             databaseUrl=""
+   *             databaseUsername=""
+   * />
+   * }
+   * </pre>
+   * 
+	 * @param datasources the hash map of the data-source data.
+	 */
+  protected void dumpDatasourcesToXML(HashMap<URI, DataSource> datasources) {
+    Document doc = root.getOwnerDocument();
+    Iterator<URI> datasourceUris = datasources.keySet().iterator();
+    URI datasourceUri = null;
+    while (datasourceUris.hasNext()) {
+      datasourceUri = datasourceUris.next();
+      DataSource datasource = datasources.get(datasourceUri);
+
+      Element datasourceElement = dsCodec.encode(datasource);
+  	  doc.adoptNode(datasourceElement);
+  	  root.appendChild(datasourceElement);
+  	}
+  }
+
+  /**
+   * Save the query data as XML elements. The structure of the XML elements
+   * from the query data follows this construction:
+   * <pre>
+   * {@code
+   * <SavedQueries>
+   *  <QueryGroup>
+   *    <Query id="" text="" />
+   *    <Query id="" text="" />
+   *    <Query id="" text="" />
+   *  </QueryGroup>
+   * </SavedQueries>
+   * }
+   * </pre>
+   * 
+   * @param queries the vector of the query entities.
+   */
+  protected void dumpQueriesToXML(Vector<QueryControllerEntity> queries) {
+    Document doc = root.getOwnerDocument();
+    Element savedQueryElement = doc.createElement("SavedQueries");
+    for (QueryControllerEntity query : queries) {
+      Element queryElement = xmlRenderer.render(savedQueryElement, query);
+      savedQueryElement.appendChild(queryElement);
+    }
+    root.appendChild(savedQueryElement);
+  }
 }

@@ -173,17 +173,6 @@ public class QueryController {
 		}
 	}
 
-	public Element toDOM(Element parent) {
-		Document doc = parent.getOwnerDocument();
-		XMLRenderer xmlrendrer = new XMLRenderer();
-		Element savedqueries = doc.createElement("SavedQueries");
-		for (QueryControllerEntity element : collection) {
-			Element xmlconstraint = xmlrendrer.render(savedqueries, element);
-			savedqueries.appendChild(xmlconstraint);
-		}
-		return savedqueries;
-	}
-
 	/**
 	 * Searches a group and returns the object else returns null
 	 */
