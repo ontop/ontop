@@ -150,29 +150,6 @@ public class QueryController {
 		}
 	}
 
-	public void fromDOM(Element idconstraints) {
-		NodeList xml_elements = idconstraints.getChildNodes();
-		XMLReader xml_reader = new XMLReader();
-
-		for (int i = 0; i < xml_elements.getLength(); i++) {
-			Node node = xml_elements.item(i);
-			if (node instanceof Element) {
-				Element element = (Element) xml_elements.item(i);
-				if (element.getNodeName().equals("Query")) {
-					QueryControllerQuery query = xml_reader.readQuery(element);
-					addQuery(query.getQuery(), query.getID());
-				} else if ((element.getNodeName().equals("QueryGroup"))) {
-					QueryControllerGroup group = xml_reader.readQueryGroup(element);
-					createGroup(group.getID());
-					Vector<QueryControllerQuery> queries = group.getQueries();
-					for (QueryControllerQuery query : queries) {
-						addQuery(query.getQuery(), query.getID(), group.getID());
-					}
-				}
-			}
-		}
-	}
-
 	/**
 	 * Searches a group and returns the object else returns null
 	 */

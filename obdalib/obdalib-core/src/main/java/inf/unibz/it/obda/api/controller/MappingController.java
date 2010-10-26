@@ -288,42 +288,6 @@ public class MappingController implements DatasourcesControllerListener {
 		return treemodel;
 	}
 
-	// TODO modify to allow modularization and independence from what type of
-	// source it is
-	public void importMappingsFromXML(Element mappings) throws QueryParseException {
-		URI source = URI.create(mappings.getAttribute("sourceuri"));
-		NodeList childs = mappings.getChildNodes();
-
-		for (int i = 0; i < childs.getLength(); i++) {
-			try {
-				Node child = childs.item(i);
-				if (!(child instanceof Element)) {
-					continue;
-				}
-				Element mapping = (Element) child;
-				RDBMSOBDAMappingAxiom newmapping = (RDBMSOBDAMappingAxiom) codec.decode(mapping);
-				if(newmapping == null){
-					throw new Exception("Error while parsing the conjunctive query of the mapping "+mapping.getAttribute("id"));
-				}
-				
-				try {
-					insertMapping(source, newmapping);
-				} catch (DuplicateMappingException e) {
-					log.warn("duplicate mapping detected while trying to load mappings from file. Ignoring it. Datasource URI: " + source
-							+ " Mapping ID: " + newmapping.getId());
-				}
-			} catch (Exception e) {
-				try {
-					log.warn("Error loading mapping with id: {}", ((Element) childs.item(i)).getAttribute("id"));
-					log.debug(e.getMessage(), e);
-				} catch (Exception e2) {
-					log.warn("Error loading mapping");
-					log.debug(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
 	/***************************************************************************
 	 * Retrives the position of the mapping identified by mapping_id in the
 	 * array of mappings for the given datasource.

@@ -17,13 +17,18 @@ import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
+import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
 import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
+import inf.unibz.it.obda.codec.xml.query.XMLReader;
 import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
+import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.io.FileUtils;
@@ -76,9 +81,12 @@ public class DataManager {
 	/** The XML codec to save/load mappings. */
 	protected MappingXMLCodec mapCodec;
 
-	/** The XML codec to save/load queries. */
+	/** The XML codec to save queries. */
 	protected XMLRenderer xmlRenderer;
 
+	/** The XML codec to load queries. */
+	protected XMLReader xmlReader;
+	
 	protected PrefixManager			prefixManager = null;
 
 	protected APIController apic = null;
@@ -94,6 +102,7 @@ public class DataManager {
 		dsCodec = new DatasourceXMLCodec();
 		mapCodec = new MappingXMLCodec(apic);
 		xmlRenderer = new XMLRenderer();
+		xmlReader = new XMLReader();
 		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 	}
@@ -328,7 +337,8 @@ public class DataManager {
 			return;
 		}
 		if (!obdaFile.canRead()) {
-			System.err.print("WARNING: can't read the OBDA file:" + obdaFile.toString());
+			System.err.print("WARNING: can't read the OBDA file:" + 
+			    obdaFile.toString());
 		}
 		Document doc = null;
 		try {
@@ -343,7 +353,8 @@ public class DataManager {
 
 		Element root = doc.getDocumentElement(); // OBDA
 		if (root.getNodeName() != "OBDA") {
-			System.err.println("WARNING: obda info file should start with tag <OBDA>");
+			System.err.println("WARNING: obda info file should start with " +
+			    "tag <OBDA>");
 			return;
 		}
 
@@ -360,36 +371,39 @@ public class DataManager {
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element node = (Element) children.item(i);
-				if (node.getNodeName().equals("mappings")) {
-					// FOUND MAPPINGS BLOCK
+				if (node.getNodeName().equals("mappings")) { // Found mapping block
 					try {
-						apic.getMappingController().importMappingsFromXML(node);
+				    URI source = URI.create(node.getAttribute("sourceuri"));
+						importMappingsFromXML(source, node);
 					} catch (QueryParseException e) {
 						log.warn(e.getMessage(), e);
 					}
 				}
 				if ((major < 0) && (node.getNodeName().equals("datasource"))) {
-					// FOUND Datasources BLOCK
-					System.err
-							.println("WARNING: Loading a datasource using the old deprecated method. Update your .obda file by saving it again.");
-					DatasourceXMLCodec codec = new DatasourceXMLCodec();
-					DataSource source = codec.decode(node);
+					// Found old data-source block
+					System.err.println("WARNING: Loading a datasource using the old " +
+							    "deprecated method. Update your .obda file by saving " +
+							    "it again.");
+					DataSource source = dsCodec.decode(node);
 					apic.getDatasourcesController().addDataSource(source);
 				}
-				if ((major > 0) && (node.getNodeName().equals(dsCodec.getElementTag()))) {
-					// FOUND Datasources BLOCK
+				String newDatasourceTag = dsCodec.getElementTag();
+				if ((major > 0) && (node.getNodeName().equals(newDatasourceTag))) {
+					// Found new data-source block
 					DataSource source = dsCodec.decode(node);
 					URI uri= apic.getCurrentOntologyURI();
-					if(uri != null){
-						source.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,uri.toString());
+					if (uri != null) {
+						source.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,
+						                    uri.toString());
 					}
 					apic.getDatasourcesController().addDataSource(source);
 				}
 				if (node.getNodeName().equals("IDConstraints")) {
+				  // TODO Implement something.
 				}
 				if (node.getNodeName().equals("SavedQueries")) {
-					// FOUND IDConstraints BLOCK
-					apic.getQueryController().fromDOM(node);
+					// Found queries block
+				  importQueriesFromXML(node);
 				}
 
 				/***************************************************************
@@ -558,5 +572,84 @@ public class DataManager {
       savedQueryElement.appendChild(queryElement);
     }
     root.appendChild(savedQueryElement);
+  }
+  
+  /**
+   * Import the mapping data from XML elements. Each mapping has a head class, 
+   * a body class and a data-source URI. The method first reads the mapping Id
+   * and then saves the pair of mapping head and body as a mapping axiom.
+   * 
+   * @param datasource the data source URI in which the mappings are linked.
+   * @param mappingRoot the mapping root in the XML file.
+   * @throws QueryParseException
+   * @see ConjunctuveQuery
+   * @see RDBMSSQLQuery
+   * @see RDBMSOBDAMappingAxiom
+   */
+  protected void importMappingsFromXML(URI datasource, Element mappingRoot) 
+      throws QueryParseException {
+    NodeList childs = mappingRoot.getChildNodes();
+    for (int i = 0; i < childs.getLength(); i++) {
+      try {
+        Node child = childs.item(i);
+        if (!(child instanceof Element)) {
+          continue;
+        }
+        Element mapping = (Element) child;
+        RDBMSOBDAMappingAxiom mappingAxiom = 
+            (RDBMSOBDAMappingAxiom) mapCodec.decode(mapping);
+        if(mappingAxiom == null){
+          throw new Exception("Error while parsing the conjunctive query of "+ 
+              "the mapping " + mapping.getAttribute("id"));
+        }        
+        try {
+          apic.getMappingController().insertMapping(datasource, mappingAxiom);
+        } catch (DuplicateMappingException e) {
+          log.warn("duplicate mapping detected while trying to load mappings " +
+              "from file. Ignoring it. Datasource URI: " + datasource + " " +
+              "Mapping ID: " + mappingAxiom.getId());
+        }
+      } catch (Exception e) {
+        try {
+          log.warn("Error loading mapping with id: {}", 
+              ((Element) childs.item(i)).getAttribute("id"));
+          log.debug(e.getMessage(), e);
+        } catch (Exception e2) {
+          log.warn("Error loading mapping");
+          log.debug(e.getMessage(), e);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Import the query data from XML elements. Several queries can be
+   * categorized into one group. The method saves all the queries according
+   * to this hierarchical structure.
+   * 
+   * @param queryRoot the query root in the XML file.
+   * @see QueryControllerGroup
+   * @see QueryControllerQuery
+   */
+  protected void importQueriesFromXML(Element queryRoot) {
+    NodeList childs = queryRoot.getChildNodes();
+    for (int i = 0; i < childs.getLength(); i++) {
+      Node node = childs.item(i);
+      if (node instanceof Element) {
+        Element element = (Element) node;
+        if (element.getNodeName().equals("Query")) {
+          QueryControllerQuery query = xmlReader.readQuery(element);
+          apic.getQueryController().addQuery(query.getQuery(), query.getID());
+        } else if ((element.getNodeName().equals("QueryGroup"))) {
+          QueryControllerGroup group = xmlReader.readQueryGroup(element);
+          apic.getQueryController().createGroup(group.getID());
+          Vector<QueryControllerQuery> queries = group.getQueries();
+          for (QueryControllerQuery query : queries) {
+            apic.getQueryController().addQuery(query.getQuery(), query.getID(), 
+                group.getID());
+          }
+        }
+      }
+    }
   }
 }
