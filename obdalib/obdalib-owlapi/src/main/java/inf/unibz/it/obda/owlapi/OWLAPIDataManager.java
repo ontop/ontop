@@ -186,8 +186,6 @@ public class OWLAPIDataManager extends DataManager {
     Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = 
         apic.getMappingController().getMappings();
     dumpMappingsToXML(mappings);
-
-    // Create the Data Source element
     HashMap<URI, DataSource> datasources = 
         apic.getDatasourcesController().getAllSources();
     dumpDatasourcesToXML(datasources);

@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.io.DataManager;
+import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.constraints.controller.RDBMSCheckConstraintController;
 import inf.unibz.it.obda.constraints.controller.RDBMSForeignKeyConstraintController;
@@ -26,6 +26,8 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.semanticweb.owl.model.AddAxiom;
@@ -36,6 +38,10 @@ import org.semanticweb.owl.model.OWLOntologyChangeException;
 import org.semanticweb.owl.model.OWLOntologyChangeListener;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.RemoveAxiom;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 public class OWLAPIController extends APIController {
 
@@ -43,9 +49,14 @@ public class OWLAPIController extends APIController {
 	URI					currentOntologyPhysicalURI	= null;
 	OWLOntologyManager	mmger						= null;
 	private OWLOntology	root;
+	private PrefixManager prefixmanager = null;
 
 	public OWLAPIController(OWLOntologyManager owlman, OWLOntology root) {
 		super();
+//		mapcontroller = new SynchronizedMappingController(dscontroller, this);
+		mapcontroller = new MappingController(dscontroller, this);
+		prefixmanager = new PrefixManager();
+		ioManager = new OWLAPIDataManager(this, prefixmanager);
 		mmger = owlman;
 		currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
 		this.root = root;
@@ -54,7 +65,6 @@ public class OWLAPIController extends APIController {
 		apicoupler = new OWLAPICoupler(this, owlman, root,(OWLAPIDataManager) ioManager);
 		setCurrentOntologyURI(root.getURI());
 		setCoupler(apicoupler);
-		
 		try {
 			setCurrentOntologyURI(root.getURI());	
 			RDBMSForeignKeyConstraintController fkc = new RDBMSForeignKeyConstraintController();
@@ -130,6 +140,64 @@ public class OWLAPIController extends APIController {
 
 	public boolean loadData(URI owlFile) {
 		loadingData = true;
+		
+		File obdaFile = new File(getIOManager().getOBDAFile(owlFile));
+		if (obdaFile == null) {
+			System.err.println("OBDAPluging. OBDA file not found.");
+			return false;
+		}
+		if (!obdaFile.exists()) {
+			return false;
+		}
+		if (!obdaFile.canRead()) {
+			System.err.print("WARNING: can't read the OBDA file:" + obdaFile.toString());
+		}
+		Document doc = null;
+		try {
+
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			doc = db.parse(obdaFile);
+			doc.getDocumentElement().normalize();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		Element root = doc.getDocumentElement(); // OBDA
+		if (root.getNodeName() != "OBDA") {
+			System.err.println("WARNING: obda info file should start with tag <OBDA>");
+			return false;
+		}
+		NamedNodeMap att = root.getAttributes();
+		if(att.getLength()>1){
+			for(int i=0;i<att.getLength();i++){
+				Node n = att.item(i);
+				String name = n.getNodeName();
+				String value = n.getNodeValue();
+				if(name.equals("xml:base")){
+					prefixmanager.addUri(URI.create(value), name);
+				}else if (name.equals("version")){
+					prefixmanager.addUri(URI.create(value), name);
+				}else if (name.equals("xmlns")){
+					prefixmanager.addUri(URI.create(value), name);
+				}else if (value.endsWith(".owl#")){
+					String[] aux = name.split(":");
+					prefixmanager.addUri(URI.create(value), aux[1]);
+				}else if(name.equals("xmlns:owl2xml")){
+					String[] aux = name.split(":");
+					prefixmanager.addUri(URI.create(value), aux[1]);
+				}
+			}
+		}else{
+			String ontoUrl = getCurrentOntologyURI().toString();
+			int i = ontoUrl.lastIndexOf("/");
+			String ontoName = ontoUrl.substring(i+1,ontoUrl.length()-4); //-4 because we want to remove the .owl suffix
+			prefixmanager.addUri(URI.create(ontoUrl),"xml:base");
+			prefixmanager.addUri(URI.create(ontoUrl),"xmlns");
+			prefixmanager.addUri(URI.create(ontoUrl+"#"),ontoName);
+		}		
 		try {
 			URI obdafile = getIOManager().getOBDAFile(owlFile);
 			getIOManager().loadOBDADataFromURI(obdafile);
