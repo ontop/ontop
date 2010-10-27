@@ -470,6 +470,10 @@ public class DataManager {
 			}
 		}
 	}
+	
+	public PrefixManager getPrefixManager(){
+		return prefixManager;
+	}
 
 	/**
 	 * Save the mapping data as XML elements. The structure of the XML elements 
