@@ -8,28 +8,11 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
-import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.event.EventType;
-import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
-import org.protege.editor.owl.model.event.OWLModelManagerListener;
-import org.protege.editor.owl.model.find.EntityFinder;
-import org.protege.editor.owl.ui.prefix.PrefixMapper;
 import org.protege.editor.owl.ui.prefix.PrefixMapperManager;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLException;
-import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyChange;
-import org.semanticweb.owl.model.OWLOntologyChangeException;
-import org.semanticweb.owl.model.OWLOntologyChangeListener;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.OWLOntologyImportsClosureSetProvider;
-import org.semanticweb.owl.util.OWLOntologyMerger;
 
 /***
  * 
