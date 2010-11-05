@@ -169,11 +169,11 @@ public class OWLAPIDataManager extends DataManager {
 	 * Saves all obda data including the prefixes stored by the prefix mapper
 	 */
 	public void saveOBDAData(URI fileuri) throws ParserConfigurationException, FileNotFoundException, IOException {
-		File file = new File(fileuri);
+		File file = new File(fileuri.toString());
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
-		Element root = doc.createElement("OBDA");
+		root = doc.createElement("OBDA");
 		Set<String> set = prefixMap.keySet();
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
@@ -183,17 +183,17 @@ public class OWLAPIDataManager extends DataManager {
 		doc.appendChild(root);
 
     // Create the Mapping element
-    Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = 
+		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = 
         apic.getMappingController().getMappings();
-    dumpMappingsToXML(mappings);
-    HashMap<URI, DataSource> datasources = 
+    	dumpMappingsToXML(mappings);
+    	HashMap<URI, DataSource> datasources = 
         apic.getDatasourcesController().getAllSources();
-    dumpDatasourcesToXML(datasources);
+    	dumpDatasourcesToXML(datasources);
 
     // Create the Query element
-    Vector<QueryControllerEntity> queries =
+    	Vector<QueryControllerEntity> queries =
         apic.getQueryController().getElements();
-    dumpQueriesToXML(queries);
+    	dumpQueriesToXML(queries);
 
 		/***********************************************************************
 		 * Appending data of the registred controllers
