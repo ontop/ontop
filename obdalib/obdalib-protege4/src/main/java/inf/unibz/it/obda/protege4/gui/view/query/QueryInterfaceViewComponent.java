@@ -17,9 +17,7 @@ import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.domain.UnionOfConjunctiveQueries;
-import inf.unibz.it.ucq.exception.QueryResultException;
 import inf.unibz.it.ucq.parser.sparql.UCQTranslator;
-import inf.unibz.it.ucq.renderer.UCQDatalogStringRenderer;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultTableModel;
 import inf.unibz.it.utils.swing.TextMessageDialog;
@@ -48,7 +46,6 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.Logger;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntologyChange;
@@ -60,7 +57,7 @@ import com.hp.hpl.jena.query.QueryParseException;
 
 public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implements SavedQueriesPanelListener{
 	/**
-	 * 
+	 *
 	 */
 	private static final long			serialVersionUID		= 1L;
 	private static final Logger			log						= Logger.getLogger(QueryInterfaceViewComponent.class);
@@ -116,7 +113,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		// QueryController.getInstance().addListener(panel_query_interface);
 
-		
+
 		panel_view_results.setCountAllTuplesActionForUCQ(new OBDADataQueryAction(){
 
 //			@Override
@@ -161,9 +158,9 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						e.printStackTrace();
 					}
 				} else if(reasoner instanceof DataQueryReasoner){
-					
+
 					try {
-						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;	
+						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
 						dqr.startProgressMonitor("Counting tuples...");
 						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
 								.getModelManager());
@@ -178,16 +175,16 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						.showMessageDialog(null,
 								"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
 					}
-					
+
 				}else {
 					JOptionPane
 							.showMessageDialog(null,
 									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
 				}
 			}
-			
+
 		});
-		
+
 		panel_view_results.setCountAllTuplesActionForEQL(new OBDADataQueryAction(){
 
 //			@Override
@@ -205,7 +202,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 				if (reasoner instanceof UCQReasoner) {
-					
+
 					try {
 						String sql = ((UCQReasoner) reasoner).unfoldEQL(query);
 						String newsql = "SELECT count(*) FROM (" +sql+") t1";
@@ -232,14 +229,14 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 							"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
 				}
 			}
-			
+
 		});
-		
+
 		panel_query_interface.setExecuteUCQAction(new OBDADataQueryAction() {
-			
+
 			private long time =0;
 			private int rows =0;
-			
+
 			public void run(String query, QueryInterfacePanel panel) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 				if (reasoner instanceof UCQReasoner) {
@@ -272,7 +269,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						dialog.setVisible(true);
 					}
 				}else if(reasoner instanceof DataQueryReasoner){
-					
+
 					try {
 						long startTime = System.currentTimeMillis();
 						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
@@ -295,7 +292,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
-					
+
 				}else {
 					JOptionPane
 							.showMessageDialog(null,
@@ -312,11 +309,11 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			}
 
 		});
-		
+
 		panel_query_interface.setRetrieveEQLUnfoldingAction(new OBDADataQueryAction() {
-			
+
 			private long time = 0;
-			
+
 			public long getExecutionTime() {
 				return time;
 			}
@@ -328,11 +325,11 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			public void run(String query, QueryInterfacePanel pane) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 				if (reasoner instanceof UCQReasoner) {
-					
+
 					try {
 						long startTime = System.currentTimeMillis();
 						String sql = ((UCQReasoner) reasoner).unfoldEQL(query);
-						
+
 //						JTextArea textArea = new JTextArea("\n\nQuery expansion:\n\n" + sql);
 //						textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
 //						JScrollPane scroll = new JScrollPane(textArea);
@@ -358,7 +355,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 //
 //						dialog.setVisible(true);
 //						closeButton.requestFocus();
-						
+
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 						TextMessageFrame panel = new TextMessageFrame();
@@ -372,12 +369,12 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
 						panel.updateStatus(msg);
 						panel.setVisible(true);
-						
+
 					} catch (Exception e) {
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
-					
+
 				} else {
 					JOptionPane
 					.showMessageDialog(null,
@@ -385,12 +382,12 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		}
 			}
 		});
-		
+
 		panel_query_interface.setExecuteEQLAction(new OBDADataQueryAction() {
-			
+
 			private long time =0;
 			private int rows =0;
-			
+
 			public void run(String query, QueryInterfacePanel panel) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 				if (reasoner instanceof UCQReasoner) {
@@ -429,28 +426,28 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		});
 
 		panel_query_interface.setRetrieveUCQExpansionAction(new OBDADataQueryAction() {
-			
+
 			private long time =0;
-			private int rows =0;
-			
+			private final int rows =0;
+
 			public void run(String query,QueryInterfacePanel pane) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 				if (reasoner instanceof UCQReasoner) {
-					try {
-						long startTime = System.currentTimeMillis();
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						Query sparqlQuery = QueryFactory.create(prefix + "\n" + query);
-						UCQTranslator translator = new UCQTranslator();
-						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-						UnionOfConjunctiveQueries result = ((UCQReasoner) reasoner).getRewritting(ucq);
-						String s = "";
-						if(result != null){
-							UCQDatalogStringRenderer ren = new UCQDatalogStringRenderer(obdaController);
-							s = ren.encode(result);
-						}
+//					try {
+//						long startTime = System.currentTimeMillis();
+//						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
+//								.getModelManager());
+//						prefixAction.run();
+//						String prefix = (String) prefixAction.getResult();
+//						Query sparqlQuery = QueryFactory.create(prefix + "\n" + query);
+//						UCQTranslator translator = new UCQTranslator();
+//						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
+//						UnionOfConjunctiveQueries result = ((UCQReasoner) reasoner).getRewritting(ucq);
+//						String s = "";
+//						if(result != null){
+//							UCQDatalogStringRenderer ren = new UCQDatalogStringRenderer(obdaController);
+//							s = ren.encode(result);
+//						}
 //						JTextArea textArea = new JTextArea("\n\nQuery expansion:\n\n" + result);
 //						textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
 //						JScrollPane scroll = new JScrollPane(textArea);
@@ -476,27 +473,27 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 //
 //						dialog.setVisible(true);
 //						closeButton.requestFocus();
-						
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						TextMessageFrame panel = new TextMessageFrame();
-						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-						panel.displaySQL(s);
-						panel.setTitle("Query Expansion");
-						panel.updateBoderTitel("Query Expansion");
-						double aux = time;
-						aux = aux/1000;
-						String msg = "Total expansion time: " + String.valueOf(aux) + " sec";
-						panel.updateStatus(msg);
-						panel.setVisible(true);
-						
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
-					}
+
+//						long end = System.currentTimeMillis();
+//						time = end - startTime;
+//						TextMessageFrame panel = new TextMessageFrame();
+//						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
+//						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
+//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+//						panel.displaySQL(s);
+//						panel.setTitle("Query Expansion");
+//						panel.updateBoderTitel("Query Expansion");
+//						double aux = time;
+//						aux = aux/1000;
+//						String msg = "Total expansion time: " + String.valueOf(aux) + " sec";
+//						panel.updateStatus(msg);
+//						panel.setVisible(true);
+//
+//					} catch (Exception e) {
+//						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
+//					}
 				} else if(reasoner instanceof DataQueryReasoner){
-					
+
 					try {
 						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
 						long startTime = System.currentTimeMillis();
@@ -528,7 +525,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						e.printStackTrace();
 						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
-					
+
 				} else {
 					JOptionPane
 							.showMessageDialog(null,
@@ -547,11 +544,11 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		});
 
 		panel_query_interface.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction() {
-			
-			
+
+
 			private long time =0;
-			private int rows =0;
-			
+			private final int rows =0;
+
 			public void run(String query, QueryInterfacePanel pane) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
 				if (reasoner instanceof UCQReasoner) {
@@ -609,7 +606,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					}
 				} else if(reasoner instanceof DataQueryReasoner){
 					DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-					
+
 					try {
 						long startTime = System.currentTimeMillis();
 						dqr.startProgressMonitor("Process Query...");
@@ -699,18 +696,18 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			}
 		}
 	}
-	
+
 	public class TextDialog extends JDialog {
-		
+
 		JTextArea textArea = new JTextArea("");
-		
+
 		public TextDialog() {
-			
+
 			textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
 			JScrollPane scroll = new JScrollPane(textArea);
 
 			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-			
+
 			setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
 					.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
 			getContentPane().setLayout(new GridBagLayout());
@@ -719,15 +716,15 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			c1.weightx = 1;
 			c1.weighty = 1;
 			c1.fill = GridBagConstraints.BOTH;
-			
+
 			getContentPane().add(scroll, c1);
-			
+
 			c1.anchor = GridBagConstraints.CENTER;
 			c1.weightx = 1;
 			c1.weighty = 1;
 			c1.fill = GridBagConstraints.HORIZONTAL;
-			
-			
+
+
 			JButton closeButton = new JButton("Close");
 			closeButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -737,13 +734,13 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 			JPanel south = new JPanel();
 			south.add(closeButton);
-			
-			
+
+
 			getContentPane().add(south, c1);
 			setSize(800, 600);
-			
+
 		}
-		
+
 		public void setContent(String content) {
 			textArea.setText(content);
 		}
