@@ -19,7 +19,11 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
-
+    <dependency>
+        <groupId>net.sourceforge.owlapi</groupId>
+        <artifactId>owlapi</artifactId>
+        <version>2.2.0-r1317</version>
+    </dependency> 
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
