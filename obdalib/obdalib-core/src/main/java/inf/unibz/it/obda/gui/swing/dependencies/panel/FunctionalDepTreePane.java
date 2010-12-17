@@ -25,8 +25,6 @@ import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNode;
 import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNodeRenderer;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -43,16 +41,18 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.obda.query.domain.Term;
+
 /**
  * The tree pane showing all functional dependencies associated the selected data source
  *
  * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 public class FunctionalDepTreePane extends JPanel implements MappingManagerPreferenceChangeListener{
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 7747935375532919184L;
 	/**
@@ -63,12 +63,12 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 	 * the RDBMS functional dependency controller
 	 */
 	private RDBMSFunctionalDependencyController fdController = null;
-	
+
 	private MappingManagerPreferences pref = null;
-	
+
     /** Creates new form FunctionalDepTreePane */
     public FunctionalDepTreePane(APIController apic) {
-    	
+
     	this.apic = apic;
     	pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
     	fdController = (RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
@@ -94,39 +94,39 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 					delete(selection);
 				}
 			}
-        	
+
         });
-        
+
         jButtonAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				addRDBMSFunctionalDependency();
-				
+
 			}
-        	
+
         });
         jButtonWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = Dependency_SelectMappingPane.gestInstance().getSelection();
 				Dependency_SelectMappingPane.gestInstance().createDialog("Create Functional Dependency", paths, RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY);
 			}
-        	
+
         });
         jButtonMine.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				Dependency_SelectMappingPane.gestInstance().showFunctionalDependencyMiningDialog(jTree1);
 			}
-        	
+
         });
     }
-    
+
     private void addRDBMSFunctionalDependency(){
-    	
-		apic.getDatasourcesController(); 
+
+		apic.getDatasourcesController();
 		FunctionalDependenciesTreeModel model =(FunctionalDependenciesTreeModel) jTree1.getModel();
 		DefaultAssertionTreeNode<RDBMSFunctionalDependency> node = new DefaultAssertionTreeNode<RDBMSFunctionalDependency>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
@@ -144,13 +144,13 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 		jTree1.setSelectionPath(path);
 		jTree1.startEditingAtPath(path);
     }
-    
+
     /**
      * adds a popup menu to the tree
      */
     private void addMenu(){
     	JPopupMenu menu = new JPopupMenu();
-    	
+
     	JMenuItem del = new JMenuItem();
     	del.setText("delete");
     	del.setToolTipText("deletes all selected Assertions");
@@ -160,12 +160,12 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 				if(selection != null){
 					delete(selection);
 				}
-			}	
+			}
     	});
-    	
+
     	menu.add(del);
     	menu.addSeparator();
-    	
+
     	JMenuItem validate = new JMenuItem();
     	validate.setEnabled(false);
     	validate.setText("Validate Dependency");
@@ -173,18 +173,18 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
     	validate.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = jTree1.getSelectionPaths();
 				if(paths != null){
 					validateRDBMSFunctionalDependencies(paths);
 				}
 			}
-    		
+
     	});
     	menu.add(validate);
     	jTree1.setComponentPopupMenu(menu);
     }
-    
+
     /**
      * deletes the selected assertions
      * @param selection current selection in the tree
@@ -195,76 +195,72 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 			Object o = path.getLastPathComponent();
 			if(o instanceof DefaultAssertionTreeNode){
 				DefaultAssertionTreeNode<RDBMSFunctionalDependency> node = (DefaultAssertionTreeNode<RDBMSFunctionalDependency>)o;
-				RDBMSFunctionalDependency dep = (RDBMSFunctionalDependency) node.getUserObject();
+				RDBMSFunctionalDependency dep = node.getUserObject();
 				fdController.removeAssertion(dep);
-				
-				
+
+
 			}
 		}
     }
-    
+
     /**
      * validates whether the data source fulfills the assertions
      * @param paths assertions to validate
      */
     private void validateRDBMSFunctionalDependencies(TreePath[] paths){
-    	
+
 		/*
 		 * Sample of an sql query produced by this method:
-		 SELECT a1.nid, a1.value FROM (Select id as nid, 2 as value, name from name) as a1 
-			WHERE ROW(a1.nid, a1.value) NOT IN 
+		 SELECT a1.nid, a1.value FROM (Select id as nid, 2 as value, name from name) as a1
+			WHERE ROW(a1.nid, a1.value) NOT IN
 		(SELECT nid, value FROM (Select id as nid, 2 as value, name from name) a2)
 		 */
     	for (int i=0;i<paths.length;i++){
 
     		Object o =  paths[i].getLastPathComponent();
     		if(!o.equals(jTree1.getModel().getRoot())){
-    		
+
 	    		DefaultAssertionTreeNode<RDBMSFunctionalDependency> node = (DefaultAssertionTreeNode<RDBMSFunctionalDependency>)o;
 	    		RDBMSFunctionalDependency dep = node.getUserObject();
 	    		RDBMSSQLQuery query1 = (RDBMSSQLQuery) dep.getSourceQueryOne();
 	    		RDBMSSQLQuery query2 = (RDBMSSQLQuery) dep.getSourceQueryOne();
-	    		List<QueryTerm> terms1 = dep.getTermsOfQueryOne();
-	    		List<QueryTerm> terms2 = dep.getTermsOfQueryTwo();
-	    		
+	    		List<Term> terms1 = dep.getTermsOfQueryOne();
+	    		List<Term> terms2 = dep.getTermsOfQueryTwo();
+
 	    		String aux1 = "";
-	    		Iterator<QueryTerm> it1 = terms1.iterator();
+	    		Iterator<Term> it1 = terms1.iterator();
 	    		while(it1.hasNext()){
 	    			if(aux1.length() > 0){
 	    				aux1 = aux1 + ",";
 	    			}
-	    			aux1= aux1 + "table1." + it1.next().getVariableName();
+	    			aux1= aux1 + "table1." + it1.next().getName();
 	    		}
 	    		String aux2 = "";
-	    		Iterator<QueryTerm> it2 = terms2.iterator();
+	    		Iterator<Term> it2 = terms2.iterator();
 	    		while(it2.hasNext()){
 	    			if(aux2.length() > 0){
 	    				aux2 = aux2 + ",";
 	    			}
-	    			aux2= aux2 + "table1." + it2.next().getVariableName();
+	    			aux2= aux2 + "table1." + it2.next().getName();
 	    		}
-	    		
-	    		String query = "SELECT " + aux2 + " FROM(" + query2.getInputQuString()+
+
+	    		String query = "SELECT " + aux2 + " FROM(" + query2.toString()+
 	    			") table1 WHERE ROW(" + aux2 +") NOT IN (SELECT " + aux1 +
-	    			" FROM (" + query1.getInputQuString() + ") table2)";
-	    		
+	    			" FROM (" + query1.toString() + ") table2)";
+
 	    		DatasourcesController con = apic.getDatasourcesController();
 	    		DataSource ds = con.getCurrentDataSource();
-	    		try {
-					SQLQueryValidator v = new SQLQueryValidator(ds, new RDBMSSQLQuery(query, apic));
-					if(v.validate()){
-						JOptionPane.showMessageDialog(this, "The Assertion produces a valid SQL query.", "Validation successful", JOptionPane.INFORMATION_MESSAGE);
-					}else{
-						JOptionPane.showMessageDialog(this, "The Assertion produces a non valid SQL query. Please check it again.", "ERROR", JOptionPane.ERROR_MESSAGE);
-						v.getReason().printStackTrace();
-					}
-				} catch (QueryParseException e) {
-					e.printStackTrace();
+	    		SQLQueryValidator v = new SQLQueryValidator(ds, new RDBMSSQLQuery(query));
+				if(v.validate()){
+					JOptionPane.showMessageDialog(this, "The Assertion produces a valid SQL query.", "Validation successful", JOptionPane.INFORMATION_MESSAGE);
+				}else{
+					JOptionPane.showMessageDialog(this, "The Assertion produces a non valid SQL query. Please check it again.", "ERROR", JOptionPane.ERROR_MESSAGE);
+					v.getReason().printStackTrace();
 				}
     		}
     	}
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -366,7 +362,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
     // End of variables declaration//GEN-END:variables
 
 	public void colorPeferenceChanged(String preference, Color col) {
-		
+
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
 	}
@@ -374,25 +370,25 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 	public void fontFamilyPreferenceChanged(String preference, String font) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
-		
+
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
-		
+
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
-		
+
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
-		
+
 	}
 
 }

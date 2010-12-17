@@ -1,18 +1,20 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
-import java.util.ArrayList;
-
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
+
+import java.util.List;
+
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.CQIEImpl;
+import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.VariableImpl;
 
 /**
  * @author This filter receives a string and returns true if any mapping
  *         contains the functor in some of the atoms in the head
- * 
+ *
  */
 
 public class MappingFunctorTreeModelFilter implements
@@ -30,7 +32,7 @@ public class MappingFunctorTreeModelFilter implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
 	 * .lang.Object)
@@ -38,35 +40,34 @@ public class MappingFunctorTreeModelFilter implements
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
 		boolean filterValue = false;
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) object;
-		ConjunctiveQuery headquery = (ConjunctiveQuery) mapping
-				.getTargetQuery();
-		ArrayList<QueryAtom> atoms = headquery.getAtoms();
+		OBDAMappingAxiom mapping = object;
+		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
+		List<Atom> atoms = headquery.getBody();
 
 		for (int i = 0; i < atoms.size(); i++) {
-			QueryAtom atom = atoms.get(i);
-			
-			ArrayList<QueryTerm> queryTerms = atom.getTerms();
+			Atom atom = atoms.get(i);
+
+			List<Term> queryTerms = atom.getTerms();
 
 			for (int j = 0; j < queryTerms.size(); j++) {
-				QueryTerm term = queryTerms.get(j);
-				
-				if (term instanceof FunctionTerm) {
-					FunctionTerm functionTerm = (FunctionTerm) term;
-					if(functionTerm.toString().indexOf(strMappingFunctor)!= -1)
+				Term term = queryTerms.get(j);
+
+				if (term instanceof ObjectVariableImpl) {
+					ObjectVariableImpl functionTerm = (ObjectVariableImpl) term;
+					if(functionTerm.getName().indexOf(strMappingFunctor)!= -1)
 					{
-						filterValue = true;	
+						filterValue = true;
 					}
-					
+
 				}
-				
-				if (term instanceof VariableTerm) {
-					VariableTerm variableTerm = (VariableTerm) term;
-					if(variableTerm.toString().indexOf(strMappingFunctor)!= -1)
+
+				if (term instanceof VariableImpl) {
+					VariableImpl variableTerm = (VariableImpl) term;
+					if(variableTerm.getName().indexOf(strMappingFunctor)!= -1)
 					{
-						filterValue = true;	
+						filterValue = true;
 					}
-					
+
 				}
 
 				/*

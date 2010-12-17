@@ -2,8 +2,6 @@ package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 /**
  * @author This filter receives a string in the constructor and returns true if accepts any query that contains the given text and
@@ -13,7 +11,7 @@ import inf.unibz.it.ucq.parser.exception.QueryParseException;
 public class QueryStringTreeModelFilter implements
 		TreeModelFilter<OBDAMappingAxiom> {
 
-	private String srtQueryTreeFilter;
+	private final String srtQueryTreeFilter;
 
 	/**
 	 * @param srtQueryTreeFilter
@@ -25,7 +23,7 @@ public class QueryStringTreeModelFilter implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
 	 * .lang.Object)
@@ -35,7 +33,7 @@ public class QueryStringTreeModelFilter implements
 		// TODO Auto-generated method stub
 		boolean filterValue = false;
 		try {
-			OBDAMappingAxiom mapping = (OBDAMappingAxiom) object;
+			OBDAMappingAxiom mapping = object;
 			RDBMSSQLQuery q = new RDBMSSQLQuery();
 			return false;
 		} catch (Exception e) {

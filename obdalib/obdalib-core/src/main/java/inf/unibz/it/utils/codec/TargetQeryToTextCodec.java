@@ -1,26 +1,33 @@
 package inf.unibz.it.utils.codec;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import com.hp.hpl.jena.graph.query.Query;
-
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.TargetQuery;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Query;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This class should be used to create a target query from a String respectively 
+ * This class should be used to create a target query from a String respectively
  * to create the String representation of a target query.
- * 
+ *
  * @author obda
  *
  */
-public class TargetQeryToTextCodec extends ObjectToTextCodec<TargetQuery> {
+public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
+
+	private final DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * The constructor. Create a new instance of the TargetQeryToTextCodec
@@ -35,72 +42,94 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<TargetQuery> {
 	 * target query representation null is returned.
 	 */
 	@Override
-	public TargetQuery decode(String input) {
-		
+	public Query decode(String input) {
+		return parse(input);
+	}
+
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
 		try {
-			ConjunctiveQuery cq = new ConjunctiveQuery(input, apic);
-			return cq;
-		} catch (QueryParseException e) {
-			e.printStackTrace();
-			return null;
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
 		}
-		
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
+		}
+		return cq;
+	}
+
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
 	}
 
 	/**
 	 * Create the String representation of the given target query.
 	 */
 	@Override
-	public String encode(TargetQuery input) {
-		
+	public String encode(Query input) {
+
 		StringBuffer sb = new StringBuffer();
-		if(input instanceof ConjunctiveQuery){
-			ArrayList<QueryAtom> list = ((ConjunctiveQuery)input).getAtoms();
-			Iterator<QueryAtom> it = list.iterator();
+		if(input instanceof CQIE){
+			List<Atom> list = ((CQIE)input).getBody();
+			Iterator<Atom> it = list.iterator();
 			while(it.hasNext()){
 				if(sb.length()>0){
 					sb.append(",");
 				}
-				QueryAtom at = it.next();
+				Atom at = it.next();
 				String name = apic.getEntityNameRenderer().getPredicateName(at);
 				sb.append(name);
 				sb.append("(");
-				ArrayList<QueryTerm> t_list =at.getTerms();
-				Iterator<QueryTerm> tit = t_list.iterator();
+				List<Term> t_list = at.getTerms();
+				Iterator<Term> tit = t_list.iterator();
 				StringBuffer term_sb = new StringBuffer();
 				while(tit.hasNext()){
-					QueryTerm qt = tit.next();
+					Term qt = tit.next();
 					if(term_sb.length()>0){
 						term_sb.append(",");
 					}
-					if(qt instanceof FunctionTerm){
-						FunctionTerm ft = (FunctionTerm) qt;
+					if(qt instanceof ObjectVariableImpl){
+						ObjectVariableImpl ft = (ObjectVariableImpl) qt;
 						String fname = apic.getEntityNameRenderer().getFunctionName(ft);
 						term_sb.append(fname);
 						term_sb.append("(");
-						ArrayList<QueryTerm> t_list2 =ft.getParameters();
-						Iterator<QueryTerm> tit2 = t_list2.iterator();
+						List<Term> t_list2 =ft.getTerms();
+						Iterator<Term> tit2 = t_list2.iterator();
 						StringBuffer para = new StringBuffer();
 						while(tit2.hasNext()){
 							if(para.length()>0){
 								para.append(",");
 							}
-							QueryTerm qt2 = tit2.next();
-							String n = qt2.getVariableName();
+							Term qt2 = tit2.next();
+							String n = qt2.getName();
 							para.append("$"+n);
 						}
 						term_sb.append(para);
 						term_sb.append(")");
 					}else{
 						term_sb.append("$");
-						term_sb.append(qt.getVariableName());
+						term_sb.append(qt.getName());
 					}
 				}
 				sb.append(term_sb);
 				sb.append(")");
 			}
 		}
-		
+
 		return sb.toString();
 	}
 

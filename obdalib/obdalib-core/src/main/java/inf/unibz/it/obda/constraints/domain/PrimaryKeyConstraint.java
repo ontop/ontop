@@ -1,14 +1,14 @@
 package inf.unibz.it.obda.constraints.domain;
 
+import inf.unibz.it.obda.constraints.AbstractConstraintAssertion;
+
 import java.util.List;
 
-import inf.unibz.it.obda.constraints.AbstractConstraintAssertion;
-import inf.unibz.it.obda.dependencies.AbstractDependencyAssertion;
-import inf.unibz.it.obda.domain.SourceQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
+import org.obda.query.domain.Query;
+import org.obda.query.domain.Term;
 
 public abstract class PrimaryKeyConstraint extends AbstractConstraintAssertion {
 
-	public abstract SourceQuery getSourceQuery();
-	public abstract List<QueryTerm> getTerms();
+	public abstract Query getSourceQuery();
+	public abstract List<Term> getTerms();
 }

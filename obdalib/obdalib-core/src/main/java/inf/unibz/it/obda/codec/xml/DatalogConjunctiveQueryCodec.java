@@ -1,68 +1,64 @@
 package inf.unibz.it.obda.codec.xml;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
-import org.w3c.dom.Element;
-
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.codec.ObjectXMLCodec;
 import inf.unibz.it.utils.codec.TargetQeryToTextCodec;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.CQIE;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+
 /**
  * The DatalogConjunctiveQueryCodec can be used to encode a conjunctive query
- * into XML or to decode a conjunctive query from XML 
- * 
+ * into XML or to decode a conjunctive query from XML
+ *
  * @author Manfred Gerstgrasser
  *
  */
 
-public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<ConjunctiveQuery> {
+public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 
 	/**
 	 * The tag used to represent a conjunctive query in XML
 	 */
 	private static final String	TAG	= "CQ";
+
 	/**
 	 * the current api controller
 	 */
 	APIController apic = null;
-	
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
 	public DatalogConjunctiveQueryCodec(APIController apic){
 		this.apic = apic;
 	}
-	
+
 	/**
 	 * Decodes the given XML element into an conjunctive query.
 	 */
 	@Override
-	public ConjunctiveQuery decode(Element input) {
-		
-		String CQstring = input.getAttribute("string");
-		ConjunctiveQuery cq=null;
-		try {
-			cq = new ConjunctiveQuery(CQstring, apic);
-		} catch (QueryParseException e1) {
-//			throw e1;
-			return null;
-		}
-		return cq;
+	public CQIE decode(Element input) {
+		String query = input.getAttribute("string");
+
+		return decode(query);
 	}
 
 	/**
 	 * Encodes the given conjunctive query int XML.
 	 */
 	@Override
-	public Element encode(ConjunctiveQuery hq) {
-		
+	public Element encode(CQIE hq) {
+
 		Element mappingheadelement = createElement(TAG);
 		TargetQeryToTextCodec codec = new TargetQeryToTextCodec(apic);
 		mappingheadelement.setAttribute("string", codec.encode(hq));
@@ -72,7 +68,7 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<ConjunctiveQuer
 	/**
 	 * Returns all attributes used in conjunctive query element.
 	 */
-	
+
 	@Override
 	public Collection<String> getAttributes() {
 		ArrayList<String> fixedAttributes = new ArrayList<String>();
@@ -83,26 +79,47 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<ConjunctiveQuer
 	/**
 	 * Returns the tag name for conjunctive queries
 	 */
-	
+
 	@Override
 	public String getElementTag() {
 		// TODO Auto-generated method stub
 		return TAG;
 	}
-	
+
 	/**
 	 * Decodes the given String into an conjunctive query.
 	 */
-	public ConjunctiveQuery decode(String input) {
-		
-		ConjunctiveQuery cq=null;
+	public CQIE decode(String input) {
+		return parse(input);
+	}
+
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
 		try {
-			cq = new ConjunctiveQuery(input, apic);
-		} catch (QueryParseException e1) {
-//			throw e1;
-			return null;
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
+		}
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
 		}
 		return cq;
 	}
 
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
+	}
 }

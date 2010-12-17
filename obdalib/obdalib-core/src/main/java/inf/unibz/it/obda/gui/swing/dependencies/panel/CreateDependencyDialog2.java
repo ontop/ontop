@@ -18,8 +18,6 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -27,6 +25,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Vector;
+
+import org.obda.query.domain.Term;
+import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.imp.TermFactoryImpl;
 
 
 /*
@@ -37,32 +39,34 @@ import java.util.Vector;
 
 /**
  *	A Dialog which allows the user to create new assertion automatically
- *	The user only has to select two mappings and insert the involved 
+ *	The user only has to select two mappings and insert the involved
  *	terms into the dialog.
  *
  * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 
 public class CreateDependencyDialog2 extends javax.swing.JDialog {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -2300573821601725277L;
 	/**
 	 * The API controller
 	 */
-	private APIController apic =null;
-	
+	private APIController apic = null;
+
 	private Vector<MappingNode> selectedMappings = null;
 	/**
 	 * the name of the assertion which will be created
 	 */
 	private String assertion = null;
-	
+
 	private CreateDependencyDialog2 myself = null;
-	
+
+	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+
     /** Creates new form CreateDependencyDialog */
     public CreateDependencyDialog2(java.awt.Frame parent, boolean modal, APIController apic, Vector<MappingNode> selection, String assertion) {
         super(parent, modal);
@@ -77,13 +81,13 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 			public void actionPerformed(ActionEvent e) {
 				myself.dispose();
 			}
-        	
+
         });
-        
+
         KeyListener k = new KeyListener(){
 
 			public void keyPressed(KeyEvent e) {
-				
+
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
 					createAssertion();
 				}else if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
@@ -94,15 +98,15 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 			public void keyReleased(KeyEvent e) {}
 
 			public void keyTyped(KeyEvent e) {}
-        	
+
         };
         jTextFieldMap1.addKeyListener(k);
         jLabelOutPut.setForeground(Color.RED.darker());
     }
-    
+
     private boolean validateInput(){
     	String input1 = jTextFieldMap1.getText();
-        	 
+
     	if(input1.equals("")){
     		jLabelOutPut.setText("Please insert variables for both mappings.");
     		return false;
@@ -113,7 +117,7 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
     		return true;
     	}
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -172,7 +176,7 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(2, 5, 2, 0);
         jPanel1.add(jLabelMapping1, gridBagConstraints);
 
-       
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -271,14 +275,14 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
      * @param evt
      */
     private void createAssertion() {//GEN-FIRST:event_jButtonCreateActionPerformed
-    	
+
     	if(validateInput()){
     		MappingController mapcon = apic.getMappingController();
         	DatasourcesController dscon = apic.getDatasourcesController();
 	    	String[] variablesMap = jTextFieldMap1.getText().split(",");
-        	Vector<QueryTerm> terms = new Vector<QueryTerm>();
+        	Vector<Term> terms = new Vector<Term>();
         	for(int i=0;i<variablesMap.length;i++){
-        		terms.add(new VariableTerm(variablesMap[i]));
+        		terms.add(termFactory.createVariable(variablesMap[i]));
         	}
 	    	for(int i=0; i<selectedMappings.size(); i++){
 	    		 MappingNode node1 = selectedMappings.get(i);
@@ -288,7 +292,7 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 	    			String id2 = node2.getUserObject().toString();
 	    			OBDAMappingAxiom map1 = mapcon.getMapping(dscon.getCurrentDataSource().getSourceID(), id1);
 	    	        OBDAMappingAxiom map2 = mapcon.getMapping(dscon.getCurrentDataSource().getSourceID(), id2);
-	    	        
+
 	    	     	if(assertion.equals(RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY)){
 	            		AssertionController<RDBMSFunctionalDependency> con = (RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
 	            		con.addAssertion(new RDBMSFunctionalDependency(dscon.getCurrentDataSource().getSourceID(), id1, id2, (RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms, terms));
@@ -302,16 +306,16 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 	            		throw new RuntimeException("Unknown assertion: " + assertion);
 	            	}
 	    		 }
-	    		 
+
 	    	 }
-	    	
+
 	    	this.dispose();
     	}
-        
+
     }//GEN-LAST:event_jButtonCreateActionPerformed
 
-    
- 
+
+
 //    /**
 //    * @param args the command line arguments
 //    */
@@ -321,7 +325,7 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 //                CreateDependencyDialog dialog = new CreateDependencyDialog(new javax.swing.JFrame(), true);
 //                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 //                    public void windowClosing(java.awt.event.WindowEvent e) {
-//                        
+//
 //                    }
 //                });
 //                dialog.setVisible(true);

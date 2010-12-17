@@ -12,7 +12,6 @@ import inf.unibz.it.obda.dependencies.miner.exception.InvalidSyntaxException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.ucq.typing.CheckOperationTerm;
 
@@ -24,6 +23,8 @@ import java.util.List;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+
+import org.obda.query.domain.Term;
 
 public class ConstraintsRenderer {
 /**
@@ -55,14 +56,14 @@ public static ConstraintsRenderer getInstance(){
 
 /**
  * Renders a check constraint assertion of the given string, if possible
- * 
+ *
  * @param input the string
  * @param uri the data source URI to which the assertion is associated
  * @return a functional dependency assertion
  * @throws Exception if the String does not represent a valid functional dependency assertion
  */
 public RDBMSCheckConstraint renderSingleCeckConstraint(String input, URI uri) throws Exception{
-	
+
 	DatasourcesController con = apic.getDatasourcesController();
 	DataSource ds =con.getAllSources().get(uri);
 	con.setCurrentDataSource(ds.getSourceID());
@@ -80,7 +81,7 @@ public RDBMSCheckConstraint renderSingleCeckConstraint(String input, URI uri) th
 
 /**
  * Renders a primary key constraint assertion of the given string, if possible
- * 
+ *
  * @param input the string
  * @param uri the data source URI to which the assertion is associated
  * @return a inclusion dependency assertion
@@ -104,7 +105,7 @@ public RDBMSPrimaryKeyConstraint renderSingleRDBMSPrimaryKeyConstraint(String in
 
 /**
  * Renders a foreign key constraint assertion of the given string, if possible
- * 
+ *
  * @param input the string
  * @param uri the data source URI to which the assertion is associated
  * @return a disjointness dependency assertion
@@ -124,14 +125,14 @@ public RDBMSForeignKeyConstraint renderSingleRDBMSForeignKeyConstraint(String in
 	}else{
 		throw new InvalidSyntaxException("Input string does not represent a valid RDBMSDisjoinednessAssertion");
 	}
-	
+
 }
 
 public RDBMSCheckConstraint createRDBMSCheckConstraint(String id, List<CheckOperationTerm> list) throws Exception{
-	
+
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
-	
+
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom = con.getMapping(currentds, id);
 	if(axiom == null){
@@ -141,11 +142,11 @@ public RDBMSCheckConstraint createRDBMSCheckConstraint(String id, List<CheckOper
 	}
 }
 
-public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, String id2, List<QueryTerm> l1, List<QueryTerm> l2) throws Exception{
-	
+public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, String id2, List<Term> l1, List<Term> l2) throws Exception{
+
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
-	
+
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom1 = con.getMapping(currentds, id1);
 	OBDAMappingAxiom axiom2 = con.getMapping(currentds, id2);
@@ -156,13 +157,13 @@ public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, Str
 	}
 }
 
-public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List<QueryTerm> list) throws Exception{
+public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List<Term> list) throws Exception{
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
-	
+
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom1 = con.getMapping(currentds, id);
-	
+
 	if(axiom1 == null ){
 		throw new Exception("Mapping not found");
 	}else{
@@ -170,13 +171,13 @@ public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List
 	}
 }
 
-public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List<QueryTerm> list) throws Exception{
+public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List<Term> list) throws Exception{
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
-	
+
 	MappingController con = apic.getMappingController();
 	OBDAMappingAxiom axiom1 = con.getMapping(currentds, id);
-	
+
 	if(axiom1 == null ){
 		throw new Exception("Mapping not found");
 	}else{
@@ -186,7 +187,7 @@ public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List
 
 /**
  * Renders a uniqueness constraint assertion of the given string, if possible
- * 
+ *
  * @param input the string
  * @param uri the data source URI to which the assertion is associated
  * @return a disjointness dependency assertion
@@ -206,18 +207,18 @@ public RDBMSUniquenessConstraint renderSingleRDBMSUniquenessConstraint(String in
 	}else{
 		throw new InvalidSyntaxException("Input string does not represent a valid RDBMSDisjoinednessAssertion");
 	}
-	
+
 }
 
 /**
  * Check whether the given string can be rendered into the given dependency assertion
- * 
- * @param input a string 
+ *
+ * @param input a string
  * @param constraint the dependency assertion
- * @return true if the string can be rendered into the given assertion, false otherwise 
+ * @return true if the string can be rendered into the given assertion, false otherwise
  */
 public boolean isValid(String input, String constraint){
-	
+
 	try {
 		AbstractConstraintAssertion con =parse(input);
 		if(constraint.equals(RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT) && con instanceof RDBMSCheckConstraint){
@@ -237,14 +238,14 @@ public boolean isValid(String input, String constraint){
 }
 
 /**
- * parses the String, and tries to render one ore more dependency assertion out of it 
- * 
+ * parses the String, and tries to render one ore more dependency assertion out of it
+ *
  * @param input the string
  * @return a list of dependency assertions
  * @throws Exception if the were errors during the parsing of the string
  */
 private AbstractConstraintAssertion parse (String input) throws Exception{
-	
+
 	ConstraintsParser parser = null;
 	byte currentBytes[] = input.getBytes();
 	ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(currentBytes);
@@ -265,7 +266,7 @@ private AbstractConstraintAssertion parse (String input) throws Exception{
 		e.printStackTrace();
 	}
 	if ((parser.getErrors().size() == 0) && (lexer.getErrors().size() == 0)) {
-		return parser.getConstraintAssertion(); 
+		return parser.getConstraintAssertion();
 	} else {
 			throw new QueryParseException(parser.getErrors().toString());
 	}

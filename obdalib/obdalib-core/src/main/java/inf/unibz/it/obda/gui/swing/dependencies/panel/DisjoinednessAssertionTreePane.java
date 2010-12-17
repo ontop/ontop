@@ -26,8 +26,6 @@ import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNode;
 import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNodeRenderer;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -44,17 +42,19 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.obda.query.domain.Term;
+
 /**
- *The Tree Pane showing the disjointness dependency assertion of the 
+ *The Tree Pane showing the disjointness dependency assertion of the
  *selected data source
  *
   * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 public class DisjoinednessAssertionTreePane extends JPanel implements MappingManagerPreferenceChangeListener{
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 7546376501403237876L;
 	/**
@@ -65,15 +65,15 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 	 * The API controller
 	 */
 	APIController apic = null;
-	
+
 	private boolean canceled = false;
-	
+
 	private SQLQueryValidator v = null;
-	
+
 	private	Thread	validatorThread	= null;
-	
+
 	MappingManagerPreferences pref = null;
-	
+
     /** Creates new form DisjoinednessAssertionTreePane */
     public DisjoinednessAssertionTreePane(APIController apic) {
         initComponents();
@@ -101,42 +101,42 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 					delete(selection);
 				}
 			}
-        	
+
         });
-        
+
         jButtonAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				addRDBMSDisjointnessDependency();
-				
+
 			}
-        	
+
         });
-        
+
         jButtonWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = Dependency_SelectMappingPane.gestInstance().getSelection();
 				Dependency_SelectMappingPane.gestInstance().createDialog2("Create Disjoinetness Dependency", paths, RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION);
 			}
-        	
+
         });
         jButtonValidate.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = jTree1.getSelectionPaths();
 				if(paths != null){
 					validateRDBMSDisjointnessDependencies(paths);
 				}
 			}
-        	
+
         });
     }
-    
+
     private void addRDBMSDisjointnessDependency(){
-		apic.getDatasourcesController(); 
+		apic.getDatasourcesController();
 		DisjoinednessAssertionTreeModel model =(DisjoinednessAssertionTreeModel) jTree1.getModel();
 		DefaultAssertionTreeNode<RDBMSDisjointnessDependency> node = new DefaultAssertionTreeNode<RDBMSDisjointnessDependency>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
@@ -159,7 +159,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
      */
     private void addMenu(){
     	JPopupMenu menu = new JPopupMenu();
-    	
+
     	JMenuItem del = new JMenuItem();
     	del.setText("delete");
     	del.setToolTipText("deletes all selected Assertions");
@@ -169,12 +169,12 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 				if(selection != null){
 					delete(selection);
 				}
-			}	
+			}
     	});
-    	
+
     	menu.add(del);
     	menu.addSeparator();
-    	
+
     	JMenuItem validate = new JMenuItem();
     	validate.setEnabled(false);
     	validate.setText("Validate Dependency");
@@ -182,23 +182,23 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
     	validate.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = jTree1.getSelectionPaths();
 				if(paths != null){
 					validateRDBMSDisjointnessDependencies(paths);
 				}
 			}
-    		
+
     	});
     	menu.add(validate);
     	jTree1.setComponentPopupMenu(menu);
     }
-    
+
     /**
      * Validates whether the data source satisfies the selected assertions
      * @param paths
      */
-    
+
     /**
      * Removes the selected assertions
      * @param selection
@@ -209,10 +209,10 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 			Object o = path.getLastPathComponent();
 			if(o instanceof DefaultAssertionTreeNode){
 				DefaultAssertionTreeNode<RDBMSDisjointnessDependency> node = (DefaultAssertionTreeNode<RDBMSDisjointnessDependency>)o;
-				RDBMSDisjointnessDependency dep = (RDBMSDisjointnessDependency) node.getUserObject();
+				RDBMSDisjointnessDependency dep = node.getUserObject();
 				disController.removeAssertion(dep);
-				
-				
+
+
 			}
 		}
     }
@@ -329,7 +329,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
 
     private boolean validateAssertion(SQLQueryValidator v){
-		
+
 		ResultSetTableModel model = (ResultSetTableModel) v.execute();
 		if (model == null){
 			v.getReason().printStackTrace();
@@ -341,11 +341,11 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 				return false;
 			}
 		}
-		
+
 	}
-    
+
     /**
-     * validates whether the data source fulfills the selected assertions 
+     * validates whether the data source fulfills the selected assertions
      * @param paths selected assertions
      */
     private void validateRDBMSDisjointnessDependencies(TreePath[] paths){
@@ -355,9 +355,9 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 			public void run() {
 				canceled = false;
 				final TreePath path[] = jTree1.getSelectionPaths();
-	
+
 				dialog.setVisible(true);
-	
+
 				if (path == null) {
 					return;
 				}
@@ -369,38 +369,32 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
             		RDBMSDisjointnessDependency inc = (RDBMSDisjointnessDependency)node.getUserObject();
         			RDBMSSQLQuery query1 = (RDBMSSQLQuery) inc.getSourceQueryOne();
             		RDBMSSQLQuery query2 = (RDBMSSQLQuery) inc.getSourceQueryTwo();
-            		List<QueryTerm> terms1 = inc.getTermsOfQueryOne();
-            		List<QueryTerm> terms2 = inc.getTermsOfQueryTwo();
+            		List<Term> terms1 = inc.getTermsOfQueryOne();
+            		List<Term> terms2 = inc.getTermsOfQueryTwo();
             		dialog.addText(inc.toString() +"... ", dialog.NORMAL);
             		String aux1 = "";
-            		Iterator<QueryTerm> it1 = terms1.iterator();
+            		Iterator<Term> it1 = terms1.iterator();
             		while(it1.hasNext()){
             			if(aux1.length() > 0){
             				aux1 = aux1 + ",";
             			}
-            			aux1= aux1 + "table1." + it1.next().getVariableName();
+            			aux1= aux1 + "table1." + it1.next().getName();
             		}
             		String aux2 = "";
-            		Iterator<QueryTerm> it2 = terms2.iterator();
+            		Iterator<Term> it2 = terms2.iterator();
             		while(it2.hasNext()){
             			if(aux2.length() > 0){
             				aux2 = aux2 + ",";
             			}
-            			aux2= aux2 + "table2." + it2.next().getVariableName();
+            			aux2= aux2 + "table2." + it2.next().getName();
             		}
-            		
-            		String query = "SELECT " + aux1 +" FROM (" + query1.getInputQuString() + ") table1 WHERE ROW("+
-        			aux1+") IN (SELECT " + aux2 + " FROM (" + query2.getInputQuString() +") table2)";
-            		
+
+            		String query = "SELECT " + aux1 +" FROM (" + query1.toString() + ") table1 WHERE ROW("+
+        			aux1+") IN (SELECT " + aux2 + " FROM (" + query2.toString() +") table2)";
+
             		DatasourcesController con = apic.getDatasourcesController();
             		DataSource ds = con.getCurrentDataSource();
-            		try {
-						v = new SQLQueryValidator(ds, new RDBMSSQLQuery(query, apic));
-					} catch (QueryParseException e) {
-						String output = "ERROR - Reason: " + v.getReason().getMessage() + " \n";
-						dialog.addText(output, dialog.ERROR);
-						error = true;
-					}
+            		v = new SQLQueryValidator(ds, new RDBMSSQLQuery(query));
 					if (canceled)
 						return;
 					if(!error){
@@ -457,7 +451,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 		});
 		cancelThread.start();
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonAdd;
@@ -471,24 +465,24 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
 	public void colorPeferenceChanged(String preference, Color col) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 	public void fontFamilyPreferenceChanged(String preference, String font) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
-		
+
 	}
 	public void fontSizePreferenceChanged(String preference, int size) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 	public void shortCutChanged(String preference, String shortcut) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 
 }

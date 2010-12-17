@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -16,27 +16,18 @@ import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.domain.SourceQuery;
-import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-
+import org.obda.query.domain.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+
 
 public class MappingController implements DatasourcesControllerListener {
 
@@ -45,12 +36,12 @@ public class MappingController implements DatasourcesControllerListener {
 
 	private Hashtable<URI, Boolean>						needsSyncwithReasoner	= null;
 
-	private MappingTreeModel								treemodel				= null;
+	private final MappingTreeModel								treemodel				= null;
 
 	private DatasourcesController							dscontroller			= null;
 
 	private MappingXMLCodec									codec = null;
-	
+
 	Logger													log						= LoggerFactory.getLogger(MappingController.class);
 
 	public MappingController(DatasourcesController dscontroller, APIController apic) {
@@ -116,7 +107,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Deletes the mapping with ID id
-	 * 
+	 *
 	 * @param datasource_uri
 	 * @param mapping_id
 	 */
@@ -135,7 +126,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Deletes all the mappings for a given datasource
-	 * 
+	 *
 	 * @param datasource_uri
 	 */
 	public void deleteMappings(URI datasource_uri) {
@@ -176,7 +167,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Announces that a mapping has been updated.
-	 * 
+	 *
 	 * @param srcuri
 	 * @param mapping_id
 	 * @param mapping
@@ -189,7 +180,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/**
 	 * Announces to the listeners that a mapping was deleted.
-	 * 
+	 *
 	 * @param mapping_id
 	 */
 	private void fireMappingDeleted(URI srcuri, String mapping_id) {
@@ -200,7 +191,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/**
 	 * Announces to the listeners that a mapping was inserted.
-	 * 
+	 *
 	 * @param mapping_id
 	 */
 	private void fireMappingInserted(URI srcuri, String mapping_id) {
@@ -212,7 +203,7 @@ public class MappingController implements DatasourcesControllerListener {
 	/***************************************************************************
 	 * Returns the object of the mapping with id ID for the datasource
 	 * source_uri
-	 * 
+	 *
 	 * @param source_uri
 	 * @param mapping_id
 	 * @return
@@ -229,7 +220,7 @@ public class MappingController implements DatasourcesControllerListener {
 	/***************************************************************************
 	 * Returns all the mappings hold by the controller. Warning. do not modify
 	 * this mappings manually, use the controllers methods.
-	 * 
+	 *
 	 * @return
 	 */
 	public Hashtable<URI, ArrayList<OBDAMappingAxiom>> getMappings() {
@@ -238,7 +229,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Returns all the mappings for a given datasource identified by its uri.
-	 * 
+	 *
 	 * @param datasource_uri
 	 * @return
 	 */
@@ -291,7 +282,7 @@ public class MappingController implements DatasourcesControllerListener {
 	/***************************************************************************
 	 * Retrives the position of the mapping identified by mapping_id in the
 	 * array of mappings for the given datasource.
-	 * 
+	 *
 	 * @param datasource_uri
 	 *            The datasource to whom the mapping belongs.
 	 * @param mapping_id
@@ -324,29 +315,27 @@ public class MappingController implements DatasourcesControllerListener {
 	/***************************************************************************
 	 * Inserts a new mapping for the currently selected data source. If now
 	 * source is selected an exception is thrown.
-	 * 
+	 *
 	 * @deprecated Use the parameter instead
-	 * 
+	 *
 	 */
+	@Deprecated
 	public String insertMapping() throws NoDatasourceSelectedException, DuplicateMappingException {
 		DataSource currentsrc = dscontroller.getCurrentDataSource();
 		if ((currentsrc == null)) {
 			throw new NoDatasourceSelectedException("No datasource was selected");
 		}
 		String new_mapping_name = getNextAvailableMappingID(currentsrc.getSourceID());
-		
-		try {
-			insertMapping(currentsrc.getSourceID(), new RDBMSOBDAMappingAxiom(new_mapping_name));
-		} catch (QueryParseException e) {
-			throw new RuntimeException("Error parsing one of the mappings queries... shouldn'nt happen");
-		}
+
+		insertMapping(currentsrc.getSourceID(), new RDBMSOBDAMappingAxiom(new_mapping_name));
+
 		return new_mapping_name;
 	}
 
 	/***************************************************************************
 	 * Inserts a mappings into the mappings for a datasource. If the ID of the
 	 * mapping already exits it throws an exception.
-	 * 
+	 *
 	 * @param datasource_uri
 	 * @param mapping
 	 * @throws DuplicateMappingException
@@ -366,7 +355,7 @@ public class MappingController implements DatasourcesControllerListener {
 	/***************************************************************************
 	 * True if the a data source is new, or mappings have been added, deleted or
 	 * modified through the corresponding methods in the mapping controller.
-	 * 
+	 *
 	 * @param srcuri
 	 * @return
 	 */
@@ -395,14 +384,14 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Updates the indicated mapping and fires the appropiate event.
-	 * 
+	 *
 	 * @param datasource_uri
 	 * @param mapping_id
 	 * @param body
 	 */
-	public void updateMapping(URI datasource_uri, String mapping_id, SourceQuery body) {
+	public void updateSourceQueryMapping(URI datasource_uri, String mapping_id, Query sourceQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
-		mapping.setSourceQuery(body);
+		mapping.setSourceQuery(sourceQuery);
 		DataSource ds = dscontroller.getCurrentDataSource();
 		if(ds != null){
 			setNeedsSyncWithReasoner(ds.getSourceID(), true);
@@ -412,7 +401,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Updates the indicated mapping and fires the appropiate event.
-	 * 
+	 *
 	 * @param datasource_uri
 	 * @param mapping_id
 	 * @param new_mappingid
@@ -430,17 +419,17 @@ public class MappingController implements DatasourcesControllerListener {
 
 	/***************************************************************************
 	 * Updates the indicated mapping and fires the appropiate event.
-	 * 
+	 *
 	 * @param datasource_uri
 	 * @param mapping_id
 	 * @param head
 	 */
-	public void updateMapping(URI datasource_uri, String mapping_id, TargetQuery head) {
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, Query targetQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		if (mapping == null) {
 			return;
 		}
-		mapping.setTargetQuery(head);
+		mapping.setTargetQuery(targetQuery);
 
 		DataSource ds = dscontroller.getCurrentDataSource();
 		if(ds != null){
@@ -451,7 +440,7 @@ public class MappingController implements DatasourcesControllerListener {
 
 	@Override
 	public void datasourcParametersUpdated() {}
-	
+
 	public void activeOntologyChanged(){
 		for (MappingControllerListener listener : listeners) {
 			try {

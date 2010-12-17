@@ -19,12 +19,12 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.dependencies.miner.IMiner;
 import inf.unibz.it.obda.dependencies.miner.RDBMSDisjointnessDependencyMiner;
+import inf.unibz.it.obda.dependencies.miner.RDBMSDisjointnessDependencyMiner.DisjointnessMiningResult;
 import inf.unibz.it.obda.dependencies.miner.RDBMSFunctionalDependencyFromDBSchemaMiner;
 import inf.unibz.it.obda.dependencies.miner.RDBMSFunctionalDependencyMiner;
-import inf.unibz.it.obda.dependencies.miner.RDBMSInclusionDependencyMiner;
-import inf.unibz.it.obda.dependencies.miner.RDBMSInclusionDependencyFromDBSchemaMiner;
-import inf.unibz.it.obda.dependencies.miner.RDBMSDisjointnessDependencyMiner.DisjointnessMiningResult;
 import inf.unibz.it.obda.dependencies.miner.RDBMSFunctionalDependencyMiner.FunctionalDependencyMiningResult;
+import inf.unibz.it.obda.dependencies.miner.RDBMSInclusionDependencyFromDBSchemaMiner;
+import inf.unibz.it.obda.dependencies.miner.RDBMSInclusionDependencyMiner;
 import inf.unibz.it.obda.dependencies.miner.RDBMSInclusionDependencyMiner.InclusionMiningResult;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.dependencies.treemodel.DisjoinednessAssertionTreeModel;
@@ -34,14 +34,10 @@ import inf.unibz.it.obda.gui.swing.mapping.panel.MappingRenderer;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeSelectionModel;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -57,18 +53,21 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.VariableImpl;
 
 
 /**
  * The panel in the dependency manager showing all current mapping
  *
 * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8310155160011653390L;
 	/**
@@ -88,7 +87,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 	 */
 	private ProgressMonitorDialog dialog = null;
 	/**
-	 * A list of assertion added during the mining. Only used to 
+	 * A list of assertion added during the mining. Only used to
 	 * remove those assertion in case the mining is canceled.
 	 */
 	private HashSet<RDBMSInclusionDependency> addedInclusionDependencies = null;
@@ -96,17 +95,17 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 	 * boolean field indicating whether the last mining was canceld
 	 */
 	private boolean miningCanceled = false;
-	
+
 	/**
-	 * A list of assertion added during the mining. Only used to 
+	 * A list of assertion added during the mining. Only used to
 	 * remove those assertion in case the mining is canceled.
 	 */
 	private HashSet<RDBMSDisjointnessDependency> addedDisjointnessDependencies = null;
-	
+
 	private HashSet<RDBMSFunctionalDependency> addedFunctionalDependencies = null;
-	
+
 	private JTree assertionTree = null;
-	
+
     /** Creates new form Dependency_SelectMappingPane */
     public Dependency_SelectMappingPane(APIController apic) {
     	this.apic = apic;
@@ -114,7 +113,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
         initComponents();
         adjustTree();
     }
-    
+
     /**
      * returns the current instance of the Pane
      * @return the current instance
@@ -122,18 +121,18 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     public static Dependency_SelectMappingPane gestInstance(){
     	return instance;
     }
-    
+
     /**
      * Create the dialog for the Add assertion wizard
-     * 
+     *
      * @param title title of the dialog
      * @param mappings the two selected mappings
      * @param assertion the name of the assertion to create
      */
     public void createDialog(String title, TreePath[] mappings, String assertion){
-    	
+
     	if(mappings == null || mappings.length != 2){
-    		
+
     		JOptionPane.showMessageDialog(null, "Please select two Mappings.", "ERROR",JOptionPane.ERROR_MESSAGE);
     		return;
     	}
@@ -144,11 +143,11 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     	dialog.setLocation(250, 400);
     	dialog.setVisible(true);
     }
-    
+
     public void createDialog2(String title, TreePath[] mappings, String assertion){
-    	
+
     	if(mappings == null || mappings.length < 2){
-    		
+
     		JOptionPane.showMessageDialog(null, "Please select at least two Mappings.", "ERROR",JOptionPane.ERROR_MESSAGE);
     		return;
     	}
@@ -162,7 +161,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     	dialog.setLocation(250, 400);
     	dialog.setVisible(true);
     }
-    
+
     /**
      * Returns the current selection in tree pane
      * @return current selection
@@ -170,17 +169,17 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     public TreePath[] getSelection(){
     	return jTree1.getSelectionPaths();
     }
-    
+
     /**
-     * Interrupts all mining threads and undoes all changes 
+     * Interrupts all mining threads and undoes all changes
      */
     public void cancelMining(){
     	miningCanceled = true;
     	dialog.stop();
     	miner.cancelMining();
-//    	undoChanges();	
+//    	undoChanges();
     }
-    
+
     /**
      * Undo all changes done by a cancel mining session
      */
@@ -193,7 +192,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     		}
     		addedInclusionDependencies = null;
     	}
-    	
+
     	if(addedDisjointnessDependencies != null){
     		RDBMSDisjointnessDependencyController disCon = (RDBMSDisjointnessDependencyController) apic.getController(RDBMSDisjointnessDependency.class);
     		Iterator<RDBMSDisjointnessDependency> it = addedDisjointnessDependencies.iterator();
@@ -211,7 +210,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     		addedFunctionalDependencies = null;
     	}
     }
-    
+
     public void showInclusionMiningDialog(JTree tree){
     	assertionTree = tree;
     	addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
@@ -220,13 +219,13 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     		JOptionPane.showMessageDialog(null, "Please select a data source.", "ERROR", JOptionPane.ERROR_MESSAGE);
     		return;
     	}
-    	
+
     	MiningDialog dialog = new MiningDialog(RDBMSInclusionDependency.INCLUSIONDEPENDENCY);
     	dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     	dialog.setLocation(250, 400);
     	dialog.setVisible(true);
     }
-    
+
     public void showFunctionalDependencyMiningDialog(JTree tree){
     	assertionTree = tree;
     	addedFunctionalDependencies = new HashSet<RDBMSFunctionalDependency>();
@@ -235,25 +234,26 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     		JOptionPane.showMessageDialog(null, "Please select a data source.", "ERROR", JOptionPane.ERROR_MESSAGE);
     		return;
     	}
-    	
+
     	MiningDialog dialog = new MiningDialog(RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY);
     	dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     	dialog.setLocation(250, 400);
     	dialog.setVisible(true);
     }
-    
+
     public void startDisjointnessDependencyMining(JTree tree){
     	assertionTree = tree;
     	miningCanceled = false;
     	addedDisjointnessDependencies = new HashSet<RDBMSDisjointnessDependency>();
     	Thread t = new Thread(){
+			@Override
 			public void run(){
 				mineDisjointnessDependencies();
 			}
 		};
 		t.start();
     }
-    
+
 //    public void startFunctionalDependencyMining(JTree tree){
 //    	assertionTree = tree;
 //    	miningCanceled = false;
@@ -265,54 +265,58 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 //		};
 //		t.start();
 //    }
-    
+
     private void startInclusionMining(boolean useData, boolean useDBSchema){
     	miningCanceled = false;
     	if(useData){
     		Thread t = new Thread(){
-    			public void run(){
+    			@Override
+				public void run(){
     				mineInclusionDependencies();
     			}
     		};
     		t.start();
     	}
-    	
+
     	if(useDBSchema){
     		Thread t = new Thread(){
-    			public void run(){
+    			@Override
+				public void run(){
     				mineInclusionDependencyFromDBSchema();
     			}
     		};
     		t.start();
     	}
     }
-    
+
     private void startfunctionalDependencyMining(boolean useData, boolean useDBSchema){
     	miningCanceled = false;
     	if(useData){
     		Thread t = new Thread(){
-    			public void run(){
+    			@Override
+				public void run(){
     				mineFunctionalDependencies();
     			}
     		};
     		t.start();
     	}
-    	
+
     	if(useDBSchema){
     		Thread t = new Thread(){
-    			public void run(){
+    			@Override
+				public void run(){
     				mineFunctionalDependenciesFromDBSchema();
     			}
     		};
     		t.start();
     	}
     }
-    
+
     /**
      * starts a new mining session
      */
     private void mineDisjointnessDependencies(){
-   	
+
     	dialog = new ProgressMonitorDialog(instance);
     	dialog.show();
     	CountDownLatch lat = new CountDownLatch(1);
@@ -333,18 +337,18 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
 		while(it.hasNext() /*&& !miningCanceled*/){
 			DisjointnessMiningResult r = it.next();
-			QueryTerm t1 = r.getFirstElement();
-			QueryTerm t2 = r.getSecondElement();
-			List<QueryTerm> termsOfT1 = null;
-			List<QueryTerm> termsOfT2 = null;
-			if(t1 instanceof FunctionTerm && t2 instanceof FunctionTerm){
-				FunctionTerm ft1 = (FunctionTerm) t1;
-				FunctionTerm ft2 = (FunctionTerm) t2;
-				termsOfT1 = ft1.getParameters();
-				termsOfT2 = ft2.getParameters();
-			}else if(t1 instanceof VariableTerm && t2 instanceof VariableTerm){
-				termsOfT1 = new Vector<QueryTerm>();
-				termsOfT2 = new Vector<QueryTerm>();
+			Term t1 = r.getFirstElement();
+			Term t2 = r.getSecondElement();
+			List<Term> termsOfT1 = null;
+			List<Term> termsOfT2 = null;
+			if(t1 instanceof ObjectVariableImpl && t2 instanceof ObjectVariableImpl){
+				ObjectVariableImpl ft1 = (ObjectVariableImpl) t1;
+				ObjectVariableImpl ft2 = (ObjectVariableImpl) t2;
+				termsOfT1 = ft1.getTerms();
+				termsOfT2 = ft2.getTerms();
+			}else if(t1 instanceof VariableImpl && t2 instanceof VariableImpl){
+				termsOfT1 = new Vector<Term>();
+				termsOfT2 = new Vector<Term>();
 				termsOfT1.add(t1);
 				termsOfT2.add(t2);
 			}else{
@@ -356,7 +360,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			}
 			RDBMSDisjointnessDependency dis = new RDBMSDisjointnessDependency(dsUri, r.getMappingIdOfFirstMapping(), r.getMappingIdOfSecondMapping(),
 											r.getFirstMappingElement(), r.geSeecondMappingElement(), termsOfT1, termsOfT2);
-			
+
 			if(disCon.insertAssertion(dis)){
 				addedDisjointnessDependencies.add(dis);
 			}
@@ -366,12 +370,12 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 //		}
 		dialog.stop();
     }
-    
+
     /**
      * starts a new mining session
      */
     private void mineInclusionDependencies(){
-   	
+
     	dialog = new ProgressMonitorDialog(instance);
     	dialog.show();
     	CountDownLatch lat = new CountDownLatch(2);
@@ -392,18 +396,18 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
 		while(it.hasNext() && !miningCanceled){
 			InclusionMiningResult r = it.next();
-			QueryTerm t1 = r.getFirstElement();
-			QueryTerm t2 = r.getSecondElement();
-			List<QueryTerm> termsOfT1 = null;
-			List<QueryTerm> termsOfT2 = null;
-			if(t1 instanceof FunctionTerm && t2 instanceof FunctionTerm){
-				FunctionTerm ft1 = (FunctionTerm) t1;
-				FunctionTerm ft2 = (FunctionTerm) t2;
-				termsOfT1 = ft1.getParameters();
-				termsOfT2 = ft2.getParameters();
-			}else if(t1 instanceof VariableTerm && t2 instanceof VariableTerm){
-				termsOfT1 = new Vector<QueryTerm>();
-				termsOfT2 = new Vector<QueryTerm>();
+			Term t1 = r.getFirstElement();
+			Term t2 = r.getSecondElement();
+			List<Term> termsOfT1 = null;
+			List<Term> termsOfT2 = null;
+			if(t1 instanceof ObjectVariableImpl && t2 instanceof ObjectVariableImpl){
+				ObjectVariableImpl ft1 = (ObjectVariableImpl) t1;
+				ObjectVariableImpl ft2 = (ObjectVariableImpl) t2;
+				termsOfT1 = ft1.getTerms();
+				termsOfT2 = ft2.getTerms();
+			}else if(t1 instanceof VariableImpl && t2 instanceof VariableImpl){
+				termsOfT1 = new Vector<Term>();
+				termsOfT2 = new Vector<Term>();
 				termsOfT1.add(t1);
 				termsOfT2.add(t2);
 			}else{
@@ -415,7 +419,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			}
 			RDBMSInclusionDependency inc = new RDBMSInclusionDependency(dsUri, r.getMappingIdOfFirstMapping(), r.getMappingIdOfSecondMapping(),
 											r.getFirstMappingElement(), r.geSeecondMappingElement(), termsOfT1, termsOfT2);
-			
+
 			if(incCon.insertAssertion(inc)){
 				addedInclusionDependencies.add(inc);
 			}
@@ -425,9 +429,9 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		}
 		dialog.stop();
     }
-    
+
     private void mineFunctionalDependencies(){
-       	
+
     	dialog = new ProgressMonitorDialog(instance);
     	dialog.show();
     	CountDownLatch lat = new CountDownLatch(1);
@@ -448,36 +452,36 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		addedInclusionDependencies = new HashSet<RDBMSInclusionDependency>();
 		while(it.hasNext() && !miningCanceled){
 			FunctionalDependencyMiningResult r = it.next();
-			Set<QueryTerm> dependees = r.getDependee();
-			Vector<QueryTerm> candidate = new Vector<QueryTerm>();
-			FunctionTerm ft = (FunctionTerm) r.getDependent();
-			ArrayList<QueryTerm> list = ft.getParameters();
-			Iterator<QueryTerm> l_it = list.iterator();
+			Set<Term> dependees = r.getDependee();
+			Vector<Term> candidate = new Vector<Term>();
+			ObjectVariableImpl ft = (ObjectVariableImpl) r.getDependent();
+			List<Term> list = ft.getTerms();
+			Iterator<Term> l_it = list.iterator();
 			HashSet<String> candidateName = new HashSet<String>();
 			while(l_it.hasNext()){
-				QueryTerm t = l_it.next();
+				Term t = l_it.next();
 				candidate.add(t);
-				candidateName.add(t.getVariableName());
+				candidateName.add(t.getName());
 			}
-			Vector<QueryTerm> aux = new Vector<QueryTerm>();
-			Iterator<QueryTerm> s_it = dependees.iterator();
+			Vector<Term> aux = new Vector<Term>();
+			Iterator<Term> s_it = dependees.iterator();
 			HashSet<String> depNames = new HashSet<String>();
 			while(s_it.hasNext()){
-				QueryTerm term = s_it.next();
-				if(term instanceof FunctionTerm){
-					FunctionTerm f = (FunctionTerm) term;
-					Iterator<QueryTerm> f_it = f.getParameters().iterator();
+				Term term = s_it.next();
+				if(term instanceof ObjectVariableImpl){
+					ObjectVariableImpl f = (ObjectVariableImpl) term;
+					Iterator<Term> f_it = f.getTerms().iterator();
 					while(f_it.hasNext()){
-						QueryTerm t = f_it.next();
-						if(!candidateName.contains(t.getVariableName()) &&depNames.add(t.getVariableName())){
+						Term t = f_it.next();
+						if(!candidateName.contains(t.getName()) &&depNames.add(t.getName())){
 							aux.add(t);
 						}
 					}
 				}else{
-					if(!candidateName.contains(term.getVariableName()) && depNames.add(term.getVariableName())){
+					if(!candidateName.contains(term.getName()) && depNames.add(term.getName())){
 						aux.add(term);
 					}
-					
+
 				}
 			}
 			String id = r.getMappingId();
@@ -485,7 +489,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			if(!aux.isEmpty() && !candidate.isEmpty()){
 				RDBMSFunctionalDependency inc = new RDBMSFunctionalDependency(dsUri, id,id,
 												query, query, aux, candidate);
-			
+
 				if(incCon.insertAssertion(inc)){
 					addedFunctionalDependencies.add(inc);
 				}
@@ -496,16 +500,16 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		}
 		dialog.stop();
     }
-    
-    private List<QueryTerm> convertSet(Set<QueryTerm> set){
-    	Iterator<QueryTerm> it = set.iterator();
-    	Vector<QueryTerm> aux = new Vector<QueryTerm>();
+
+    private List<Term> convertSet(Set<Term> set){
+    	Iterator<Term> it = set.iterator();
+    	Vector<Term> aux = new Vector<Term>();
     	while(it.hasNext()){
     		aux.add(it.next());
     	}
     	return aux;
     }
-    
+
     private void mineInclusionDependencyFromDBSchema(){
     	dialog = new ProgressMonitorDialog(instance);
     	dialog.show();
@@ -533,7 +537,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		}
     	dialog.stop();
     }
-    
+
     private void mineFunctionalDependenciesFromDBSchema(){
     	dialog = new ProgressMonitorDialog(instance);
     	dialog.show();
@@ -565,7 +569,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		}
     	dialog.stop();
     }
-    
+
     /**
      * Adjusts some configuration of the tree and adds listener and menus
      *  to it.
@@ -578,21 +582,21 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     	jTree1.setEditable(false);
     	jTree1.setRowHeight(0);
     	jTree1.setRootVisible(false);
-    	
+
     	JPopupMenu menu = new JPopupMenu();
     	JMenuItem createIncDep = new JMenuItem();
     	createIncDep.setText("Create Inclusion Dependency");
     	createIncDep.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = jTree1.getSelectionPaths();
 				createDialog("Create Inclusion Dependency", paths, RDBMSInclusionDependency.INCLUSIONDEPENDENCY);
 			}
-			
+
 		});
     	menu.add(createIncDep);
-    	
+
     	JMenuItem createFuncDep = new JMenuItem();
     	createFuncDep.setText("Create Functional Dependency");
     	createFuncDep.addActionListener(new ActionListener(){
@@ -601,10 +605,10 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 				TreePath[] paths = jTree1.getSelectionPaths();
 				createDialog("Create Functional Dependency", paths, RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY);
 			}
-			
+
 		});
     	menu.add(createFuncDep);
-    	
+
     	JMenuItem createDisAssertion = new JMenuItem();
     	createDisAssertion.setText("Create Disjoinedness Dependency");
     	createDisAssertion.addActionListener(new ActionListener(){
@@ -613,26 +617,26 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 				TreePath[] paths = jTree1.getSelectionPaths();
 				createDialog("Create Disjoinedness Assertion", paths, RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION);
 			}
-			
+
 		});
     	menu.add(createDisAssertion);
-    	
+
     	JMenuItem mine = new JMenuItem();
     	mine.setText("Mine Inclusion Dependencies");
     	mine.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 //				startMining(InclusionDependencyTreePane.getInstance().getInclusionDependencyTree());
 				mineInclusionDependencyFromDBSchema();
 			}
 		});
     	menu.addSeparator();
     	menu.add(mine);
-    	
+
     	jTree1.setComponentPopupMenu(menu);
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -670,21 +674,21 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			model.addAssertions(inc);
 		}else{
 			return;
-		
+
 		}
 	}
-    
+
     private void addRDBMSDisjointnessDependenciesToTree(HashSet<RDBMSDisjointnessDependency> dis){
 		if(assertionTree.getModel() instanceof DisjoinednessAssertionTreeModel && !dis.isEmpty()){
 			DisjoinednessAssertionTreeModel model = (DisjoinednessAssertionTreeModel) assertionTree.getModel();
 			model.addAssertions(dis);
 		}else{
-		
+
 			return;
-		
+
 		}
 	}
-    
+
     private void addRDBMSFunctionalDependenciesToTree(HashSet<RDBMSFunctionalDependency> dis){
 		if(assertionTree.getModel() instanceof FunctionalDependenciesTreeModel && !dis.isEmpty()){
 			FunctionalDependenciesTreeModel model = (FunctionalDependenciesTreeModel) assertionTree.getModel();
@@ -693,13 +697,13 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			return;
 		}
 	}
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree jTree1;
     // End of variables declaration//GEN-END:variable
- 
-    
+
+
     /**
     *
     * @author obda
@@ -707,13 +711,13 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
    private class MiningDialog extends javax.swing.JFrame {
 
        /**
-   	 * 
+   	 *
    	 */
    	private static final long serialVersionUID = 8531081198402826251L;
    	/** Creates new form MiningDialog */
-   	
+
    		String dependency = null;
-   	
+
        public MiningDialog(String dep){
     	   dependency = dep;
            initComponents();
@@ -820,7 +824,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
     		   startfunctionalDependencyMining(jCheckBoxData.isSelected(), jCheckBoxSchema.isSelected());
     	   }
        }//GEN-LAST:event_jButtonOKActionPerformed
-       
+
        private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
            this.dispose();
        }//GEN-LAST:event_jButtonOKActionPerformed

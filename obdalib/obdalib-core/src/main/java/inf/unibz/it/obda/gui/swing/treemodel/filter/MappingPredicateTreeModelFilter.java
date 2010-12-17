@@ -1,21 +1,22 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
-import java.util.ArrayList;
-
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
+
+import java.util.List;
+
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.imp.CQIEImpl;
 
 /**
  * @author This filter receives a string like parameter in the constructor and returns true if any mapping contains an atom in the head whose
  *         predicate matches predicate
- * 
+ *
  */
 public class MappingPredicateTreeModelFilter implements
 		TreeModelFilter<OBDAMappingAxiom> {
 
-	private String srtPredicateFilter;
+	private final String srtPredicateFilter;
 
 	/**
 	 * @param srtPredicateFilter
@@ -27,7 +28,7 @@ public class MappingPredicateTreeModelFilter implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
 	 * .lang.Object)
@@ -35,15 +36,14 @@ public class MappingPredicateTreeModelFilter implements
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
 		boolean filterValue = false;
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) object;
-		ConjunctiveQuery headquery = (ConjunctiveQuery) mapping
-				.getTargetQuery();
-		ArrayList<QueryAtom> atoms = headquery.getAtoms();
+		OBDAMappingAxiom mapping = object;
+		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
+		List<Atom> atoms = headquery.getBody();
 		int atomscount = atoms.size();
 		for (int i = 0; i < atomscount; i++) {
-			QueryAtom atom = atoms.get(i);
+			Atom atom = atoms.get(i);
 
-			if (atom.getNamedPredicate().getUri().toString().indexOf(srtPredicateFilter) != -1)
+			if (atom.getPredicate().getName().toString().indexOf(srtPredicateFilter) != -1)
 				filterValue = true;
 
 		}

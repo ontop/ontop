@@ -1,7 +1,5 @@
 package inf.unibz.it.ucq.swing;
 
-import inf.unibz.it.obda.queryanswering.QueryResultSet;
-import inf.unibz.it.ucq.domain.Constant;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.exception.QueryResultException;
 
@@ -13,8 +11,16 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
+import org.obda.query.domain.Constant;
+import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.imp.TermFactoryImpl;
+import org.obda.query.domain.imp.ValueConstantImpl;
+
+import com.sun.msv.datatype.xsd.StringType;
+import com.sun.msv.datatype.xsd.XSDatatype;
+
 public class IncrementalQueryResultTableModel implements TableModel{
-	
+
 
 	QueryResult		results;				// The ResultSet to interpret
 
@@ -26,9 +32,11 @@ public class IncrementalQueryResultTableModel implements TableModel{
 	Vector<Constant[]> 	resultsTable	= null;
 	HashSet<String> mergeSet = null;
 	private Vector<TableModelListener> listener = null;
-	
+
 	boolean isAfterLast = false;
-	
+
+	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
 	 * private because it is only intended to be used by
@@ -46,12 +54,13 @@ public class IncrementalQueryResultTableModel implements TableModel{
 		mergeSet = new HashSet<String>();
 		int i = 0;
 		while (i < fetchsize && !isAfterLast) {
-			
+
 			if(results.nextRow()){
-				
-				Constant[] crow = new Constant[numcols];
+
+				Constant[] crow = new ValueConstantImpl[numcols];
 				for (int j = 0; j < numcols; j++) {
-					crow[j] = new Constant(results.getConstantFromColumn(j).toString(), "xs:string");
+					XSDatatype stringType = StringType.theInstance;
+					crow[j] = (ValueConstantImpl) termFactory.createValueConstant(results.getConstantFromColumn(j).toString(), stringType);
 //					System.out.println(crow[j]);
 				}
 				resultsTable.add(crow);
@@ -60,10 +69,10 @@ public class IncrementalQueryResultTableModel implements TableModel{
 				System.out.println("is after last");
 				isAfterLast = true;
 			}
-			
+
 		}
 		numrows = i;
-		
+
 
 	}
 
@@ -73,13 +82,14 @@ public class IncrementalQueryResultTableModel implements TableModel{
 	 */
 	public void close() {
 		try {
-			
+
 			results.close();
 		} catch (QueryResultException e) {
 		}
 	}
 
 	/** Automatically close when we're garbage collected */
+	@Override
 	protected void finalize() {
 		close();
 	}
@@ -101,7 +111,7 @@ public class IncrementalQueryResultTableModel implements TableModel{
 				return results.getSignature().get(column);
 			}else{
 				return "";
-			}	
+			}
 		} catch (QueryResultException e) {
 			e.printStackTrace();
 			return "NULL";
@@ -130,7 +140,7 @@ public class IncrementalQueryResultTableModel implements TableModel{
 //			Constant c = results.getConstantFromColumn(column); // Go to the
 //																// specified row
 //			return c.toString(); // Convert it to a string
-			
+
 			try {
 				if(row + 5 > numrows && !isAfterLast){
 					fetchMoreTuples();
@@ -139,7 +149,7 @@ public class IncrementalQueryResultTableModel implements TableModel{
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		
+
 			return resultsTable.get(row)[column].toString();
 //		} catch (QueryResultException e) {
 //			e.printStackTrace(System.err);
@@ -163,24 +173,25 @@ public class IncrementalQueryResultTableModel implements TableModel{
 	public void removeTableModelListener(TableModelListener l) {
 		listener.remove(l);
 	}
-	
+
 	private boolean add(Constant crow[]){
-		
+
 		String row ="";
 		for(int i=0; i< crow.length; i++){
 			row = row + crow[i].toString();
 		}
 		return mergeSet.add(row);
 	}
-	
+
 	private void fetchMoreTuples() throws QueryResultException{
 		int i = 0;
 		while (i < fetchsize && !isAfterLast) {
-			
+
 			if(results.nextRow()){
-				Constant[] crow = new Constant[numcols];
+				Constant[] crow = new ValueConstantImpl[numcols];
 				for (int j = 0; j < numcols; j++) {
-					crow[j] = new Constant(results.getConstantFromColumn(j).toString(), "xs:string");
+					XSDatatype stringType = StringType.theInstance;
+					crow[j] = (ValueConstantImpl) termFactory.createValueConstant(results.getConstantFromColumn(j).toString(), stringType);
 					System.out.println(crow[j]);
 				}
 				resultsTable.add(crow);
@@ -189,7 +200,7 @@ public class IncrementalQueryResultTableModel implements TableModel{
 				System.out.println("is after last!");
 				isAfterLast = true;
 			}
-			
+
 		}
 //		if(results.isAfterLast()){
 //			results.close();
@@ -198,11 +209,11 @@ public class IncrementalQueryResultTableModel implements TableModel{
 	}
 
 	private void fireModelChangedEvent(){
-		
+
 		Iterator<TableModelListener> it = listener.iterator();
 		while(it.hasNext()){
 			it.next().tableChanged(new TableModelEvent(this));
 		}
 	}
-	
+
 }

@@ -17,8 +17,6 @@ import inf.unibz.it.sql.parser.SimpleSQLParser.SelectItem;
 import inf.unibz.it.sql.parser.SimpleSQLParser.SimpleExpression;
 import inf.unibz.it.sql.parser.SimpleSQLParser.StringConstant;
 import inf.unibz.it.sql.parser.SimpleSQLParser.TableSource;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,19 +37,22 @@ import java.util.concurrent.CountDownLatch;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.imp.TermFactoryImpl;
 
 
 /**
  * Miner which takes the data base schema as base for finding
- * inclusion dependencies between tables. (e.g foreign key constraints) 
- * 
+ * inclusion dependencies between tables. (e.g foreign key constraints)
+ *
  * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  *
  */
 
 public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
-	
+
 	/**
 	 * The API controller
 	 */
@@ -63,7 +64,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 	/**
 	 * Collection of all mapping axioms for the currently selected data source
 	 */
-	private Collection<OBDAMappingAxiom> mappings;
+	private final Collection<OBDAMappingAxiom> mappings;
 	/**
 	 * An index which links each table in the data base schema to the mapping axioms where it is used
 	 */
@@ -80,21 +81,23 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 	 * The thread which does the interaction with the database.
 	 */
 	private Thread miningThread = null;
-	
+
 	/**
 	 * A Map, which stores for each mapping the aliases used in the SQL query
 	 */
 	private Map<OBDAMappingAxiom, HashMap<String, String>> tablesAliasMap = null;
-	
+
 	private boolean isCanceled = false;
-	
+
 	private boolean hasErrorOccurred = false;
-	
+
 	private MiningException exception = null;
-	
+
+	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+
 	/**
 	 * The construction creates a new instance of the RDBMSSchemaInclusionDependencyMiner
-	 * 
+	 *
 	 * @param con the api controller
 	 * @param latch the count down signal to tell the parent thread when the mining is finished
 	 */
@@ -110,20 +113,20 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		createTableIndex();
 	}
-	
+
 	/**
-	 * This Method creates the table to mapping index by parsing the 
+	 * This Method creates the table to mapping index by parsing the
 	 * SQL query of the mapping axioms.
 	 */
 	private void createTableIndex(){
-		
+
 		tableToMappingIndex = new HashMap<String, HashSet<OBDAMappingAxiom>>();
 		tablesAliasMap = new HashMap<OBDAMappingAxiom, HashMap<String, String>>();
 		Iterator<OBDAMappingAxiom> it = mappings.iterator();
 		while(it.hasNext()){
 			OBDAMappingAxiom axiom = it.next();
 			RDBMSSQLQuery t = (RDBMSSQLQuery) axiom.getSourceQuery();
-			SimpleSQLParser parser = parseSQLQuery(t.getInputQuString());
+			SimpleSQLParser parser = parseSQLQuery(t.toString());
 			Map<String,TableSource> tableMap = parser.getTableSources();
 			if(tableMap != null && tableMap.size() == 1){
 				Set<String> set = tableMap.keySet();
@@ -162,14 +165,14 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 				}
 				tablesAliasMap.put(axiom, aliases);
 			}
-		}	
+		}
 	}
-	
+
 	/**
-	 * This method parses the given SQL query and splits it in 
+	 * This method parses the given SQL query and splits it in
 	 * different tokens like the selected columns the table and the where
 	 * clause
-	 * 
+	 *
 	 * @param input the SQL query
 	 * @return a map containing information about the tables used in the sql query
 	 */
@@ -195,9 +198,10 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 			return null;
 		}
 	}
-	
+
 	public void startMining(){
 		miningThread = new Thread(){
+			@Override
 			public void run(){
 				try {
 					mine();
@@ -207,22 +211,22 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 					exception = new MiningException("Excetpion thrown during mining process.\n" + e.getMessage());
 					signal.countDown();
 				}
-				
+
 			}
 		};
 		miningThread.start();
 	}
-	
+
 	public void cancelMining(){
 		if(miningThread != null){
 			isCanceled = true;
 			miningThread.interrupt();
 		}
-		
+
 	}
-	
+
 	private void mine() throws Exception{
-		
+
 		RDBMSInclusionDependencyController depcon = (RDBMSInclusionDependencyController) apic.getController(RDBMSInclusionDependency.class);
 		Connection conn = getConnection();
 	    DatabaseMetaData meta;
@@ -253,7 +257,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 				    String fkTableName = null;
 				    String fkColumnName = null;
 				     while (rs.next() && !isCanceled) {
-				    	  
+
 					       String seq = rs.getString("KEY_SEQ");
 					       int i = Integer.valueOf(seq);
 					       if(i == 1){//1 means a new sequence of columns building a key
@@ -266,7 +270,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 					    		   pk = new HashSet<String>();
 					    		   fk.add(fkColumnName);
 					    		   pk.add(pkColumnName);
-					    	   }else{// if not a other seqence is already initialized 
+					    	   }else{// if not a other seqence is already initialized
 					    		   Key aux = new Key(pkTableName, fkTableName, pk, fk); //create key with old sequence
 					    		   keys.add(aux);
 					    		   pkTableName = rs.getString("PKTABLE_NAME");
@@ -274,7 +278,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 							       fkTableName = rs.getString("FKTABLE_NAME");
 							       fkColumnName = rs.getString("FKCOLUMN_NAME");
 							       // start new sequence
-					    		   fk = new HashSet<String>(); 
+					    		   fk = new HashSet<String>();
 					    		   pk = new HashSet<String>();
 					    		   fk.add(fkColumnName);
 					    		   pk.add(pkColumnName);
@@ -308,13 +312,13 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 										   Set<String> set_fk = k.getForeignKeys();
 										   Iterator<String> pk_it = set_pk.iterator();
 										   Iterator<String> fk_it = set_fk.iterator();
-										   Vector<QueryTerm> aux1 = new Vector<QueryTerm>();
-										   Vector<QueryTerm> aux2 = new Vector<QueryTerm>();
+										   Vector<Term> aux1 = new Vector<Term>();
+										   Vector<Term> aux2 = new Vector<Term>();
 										   while(pk_it.hasNext() && fk_it.hasNext()){
-											   
+
 											   String pkName = pk_it.next();
 											   String fkName = fk_it.next();
-											   
+
 											   String column1 = null;
 										       String column2 = null;
 										       HashMap<String, String> aliasMapPKColumnName = tablesAliasMap.get(axiom1);
@@ -336,8 +340,8 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 										    	   }
 										       }
 										       if(column1 != null && column2 != null){
-												   aux1.add(new VariableTerm(column1));
-												   aux2.add(new VariableTerm(column2));
+												   aux1.add(termFactory.createVariable(column1));
+												   aux2.add(termFactory.createVariable(column2));
 										       }
 									       //if one of the both colums is null, this means that the column
 									       //is not selected in the mapping an therefore no dependency is created
@@ -359,16 +363,16 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 	    		}
 	    	}
 	    }
-	    
+
 	    r.close();
 //	    st.close();
 	    conn.close();
 	}
-	
+
 	public HashSet<RDBMSInclusionDependency> getMiningResults(){
 		return foundInclusions;
 	}
-	
+
 	@Override
 	public MiningException getException() {
 		return exception;
@@ -378,18 +382,18 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 	public boolean hasErrorOccurred() {
 		return hasErrorOccurred;
 	}
-	
+
 	private Connection getConnection() throws Exception {
 	    Class.forName(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
 	    return DriverManager.getConnection(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL)+ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME), ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME),ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD));
 	  }
-	
+
 	private class Key{
 		Set<String> primayKeys = null;
 		Set<String> foreignKeys = null;
 		String fkTable = null;
 		String pkTable = null;
-		
+
 		private Key(String pkt, String fkt, Set<String> pk, Set<String>fk){
 			primayKeys = pk;
 			foreignKeys = fk;
@@ -412,7 +416,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 		public String getPkTable() {
 			return pkTable;
 		}
-		
-		
+
+
 	}
 }

@@ -5,10 +5,10 @@
  * The OBDA-API is licensed under the terms of the Lesser General Public
  * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
  * work include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
+ *
+ * a) The OBDA-API developed by the author and licensed under the LGPL; and,
+ * b) third-party components licensed under terms that may be different from
+ *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
 package inf.unibz.it.obda.gui.swing.mapping.panel;
@@ -18,25 +18,16 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
-import inf.unibz.it.ucq.domain.BinaryQueryAtom;
-import inf.unibz.it.ucq.domain.ConceptQueryAtom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -48,6 +39,16 @@ import javax.swing.JTree;
 import javax.swing.event.CellEditorListener;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.TreeCellEditor;
+
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MappingTreeNodeCellEditor implements TreeCellEditor {
 
@@ -64,7 +65,11 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	private Vector<CellEditorListener> listener = null;
 	private MappingManagerPanel mappingmanagerpanel = null;
 	private boolean editingCanceled = false;
-	
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
 	public MappingTreeNodeCellEditor(JTree tree, MappingManagerPanel panel, APIController apic) {
 //		super(tree, new MappingRenderer(apic));
 //		super(tree, renderer);
@@ -77,8 +82,8 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
 		me = new MappingEditorPanel(tree);
-		
-		
+
+
 
 	}
 //
@@ -121,11 +126,11 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	}
 
 	public boolean isInputValid(){
-		
+
 		if(me.getEditingObject() instanceof MappingHeadNode){
 			String txt = me.getText();
 			try {
-				ConjunctiveQuery query = new ConjunctiveQuery(txt,controller);
+				CQIE query = parse(txt);
 //				checkValidityOfConjunctiveQuery(query );
 				return true;
 			} catch (Exception e) {
@@ -134,31 +139,60 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		}else {
 			return true;
 		}
-		
+
 	}
-	
-	private void checkValidityOfConjunctiveQuery(ConjunctiveQuery cq ) throws Exception{
-		ArrayList<QueryAtom> atoms = cq.getAtoms();
-		Iterator<QueryAtom> it = atoms.iterator();
+
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
+		try {
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
+		}
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
+		}
+		return cq;
+	}
+
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(controller.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
+	}
+
+	private void checkValidityOfConjunctiveQuery(CQIE cq) throws Exception{
+		List<Atom> atoms = cq.getBody();
+		Iterator<Atom> it = atoms.iterator();
 		APICoupler coup= controller.getCoupler();
 		URI onto_uri =controller.getCurrentOntologyURI();
 		while(it.hasNext()){
-			QueryAtom atom = it.next();
-			if(atom instanceof ConceptQueryAtom){
-				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
-				String name = controller.getEntityNameRenderer().getPredicateName(cqa);
+			Atom atom = it.next();
+			int arity = atom.getArity();
+			if (arity == 1){  // concept query atom
+				String name = controller.getEntityNameRenderer().getPredicateName(atom);
 				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(name));
 				if(!isConcept){
 					throw new Exception("Concept "+name+" not present in ontology.");
 				}
-				
-			}else{
-				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
-				String name = controller.getEntityNameRenderer().getPredicateName(bqa);
-				ArrayList<QueryTerm> terms = bqa.getTerms();
-				QueryTerm t2 = terms.get(1);
+
+			} else if (arity == 2) {  // binary query atom
+				String name = controller.getEntityNameRenderer().getPredicateName(atom);
+				List<Term> terms = atom.getTerms();
+				Term t2 = terms.get(1);
 				boolean found = false;
-				if(t2 instanceof FunctionTerm){
+				if(t2 instanceof ObjectVariableImpl){
 					found =coup.isObjectProperty(onto_uri,new URI(name));
 				}else{
 					found =coup.isDatatypeProperty(onto_uri,new URI(name));
@@ -166,6 +200,8 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 				if(!found){
 					throw new Exception("Property "+name+" not present in ontology.");
 				}
+			} else {
+				// TODO Throw an exception
 			}
 		}
 	}
@@ -175,7 +211,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		}
 
 		public void cancelCellEditing() {
-			
+
 			if(!editingCanceled){
 				mappingmanagerpanel.applyChangedToNode(getCellEditorValue().toString());
 			}
@@ -203,47 +239,48 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		}
 
 		public boolean stopCellEditing() {
-			
+
 			return isInputValid();
 		}
-		
-		
-		
-		
+
+
+
+
 		private class HeadInputVerifier extends InputVerifier {
 
+			@Override
 			public boolean verify(JComponent field) {
 				JTextPane pane = (JTextPane) field;
 				String txt = pane.getText();
-				try {
-					ConjunctiveQuery query = new ConjunctiveQuery(txt,controller);
-				} catch (QueryParseException e) {
+				CQIE cq = parse(txt);
+
+				if (cq != null)
+					return true;
+				else
 					return false;
-				}
-				return true;
 			}
 
 		}
-		
+
 		private class MappingEditorPanel extends JPanel{
 
-			
+
 			/**
-			 * 
+			 *
 			 */
 			private static final long serialVersionUID = 8573053733072805037L;
-			private String value="";
-		    private javax.swing.JScrollPane jScrollPane1;
-		    private javax.swing.JTextPane pane;
-		    private JTree tree;
+			private final String value="";
+		    private final javax.swing.JScrollPane jScrollPane1;
+		    private final javax.swing.JTextPane pane;
+		    private final JTree tree;
 		    private Object obj = null;
-			
+
 			private MappingEditorPanel(JTree tree){
-				
+
 				this.tree = tree;
 				this.setMinimumSize(new Dimension(800,75));
 				this.setPreferredSize(new Dimension(800,75));
-				
+
 		        java.awt.GridBagConstraints gridBagConstraints;
 		        jScrollPane1 = new javax.swing.JScrollPane();
 		        pane = new javax.swing.JTextPane();
@@ -259,11 +296,11 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		        gridBagConstraints.weightx = 1.0;
 		        gridBagConstraints.weighty = 1.0;
 		        add(jScrollPane1, gridBagConstraints);
-		        
+
 		        pane.addKeyListener(new KeyListener(){
 
 					public void keyPressed(KeyEvent e) {
-						
+
 						if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK && e.getKeyCode() == KeyEvent.VK_ENTER) {
 							mappingmanagerpanel.stopTreeEditing();
 						}else if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
@@ -273,10 +310,10 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 					}
 					public void keyReleased(KeyEvent e) {}
 					public void keyTyped(KeyEvent e) {}
-		        	
+
 		        });
 			}
-			
+
 			public void setText(Object value){
 				obj = value;
 				MappingRenderer ren = (MappingRenderer) tree.getCellRenderer();
@@ -292,18 +329,18 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 					pane.setStyledDocument(doc);
 				}
 			}
-			
+
 			public Object getEditingObject(){
 				return obj;
 			}
-			
+
 			public String getText(){
 				return pane.getText();
 			}
-			
+
 			public JTextPane getPane(){
 				return pane;
 			}
 		}
-	
+
 }

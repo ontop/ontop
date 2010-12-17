@@ -1,11 +1,10 @@
 package inf.unibz.it.utils.codec;
 
-import inf.unibz.it.dl.assertion.Assertion;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.obda.query.domain.CQIE;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -14,9 +13,9 @@ import org.w3c.dom.Element;
  * representation. These are intended for input and output of XML OBDA files.
  * Elements return by this codec are created using the internal Document object,
  * through the createElement call. These should be adopted by target documents.
- * 
+ *
  * @author Mariano Rodriguez Muro
- * 
+ *
  * @param <AssertionClass>
  */
 public abstract class ObjectXMLCodec<ObjectClass extends Object> implements IOCodec<Element, ObjectClass>, XMLEncodable {

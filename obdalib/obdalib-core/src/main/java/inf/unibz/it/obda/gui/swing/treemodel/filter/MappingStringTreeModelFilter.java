@@ -1,27 +1,23 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
-import java.net.URI;
-import java.util.ArrayList;
-
-import inf.unibz.it.dl.domain.NamedConcept;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.ConceptQueryAtom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
+
+import java.util.List;
+
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.CQIEImpl;
 
 /**
  * @author This filter receives a string in the constructor and returns true if
  *         accepts any mapping containing the string in the head or body
- * 
+ *
  */
 public class MappingStringTreeModelFilter implements
 		TreeModelFilter<OBDAMappingAxiom> {
-	private String srtModelFilter;
+	private final String srtModelFilter;
 
 	/**
 	 * @param strModeFilter
@@ -33,7 +29,7 @@ public class MappingStringTreeModelFilter implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
 	 * .lang.Object)
@@ -41,30 +37,29 @@ public class MappingStringTreeModelFilter implements
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
 		boolean filterValue = false;
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) object;
+		OBDAMappingAxiom mapping = object;
 		if (mapping.getId().indexOf(srtModelFilter) != -1)
 			filterValue = true;
-		ConjunctiveQuery headquery = (ConjunctiveQuery) mapping
-				.getTargetQuery();
+		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
 		RDBMSSQLQuery bodyquery = (RDBMSSQLQuery) mapping.getSourceQuery();
 
-		ArrayList<QueryAtom> atoms = headquery.getAtoms();
+		List<Atom> atoms = headquery.getBody();
 
 		for (int i = 0; i < atoms.size(); i++) {
-			QueryAtom atom = atoms.get(i);
-			if (atom.getNamedPredicate().getUri().toString().indexOf(srtModelFilter) != -1) {
+			Atom atom = atoms.get(i);
+			if (atom.getPredicate().getName().toString().indexOf(srtModelFilter) != -1) {
 				filterValue = true;
 			}
-			ArrayList<QueryTerm> queryTerms = atom.getTerms();
+			List<Term> queryTerms = atom.getTerms();
 
 			for (int j = 0; j < queryTerms.size(); j++) {
-				QueryTerm term = queryTerms.get(j);
+				Term term = queryTerms.get(j);
 				if (term.toString().indexOf(srtModelFilter) != -1)
 					filterValue = true;
 
 			}
 		}
-		if (bodyquery.getInputQuString().indexOf(srtModelFilter) != -1)
+		if (bodyquery.toString().indexOf(srtModelFilter) != -1)
 			filterValue = true;
 
 		return filterValue;

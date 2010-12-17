@@ -1,13 +1,13 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
-import java.util.ArrayList;
+import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+
 import java.util.List;
 
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.CQIEImpl;
 
 /**
  * @author This Filter receives a string and returns true if any mapping
@@ -16,7 +16,7 @@ import inf.unibz.it.ucq.domain.VariableTerm;
 public class MappingHeadVariableTreeModelFilter implements
 		TreeModelFilter<OBDAMappingAxiom> {
 
-	private String srtHeadVariableFilter;
+	private final String srtHeadVariableFilter;
 
 	/**
 	 * @param srtHeadVariableFilter
@@ -28,7 +28,7 @@ public class MappingHeadVariableTreeModelFilter implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
 	 * .lang.Object)
@@ -37,18 +37,17 @@ public class MappingHeadVariableTreeModelFilter implements
 	public boolean match(OBDAMappingAxiom object) {
 		// TODO Auto-generated method stub
 		boolean filterValue = false;
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) object;
-		ConjunctiveQuery headquery = (ConjunctiveQuery) mapping
-				.getTargetQuery();
+		OBDAMappingAxiom mapping = object;
+		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
 
-		ArrayList<QueryAtom> headAtom = headquery.getAtoms(); // atoms
+		List<Atom> headAtom = headquery.getBody(); // atoms
 
 		for (int i = 0; i < headAtom.size(); i++) {
-			QueryAtom atom = headAtom.get(i);
-			if (atom.getNamedPredicate().getUri().toString().indexOf(srtHeadVariableFilter) != -1) {
+			Atom atom = headAtom.get(i);
+			if (atom.getPredicate().getName().toString().indexOf(srtHeadVariableFilter) != -1) {
 				filterValue = true;
 			}
-			ArrayList<QueryTerm> terms = atom.getTerms();
+			List<Term> terms = atom.getTerms();
 			for (int j = 0; j < terms.size(); j++) {
 				if ((terms.get(j).toString()).indexOf(srtHeadVariableFilter) != -1) {
 					filterValue = true;

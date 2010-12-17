@@ -5,25 +5,26 @@
  * The OBDA-API is licensed under the terms of the Lesser General Public
  * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
  * work include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
+ *
+ * a) The OBDA-API developed by the author and licensed under the LGPL; and,
+ * b) third-party components licensed under terms that may be different from
+ *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
 package inf.unibz.it.obda.validator;
 
-import inf.unibz.it.obda.domain.Query;
+import org.obda.query.domain.Query;
+
 
 public abstract class QueryValidator {
 
 	private Query query = null;
-	
+
 	public QueryValidator(Query q){
-		
+
 		query = q;
 	}
-	
+
 	public abstract boolean validate();
 	public abstract Object execute();
 }

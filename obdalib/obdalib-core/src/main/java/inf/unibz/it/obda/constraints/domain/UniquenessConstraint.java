@@ -1,13 +1,14 @@
 package inf.unibz.it.obda.constraints.domain;
 
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertion;
-import inf.unibz.it.obda.domain.SourceQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
 
 import java.util.List;
 
+import org.obda.query.domain.Query;
+import org.obda.query.domain.Term;
+
 public abstract class UniquenessConstraint extends AbstractConstraintAssertion{
 
-	public abstract SourceQuery getSourceQuery();
-	public abstract List<QueryTerm> getTerms();
+	public abstract Query getSourceQuery();
+	public abstract List<Term> getTerms();
 }

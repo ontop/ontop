@@ -26,8 +26,6 @@ import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNode;
 import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNodeRenderer;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -46,16 +44,18 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.obda.query.domain.Term;
+
 /**
  * The tree pane showing all inclusion dependencies associated the selected data source
  *
  * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 public class InclusionDependencyTreePane extends JPanel implements MappingManagerPreferenceChangeListener{
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 5849742849711210687L;
 	/**
@@ -66,17 +66,17 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 	 * the RDBMS inclusion dependency controller
 	 */
 	private RDBMSInclusionDependencyController incController = null;
-	
+
 	private boolean canceled = false;
-	
+
 	private SQLQueryValidator v = null;
-	
+
 	private	Thread	validatorThread	= null;
-	
+
 	private static InclusionDependencyTreePane instance = null;
-	
+
 	private MappingManagerPreferences pref = null;
-	
+
     /** Creates new form InclusionDependencyTreePane */
     public InclusionDependencyTreePane(APIController apic) {
     	instance = this;
@@ -98,7 +98,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
         jTree1.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
 //        incController.addControllerListener(model);
-        
+
         jButton1.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
@@ -107,40 +107,40 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 					delete(selection);
 				}
 			}
-        	
+
         });
-        
+
         jButtonAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-			
+
 				addRDBMSInclusionDependency();
 			}
-        	
+
         });
-        
+
         jButtonWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = Dependency_SelectMappingPane.gestInstance().getSelection();
 				Dependency_SelectMappingPane.gestInstance().createDialog("Create Inclusion Dependency", paths, RDBMSInclusionDependency.INCLUSIONDEPENDENCY);
 			}
-        	
+
         });
-        
+
         jButtonMine.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				Dependency_SelectMappingPane.gestInstance().showInclusionMiningDialog(jTree1);
 			}
-        	
+
         });
     }
-    
+
     private void addRDBMSInclusionDependency(){
-		DatasourcesController dscon = apic.getDatasourcesController(); 
+		DatasourcesController dscon = apic.getDatasourcesController();
 		if(dscon.getCurrentDataSource() == null){
 			JOptionPane.showMessageDialog(null, "Please select a data source.", "ERROR", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -162,11 +162,11 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 		jTree1.setSelectionPath(path);
 		jTree1.startEditingAtPath(path);
     }
-    
+
     public static InclusionDependencyTreePane getInstance(){
     	return instance;
     }
-    
+
     public JTree getInclusionDependencyTree(){
     	return jTree1;
     }
@@ -175,7 +175,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
      */
     private void addMenu(){
     	JPopupMenu menu = new JPopupMenu();
-    	
+
     	JMenuItem del = new JMenuItem();
     	del.setText("delete");
     	del.setToolTipText("deletes all selected Assertions");
@@ -185,32 +185,32 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 				if(selection != null){
 					delete(selection);
 				}
-			}	
+			}
     	});
-    	
+
     	menu.add(del);
     	menu.addSeparator();
-    	
+
     	JMenuItem validate = new JMenuItem();
     	validate.setText("Validate Dependency");
     	validate.setToolTipText("Check wehter the produced SQL query is valid.");
     	validate.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				
+
 				TreePath[] paths = jTree1.getSelectionPaths();
 				if (paths != null){
 					validateRDBMSInclusionDependencies(paths);
 				}
 			}
-    		
+
     	});
     	menu.add(validate);
     	jTree1.setComponentPopupMenu(menu);
     }
-    
+
     /**
-     * validates whether the data source fulfills the selected assertions 
+     * validates whether the data source fulfills the selected assertions
      * @param paths selected assertions
      */
     private void validateRDBMSInclusionDependencies(TreePath[] paths){
@@ -220,9 +220,9 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 			public void run() {
 				canceled = false;
 				final TreePath path[] = jTree1.getSelectionPaths();
-	
+
 				dialog.setVisible(true);
-	
+
 				if (path == null) {
 					return;
 				}
@@ -234,38 +234,32 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
             		RDBMSInclusionDependency inc = (RDBMSInclusionDependency)node.getUserObject();
         			RDBMSSQLQuery query1 = (RDBMSSQLQuery) inc.getSourceQueryOne();
             		RDBMSSQLQuery query2 = (RDBMSSQLQuery) inc.getSourceQueryTwo();
-            		List<QueryTerm> terms1 = inc.getTermsOfQueryOne();
-            		List<QueryTerm> terms2 = inc.getTermsOfQueryTwo();
+            		List<Term> terms1 = inc.getTermsOfQueryOne();
+            		List<Term> terms2 = inc.getTermsOfQueryTwo();
             		dialog.addText(inc.toString() +"... ", dialog.NORMAL);
             		String aux1 = "";
-            		Iterator<QueryTerm> it1 = terms1.iterator();
+            		Iterator<Term> it1 = terms1.iterator();
             		while(it1.hasNext()){
             			if(aux1.length() > 0){
             				aux1 = aux1 + ",";
             			}
-            			aux1= aux1 + "table1." + it1.next().getVariableName();
+            			aux1= aux1 + "table1." + it1.next().getName();
             		}
             		String aux2 = "";
-            		Iterator<QueryTerm> it2 = terms2.iterator();
+            		Iterator<Term> it2 = terms2.iterator();
             		while(it2.hasNext()){
             			if(aux2.length() > 0){
             				aux2 = aux2 + ",";
             			}
-            			aux2= aux2 + "table2." + it2.next().getVariableName();
+            			aux2= aux2 + "table2." + it2.next().getName();
             		}
-            		
-            		String query = "SELECT " + aux1 +" FROM (" + query1.getInputQuString() + ") table1 WHERE ROW("+
-        			aux1+") NOT IN (SELECT " + aux2 + " FROM (" + query2.getInputQuString() +") table2)";
-            		
+
+            		String query = "SELECT " + aux1 +" FROM (" + query1.toString() + ") table1 WHERE ROW("+
+        			aux1+") NOT IN (SELECT " + aux2 + " FROM (" + query2.toString() +") table2)";
+
             		DatasourcesController con = apic.getDatasourcesController();
             		DataSource ds = con.getCurrentDataSource();
-            		try {
-						v = new SQLQueryValidator(ds, new RDBMSSQLQuery(query, apic));
-					} catch (QueryParseException e) {
-						String output = "ERROR - Reason: " + v.getReason().getMessage() + " \n";
-						dialog.addText(output, dialog.ERROR);
-						error = true;
-					}
+            		v = new SQLQueryValidator(ds, new RDBMSSQLQuery(query));
 					if (canceled)
 						return;
 					if(!error){
@@ -322,24 +316,24 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 		});
 		cancelThread.start();
     }
-    
+
     private void delete(TreePath[] selection){
     	for(int i=0; i< selection.length;i++){
 			TreePath path = selection[i];
 			Object o = path.getLastPathComponent();
 			if(o instanceof DefaultAssertionTreeNode){
 				DefaultAssertionTreeNode<RDBMSInclusionDependency> node = (DefaultAssertionTreeNode<RDBMSInclusionDependency>)o;
-				RDBMSInclusionDependency dep = (RDBMSInclusionDependency) node.getUserObject();
+				RDBMSInclusionDependency dep = node.getUserObject();
 				incController.removeAssertion(dep);
-				
-				
+
+
 			}
 		}
     	jTree1.setSelectionPath(null);
     }
-    
+
     private boolean validateAssertion(SQLQueryValidator v){
-				
+
 		ResultSetTableModel model = (ResultSetTableModel) v.execute();
 		if (model == null){
 			v.getReason().printStackTrace();
@@ -351,9 +345,9 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 				return false;
 			}
 		}
-		
+
 	}
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -486,28 +480,28 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
 	public void colorPeferenceChanged(String preference, Color col) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 
 	public void fontFamilyPreferenceChanged(String preference, String font) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
-		
+
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
-		model.reload();		
+		model.reload();
 	}
 
 }

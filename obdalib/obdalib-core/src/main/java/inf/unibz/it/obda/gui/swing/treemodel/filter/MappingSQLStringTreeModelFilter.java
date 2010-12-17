@@ -11,7 +11,7 @@ import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 public class MappingSQLStringTreeModelFilter implements
 		TreeModelFilter<OBDAMappingAxiom> {
 
-	private String srtSQLStringTreeModelFilter;
+	private final String srtSQLStringTreeModelFilter;
 
 	/**
 	 * @param srtSQLStringTreeModelFilter
@@ -21,7 +21,7 @@ public class MappingSQLStringTreeModelFilter implements
 		this.srtSQLStringTreeModelFilter=srtSQLStringTreeModelFilter;
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java.lang.Object)
 	 */
@@ -29,9 +29,9 @@ public class MappingSQLStringTreeModelFilter implements
 	public boolean match(OBDAMappingAxiom object) {
 		// TODO Auto-generated method stub
 		boolean filterValue = false;
-		OBDAMappingAxiom mapping = (OBDAMappingAxiom) object;
+		OBDAMappingAxiom mapping = object;
 		RDBMSSQLQuery bodyquery = (RDBMSSQLQuery) mapping.getSourceQuery();
-		if (bodyquery.getInputQuString().indexOf(srtSQLStringTreeModelFilter) != -1)
+		if (bodyquery.toString().indexOf(srtSQLStringTreeModelFilter) != -1)
 			filterValue = true;
 		return filterValue;
 	}

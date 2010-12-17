@@ -1,11 +1,8 @@
 package inf.unibz.it.obda.constraints.miner;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
-import inf.unibz.it.obda.dependencies.miner.exception.MiningException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
@@ -16,16 +13,6 @@ import inf.unibz.it.sql.parser.SQLParser;
 import inf.unibz.it.sql.parser.SQLQuery;
 import inf.unibz.it.sql.parser.SQLSelection;
 import inf.unibz.it.sql.parser.SQLTable;
-import inf.unibz.it.sql.parser.SimpleSQLParser;
-import inf.unibz.it.sql.parser.SimpleSQLParser.ConstantSubExpression;
-import inf.unibz.it.sql.parser.SimpleSQLParser.IConstant;
-import inf.unibz.it.sql.parser.SimpleSQLParser.IExpression;
-import inf.unibz.it.sql.parser.SimpleSQLParser.SelectItem;
-import inf.unibz.it.sql.parser.SimpleSQLParser.SimpleExpression;
-import inf.unibz.it.sql.parser.SimpleSQLParser.StringConstant;
-import inf.unibz.it.sql.parser.SimpleSQLParser.TableSource;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,35 +22,37 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class AbstractAssertionMiner {
-	
+
 	private APIController apic = null;
 	private DataSource	ds = null;
-	private Collection<OBDAMappingAxiom> mappings;
+	private final Collection<OBDAMappingAxiom> mappings;
 	private HashMap<String, HashSet<OBDAMappingAxiom>> tableToMappingIndex = null;
 	private Map<OBDAMappingAxiom, HashMap<String, String>> tablesAliasMap = null;
 	private HashMap<String, List<String>> tableColumns = null;
 	private HashMap<OBDAMappingAxiom, SQLQuery> axiomToParsedQueryMap = null;
 	private List<String> tables = null;
 	private List<OBDAMappingAxiom> queriesWithJoins = null;
-	private String tableNamePattern = "%";
-	private String schemaPattern = "%";
-	
+	private final String tableNamePattern = "%";
+	private final String schemaPattern = "%";
+	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+
 	public AbstractAssertionMiner(APIController con){
-		
+
 		apic = con;
 		ds= apic.getDatasourcesController().getCurrentDataSource();
 		ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
@@ -72,11 +61,11 @@ public class AbstractAssertionMiner {
 		createTableIndex();
 		retrieveTableInfo();
 	}
-	
+
 	private void retrieveTableInfo(){
 		tableColumns = new HashMap<String, List<String>>();
 		tables = new Vector<String>();
-		
+
 		try {
 			Connection con = getConnection();
 			DataSource source = ds;
@@ -119,13 +108,13 @@ public class AbstractAssertionMiner {
 			e1.printStackTrace();
 		}
 	}
-	
+
 	private void makeTableMap(ResultSet r, DatabaseMetaData meta, Connection con) throws Exception{
 		while (r.next()) {
 			String name = r.getString("TABLE_NAME");
 			 tables.add(name);
 			 ResultSet rs = meta.getColumns(con.getCatalog(), "%", name, "%");
-			 
+
 			 Vector<String> aux = new Vector<String>();
 			 while(rs.next()){
 				 String column = rs.getString("COLUMN_NAME");
@@ -136,9 +125,9 @@ public class AbstractAssertionMiner {
 		}
 		r.close();
 	}
-	
+
 	private void createTableIndex(){
-		
+
 		tableToMappingIndex = new HashMap<String, HashSet<OBDAMappingAxiom>>();
 		tablesAliasMap = new HashMap<OBDAMappingAxiom, HashMap<String, String>>();
 		axiomToParsedQueryMap = new HashMap<OBDAMappingAxiom, SQLQuery>();
@@ -147,8 +136,8 @@ public class AbstractAssertionMiner {
 		while(it.hasNext()){
 			OBDAMappingAxiom axiom = it.next();
 			RDBMSSQLQuery t = (RDBMSSQLQuery) axiom.getSourceQuery();
-			SQLQuery query = parseSQLQuery(t.getInputQuString());
-			
+			SQLQuery query = parseSQLQuery(t.toString());
+
 			if(query != null){
 				axiomToParsedQueryMap.put(axiom, query);
 				List<SQLTable> tables = query.getTables();
@@ -160,7 +149,7 @@ public class AbstractAssertionMiner {
 					}
 					aux.add(axiom);
 					tableToMappingIndex.put(table, aux);
-					
+
 					List<SQLSelection> sel = query.getSelect();
 					HashMap<String, String> aliases = new HashMap<String, String>();
 					Iterator<SQLSelection> it1 = sel.iterator();
@@ -175,12 +164,12 @@ public class AbstractAssertionMiner {
 					queriesWithJoins.add(axiom);
 				}
 			}
-		}	
+		}
 	}
-	
+
 	public List<RDBMSForeignKeyConstraint> mineForeignkeyConstraints() throws Exception{
 		Vector<RDBMSForeignKeyConstraint> fkconstraints = new Vector<RDBMSForeignKeyConstraint>();
-		
+
 		Connection conn = getConnection();
 		DatabaseMetaData meta;
 	    ResultSet r = null;
@@ -200,43 +189,43 @@ public class AbstractAssertionMiner {
 		    	}
 		    	if(varoft1.size() != varoft2.size()){
 		    		return null;
-		    	}		    	
-		    	
+		    	}
+
 		    	HashSet<OBDAMappingAxiom> mappingsOfT1 = tableToMappingIndex.get(t1);
 		    	HashSet<OBDAMappingAxiom> mappingsOfT2 = tableToMappingIndex.get(t2);
-		    	
+
 		    	if(mappingsOfT1 != null && mappingsOfT2 != null){
 		    		Iterator<OBDAMappingAxiom> itT1 = mappingsOfT1.iterator();
 			    	Iterator<OBDAMappingAxiom> itT2 = mappingsOfT2.iterator();
 			    	while(itT1.hasNext()){
-			    		
+
 			    		OBDAMappingAxiom axiom1 = itT1.next();
 			    		HashMap<String, String> aliases1 = tablesAliasMap.get(axiom1);
-			    		Vector<QueryTerm> terms1 = new Vector<QueryTerm>();
+			    		Vector<Term> terms1 = new Vector<Term>();
 			    		Iterator<String> varit1 = varoft1.iterator();
 			    		while(varoft1.size() >0 && varit1.hasNext()){
 			    			String name1 = varit1.next();
 			    			String alias1 = aliases1.get(name1);
 			    			if(alias1 == null){
-			    				terms1.add(new VariableTerm(name1.toLowerCase()));
+			    				terms1.add(termFactory.createVariable(name1.toLowerCase()));
 			    			}else{
-			    				terms1.add(new VariableTerm(alias1));
+			    				terms1.add(termFactory.createVariable(alias1));
 			    			}
 			    		}
-			    		
+
 			    		while(varoft2.size() >0 && itT2.hasNext()){
-			    			
+
 			    			OBDAMappingAxiom axiom2 = itT2.next();
 				    		HashMap<String, String> aliases2 = tablesAliasMap.get(axiom2);
-				    		Vector<QueryTerm> terms2 = new Vector<QueryTerm>();
+				    		Vector<Term> terms2 = new Vector<Term>();
 				    		Iterator<String> varit2 = varoft2.iterator();
 				    		while(varit2.hasNext()){
 				    			String name2 = varit2.next();
 				    			String alias2 = aliases2.get(name2);
 				    			if(alias2 == null){
-				    				terms2.add(new VariableTerm(name2.toLowerCase()));
+				    				terms2.add(termFactory.createVariable(name2.toLowerCase()));
 				    			}else{
-				    				terms2.add(new VariableTerm(alias2));
+				    				terms2.add(termFactory.createVariable(alias2));
 				    			}
 				    		}
 				    		if(!axiom1.getId().equals(axiom2.getId())){
@@ -248,8 +237,8 @@ public class AbstractAssertionMiner {
 		    	rs.close();
 	    	}
 	    }
-		
-	    
+
+
 	    Iterator<OBDAMappingAxiom> it3 = queriesWithJoins.iterator();
 	    while(it3.hasNext()){
 	    	OBDAMappingAxiom ax = it3.next();
@@ -267,8 +256,8 @@ public class AbstractAssertionMiner {
 	    					OBDAMappingAxiom ax5 = it5.next();
 	    					if(foreignKeyConstraintCanBeMade(con, ax5)){
 	    						List<String> cn = tableColumns.get(table);
-	    						Vector<QueryTerm> terms1 = new Vector<QueryTerm>();
-	    						Vector<QueryTerm> terms2 = new Vector<QueryTerm>();
+	    						Vector<Term> terms1 = new Vector<Term>();
+	    						Vector<Term> terms2 = new Vector<Term>();
 	    						HashMap<String, String> aliases1 = tablesAliasMap.get(ax);
 	    						HashMap<String, String> aliases2 = tablesAliasMap.get(ax5);
 	    						if(aliases1 != null && aliases2 != null){
@@ -283,10 +272,10 @@ public class AbstractAssertionMiner {
 		    							if(alias2 == null){
 		    								alias2 = name;
 		    							}
-		    							terms1.add(new VariableTerm(alias1.toLowerCase()));
-		    							terms2.add(new VariableTerm(alias2.toLowerCase()));
+		    							terms1.add(termFactory.createVariable(alias1.toLowerCase()));
+		    							terms2.add(termFactory.createVariable(alias2.toLowerCase()));
 		    						}
-		    						
+
 		    						if(!ax.getId().equals(ax5.getId())){
 						    			fkconstraints.add(new RDBMSForeignKeyConstraint(ax5.getId(),ax.getId(),(RDBMSSQLQuery)ax5.getSourceQuery(),(RDBMSSQLQuery)ax.getSourceQuery(),terms2, terms1));
 						    		}
@@ -297,12 +286,12 @@ public class AbstractAssertionMiner {
 	    		}
 	    	}
 	    }
-		
+
 		Iterator<String> it5 = tables.iterator();
 		while(it5.hasNext()){
 			String table = it5.next();
 			HashSet<OBDAMappingAxiom> maps = tableToMappingIndex.get(table);
-			if(maps != null){	
+			if(maps != null){
 				int c = 0;
 				while(true){
 					List<OBDAMappingAxiom> general = findMappingWithIConditionsInSQL(maps, c);
@@ -314,12 +303,12 @@ public class AbstractAssertionMiner {
 					while(git.hasNext()){
 						OBDAMappingAxiom ax1 = git.next();
 						Iterator<OBDAMappingAxiom> lit = less.iterator();
-						while(lit.hasNext()){	
+						while(lit.hasNext()){
 							OBDAMappingAxiom ax2 = lit.next();
 							if(isMoreGeneralThen(ax1,ax2)){
-								List<QueryTerm> termsAx1 = new Vector<QueryTerm>();
-								List<QueryTerm> termsAx2 = new Vector<QueryTerm>();
-								
+								List<Term> termsAx1 = new Vector<Term>();
+								List<Term> termsAx2 = new Vector<Term>();
+
 								List<String> columnnames = tableColumns.get(table);
 								Iterator<String> cit = columnnames.iterator();
 								HashMap<String, String> aliasesAx1 = tablesAliasMap.get(ax1);
@@ -334,10 +323,10 @@ public class AbstractAssertionMiner {
 									if(aliasAx2 == null){
 										aliasAx2 = name;
 									}
-									termsAx1.add(new VariableTerm(aliasAx1.toLowerCase()));
-									termsAx2.add(new VariableTerm(aliasAx2.toLowerCase()));
+									termsAx1.add(termFactory.createVariable(aliasAx1.toLowerCase()));
+									termsAx2.add(termFactory.createVariable(aliasAx2.toLowerCase()));
 								}
-								
+
 								RDBMSForeignKeyConstraint dep = new RDBMSForeignKeyConstraint(ax2.getId(), ax1.getId(),(RDBMSSQLQuery) ax2.getSourceQuery(), (RDBMSSQLQuery) ax1.getSourceQuery(), termsAx2, termsAx1);;
 								fkconstraints.add(dep);
 							}
@@ -347,12 +336,12 @@ public class AbstractAssertionMiner {
 				}
 			}
 		}
-	    
+
 		return fkconstraints;
 	}
-	
+
 	private boolean foreignKeyConstraintCanBeMade(List<SQLCondition> con, OBDAMappingAxiom ax){
-		
+
 		if(con == null){
 			return false;
 		}
@@ -375,14 +364,14 @@ public class AbstractAssertionMiner {
 		}
 		return false;
 	}
-	
+
 	private List<SQLCondition> getCondtionsForTable(SQLQuery q){
-		
+
 		return q.getConditions();
 	}
-	
+
 	public List<RDBMSPrimaryKeyConstraint> minePirmaryKeyConstraints() throws Exception{
-		
+
 		Vector<RDBMSPrimaryKeyConstraint> pkconstraints = new Vector<RDBMSPrimaryKeyConstraint>();
 		Connection conn = getConnection();
 		DatabaseMetaData meta;
@@ -396,22 +385,22 @@ public class AbstractAssertionMiner {
 		    while(rs.next()){
 		    	var.add(rs.getString("COLUMN_NAME"));
 		    }
-		    
+
 		    HashSet<OBDAMappingAxiom> ma = tableToMappingIndex.get(table);
 		    if(ma != null){
 			    Iterator<OBDAMappingAxiom> mit = ma.iterator();
 			    while(mit.hasNext()){
 			    	OBDAMappingAxiom axiom = mit.next();
 			    	HashMap<String, String> aliases = tablesAliasMap.get(axiom);
-			    	Vector<QueryTerm> terms = new Vector<QueryTerm>();
+			    	Vector<Term> terms = new Vector<Term>();
 			    	Iterator<String> varit = var.iterator();
 			    	while(varit.hasNext()){
 			    		String name = varit.next();
 			    		String alias = aliases.get(name);
 			    		if(alias == null){
-			    			terms.add(new VariableTerm(name));
+			    			terms.add(termFactory.createVariable(name));
 			    		}else{
-			    			terms.add(new VariableTerm(alias));
+			    			terms.add(termFactory.createVariable(alias));
 			    		}
 			    	}
 			    	if(terms.size()>0){
@@ -422,9 +411,9 @@ public class AbstractAssertionMiner {
 	    }
 		return pkconstraints;
 	}
-	
+
 	private boolean isMoreGeneralThen(OBDAMappingAxiom ax1, OBDAMappingAxiom ax2){
-		
+
 		SQLQuery q1 = axiomToParsedQueryMap.get(ax1);
 		SQLQuery q2 = axiomToParsedQueryMap.get(ax2);
 		List<SQLCondition> q1_con = q1.getConditions();
@@ -435,12 +424,12 @@ public class AbstractAssertionMiner {
 			SQLCondition c1 = it1.next();
 			isTrue = q2_con.contains(c1);
 		}
-		
+
 		return isTrue;
 	}
-	
+
 	private List<OBDAMappingAxiom> findMappingWithIConditionsInSQL(HashSet<OBDAMappingAxiom> maps, int i){
-		
+
 		Vector<OBDAMappingAxiom> axioms = new Vector<OBDAMappingAxiom>();
 		Iterator<OBDAMappingAxiom> it = maps.iterator();
 		while(it.hasNext()){
@@ -453,13 +442,13 @@ public class AbstractAssertionMiner {
 				}
 			}
 		}
-		
+
 		return axioms;
-		
+
 	}
-	
+
 	private List<OBDAMappingAxiom> findMappingsWichMoreThenIConditionsInSQL(HashSet<OBDAMappingAxiom> maps, int i){
-		
+
 		Vector<OBDAMappingAxiom> axioms = new Vector<OBDAMappingAxiom>();
 		Iterator<OBDAMappingAxiom> it = maps.iterator();
 		while(it.hasNext()){
@@ -472,16 +461,16 @@ public class AbstractAssertionMiner {
 				}
 			}
 		}
-		
+
 		return axioms;
-		
+
 	}
-	
+
 	private Connection getConnection() throws Exception {
 	    Class.forName(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
 	    return DriverManager.getConnection(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL)+ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME), ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME),ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD));
 	}
-	
+
 	private SQLQuery parseSQLQuery(String input){
 		try {
 			SQLParser parser = null;
@@ -505,5 +494,5 @@ public class AbstractAssertionMiner {
 		}
 	}
 }
-	
+
 

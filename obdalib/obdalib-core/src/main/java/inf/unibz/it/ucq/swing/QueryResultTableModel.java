@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -12,8 +12,6 @@
  */
 package inf.unibz.it.ucq.swing;
 
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
-import inf.unibz.it.ucq.domain.Constant;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.exception.QueryResultException;
 
@@ -22,6 +20,14 @@ import java.util.Vector;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+
+import org.obda.query.domain.Constant;
+import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.imp.TermFactoryImpl;
+import org.obda.query.domain.imp.ValueConstantImpl;
+
+import com.sun.msv.datatype.xsd.StringType;
+import com.sun.msv.datatype.xsd.XSDatatype;
 
 /**
  * This class takes a JDBC ResultSet object and implements the TableModel
@@ -39,6 +45,8 @@ public class QueryResultTableModel implements TableModel {
 
 	Vector<Constant[]> 	resultsTable	= null;
 	HashSet<String> mergeSet = null;
+
+	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -58,13 +66,14 @@ public class QueryResultTableModel implements TableModel {
 		// browsability to resultset)
 		int i = 0;
 		while (results.nextRow()) {
-			Constant[] crow = new Constant[numcols];
+			Constant[] crow = new ValueConstantImpl[numcols];
 			for (int j = 0; j < numcols; j++) {
-				crow[j] = new Constant(results.getConstantFromColumn(j).toString(), "xs:string");
+				XSDatatype stringType = StringType.theInstance;
+				crow[j] = (ValueConstantImpl) termFactory.createValueConstant(results.getConstantFromColumn(j).toString(), stringType);
 			}
 			resultsTable.add(crow);
 			i += 1;
-			
+
 		}
 		numrows = resultsTable.size();
 
@@ -83,6 +92,7 @@ public class QueryResultTableModel implements TableModel {
 	}
 
 	/** Automatically close when we're garbage collected */
+	@Override
 	protected void finalize() {
 		close();
 	}
@@ -104,7 +114,7 @@ public class QueryResultTableModel implements TableModel {
 				return results.getSignature().get(column);
 			}else{
 				return "";
-			}	
+			}
 		} catch (QueryResultException e) {
 			e.printStackTrace();
 			return "NULL";
@@ -154,9 +164,9 @@ public class QueryResultTableModel implements TableModel {
 
 	public void removeTableModelListener(TableModelListener l) {
 	}
-	
+
 	private boolean add(Constant crow[]){
-		
+
 		String row ="";
 		for(int i=0; i< crow.length; i++){
 			row = row + crow[i].toString();

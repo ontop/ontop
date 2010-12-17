@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -16,8 +16,7 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
-import inf.unibz.it.obda.domain.SourceQuery;
-import inf.unibz.it.obda.domain.TargetQuery;
+import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.MappingValidationDialog;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
@@ -40,8 +39,6 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.RDBMSMappingValidator;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -52,7 +49,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -66,6 +62,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Query;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -102,6 +104,10 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	final String				HEAD				= "head";
 	final String				SQL					= "sql";
 	final String				TEXT				= "text";
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/** Creates new form MappingManagerPanel */
 	public MappingManagerPanel(APIController apic, MappingController mapc, DatasourcesController dsc) {
@@ -370,6 +376,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 		jTextField1.setPreferredSize(new java.awt.Dimension(250, 20));
 		jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyPressed(java.awt.event.KeyEvent evt) {
 				try {
 					sendFilters(evt);
@@ -476,16 +483,16 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	/***
 	 * The action for the search field and the search checkbox. If the checkbox
-	 * is not selected it cleans the filters. If it is selected it updates to the 
+	 * is not selected it cleans the filters. If it is selected it updates to the
 	 * current search string.
 	 */
 	private void processFilterAction() {
 		if (!(jCheckBox1.isSelected())) {
-			applyFilters(new ArrayList<TreeModelFilter>());
+			applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
 		}
 		if (jCheckBox1.isSelected()) {
 			try {
-				List<TreeModelFilter> filters = parseSearchString(jTextField1.getText());
+				List<TreeModelFilter<OBDAMappingAxiom>> filters = parseSearchString(jTextField1.getText());
 				if (filters == null) {
 					throw new Exception("Impossible to parse search string.");
 				}
@@ -499,7 +506,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	/***
 	 * Action for the filter checkbox
-	 * 
+	 *
 	 * @param evt
 	 * @throws Exception
 	 */
@@ -510,7 +517,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	/***
 	 * Action for key's entered in the search textbox
-	 * 
+	 *
 	 * @param evt
 	 * @throws Exception
 	 */
@@ -550,29 +557,25 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				MappingBodyNode body = node.getBodyNode();
 				MappingHeadNode head = node.getHeadNode();
 				RDBMSMappingValidator v;
-				try {
-					RDBMSSQLQuery rdbmssqlQuery = new RDBMSSQLQuery(body.getQuery(), apic);
-					ConjunctiveQuery conjunctiveQuery = new ConjunctiveQuery(head.getQuery(), apic);
-					v = new RDBMSMappingValidator(apic, dsc.getCurrentDataSource(), rdbmssqlQuery, conjunctiveQuery);
-					Enumeration<String> errors = v.validate();
-					if (!errors.hasMoreElements()) {
-						String output = id + ": " + "valid  \n";
-						outputField.addText(output, outputField.VALID);
-					} else {
-						while (errors.hasMoreElements()) {
-							String ele = errors.nextElement();
-							String output = id + ": " + ele + "  \n";
-							if (ele.startsWith("N")) {
-								outputField.addText(output, outputField.NONCRITICAL_ERROR);
-							} else if (ele.startsWith("C")) {
-								outputField.addText(output, outputField.CRITICAL_ERROR);
-							} else {
-								outputField.addText(output, outputField.NORMAL);
-							}
+				RDBMSSQLQuery rdbmssqlQuery = new RDBMSSQLQuery(body.getQuery());
+				CQIE conjunctiveQuery = parse(head.getQuery());
+				v = new RDBMSMappingValidator(apic, dsc.getCurrentDataSource(), rdbmssqlQuery, conjunctiveQuery);
+				Enumeration<String> errors = v.validate();
+				if (!errors.hasMoreElements()) {
+					String output = id + ": " + "valid  \n";
+					outputField.addText(output, outputField.VALID);
+				} else {
+					while (errors.hasMoreElements()) {
+						String ele = errors.nextElement();
+						String output = id + ": " + ele + "  \n";
+						if (ele.startsWith("N")) {
+							outputField.addText(output, outputField.NONCRITICAL_ERROR);
+						} else if (ele.startsWith("C")) {
+							outputField.addText(output, outputField.CRITICAL_ERROR);
+						} else {
+							outputField.addText(output, outputField.NORMAL);
 						}
 					}
-				} catch (QueryParseException e) {
-					outputField.addText(id + ": syntax error \n", outputField.CRITICAL_ERROR);
 				}
 			}
 		}
@@ -598,13 +601,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 						String id = node.getMappingID();
 						MappingBodyNode body = node.getBodyNode();
 						outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-						try {
-							v = new SQLQueryValidator(dsc.getCurrentDataSource(), new RDBMSSQLQuery(body.getQuery(), apic));
-						} catch (QueryParseException e) {
-							String output = " invalid Reason: " + v.getReason().getMessage() + " \n";
-							outputField.addText(output, outputField.CRITICAL_ERROR);
-							return;
-						}
+						v = new SQLQueryValidator(dsc.getCurrentDataSource(), new RDBMSSQLQuery(body.getQuery()));
 						long timestart = System.currentTimeMillis();
 
 						if (canceled)
@@ -636,14 +633,16 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 			public void run() {
 				while (!outputField.closed) {
 					try {
-						Thread.currentThread().sleep(100);
+						Thread.currentThread();
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
 				if (validatorThread.isAlive()) {
 					try {
-						Thread.currentThread().sleep(250);
+						Thread.currentThread();
+						Thread.sleep(250);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -663,10 +662,6 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private void menuValidateHeadActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateHeadActionPerformed
 		// TODO add your handling code here:
 	}// GEN-LAST:event_menuValidateHeadActionPerformed
-
-	private void menuDeleteActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuDeleteActionPerformed
-		// TODO add your handling code here:
-	}// GEN-LAST:event_menuDeleteActionPerformed
 
 	private void duplicateMappingButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_duplicateMappingButtonActionPerformed
 		TreePath[] currentSelection = treeMappingsTree.getSelectionPaths();
@@ -716,7 +711,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 			for (int i = 0; i < currentSelection.length; i++) {
 				TreePath current_path = currentSelection[i];
 				MappingNode mappingnode = (MappingNode) current_path.getLastPathComponent();
-				controller.deleteMapping(srcuri, (String) mappingnode.getMappingID());
+				controller.deleteMapping(srcuri, mappingnode.getMappingID());
 			}
 		}
 	}
@@ -816,43 +811,22 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	}
 
 	private void updateNode(String str) {
-		try {
-			MappingController con = mapc;
-			URI sourceName = dsc.getCurrentDataSource().getSourceID();
-			String nodeContent = (String) editedNode.getUserObject();
-			if (editedNode instanceof MappingNode) {
-				con.updateMapping(sourceName, nodeContent, str);
-			} else if (editedNode instanceof MappingBodyNode) {
-				MappingBodyNode node = (MappingBodyNode) editedNode;
-				MappingNode parent = (MappingNode) node.getParent();
-				SourceQuery b = new RDBMSSQLQuery(str, apic);
-				con.updateMapping(sourceName, parent.getMappingID(), b);
-			} else if (editedNode instanceof MappingHeadNode) {
-				MappingHeadNode node = (MappingHeadNode) editedNode;
-				MappingNode parent = (MappingNode) node.getParent();
-				TargetQuery h = new ConjunctiveQuery(str, apic);
-				con.updateMapping(sourceName, parent.getMappingID(), h);
-			}
-		} catch (QueryParseException e) {
-			e.printStackTrace();
+		MappingController con = mapc;
+		URI sourceName = dsc.getCurrentDataSource().getSourceID();
+		String nodeContent = (String) editedNode.getUserObject();
+		if (editedNode instanceof MappingNode) {
+			con.updateMapping(sourceName, nodeContent, str);
+		} else if (editedNode instanceof MappingBodyNode) {
+			MappingBodyNode node = (MappingBodyNode) editedNode;
+			MappingNode parent = (MappingNode) node.getParent();
+			Query b = new RDBMSSQLQuery(str);
+			con.updateSourceQueryMapping(sourceName, parent.getMappingID(), b);
+		} else if (editedNode instanceof MappingHeadNode) {
+			MappingHeadNode node = (MappingHeadNode) editedNode;
+			MappingNode parent = (MappingNode) node.getParent();
+			Query h = parse(str);
+			con.updateTargetQueryMapping(sourceName, parent.getMappingID(), h);
 		}
-	}
-
-	private TreePath[] selectPath(TreePath[] currentselection, TreePath newPath) {
-		Vector<TreePath> paths = new Vector<TreePath>();
-		boolean found = false;
-		for (int i = 0; i < currentselection.length; i++) {
-			if (currentselection[i].equals(newPath)) {
-				found = true;
-			} else {
-				paths.add(currentselection[i]);
-			}
-		}
-		if (!found) {
-			paths.add(newPath);
-		}
-		TreePath[] aux = new TreePath[paths.size()];
-		return paths.toArray(aux);
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
@@ -876,139 +850,34 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	}
 
 	/***
-	 * Parses the string in the search field. 
-	 * 
+	 * Parses the string in the search field.
+	 *
 	 * @param textToParse
 	 * @return A list of filter objects or null if the string was empty or erroneous
 	 * @throws Exception
 	 */
-	private List<TreeModelFilter> parseSearchString(String textToParse) throws Exception {
-		String temp = "";
-		List<TreeModelFilter> ListOfFilters = new ArrayList<TreeModelFilter>();
-		// id:"company id" funct:"market"
-
-		MappingController controller = mapc;
-		MappingTreeModel model = mapc.getTreeModel();
-
-		// Part of filter that contains the head":"
+	private List<TreeModelFilter<OBDAMappingAxiom>> parseSearchString(String textToParse) throws Exception {
+		List<TreeModelFilter<OBDAMappingAxiom>> ListOfFilters =
+			new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 		if (textToParse != null) {
-			String[] textFilter = textToParse.split(" ");
+			String[] textFilter = textToParse.split(",");
 			for (int i = 0; i < textFilter.length; i++) {
-				if (textFilter[i].contains(":") && !textFilter[i].endsWith(":")) {
-					String[] headFilter = textFilter[i].split(":");
-					// base case id:"bro"
-					if ((headFilter[1].endsWith("\"") || textFilter[i].endsWith("'"))
-							&& (headFilter[1].startsWith("\"") || headFilter[1].startsWith("'"))) {
-						if (createFilter(headFilter[0], (headFilter[1].replace("'", "")).replace("\"", "")) != null) {
-							ListOfFilters.add(createFilter(headFilter[0], (headFilter[1].replace("'", "")).replace("\"", "")));
-							continue;
+				if (textFilter[i].contains(":")) {
+					String[] components = textFilter[i].split(":");
+					String head = components[0].trim();
+					String body = components[1].trim();
+					if ((body.startsWith("\"") && body.endsWith("\"")) ||
+						(body.startsWith("'") && body.endsWith("'"))) {
+						body = body.replaceAll("[\"|']", ""); // removes the quote signs.
+						String[] keywords = body.split(" ");
+						for (int j = 0; j < keywords.length; j++) {
+							TreeModelFilter<OBDAMappingAxiom> filter =
+								createFilter(head, keywords[j]);
+							if (filter != null)
+								ListOfFilters.add(filter);
 						}
 					}
-					// Wrong format id:bro"
-					if ((headFilter[1].endsWith("\"") || headFilter[1].endsWith("'"))
-							&& (!headFilter[1].startsWith("\"") || !headFilter[1].startsWith("'"))) {
-						// JOptionPane.showMessageDialog(this,
-						// "The format is not correct ", "ERROR",
-						// JOptionPane.ERROR_MESSAGE);
-						// break;
-						return null;
-					}
-					// Wrong format id:bro
-					if ((!headFilter[1].endsWith("\"") || !headFilter[1].endsWith("'"))
-							&& (!headFilter[1].startsWith("\"") || !headFilter[1].startsWith("'"))) {
-						/*
-						 * JOptionPane.showMessageDialog(this,
-						 * "The format is not correct ", "ERROR",
-						 * JOptionPane.ERROR_MESSAGE);
-						 */
-						return null;
-					}
-					// part of the filter id:"bro
-					if ((!headFilter[1].endsWith("\"") || !headFilter[1].endsWith("'"))
-							&& (headFilter[1].startsWith("\"") || headFilter[1].startsWith("'"))) {
-						temp = headFilter[0].concat(":").concat(headFilter[1]);
-						// Wrong the filter is incomplete
-						if (i == textFilter.length - 1 && temp != "") {
-							/*
-							 * JOptionPane.showMessageDialog(this,
-							 * "The format is not correct ", "ERROR",
-							 * JOptionPane.ERROR_MESSAGE);
-							 */
-							return null;
-						} else
-							;
-
-						continue;
-					}
-					if (textFilter[i].endsWith(":")) {
-						temp = textFilter[i];
-						continue;
-					}
-				}
-				// ----------------------------------Filter body
-				if (!textFilter[i].contains(":")) {
-					// complement of the head----> id"
-					if ((textFilter[i].endsWith("\"") || textFilter[i].endsWith("'"))) {
-						temp = temp.concat(" ").concat(textFilter[i]);
-						if (temp.contains(":")) {
-							String[] tokens = temp.split(":");
-							if ((tokens[1].startsWith("\"") || tokens[1].startsWith("'")) && tokens[1].endsWith("\"")
-									|| tokens[1].endsWith("'")) {
-								if (createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")) != null) {
-									ListOfFilters.add(createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")));
-									temp = "";
-									continue;
-								}
-							}
-						}
-					} else {
-						/*
-						 * JOptionPane.showMessageDialog(this,
-						 * "The format is not correct ", "ERROR",
-						 * JOptionPane.ERROR_MESSAGE);
-						 */
-						return null;
-					}
-					// Part of the filter assigned to temp
-					if ((!textFilter[i].endsWith("\"") || !textFilter[i].endsWith("'"))
-							&& (!textFilter[i].startsWith("\"") || !textFilter[i].startsWith("'"))) {
-						temp = temp.concat(textFilter[i]);
-						continue;
-					}
-					// Wrong format "id
-					if (!textFilter[i].endsWith("\"") || !textFilter[i].endsWith("'")
-							&& (textFilter[i].startsWith("\"") || textFilter[i].startsWith("'"))) {
-						/*
-						 * JOptionPane.showMessageDialog(this,
-						 * "The format is not correct ", "ERROR",
-						 * JOptionPane.ERROR_MESSAGE);
-						 */
-						return null;
-					}
-					// Body base case "select"
-
-					if (textFilter[i].startsWith("\"") || textFilter[i].endsWith("'")
-							&& (textFilter[i].startsWith("\"") || textFilter[i].startsWith("'")))
-						// check this part
-						temp = temp.concat(textFilter[i]);
-					if (temp.contains(":")) {
-						String[] tokens = temp.split(":");
-						if ((tokens[1].startsWith("\"") || tokens[1].startsWith("'")) && tokens[1].endsWith("\"")
-								|| tokens[1].endsWith("'")) {
-							if (createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")) != null) {
-								ListOfFilters.add(createFilter(tokens[0], (tokens[1].replace("'", "")).replace("\"", "")));
-								temp = "";
-								continue;
-							}
-						}
-					}
-
-					if (i == textFilter.length - 1 && temp != "") {
-						/*
-						 * JOptionPane.showMessageDialog(this,
-						 * "The format is not correct ", "ERROR",
-						 * JOptionPane.ERROR_MESSAGE);
-						 */
+					else {
 						return null;
 					}
 				}
@@ -1020,12 +889,12 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	/***
 	 * This function given the kind of filter and the string for it, is added to
 	 * a list of current filters.
-	 * 
+	 *
 	 * @param filter
 	 * @param strFilter
 	 */
-	private TreeModelFilter createFilter(String filter, String strFilter) {
-		TreeModelFilter typeOfFilter;
+	private TreeModelFilter<OBDAMappingAxiom> createFilter(String filter, String strFilter) {
+		TreeModelFilter<OBDAMappingAxiom> typeOfFilter = null;
 		if (filter.trim().equals(HEAD)) {
 			typeOfFilter = new MappingHeadVariableTreeModelFilter(strFilter);
 		} else if (filter.trim().equals(FUNCT)) {
@@ -1038,8 +907,6 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 			typeOfFilter = new MappingStringTreeModelFilter(strFilter);
 		} else if (filter.trim().equals(ID)) {
 			typeOfFilter = new MappingIDTreeModelFilter(strFilter);
-		} else {
-			typeOfFilter = null;
 		}
 		return typeOfFilter;
 	}
@@ -1047,15 +914,45 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	/***
 	 * This function add the list of current filters to the model and then the
 	 * Tree is refreshed shows the mappings after the filters have been applied
-	 * 
-	 * 
+	 *
+	 *
 	 * @param ListOfMappings
 	 */
-	private void applyFilters(List<TreeModelFilter> filters) {
-		MappingTreeModel model = mapc.getTreeModel();
+	private void applyFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
+		MappingTreeModel model = (MappingTreeModel) treeMappingsTree.getModel();
 		model.removeAllFilters();
 		model.addFilters(filters);
 		model.currentSourceChanged(apic.getDatasourcesController().getCurrentDataSource().getSourceID(), apic.getDatasourcesController()
 				.getCurrentDataSource().getSourceID());
+	}
+
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
+		try {
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
+		}
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
+		}
+		return cq;
+	}
+
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
 	}
 }

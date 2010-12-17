@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -13,17 +13,12 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.IconLoader;
-import inf.unibz.it.obda.gui.swing.mapping.panel.MappingStyledDocument;
-import inf.unibz.it.obda.gui.swing.mapping.panel.QueryPainter;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -43,10 +38,17 @@ import javax.swing.text.StyleContext;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.CQIE;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MappingRenderer extends DefaultTreeCellRenderer {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long			serialVersionUID				= -4636107842424616156L;
 	Icon								mappingIcon						= null;
@@ -66,7 +68,11 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 	private JTextPane					area							= null;
 	private JPanel						panel							= null;
 	private MappingManagerPreferences	pref							= null;
-	private APIController	apic;
+	private final APIController	apic;
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public MappingRenderer(APIController apic) {
 		this.apic = apic;
@@ -78,6 +84,7 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 		pref =  OBDAPreferences.getOBDAPreferences().getMappingsPreference();
 	}
 
+	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row,
 			boolean hasFocus) {
 
@@ -138,15 +145,12 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 
 			MappingHeadNode m = (MappingHeadNode) node;
 			String q = m.getQuery();
-			
-			try {
-				TargetQuery h = new ConjunctiveQuery(q, apic);
-				label.setIcon(mappingheadIcon);
 
-			} catch (QueryParseException e1) {
+			CQIE h = parse(q);
+			if (h != null)
+				label.setIcon(mappingheadIcon);
+			else
 				label.setIcon(invalidmappingheadIcon);
-				e1.printStackTrace();
-			}
 
 			String txt = ((String) node.getUserObject());
 
@@ -193,5 +197,38 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 
 		return panel;
 
+	}
+
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
+		try {
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
+		}
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
+		}
+		catch (NullPointerException e) {
+			log.warn(e.getMessage()); // Null for adding a new mapping
+		}
+		return cq;
+	}
+
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
 	}
 }

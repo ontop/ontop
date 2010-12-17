@@ -29,6 +29,7 @@ import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.io.FileUtils;
@@ -86,7 +87,7 @@ public class DataManager {
 
 	/** The XML codec to load queries. */
 	protected XMLReader xmlReader;
-	
+
 	protected PrefixManager			prefixManager = null;
 
 	protected APIController apic = null;
@@ -337,7 +338,7 @@ public class DataManager {
 			return;
 		}
 		if (!obdaFile.canRead()) {
-			System.err.print("WARNING: can't read the OBDA file:" + 
+			System.err.print("WARNING: can't read the OBDA file:" +
 			    obdaFile.toString());
 		}
 		Document doc = null;
@@ -470,13 +471,13 @@ public class DataManager {
 			}
 		}
 	}
-	
+
 	public PrefixManager getPrefixManager(){
 		return prefixManager;
 	}
 
 	/**
-	 * Save the mapping data as XML elements. The structure of the XML elements 
+	 * Save the mapping data as XML elements. The structure of the XML elements
 	 * from the mapping data follows this construction:
 	 * <pre>
 	 * {@code
@@ -503,7 +504,7 @@ public class DataManager {
 
       Element mappingGroup = doc.createElement("mappings");
       mappingGroup.setAttribute("sourceuri", datasourceUri.toString());
-      mappingGroup.setAttribute("headclass", inf.unibz.it.ucq.domain.ConjunctiveQuery.class.toString());
+      mappingGroup.setAttribute("headclass", org.obda.query.domain.imp.CQIEImpl.class.toString());
       mappingGroup.setAttribute("bodyclass", inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery.class.toString());
       root.appendChild(mappingGroup);
 
@@ -523,7 +524,7 @@ public class DataManager {
   }
 
 	/**
-	 * Save the data-source data as XML elements. The structure of the XML 
+	 * Save the data-source data as XML elements. The structure of the XML
 	 * elements from the data-source data follows this construction:
    * <pre>
    * {@code
@@ -534,7 +535,7 @@ public class DataManager {
    * />
    * }
    * </pre>
-   * 
+   *
 	 * @param datasources the hash map of the data-source data.
 	 */
   protected void dumpDatasourcesToXML(HashMap<URI, DataSource> datasources) {
@@ -565,7 +566,7 @@ public class DataManager {
    * </SavedQueries>
    * }
    * </pre>
-   * 
+   *
    * @param queries the vector of the query entities.
    */
   protected void dumpQueriesToXML(Vector<QueryControllerEntity> queries) {
@@ -577,12 +578,12 @@ public class DataManager {
     }
     root.appendChild(savedQueryElement);
   }
-  
+
   /**
-   * Import the mapping data from XML elements. Each mapping has a head class, 
+   * Import the mapping data from XML elements. Each mapping has a head class,
    * a body class and a data-source URI. The method first reads the mapping Id
    * and then saves the pair of mapping head and body as a mapping axiom.
-   * 
+   *
    * @param datasource the data source URI in which the mappings are linked.
    * @param mappingRoot the mapping root in the XML file.
    * @throws QueryParseException
@@ -590,7 +591,7 @@ public class DataManager {
    * @see RDBMSSQLQuery
    * @see RDBMSOBDAMappingAxiom
    */
-  protected void importMappingsFromXML(URI datasource, Element mappingRoot) 
+  protected void importMappingsFromXML(URI datasource, Element mappingRoot)
       throws QueryParseException {
     NodeList childs = mappingRoot.getChildNodes();
     for (int i = 0; i < childs.getLength(); i++) {
@@ -600,12 +601,12 @@ public class DataManager {
           continue;
         }
         Element mapping = (Element) child;
-        RDBMSOBDAMappingAxiom mappingAxiom = 
+        RDBMSOBDAMappingAxiom mappingAxiom =
             (RDBMSOBDAMappingAxiom) mapCodec.decode(mapping);
         if(mappingAxiom == null){
-          throw new Exception("Error while parsing the conjunctive query of "+ 
+          throw new Exception("Error while parsing the conjunctive query of "+
               "the mapping " + mapping.getAttribute("id"));
-        }        
+        }
         try {
           apic.getMappingController().insertMapping(datasource, mappingAxiom);
         } catch (DuplicateMappingException e) {
@@ -615,7 +616,7 @@ public class DataManager {
         }
       } catch (Exception e) {
         try {
-          log.warn("Error loading mapping with id: {}", 
+          log.warn("Error loading mapping with id: {}",
               ((Element) childs.item(i)).getAttribute("id"));
           log.debug(e.getMessage(), e);
         } catch (Exception e2) {
@@ -625,12 +626,12 @@ public class DataManager {
       }
     }
   }
-  
+
   /**
    * Import the query data from XML elements. Several queries can be
    * categorized into one group. The method saves all the queries according
    * to this hierarchical structure.
-   * 
+   *
    * @param queryRoot the query root in the XML file.
    * @see QueryControllerGroup
    * @see QueryControllerQuery
@@ -649,7 +650,7 @@ public class DataManager {
           apic.getQueryController().createGroup(group.getID());
           Vector<QueryControllerQuery> queries = group.getQueries();
           for (QueryControllerQuery query : queries) {
-            apic.getQueryController().addQuery(query.getQuery(), query.getID(), 
+            apic.getQueryController().addQuery(query.getQuery(), query.getID(),
                 group.getID());
           }
         }

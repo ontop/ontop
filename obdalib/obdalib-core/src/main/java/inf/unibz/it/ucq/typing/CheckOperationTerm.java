@@ -1,33 +1,35 @@
 package inf.unibz.it.ucq.typing;
 
-import inf.unibz.it.ucq.domain.QueryTerm;
+import org.obda.query.domain.Term;
+
 
 public class CheckOperationTerm {
 
-	private QueryTerm term1 = null;
-	private QueryTerm term2 = null;
+	private Term term1 = null;
+	private Term term2 = null;
 	private String operator = null;
-	
-	public CheckOperationTerm(QueryTerm t1,String op, QueryTerm t2){
-		
+
+	public CheckOperationTerm(Term t1,String op, Term t2){
+
 		term1 = t1;
 		term2 = t2;
 		operator = op;
 	}
 
-	public QueryTerm getTerm1() {
+	public Term getTerm1() {
 		return term1;
 	}
 
-	public QueryTerm getTerm2() {
+	public Term getTerm2() {
 		return term2;
 	}
 
 	public String getOperator() {
 		return operator;
 	}
-	
+
+	@Override
 	public String toString(){
-		return term1.getVariableName() + operator + term2.getVariableName();
+		return term1.getName() + operator + term2.getName();
 	}
 }

@@ -11,7 +11,6 @@ import inf.unibz.it.obda.dependencies.miner.exception.InvalidSyntaxException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.io.ByteArrayInputStream;
@@ -23,18 +22,19 @@ import java.util.Vector;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.Term;
 
 /**
  * The dependency assertion renderer dependency assertion from different
  * from a string.
- * 
+ *
  * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  *
  */
 
 public class DependencyAssertionRenderer {
-	
+
 	/**
 	 * the API conroller
 	 */
@@ -43,7 +43,7 @@ public class DependencyAssertionRenderer {
 	 * instance of itself
 	 */
 	private static DependencyAssertionRenderer instance = null;
-	
+
 	/**
 	 * creates a new DependencyAssertionRenderer object
 	 * @param apic
@@ -52,7 +52,7 @@ public class DependencyAssertionRenderer {
 		this.apic = apic;
 		instance = this;
 	}
-	
+
 	/**
 	 * Returns the current instance of the Dependency Assertion Renderer
 	 * @return an instance
@@ -60,17 +60,17 @@ public class DependencyAssertionRenderer {
 	public static DependencyAssertionRenderer getInstance(){
 		return instance;
 	}
-	
+
 	/**
 	 * Renders a functional dependency assertion of the given string, if possible
-	 * 
+	 *
 	 * @param input the string
 	 * @param uri the data source URI to which the assertion is associated
 	 * @return a functional dependency assertion
 	 * @throws Exception if the String does not represent a valid functional dependency assertion
 	 */
 	public RDBMSFunctionalDependency renderSingleRDBMSFunctionalDependency(String input, URI uri) throws Exception{
-		
+
 		DatasourcesController con = apic.getDatasourcesController();
 		DataSource ds = con.getAllSources().get(uri);
 		con.setCurrentDataSource(ds.getSourceID());
@@ -86,10 +86,10 @@ public class DependencyAssertionRenderer {
 			throw new InvalidSyntaxException("Input string does not represent a valid RDBMSDisjoinednessAssertion");
 		}
 	}
-	
+
 	/**
 	 * Renders a inclusion dependency assertion of the given string, if possible
-	 * 
+	 *
 	 * @param input the string
 	 * @param uri the data source URI to which the assertion is associated
 	 * @return a inclusion dependency assertion
@@ -114,7 +114,7 @@ public class DependencyAssertionRenderer {
 
 	/**
 	 * Renders a disjointness dependency assertion of the given string, if possible
-	 * 
+	 *
 	 * @param input the string
 	 * @param uri the data source URI to which the assertion is associated
 	 * @return a disjointness dependency assertion
@@ -135,19 +135,19 @@ public class DependencyAssertionRenderer {
 		}else{
 			throw new InvalidSyntaxException("Input string does not represent a valid RDBMSDisjoinednessAssertion");
 		}
-		
+
 	}
-	
+
 	/**
 	 * Renders a list of functional dependency assertion of the given string, if possible
-	 * 
+	 *
 	 * @param input the string
 	 * @param uri the data source URI to which the assertion is associated
 	 * @return a list of functional dependency assertion
 	 * @throws Exception if the String does not represent a valid list of functional dependency assertion
 	 */
 	public Vector<RDBMSFunctionalDependency> renderRDBMSFunctionalDependency(String input) throws Exception{
-		
+
 		Vector<AbstractDependencyAssertion> aux = parse(input);
 		if(aux != null){
 			Iterator<AbstractDependencyAssertion> it = aux.iterator();
@@ -165,10 +165,10 @@ public class DependencyAssertionRenderer {
 			throw new InvalidSyntaxException("Input string does not represent a valid RDBMSDisjoinednessAssertion");
 		}
 	}
-	
+
 	/**
 	 * Renders a list of inclusion dependency assertion of the given string, if possible
-	 * 
+	 *
 	 * @param input the string
 	 * @param uri the data source URI to which the assertion is associated
 	 * @return a list of inclusion dependency assertion
@@ -194,7 +194,7 @@ public class DependencyAssertionRenderer {
 	}
 	/**
 	 * Renders a list of disjointness dependency assertion of the given string, if possible
-	 * 
+	 *
 	 * @param input the string
 	 * @param uri the data source URI to which the assertion is associated
 	 * @return a list of disjointness dependency assertion
@@ -218,16 +218,16 @@ public class DependencyAssertionRenderer {
 			throw new InvalidSyntaxException("Input string does not represent a valid RDBMSDisjoinednessAssertion");
 		}
 	}
-	
+
 	/**
 	 * Check whether the given string can be rendered into the given dependency assertion
-	 * 
-	 * @param input a string 
+	 *
+	 * @param input a string
 	 * @param dependency the dependency assertion
-	 * @return true if the string can be rendered into the given assertion, false otherwise 
+	 * @return true if the string can be rendered into the given assertion, false otherwise
 	 */
 	public boolean isValid(String input, String dependency){
-		
+
 		try {
 			Vector<AbstractDependencyAssertion> v =parse(input);
 			AbstractDependencyAssertion ass = v.get(0);
@@ -244,12 +244,12 @@ public class DependencyAssertionRenderer {
 			return false;
 		}
 	}
-	
-	public RDBMSInclusionDependency createAndValidateRDBMSInclusionDependency(String id1, String id2, Vector<QueryTerm> t1, Vector<QueryTerm> t2){
-		
+
+	public RDBMSInclusionDependency createAndValidateRDBMSInclusionDependency(String id1, String id2, Vector<Term> t1, Vector<Term> t2){
+
 		DatasourcesController dscon = apic.getDatasourcesController();
 		URI currentds = dscon.getCurrentDataSource().getSourceID();
-		
+
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);
 		OBDAMappingAxiom axiom2 = mapcon.getMapping(currentds, id2);
@@ -265,12 +265,12 @@ public class DependencyAssertionRenderer {
 			}
 		}
 	}
-	
-	public RDBMSFunctionalDependency createAndValidateRDBMSFunctionalDependency(String id1, String id2, Vector<QueryTerm> t1, Vector<QueryTerm> t2){
-		
+
+	public RDBMSFunctionalDependency createAndValidateRDBMSFunctionalDependency(String id1, String id2, Vector<Term> t1, Vector<Term> t2){
+
 		DatasourcesController dscon = apic.getDatasourcesController();
 		URI currentds = dscon.getCurrentDataSource().getSourceID();
-		
+
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);
 		OBDAMappingAxiom axiom2 = mapcon.getMapping(currentds, id2);
@@ -286,12 +286,12 @@ public class DependencyAssertionRenderer {
 			}
 		}
 	}
-	
-	public RDBMSDisjointnessDependency createAndValidateRDBMSDisjointnessDependency(String id1, String id2, Vector<QueryTerm> t1, Vector<QueryTerm> t2){
-		
+
+	public RDBMSDisjointnessDependency createAndValidateRDBMSDisjointnessDependency(String id1, String id2, Vector<Term> t1, Vector<Term> t2){
+
 		DatasourcesController dscon = apic.getDatasourcesController();
 		URI currentds = dscon.getCurrentDataSource().getSourceID();
-		
+
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);
 		OBDAMappingAxiom axiom2 = mapcon.getMapping(currentds, id2);
@@ -307,16 +307,16 @@ public class DependencyAssertionRenderer {
 			}
 		}
 	}
-	
+
 	/**
-	 * parses the String, and tries to render one ore more dependency assertion out of it 
-	 * 
+	 * parses the String, and tries to render one ore more dependency assertion out of it
+	 *
 	 * @param input the string
 	 * @return a list of dependency assertions
 	 * @throws Exception if the were errors during the parsing of the string
 	 */
 	private Vector<AbstractDependencyAssertion> parse (String input) throws Exception{
-		
+
 		DependencyAssertionParser parser = null;
 		byte currentBytes[] = input.getBytes();
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(currentBytes);
@@ -337,7 +337,7 @@ public class DependencyAssertionRenderer {
 			e.printStackTrace();
 		}
 		if ((parser.getErrors().size() == 0) && (lexer.getErrors().size() == 0)) {
-			return parser.getDependencyAssertion(); 
+			return parser.getDependencyAssertion();
 		} else {
 				throw new QueryParseException(parser.getErrors().toString());
 		}

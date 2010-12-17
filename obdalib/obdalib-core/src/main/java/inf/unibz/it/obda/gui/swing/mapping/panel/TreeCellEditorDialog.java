@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -16,21 +16,12 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.domain.SourceQuery;
-import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.BinaryQueryAtom;
-import inf.unibz.it.ucq.domain.ConceptQueryAtom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -43,11 +34,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-import javax.sound.midi.ControllerEventListener;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -57,10 +46,21 @@ import javax.swing.JTree;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Query;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TreeCellEditorDialog extends JDialog {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long			serialVersionUID	= -5948486809738359179L;
 	private DefaultMutableTreeNode		editedNode			= null;
@@ -76,7 +76,11 @@ public class TreeCellEditorDialog extends JDialog {
 	private DatasourcesController		dsc					= null;
 
 	private MappingController			mapc				= null;
-	private APIController	apic;
+	private final APIController	apic;
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public TreeCellEditorDialog(APIController apic, DatasourcesController dsc, MappingController mapc) {
 		this.apic = apic;
@@ -165,7 +169,7 @@ public class TreeCellEditorDialog extends JDialog {
 					String nodeContent = (String) editedNode.getUserObject();
 					if (editedNode instanceof MappingHeadNode) {
 
-						
+
 //						try {
 //							TargetQuery h = new ConjunctiveQuery();
 //						} catch (QueryParseException e1) {
@@ -241,44 +245,43 @@ public class TreeCellEditorDialog extends JDialog {
 			MappingBodyNode node = (MappingBodyNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();
 
-			SourceQuery b = new RDBMSSQLQuery(str, apic);
-			con.updateMapping(sourceName, parent.getMappingID(), b);
+			Query b = new RDBMSSQLQuery(str);
+			con.updateSourceQueryMapping(sourceName, parent.getMappingID(), b);
 
 		} else if (editedNode instanceof MappingHeadNode) {
 
 			MappingHeadNode node = (MappingHeadNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();
 
-			TargetQuery h = new ConjunctiveQuery(str, apic);
-			checkValidityOfConjunctiveQuery((ConjunctiveQuery) h);
-			con.updateMapping(sourceName, parent.getMappingID(), h);
+			Query h = parse(str);
+			checkValidityOfConjunctiveQuery((CQIE) h);
+			con.updateTargetQueryMapping(sourceName, parent.getMappingID(), h);
 		}
 	}
-	
-	private void checkValidityOfConjunctiveQuery(ConjunctiveQuery cq ) throws Exception{
-		ArrayList<QueryAtom> atoms = cq.getAtoms();
-		Iterator<QueryAtom> it = atoms.iterator();
+
+	private void checkValidityOfConjunctiveQuery(CQIE cq ) throws Exception{
+		List<Atom> atoms = cq.getBody();
+		Iterator<Atom> it = atoms.iterator();
 		APICoupler coup= apic.getCoupler();
 		URI onto_uri =apic.getCurrentOntologyURI();
 		while(it.hasNext()){
-			QueryAtom atom = it.next();
-			if(atom instanceof ConceptQueryAtom){
-				ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
-				String name = apic.getEntityNameRenderer().getPredicateName(cqa);
+			Atom atom = it.next();
+			int arity = atom.getArity();
+			if (arity == 1) {  // concept query atom
+				String name = apic.getEntityNameRenderer().getPredicateName(atom);
 				String classUri = onto_uri.toString()+"#"+name;
 				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(classUri));
 				if(!isConcept){
 					throw new Exception("Concept "+name+" not present in ontology.");
 				}
-				
-			}else{
-				BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
-				String name =apic.getEntityNameRenderer().getPredicateName(bqa);
+
+			} else if (arity == 2) {  // binary concept atom
+				String name =apic.getEntityNameRenderer().getPredicateName(atom);
 				String propUri = onto_uri.toString()+"#"+name;
-				ArrayList<QueryTerm> terms = bqa.getTerms();
-				QueryTerm t2 = terms.get(1);
+				List<Term> terms = atom.getTerms();
+				Term t2 = terms.get(1);
 				boolean found = false;
-				if(t2 instanceof FunctionTerm){
+				if(t2 instanceof ObjectVariableImpl){
 					found =coup.isObjectProperty(onto_uri,new URI(propUri));
 				}else{
 					found =coup.isDatatypeProperty(onto_uri,new URI(propUri));
@@ -288,7 +291,35 @@ public class TreeCellEditorDialog extends JDialog {
 				}
 			}
 		}
-		
 	}
 
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
+		try {
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
+		}
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
+		}
+		return cq;
+	}
+
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
+	}
 }

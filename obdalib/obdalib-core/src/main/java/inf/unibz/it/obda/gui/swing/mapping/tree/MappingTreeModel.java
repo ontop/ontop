@@ -5,10 +5,10 @@
  * The OBDA-API is licensed under the terms of the Lesser General Public
  * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
  * work include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
+ *
+ * a) The OBDA-API developed by the author and licensed under the LGPL; and,
+ * b) third-party components licensed under terms that may be different from
+ *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
 package inf.unibz.it.obda.gui.swing.mapping.tree;
@@ -25,8 +25,6 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.codec.SourceQueryToTextCodec;
 import inf.unibz.it.utils.codec.TargetQeryToTextCodec;
 
@@ -40,6 +38,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.antlr.runtime.RecognitionException;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Query;
+import org.obda.query.domain.imp.CQIEImpl;
+import org.obda.query.tools.parser.DatalogProgramParser;
+import org.obda.query.tools.parser.DatalogQueryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // TODO Make the three model be based on the actual mapping collection
 public class MappingTreeModel extends DefaultTreeModel implements
 		MappingControllerListener, FilteredTreeModel {
@@ -49,8 +56,12 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	private MappingController controller = null;
 	private DefaultMutableTreeNode root = null;
 	private DatasourcesController dsc = null;
-	private List<TreeModelFilter> ListFilters = new ArrayList<TreeModelFilter>();
+	private final List<TreeModelFilter<OBDAMappingAxiom>> ListFilters = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 	protected APIController apic = null;
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public MappingTreeModel(APIController apic, DatasourcesController dsc,
 			MappingController controller) {
@@ -67,6 +78,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * like a node editor in the GUI. It calls the update methods of the mapping
 	 * controller.
 	 */
+	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
 		DefaultMutableTreeNode oldmappingnode = (DefaultMutableTreeNode) path
 				.getLastPathComponent();
@@ -78,30 +90,17 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		URI sourceName = dsc.getCurrentDataSource().getSourceID();
 
 		if (oldmappingnode instanceof MappingNode) {
-			controller.updateMapping(sourceName, (String) oldmappingvalue,
-					(String) newValue);
+			String query = (String) newValue;
+			controller.updateMapping(sourceName, (String) oldmappingvalue, query);
 		} else if (oldmappingnode instanceof MappingHeadNode) {
-			ConjunctiveQuery newquery;
-			try {
-				newquery = new ConjunctiveQuery((String) newValue, apic);
-				controller.updateMapping(sourceName, (String) parentnode
-						.getUserObject(), newquery);
-			} catch (QueryParseException e) {
-				// If there was an error creating the new query, revert the
-				// changes
-			}
+			String query = (String) newValue;
+			CQIE newquery = parse(query);
+			controller.updateTargetQueryMapping(sourceName, (String) parentnode
+					.getUserObject(), newquery);
 		} else if (oldmappingnode instanceof MappingBodyNode) {
-			try {
-				RDBMSSQLQuery query = new RDBMSSQLQuery((String) newValue, apic);
-				controller.updateMapping(sourceName, (String) parentnode
-						.getUserObject(), query);
-			} catch (QueryParseException e) {
-				MappingBodyNode node = (MappingBodyNode) path
-						.getLastPathComponent();
-				OBDAMappingAxiom mapping = controller.getMapping(sourceName,
-						(String) parentnode.getUserObject());
-				node.setQuery(mapping.getSourceQuery().getInputQuString());
-			}
+			RDBMSSQLQuery query = new RDBMSSQLQuery((String) newValue);
+			controller.updateSourceQueryMapping(sourceName, (String) parentnode
+					.getUserObject(), query);
 		}
 	}
 
@@ -127,7 +126,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		removeNodeFromParent(affectedNode);
 		nodeStructureChanged(root);
 	}
-	
+
 	/***************************************************************************
 	 * Called from the mapping controller when anew mapping is added. Updates
 	 * the model to include the corresponding node. Only if the current source
@@ -143,7 +142,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller.getMapping(src_uri, mapping_id);
 		MappingNode mappingNode = MappingNode.getMappingNodeFromMapping(mapping);
 
-			insertNodeInto(mappingNode, (DefaultMutableTreeNode) root, root
+			insertNodeInto(mappingNode, root, root
 					.getChildCount());
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -169,8 +168,8 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			MappingBodyNode body = mappingnode.getBodyNode();
 			MappingHeadNode head = mappingnode.getHeadNode();
 
-			SourceQuery srcq = mapping.getSourceQuery();
-			TargetQuery trgq = mapping.getTargetQuery();
+			Query srcq = mapping.getSourceQuery();
+			Query trgq = mapping.getTargetQuery();
 			TargetQeryToTextCodec tttc = new TargetQeryToTextCodec(apic);
 			SourceQueryToTextCodec sttc = new SourceQueryToTextCodec(apic);
 			String newbodyquery =sttc.encode(srcq);
@@ -208,7 +207,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 					RDBMSOBDAMappingAxiom mappingTest = (RDBMSOBDAMappingAxiom) dataSourceMapping;
 					if (testFilters(mappingTest))
 						newnodes
-								.add(getMappingNodeFromMapping((OBDAMappingAxiom) mappingTest));
+								.add(getMappingNodeFromMapping(mappingTest));
 				}
 			}
 			root.removeAllChildren();
@@ -223,7 +222,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	/***************************************************************************
 	 * Gets the mapping node for the mapping identified by mappingid
-	 * 
+	 *
 	 * @param mappingid
 	 * @return
 	 */
@@ -239,14 +238,14 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	/***************************************************************************
 	 * Gets the mapping node that corresponds to the mapping.
-	 * 
+	 *
 	 * @param mapping
 	 * @return
 	 */
 	private MappingNode getMappingNodeFromMapping(OBDAMappingAxiom mapping) {
 		MappingNode mappingnode = new MappingNode(mapping.getId());
-		SourceQuery srcquery = mapping.getSourceQuery();
-		ConjunctiveQuery tgtquery = (ConjunctiveQuery) mapping.getTargetQuery();
+		Query srcquery = mapping.getSourceQuery();
+		CQIE tgtquery = (CQIEImpl) mapping.getTargetQuery();
 		MappingBodyNode body = null;
 		MappingHeadNode head = null;
 		if (srcquery != null) {
@@ -268,11 +267,11 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	}
 
 	/**
-	 * Synchronizes an array of mapping axioms to the tree node structure 
-	 * following a particular data source URI. Each data source has a collection 
-	 * of mapping axioms in which each axiom contains a source query and a target 
+	 * Synchronizes an array of mapping axioms to the tree node structure
+	 * following a particular data source URI. Each data source has a collection
+	 * of mapping axioms in which each axiom contains a source query and a target
 	 * query.
-	 * 
+	 *
 	 * @param datasourceUri a data source uri.
 	 * @param mappings an array of mapping axioms.
 	 * @see OBDAMappingAxiom
@@ -286,7 +285,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	    mappingInserted(datasourceUri, mappingId);
 	  }
 	}
-	
+
 	/*
 	 * @see
 	 * inf.unibz.it.obda.api.controller.MappingControllerListener#allMappingsRemoved
@@ -302,7 +301,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	}
 
 	@Override
-	public void ontologyChanged() {		
+	public void ontologyChanged() {
 		try {
 			DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
 			if(ds!=null){
@@ -310,7 +309,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 				ArrayList<OBDAMappingAxiom> newmappings = controller.getMappings(ds.getSourceID());
 				if (newmappings != null) {
 					for (OBDAMappingAxiom dataSourceMapping : newmappings) {
-						newnodes.add(getMappingNodeFromMapping((OBDAMappingAxiom)dataSourceMapping));
+						newnodes.add(getMappingNodeFromMapping(dataSourceMapping));
 					}
 				}
 				root.removeAllChildren();
@@ -323,14 +322,14 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			e.printStackTrace(System.err);
 		}
 	}
-	
+
 	/*
 	 * @see
 	 * inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel#addFilter
 	 * (inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter)
 	 */
 	@Override
-	public void addFilter(TreeModelFilter T) {
+	public void addFilter(TreeModelFilter<OBDAMappingAxiom> T) {
 		ListFilters.add(T);
 	}
 
@@ -340,7 +339,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * (java.util.List)
 	 */
 	@Override
-	public void addFilters(List<TreeModelFilter> T) {
+	public void addFilters(List<TreeModelFilter<OBDAMappingAxiom>> T) {
 		// TODO Auto-generated method stub
 		for (int i = 0; i < T.size(); i++) {
 			ListFilters.add(T.get(i));
@@ -362,12 +361,12 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * (inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter)
 	 */
 	@Override
-	public void removeFilter(TreeModelFilter T) {
+	public void removeFilter(TreeModelFilter<OBDAMappingAxiom> filter) {
 		// TODO Auto-generated method stub
-		Iterator<TreeModelFilter> iter = ListFilters.iterator();
+		Iterator<TreeModelFilter<OBDAMappingAxiom>> iter = ListFilters.iterator();
 		while (iter.hasNext()) {
 			Object element = iter.next();
-			if (element.equals(T))
+			if (element.equals(filter))
 				ListFilters.remove(element);
 			break;
 		}
@@ -379,9 +378,9 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * (java.util.List)
 	 */
 	@Override
-	public void removeFilter(List<TreeModelFilter> T) {
+	public void removeFilter(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
 		// TODO Auto-generated method stub
-		Iterator<TreeModelFilter> iter = ListFilters.iterator();
+		Iterator<TreeModelFilter<OBDAMappingAxiom>> iter = ListFilters.iterator();
 		while (iter.hasNext()) {
 			Object element = iter.next();
 			ListFilters.remove(element);
@@ -391,10 +390,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	/******
 	 * This function compares with all the elements of the list of filters
 	 * "ListFilters", if any of it doesn't match then it returns false
-	 * 
+	 *
 	 * @param mapping
 	 * @return allFiltersTrue
-	 * 
+	 *
 	 */
 	private boolean testFilters(RDBMSOBDAMappingAxiom mapping) {
 		boolean allFiltersTrue = true;
@@ -403,5 +402,35 @@ public class MappingTreeModel extends DefaultTreeModel implements
 					&& ListFilters.get(i).match(mapping);
 		}
 		return allFiltersTrue;
+	}
+
+	private CQIE parse(String query) {
+		CQIE cq = null;
+		query = prepareQuery(query);
+		try {
+			datalogParser.parse(query);
+			cq = datalogParser.getRule(0);
+		}
+		catch (RecognitionException e) {
+			log.warn(e.getMessage());
+		}
+		return cq;
+	}
+
+	private String prepareQuery(String input) {
+		String query = "";
+		DatalogQueryHelper queryHelper =
+			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+
+		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		if (atoms.length == 1)  // if no head
+			query = queryHelper.getDefaultHead() + " " +
+			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+			 	input;
+
+		// Append the prefixes
+		query = queryHelper.getPrefixes() + query;
+
+		return query;
 	}
 }

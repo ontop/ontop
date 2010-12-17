@@ -7,14 +7,8 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +19,11 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.JOptionPane;
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.CQIEImpl;
+import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.VariableImpl;
 
 
 /**
@@ -33,39 +31,39 @@ import javax.swing.JOptionPane;
  * Note: For now it is done based only on the data in the data source
  *
  * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  *
  */
 
 public class RDBMSInclusionDependencyMiner implements IMiner{
 
 	/**
-	 *A collection of all mappings  
+	 *A collection of all mappings
 	 */
-	private Collection<OBDAMappingAxiom> mappings;
+	private final Collection<OBDAMappingAxiom> mappings;
 	/**
-	 * Indicates how many threads should be used to do the containment checking. 
+	 * Indicates how many threads should be used to do the containment checking.
 	 */
-	private int nrOfThreads = 2;
+	private final int nrOfThreads = 2;
 	/**
-	 * This map contains for each SQL query executed by the threads the result as 
+	 * This map contains for each SQL query executed by the threads the result as
 	 * a boolean Object. Using this map we avoid executing the same query several
-	 * times. 
+	 * times.
 	 */
 	private Map<String, Boolean> resultOfSQLQueries =null;
 	/**
 	 * A list of jobs, which has to be executed by the threads. The length of the
 	 * object array can either be 3 or 4. If the length is 3 it contains at position
 	 * 0 the SQL query to execute and at position 1 and 2 the TermMappings for which
-	 * the check whether the TermMapping in position 1 is contained in the one at 
+	 * the check whether the TermMapping in position 1 is contained in the one at
 	 * position 2.
 	 * If the array length is 4 again at position 0 one can find the sql query. At
 	 * Position 1 and 2 the two atoms and at pos 3 the index of the term one which
-	 * the check is done. 
+	 * the check is done.
 	 */
 	private List<Job> queue = null;
 	/**
-	 * The data source manager is used to identify the used DBMS on which it 
+	 * The data source manager is used to identify the used DBMS on which it
 	 * depends how the sql queries are produced.
 	 */
 	private CountDownLatch doneSignal = null;
@@ -74,122 +72,122 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 	 * errors or exceptions
 	 */
 //	private Logger log = LoggerFactory.getLogger(InclusionDependencyMiner.class);
-	
+
 	/**
 	 * A set of found mining results, which later will be tranformed in
 	 * inclusion dependencies
 	 */
 	private HashSet<InclusionMiningResult> foundInclusion = null;
-	
+
 	/**
 	 * The API controller
 	 */
 	private APIController apic = null;
-	
+
 	/**
 	 * A set of all target queries in the mappings
 	 */
-	private HashSet<QueryAtom> splitted = null;
-	
+	private HashSet<Atom> splitted = null;
+
 	/**
 	 * A map which show from which mapping each target query comes from
 	 */
-	private HashMap<QueryAtom, OBDAMappingAxiom> sourceQueryMap= null;
-	
+	private HashMap<Atom, OBDAMappingAxiom> sourceQueryMap= null;
+
 	/**
 	 * A list of threads, which are execution the mining
 	 */
 	private List<MiningThread> threads = null;
-	
+
 	private boolean hasErrorOccurred = false;
-	
+
 	private MiningException exception = null;
 
 	/**
 	 * Creates a new instance of the RDBMSInclusionDependencyMiner
-	 * 
+	 *
 	 * @param apic the API controller
 	 * @param signal a count down latch
 	 */
 	public RDBMSInclusionDependencyMiner(APIController apic,
-			CountDownLatch signal){	
-		
+			CountDownLatch signal){
+
 		this.apic = apic;
 		resultOfSQLQueries = new HashMap<String, Boolean>();
 		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		queue = new Vector<Job>();
-		sourceQueryMap = new HashMap<QueryAtom, OBDAMappingAxiom>();
+		sourceQueryMap = new HashMap<Atom, OBDAMappingAxiom>();
 		foundInclusion = new HashSet<InclusionMiningResult>();
 		doneSignal = signal;
 		splittMappings();
 		createJobs();
 	}
-	
+
 	/**
 	 * Splits the target query of all mappings in it component parts.
 	 */
 	private void splittMappings(){
-		
-		splitted = new HashSet<QueryAtom>();
+
+		splitted = new HashSet<Atom>();
 		Iterator<OBDAMappingAxiom> it = mappings.iterator();
 		while(it.hasNext()){
 			OBDAMappingAxiom axiom = it.next();
-			ConjunctiveQuery q = (ConjunctiveQuery) axiom.getTargetQuery();
-			ArrayList<QueryAtom> list =q.getAtoms();
-			Iterator<QueryAtom> it2 = list.iterator();
+			CQIEImpl q = (CQIEImpl) axiom.getTargetQuery();
+			List<Atom> list = q.getBody();
+			Iterator<Atom> it2 = list.iterator();
 			while(it2.hasNext()){
-				QueryAtom atom = it2.next();
+				Atom atom = it2.next();
 				splitted.add(atom);
 				sourceQueryMap.put(atom, axiom);
 			}
 		}
-			
+
 	}
-	
+
 	/**
 	 * The method goes through and tries to find possible inclusion
-	 * dependencies. When it finds a two candidates it creates 
+	 * dependencies. When it finds a two candidates it creates
 	 * a job object and adds it to the queue. Later the job will
 	 * be executed to whether it actually is inclusion dependency or not
 	 */
 	private void createJobs(){
-		
-		Iterator<QueryAtom> it1 = splitted.iterator();
+
+		Iterator<Atom> it1 = splitted.iterator();
 		while(it1.hasNext()){
-			QueryAtom candidate = it1.next();
-			ArrayList<QueryTerm> termsOfCandidate =candidate.getTerms();
-			Iterator<QueryTerm> canIt = termsOfCandidate.iterator();
+			Atom candidate = it1.next();
+			List<Term> termsOfCandidate = candidate.getTerms();
+			Iterator<Term> canIt = termsOfCandidate.iterator();
 			while(canIt.hasNext()){
-				QueryTerm canTerm = canIt.next();
-				Iterator<QueryAtom> it2 = splitted.iterator();
+				Term canTerm = canIt.next();
+				Iterator<Atom> it2 = splitted.iterator();
 				while(it2.hasNext()){
-					QueryAtom container = it2.next();
+					Atom container = it2.next();
 					if(container != candidate){
-						ArrayList<QueryTerm> termsOfContainer =container.getTerms();
-						Iterator<QueryTerm> conIt = termsOfContainer.iterator();
+						List<Term> termsOfContainer = container.getTerms();
+						Iterator<Term> conIt = termsOfContainer.iterator();
 						while(conIt.hasNext()){
-							QueryTerm containerTerm = conIt.next();
+							Term containerTerm = conIt.next();
 							OBDAMappingAxiom ax1 =sourceQueryMap.get(candidate);
 							OBDAMappingAxiom ax2 =sourceQueryMap.get(container);
-							String sql = checkContainment(ax1.getSourceQuery().getInputQuString(), ax2.getSourceQuery().getInputQuString(), canTerm, containerTerm);
+							String sql = checkContainment(ax1.getSourceQuery().toString(), ax2.getSourceQuery().toString(), canTerm, containerTerm);
 							if(sql != null){
 								Job aux = new Job(sql,ax1.getId(), ax2.getId(),(RDBMSSQLQuery)ax1.getSourceQuery(), canTerm,(RDBMSSQLQuery) ax2.getSourceQuery(),containerTerm);
 								queue.add(aux);
 							}
-							
+
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * The method takes the queue of jobs, divides them in to equal parts
 	 * and passes them to different threads, which executes the jobs.
 	 */
 	public void startMining(){
-		
+
 		threads = new Vector<MiningThread>();
 		int qLength = queue.size()/nrOfThreads;
 		Random random = new Random();
@@ -210,7 +208,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		threads.add(thread);
 		thread.start();
 	}
-	
+
 	/**
 	 * Interrupts all started Mining threads
 	 */
@@ -221,34 +219,34 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		}
 		foundInclusion = new HashSet<InclusionMiningResult>();
 	}
-	
+
 	/**
 	 * private method which check whether tm1 can be included in tm2
 	 * according to the formulation of their mapping axioms
-	 * 
+	 *
 	 * @param m1 mapping where tm1 comes from
 	 * @param m2 mapping where tm2 comes from
 	 * @param tm1 first candidate term
 	 * @param tm2 second candidate term
 	 * @return null if not possible, an query to check the dependency on the data in the source
 	 */
-	private String checkContainment (String m1, 
-			String m2,QueryTerm tm1, QueryTerm tm2){
-		
+	private String checkContainment (String m1,
+			String m2,Term tm1, Term tm2){
+
 		if(m1.equals(m2)){
 			return null;
 		}
-		if(tm1 instanceof VariableTerm && tm2 instanceof VariableTerm){
-			VariableTerm vt1 = (VariableTerm) tm1;
-			VariableTerm vt2 = (VariableTerm) tm2;
-			String var1 = vt1.getVariableName();
-			String var2 = vt2.getVariableName();
+		if(tm1 instanceof VariableImpl && tm2 instanceof VariableImpl){
+			VariableImpl vt1 = (VariableImpl) tm1;
+			VariableImpl vt2 = (VariableImpl) tm2;
+			String var1 = vt1.getName();
+			String var2 = vt2.getName();
 			return produceSQL(m1, m2, var1, var2);
-			
-		}else if(tm1 instanceof FunctionTerm && tm2 instanceof FunctionTerm){
-			FunctionTerm ft1 = (FunctionTerm) tm1;
-			FunctionTerm ft2 = (FunctionTerm)tm2;		
-			if(ft1.getVariableName().equals(ft2.getVariableName())){
+
+		}else if(tm1 instanceof ObjectVariableImpl && tm2 instanceof ObjectVariableImpl){
+			ObjectVariableImpl ft1 = (ObjectVariableImpl) tm1;
+			ObjectVariableImpl ft2 = (ObjectVariableImpl)tm2;
+			if(ft1.getName().equals(ft2.getName())){
 				return produceSQL(m1,m2,ft1,ft2);
 			}else {
 				return null;
@@ -257,54 +255,53 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			return null;
 		}
 	}
-//	
+//
 	/**
 	 * Returns the query which can be use to check the dependency on the
 	 * data in the source.
 	 */
 	private String produceSQL(String candidate, String container, String v1, String v2){
-		
+
 		/*
 //		 * Sample of an sql query produced by this method:
-//		 SELECT a1.nid, a1.value FROM (Select id as nid, 2 as value, name from name) as a1 
-//			WHERE ROW(a1.nid, a1.value) NOT IN 
+//		 SELECT a1.nid, a1.value FROM (Select id as nid, 2 as value, name from name) as a1
+//			WHERE ROW(a1.nid, a1.value) NOT IN
 //		(SELECT nid, value FROM (Select id as nid, 2 as value, name from name) a2)
 //		 */
 		String query = "SELECT table1." + v1 +" FROM("+ candidate +") table1 WHERE ROW( table1." +v1 +
 						") NOT IN (SELECT table2."+v2+" FROM (" + container +") table2";
 		return query;
 	}
-	
+
 	/**
 	 * Returns the query which can be use to check the dependency on the
 	 * data in the source if the involved terms are functional terms.
 	 */
-	private String produceSQL(String candidate, String container, FunctionTerm ft1, FunctionTerm ft2){
-		
-		ArrayList<QueryTerm> termsOfFT1 =ft1.getParameters();
-		ArrayList<QueryTerm> termsOfFT2 =ft2.getParameters();
+	private String produceSQL(String candidate, String container, ObjectVariableImpl ft1, ObjectVariableImpl ft2){
+
+		List<Term> termsOfFT1 = ft1.getTerms();
+		List<Term> termsOfFT2 = ft2.getTerms();
 		String var1 = "";
-		Iterator<QueryTerm> it = termsOfFT1.iterator();
+		Iterator<Term> it = termsOfFT1.iterator();
 		while(it.hasNext()){
 			if(var1.length() >0){
 				var1 = var1 +", ";
 			}
-			var1 = var1 + "table1."+it.next().getVariableName();
+			var1 = var1 + "table1."+it.next().getName();
 		}
 		String var2 = "";
-		Iterator<QueryTerm> it1 = termsOfFT2.iterator();
+		Iterator<Term> it1 = termsOfFT2.iterator();
 		while(it1.hasNext()){
 			if(var2.length() >0){
 				var2 = var2 +", ";
 			}
-			var2 = var2 + "table2."+it1.next().getVariableName();
 		}
-		
+
 		String query = "SELECT " + var1 +" FROM (" + candidate + ") table1 WHERE ROW("+
 						var1+") NOT IN (SELECT " + var2 + " FROM (" + container +") table2)";
-		return query; 
+		return query;
 	}
-	
+
 	/**
 	 * Returns the results of the mining
 	 * @return set of mining results
@@ -322,47 +319,47 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 	public boolean hasErrorOccurred() {
 		return hasErrorOccurred;
 	}
-	
+
 	/**
 	 * Class representing a mining result. It contains all
 	 * necessary information to create inclusion dependency, which
 	 * can be used by the reasoner.
-	 * 
+	 *
 	 * @author Manfred Gerstgrasser
- * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+ * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
 	 *
 	 */
 	public class InclusionMiningResult{
-		
+
 		/**
 		 * The frist query
 		 */
 		private RDBMSSQLQuery firstMappingElement = null;
 		/**
-		 *the second query 
+		 *the second query
 		 */
 		private RDBMSSQLQuery secondMappingElement = null;
 		/**
 		 * the query term associated to the first query
 		 */
-		private QueryTerm firstPositionElement = null;
+		private Term firstPositionElement = null;
 		/**
 		 * the query term associated to the second query
 		 */
-		private QueryTerm secondPositionElement = null;
+		private Term secondPositionElement = null;
 		/**
 		 * the mapping id of the mapping where the first query comes from
 		 */
 		private String mappingIdOfFirstMapping = null;
 		/**
 		 * the mapping id of the mapping where the first query comes from
-		 * 
+		 *
 		 */
 		private String mappingIdOfSecondMapping = null;
-		
+
 		/**
 		 * Return a new MiningResult object
-		 * 
+		 *
 		 * @param id1 first mapping id
 		 * @param id2 second mapping id
 		 * @param map1	first query
@@ -370,9 +367,9 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		 * @param map2	second query
 		 * @param pos2	term associated to the second query
 		 */
-		InclusionMiningResult(String id1, String id2, RDBMSSQLQuery map1, QueryTerm pos1, 
-				RDBMSSQLQuery map2, QueryTerm pos2){
-			
+		InclusionMiningResult(String id1, String id2, RDBMSSQLQuery map1, Term pos1,
+				RDBMSSQLQuery map2, Term pos2){
+
 			firstMappingElement = map1;
 			secondMappingElement = map2;
 			firstPositionElement = pos1;
@@ -380,7 +377,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			mappingIdOfFirstMapping = id1;
 			mappingIdOfSecondMapping = id2;
 		}
-		
+
 		/**
 		 * Returns the first query
 		 * @return first query
@@ -399,14 +396,14 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		 * Returns the term associated to the first query
 		 * @return term associated to first query
 		 */
-		public QueryTerm getFirstElement() {
+		public Term getFirstElement() {
 			return firstPositionElement;
 		}
 		/**
 		 * Returns the term associated to the second query
 		 * @return term associated to second query
 		 */
-		public QueryTerm getSecondElement() {
+		public Term getSecondElement() {
 			return secondPositionElement;
 		}
 		/**
@@ -424,16 +421,16 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			return mappingIdOfSecondMapping;
 		}
 	}
-	
+
 	/**
 	 * Class representing a job, which will be executed by a Mining Thread
-	 * 
+	 *
 	 * @author Manfred Gerstgrasser
-	 * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy 
+	 * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
 	 *
 	 */
 	private class Job {
-		
+
 		/**
 		 * the query to execute
 		 */
@@ -449,11 +446,11 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		/**
 		 * the term associated to the first query
 		 */
-		private QueryTerm candidateTerm = null;
+		private Term candidateTerm = null;
 		/**
 		 * the term associated to the second query
 		 */
-		private QueryTerm containerTerm = null;
+		private Term containerTerm = null;
 		/**
 		 * the id of the mapping where the first query comes from
 		 */
@@ -462,10 +459,10 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		 * the id of the mapping where the second query comes from
 		 */
 		private String secondMappingID=null;
-		
+
 		/**
 		 * Returns a new Job object
-		 * 
+		 *
 		 * @param sql	the query to execute
 		 * @param id1	id of first mapping
 		 * @param id2	id of second mapping
@@ -474,9 +471,9 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		 * @param con	the second query
 		 * @param posCon	term associated to second query
 		 */
-		private Job(String sql, String id1, String id2, RDBMSSQLQuery can,QueryTerm posCan,
-				RDBMSSQLQuery con, QueryTerm posCon){
-			
+		private Job(String sql, String id1, String id2, RDBMSSQLQuery can,Term posCan,
+				RDBMSSQLQuery con, Term posCon){
+
 			sqlquery = sql;
 			candidate = can;
 			container = con;
@@ -504,14 +501,14 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		 * Returns the term associated to the first query
 		 * @return second query
 		 */
-		public QueryTerm getCandidateTerm() {
+		public Term getCandidateTerm() {
 			return candidateTerm;
 		}
 		/**
 		 * Returns the term associated to the second query
 		 * @return the term associated to the second query
 		 */
-		public QueryTerm getContainerTerm() {
+		public Term getContainerTerm() {
 			return containerTerm;
 		}
 		/**
@@ -535,33 +532,33 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 		public String getSecondMappingID() {
 			return secondMappingID;
 		}
-		
+
 	}
-//		
-//		
+//
+//
 //
 //	// This class extends the class java.lang.Thread and executes the jobs assigned to it
 //	// by executing the sql query, checking the result and if necessary it inserts or
 //	// updating an entry in the corresponding index
 	private class MiningThread extends Thread{
-		
+
 		/**
 		 * The list of jobs the threads has to do.
 		 */
 		private List<Job> jobs = null;
 		/**
-		 * The count down signal 
+		 * The count down signal
 		 */
 		private final CountDownLatch signal;
 		/**
 		 * the result set model factory
 		 */
-		private JDBCConnectionManager	man	= null;
+		private final JDBCConnectionManager	man	= null;
 		/**
 		 * the result set model
 		 */
-		private IncrementalResultSetTableModel	model			= null;
-		
+		private final IncrementalResultSetTableModel	model			= null;
+
 		/**
 		 * returns a new Mining Thread
 		 * @param obj list of jobs to execute
@@ -571,11 +568,11 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			jobs = obj;
 			this.signal = latch;
 		}
-		
+
 		@Override
 		public void run(){
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-			
+
 			try {
 				man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, true);
 				man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_SCROLL_SENSITIVE);
@@ -591,8 +588,8 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 								RDBMSSQLQuery mapContainer = job.getContainer();
 								String id1 = job.getFirstMappingID();
 								String id2 = job.getSecondMappingID();
-								QueryTerm candidateTerm = job.getCandidateTerm();
-								QueryTerm containerTerm = job.getContainerTerm();
+								Term candidateTerm = job.getCandidateTerm();
+								Term containerTerm = job.getContainerTerm();
 								InclusionMiningResult entry = new InclusionMiningResult(id1, id2, mapCandidate,candidateTerm,mapContainer,containerTerm);
 								synchronized(foundInclusion){
 									foundInclusion.add(entry);
@@ -619,8 +616,8 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 										RDBMSSQLQuery mapContainer = job.getContainer();
 										String id1 = job.getFirstMappingID();
 										String id2 = job.getSecondMappingID();
-										QueryTerm candidateTerm = job.getCandidateTerm();
-										QueryTerm containerTerm = job.getContainerTerm();
+										Term candidateTerm = job.getCandidateTerm();
+										Term containerTerm = job.getContainerTerm();
 										InclusionMiningResult entry = new InclusionMiningResult(id1, id2, mapCandidate,candidateTerm,mapContainer,containerTerm);
 										synchronized(foundInclusion){
 											foundInclusion.add(entry);
@@ -632,7 +629,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 							} catch (Exception e) {
 //								e.printStackTrace();
 								resultOfSQLQueries.put(sql, new Boolean("false"));
-							} 
+							}
 						}
 					}
 				}
