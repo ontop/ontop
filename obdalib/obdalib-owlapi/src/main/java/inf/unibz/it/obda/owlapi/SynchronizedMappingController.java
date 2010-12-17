@@ -5,11 +5,8 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.QueryAtom;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -21,7 +18,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.semanticweb.owl.model.AddAxiom;
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.CQIE;
+import org.obda.query.domain.imp.CQIEImpl;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataProperty;
@@ -31,16 +30,14 @@ import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntologyChange;
 import org.semanticweb.owl.model.OWLOntologyChangeListener;
 import org.semanticweb.owl.model.RemoveAxiom;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Due to the refactoring mechanism implemented in the owl api, 
+ * Due to the refactoring mechanism implemented in the owl api,
  * that allows only to add and remove axioms and the fact that there is no common
  * policy of how those atoms are ordered, at this point we have no reliable
  * method to establish which is the actual entity to update. Therefore
  * for the moment this synchronizer only handles Remove events.
- * 
+ *
  * @author obda
  *
  */
@@ -56,11 +53,11 @@ public class SynchronizedMappingController extends MappingController implements 
 	 * current api controller
 	 */
 	private APIController 			apic					= null;
-	
-	
+
+
 	/**
 	 * The constructor. Creates a new instance of the SynchronizedMappingController
-	 * @param dsc the data source controller	
+	 * @param dsc the data source controller
 	 * @param ac the api controller
 	 */
 	public SynchronizedMappingController(DatasourcesController dsc,
@@ -70,17 +67,17 @@ public class SynchronizedMappingController extends MappingController implements 
 		apic = ap;
 	}
 
-	
+
 	/**
 	 * Handles the ontology change event, which is thrown whenever something
 	 * changes in the ontology. Attention: the implementation is strongly coupled
-	 * to the event structure of protege. E.g a renaming is done be adding a new 
-	 * entity and deleting the old, etc.   
+	 * to the event structure of protege. E.g a renaming is done be adding a new
+	 * entity and deleting the old, etc.
 	 */
 	@Override
 	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
 			throws OWLException {
-		
+
 		((OWLAPICoupler)apic.getCoupler()).synchWithOntology(changes.get(0).getOntology());
 		String ontoprefix = apic.getCoupler().getPrefixForUri(changes.get(0).getOntology().getURI());
 		List<RemoveAxiom> vec = getRemoveAxioms(changes);
@@ -95,15 +92,15 @@ public class SynchronizedMappingController extends MappingController implements 
 			}
 		}
 	}
-	
+
 	/**
 	 * Private method that checks whether all changes involve a remove axiom. In
-	 * that case we can be sure we have to remove an entity. Otherwise the 
+	 * that case we can be sure we have to remove an entity. Otherwise the
 	 * Change Event is a candidate for a renaming but some further checks
-	 * have to be done. 
+	 * have to be done.
 	 */
 	private List<RemoveAxiom> getRemoveAxioms(List<? extends OWLOntologyChange> changes){
-		
+
 		Vector<RemoveAxiom> vec = new Vector<RemoveAxiom>();
 		Iterator<? extends OWLOntologyChange>it = changes.iterator();
 		while(it.hasNext()){
@@ -114,14 +111,14 @@ public class SynchronizedMappingController extends MappingController implements 
 		}
 		return vec;
 	}
-	
+
 	/**
-	 * private method that is used to check whether an Entity is still in the 
+	 * private method that is used to check whether an Entity is still in the
 	 * ontology or not.
 	 */
 	private boolean stillExists(OWLEntity ent){
-		
-		APICoupler coupler = apic.getCoupler(); 
+
+		APICoupler coupler = apic.getCoupler();
 		boolean extists = true;
 		if(ent instanceof OWLClass){
 			extists = coupler.isNamedConcept(apic.getCurrentOntologyURI(),ent.getURI());
@@ -130,20 +127,20 @@ public class SynchronizedMappingController extends MappingController implements 
 		}else{
 			extists = coupler.isObjectProperty(apic.getCurrentOntologyURI(),ent.getURI());
 		}
-		
+
 		if(extists){
 			return true;
 		}else{
 			return false;
 		}
 	}
-	
+
 	/**
 	 * private method that retrieves all involved entities in an Change Event.
 	 */
 	private Set<OWLEntity> getInvolvedEntities(List<RemoveAxiom> changes){
 		Set<OWLEntity> set = new HashSet<OWLEntity>();
-		
+
 		Iterator<RemoveAxiom> it = changes.iterator();
 		while(it.hasNext()){
 			OWLAxiom ch = it.next().getAxiom();
@@ -159,7 +156,7 @@ public class SynchronizedMappingController extends MappingController implements 
 						set.add(ent);
 					}
 				}
-				
+
 			}else{
 				Set<OWLEntity> entities = ch.getReferencedEntities();
 				Iterator<OWLEntity> eit = entities.iterator();
@@ -173,13 +170,13 @@ public class SynchronizedMappingController extends MappingController implements 
 		}
 		return set;
 	}
-		
+
 	/**
-	 * Removes all entities from the mappings that where involved in the 
+	 * Removes all entities from the mappings that where involved in the
 	 * Remove Event.
 	 */
 	private void removeAxiom(String name){
-		
+
 		HashMap<URI, DataSource> datasources = dscontroller.getAllSources();
 		Set<URI> keys = datasources.keySet();
 		Iterator<URI> kit = keys.iterator();
@@ -188,16 +185,16 @@ public class SynchronizedMappingController extends MappingController implements 
 			ArrayList<OBDAMappingAxiom> maps = getMappings(ds.getSourceID());
 			Iterator<OBDAMappingAxiom> it = maps.iterator();
 			Vector<String> mappingsToRemove = new Vector<String>();
-			Map<String, ArrayList<QueryAtom>> mappingsToUpdate = new HashMap<String, ArrayList<QueryAtom>>();
+			Map<String, CQIE> mappingsToUpdate = new HashMap<String, CQIE>();
 			while(it.hasNext()){
 				OBDAMappingAxiom map = it.next();
-				ConjunctiveQuery cq = (ConjunctiveQuery) map.getTargetQuery();
-				ArrayList<QueryAtom> atoms = cq.getAtoms();
-				Iterator<QueryAtom> it2 = atoms.iterator();
-				ArrayList<QueryAtom> newList = new ArrayList<QueryAtom>();
+				CQIE cq = (CQIEImpl) map.getTargetQuery();
+				List<Atom> atoms = cq.getBody();
+				Iterator<Atom> it2 = atoms.iterator();
+				ArrayList<Atom> newList = new ArrayList<Atom>();
 				boolean update = false;
 				while(it2.hasNext()){
-					QueryAtom atom = it2.next();
+					Atom atom = it2.next();
 					String n = apic.getEntityNameRenderer().getPredicateName(atom);
 					if(n.equals(name)){
 						update = true;
@@ -205,28 +202,28 @@ public class SynchronizedMappingController extends MappingController implements 
 						newList.add(atom);
 					}
 				}
+
+				cq.updateBody(newList);
 				if(update){
 					if(newList.size()==0){
 						mappingsToRemove.add(map.getId());
 					}else{
-						mappingsToUpdate.put(map.getId(), newList);
+						mappingsToUpdate.put(map.getId(), cq);
 					}
 				}
 			}
-			
+
 			Iterator<String> it3 = mappingsToRemove.iterator();
 			while(it3.hasNext()){
 				String mapID = it3.next();
 				deleteMapping(ds.getSourceID(), mapID);
 			}
-			
+
 			Iterator<String> it4 = mappingsToUpdate.keySet().iterator();
 			while(it4.hasNext()){
 				String key = it4.next();
-				ArrayList<QueryAtom> body =mappingsToUpdate.get(key);
-				ConjunctiveQuery cq = new ConjunctiveQuery();
-				cq.addQueryAtom(body);
-				updateMapping(ds.getSourceID(), key, cq);
+				CQIE cq = mappingsToUpdate.get(key);
+				updateTargetQueryMapping(ds.getSourceID(), key, cq);
 			}
 		}
 	}

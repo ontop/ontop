@@ -39,9 +39,9 @@ import org.w3c.dom.Node;
 /**
  * The obda plugin data manager is an extension of the original data manager in the
  * obda api. The only difference between this data manager an the original one is
- * the loading of prefixes. It looks whether an obda file has specified some some 
- * prefixes and if so they are loaded and administrated by the prefix manager. 
- * 
+ * the loading of prefixes. It looks whether an obda file has specified some some
+ * prefixes and if so they are loaded and administrated by the prefix manager.
+ *
  * @author Manfred Gerstgrasser
  */
 
@@ -51,7 +51,7 @@ public class OWLAPIDataManager extends DataManager {
 	 * a map containing for each prefix the corresponding ontology URI
 	 */
 	private Map<String,String> prefixMap = null;
-	
+
 	/**
 	 * The constructor. Creates a new instance of the OBDAPluginDataManager
 	 * @param apic the current api controller
@@ -60,13 +60,14 @@ public class OWLAPIDataManager extends DataManager {
 		super(apic, man);
 		prefixMap = new HashMap<String, String>();
 	}
-	
+
 	/**
 	 * Load the given obda file. In contrast to the original it looks whether the obda
 	 * file defines some prefixes. If so they are loaded into the prefix mapper.
 	 */
+	@Override
 	public void loadOBDADataFromURI(URI obdaFileURI) {
-		
+
 		File obdaFile = new File(obdaFileURI);
 		if (obdaFile == null) {
 			System.err.println("OBDAPluging. OBDA file not found.");
@@ -112,22 +113,23 @@ public class OWLAPIDataManager extends DataManager {
 			}
 			if(name.startsWith("xmlns:") && !value.startsWith(".owl#")){
 				String[] aux = name.split(":");
-				prefixMap.put(aux[1], value);				
+				prefixMap.put(aux[1], value);
 			}
 		}
-		
+
 		super.loadOBDADataFromURI(obdaFileURI);
 	}
-	
+
 	/***************************************************************************
 	 * Saves all the OBDA data of the project to the specified file. If
 	 * useTempFile is true, the mechanism will first attempt to save the data
 	 * into a temporary file. If this is successful it will attempt to replace
 	 * the specified file with the newly created temporarely file.
-	 * 
+	 *
 	 * If useTempFile is false, the procedure will attempt to directly save all
 	 * the data to the file.
 	 */
+	@Override
 	public void saveOBDAData(URI obdaFileURI, boolean useTempFile) throws IOException, ParserConfigurationException {
 		File tempFile = null;
 		File obdaFile = new File(obdaFileURI);
@@ -168,6 +170,7 @@ public class OWLAPIDataManager extends DataManager {
 	/**
 	 * Saves all obda data including the prefixes stored by the prefix mapper
 	 */
+	@Override
 	public void saveOBDAData(URI fileuri) throws ParserConfigurationException, FileNotFoundException, IOException {
 		File file = new File(fileuri.toString());
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -183,10 +186,10 @@ public class OWLAPIDataManager extends DataManager {
 		doc.appendChild(root);
 
     // Create the Mapping element
-		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = 
+		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings =
         apic.getMappingController().getMappings();
     	dumpMappingsToXML(mappings);
-    	HashMap<URI, DataSource> datasources = 
+    	HashMap<URI, DataSource> datasources =
         apic.getDatasourcesController().getAllSources();
     	dumpDatasourcesToXML(datasources);
 
@@ -252,9 +255,9 @@ public class OWLAPIDataManager extends DataManager {
 				root.appendChild(controllerElement);
 			}
 		}
-		XMLUtils.saveDocumentToXMLFile(doc, file.toString());
+		XMLUtils.saveDocumentToXMLFile(doc, file);
 	}
-	
+
 	/**
 	 * Returns the Map containing for each prefix the corresponding onotlogy URI
 	 * @return the prefix map
