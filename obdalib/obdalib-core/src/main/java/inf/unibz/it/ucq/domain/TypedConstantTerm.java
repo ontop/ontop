@@ -4,6 +4,7 @@ import inf.unibz.it.obda.api.controller.APIController;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
+@Deprecated
 public class TypedConstantTerm extends QueryTerm {
 
 	private XSDatatype datatype = null;

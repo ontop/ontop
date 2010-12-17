@@ -18,6 +18,7 @@ import inf.unibz.it.obda.api.controller.APIController;
 import java.net.URI;
 import java.util.ArrayList;
 
+@Deprecated
 public class FunctionTerm extends QueryTerm {
 
 	private ArrayList<QueryTerm> function_terms = null;

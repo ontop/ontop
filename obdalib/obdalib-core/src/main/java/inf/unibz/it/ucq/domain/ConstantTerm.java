@@ -15,6 +15,7 @@ package inf.unibz.it.ucq.domain;
 
 import inf.unibz.it.obda.api.controller.APIController;
 
+@Deprecated
 public class ConstantTerm extends QueryTerm {
 
 	public ConstantTerm(String name) {

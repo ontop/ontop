@@ -15,6 +15,7 @@ package inf.unibz.it.obda.domain;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
+@Deprecated
 public abstract class Query implements Cloneable {
 
 	/***************************************************************************

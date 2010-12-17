@@ -5,10 +5,10 @@
  * The OBDA-API is licensed under the terms of the Lesser General Public
  * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
  * work include:
- * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
+ *
+ * a) The OBDA-API developed by the author and licensed under the LGPL; and,
+ * b) third-party components licensed under terms that may be different from
+ *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
 package inf.unibz.it.obda.domain;
@@ -16,14 +16,14 @@ package inf.unibz.it.obda.domain;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
-
+@Deprecated
 public abstract class TargetQuery extends Query {
 
 	public TargetQuery(String inputquery, APIController apic) throws QueryParseException {
 		super(inputquery, apic);
 	}
-	
-	
+
+
 	public TargetQuery() {
 		super();
 	}

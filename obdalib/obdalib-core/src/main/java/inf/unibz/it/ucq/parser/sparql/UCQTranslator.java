@@ -52,6 +52,7 @@ import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
+@Deprecated
 public class UCQTranslator {
 	
 	/***************************************************************************

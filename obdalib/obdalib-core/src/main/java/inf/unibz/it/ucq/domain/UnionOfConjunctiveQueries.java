@@ -16,6 +16,7 @@ package inf.unibz.it.ucq.domain;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+@Deprecated
 public class UnionOfConjunctiveQueries {
 	
 	private ArrayList<ConjunctiveQuery>	queries	= null;

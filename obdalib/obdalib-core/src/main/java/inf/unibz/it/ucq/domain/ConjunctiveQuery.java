@@ -28,6 +28,7 @@ import org.antlr.runtime.RecognitionException;
 
 // TODO: Remove Target query form here, this is an OBDA specific thing
 
+@Deprecated
 public class ConjunctiveQuery extends TargetQuery {
 
 	private ArrayList<QueryAtom>	atoms;

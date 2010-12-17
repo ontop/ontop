@@ -1,5 +1,6 @@
 package inf.unibz.it.ucq.domain;
 
+@Deprecated
 public class Constant {
 	//TODO ADD TYPES, URIS FOR OBJECT CONSTANTS AND XSDDATATYPES FOR OTHERS
 	//TODO implement XSDTypes 

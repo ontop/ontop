@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+@Deprecated
 public class ConceptQueryAtom extends QueryAtom {
 
 	private NamedConcept			concept	= null;

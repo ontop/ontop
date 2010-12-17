@@ -15,6 +15,7 @@ package inf.unibz.it.ucq.domain;
 
 import inf.unibz.it.obda.api.controller.APIController;
 
+@Deprecated
 public abstract class QueryTerm implements Cloneable {
 	private String name;
 	

@@ -42,6 +42,7 @@ import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
 
+@Deprecated
 public class DatalogCQParser extends Parser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ALPHAVAR", "ALPHA", "INT", "CHAR", "WS", "','", "'('", "')'", "':'", "'$'", "'?'", "'\\''"

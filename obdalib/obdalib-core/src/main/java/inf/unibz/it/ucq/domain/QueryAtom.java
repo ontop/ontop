@@ -19,6 +19,7 @@ import inf.unibz.it.dl.domain.NamedPredicate;
 import java.net.URI;
 import java.util.ArrayList;
 
+@Deprecated
 public abstract class QueryAtom implements Cloneable {
 	public abstract ArrayList<QueryTerm> getTerms();
 	public abstract QueryAtom clone();

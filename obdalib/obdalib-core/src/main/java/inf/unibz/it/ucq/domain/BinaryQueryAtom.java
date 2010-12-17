@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+@Deprecated
 public class BinaryQueryAtom extends QueryAtom {
 	NamedProperty relation = null;
 	QueryTerm term1 = null;
