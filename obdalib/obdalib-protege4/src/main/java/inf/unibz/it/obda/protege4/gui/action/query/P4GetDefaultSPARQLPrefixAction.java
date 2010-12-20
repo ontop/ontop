@@ -68,7 +68,7 @@ public class P4GetDefaultSPARQLPrefixAction extends GetDefaultSPARQLPrefixAction
 		}
 				 
 		prefix = queryString;
-		System.out.println(prefix);
+//		System.out.println(prefix);
 	}
 
 }
