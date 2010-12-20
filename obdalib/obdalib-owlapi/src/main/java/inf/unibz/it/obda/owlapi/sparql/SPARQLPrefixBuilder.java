@@ -3,7 +3,6 @@ package inf.unibz.it.obda.owlapi.sparql;
 import java.util.Set;
 
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.util.SimpleURIShortFormProvider;
 
 public class SPARQLPrefixBuilder {
@@ -35,6 +34,7 @@ public class SPARQLPrefixBuilder {
 		sparqlPrefix += "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n";
 		sparqlPrefix += "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n";
 		sparqlPrefix += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n";
+		sparqlPrefix += "PREFIX obdap: <http://obda.org/mapping/predicates/>\n";
 		// queryString += "PREFIX xs: <http://www.w3.org/2001/XMLSchema#>\n";
 
 		return sparqlPrefix;
