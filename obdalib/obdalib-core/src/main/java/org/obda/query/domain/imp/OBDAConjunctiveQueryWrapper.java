@@ -20,8 +20,8 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
-import org.obda.reformulation.domain.PredicateFactory;
-import org.obda.reformulation.domain.imp.BasicPredicateFactoryImpl;
+import org.obda.query.domain.PredicateFactory;
+import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 
 public class OBDAConjunctiveQueryWrapper implements CQIE {
 

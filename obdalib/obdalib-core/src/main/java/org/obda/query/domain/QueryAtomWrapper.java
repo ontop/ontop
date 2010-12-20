@@ -12,9 +12,9 @@ import java.util.Vector;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
-import org.obda.reformulation.domain.Predicate;
-import org.obda.reformulation.domain.PredicateFactory;
-import org.obda.reformulation.domain.imp.BasicPredicateFactoryImpl;
+import org.obda.query.domain.Predicate;
+import org.obda.query.domain.PredicateFactory;
+import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 
 public class QueryAtomWrapper implements Atom {
 
