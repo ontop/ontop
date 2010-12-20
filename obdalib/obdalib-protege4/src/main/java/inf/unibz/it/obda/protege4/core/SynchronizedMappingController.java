@@ -21,7 +21,7 @@ import java.util.Vector;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.reformulation.domain.imp.PredicateImp;
+import org.obda.query.domain.imp.PredicateImp;
 import org.semanticweb.owl.model.AddAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
