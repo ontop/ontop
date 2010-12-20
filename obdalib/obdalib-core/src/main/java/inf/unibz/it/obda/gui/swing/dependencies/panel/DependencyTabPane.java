@@ -10,15 +10,13 @@
  */
 package inf.unibz.it.obda.gui.swing.dependencies.panel;
 
-import java.awt.Dimension;
-
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.constraints.panel.CheckConstraintsPanel;
 import inf.unibz.it.obda.gui.swing.constraints.panel.ForeignKeyConstraintsPanel;
 import inf.unibz.it.obda.gui.swing.constraints.panel.PrimaryKeyConstraintPanel;
 import inf.unibz.it.obda.gui.swing.constraints.panel.UniquenessConstraintPanel;
 
-import javax.swing.JFrame;
+import java.awt.Dimension;
 
 /**
  *The tab pane which is added to the OBDA tab of Protege4

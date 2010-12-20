@@ -13,8 +13,6 @@
  */
 package inf.unibz.it.obda.gui.swing.dataquery.dialog;
 
-import inf.unibz.it.obda.gui.IconLoader;
-
 import javax.swing.table.TableColumn;
 
 /**

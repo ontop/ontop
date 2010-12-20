@@ -41,17 +41,16 @@ import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
-
 /**
  * Miner which takes the data base schema as base for finding
  * inclusion dependencies between tables. (e.g foreign key constraints)
  *
  * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
-
-public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
+public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner {
 
 	/**
 	 * The API controller
@@ -388,7 +387,7 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 	    return DriverManager.getConnection(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL)+ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME), ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME),ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD));
 	  }
 
-	private class Key{
+	private class Key {
 		Set<String> primayKeys = null;
 		Set<String> foreignKeys = null;
 		String fkTable = null;
@@ -416,7 +415,5 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner{
 		public String getPkTable() {
 			return pkTable;
 		}
-
-
 	}
 }

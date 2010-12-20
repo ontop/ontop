@@ -25,7 +25,6 @@ import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.MutableTreeNode;
 
 public class DatasourceTreeCellRenderer extends DefaultTreeCellRenderer {
 		Icon dbms_source_icon = null;

@@ -3,7 +3,6 @@ package inf.unibz.it.ucq.dig11;
 
 import java.util.Vector;
 
-//import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

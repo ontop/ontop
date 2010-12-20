@@ -1,23 +1,17 @@
 package inf.unibz.it.obda.gui.swing.dependencies.treemodel;
 
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.tree.MutableTreeNode;
-
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.dependencies.controller.RDBMSInclusionDependencyController;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionControllerTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNode;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNodeFactory;
-import inf.unibz.it.obda.gui.swing.treemodel.DefaultAssertionTreeNode;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import javax.swing.tree.MutableTreeNode;
 
 /**
  * A modified tree model, adapted to the needs for handling inclusion

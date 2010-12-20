@@ -1,9 +1,5 @@
 package inf.unibz.it.obda.gui.swing.utils;
 
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-
-import javax.swing.JFrame;
 
 /*
  * To change this template, choose Tools | Templates

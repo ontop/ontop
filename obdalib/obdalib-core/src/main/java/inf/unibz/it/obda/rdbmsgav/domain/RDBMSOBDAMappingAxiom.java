@@ -56,7 +56,6 @@ public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 		this.targetQuery = (CQIEImpl) query;
 	}
 
-
 	/****
 	 * Warning it doesn't do anything at the moment
 	 */
@@ -64,16 +63,13 @@ public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 		//TODO remove or keep method
 	}
 
-
 	public RDBMSSQLQuery getSourceQuery() {
 		return sourceQuery;
 	}
 
-
 	public CQIEImpl getTargetQuery() {
 		return targetQuery;
 	}
-
 
 	/****
 	 * Warning doesnt do anything at the moment

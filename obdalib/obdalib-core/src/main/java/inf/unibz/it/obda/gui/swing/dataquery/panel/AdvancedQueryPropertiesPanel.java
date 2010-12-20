@@ -14,7 +14,6 @@
 
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.utils.swing.DialogUtils;
 
 import javax.swing.JDialog;

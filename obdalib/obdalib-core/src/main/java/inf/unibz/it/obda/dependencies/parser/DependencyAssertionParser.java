@@ -10,12 +10,9 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -28,13 +25,7 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
-
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
+import org.obda.query.domain.VariableTerm;
 
 public class DependencyAssertionParser extends Parser {
     public static final String[] tokenNames = new String[] {

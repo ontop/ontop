@@ -12,9 +12,6 @@ import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.domain.QueryTerm;
-import inf.unibz.it.ucq.domain.TypedConstantTerm;
-import inf.unibz.it.ucq.domain.VariableTerm;
 import inf.unibz.it.ucq.typing.CheckOperationTerm;
 import inf.unibz.it.ucq.typing.UnknownXSDTypeException;
 import inf.unibz.it.ucq.typing.XSDTypingController;
@@ -25,9 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.antlr.runtime.BaseRecognizer;
 import org.antlr.runtime.BitSet;
-import org.antlr.runtime.DFA;
 import org.antlr.runtime.MismatchedSetException;
 import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.Parser;
@@ -38,13 +33,6 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
-
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 public class ConstraintsParser extends Parser {
     public static final String[] tokenNames = new String[] {

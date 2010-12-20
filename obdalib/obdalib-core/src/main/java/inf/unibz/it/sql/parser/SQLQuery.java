@@ -1,6 +1,5 @@
 package inf.unibz.it.sql.parser;
 
-import java.text.Normalizer.Form;
 import java.util.Iterator;
 import java.util.List;
 

@@ -15,6 +15,7 @@ import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
 public class RDBMSUniquenessConstraintXMLCodec extends AssertionXMLCodec<RDBMSUniquenessConstraint>{
 
 	public RDBMSUniquenessConstraintXMLCodec() {

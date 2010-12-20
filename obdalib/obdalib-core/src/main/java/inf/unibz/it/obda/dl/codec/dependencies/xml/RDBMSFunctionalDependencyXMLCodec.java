@@ -21,7 +21,8 @@ import org.w3c.dom.NodeList;
  *
  * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFunctionalDependency> {
 
@@ -29,7 +30,6 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 
 	public RDBMSFunctionalDependencyXMLCodec() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -76,7 +76,6 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 		}
 
 		return DependencyAssertionRenderer.getInstance().createAndValidateRDBMSFunctionalDependency(id1, id2, aux1, aux2);
-
 	}
 
 	/**
@@ -123,8 +122,6 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 	 * Returns the xml tag name of a RDBMSFunctionalDependency
 	 */
 	public String getElementTag() {
-		// TODO Auto-generated method stub
 		return TAG;
 	}
-
 }

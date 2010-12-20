@@ -1,12 +1,11 @@
 package inf.unibz.it.obda.dependencies;
 
-import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-
 import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
+
+import java.net.URI;
+import java.util.HashSet;
 
 /**.
  * All dependency controller should implement this abstract class. It adds

@@ -15,7 +15,6 @@ package inf.unibz.it.obda.validator;
 
 import org.obda.query.domain.Query;
 
-
 public abstract class QueryValidator {
 
 	private Query query = null;

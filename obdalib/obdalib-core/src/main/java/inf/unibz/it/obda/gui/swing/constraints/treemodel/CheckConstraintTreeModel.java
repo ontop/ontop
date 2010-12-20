@@ -3,7 +3,6 @@ package inf.unibz.it.obda.gui.swing.constraints.treemodel;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.controller.RDBMSCheckConstraintController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSCheckConstraint;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionControllerTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNode;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNodeFactory;

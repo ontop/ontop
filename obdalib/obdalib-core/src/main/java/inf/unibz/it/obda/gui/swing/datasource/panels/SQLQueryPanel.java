@@ -18,13 +18,10 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
-import inf.unibz.it.obda.validator.exception.NoConnectionException;
 
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;

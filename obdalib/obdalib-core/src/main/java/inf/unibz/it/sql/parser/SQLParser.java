@@ -17,13 +17,6 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
-
 public class SQLParser extends Parser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ALPHAVAR", "NUMBER", "ALPHA", "DIGIT", "CHAR", "INTEGER", "BOOL", "WS", "'select'", "'SELECT'", "'Select'", "'FROM'", "'from'", "'WHERE'", "'where'", "'DISTINCT'", "'distinct'", "','", "'.'", "'as'", "'AS'", "'AND'", "'and'", "'YEAR('", "')'", "'\\''", "'>'", "'='", "'<'", "'<>'", "'<='", "'>='", "'=>'", "'=<'"

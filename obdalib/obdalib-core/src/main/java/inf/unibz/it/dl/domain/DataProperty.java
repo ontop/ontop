@@ -14,7 +14,6 @@
 package inf.unibz.it.dl.domain;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 public class DataProperty extends NamedProperty {
 	public DataProperty(URI uri) {

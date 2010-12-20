@@ -13,17 +13,12 @@
  */
 package inf.unibz.it.obda.gui.swing.preferences;
 
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
-import javax.swing.KeyStroke;
-import javax.swing.event.ChangeListener;
 
 public class OBDAPreferences {
 	

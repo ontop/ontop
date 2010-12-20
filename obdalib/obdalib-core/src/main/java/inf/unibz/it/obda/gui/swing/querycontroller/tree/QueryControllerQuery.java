@@ -1,11 +1,6 @@
 package inf.unibz.it.obda.gui.swing.querycontroller.tree;
 
-import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-
-import java.util.Vector;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 
 public class QueryControllerQuery extends QueryControllerEntity{
 

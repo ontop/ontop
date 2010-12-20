@@ -2,8 +2,6 @@ package inf.unibz.it.quonto.obda.controller;
 
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.quonto.dl.assertion.IDConstraint;
-import inf.unibz.it.quonto.obda.controller.IDConstraintController;
-import inf.unibz.it.quonto.obda.controller.IDConstraintController;
 
 import java.util.Collection;
 

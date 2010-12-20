@@ -57,15 +57,18 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 	 */
 	private final Collection<OBDAMappingAxiom> mappings;
 	/**
-	 * An index which links each table in the data base schema to the mapping axioms where it is used
+	 * An index which links each table in the data base schema to the mapping
+	 * axioms where it is used
 	 */
 	private HashMap<String, HashSet<OBDAMappingAxiom>> tableToMappingIndex = null;
 	/**
-	 * the count down signal, which tells the parent thread that the child thread has finished its work
+	 * the count down signal, which tells the parent thread that the child
+	 * thread has finished its work
 	 */
 	private CountDownLatch signal = null;
 	/**
-	 * A collection of all found inclusion dependencies implied by the data base schema
+	 * A collection of all found inclusion dependencies implied by the
+	 * database schema
 	 */
 	private HashSet<RDBMSFunctionalDependency> foundInclusions= null;
 	/**
@@ -84,15 +87,19 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 
 	private MiningException exception = null;
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory =
+		(TermFactoryImpl) TermFactory.getInstance();
 
 	/**
-	 * The construction creates a new instance of the RDBMSSchemaInclusionDependencyMiner
+	 * The construction creates a new instance of the
+	 * {@link RDBMSSchemaInclusionDependencyMiner}
 	 *
 	 * @param con the api controller
-	 * @param latch the count down signal to tell the parent thread when the mining is finished
+	 * @param latch the count down signal to tell the parent thread when
+	 * the mining is finished
 	 */
-	public RDBMSFunctionalDependencyFromDBSchemaMiner(APIController con, CountDownLatch latch){
+	public RDBMSFunctionalDependencyFromDBSchemaMiner(APIController con,
+			CountDownLatch latch) {
 		apic = con;
 		signal = latch;
 		foundInclusions = new HashSet<RDBMSFunctionalDependency>();
@@ -101,7 +108,8 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 			} catch (Exception e) {
 			e.printStackTrace();
 		}
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
+		mappings = apic.getMappingController().getMappings(
+				apic.getDatasourcesController().getCurrentDataSource().getSourceID());
 		createTableIndex();
 	}
 
@@ -109,7 +117,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 	 * This Method creates the table to mapping index by parsing the
 	 * SQL query of the mapping axioms.
 	 */
-	private void createTableIndex(){
+	private void createTableIndex() {
 
 		tableToMappingIndex = new HashMap<String, HashSet<OBDAMappingAxiom>>();
 		tablesAliasMap = new HashMap<OBDAMappingAxiom, HashMap<String, String>>();
@@ -216,7 +224,8 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 
 	private void mine() throws Exception{
 
-		RDBMSFunctionalDependencyController depcon = (RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
+		RDBMSFunctionalDependencyController depcon =
+			(RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
 		Connection conn = getConnection();
 	    DatabaseMetaData meta;
 	    ResultSet r = null;
@@ -229,7 +238,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 	    while (r.next() && !isCanceled) {
 			 v.add(r.getString("TABLE_NAME"));
 		}
-		//	    	ResultSet rs = meta.getExportedKeys(conn.getCatalog(), null, tablename);
+
 	    Iterator<String> it = v.iterator();
 	    while(it.hasNext() && !isCanceled){
 	    	String tn1 = it.next();

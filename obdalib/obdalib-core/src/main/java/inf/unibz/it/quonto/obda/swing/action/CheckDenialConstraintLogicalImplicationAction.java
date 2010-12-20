@@ -1,9 +1,6 @@
 package inf.unibz.it.quonto.obda.swing.action;
 
 import inf.unibz.it.quonto.dl.assertion.DenialConstraint;
-import inf.unibz.it.quonto.dl.assertion.IDConstraint;
-
-import javax.swing.AbstractAction;
 
 abstract public class CheckDenialConstraintLogicalImplicationAction  extends ConstraintCheckAction<DenialConstraint>{
 	

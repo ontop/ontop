@@ -12,8 +12,6 @@
  */
 package inf.unibz.it.obda.domain;
 
-import inf.unibz.it.obda.api.controller.APIController;
-
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.HashMap;

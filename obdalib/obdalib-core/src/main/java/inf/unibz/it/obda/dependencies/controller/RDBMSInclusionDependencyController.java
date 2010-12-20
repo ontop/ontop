@@ -1,12 +1,9 @@
 package inf.unibz.it.obda.dependencies.controller;
 
 import inf.unibz.it.obda.api.controller.AssertionController;
-import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.swing.dependencies.treemodel.InclusionDependencyTreeModel;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -14,11 +11,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-
-import javax.swing.JTree;
 
 
 

@@ -13,12 +13,11 @@ import org.obda.query.domain.Term;
  *
  * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
- *
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
-public abstract class DisjointnessDependencyAssertion extends AbstractDependencyAssertion{
-
+public abstract class DisjointnessDependencyAssertion
+		extends AbstractDependencyAssertion {
 	public abstract Query getSourceQueryOne();
 	public abstract Query getSourceQueryTwo();
 	public abstract List<Term> getTermsOfQueryOne();

@@ -2,8 +2,6 @@ package inf.unibz.it.quonto.obda.controller;
 
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.quonto.dl.assertion.DenialConstraint;
-import inf.unibz.it.quonto.obda.controller.DenialConstraintController;
-import inf.unibz.it.quonto.obda.controller.DenialConstraintController;
 
 import java.util.Collection;
 

@@ -1,16 +1,15 @@
 package inf.unibz.it.obda.gui.swing.dependencies.treemodel;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.dependencies.controller.RDBMSFunctionalDependencyController;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionControllerTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNode;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNodeFactory;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.swing.tree.MutableTreeNode;
 

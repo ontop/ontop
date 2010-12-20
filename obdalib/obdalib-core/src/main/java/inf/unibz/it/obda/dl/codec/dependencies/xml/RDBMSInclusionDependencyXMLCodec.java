@@ -21,9 +21,9 @@ import org.w3c.dom.NodeList;
  *
  * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
-
 public class RDBMSInclusionDependencyXMLCodec extends AssertionXMLCodec<RDBMSInclusionDependency> {
 
 	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
@@ -77,7 +77,6 @@ public class RDBMSInclusionDependencyXMLCodec extends AssertionXMLCodec<RDBMSInc
 		}
 
 		return DependencyAssertionRenderer.getInstance().createAndValidateRDBMSInclusionDependency(id1, id2, aux1, aux2);
-
 	}
 
 	/**
@@ -127,5 +126,4 @@ public class RDBMSInclusionDependencyXMLCodec extends AssertionXMLCodec<RDBMSInc
 
 		return TAG;
 	}
-
 }

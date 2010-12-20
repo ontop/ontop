@@ -14,16 +14,14 @@ import org.obda.query.domain.Term;
  * Class representing a functional dependency assertion for a
  * relational data base management system.
  *
- @author Manfred Gerstgrasser
+ * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
-
 public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 
 	public static final String INCLUSIONDEPENDENCY = "RDBMSInclusionDependency";
-
 
 	/**
 	 * The first query involved in this disjointness dependency assertion
@@ -34,11 +32,13 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	 */
 	private RDBMSSQLQuery queryTwo = null;
 	/**
-	 * A list of terms associated to the first query involved in this disjointness dependency assertion
+	 * A list of terms associated to the first query involved in this
+	 * disjointness dependency assertion
 	 */
 	private List<Term> termsOfQueryOne = null;
 	/**
-	 * A list of terms associated to the second query involved in this disjointness dependency assertion
+	 * A list of terms associated to the second query involved in this
+	 * disjointness dependency assertion
 	 */
 	private List<Term> termsOfQueryTwo = null;
 	/**
@@ -65,9 +65,9 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	 * @param terms1	list of terms associated to the first query
 	 * @param terms2	list of terms associated to the second query
 	 */
-	public RDBMSInclusionDependency(URI uri,String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,
-			List<Term> terms1, List<Term> terms2){
-
+	public RDBMSInclusionDependency(URI uri,String id1, String id2,
+			RDBMSSQLQuery q1, RDBMSSQLQuery q2,
+			List<Term> terms1, List<Term> terms2) {
 		datasourceUri = uri;
 		queryOne = q1;
 		queryTwo = q2;
@@ -84,6 +84,7 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	public Query getSourceQueryOne() {
 		return queryOne;
 	}
+
 	@Override
 	/**
 	 * Returns the second query involved in the assertion
@@ -91,15 +92,19 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	public Query getSourceQueryTwo() {
 		return queryTwo;
 	}
+
 	/**
-	 * Returns a list of terms associated to the first query involved in the assertion
+	 * Returns a list of terms associated to the first query involved in
+	 * the assertion
 	 */
 	@Override
 	public List<Term> getTermsOfQueryOne() {
 		return termsOfQueryOne;
 	}
+
 	/**
-	 * Returns a list of terms associated to the second query involved in the assertion
+	 * Returns a list of terms associated to the second query involved in
+	 * the assertion
 	 */
 	@Override
 	public List<Term> getTermsOfQueryTwo() {
@@ -107,7 +112,7 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	}
 
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 
 		String s = queryOne.toString() + queryTwo.toString();
 		Iterator<Term> it1 = termsOfQueryOne.iterator();
@@ -179,6 +184,4 @@ public class RDBMSInclusionDependency extends InclusionDependencyAssertion{
 	public String getMappingTwoId() {
 		return mappingTwoId;
 	}
-
-
 }

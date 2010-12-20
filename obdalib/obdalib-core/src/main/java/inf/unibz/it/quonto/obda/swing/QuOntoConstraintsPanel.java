@@ -6,9 +6,6 @@
 
 package inf.unibz.it.quonto.obda.swing;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNode;
@@ -26,7 +23,6 @@ import inf.unibz.it.quonto.obda.swing.treemodel.EQLConstraintControllerTreeModel
 import inf.unibz.it.quonto.obda.swing.treemodel.IDConstraintControllerTreeModel;
 import inf.unibz.it.utils.swing.TextMessageDialog;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;

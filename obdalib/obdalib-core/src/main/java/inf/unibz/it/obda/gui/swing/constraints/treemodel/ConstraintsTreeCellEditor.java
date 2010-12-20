@@ -11,13 +11,6 @@ import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.constraints.parser.ConstraintsRenderer;
-import inf.unibz.it.obda.dependencies.AbstractDependencyAssertion;
-import inf.unibz.it.obda.dependencies.controller.RDBMSDisjointnessDependencyController;
-import inf.unibz.it.obda.dependencies.controller.RDBMSFunctionalDependencyController;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
-import inf.unibz.it.obda.dependencies.parser.DependencyAssertionRenderer;
 import inf.unibz.it.obda.gui.swing.treemodel.AssertionTreeNode;
 
 import java.awt.Component;

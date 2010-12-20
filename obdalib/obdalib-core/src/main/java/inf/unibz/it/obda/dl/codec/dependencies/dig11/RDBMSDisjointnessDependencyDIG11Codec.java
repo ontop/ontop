@@ -23,7 +23,6 @@ AssertionDIG11Codec<RDBMSDisjointnessDependency> {
 
 	public RDBMSDisjointnessDependencyDIG11Codec() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	private static final String	TAG	= "RDBMSDisjointnessDependency";
@@ -62,7 +61,6 @@ AssertionDIG11Codec<RDBMSDisjointnessDependency> {
 		}
 
 		return DependencyAssertionRenderer.getInstance().createAndValidateRDBMSDisjointnessDependency(id1, id2, aux1, aux2);
-
 	}
 
 	@Override

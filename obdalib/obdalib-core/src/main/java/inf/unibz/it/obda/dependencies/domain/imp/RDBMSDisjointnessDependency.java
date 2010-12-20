@@ -14,13 +14,13 @@ import org.obda.query.domain.Term;
  * Class representing a disjointness dependency assertion for a
  * relational data base management system.
  *
- @author Manfred Gerstgrasser
+ * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 
-public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion{
+public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion {
 
 	public static final String DISJOINEDNESSASSERTION = "RDBMSDisjoinednessAssertion";
 
@@ -52,7 +52,6 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	 * The data source to which the assertions is associated
 	 */
 	private URI datasourceUri = null;
-
 
 	/**
 	 * Returns a new RDBMSDisjointnessDependency object
@@ -179,5 +178,4 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	public String getMappingTwoId() {
 		return mappingTwoId;
 	}
-
 }

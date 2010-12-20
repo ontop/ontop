@@ -1,7 +1,6 @@
 package inf.unibz.it.quonto.dl.codec;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.quonto.dl.assertion.IDConstraint;
 
 import java.util.ArrayList;

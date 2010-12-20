@@ -12,18 +12,11 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import inf.unibz.it.obda.codec.xml.query.XMLReader;
-import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 
 import java.util.Iterator;
 import java.util.Vector;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /***
  * Controller for the query manager

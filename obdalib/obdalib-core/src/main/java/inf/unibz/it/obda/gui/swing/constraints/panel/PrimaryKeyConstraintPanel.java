@@ -12,17 +12,12 @@
 package inf.unibz.it.obda.gui.swing.constraints.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.constraints.controller.RDBMSForeignKeyConstraintController;
 import inf.unibz.it.obda.constraints.controller.RDBMSPrimaryKeyConstraintController;
-import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
-import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.constraints.miner.AbstractAssertionMiner;
 import inf.unibz.it.obda.gui.swing.constraints.treemodel.ConstraintsTreeCellEditor;
 import inf.unibz.it.obda.gui.swing.constraints.treemodel.ConstraintsTreeCellRenderer;
-import inf.unibz.it.obda.gui.swing.constraints.treemodel.ForeignKeyConstraintTreeModel;
 import inf.unibz.it.obda.gui.swing.constraints.treemodel.PrimaryKeyConstraintTreeModel;
-import inf.unibz.it.obda.gui.swing.constraints.treemodel.UniquenessConstraintTreeModel;
 import inf.unibz.it.obda.gui.swing.dependencies.panel.ProgressMonitorDialog;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferenceChangeListener;

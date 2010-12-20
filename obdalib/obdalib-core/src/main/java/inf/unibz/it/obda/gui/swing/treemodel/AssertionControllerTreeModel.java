@@ -10,7 +10,6 @@ import java.util.Enumeration;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 public abstract class AssertionControllerTreeModel<AssertionClass extends Assertion> extends DefaultTreeModel implements
 		AssertionControllerListener<AssertionClass> {

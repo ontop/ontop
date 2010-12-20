@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.constraints.controller;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;

@@ -8,8 +8,8 @@ import java.net.URI;
 import java.net.URL;
 
 import org.obda.query.domain.Atom;
+import org.obda.query.domain.Predicate;
 import org.obda.query.domain.imp.ObjectVariableImpl;
-import org.obda.reformulation.domain.Predicate;
 
 
 /**

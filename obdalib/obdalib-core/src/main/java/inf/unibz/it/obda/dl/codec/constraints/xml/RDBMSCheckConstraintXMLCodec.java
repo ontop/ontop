@@ -22,6 +22,7 @@ import org.w3c.dom.NodeList;
 
 import com.sun.msv.datatype.xsd.StringType;
 import com.sun.msv.datatype.xsd.XSDatatype;
+
 public class RDBMSCheckConstraintXMLCodec extends AssertionXMLCodec<RDBMSCheckConstraint>{
 
 	public RDBMSCheckConstraintXMLCodec() {

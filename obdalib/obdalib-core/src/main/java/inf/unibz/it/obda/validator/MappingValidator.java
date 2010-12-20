@@ -14,7 +14,6 @@
 package inf.unibz.it.obda.validator;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.TargetQuery;
 
 import java.util.Enumeration;
 

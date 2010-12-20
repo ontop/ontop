@@ -13,9 +13,9 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import java.net.URI;
-
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+
+import java.net.URI;
 
 
 public interface MappingControllerListener {

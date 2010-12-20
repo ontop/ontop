@@ -23,7 +23,6 @@ import java.util.List;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-
 import org.obda.query.domain.Term;
 
 public class ConstraintsRenderer {

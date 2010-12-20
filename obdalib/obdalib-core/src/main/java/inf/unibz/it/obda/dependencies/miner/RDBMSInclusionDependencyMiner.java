@@ -25,7 +25,6 @@ import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.ObjectVariableImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
-
 /**
  * This Class is mining for inclusion dependencies for the given mappings.
  * Note: For now it is done based only on the data in the data source

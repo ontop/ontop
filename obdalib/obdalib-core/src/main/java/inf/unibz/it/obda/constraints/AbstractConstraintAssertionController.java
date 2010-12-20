@@ -1,7 +1,6 @@
 package inf.unibz.it.obda.constraints;
 
 import inf.unibz.it.dl.assertion.Assertion;
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 

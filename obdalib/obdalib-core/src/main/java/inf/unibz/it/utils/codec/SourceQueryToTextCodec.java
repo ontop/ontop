@@ -12,7 +12,6 @@ import org.obda.query.domain.Query;
  * @author obda
  *
  */
-
 public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 
 	/**
@@ -45,6 +44,4 @@ public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 
 		return input.toString();
 	}
-
-
 }

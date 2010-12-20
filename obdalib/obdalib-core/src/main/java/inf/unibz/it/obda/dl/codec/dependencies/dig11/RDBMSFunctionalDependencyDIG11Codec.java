@@ -16,7 +16,7 @@ import org.obda.query.domain.imp.TermFactoryImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class RDBMSFunctionalDependencyDIG11Codec  extends AssertionDIG11Codec<RDBMSFunctionalDependency> {
+public class RDBMSFunctionalDependencyDIG11Codec extends AssertionDIG11Codec<RDBMSFunctionalDependency> {
 
 	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
 

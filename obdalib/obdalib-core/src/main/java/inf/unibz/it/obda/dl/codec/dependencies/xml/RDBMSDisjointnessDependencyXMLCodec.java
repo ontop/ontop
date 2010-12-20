@@ -21,16 +21,15 @@ import org.w3c.dom.NodeList;
  *
  * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
-
 public class RDBMSDisjointnessDependencyXMLCodec extends AssertionXMLCodec<RDBMSDisjointnessDependency> {
 
 	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
 
 	public RDBMSDisjointnessDependencyXMLCodec() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -77,7 +76,6 @@ public class RDBMSDisjointnessDependencyXMLCodec extends AssertionXMLCodec<RDBMS
 		}
 
 		return DependencyAssertionRenderer.getInstance().createAndValidateRDBMSDisjointnessDependency(id1, id2, aux1, aux2);
-
 	}
 
 	/**

@@ -2,7 +2,6 @@ package inf.unibz.it.obda.dependencies.controller;
 
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.domain.DataSource;
 

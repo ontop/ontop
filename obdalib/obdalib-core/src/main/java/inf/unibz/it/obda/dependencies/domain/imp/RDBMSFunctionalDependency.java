@@ -14,10 +14,10 @@ import org.obda.query.domain.Term;
  * Class representing a functional dependency assertion for a
  * relational data base management system.
  *
- @author Manfred Gerstgrasser
+ * @author Manfred Gerstgrasser
  * 		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
- *
- *
+ * @author Josef Hardi <josef.hardi@unibz.it>
+ *		   KRDB Research Center, Free University of Bolzano/Bozen, Italy
  */
 
 public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
@@ -33,11 +33,13 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	 */
 	private RDBMSSQLQuery queryTwo = null;
 	/**
-	 * A list of terms associated to the first query involved in this disjointness dependency assertion
+	 * A list of terms associated to the first query involved in this
+	 * disjointness dependency assertion
 	 */
 	private List<Term> termsOfQueryOne = null;
 	/**
-	 * A list of terms associated to the second query involved in this disjointness dependency assertion
+	 * A list of terms associated to the second query involved in this
+	 * disjointness dependency assertion
 	 */
 	private List<Term> termsOfQueryTwo = null;
 	/**
@@ -64,9 +66,9 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	 * @param terms1	list of terms associated to the first query
 	 * @param terms2	list of terms associated to the second query
 	 */
-	public RDBMSFunctionalDependency(URI uri,String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,
-			List<Term> terms1, List<Term> terms2){
-
+	public RDBMSFunctionalDependency(URI uri,String id1, String id2,
+			RDBMSSQLQuery q1, RDBMSSQLQuery q2,
+			List<Term> terms1, List<Term> terms2) {
 		datasourceUri = uri;
 		queryOne = q1;
 		queryTwo = q2;
@@ -75,7 +77,6 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 		mappingOneId = id1;
 		mappingTwoId = id2;
 	}
-
 
 	/**
 	 * Returns the first query involved in the assertion
@@ -92,14 +93,16 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 		return queryTwo;
 	}
 	/**
-	 * Returns a list of terms associated to the first query involved in the assertion
+	 * Returns a list of terms associated to the first query involved in
+	 * the assertion
 	 */
 	@Override
 	public List<Term> getTermsOfQueryOne() {
 		return termsOfQueryOne;
 	}
 	/**
-	 * Returns a list of terms associated to the second query involved in the assertion
+	 * Returns a list of terms associated to the second query involved in
+	 * the assertion
 	 */
 	@Override
 	public List<Term> getTermsOfQueryTwo() {
@@ -107,7 +110,7 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	}
 
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 
 		String s = queryOne.toString() + queryTwo.toString();
 		Iterator<Term> it1 = termsOfQueryOne.iterator();
@@ -128,7 +131,7 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 	}
 
 	@Override
-	public boolean equals(Object o){
+	public boolean equals(Object o) {
 		if(o instanceof RDBMSFunctionalDependency){
 			return o.toString().equals(this.toString());
 		}else {
@@ -172,15 +175,11 @@ public class RDBMSFunctionalDependency extends FunctionalDependencyAssertion {
 		return datasourceUri;
 	}
 
-
 	public String getMappingOneId() {
 		return mappingOneId;
 	}
 
-
 	public String getMappingTwoId() {
 		return mappingTwoId;
 	}
-
-
 }

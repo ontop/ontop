@@ -9,8 +9,7 @@ import java.util.List;
 import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
 
-public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint{
-
+public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 
 	public static final String RDBMSFOREIGNKEYCONSTRAINT = "RDBMSForeignKeyConstraint";
 
@@ -42,7 +41,6 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint{
 	 * The data source to which the assertions is associated
 	 */
 	private final String datasourceUri = null;
-
 
 	public RDBMSForeignKeyConstraint(String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,List<Term> l1, List<Term> l2){
 		mappingID1 = id1;

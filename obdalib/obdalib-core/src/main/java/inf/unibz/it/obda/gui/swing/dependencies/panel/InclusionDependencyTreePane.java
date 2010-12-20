@@ -503,5 +503,4 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
 		model.reload();
 	}
-
 }

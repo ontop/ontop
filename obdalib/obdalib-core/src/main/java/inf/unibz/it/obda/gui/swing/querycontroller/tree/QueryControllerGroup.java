@@ -4,8 +4,6 @@ import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 
 import java.util.Vector;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 public class QueryControllerGroup extends QueryControllerEntity {
 
 	

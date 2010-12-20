@@ -15,11 +15,11 @@ import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
 public class RDBMSPrimaryKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSPrimaryKeyConstraint>{
 
 	public RDBMSPrimaryKeyConstraintXMLCodec() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	private static final String	TAG	= "RDBMSPrimaryKeyConstraint";

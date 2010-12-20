@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.codec.xml;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.utils.codec.ObjectXMLCodec;
@@ -8,11 +7,8 @@ import inf.unibz.it.utils.codec.ObjectXMLCodec;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 
 public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 
