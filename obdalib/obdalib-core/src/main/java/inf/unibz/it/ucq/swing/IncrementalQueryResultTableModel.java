@@ -65,8 +65,8 @@ public class IncrementalQueryResultTableModel implements TableModel{
 				}
 				resultsTable.add(crow);
 				i += 1;
-			}else{
-				System.out.println("is after last");
+			}
+			else {
 				isAfterLast = true;
 			}
 
@@ -196,8 +196,8 @@ public class IncrementalQueryResultTableModel implements TableModel{
 				}
 				resultsTable.add(crow);
 				i += 1;
-			}else{
-				System.out.println("is after last!");
+			}
+			else {
 				isAfterLast = true;
 			}
 

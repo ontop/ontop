@@ -94,8 +94,7 @@ public class DataManager {
 
 	protected Element root;
 
-	Logger																log								= LoggerFactory
-																												.getLogger(DataManager.class);
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public DataManager(APIController apic, PrefixManager pref) {
 		this.apic = apic;
@@ -174,7 +173,7 @@ public class DataManager {
 			try {
 				FileUtils.copy(tempFile.toString(), obdaFileURI.toString());
 			} catch (IOException e) {
-				System.err.println("WARNING: error while copying temp file.");
+				log.error("Error while copying the temporary file.");
 			}
 			tempFile.delete();
 		}
@@ -330,7 +329,7 @@ public class DataManager {
 	public void loadOBDADataFromURI(URI obdaFileURI) {
 		File obdaFile = new File(obdaFileURI);
 		if (obdaFile == null) {
-			System.err.println("OBDAPluging. OBDA file not found.");
+			log.error("OBDA file not found.");
 			return;
 		}
 
@@ -354,8 +353,7 @@ public class DataManager {
 
 		Element root = doc.getDocumentElement(); // OBDA
 		if (root.getNodeName() != "OBDA") {
-			System.err.println("WARNING: obda info file should start with " +
-			    "tag <OBDA>");
+			log.error("OBDA info file should start with <OBDA> tag");
 			return;
 		}
 

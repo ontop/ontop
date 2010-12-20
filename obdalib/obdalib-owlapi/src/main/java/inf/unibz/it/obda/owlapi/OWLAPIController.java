@@ -38,6 +38,8 @@ import org.semanticweb.owl.model.OWLOntologyChangeException;
 import org.semanticweb.owl.model.OWLOntologyChangeListener;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.RemoveAxiom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -48,8 +50,10 @@ public class OWLAPIController extends APIController {
 	OWLOntology			currentOntology				= null;
 	URI					currentOntologyPhysicalURI	= null;
 	OWLOntologyManager	mmger						= null;
-	private OWLOntology	root;
+	private final OWLOntology	root;
 	private PrefixManager prefixmanager = null;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public OWLAPIController(OWLOntologyManager owlman, OWLOntology root) {
 		super();
@@ -66,7 +70,7 @@ public class OWLAPIController extends APIController {
 		setCurrentOntologyURI(root.getURI());
 		setCoupler(apicoupler);
 		try {
-			setCurrentOntologyURI(root.getURI());	
+			setCurrentOntologyURI(root.getURI());
 			RDBMSForeignKeyConstraintController fkc = new RDBMSForeignKeyConstraintController();
 			addAssertionController(RDBMSForeignKeyConstraint.class, fkc, new RDBMSForeignKeyConstraintXMLCodec());
 			dscontroller.addDatasourceControllerListener(fkc);
@@ -82,7 +86,7 @@ public class OWLAPIController extends APIController {
 			RDBMSUniquenessConstraintController uqc = new RDBMSUniquenessConstraintController();
 			addAssertionController(RDBMSUniquenessConstraint.class, uqc, new RDBMSUniquenessConstraintXMLCodec());
 			dscontroller.addDatasourceControllerListener(uqc);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -93,24 +97,24 @@ public class OWLAPIController extends APIController {
 	public void setCurrentOntologyURI(URI uri) {
 		this.currentOntology = mmger.getOntology(uri);
 		super.setCurrentOntologyURI(uri);
-		
+
 	}
-	
+
 	@Override
 	public File getCurrentOntologyFile() {
 		currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
 
 		if (currentOntologyPhysicalURI == null)
 			return null;
-		
+
 		File owlfile = new File(currentOntologyPhysicalURI);
 		return owlfile;
-		
+
 //		File obdafile = new File(ioManager.getOBDAFile(owlfile.toURI()));
 //		return obdafile;
 	}
 
-	private OWLAPICoupler	apicoupler;
+	private final OWLAPICoupler	apicoupler;
 	private boolean			loadingData;
 
 	private void triggerOntologyChanged() {
@@ -140,17 +144,17 @@ public class OWLAPIController extends APIController {
 
 	public boolean loadData(URI owlFile) {
 		loadingData = true;
-		
+
 		File obdaFile = new File(getIOManager().getOBDAFile(owlFile));
 		if (obdaFile == null) {
-			System.err.println("OBDAPluging. OBDA file not found.");
+			log.error("OBDA file not found.");
 			return false;
 		}
 		if (!obdaFile.exists()) {
 			return false;
 		}
 		if (!obdaFile.canRead()) {
-			System.err.print("WARNING: can't read the OBDA file:" + obdaFile.toString());
+			log.error("Cannot read the OBDA file:" + obdaFile.toString());
 		}
 		Document doc = null;
 		try {
@@ -167,7 +171,7 @@ public class OWLAPIController extends APIController {
 
 		Element root = doc.getDocumentElement(); // OBDA
 		if (root.getNodeName() != "OBDA") {
-			System.err.println("WARNING: obda info file should start with tag <OBDA>");
+			log.error("The OBDA info file should start with <OBDA> tag!");
 			return false;
 		}
 		NamedNodeMap att = root.getAttributes();
@@ -197,7 +201,7 @@ public class OWLAPIController extends APIController {
 			prefixmanager.addUri(URI.create(ontoUrl),"xml:base");
 			prefixmanager.addUri(URI.create(ontoUrl),"xmlns");
 			prefixmanager.addUri(URI.create(ontoUrl+"#"),ontoName);
-		}		
+		}
 		try {
 			URI obdafile = getIOManager().getOBDAFile(owlFile);
 			getIOManager().loadOBDADataFromURI(obdafile);
@@ -233,6 +237,7 @@ public class OWLAPIController extends APIController {
 
 
 
+	@Override
 	public URI getPhysicalURIOfOntology(URI onto) {
 		// TODO Auto-generated method stub
 		return null;

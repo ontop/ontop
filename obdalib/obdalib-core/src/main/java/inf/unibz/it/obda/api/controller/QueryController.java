@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -18,6 +18,9 @@ import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /***
  * Controller for the query manager
  */
@@ -26,6 +29,9 @@ public class QueryController {
 	private Vector<QueryControllerEntity>	collection		= null;
 	private Vector<QueryControllerListener>	listeners		= null;
 	private boolean							eventDisabled	= false;
+
+	/** The logger */
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public QueryController() {
 		collection = new Vector<QueryControllerEntity>();
@@ -50,8 +56,9 @@ public class QueryController {
 			QueryControllerGroup group = new QueryControllerGroup(group_name);
 			collection.add(group);
 			fireElementAdded(group);
-		} else {
-			System.out.println("Group already exists!");
+		}
+		else {
+			log.info("Group already exists!");
 		}
 	}
 
@@ -65,7 +72,7 @@ public class QueryController {
 				continue;
 			QueryControllerGroup element = (QueryControllerGroup) temporal;
 			if (element instanceof QueryControllerGroup) {
-				QueryControllerGroup group = (QueryControllerGroup) element;
+				QueryControllerGroup group = element;
 				if (group.getID().equals(group_name)) {
 					collection.remove(group);
 					fireElementRemoved(group);
@@ -85,8 +92,9 @@ public class QueryController {
 			query.setQuery(querystr);
 			collection.add(query);
 			fireElementAdded(query);
-		} else {
-			System.out.println("Query already exists!");
+		}
+		else {
+			log.info("Query already exists!");
 		}
 		return query;
 	}
@@ -114,8 +122,9 @@ public class QueryController {
 			QueryControllerGroup group = getGroup(groupid);
 			group.addQuery(query);
 			fireElementAdded(query, group);
-		} else {
-			System.out.println("Query already exists!");
+		}
+		else {
+			log.info("Query already exists!");
 		}
 		return query;
 	}
@@ -125,7 +134,7 @@ public class QueryController {
 	 */
 	public void removeQuery(String id) {
 		int index = getElementPosition(id);
-		QueryControllerEntity element = (QueryControllerEntity) collection.get(index);
+		QueryControllerEntity element = collection.get(index);
 
 		if (element instanceof QueryControllerQuery) {
 			collection.remove(index);
@@ -158,14 +167,14 @@ public class QueryController {
 	 * Returns the index of the element in the vector. If its is a query and the
 	 * query is found inside a query group. The position of the group is
 	 * returned instead.
-	 * 
+	 *
 	 * @param element_id
 	 * @return
 	 */
 	public int getElementPosition(String element_id) {
 		int index = -1;
 		for (int i = 0; i < collection.size(); i++) {
-			QueryControllerEntity element = (QueryControllerEntity) collection.get(i);
+			QueryControllerEntity element = collection.get(i);
 
 			if (element instanceof QueryControllerQuery) {
 				QueryControllerQuery query = (QueryControllerQuery) element;

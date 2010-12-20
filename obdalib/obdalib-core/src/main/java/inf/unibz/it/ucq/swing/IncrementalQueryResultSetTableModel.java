@@ -16,7 +16,6 @@ import org.obda.query.domain.Constant;
 
 public class IncrementalQueryResultSetTableModel implements TableModel{
 
-
 	QueryResultSet		results;
 	int		numcols, numrows, fetchsize;
 
@@ -54,8 +53,8 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 					}
 					resultsTable.add(crow);
 					i += 1;
-				}else{
-					System.out.println("is after last");
+				}
+				else {
 					isAfterLast = true;
 				}
 
@@ -185,8 +184,8 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 					}
 					resultsTable.add(crow);
 					i += 1;
-				}else{
-					System.out.println("is after last!");
+				}
+				else {
 					isAfterLast = true;
 				}
 

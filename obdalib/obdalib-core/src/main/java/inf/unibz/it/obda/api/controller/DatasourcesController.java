@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -23,17 +23,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 public class DatasourcesController implements OntologyControllerListener {
 
-	private DatasourceXMLCodec							codec				= new DatasourceXMLCodec();
+	private final DatasourceXMLCodec							codec				= new DatasourceXMLCodec();
 
 	private HashMap<URI, DataSource>					datasources			= null;
 
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
 
 	private DataSource									currentdatasource	= null;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public DatasourcesController() {
 		datasources = new HashMap<URI, DataSource>();
@@ -81,13 +85,13 @@ public class DatasourcesController implements OntologyControllerListener {
 			listener.datasourceDeleted(source);
 		}
 	}
-	
+
 	public void fireParametersUpdated(){
 		for (DatasourcesControllerListener listener : listeners) {
 			listener.datasourcParametersUpdated();
 		}
 	}
-	
+
 	public void fireDataSourceNameUpdated(URI old, DataSource neu){
 		for (DatasourcesControllerListener listener : listeners) {
 			listener.datasourceUpdated(old.toString(), neu);
@@ -100,7 +104,7 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	/***
 	 * Gets all sources for Ontology
-	 * 
+	 *
 	 * @param ontologyURI
 	 * @return
 	 */
@@ -108,7 +112,7 @@ public class DatasourcesController implements OntologyControllerListener {
 		HashSet<DataSource> ontoSources = new HashSet<DataSource>();
 		Collection<DataSource> allSources = datasources.values();
 		for (Iterator<DataSource> iterator = allSources.iterator(); iterator.hasNext();) {
-			DataSource dataSource = (DataSource) iterator.next();
+			DataSource dataSource = iterator.next();
 			if (dataSource.getSourceID().equals(ontologyURI.toString())) {
 				ontoSources.add(dataSource);
 			}
@@ -123,13 +127,13 @@ public class DatasourcesController implements OntologyControllerListener {
 	}
 
 	public synchronized DataSource getDataSource(URI name) {
-		
+
 		return datasources.get(name);
 	}
 
 	/***
 	 * Use a DatasourceXML codec instead
-	 * 
+	 *
 	 * @param sourceelement
 	 */
 	@Deprecated
@@ -141,7 +145,7 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	/***
 	 * Use a DatasourceXMLCodec instead
-	 * 
+	 *
 	 * @param strsources
 	 * @throws Exception
 	 */
@@ -150,7 +154,7 @@ public class DatasourcesController implements OntologyControllerListener {
 		try {
 			datasources = DataSource.decodeDataSources(strsources);
 		} catch (Exception e) {
-			System.err.println("WARNING: Error parsing datasources");
+			log.error("Error while parsing the data source");
 			throw e;
 		}
 	}
@@ -165,7 +169,7 @@ public class DatasourcesController implements OntologyControllerListener {
 	}
 
 	public synchronized void removeDataSource(URI id) {
-		
+
 		DataSource source = getDataSource(id);
 		datasources.remove(id);
 		fireDatasourceDeleted(source);

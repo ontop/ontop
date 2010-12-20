@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -35,6 +35,9 @@ import java.util.Vector;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class APIController {
 
@@ -51,26 +54,28 @@ public abstract class APIController {
 	private HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>		assertionXMLCodecs		= null;
 
 	protected DataManager												ioManager				= null;
-	
+
 	protected DatasourcesController dscontroller = null;
-	
+
 	protected MappingController mapcontroller = null;
-	
+
 	protected QueryController queryController = null;
-	
+
 	//renders the Dependency assertions from the obda file
 	private DependencyAssertionRenderer dependencyRenderer = null;
 	private ConstraintsRenderer constraintsRenderer = null;
-	
-	
+
+
 	// the entity name renderer provides the name any entity which belongs to a loaded ontology.
 	protected EntityNameRenderer nameRenderer = null;
-	
+
 	// a set of all currently loaded ontotlogies
 	protected HashSet<String> loadedOntologies = null;
 
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
 	public APIController() {
-		
+
 		dscontroller = new DatasourcesController();
 		mapcontroller = new MappingController(dscontroller, this);
 		queryController = new QueryController();
@@ -78,25 +83,25 @@ public abstract class APIController {
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 		loadedOntologies = new HashSet<String>();
 		ioManager = new DataManager(this, new PrefixManager());
-		
+
 		dependencyRenderer = new DependencyAssertionRenderer(this);
 		constraintsRenderer = new ConstraintsRenderer(this);
 	}
-	
+
 	public QueryController getQueryController() {
 		return queryController;
 	}
-	
+
 	public DatasourcesController getDatasourcesController() {
 		return dscontroller;
 	}
-	
+
 	public MappingController getMappingController() {
 		return mapcontroller;
 	}
 
 	public AssertionController<?> getController(Class<?> assertionClass) {
-		return (AssertionController<?>) assertionControllers.get(assertionClass);
+		return assertionControllers.get(assertionClass);
 	}
 
 	/***************************************************************************
@@ -104,7 +109,7 @@ public abstract class APIController {
 	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
 	 * operations over it. For example, checking wether a named object is a
 	 * Property or Concepts, etc.
-	 * 
+	 *
 	 * @param coupler
 	 */
 	public void setCoupler(APICoupler coupler) {
@@ -118,7 +123,7 @@ public abstract class APIController {
 	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
 	 * operations over it. For example, checking if a named object is a Property
 	 * or Concepts, etc.
-	 * 
+	 *
 	 * @param coupler
 	 */
 	public APICoupler getCoupler() {
@@ -132,7 +137,7 @@ public abstract class APIController {
 	/***************************************************************************
 	 * Registers a new assertion controller. These are used during
 	 * saving/loading
-	 * 
+	 *
 	 * @param controller
 	 */
 	public <T extends Assertion> void addAssertionController(Class<T> assertionClass, AssertionController<T> controller,
@@ -147,7 +152,7 @@ public abstract class APIController {
 	/***************************************************************************
 	 * Removes the assertion controller which is currently linked to the given
 	 * assertionClass
-	 * 
+	 *
 	 * @param assertionClass
 	 */
 	public void removeAssertionController(Class assertionClass) {
@@ -155,8 +160,8 @@ public abstract class APIController {
 		assertionXMLCodecs.remove(assertionClass);
 		ioManager.removeAssertionController(assertionClass);
 	}
-	
-	
+
+
 
 	public void addOntologyControllerListener(OntologyControllerListener listener) {
 		getOntologyControllerListeners().add(listener);
@@ -172,7 +177,7 @@ public abstract class APIController {
 	/***
 	 * Sets the current ontology URI and loads all .obda data for the current
 	 * obda file.
-	 * 
+	 *
 	 * @param uri
 	 */
 	public void setCurrentOntologyURI(URI uri) {
@@ -192,7 +197,7 @@ public abstract class APIController {
 
 //		ioManager.loadOBDADataFromFile(ioManager.getOBDAFile(getCurrentOntologyFile()));
 		mapcontroller.activeOntologyChanged();
-		
+
 	}
 
 	public URI getCurrentOntologyURI() {
@@ -210,7 +215,7 @@ public abstract class APIController {
 	// }
 
 	public abstract URI getPhysicalURIOfOntology(URI onto);
-	
+
 	public abstract File getCurrentOntologyFile();
 
 	public String getVersion() {
@@ -248,15 +253,15 @@ public abstract class APIController {
 			return "";
 		}
 	}
-	
+
 	/***
 	 * Gets the set of URI's for the currently loaded ontologies, i.e., ontologies
 	 * for which mappings have been loaded.
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract Set<URI> getOntologyURIs();
-	
+
 	/**
 	 * Returns the current entity name renderer
 	 * @return the current entity name renderer
@@ -266,21 +271,21 @@ public abstract class APIController {
 	}
 
 	/**
-	 * Adds the given ontology uri to the set of already 
+	 * Adds the given ontology uri to the set of already
 	 * loaded ontologies uri's.
-	 * 
+	 *
 	 * @param ontoUri
 	 */
-	
+
 	public void markAsLoaded(URI ontoUri){
 		loadedOntologies.add(ontoUri.toString());
 	}
-	
-	
+
+
 	/**
 	 * Removes the ontolgy identified by the given URI from the set of all
 	 * currently loaded ontologies and all other objects (data sources, mappings, etc)
-	 * 
+	 *
 	 * @param ontoUri the URI of the ontology to remove
 	 */
 	public void unloaded(URI ontoUri){
@@ -299,12 +304,12 @@ public abstract class APIController {
 			}
 		}
 		if(!controlle){
-			System.err.println("ERROR: NO data source deleted after an ontology was deleted");
+			log.error("ERROR: NO data source deleted after an ontology was deleted");
 		}
 		Iterator<URI> it2 = dstoDelete.iterator();
 		while(it2.hasNext()){
 			dscontroller.removeDataSource(it2.next());
-		}		
+		}
 		couplerInstance.removeOntology(ontoUri);
 	}
 }

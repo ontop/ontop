@@ -14,6 +14,8 @@ import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.ObjectVariableImpl;
 import org.obda.query.domain.imp.ValueConstantImpl;
 import org.obda.query.domain.imp.VariableImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -30,6 +32,9 @@ public class OBDADIGCodec {
 	public static final String	TELLS_MAPPING_ENABLED			= "enabled";
 
 	private static APIController apic = null;
+
+	private static final Logger log =
+		LoggerFactory.getLogger("inf.unibz.it.obda.rdbmsgav.codec.dig11.OBDADIGCodec");
 
 	public static Element getDIG(OBDAMappingAxiom mapping, String datasource_uri, Document parentdoc, APIController apic) {
 		Element dig_mapping = null;
@@ -82,8 +87,9 @@ public class OBDADIGCodec {
 				Element dig_atom = getDIG(atom, parentdoc, apic);
 				if (dig_atom != null) {
 					intersection.appendChild(dig_atom);
-				} else {
-					System.out.println("Atom null while trying to render it");
+				}
+				else {
+					log.info("Atom null while trying to render it");
 				}
 			}
 			// building the head with all variables selected
@@ -131,9 +137,9 @@ public class OBDADIGCodec {
 				Element dig_term = getDIG(current_term, parentdoc);
 				if (atom != null) {
 					role_query_atom.appendChild(dig_term);
-				} else {
-					//TODO replace this for proper logging
-					System.out.println("Atom null while trying to render it");
+				}
+				else {
+					log.info("Atom null while trying to render it");
 				}
 			}
 			Element role_element = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_RATOM);

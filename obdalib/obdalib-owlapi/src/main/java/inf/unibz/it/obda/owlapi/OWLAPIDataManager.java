@@ -31,6 +31,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -61,6 +63,9 @@ public class OWLAPIDataManager extends DataManager {
 		prefixMap = new HashMap<String, String>();
 	}
 
+	/** The logger */
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
 	/**
 	 * Load the given obda file. In contrast to the original it looks whether the obda
 	 * file defines some prefixes. If so they are loaded into the prefix mapper.
@@ -70,14 +75,14 @@ public class OWLAPIDataManager extends DataManager {
 
 		File obdaFile = new File(obdaFileURI);
 		if (obdaFile == null) {
-			System.err.println("OBDAPluging. OBDA file not found.");
+			log.error("The OBDA file is not found!");
 			return;
 		}
 		if (!obdaFile.exists()) {
 			return;
 		}
 		if (!obdaFile.canRead()) {
-			System.err.print("WARNING: can't read the OBDA file:" + obdaFile.toString());
+			log.error("Cannot read the OBDA file:" + obdaFile.toString());
 		}
 		Document doc = null;
 		try {
@@ -93,7 +98,7 @@ public class OWLAPIDataManager extends DataManager {
 
 		Element root = doc.getDocumentElement(); // OBDA
 		if (root.getNodeName() != "OBDA") {
-			System.err.println("WARNING: obda info file should start with tag <OBDA>");
+			log.error("The OBDA info file should start with <OBDA> tag!");
 			return;
 		}
 		NamedNodeMap att = root.getAttributes();
@@ -161,7 +166,7 @@ public class OWLAPIDataManager extends DataManager {
 			try {
 				FileUtils.copy(tempFile.toString(), obdaFileURI.toString());
 			} catch (IOException e) {
-				System.err.println("WARNING: error while copying temp file.");
+				log.error("Error occurred while copying the temporary file.");
 			}
 			tempFile.delete();
 		}
