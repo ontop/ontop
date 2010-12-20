@@ -20,17 +20,17 @@ import org.semanticweb.owl.util.OWLOntologyImportsClosureSetProvider;
 import org.semanticweb.owl.util.OWLOntologyMerger;
 
 /***
- * 
+ *
  * Interacts with OWLAPI objects to inspect the original ontology. Note that
  * this coupler only works fine if the active ontology is setup properly so that
  * the EntityFinder finds the classes.
- * 
+ *
  * TODO Needs to be refactored to handle URI's properly. In general, the whole
  * OBDA API needs to be refactored like this.
- * 
- * 
+ *
+ *
  * @author Mariano Rodriguez Muro
- * 
+ *
  */
 public class OWLAPICoupler implements APICoupler {
 
@@ -39,10 +39,10 @@ public class OWLAPICoupler implements APICoupler {
 	private APIController	apic;
 
 	// private OWLModelManager mmgr;
-	
+
 	private OWLOntologyManager mmgr = null;
-	
-	private OWLOntology merged = null;
+
+	private final OWLOntology merged = null;
 
 	private OWLOntology	mergedOntology;
 
@@ -51,7 +51,7 @@ public class OWLAPICoupler implements APICoupler {
 	private HashSet<String>	classesURIs;
 
 	private HashSet<String>	objectProperties;
-	
+
 	private OWLAPIDataManager datamanager =null;
 
 	public OWLAPICoupler(APIController apic, OWLOntologyManager mmgr, OWLOntology root, OWLAPIDataManager iomanager) {
@@ -59,7 +59,7 @@ public class OWLAPICoupler implements APICoupler {
 		this.apic = apic;
 		this.mmgr = mmgr;
 		this.datamanager = iomanager;
-		
+
 		OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologyImportsClosureSetProvider(mmgr, root));
 		try {
 			mergedOntology = merger.createMergedOntology(mmgr, root.getURI());
@@ -70,12 +70,12 @@ public class OWLAPICoupler implements APICoupler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
+
 		classesURIs = new HashSet<String>();
 		dataProperties = new HashSet<String>();
 		objectProperties = new HashSet<String>();
-		
+
 		Set<OWLClass> set = mergedOntology.getReferencedClasses();
 		Iterator<OWLClass> it = set.iterator();
 		while(it.hasNext()){
@@ -90,7 +90,7 @@ public class OWLAPICoupler implements APICoupler {
 		for (OWLObjectProperty c: mergedOntology.getReferencedObjectProperties()) {
 			objectProperties.add(c.getURI().toString());
 		}
-		
+
 	}
 
 	public boolean isDatatypeProperty(URI ontouri,URI propertyURI) {
@@ -108,14 +108,14 @@ public class OWLAPICoupler implements APICoupler {
 	public OWLOntologyManager getOWLOntologyManager(){
 		return mmgr;
 	}
-	
+
 	public void synchWithOntology(OWLOntology root){
 		mergedOntology = root;
-		
+
 		classesURIs = new HashSet<String>();
 		dataProperties = new HashSet<String>();
 		objectProperties = new HashSet<String>();
-		
+
 		Set<OWLClass> set = mergedOntology.getReferencedClasses();
 		Iterator<OWLClass> it = set.iterator();
 		while(it.hasNext()){
@@ -131,8 +131,8 @@ public class OWLAPICoupler implements APICoupler {
 
 	@Override
 	public String getPrefixForUri(URI uri) {
-		
-		Map<String, String> map = datamanager.getPrefixMap();
+
+		Map<String, URI> map = datamanager.getPrefixMap();
 		String uristring = uri.toString();
 		String base = "";
 		if(uristring.contains("#")){
@@ -145,7 +145,7 @@ public class OWLAPICoupler implements APICoupler {
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
 			String key = sit.next();
-			String value = map.get(key);
+			String value = map.get(key).toString();
 			if(value.equals(base)){
 				return key;
 			}
@@ -158,14 +158,14 @@ public class OWLAPICoupler implements APICoupler {
 		if(prefix.equals("")){
 			return apic.getCurrentOntologyURI().toString();
 		}else{
-			return datamanager.getPrefixMap().get(prefix);
+			return datamanager.getPrefixMap().get(prefix).toString();
 		}
-		
+
 	}
 
 	@Override
 	public void removeOntology(URI ontouri) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

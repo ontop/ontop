@@ -50,9 +50,9 @@ import org.w3c.dom.Node;
 public class OWLAPIDataManager extends DataManager {
 
 	/**
-	 * a map containing for each prefix the corresponding ontology URI
+	 * the current api controller
 	 */
-	private Map<String,String> prefixMap = null;
+	private APIController apic = null;
 
 	/**
 	 * The constructor. Creates a new instance of the OBDAPluginDataManager
@@ -60,7 +60,7 @@ public class OWLAPIDataManager extends DataManager {
 	 */
 	public OWLAPIDataManager(APIController apic, PrefixManager man) {
 		super(apic, man);
-		prefixMap = new HashMap<String, String>();
+		this.apic = apic;
 	}
 
 	/** The logger */
@@ -106,19 +106,18 @@ public class OWLAPIDataManager extends DataManager {
 			Node n = att.item(i);
 			String name = n.getNodeName();
 			String value = n.getNodeValue();
-			if(name.endsWith("xml:base")){
-				prefixMap.put("base", value);
+			if(name.equals("xml:base")){
+				prefixManager.addUri(URI.create(value), name);
 			}else if (name.equals("version")){
-				prefixMap.put(name, value);
+				prefixManager.addUri(URI.create(value), name);
 			}else if (name.equals("xmlns")){
-				prefixMap.put(name, value);
+				prefixManager.addUri(URI.create(value), name);
 			}else if (value.endsWith(".owl#")){
 				String[] aux = name.split(":");
-				prefixMap.put(aux[1], value);
-			}
-			if(name.startsWith("xmlns:") && !value.startsWith(".owl#")){
+				prefixManager.addUri(URI.create(value), aux[1]);
+			}else if(name.startsWith("xmlns:")){
 				String[] aux = name.split(":");
-				prefixMap.put(aux[1], value);
+				prefixManager.addUri(URI.create(value), aux[1]);
 			}
 		}
 
@@ -182,11 +181,11 @@ public class OWLAPIDataManager extends DataManager {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
 		root = doc.createElement("OBDA");
-		Set<String> set = prefixMap.keySet();
+		Set<String> set = prefixManager.getPrefixMap().keySet();
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
 			String key = sit.next();
-			root.setAttribute(key, prefixMap.get(key));
+			root.setAttribute(key, prefixManager.getPrefixMap().get(key).toString());
 		}
 		doc.appendChild(root);
 
@@ -267,7 +266,7 @@ public class OWLAPIDataManager extends DataManager {
 	 * Returns the Map containing for each prefix the corresponding onotlogy URI
 	 * @return the prefix map
 	 */
-	public Map<String,String> getPrefixMap(){
-		return prefixMap;
+	public Map<String, URI> getPrefixMap(){
+		return prefixManager.getPrefixMap();
 	}
 }
