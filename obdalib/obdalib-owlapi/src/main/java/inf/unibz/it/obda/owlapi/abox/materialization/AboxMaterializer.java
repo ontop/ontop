@@ -6,12 +6,6 @@ import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
-import inf.unibz.it.ucq.domain.BinaryQueryAtom;
-import inf.unibz.it.ucq.domain.ConceptQueryAtom;
-import inf.unibz.it.ucq.domain.ConjunctiveQuery;
-import inf.unibz.it.ucq.domain.FunctionTerm;
-import inf.unibz.it.ucq.domain.QueryAtom;
-import inf.unibz.it.ucq.domain.QueryTerm;
 
 import java.io.File;
 import java.net.URI;
@@ -23,6 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.imp.CQIEImpl;
+import org.obda.query.domain.imp.ObjectVariableImpl;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.NamespaceManager;
 import org.semanticweb.owl.model.OWLClass;
@@ -51,7 +49,7 @@ public class AboxMaterializer {
 
 
 	private AboxMaterializer(String owlfile){
-		
+
 		this.owlFile= owlfile;
 		try {
 			this.manager = OWLManager.createOWLOntologyManager();
@@ -63,13 +61,13 @@ public class AboxMaterializer {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public AboxMaterializer(){
-		
+
 	}
-	
+
 	public Set<OWLIndividualAxiom> materializeAbox(String file,OWLOntology new_onto, OWLOntologyManager man) throws Exception{
-		
+
 		if(manager == null){
 			currentOntology = new_onto;
 			factory = man.getOWLDataFactory();
@@ -100,37 +98,37 @@ public class AboxMaterializer {
 		for (OWLObjectProperty c: currentOntology.getObjectPropertiesInSignature()) {
 			objectProperties.add(c.getURI().toString());
 		}
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			OBDAMappingAxiom ax = it.next();
 			String sql = ax.getSourceQuery().toString();
-			ConjunctiveQuery cq = (ConjunctiveQuery) ax.getTargetQuery();
-			List<QueryAtom> atoms = cq.getAtoms();
-			Iterator<QueryAtom> a_it = atoms.iterator();
-			while(a_it.hasNext()){
+			CQIEImpl cq = (CQIEImpl) ax.getTargetQuery();
+			List<Atom> atoms = cq.getBody();
+			Iterator<Atom> a_it = atoms.iterator();
+			while (a_it.hasNext()) {
 				ResultSet res = jdbcMan.executeQuery(ds, sql);
-				QueryAtom atom = a_it.next();
-				String name = atom.getNamedPredicate().getUri().getFragment();			
+				Atom atom = a_it.next();
+				String name = atom.getPredicate().getName().getFragment();
 				String uri = ontoUri+"#"+name;
-				if(atom instanceof ConceptQueryAtom){
-					if(classesURIs.contains(uri)){
-						ConceptQueryAtom cqa = (ConceptQueryAtom) atom;
-						List<QueryTerm> terms = cqa.getTerms();
-						while(res.next()){
-							Iterator<QueryTerm> teit = terms.iterator();
-							while(teit.hasNext()){
-								FunctionTerm ft = (FunctionTerm) teit.next();
+				int arity = atom.getArity();
+				if (arity == 1) {  // Concept query atom
+					if (classesURIs.contains(uri)) {
+						List<Term> terms = atom.getTerms();
+						while (res.next()) {
+							Iterator<Term> teit = terms.iterator();
+							while (teit.hasNext()) {
+								ObjectVariableImpl ft = (ObjectVariableImpl) teit.next();
 								StringBuffer sb = new StringBuffer();
-								sb.append(ft.getVariableName());
+								sb.append(ft.getName());
 								sb.append("-");
-								List<QueryTerm> parameters = ft.getParameters();
-								Iterator<QueryTerm> pit = parameters.iterator();
+								List<Term> parameters = ft.getTerms();
+								Iterator<Term> pit = parameters.iterator();
 								StringBuffer aux = new StringBuffer();
-								while(pit.hasNext()){
-									if(aux.length()>0){
+								while (pit.hasNext()) {
+									if (aux.length() > 0) {
 										aux.append("-");
 									}
-									QueryTerm qt = pit.next();
-									String s = res.getString(qt.getVariableName());
+									Term qt = pit.next();
+									String s = res.getString(qt.getName());
 									aux.append(s);
 								}
 								sb.append(aux.toString());
@@ -142,27 +140,28 @@ public class AboxMaterializer {
 								individuals.add(classAssertion);
 							}
 						}
-					}else{
+					}
+					else {
 						throw new RuntimeException("Unknow concept: " + uri);
 					}
-				}else{
-					BinaryQueryAtom bqa = (BinaryQueryAtom) atom;
-					if(dataProperties.contains(uri)){
-						while(res.next()){
-							String valueVar = bqa.getTerms().get(1).getVariableName();
-							FunctionTerm ft = (FunctionTerm) bqa.getTerms().get(0);
+				}
+				else {
+					if (dataProperties.contains(uri)) {
+						while (res.next()) {
+							String valueVar = atom.getTerms().get(1).getName();
+							ObjectVariableImpl ft = (ObjectVariableImpl) atom.getTerms().get(0);
 							StringBuffer sb = new StringBuffer();
-							sb.append(ft.getVariableName());
+							sb.append(ft.getName());
 							sb.append("-");
-							List<QueryTerm> parameters = ft.getParameters();
-							Iterator<QueryTerm> pit = parameters.iterator();
+							List<Term> parameters = ft.getTerms();
+							Iterator<Term> pit = parameters.iterator();
 							StringBuffer aux = new StringBuffer();
-							while(pit.hasNext()){
-								if(aux.length()>0){
+							while (pit.hasNext()) {
+								if (aux.length() > 0) {
 									aux.append("-");
 								}
-								QueryTerm qt = pit.next();
-								String s = res.getString(qt.getVariableName());
+								Term qt = pit.next();
+								String s = res.getString(qt.getName());
 								aux.append(s);
 							}
 							sb.append(aux.toString());
@@ -174,38 +173,39 @@ public class AboxMaterializer {
 //							manager.addAxiom(currentOntology, axiom);
 							individuals.add(axiom);
 						}
-					}else if(objectProperties.contains(uri)){
-						while(res.next()){
-							FunctionTerm ft1 = (FunctionTerm) bqa.getTerms().get(0);
+					}
+					else if (objectProperties.contains(uri)) {
+						while (res.next()) {
+							ObjectVariableImpl ft1 = (ObjectVariableImpl) atom.getTerms().get(0);
 							StringBuffer sb1 = new StringBuffer();
-							sb1.append(ft1.getVariableName());
+							sb1.append(ft1.getName());
 							sb1.append("-");
-							List<QueryTerm> parameters = ft1.getParameters();
-							Iterator<QueryTerm> pit = parameters.iterator();
+							List<Term> parameters = ft1.getTerms();
+							Iterator<Term> pit = parameters.iterator();
 							StringBuffer aux = new StringBuffer();
-							while(pit.hasNext()){
-								if(aux.length()>0){
+							while (pit.hasNext()) {
+								if (aux.length() > 0) {
 									aux.append("-");
 								}
-								QueryTerm qt = pit.next();
-								String s = res.getString(qt.getVariableName());
+								Term qt = pit.next();
+								String s = res.getString(qt.getName());
 								aux.append(s);
 							}
 							sb1.append(aux.toString());
 //							System.out.println(sb1.toString());
-							FunctionTerm ft2 = (FunctionTerm) bqa.getTerms().get(1);
+							ObjectVariableImpl ft2 = (ObjectVariableImpl) atom.getTerms().get(1);
 							StringBuffer sb2 = new StringBuffer();
-							sb2.append(ft2.getVariableName());
+							sb2.append(ft2.getName());
 							sb2.append("-");
-							List<QueryTerm> parameters2 = ft2.getParameters();
-							Iterator<QueryTerm> pit2 = parameters2.iterator();
+							List<Term> parameters2 = ft2.getTerms();
+							Iterator<Term> pit2 = parameters2.iterator();
 							StringBuffer aux2 = new StringBuffer();
-							while(pit2.hasNext()){
-								if(aux2.length()>0){
+							while (pit2.hasNext()) {
+								if (aux2.length() > 0) {
 									aux2.append("-");
 								}
-								QueryTerm qt = pit2.next();
-								String s = res.getString(qt.getVariableName());
+								Term qt = pit2.next();
+								String s = res.getString(qt.getName());
 								aux2.append(s);
 							}
 							sb2.append(aux2.toString());
@@ -217,7 +217,7 @@ public class AboxMaterializer {
 //							manager.addAxiom(currentOntology, axiom);
 							individuals.add(axiom);
 						}
-					}else{ 
+					}else{
 						throw new RuntimeException("Unknow concept");
 					}
 				}
@@ -227,9 +227,9 @@ public class AboxMaterializer {
 //		manager.addAxioms(new_onto, individuals);
 		return individuals;
 	}
-	
+
 	private ArrayList<OBDAMappingAxiom> getMappings(){
-		
+
 		ArrayList<OBDAMappingAxiom> mappings = null;
 		MappingController mapcon = controller.getMappingController();
 		DatasourcesController dscon = controller.getDatasourcesController();
@@ -247,22 +247,22 @@ public class AboxMaterializer {
 		mappings = mapcon.getMappings(currentDS_uri);
 		return mappings;
 	}
-	
+
 	public void saveOntology(String path) throws UnknownOWLOntologyException, OWLOntologyStorageException{
 		File f = new File(path);
 		manager.saveOntology(currentOntology, f.toURI());
 	}
-	
+
 	public OWLOntologyManager getManager(){
 		return manager;
 	}
-	
+
 	public OWLOntology getCurrentOntology(){
 		return currentOntology;
 	}
-	
+
 	public static void main(String[] args) throws Exception{
-		
+
 		if(args.length == 2){
 			String owlfile = args[0];
 			String path = args[1];
