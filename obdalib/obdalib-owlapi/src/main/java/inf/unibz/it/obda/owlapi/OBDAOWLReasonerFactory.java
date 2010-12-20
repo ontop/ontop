@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.owlapi;
 
-import org.semanticweb.owl.inference.OWLReasonerFactory;
-
 import inf.unibz.it.obda.api.controller.APIController;
+
+import org.semanticweb.owl.inference.OWLReasonerFactory;
 
 public interface OBDAOWLReasonerFactory extends OWLReasonerFactory {
 
