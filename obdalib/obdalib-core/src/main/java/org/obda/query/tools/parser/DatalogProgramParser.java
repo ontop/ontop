@@ -43,6 +43,10 @@ public class DatalogProgramParser {
 		parser = new DatalogParser(tokenStream);
 
 		datalog = parser.parse();
+
+		if (parser.getNumberOfSyntaxErrors() != 0)
+			return null;
+
 		return datalog;
 	}
 
