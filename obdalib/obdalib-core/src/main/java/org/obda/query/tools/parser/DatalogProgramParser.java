@@ -45,7 +45,7 @@ public class DatalogProgramParser {
 		datalog = parser.parse();
 
 		if (parser.getNumberOfSyntaxErrors() != 0)
-			return null;
+			throw new RecognitionException();
 
 		return datalog;
 	}
