@@ -12,6 +12,10 @@ import org.obda.query.domain.Predicate;
 
 public class IndexedCQIEImpl implements CQIE {
 
+	/**
+	 * This class is not yet used. It is thought for later to be used for speeding up the
+	 * computation.
+	 */
 	private Atom head = null;
 	private List<Atom> body = null;
 	private Map<Predicate, Vector<Atom>> predicateToAtomMap = null;

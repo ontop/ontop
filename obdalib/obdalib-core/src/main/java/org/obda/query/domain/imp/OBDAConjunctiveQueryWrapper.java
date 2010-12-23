@@ -23,6 +23,8 @@ import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 
+//** This class is no longer neccessary. It should be deleted
+
 public class OBDAConjunctiveQueryWrapper implements CQIE {
 
 	private ConjunctiveQuery cq = null;
