@@ -107,7 +107,7 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 	}
 
 	private String prepareQuery(String input) {
-		String query = "";
+		String query = input;
 		DatalogQueryHelper queryHelper =
 			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
 
@@ -115,7 +115,7 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 		if (atoms.length == 1)  // if no head
 			query = queryHelper.getDefaultHead() + " " +
 			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
-			 	input;
+			 	query;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;
