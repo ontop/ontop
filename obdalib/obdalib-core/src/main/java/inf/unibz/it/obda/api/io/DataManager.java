@@ -187,17 +187,21 @@ public class DataManager {
 
 		// Create the document root
 		root = doc.createElement("OBDA");
-		Set<String> prefs = prefixManager.getPrefixMap().keySet();
-		Iterator<String> sit = prefs.iterator();
-		while(sit.hasNext()){
+		HashMap<String, URI> prefixes = prefixManager.getPrefixMap();
+		Set<String> keys = prefixes.keySet();
+		Iterator<String> sit = keys.iterator();
+		while (sit.hasNext()) {
 			String key = sit.next();
-			if(key.equals("version")){
+			if (key.equals("version")) {
 				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
-			}else if(key.equals("xml:base")){
+			}
+			else if (key.equals("xml:base")) {
 				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
-			}else if(key.equals("xmlns")){
+			}
+			else if (key.equals("xmlns")) {
 				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
-			}else{
+			}
+			else {
 				root.setAttribute("xmlns:"+key, prefixManager.getURIForPrefix(key).toString());
 			}
 		}
@@ -275,7 +279,7 @@ public class DataManager {
 				root.appendChild(controllerElement);
 			}
 		}
-		XMLUtils.saveDocumentToXMLFile(doc, file.toString());
+		XMLUtils.saveDocumentToXMLFile(doc, prefixes, file.toString());
 	}
 
 	/***************************************************************************

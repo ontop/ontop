@@ -13,17 +13,21 @@
  */
 package inf.unibz.it.utils.xml;
 
-
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Set;
 
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 public class XMLUtils {
 
@@ -31,25 +35,81 @@ public class XMLUtils {
 
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, String filename) throws FileNotFoundException, IOException {
+	public static void saveDocumentToXMLFile(Document doc, HashMap<String, URI> prefixes, String filename)
+			throws FileNotFoundException, IOException {
 		File file = new File(filename);
-		saveDocumentToXMLFile(doc, file);
+		saveDocumentToXMLFile(doc, prefixes, file);
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, File file) throws FileNotFoundException, IOException {
-		FileOutputStream fos = new FileOutputStream(file);
-		// XERCES 1 or 2 additionnal classes.
-		OutputFormat of = new OutputFormat("XML","ISO-8859-1",true);
-		of.setIndent(2);
-		of.setIndenting(true);
-		//of.setDoctype(null,"users.dtd");
-		XMLSerializer serializer = new XMLSerializer(fos,of);
-		// As a DOM Serializer
-		serializer.asDOMSerializer();
-		Element docroot = doc.getDocumentElement();
-		serializer.serialize( docroot );
-		fos.close();
+	public static void saveDocumentToXMLFile(Document doc, HashMap<String, URI> prefixes, File file)
+			throws FileNotFoundException, IOException {
+
+		File tmpFile = prepare(doc);
+		String entityFragment = prepare(prefixes);
+
+		// Input
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(new FileInputStream(tmpFile)));
+
+		// Output
+	    PrintWriter out = new PrintWriter(new FileOutputStream(file));
+
+		String cursor = "";
+		int line = 1;
+		int TARGET_LINE = 2;  // after then <?xml ... ?> declaration
+		while ((cursor = in.readLine()) != null) {
+			if (line == TARGET_LINE)
+				out.println(entityFragment);
+
+		    out.println(cursor);
+
+		    line++;
+		}
+
+		out.flush();
+		out.close();
+		in.close();
+
+		tmpFile.delete();
 	}
 
+	private static File prepare(Document doc) throws IOException {
 
+		File fOut = new File("$$$$$$.tmp");
+
+		FileOutputStream outStream = new FileOutputStream(fOut);
+
+		OutputFormat outFormat = new OutputFormat();
+		outFormat.setMethod("xml");
+		outFormat.setIndenting(true);
+		outFormat.setIndent(2);
+		outFormat.setLineWidth(0);
+
+		XMLSerializer serializer = new XMLSerializer(outStream, outFormat);
+		serializer.serialize(doc);
+		outStream.close();
+
+		return fOut;
+	}
+
+	private static String prepare(HashMap<String, URI> prefixes) {
+
+		String doctype = "<!DOCTYPE OBDA [\n";
+		Set<String> prefixIds = prefixes.keySet();
+		for (String id : prefixIds) {
+			if (!(id.equals("version") ||
+				  id.equals("xml:base") ||
+				  id.equals("xmlns") ||
+				  id.equals("rdf") ||
+				  id.equals("rdfs") ||
+				  id.equals("owl") ||
+				  id.equals("xsd"))) {
+				String uri = prefixes.get(id).toString();
+				doctype += "   <!ENTITY " + id + " '" +  uri + "'>\n";
+			}
+		}
+		doctype += "]>";
+
+		return doctype;
+	}
 }
