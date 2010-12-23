@@ -9,4 +9,5 @@ public interface CQIE extends Query{
 	public boolean isBoolean();
 	public void updateHead(Atom head);
 	public void updateBody(List<Atom> body);
+	public CQIE clone();
 }
