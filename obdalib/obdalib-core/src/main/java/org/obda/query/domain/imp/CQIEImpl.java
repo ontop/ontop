@@ -100,75 +100,75 @@ public class CQIEImpl implements CQIE {
 		return isBoolean;
 	}
 
-	@Override
-	public String toString(){
-
-		StringBuilder sbHead = new StringBuilder();
-		Iterator<Term> hit =  head.getTerms().iterator();
-		while(hit.hasNext()){
-			Term h = hit.next();
-			if(sbHead.length()>0){
-				sbHead.append(", ");
-			}
-			if(h instanceof ObjectVariableImpl){
-				ObjectVariableImpl ov = (ObjectVariableImpl) h;
-				StringBuilder sbpara = new StringBuilder();
-				Iterator<Term> pit = ov.getTerms().iterator();
-				while(pit.hasNext()){
-					if(sbpara.length() >0){
-						sbpara.append(", ");
-					}
-					sbpara.append(pit.next().getName());
-				}
-				sbHead.append(ov.getName());
-				sbHead.append("(");
-				sbHead.append(sbpara);
-				sbHead.append(")");
-			}else{
-				sbHead.append(h.getName());
-			}
-		}
-
-
-		StringBuilder sbBody = new StringBuilder();
-		Iterator<Atom> bit = body.iterator();
-		while(bit.hasNext()){
-			Atom a = bit.next();
-			if(sbBody.length() >0){
-				sbBody.append(", ");
-			}
-			StringBuilder sbAtom = new StringBuilder();
-			Iterator<Term> ait =  a.getTerms().iterator();
-			while(ait.hasNext()){
-				Term h = ait.next();
-				if(sbAtom.length()>0){
-					sbAtom.append(", ");
-				}
-				if(h instanceof ObjectVariableImpl){
-					ObjectVariableImpl ov = (ObjectVariableImpl) h;
-					StringBuilder sbpara = new StringBuilder();
-					Iterator<Term> pit = ov.getTerms().iterator();
-					while(pit.hasNext()){
-						if(sbpara.length() >0){
-							sbpara.append(", ");
-						}
-						sbpara.append(pit.next().getName());
-					}
-					sbAtom.append(ov.getName());
-					sbAtom.append("(");
-					sbAtom.append(sbpara);
-					sbAtom.append(")");
-				}else{
-					sbAtom.append(h.getName());
-				}
-			}
-			sbBody.append(a.getPredicate().getName().getFragment());
-			sbBody.append("(");
-			sbBody.append(sbAtom);
-			sbBody.append(")");
-		}
-		return sbHead + ":- "+ sbBody;
-	}
+//	@Override
+//	public String toString(){
+//
+//		StringBuilder sbHead = new StringBuilder();
+//		Iterator<Term> hit =  head.getTerms().iterator();
+//		while(hit.hasNext()){
+//			Term h = hit.next();
+//			if(sbHead.length()>0){
+//				sbHead.append(", ");
+//			}
+//			if(h instanceof ObjectVariableImpl){
+//				ObjectVariableImpl ov = (ObjectVariableImpl) h;
+//				StringBuilder sbpara = new StringBuilder();
+//				Iterator<Term> pit = ov.getTerms().iterator();
+//				while(pit.hasNext()){
+//					if(sbpara.length() >0){
+//						sbpara.append(", ");
+//					}
+//					sbpara.append(pit.next().getName());
+//				}
+//				sbHead.append(ov.getName());
+//				sbHead.append("(");
+//				sbHead.append(sbpara);
+//				sbHead.append(")");
+//			}else{
+//				sbHead.append(h.getName());
+//			}
+//		}
+//
+//
+//		StringBuilder sbBody = new StringBuilder();
+//		Iterator<Atom> bit = body.iterator();
+//		while(bit.hasNext()){
+//			Atom a = bit.next();
+//			if(sbBody.length() >0){
+//				sbBody.append(", ");
+//			}
+//			StringBuilder sbAtom = new StringBuilder();
+//			Iterator<Term> ait =  a.getTerms().iterator();
+//			while(ait.hasNext()){
+//				Term h = ait.next();
+//				if(sbAtom.length()>0){
+//					sbAtom.append(", ");
+//				}
+//				if(h instanceof ObjectVariableImpl){
+//					ObjectVariableImpl ov = (ObjectVariableImpl) h;
+//					StringBuilder sbpara = new StringBuilder();
+//					Iterator<Term> pit = ov.getTerms().iterator();
+//					while(pit.hasNext()){
+//						if(sbpara.length() >0){
+//							sbpara.append(", ");
+//						}
+//						sbpara.append(pit.next().getName());
+//					}
+//					sbAtom.append(ov.getName());
+//					sbAtom.append("(");
+//					sbAtom.append(sbpara);
+//					sbAtom.append(")");
+//				}else{
+//					sbAtom.append(h.getName());
+//				}
+//			}
+//			sbBody.append(a.getPredicate().getName().getFragment());
+//			sbBody.append("(");
+//			sbBody.append(sbAtom);
+//			sbBody.append(")");
+//		}
+//		return sbHead + ":- "+ sbBody;
+//	}
 
 	@Override
 	public CQIEImpl clone() {

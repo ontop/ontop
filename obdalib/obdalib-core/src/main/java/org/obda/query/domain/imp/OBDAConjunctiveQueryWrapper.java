@@ -208,4 +208,17 @@ public int hashCode(){
 	public void updateBody(List<Atom> body) {
 		this.body = body;
 	}
+	
+	@Override
+	public CQIEImpl clone() {
+		//TODO implement it correctly
+		Atom copyHead = head.copy();
+		List<Atom> copyBody = new Vector<Atom>();
+		for (Atom atom : body) {
+			copyBody.add(atom.copy());
+		}
+		boolean copyIsBoolean = isBoolean;
+
+		return new CQIEImpl(copyHead, copyBody, copyIsBoolean);
+	}
 }
