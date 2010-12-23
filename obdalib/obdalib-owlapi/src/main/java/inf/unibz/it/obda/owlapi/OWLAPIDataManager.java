@@ -181,7 +181,8 @@ public class OWLAPIDataManager extends DataManager {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
 		root = doc.createElement("OBDA");
-		Set<String> set = prefixManager.getPrefixMap().keySet();
+		HashMap<String, URI> prefixes = prefixManager.getPrefixMap();
+		Set<String> set = prefixes.keySet();
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
 			String key = sit.next();
@@ -259,7 +260,7 @@ public class OWLAPIDataManager extends DataManager {
 				root.appendChild(controllerElement);
 			}
 		}
-		XMLUtils.saveDocumentToXMLFile(doc, file);
+		XMLUtils.saveDocumentToXMLFile(doc, prefixes, file);
 	}
 
 	/**
