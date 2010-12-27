@@ -20,7 +20,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 
 	private final String[][] ORACLE = {
 		// The answer for the target queries.
-		{"name, lastname, dateofbirth, ssn:- " +
+		{"name, lastname, dateofbirth, ssn :- " +
 			"Investor(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id)), " +
 			"firstName(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), name), " +
 			"lastName(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), lastname), " +
@@ -68,13 +68,13 @@ public class OWLAPIDataManagerTest extends TestCase {
 				Query targetQuery = axiom.getTargetQuery();
 				String sTargetQuery = targetQuery.toString();
 				assertEquals("Target query is not the same!",
-						sTargetQuery, ORACLE[0][i]);
+						ORACLE[0][i], sTargetQuery);
 
 				// The source queries
 				Query sourceQuery = axiom.getSourceQuery();
 				String sSourceQuery = sourceQuery.toString();
 				assertEquals("Source query is not the same!",
-						sSourceQuery, ORACLE[1][i]);
+						ORACLE[1][i], sSourceQuery);
 
 				i++; // increment
 			}
