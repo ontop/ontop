@@ -42,4 +42,8 @@ public class ValueConstantImpl implements ValueConstant{
 	public XSDatatype getType() {
 		return type;
 	}
+	
+	public String toString() {
+		return "\"" + getName().toString() + "\"";
+	}
 }

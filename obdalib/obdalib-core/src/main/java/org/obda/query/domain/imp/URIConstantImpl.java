@@ -19,6 +19,8 @@ import org.obda.query.domain.URIConstant;
 public class URIConstantImpl implements URIConstant {
 
 	private final URI uri;
+	
+	private String string = null;
 
 	/**
 	 * The default constructor.
@@ -27,6 +29,7 @@ public class URIConstantImpl implements URIConstant {
 	 */
 	public URIConstantImpl(URI uri) {
 		this.uri = uri;
+		this.string = "<" + uri.toString() + ">";
 	}
 
 	@Override
@@ -41,6 +44,10 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public Term copy() {
-		return null;
+		return new URIConstantImpl(uri);
+	}
+	
+	public String toString() {
+		return "<" + getName() + ">";
 	}
 }

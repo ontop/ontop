@@ -13,7 +13,8 @@ public class VariableImpl implements Variable{
 	
 	protected VariableImpl(String name, int identifier, XSDatatype type){
 		this.name = name;
-		this.identifier = identifier;
+//		this.identifier = identifier;
+		this.identifier = name.hashCode();
 		this.type = type;
 	}
 
@@ -21,11 +22,11 @@ public class VariableImpl implements Variable{
 		 if(obj == null || !(obj instanceof Variable)){
 			 return false;
 		 }
-		 
-		 return this.hash() == ((VariableImpl)obj).hash();
+		 //return this.hash() == ((VariableImpl)obj).hash();
+		 return this.hashCode() == ((VariableImpl)obj).hashCode();
 	 }
 
-	 public long hash(){
+	 public int hashCode(){
 		 return identifier;
 	 }
 
@@ -34,8 +35,12 @@ public class VariableImpl implements Variable{
 		return name;
 	}
 
+	public String toString() {
+		return getName();
+	}
+	
 	public Variable copy() {
 		return new VariableImpl(new String(name), identifier, type);
 	}
-
+	
 }

@@ -2,6 +2,7 @@ package org.obda.query.domain.imp;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -61,7 +62,7 @@ public class IndexedCQIEImpl implements CQIE {
 	public CQIEImpl clone() {
 		//TODO implement it correctly
 		Atom copyHead = head.copy();
-		List<Atom> copyBody = new Vector<Atom>();
+		List<Atom> copyBody = new LinkedList<Atom>();
 		for (Atom atom : body) {
 			copyBody.add(atom.copy());
 		}

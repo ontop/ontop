@@ -12,16 +12,16 @@ import inf.unibz.it.ucq.domain.VariableTerm;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
+import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.PredicateFactory;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 
 //** This class is no longer neccessary. It should be deleted
 
@@ -215,7 +215,7 @@ public int hashCode(){
 	public CQIEImpl clone() {
 		//TODO implement it correctly
 		Atom copyHead = head.copy();
-		List<Atom> copyBody = new Vector<Atom>();
+		List<Atom> copyBody = new LinkedList<Atom>();
 		for (Atom atom : body) {
 			copyBody.add(atom.copy());
 		}

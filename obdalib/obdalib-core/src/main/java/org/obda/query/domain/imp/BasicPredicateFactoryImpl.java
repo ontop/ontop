@@ -64,8 +64,8 @@ public class BasicPredicateFactoryImpl implements PredicateFactory {
 		//TODO
 	}
 
-	public Predicate getQueryOnlyPredicate(String name, int arity) {
-		URI uri = URI.create("http://www.obda.org/ucq/predicate/queryonly#"+name);
-		return new QueryOnlyPredicateImpl(uri, queryonlyidentifier++, arity);
-	}
+//	public Predicate getQueryOnlyPredicate(String name, int arity) {
+//		URI uri = URI.create("http://www.obda.org/ucq/predicate/queryonly#"+name);
+//		return new QueryOnlyPredicateImpl(uri, queryonlyidentifier++, arity);
+//	}
 }

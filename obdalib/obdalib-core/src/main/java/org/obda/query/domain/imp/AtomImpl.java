@@ -51,4 +51,20 @@ public class AtomImpl implements Atom{
 		}
 		return new AtomImpl(predicate.copy(), v);
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer bf = new StringBuffer();
+		bf.append(predicate.toString());
+		bf.append("(");
+		for (int i = 0; i < terms.size(); i++) {
+			bf.append(terms.get(i));
+			if (i+1 < terms.size()) {
+				bf.append(", ");
+			}
+		}
+		bf.append(")");
+		return bf.toString();
+	}
+	
 }

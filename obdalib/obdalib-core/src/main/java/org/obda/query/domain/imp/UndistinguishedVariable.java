@@ -19,7 +19,7 @@ public class UndistinguishedVariable implements Variable{
 			 return false;
 		 }
 		 
-		 return this.hash() == ((VariableImpl)obj).hash();
+		 return this.hash() == ((VariableImpl)obj).hashCode();
 	 }
 
 	 public long hash(){
@@ -37,5 +37,9 @@ public class UndistinguishedVariable implements Variable{
 
 	public void setName(String n){
 		name = n;
+	}
+	
+	public String toString() {
+		return getName();
 	}
 }

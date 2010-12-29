@@ -46,4 +46,8 @@ public class PredicateImp implements Predicate{
 	public Predicate copy() {
 		return new PredicateImp(this.name, this.identfier, this.arity);
 	}
+	
+	public String toString() {
+		return this.name.toString();
+	}
 }

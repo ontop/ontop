@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import org.obda.query.domain.FunctionSymbol;
 import org.obda.query.domain.ObjectConstant;
+import org.obda.query.domain.Term;
 import org.obda.query.domain.ValueConstant;
 
 public class ObjectConstantImpl implements ObjectConstant{
@@ -50,6 +51,20 @@ public class ObjectConstantImpl implements ObjectConstant{
 		sb_name.append(sb_t);
 		sb_name.append(")");
 		return sb_name.toString();
+	}
+	
+	public String toString() {
+		return getName();
+	}
+
+	@Override
+	public boolean containsTerm(Term t) {
+		for (int i = 0; i < terms.size(); i++) {
+			Term t2 = terms.get(i);
+			if (t2.toString().equals(t.toString()))
+				return true;
+		}
+		return false;
 	}
 
 }

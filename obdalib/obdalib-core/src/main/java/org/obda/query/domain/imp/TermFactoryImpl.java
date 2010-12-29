@@ -12,6 +12,7 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class TermFactoryImpl extends TermFactory{
 
+	//TODO check what is this being used for, this seems like it can be a problem with HASH
 	private int identifier = 1;
 
 	@Override

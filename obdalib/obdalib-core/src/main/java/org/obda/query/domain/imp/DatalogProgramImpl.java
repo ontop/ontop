@@ -57,5 +57,14 @@ public class DatalogProgramImpl implements DatalogProgram{
 	public List<CQIE> getRules() {
 		return rules;
 	}
+	
+	public String toString() {
+		StringBuffer bf = new StringBuffer();
+		for (CQIE rule: this.rules) {
+			bf.append(rule.toString());
+			bf.append("\n");
+		}
+		return bf.toString();
+	}
 
 }

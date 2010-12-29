@@ -6,4 +6,6 @@ public interface ObjectConstant extends Constant{
 
 	 public FunctionSymbol getFunctionSymbol() ;
 	 public List<ValueConstant> getTerms();
+	 public boolean containsTerm(Term t);
+	 
 }

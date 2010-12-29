@@ -77,7 +77,9 @@ public class SynchronizedMappingController extends MappingController implements 
 	@Override
 	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
 			throws OWLException {
-
+		if (changes.size() <= 0) {
+			return;
+		}
 		((OWLAPICoupler)apic.getCoupler()).synchWithOntology(changes.get(0).getOntology());
 		String ontoprefix = apic.getCoupler().getPrefixForUri(changes.get(0).getOntology().getURI());
 		List<RemoveAxiom> vec = getRemoveAxioms(changes);

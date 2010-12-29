@@ -7,6 +7,7 @@
 package org.obda.query.tools.parser;
 
 import java.net.URI;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -109,13 +110,13 @@ public class SPARQLDatalogTranslator {
 			Term term = termFactory.createVariable(name);
 			headTerms.add(term);
 		}
-		Predicate predicate = predicateFactory.getQueryOnlyPredicate("p", termSize);
+		Predicate predicate = predicateFactory.getPredicate(URI.create("q"), termSize);
 
 		return new AtomImpl(predicate, headTerms);
 	}
 
 	/** Extract the body atoms */
-	private Vector<Atom> getBodyAtoms(Element element) throws QueryException {
+	private LinkedList<Atom> getBodyAtoms(Element element) throws QueryException {
 
 		ElementTriplesBlock triplesBlock = null; // initiate the triples
 
@@ -127,7 +128,7 @@ public class SPARQLDatalogTranslator {
 
 		BasicPattern triples = triplesBlock.getTriples();
 
-		Vector<Atom> body = new Vector<Atom>();
+		LinkedList<Atom> body = new LinkedList<Atom>();
 		for (int j = 0; j < triples.size(); j++) {
 			Vector<Term> terms = new Vector<Term>();
 			Triple triple = triples.get(j);
@@ -148,6 +149,9 @@ public class SPARQLDatalogTranslator {
 					terms.add(termFactory.createVariable(subject.getName()));
 				}
 				else if (s instanceof Node_Literal) { // Subject is a node literal
+					//TODO Literals shouldn't be allowed with rdf:type 
+					/* Literals are no longer suppoerted with rdf:type, only URIs (objects) */
+//					throw new QueryException("Query translation error: literals are not supported as subjects with predicate rdf:type, use only URI's");
 					Node_Literal subject = (Node_Literal) s;
 					terms.add(termFactory.createValueConstant(subject.getLiteralValue().toString()));
 				}
