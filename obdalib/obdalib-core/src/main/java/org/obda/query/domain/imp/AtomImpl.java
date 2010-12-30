@@ -1,5 +1,6 @@
 package org.obda.query.domain.imp;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -55,7 +56,8 @@ public class AtomImpl implements Atom{
 	@Override
 	public String toString() {
 		StringBuffer bf = new StringBuffer();
-		bf.append(predicate.toString());
+		URI predicateURI = predicate.getName();
+		bf.append(predicateURI.toString());
 		bf.append("(");
 		for (int i = 0; i < terms.size(); i++) {
 			bf.append(terms.get(i));

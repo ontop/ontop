@@ -10,9 +10,10 @@ public class PredicateImp implements Predicate{
 	private URI name = null;
 	private int identfier = -1;
 
+	//TODO PredicateImp remove identifier
 	protected PredicateImp (URI name, int identifier, int arity){
 		this.name = name;
-		this.identfier = identifier;
+		this.identfier = name.toString().hashCode();
 		this.arity = arity;
 	}
 
@@ -34,7 +35,7 @@ public class PredicateImp implements Predicate{
 		if(obj == null|| !(obj instanceof PredicateImp)){
 			return false;
 		}else{
-			return this.hashCode() == obj.hashCode();
+			return this.identfier == obj.hashCode();
 		}
 	}
 

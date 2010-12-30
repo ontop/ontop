@@ -1,34 +1,54 @@
 package org.obda.query.domain.imp;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
+import org.obda.query.domain.Predicate;
 
 public class DatalogProgramImpl implements DatalogProgram{
 
 	private List<CQIE> rules = null;
 	
+	private Map<Predicate, List<CQIE>> predicateIndex = null;
+	
 	public DatalogProgramImpl(){
 		rules = new Vector<CQIE>();
+		predicateIndex = new HashMap<Predicate, List<CQIE>>();
 	}
 	
 	public void appendRule(CQIE rule){
 		rules.add(rule);
+		
+		Predicate predicate = rule.getHead().getPredicate();
+		List<CQIE> indexedRules = this.getRules(predicate);
+		indexedRules.add(rule);
 	}
 	
-	public void appendRule(List<CQIE> rule){
-		 rules.addAll(rule);
+	public void appendRule(List<CQIE> rules){
+		for (CQIE rule: rules) {
+			appendRule(rule);
+		}
+		 
 	}
 	
 	public void removeRule(CQIE rule){
 		rules.remove(rule);
+		
+		Predicate predicate = rule.getHead().getPredicate();
+		List<CQIE> indexedRules = this.getRules(predicate);
+		indexedRules.remove(rule);
 	}
 	
-	public void removeRules(List<CQIE> rule){
-		rules.removeAll(rule);
+	public void removeRules(List<CQIE> rules){
+		for (CQIE rule: rules) {
+			removeRule(rule);
+		}
 	}
 	public boolean isUCQ(){
 		
@@ -65,6 +85,17 @@ public class DatalogProgramImpl implements DatalogProgram{
 			bf.append("\n");
 		}
 		return bf.toString();
+	}
+
+	@Override
+	public List<CQIE> getRules(Predicate headPredicate) {
+		List<CQIE> rules = this.predicateIndex.get(headPredicate);
+		if (rules == null) 
+		{
+			rules = new LinkedList<CQIE>();
+			predicateIndex.put(headPredicate, rules);
+		}
+		return rules;
 	}
 
 }
