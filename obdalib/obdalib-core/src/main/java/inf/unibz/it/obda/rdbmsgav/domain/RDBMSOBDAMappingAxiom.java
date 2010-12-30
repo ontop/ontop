@@ -87,4 +87,13 @@ public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 
 		return clone;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer bf = new StringBuffer();
+		bf.append(sourceQuery.toString());
+		bf.append(" ==> ");
+		bf.append(targetQuery.toString());
+		return bf.toString();
+	}
 }
