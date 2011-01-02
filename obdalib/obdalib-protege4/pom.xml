@@ -46,12 +46,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>${aversion}</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>${aversion}</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
@@ -247,6 +247,16 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+                    <excludes> 
+                          <exclude>**/dependencies/**/*.java</exclude>      
+                          <exclude>**/constraints/**/*.java</exclude>                                                                                                                                                                
+                          <exclude>**/DependencyInterfaceViewComponent.java</exclude>
+                          <exclude>**/constraints/parser/**/*.java</exclude>
+                          <exclude>**/constraints/xml/**/*.java</exclude>
+                          <exclude>**/swing/constraints/**/*.java</exclude>
+                          <exclude>**/swing/dependencies/**/*.java</exclude>                                                                                                                                                                                          
+                      </excludes>
+					
 				</configuration>
 			</plugin>
 			<plugin>

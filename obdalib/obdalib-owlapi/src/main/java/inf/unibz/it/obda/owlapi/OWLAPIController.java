@@ -3,21 +3,6 @@ package inf.unibz.it.obda.owlapi;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.constraints.controller.RDBMSCheckConstraintController;
-import inf.unibz.it.obda.constraints.controller.RDBMSForeignKeyConstraintController;
-import inf.unibz.it.obda.constraints.controller.RDBMSPrimaryKeyConstraintController;
-import inf.unibz.it.obda.constraints.controller.RDBMSUniquenessConstraintController;
-import inf.unibz.it.obda.constraints.domain.imp.RDBMSCheckConstraint;
-import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
-import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
-import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
-import inf.unibz.it.obda.dependencies.controller.RDBMSDisjointnessDependencyController;
-import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
-import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSCheckConstraintXMLCodec;
-import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSForeignKeyConstraintXMLCodec;
-import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSPrimaryKeyConstraintXMLCodec;
-import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSUniquenessConstraintXMLCodec;
-import inf.unibz.it.obda.dl.codec.dependencies.xml.RDBMSDisjointnessDependencyXMLCodec;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,21 +56,21 @@ public class OWLAPIController extends APIController {
 		setCoupler(apicoupler);
 		try {
 			setCurrentOntologyURI(root.getURI());
-			RDBMSForeignKeyConstraintController fkc = new RDBMSForeignKeyConstraintController();
-			addAssertionController(RDBMSForeignKeyConstraint.class, fkc, new RDBMSForeignKeyConstraintXMLCodec());
-			dscontroller.addDatasourceControllerListener(fkc);
-			RDBMSPrimaryKeyConstraintController pkc = new RDBMSPrimaryKeyConstraintController();
-			addAssertionController(RDBMSPrimaryKeyConstraint.class, pkc, new RDBMSPrimaryKeyConstraintXMLCodec());
-			dscontroller.addDatasourceControllerListener(pkc);
-			RDBMSCheckConstraintController ccc = new RDBMSCheckConstraintController();
-			addAssertionController(RDBMSCheckConstraint.class,ccc, new RDBMSCheckConstraintXMLCodec());
-			dscontroller.addDatasourceControllerListener(ccc);
-			RDBMSDisjointnessDependencyController ddc = new RDBMSDisjointnessDependencyController();
-			addAssertionController(RDBMSDisjointnessDependency.class, ddc,new RDBMSDisjointnessDependencyXMLCodec());
-			dscontroller.addDatasourceControllerListener(ddc);
-			RDBMSUniquenessConstraintController uqc = new RDBMSUniquenessConstraintController();
-			addAssertionController(RDBMSUniquenessConstraint.class, uqc, new RDBMSUniquenessConstraintXMLCodec());
-			dscontroller.addDatasourceControllerListener(uqc);
+//			RDBMSForeignKeyConstraintController fkc = new RDBMSForeignKeyConstraintController();
+//			addAssertionController(RDBMSForeignKeyConstraint.class, fkc, new RDBMSForeignKeyConstraintXMLCodec());
+//			dscontroller.addDatasourceControllerListener(fkc);
+//			RDBMSPrimaryKeyConstraintController pkc = new RDBMSPrimaryKeyConstraintController();
+//			addAssertionController(RDBMSPrimaryKeyConstraint.class, pkc, new RDBMSPrimaryKeyConstraintXMLCodec());
+//			dscontroller.addDatasourceControllerListener(pkc);
+//			RDBMSCheckConstraintController ccc = new RDBMSCheckConstraintController();
+//			addAssertionController(RDBMSCheckConstraint.class,ccc, new RDBMSCheckConstraintXMLCodec());
+//			dscontroller.addDatasourceControllerListener(ccc);
+//			RDBMSDisjointnessDependencyController ddc = new RDBMSDisjointnessDependencyController();
+//			addAssertionController(RDBMSDisjointnessDependency.class, ddc,new RDBMSDisjointnessDependencyXMLCodec());
+//			dscontroller.addDatasourceControllerListener(ddc);
+//			RDBMSUniquenessConstraintController uqc = new RDBMSUniquenessConstraintController();
+//			addAssertionController(RDBMSUniquenessConstraint.class, uqc, new RDBMSUniquenessConstraintXMLCodec());
+//			dscontroller.addDatasourceControllerListener(uqc);
 
 		} catch (Exception e) {
 			e.printStackTrace();

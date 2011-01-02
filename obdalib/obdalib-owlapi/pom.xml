@@ -6,12 +6,15 @@
 		<version>1.0.3-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<modelVersion>4.0.0</modelVersion>
+
 	<artifactId>obdalib-owlapi</artifactId>
+	<groupId>inf.unibz.it.obda</groupId>	
 	<packaging>jar</packaging>
 	<name>obdalib-owlapi</name>
-	<url>http://maven.apache.org</url>
 	<version>1.0.3-SNAPSHOT</version>
+
 	<repositories>
 		<repository>
 			<id>on.cs.unibas.ch</id>
@@ -31,7 +34,7 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>${aversion}</version>
+			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
