@@ -65,6 +65,11 @@ public class TestFileGenerator {
 		tests = new Vector<String>();
 		expressions = new Vector<OntologyGeneratorExpression>();
 		manager = OWLManager.createOWLOntologyManager();
+		log.info("Main Location: {}", tl);
+		log.info("Location for OBDA files: {}", obdalocation);
+		log.info("Location for XML files: {}", xmllocation);
+		log.info("Mode: {}", mode);
+		
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -80,6 +85,8 @@ public class TestFileGenerator {
 		String tl = args[2];
 		String inputfile = args[3];
 		String mode = args[4];
+		
+	
 
 		TestFileGenerator gen = new TestFileGenerator(obdaloc, xmlloc, tl, mode);
 		gen.parseInputFile(inputfile);
@@ -695,23 +702,17 @@ public class TestFileGenerator {
 
 			BufferedWriter out = new BufferedWriter(fstream);
 
-			out.append("import junit.framework.TestCase;");
-			out.newLine();
-			out.append("import org.obda.reformulation.dllite.tests.Tester;");
-			out.newLine();
-			out.append("import java.util.Set;");
-			out.newLine();
-			out.append("import java.util.Iterator;");
-			out.newLine();
+			out.append("import junit.framework.TestCase;\n");
+			out.append("import org.obda.reformulation.tests.Tester;\n");
+			out.append("import java.util.Set;\n");
+			out.append("import java.util.Iterator;\n");
 			out.append("import java.util.List;\n");
 			out.append("import org.slf4j.Logger;\n");
 			out.append("import org.slf4j.LoggerFactory;\n");
 
 			out.newLine();
 			out.newLine();
-			out.append("public class ReformulationTest extends TestCase {");
-			out.newLine();
-			out.newLine();
+			out.append("public class ReformulationTest extends TestCase {\n\n");
 			out.append("\tprivate Tester tester = null;\n");
 			out.append("Logger										log				= LoggerFactory.getLogger(this.getClass());\n");
 			out.newLine();
@@ -729,9 +730,11 @@ public class TestFileGenerator {
 			for (int i = 0; i < tests.size(); i++) {
 				out.append("\tpublic void " + tests.get(i) + "() throws Exception{");
 				out.newLine();
-				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";");
-				out.newLine();
-				out.append("\t\ttester.load(ontoname);");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\n");
+				out.append("\t\tlog.debug(\"Test case: {}\", ontoname);\n");
+				out.append("\t\tlog.debug(\"Testing in-memory db/direct-mappings\");\n");
+				out.append("\t\ttester.load(ontoname, false, false);");
 				out.newLine();
 				out.append("\t\tSet<String> queryids = tester.getQueryIds();");
 				out.newLine();
@@ -774,6 +777,52 @@ public class TestFileGenerator {
 				out.newLine();
 				out.append("\t\t}");
 				out.newLine();
+				out.append("\t\tlog.debug(\"Testing in-memory db/complex-mappings\");\n");
+				out.append("\t\ttester.load(ontoname, true, true);");
+				out.newLine();
+				
+				/* Generating secon part of the test, inmemory, complex mappings */
+				
+				out.append("\t\tqueryids = tester.getQueryIds();");
+				out.newLine();
+				out.append("\t\tqit = queryids.iterator();");
+				out.newLine();
+				out.append("\t\twhile(qit.hasNext()){");
+				out.newLine();
+				out.append("\t\t\tString id = qit.next();");
+				out.newLine();
+				out.append("log.debug(\"Testing query: {}\", id);\n");
+				out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);");
+				out.newLine();
+				out.append("\t\t\tSet<String> res = tester.executeQuery(id);");
+				out.newLine();
+				out.append("\t\t\tif(exp.size()==0 && res.size() ==0){");
+				out.newLine();
+				out.append("\t\t\t\tassertEquals(true, true);");
+				out.newLine();
+				out.append("\t\t\t}else if(exp.size() == res.size()){");
+				out.newLine();
+				out.append("\t\t\t\tboolean bool = true;");
+				out.newLine();
+				out.append("\t\t\t\tIterator<String> it = res.iterator();");
+				out.newLine();
+				out.append("\t\t\t\twhile(it.hasNext() && bool){");
+				out.newLine();
+				out.append("\t\t\t\t\tString r = it.next();");
+				out.newLine();
+				out.append("\t\t\t\t\tbool = exp.contains(r);");
+				out.newLine();
+				out.append("\t\t\t\t}");
+				out.newLine();
+				out.append("\t\t\t\tassertEquals(bool,true);");
+				out.newLine();
+				out.append("\t\t\t}else{");
+				out.newLine();
+				out.append("\t\t\t\tassertEquals(false,true);");
+				out.newLine();
+				out.append("\t\t\t}");
+				out.newLine();
+				out.append("\t\t}");				
 				out.append("\t}");
 				out.newLine();
 				out.newLine();

@@ -69,6 +69,7 @@ public class JDBCEngine implements EvaluationEngine {
 	}
 
 	public ResultSet execute(String sql) throws Exception {
+		log.debug("Executing SQL query: \n{}", sql);
 		return connection.createStatement().executeQuery(sql);
 	}
 

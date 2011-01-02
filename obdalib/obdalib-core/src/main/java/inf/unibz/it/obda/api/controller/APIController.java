@@ -17,8 +17,6 @@ import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.api.io.EntityNameRenderer;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.constraints.parser.ConstraintsRenderer;
-import inf.unibz.it.obda.dependencies.parser.DependencyAssertionRenderer;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
@@ -62,8 +60,8 @@ public abstract class APIController {
 	protected QueryController queryController = null;
 
 	//renders the Dependency assertions from the obda file
-	private DependencyAssertionRenderer dependencyRenderer = null;
-	private ConstraintsRenderer constraintsRenderer = null;
+//	private DependencyAssertionRenderer dependencyRenderer = null;
+//	private ConstraintsRenderer constraintsRenderer = null;
 
 
 	// the entity name renderer provides the name any entity which belongs to a loaded ontology.
@@ -84,8 +82,8 @@ public abstract class APIController {
 		loadedOntologies = new HashSet<String>();
 		ioManager = new DataManager(this, new PrefixManager());
 
-		dependencyRenderer = new DependencyAssertionRenderer(this);
-		constraintsRenderer = new ConstraintsRenderer(this);
+//		dependencyRenderer = new DependencyAssertionRenderer(this);
+//		constraintsRenderer = new ConstraintsRenderer(this);
 	}
 
 	public QueryController getQueryController() {

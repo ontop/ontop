@@ -13,6 +13,8 @@ import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.obda.reformulation.domain.Assertion;
 import org.obda.reformulation.domain.PositiveInclusion;
 import org.obda.reformulation.domain.imp.ApplicabilityChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DLRPerfectReformulator implements QueryRewriter {
 
@@ -20,7 +22,9 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	private AtomUnifier					unifier			= null;
 	private PositiveInclusionApplicator	piApplicator	= null;
 	private List<Assertion>				assertions		= null;
-	ApplicabilityChecker checker = new ApplicabilityChecker();
+	ApplicabilityChecker				checker			= new ApplicabilityChecker();
+
+	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
 	public DLRPerfectReformulator(List<Assertion> ass) {
 		this.assertions = ass;
@@ -63,7 +67,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 					while (ait.hasNext()) {
 						Assertion ass = ait.next();
 						if (ass instanceof PositiveInclusion) {
-							PositiveInclusion pi = (PositiveInclusion)ass;
+							PositiveInclusion pi = (PositiveInclusion) ass;
 							if (checker.isPIApplicable(pi, currentAtom)) {
 								CQIE newquery = piApplicator.applyPI(cqie, pi);
 								if (newRules.add(newquery.hashCode())) {
@@ -110,18 +114,24 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
+		log.info("Starting query rewrting. Received query: \n{}", prog.toString());
+		
 		if (!prog.isUCQ()) {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
+		/* Query preprocessing */
+		log.info("Anonymizing the query");
 		QueryAnonymizer ano = new QueryAnonymizer();
 		DatalogProgram anonymizedProgram = ano.anonymize(prog);
+		
+		log.debug("Reformulating");
 		DatalogProgram reformulation = reformulate(anonymizedProgram);
+		log.debug("Done reformulating. Output: \n{}", reformulation.toString());
+		
 		return reformulation;
 
 	}
-
-	
 
 	@Override
 	public void updateAssertions(List<Assertion> ass) {

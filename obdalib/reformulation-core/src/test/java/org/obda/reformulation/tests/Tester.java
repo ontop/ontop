@@ -35,19 +35,29 @@ import org.w3c.dom.NodeList;
 
 public class Tester {
 
+	private Map<String, Vector<String>>	queryheads		= null;
+	private Map<String, Set<String>>	queryresults	= null;
+	private OWLOntologyManager			manager			= null;
+	private OWLOntology					ontology		= null;
+	private OWLAPIController			apic			= null;
+	private DataQueryReasoner			reasoner		= null;
+	private String						owlloc			= null;
+	private String						xmlLoc			= null;
+	private Map<String, String>			queryMap		= null;
 
-	private Map<String, Vector<String>> queryheads = null;
-	private Map<String, Set<String>> queryresults = null;
-	private OWLOntologyManager manager = null;
-	private OWLOntology ontology = null;
-	private OWLAPIController apic = null;
-	private DataQueryReasoner reasoner = null;
-	private String owlloc = null;
-	private String xmlLoc = null;
-	private Map<String, String> queryMap= null;
-
-
-	public Tester(String propfile){
+	/***
+	 * A helper class that handles loading each test scenario and comparing the
+	 * expected results with the results given by the reasoner.
+	 * 
+	 * Loading of an scenario can be done using either direct or complex
+	 * mappings.
+	 * 
+	 * @param propfile
+	 *            A properties file that specifies the base location of the owl,
+	 *            obda and xml files that contain the scenarios, mappings and
+	 *            expected results.
+	 */
+	public Tester(String propfile) {
 		queryheads = new HashMap<String, Vector<String>>();
 		queryresults = new HashMap<String, Set<String>>();
 		try {
@@ -57,8 +67,7 @@ public class Tester {
 		}
 	}
 
-	private void loadProperties(String propfile) throws Exception{
-
+	private void loadProperties(String propfile) throws Exception {
 
 		FileInputStream stream = new FileInputStream(new File(propfile));
 		Properties properties = new Properties();
@@ -73,80 +82,89 @@ public class Tester {
 			throw new Exception("Property location.of.result.files not set!");
 		}
 
-//		Tester t = new Tester();
-//		for(int i=minNr; i<=maxNr; i++){
-//			String owlfile= owlLoc+filename+i+".owl";
-//			String resultfile = xmlLoc+filename+i+".xml";
-//			t.executeTestFor(owlfile, resultfile);
-//		}
+		// Tester t = new Tester();
+		// for(int i=minNr; i<=maxNr; i++){
+		// String owlfile= owlLoc+filename+i+".owl";
+		// String resultfile = xmlLoc+filename+i+".xml";
+		// t.executeTestFor(owlfile, resultfile);
+		// }
 
 	}
 
-	public void load(String onto) throws Exception{
+	public void load(String onto, boolean createMappings, boolean complexUnfolding) throws Exception {
 
-		String owlfile = owlloc+onto+".owl";
-		String resultfile = xmlLoc+onto+".xml";
+		String owlfile = owlloc + onto + ".owl";
+		String resultfile = xmlLoc + onto + ".xml";
 		loadOntology(owlfile);
 		loadResults(resultfile);
 		OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
 		fac.setup(manager, "00100100", "dataqueryreasoner");
 		fac.setOBDAController(apic);
 		ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-        ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
-        ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+		if (createMappings)
+			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+		else
+			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
+
+		ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
+
+		if (complexUnfolding)
+			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+		else
+			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "direct");
+
 		reasoner = (DataQueryReasoner) fac.createReasoner(manager);
 
-		queryMap =new HashMap<String, String>();
+		queryMap = new HashMap<String, String>();
 		Vector<QueryControllerEntity> vec = apic.getQueryController().getElements();
 		Iterator<QueryControllerEntity> it = vec.iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			QueryControllerEntity e = it.next();
-			if(e instanceof QueryControllerQuery){
+			if (e instanceof QueryControllerQuery) {
 				QueryControllerQuery qcq = (QueryControllerQuery) e;
 				queryMap.put(qcq.getID(), qcq.getQuery());
-			}else{
+			} else {
 				QueryControllerGroup group = (QueryControllerGroup) e;
-				Vector<QueryControllerQuery> q =group.getQueries();
+				Vector<QueryControllerQuery> q = group.getQueries();
 				Iterator<QueryControllerQuery> qit = q.iterator();
-				while(qit.hasNext()){
+				while (qit.hasNext()) {
 					QueryControllerQuery qcq = qit.next();
-					String id= group.getID()+"_"+qcq.getID();
+					String id = group.getID() + "_" + qcq.getID();
 					queryMap.put(id, qcq.getQuery());
 				}
 			}
 		}
 	}
 
-	public Set<String> getQueryIds(){
+	public Set<String> getQueryIds() {
 		return queryresults.keySet();
 	}
 
-	public Set<String> executeQuery(String id) throws Exception{
-		String query =queryMap.get(id);
-		return execute(query,id);
+	public Set<String> executeQuery(String id) throws Exception {
+		String query = queryMap.get(id);
+		return execute(query, id);
 	}
 
-	public Set<String> getExpectedResult(String id){
+	public Set<String> getExpectedResult(String id) {
 		return queryresults.get(id);
 	}
 
-	private Set<String> execute(String query,String id) throws Exception{
+	private Set<String> execute(String query, String id) throws Exception {
 
 		String prefix = getPrefix();
 		String fullquery = prefix + "\n" + query;
 		QueryResultSet result = reasoner.getStatement(fullquery).getResultSet();
-		int col= result.getColumCount();
-		HashSet<String> tuples =new HashSet<String>();
-		while(result.nextRow()){
+		int col = result.getColumCount();
+		HashSet<String> tuples = new HashSet<String>();
+		while (result.nextRow()) {
 			String tuple = "";
-			for(int i=1;i<=col; i++){
-				if(tuple.length() >0){
+			for (int i = 1; i <= col; i++) {
+				if (tuple.length() > 0) {
 					tuple = tuple + ",";
 				}
-				if(isBooleanQuery(id)){
+				if (isBooleanQuery(id)) {
 					tuple = tuple + result.getAsString(i);
-				}else{
+				} else {
 					URI uri = result.getAsURI(i);
 					tuple = tuple + uri.getFragment();
 				}
@@ -156,19 +174,19 @@ public class Tester {
 		return tuples;
 	}
 
-	private void loadOntology(String owlfile) throws OWLOntologyCreationException{
+	private void loadOntology(String owlfile) throws OWLOntologyCreationException {
 
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
 		apic = new OWLAPIController(manager, ontology);
-//		apic.loadData(new File(owlfile).toURI());
+		// apic.loadData(new File(owlfile).toURI());
 		URI obdafile = apic.getIOManager().getOBDAFile(manager.getPhysicalURIForOntology(ontology));
 		apic.getIOManager().loadOBDADataFromURI(obdafile);
 		fillPrefixManager();
 	}
 
-	private void loadResults(String resultfile){
+	private void loadResults(String resultfile) {
 
 		queryheads = new HashMap<String, Vector<String>>();
 		queryresults = new HashMap<String, Set<String>>();
@@ -212,37 +230,37 @@ public class Tester {
 					String queryid = node.getAttribute("queryid");
 					Node head = node.getElementsByTagName("head").item(0);
 					Node tuples = node.getElementsByTagName("tuples").item(0);
-					queryheads.put(queryid, getVariables((Element)head));
-					queryresults.put(queryid, getResults((Element)tuples));
+					queryheads.put(queryid, getVariables((Element) head));
+					queryresults.put(queryid, getResults((Element) tuples));
 				}
 			}
 		}
 
 	}
 
-	private Vector<String> getVariables(Element node){
+	private Vector<String> getVariables(Element node) {
 		Vector<String> v = new Vector<String>();
 		NodeList list = node.getElementsByTagName("variable");
-		for(int i=0; i<list.getLength();i++){
+		for (int i = 0; i < list.getLength(); i++) {
 			Element n = (Element) list.item(i);
 			String s = n.getTextContent().trim();
-			if(s.length()>0){
+			if (s.length() > 0) {
 				v.add(s);
 			}
 		}
 		return v;
 	}
 
-	private Set<String> getResults(Element node){
+	private Set<String> getResults(Element node) {
 		HashSet<String> set = new HashSet<String>();
 		NodeList list = node.getElementsByTagName("tuple");
-		for(int i=0; i<list.getLength();i++){
+		for (int i = 0; i < list.getLength(); i++) {
 			Element n = (Element) list.item(i);
 			NodeList constants = n.getElementsByTagName("constant");
-			for(int j=0; j<constants.getLength();j++){
+			for (int j = 0; j < constants.getLength(); j++) {
 				Element con = (Element) constants.item(j);
 				String s = con.getTextContent().trim();
-				if(s.length()>0){
+				if (s.length() > 0) {
 					set.add(s);
 				}
 			}
@@ -250,7 +268,7 @@ public class Tester {
 		return set;
 	}
 
-	private String getPrefix(){
+	private String getPrefix() {
 		String queryString = "";
 		String defaultNamespace = ontology.getURI().toString();
 		if (defaultNamespace.endsWith("#")) {
@@ -259,7 +277,6 @@ public class Tester {
 			queryString += "BASE <" + defaultNamespace + ">\n";
 		}
 		queryString += "PREFIX :   <" + defaultNamespace + "#>\n";
-
 
 		queryString += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n";
 		queryString += "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n";
@@ -271,42 +288,16 @@ public class Tester {
 		return queryString;
 	}
 
-	private boolean isBooleanQuery(String queryid){
+	private boolean isBooleanQuery(String queryid) {
 		Vector<String> head = queryheads.get(queryid);
-		if(head.size()>0){
+		if (head.size() > 0) {
 			return false;
-		}else{
+		} else {
 			return true;
 		}
 	}
 
-	public static void main(String args[]) throws Exception{
-
-		Tester te = new Tester("test.properties");
-		te.load("test_27_1_1");
-		Set<String> queryids = te.getQueryIds();
-		Iterator<String> qit = queryids.iterator();
-		while(qit.hasNext()){
-			String id = qit.next();
-			Set<String> exp = te.getExpectedResult(id);
-			Set<String> res = te.executeQuery(id);
-			if(exp.size()==0 && res.size() ==0){
-				System.out.println(true);
-			}else if(exp.size() == res.size()){
-				boolean bool = true;
-				Iterator<String> it = res.iterator();
-				while(it.hasNext() && bool){
-					String r = it.next();
-					bool = exp.contains(r);
-				}
-				System.out.println(bool);
-			}else{
-				System.out.println(true);
-			}
-		}
-	}
-
-	private void fillPrefixManager(){
+	private void fillPrefixManager() {
 		PrefixManager man = apic.getIOManager().getPrefixManager();
 		man.addUri(URI.create("http://www.w3.org/2000/01/rdf-schema#"), "rdfs");
 		man.addUri(URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#"), "rdf");
