@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA>
+  <SavedQueries>
+    <Query id="b" text="SELECT $y WHERE {:s2 dllite:R$y}"/>
+    <Query id="e" text="SELECT $y WHERE {:s1 dllite:S$y}"/>
+    <Query id="f" text="ASK WHERE {:s1 dllite:R:s2}"/>
+    <Query id="d" text="SELECT $x WHERE {$x dllite:S:s2}"/>
+    <Query id="i" text="ASK WHERE {:s2 dllite:S:s1}"/>
+    <Query id="c" text="SELECT $x WHERE {$x dllite:R:s1}"/>
+    <Query id="h" text="ASK WHERE {:s1 dllite:S:s2}"/>
+    <Query id="g" text="ASK WHERE {:s2 dllite:R:s1}"/>
+  </SavedQueries>
+</OBDA>

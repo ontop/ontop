@@ -6,6 +6,12 @@
         </head>
         <tuples/>
     </result>
+    <result queryid="a">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples/>
+    </result>
     <result queryid="b">
         <head>
             <variable>x</variable>
@@ -25,11 +31,5 @@
                 <constant>r2</constant>
             </tuple>
         </tuples>
-    </result>
-    <result queryid="a">
-        <head>
-            <variable>x</variable>
-        </head>
-        <tuples/>
     </result>
 </results>

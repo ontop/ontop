@@ -224,7 +224,7 @@ public class TestFileGenerator {
 
 	private String[] getQueryHead(String query) throws Exception {
 
-		String[] aux = query.split("<-");
+		String[] aux = query.split(":-");
 		if (aux.length != 2) {
 			throw new Exception("Wrong query format at " + linenr);
 		}
@@ -529,7 +529,7 @@ public class TestFileGenerator {
 
 	private String getSPARQLQuery(String query) throws Exception {
 
-		String[] aux = query.split("<-");
+		String[] aux = query.split(":-");
 		if (aux.length != 2) {
 			throw new Exception("Wrong query format at " + linenr);
 		}
@@ -616,7 +616,7 @@ public class TestFileGenerator {
 
 		StringBuffer ds = new StringBuffer(); // datalog string
 
-		String[] aux = query.split("<-");
+		String[] aux = query.split(":-");
 		if (aux.length != 2)
 			throw new Exception("Wrong query format at " + linenr);
 
@@ -716,7 +716,7 @@ public class TestFileGenerator {
 			out.append("\tprivate Tester tester = null;\n");
 			out.append("Logger										log				= LoggerFactory.getLogger(this.getClass());\n");
 			out.newLine();
-			out.append("\tprivate String propfile = \"src/test/java/test.properties\";");
+			out.append("\tprivate String propfile = \"src/test/resources/test.properties\";");
 			out.newLine();
 			out.append("\tpublic ReformulationTest(){");
 			out.newLine();
@@ -738,6 +738,7 @@ public class TestFileGenerator {
 				out.newLine();
 				out.append("\t\tSet<String> queryids = tester.getQueryIds();");
 				out.newLine();
+				out.append("\t\tlog.debug(\"Testing {} queries\", queryids.size());");
 				out.append("\t\tIterator<String> qit = queryids.iterator();");
 				out.newLine();
 				out.append("\t\twhile(qit.hasNext()){");
@@ -748,34 +749,14 @@ public class TestFileGenerator {
 				out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);");
 				out.newLine();
 				out.append("\t\t\tSet<String> res = tester.executeQuery(id);");
-				out.newLine();
-				out.append("\t\t\tif(exp.size()==0 && res.size() ==0){");
-				out.newLine();
-				out.append("\t\t\t\tassertEquals(true, true);");
-				out.newLine();
-				out.append("\t\t\t}else if(exp.size() == res.size()){");
-				out.newLine();
-				out.append("\t\t\t\tboolean bool = true;");
-				out.newLine();
-				out.append("\t\t\t\tIterator<String> it = res.iterator();");
-				out.newLine();
-				out.append("\t\t\t\twhile(it.hasNext() && bool){");
-				out.newLine();
-				out.append("\t\t\t\t\tString r = it.next();");
-				out.newLine();
-				out.append("\t\t\t\t\tbool = exp.contains(r);");
-				out.newLine();
-				out.append("\t\t\t\t}");
-				out.newLine();
-				out.append("\t\t\t\tassertEquals(bool,true);");
-				out.newLine();
-				out.append("\t\t\t}else{");
-				out.newLine();
-				out.append("\t\t\t\tassertEquals(false,true);");
-				out.newLine();
-				out.append("\t\t\t}");
-				out.newLine();
-				out.append("\t\t}");
+				
+				out.append("\t\t\tassertTrue(exp.size() == res.size());\n");
+				out.append("\t\t\tfor (String realResult : res) {\n");
+				out.append("\t\t\t\tassertTrue(exp.contains(realResult));\n");
+				out.append("\t\t\t}\n");
+				
+				out.append("\t\t}\n");
+				
 				out.newLine();
 				out.append("\t\tlog.debug(\"Testing in-memory db/complex-mappings\");\n");
 				out.append("\t\ttester.load(ontoname, true, true);");
@@ -791,38 +772,18 @@ public class TestFileGenerator {
 				out.newLine();
 				out.append("\t\t\tString id = qit.next();");
 				out.newLine();
-				out.append("log.debug(\"Testing query: {}\", id);\n");
+				out.append("\t\tlog.debug(\"Testing query: {}\", id);\n");
 				out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);");
 				out.newLine();
 				out.append("\t\t\tSet<String> res = tester.executeQuery(id);");
 				out.newLine();
-				out.append("\t\t\tif(exp.size()==0 && res.size() ==0){");
-				out.newLine();
-				out.append("\t\t\t\tassertEquals(true, true);");
-				out.newLine();
-				out.append("\t\t\t}else if(exp.size() == res.size()){");
-				out.newLine();
-				out.append("\t\t\t\tboolean bool = true;");
-				out.newLine();
-				out.append("\t\t\t\tIterator<String> it = res.iterator();");
-				out.newLine();
-				out.append("\t\t\t\twhile(it.hasNext() && bool){");
-				out.newLine();
-				out.append("\t\t\t\t\tString r = it.next();");
-				out.newLine();
-				out.append("\t\t\t\t\tbool = exp.contains(r);");
-				out.newLine();
-				out.append("\t\t\t\t}");
-				out.newLine();
-				out.append("\t\t\t\tassertEquals(bool,true);");
-				out.newLine();
-				out.append("\t\t\t}else{");
-				out.newLine();
-				out.append("\t\t\t\tassertEquals(false,true);");
-				out.newLine();
-				out.append("\t\t\t}");
-				out.newLine();
-				out.append("\t\t}");				
+				out.append("\t\t\tassertTrue(exp.size() == res.size());\n");
+				out.append("\t\t\tfor (String realResult : res) {\n");
+				out.append("\t\t\t\tassertTrue(exp.contains(realResult));\n");
+				out.append("\t\t\t}\n");
+
+				out.append("\t\t}\n");
+				
 				out.append("\t}");
 				out.newLine();
 				out.newLine();

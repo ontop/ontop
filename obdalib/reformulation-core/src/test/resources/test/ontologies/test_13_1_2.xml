@@ -1,43 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <results>
-    <result queryid="e">
-        <head>
-            <variable>x</variable>
-        </head>
-        <tuples>
-            <tuple>
-                <constant>r1</constant>
-            </tuple>
-        </tuples>
-    </result>
-    <result queryid="d">
-        <head>
-            <variable>x</variable>
-            <variable>y</variable>
-        </head>
-        <tuples>
-            <tuple>
-                <constant>r1,r2</constant>
-            </tuple>
-        </tuples>
-    </result>
-    <result queryid="l">
-        <head/>
-        <tuples>
-            <tuple>
-                <constant>false</constant>
-            </tuple>
-        </tuples>
-    </result>
     <result queryid="c">
         <head>
             <variable>x</variable>
         </head>
         <tuples/>
     </result>
-    <result queryid="g">
+    <result queryid="k">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>true</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="f">
         <head>
-            <variable>x</variable>
+            <variable>y</variable>
         </head>
         <tuples/>
     </result>
@@ -51,11 +30,11 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="k">
+    <result queryid="l">
         <head/>
         <tuples>
             <tuple>
-                <constant>true</constant>
+                <constant>false</constant>
             </tuple>
         </tuples>
     </result>
@@ -76,11 +55,26 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="f">
+    <result queryid="d">
         <head>
+            <variable>x</variable>
             <variable>y</variable>
         </head>
-        <tuples/>
+        <tuples>
+            <tuple>
+                <constant>r1,r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="e">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>r1</constant>
+            </tuple>
+        </tuples>
     </result>
     <result queryid="i">
         <head/>
@@ -89,6 +83,12 @@
                 <constant>true</constant>
             </tuple>
         </tuples>
+    </result>
+    <result queryid="g">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples/>
     </result>
     <result queryid="j">
         <head/>

@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <results>
+    <result queryid="a">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>false</constant>
+            </tuple>
+        </tuples>
+    </result>
     <result queryid="b">
         <head/>
         <tuples>
@@ -9,14 +17,6 @@
         </tuples>
     </result>
     <result queryid="c">
-        <head/>
-        <tuples>
-            <tuple>
-                <constant>false</constant>
-            </tuple>
-        </tuples>
-    </result>
-    <result queryid="a">
         <head/>
         <tuples>
             <tuple>

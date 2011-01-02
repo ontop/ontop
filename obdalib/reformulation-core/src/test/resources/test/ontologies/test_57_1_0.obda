@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA>
+  <SavedQueries>
+    <Query id="c" text="ASK WHERE {:r1 dllite:R:r2}"/>
+    <Query id="d" text="ASK WHERE {:b rdf:type dllite:B}"/>
+    <Query id="a" text="SELECT $x WHERE {$x dllite:R:r2}"/>
+    <Query id="b" text="SELECT $y WHERE {:r1 dllite:R$y}"/>
+  </SavedQueries>
+</OBDA>

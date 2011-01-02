@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <results>
-    <result queryid="a">
+    <result queryid="b">
         <head>
             <variable>x</variable>
         </head>
@@ -18,7 +18,7 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="b">
+    <result queryid="a">
         <head>
             <variable>x</variable>
         </head>

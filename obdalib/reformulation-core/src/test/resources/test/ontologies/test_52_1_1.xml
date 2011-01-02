@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <results>
-    <result queryid="d">
+    <result queryid="e">
         <head/>
         <tuples>
             <tuple>
@@ -8,21 +8,17 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="b">
+    <result queryid="c">
         <head>
             <variable>x</variable>
         </head>
-        <tuples>
-            <tuple>
-                <constant>r1</constant>
-            </tuple>
-        </tuples>
+        <tuples/>
     </result>
-    <result queryid="i">
+    <result queryid="h">
         <head/>
         <tuples>
             <tuple>
-                <constant>false</constant>
+                <constant>true</constant>
             </tuple>
         </tuples>
     </result>
@@ -40,19 +36,23 @@
         </head>
         <tuples/>
     </result>
-    <result queryid="e">
-        <head/>
+    <result queryid="b">
+        <head>
+            <variable>x</variable>
+        </head>
         <tuples>
             <tuple>
-                <constant>true</constant>
+                <constant>r1</constant>
             </tuple>
         </tuples>
     </result>
-    <result queryid="h">
-        <head/>
+    <result queryid="f">
+        <head>
+            <variable>y</variable>
+        </head>
         <tuples>
             <tuple>
-                <constant>true</constant>
+                <constant>r2</constant>
             </tuple>
         </tuples>
     </result>
@@ -64,19 +64,19 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="c">
-        <head>
-            <variable>x</variable>
-        </head>
-        <tuples/>
-    </result>
-    <result queryid="f">
-        <head>
-            <variable>y</variable>
-        </head>
+    <result queryid="i">
+        <head/>
         <tuples>
             <tuple>
-                <constant>r2</constant>
+                <constant>false</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="d">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>true</constant>
             </tuple>
         </tuples>
     </result>

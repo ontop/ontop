@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <results>
-    <result queryid="d">
-        <head>
-            <variable>x</variable>
-        </head>
+    <result queryid="b">
+        <head/>
         <tuples>
             <tuple>
-                <constant>r1</constant>
+                <constant>false</constant>
             </tuple>
         </tuples>
     </result>
@@ -18,19 +16,23 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="b">
-        <head/>
+    <result queryid="d">
+        <head>
+            <variable>x</variable>
+        </head>
         <tuples>
             <tuple>
-                <constant>false</constant>
+                <constant>r1</constant>
             </tuple>
         </tuples>
     </result>
-    <result queryid="c">
-        <head/>
+    <result queryid="e">
+        <head>
+            <variable>y</variable>
+        </head>
         <tuples>
             <tuple>
-                <constant>false</constant>
+                <constant>r2</constant>
             </tuple>
         </tuples>
     </result>
@@ -42,13 +44,11 @@
             </tuple>
         </tuples>
     </result>
-    <result queryid="e">
-        <head>
-            <variable>y</variable>
-        </head>
+    <result queryid="c">
+        <head/>
         <tuples>
             <tuple>
-                <constant>r2</constant>
+                <constant>false</constant>
             </tuple>
         </tuples>
     </result>

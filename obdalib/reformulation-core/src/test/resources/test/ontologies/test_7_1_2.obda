@@ -3,11 +3,11 @@
 ]>
 <OBDA>
   <SavedQueries>
-    <Query id="a" text="SELECT $x WHERE {$x rdf:type dllite:A}"/>
-    <Query id="e" text="ASK WHERE {$x rdf:type dllite:A}"/>
     <Query id="d" text="SELECT $x WHERE {$x dllite:R$x}"/>
     <Query id="c" text="SELECT $y WHERE {$x dllite:R$y}"/>
+    <Query id="e" text="ASK WHERE {$x rdf:type dllite:A}"/>
     <Query id="b" text="SELECT $x WHERE {$x dllite:R$y}"/>
+    <Query id="a" text="SELECT $x WHERE {$x rdf:type dllite:A}"/>
     <Query id="f" text="ASK WHERE {$x dllite:R$y}"/>
     <Query id="g" text="ASK WHERE {$x dllite:R$x}"/>
   </SavedQueries>

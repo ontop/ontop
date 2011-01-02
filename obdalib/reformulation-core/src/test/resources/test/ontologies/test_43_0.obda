@@ -3,8 +3,8 @@
 ]>
 <OBDA>
   <SavedQueries>
-    <Query id="a" text="SELECT $x WHERE {$x dllite:S$y}"/>
     <Query id="c" text="SELECT $x $y WHERE {$x dllite:S$y}"/>
     <Query id="b" text="SELECT $y WHERE {$x dllite:S$y}"/>
+    <Query id="a" text="SELECT $x WHERE {$x dllite:S$y}"/>
   </SavedQueries>
 </OBDA>
