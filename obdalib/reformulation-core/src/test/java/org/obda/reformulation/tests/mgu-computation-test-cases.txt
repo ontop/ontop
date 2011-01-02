@@ -1,0 +1,120 @@
+
+% EXCEPTIONS 
+
+% A(..f(f(x))..) 
+% - if in any atom there is a nested term
+%A(..f(<http://localhost/>)..) 
+% - if in any atom there is a function terms with URIs
+
+% terms in atoms must be separated by 1 white space
+% substitutions in MGU's must be separated by 1 white space
+%
+% These tests check the MGU produced for 2 given atoms. NULL means
+% the atoms do not unify, an empty MGU means the atoms are syntactically
+% the same (up to non distinguished variables)
+
+
+
+A(x) | B(x) = NULL
+A(x) | A(y) = {x/y}
+A(x) | A(x) = {}
+%A(x) | A(<urn::localhost>) = {x/<urn::localhost>}
+A(x) | A("test") = {x/"test"}
+A(x) | A(f(y)) = {x/f(y)}
+A(x) | A(f(x)) = NULL
+A(x) | A(f(y,z)) = {x/f(y,z)}
+A(x) | A(f(x,y)) = NULL
+A(x) | A(f(y,x)) = NULL
+A(x) | A(f(y,z,m)) = {x/f(y,z,m)}
+A(x) | A(f(x,y,z)) = NULL
+A(x) | A(f(y,x,z)) = NULL
+A(x) | A(f(y,z,x)) = NULL
+A(x) | A(#) = {}
+
+A(#) | A(x) = {}
+A(#) | A(x y) = NULL
+A(#) | A("test") = {}
+A(#) | A(f(x)) = {}
+A(#) | A(f(x,y)) = {}
+A(#) | A(f(x,x)) = {}
+A(#) | A(#) = {}
+A(#) | B(#) = NULL
+A(# #) | A(x y) = {}
+A(# x) | A(x y) = {x/y}
+A(# # #) | A(x "test" f(x,y)) = {}
+A(# # x y) | A(x y z x) = {x/z y/z}
+% Checking if the previous case makes sense even without Undistinguished Variables
+A(m n x y) | A(x y z x) = {m/z n/z x/z y/z}
+
+A(<urn::localhost>) | A(x) = {x/<urn::localhost>}
+A(<urn::localhost>) | A(<urn::localhost>) = {}
+A(<urn::localhost>) | A(<urn::localhost2>) = NULL
+A(<urn::localhost>) | A("test") = NULL
+A(<urn::localhost>) | A(f(x)) = NULL
+A(<urn::localhost>) | A(f(x,y)) = NULL
+A(<urn::localhost>) | A(f(x,y,z)) = NULL
+
+A("test") | A(x) = {x/"test"}
+%A("test") | A(<urn::localhost>) = NULL
+A("test") | A("test") = {}
+A("test") | A("test2") = NULL
+A("test") | A(f(x)) = NULL
+A("test") | A(f(x,y)) = NULL
+A("test") | A(f(x,y,z)) = NULL
+
+A(f(x)) | A(x) = NULL
+A(f(x)) | A(y) = {y/f(x)}
+A(f(x)) | A("test") = NULL
+%A(f(x)) | A(<urn::localhost>)  = NULL
+A(f(x)) | A(f(x)) = {}
+A(f(x)) | A(f(y)) = {x/y}
+A(f(x)) | A(f("test")) = {x/"test"}
+%A(f(x)) | A(f(<urn::localhost>)) = {x/<localhost/>}
+A(f(x)) | A(f(x,y)) = NULL
+A(f(x)) | A(f(x,x)) = NULL
+A(f(x)) | A(f(y,y)) = NULL
+A(f("test")) | A(f(x)) = {x/"test"}
+A(f("test")) | A(f("test")) = {}
+A(f("test")) | A(f("test2")) = NULL
+%A(f("test")) | A(f(<urn::localhost>)) = NULL
+A(f("test")) | A(f(x,y)) = NULL
+
+%A(f(x,y)) | A(<urn::localhost>) = NULL
+A(f(x,y)) | A("test") = NULL
+A(f(x,y)) | A(x) = NULL
+A(f(x,y)) | A(y) = NULL
+A(f(x,y)) | A(z) = {z/f(x,y)}
+A(f(x,y)) | A(f(x)) = NULL
+A(f(x,y)) | A(f(y)) = NULL
+A(f(x,y)) | A(f(z)) = NULL
+A(f(x,y)) | A(g(x,y)) = NULL
+
+A(f(x,y)) | A(f(x,y)) = {}
+A(f(x,y)) | A(f(y,x))  = {x/y}
+A(f(x,y)) | A(f(x,x)) = {y/x}
+A(f(x,y)) | A(f(y,y)) = {x/y}
+A(f(x,y)) | A(f(y,z)) = {x/z y/z}
+A(f(x,y)) | A(f(z,y)) = {x/z}
+A(f(x,y)) | A(f(y,y)) = {x/y}
+A(f(x,y)) | A(f(z,z)) = {x/z y/z}
+A(f(x,y)) | A(f(m,n)) = {x/m y/n}
+A(f(x,y)) | A(f(m,m)) = {x/m y/m}
+A(f(x,y)) | A(g(x,y)) = NULL
+
+A(f(x,x)) | A(f(x,y)) = {x/y}
+A(f(x,x)) | A(f(y,x))  = {x/y}
+A(f(x,x)) | A(f(x,x)) = {}
+A(f(x,x)) | A(f(y,y)) = {x/y}
+A(f(x,x)) | A(f(y,z)) = {x/z y/z}
+A(f(x,x)) | A(f(z,y)) = {x/y z/y}
+A(f(x,x)) | A(f(y,y)) = {x/y}
+A(f(x,x)) | A(f(m,n)) = {x/n m/n}
+A(f(x,x)) | A(g(x,y)) = NULL
+
+
+
+
+
+
+
+

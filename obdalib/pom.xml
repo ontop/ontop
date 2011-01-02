@@ -5,13 +5,25 @@
 	<artifactId>obdalib-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0.3-SNAPSHOT</version>
-	<name>obda-parent</name>
+	<name>obdalib-parent</name>
 	<url>http://maven.apache.org</url>
+
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.1</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+
 
 	<modules>
 		<module>obdalib-core</module>
 		<module>obdalib-owlapi</module>
 		<module>obdalib-protege4</module>
+        <module>reformulation-core</module>
+        <module>reformulation-plugin</module>
 	</modules>
 
 	<properties>
