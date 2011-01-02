@@ -8,6 +8,8 @@ import org.obda.query.domain.FunctionSymbol;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.Variable;
 
+// TODO This class must become "FunctionalTerm", it should allow for constants
+// or variables as inner terms (no nesting for the moment)
 public class ObjectVariableImpl implements Variable {
 
 	private FunctionSymbol	functor	= null;
@@ -67,8 +69,7 @@ public class ObjectVariableImpl implements Variable {
 		sb_name.append(")");
 		return sb_name.toString();
 	}
-	
-	
+
 	public boolean containsTerm(Term t) {
 		for (int i = 0; i < terms.size(); i++) {
 			Term t2 = terms.get(i);
