@@ -94,7 +94,7 @@ public class QueryController {
 			fireElementAdded(query);
 		}
 		else {
-			log.info("Query already exists!");
+			log.warn("Query controler: Query already exists. ID: {}", id);
 		}
 		return query;
 	}

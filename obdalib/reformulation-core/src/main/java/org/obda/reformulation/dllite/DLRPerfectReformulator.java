@@ -114,20 +114,20 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
-		log.info("Starting query rewrting. Received query: \n{}", prog.toString());
+		log.debug("Starting query rewrting. Received query: \n{}", prog);
 		
 		if (!prog.isUCQ()) {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
 		/* Query preprocessing */
-		log.info("Anonymizing the query");
+		log.debug("Anonymizing the query");
 		QueryAnonymizer ano = new QueryAnonymizer();
 		DatalogProgram anonymizedProgram = ano.anonymize(prog);
 		
 		log.debug("Reformulating");
 		DatalogProgram reformulation = reformulate(anonymizedProgram);
-		log.debug("Done reformulating. Output: \n{}", reformulation.toString());
+		log.debug("Done reformulating. Output: \n{}", reformulation);
 		
 		return reformulation;
 

@@ -98,7 +98,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		for (OBDAMappingAxiom mapping : splitMappings) {
 			CQIE mappingrule = getRule(mapping);
 			compilationOfM.appendRule(mappingrule);
-			log.debug("Rule generated: {}", mappingrule.toString());
+			log.debug("Rule generated: {}", mappingrule);
 		}
 		this.compilationOfM = compilationOfM;
 
@@ -176,7 +176,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 	@Override
 	public DatalogProgram unfold(DatalogProgram inputquery) throws Exception {
-		log.debug("Computing partial evaluation for: \n{}", inputquery.toString());
+		log.debug("Computing partial evaluation for: \n{}", inputquery);
 		deAnonymize(inputquery);
 		LinkedList<CQIE> evaluation = new LinkedList<CQIE>();
 		Iterator<CQIE> qit = inputquery.getRules().iterator();
@@ -215,7 +215,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		DatalogProgram dp = new DatalogProgramImpl();
 		dp.appendRule(partialEvaluation);
 
-		log.debug("Computed partial evaluation: \n{}", dp.toString());
+		log.debug("Computed partial evaluation: \n{}", dp);
 		return dp;
 	}
 

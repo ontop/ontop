@@ -16,8 +16,10 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Constant;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
+import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.UndistinguishedVariable;
+import org.obda.query.domain.imp.VariableImpl;
 import org.obda.reformulation.domain.DLLiterOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +40,8 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	private Map<Atom, String>				aliasMapper	= null;
 	private PrefixManager					manager		= null;
 	private int								counter		= 1;
-	
-	Logger log = LoggerFactory.getLogger(SimpleDirectQueryGenrator.class);
+
+	Logger									log			= LoggerFactory.getLogger(SimpleDirectQueryGenrator.class);
 
 	public SimpleDirectQueryGenrator(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
 
@@ -115,6 +117,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	 */
 	private String generateSelectClause(CQIE query) throws Exception {
 		StringBuffer sb = new StringBuffer();
+		int variableCounter = 0;
 		if (query.isBoolean()) {
 			sb.append("TRUE AS x ");
 		} else {
@@ -126,18 +129,33 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 					sb.append(", ");
 				}
 				Term t = it.next();
-				List<Object[]> list = termMap.get(t.getName());
-				if (list != null && list.size() > 0) {
-					Object[] obj = list.get(0);
-					String table = aliasMapper.get(((Atom) obj[0]));
-					String column = "term" + obj[1];
-					StringBuffer aux = new StringBuffer();
-					aux.append(table);
-					aux.append(".");
-					aux.append(column);
-					aux.append(" as ");
-					aux.append(t.getName());
-					sb.append(aux.toString());
+				if (t instanceof VariableImpl) {
+					List<Object[]> list = termMap.get(t.getName());
+					if (list != null && list.size() > 0) {
+						Object[] obj = list.get(0);
+						String table = aliasMapper.get(((Atom) obj[0]));
+						String column = "term" + obj[1];
+						StringBuffer aux = new StringBuffer();
+						aux.append(table);
+						aux.append(".");
+						aux.append(column);
+						aux.append(" as ");
+						aux.append(t.getName());
+						sb.append(aux.toString());
+					}
+				} else if (t instanceof URIConstant) {
+					URIConstant uriterm = (URIConstant)t;
+					sb.append("'");
+					sb.append(uriterm.getName().trim());
+					sb.append("' as auxvar");
+					sb.append(variableCounter);
+					variableCounter += 1;
+					/* note that we use the counter to be able to give a name to the
+					 * column that the URIConstant will occupy. Since we don't have the
+					 * orginal name of the head of the query, we need to invent one. 
+					 */
+				} else {
+					throw new RuntimeException("SimpleDirectQueryGenrator: Unexpected term in the head of a query: " + t);
 				}
 			}
 		}
