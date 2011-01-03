@@ -1,4 +1,4 @@
-The following are tests for soundness and completeness of query answering methods for DL-Lite,,f,,, DL-Lite,,R,, and DL-Lite,,A,,. These tests can be used as input for our ''evaluator'' engine. Information about this engine can be found [wiki:evaluation_engine here]
+                  The following are tests for soundness and completeness of query answering methods for DL-Lite,,f,,, DL-Lite,,R,, and DL-Lite,,A,,. These tests can be used as input for our ''evaluator'' engine. Information about this engine can be found [wiki:evaluation_engine here]
 
 =  Completeness Test DLLite,,R,, query answering =
 
@@ -549,105 +549,62 @@ With exists R on the left
 ||   || ap    ||           ||                || q() :- S(<s2>,<s2>) || {false} || ||
 
 
-#END# Correct tests end here, ignore the ones bellow
-
-
-With exists R inverse on the left   ''Missing constants''!!
+With exists R inverse on the left 
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
-|| 19||a || ER^^-^^ ISA B || R(r1,r2)        || q(x) :- R(x,y) || {r1} || ||
-|| || b || ||                                || q(y) :- R(x,y) || {r2} || ||
-|| || c || ||                                || q(x) :- R(x,x) || {}   || ||
-|| || d || ||                                || q(x,y) :- R(x,y) || {(r1,r2)} || ||
-|| || e || ||                                || q(x) :- B(x) || {r2} || ||
-|| || f || ||                                || q() :- R(x,y) || {true} || booleans||
-|| || g || ||                                || q() :- R(x,x) || {false}   || ||
-|| || h || ||                                || q() :- B(x) || {true} || ||
-|| 20||a || ER^^-^^ ISA B || B(b)            || q(x) :- R(x,y) || {} || ||
-|| || b || ||                                || q(y) :- R(x,y) || {} || ||
-|| || c || ||                                || q(x) :- R(x,x) || {}   || ||
-|| || d || ||                                || q(x,y) :- R(x,y) || {} || ||
-|| || e || ||                                || q(x) :- B(x) || {b} || ||
-|| || f || ||                                || q() :- R(x,y) || {false} || booleans||
-|| || g || ||                                || q() :- R(x,x) || {false}   || ||
-|| || h || ||                                || q() :- B(x) || {true} || ||
-|| 21||a || ER^^-^^ ISA B || R(r1,r2) B(b)  || q(x) :- R(x,y) || {r1} || ||
-|| || b || ||                                || q(y) :- R(x,y) || {r2} || ||
-|| || c || ||                                || q(x) :- R(x,x) || {}   || ||
-|| || d || ||                                || q(x,y) :- R(x,y) || {(r1,r2)} || ||
-|| || e || ||                                || q(x) :- B(x) || {b r2} || ||
-|| || f || ||                                || q() :- R(x,y) || {true} || booleans||
-|| || g || ||                                || q() :- R(x,x) || {false}   || ||
-|| || h || ||                                || q() :- B(x) || {true} || ||
-|| 22||a || ER^^-^^ ISA ES ||      R(r1,r2)  || q(x) :- R(x,y) || {r1} || ||
-||   || b    ||           ||                 || q(y) :- R(x,y) || {r2} || ||
-||   || c    ||           ||                 || q(x) :- R(x,x) || {} || ||
-||   || d    ||           ||                 || q(x,y) :- R(x,y) || {(r1,r2)} || ||
-||   || e    ||           ||                 || q(x) :- S(x,y) || {r2} || ||
-||   || f    ||           ||                 || q(y) :- S(x,y) || {} || ||
-||   || g    ||           ||                 || q(x) :- S(x,x) || {} || ||
-||   || h    ||           ||                 || q(x,y) :- S(x,y) || {} || ||
-||   || i    ||           ||                || q() :- R(x,y) || {true} || ||
-||   || j    ||           ||                || q() :- R(x,x) || {false} || ||
-||   || k    ||           ||                || q() :- S(x,y) || {true} || ||
-||   || l    ||           ||                || q() :- S(x,x) || {false} || ||
-|| 23||a || ER^^-^^ ISA ES ||        S(s1,s2)|| q(x) :- R(x,y) || {} || ||
-||    || b   ||           ||                || q(y) :- R(x,y) || {} || ||
-||   || c   ||           ||                || q(x) :- R(x,x) || {} || ||
-||   || d    ||           ||                || q(x,y) :- R(x,y) || {} || ||
-||  || e    ||           ||                || q(x) :- S(x,y) || {s1} || ||
-||   || f    ||           ||                || q(y) :- S(x,y) || {s2} || ||
-||  || g     ||           ||                || q(x) :- S(x,x) || {} || ||
-|| || h     ||           ||                || q(x,y) :- S(x,y) || {(s1,s2)} || ||
-||  || i     ||           ||                || q() :- R(x,y) || {false} || ||
-||  || j     ||           ||                || q() :- R(x,x) || {false} || ||
-||  || k     ||           ||                || q() :- S(x,y) || {true} || ||
-|| || l      ||           ||                || q() :- S(x,x) || {false} || ||
-|| 24||a || ER^^-^^ ISA ES ||R(r1,r2) S(s1,s2)|| q(x) :- R(x,y) || {r1} || ||
-||  || b     ||           ||                || q(y) :- R(x,y) || {r2} || ||
-||  || c     ||           ||                || q(x) :- R(x,x) || {} || ||
-||  || d     ||           ||                || q(x,y) :- R(x,y) || {(r1,r2)} || ||
-||  || e     ||           ||                || q(x) :- S(x,y) || {r2 s1} || ||
-||  || f     ||           ||                || q(y) :- S(x,y) || {s2} || ||
-||  || g     ||           ||                || q(x) :- S(x,x) || {} || ||
-||  || h     ||           ||                || q(x,y) :- S(x,y) || {(s1,s2)} || ||
-||   || i    ||           ||                || q() :- R(x,y) || {true} || ||
-||   || j    ||           ||                || q() :- R(x,x) || {false} || ||
-||   || k    ||           ||                || q() :- S(x,y) || {true} || ||
-||   || l    ||           ||                || q() :- S(x,x) || {false} || ||
-|| 25||a || ER^^-^^ ISA ES^^-^^ ||  R(r1,r2)  || q(x) :- R(x,y) || {r1} || ||
-||   || b    ||           ||                || q(y) :- R(x,y) || {r2} || ||
-||   || c    ||           ||                || q(x) :- R(x,x) || {} || ||
-||   || d    ||           ||                || q(x,y) :- R(x,y) || {(r1,r2)} || ||
-||  || e     ||           ||                || q(x) :- S(x,y) || {} || (notice that this is the inverse of case a) ||
-||  || f     ||           ||                || q(y) :- S(x,y) || {r2} || ||
-||  || g     ||           ||                || q(x) :- S(x,x) || {} || ||
-||  || h     ||           ||                || q(x,y) :- S(x,y) || {} || ||
-||  || i     ||           ||                || q() :- R(x,y) || {true} || ||
-||  || j     ||           ||                || q() :- R(x,x) || {false} || ||
-||  || k     ||           ||                || q() :- S(x,y) || {true} || ||
-||  || l     ||           ||                || q() :- S(x,x) || {false} || ||
-|| 26||a || ER^^-^^ ISA ES^^-^^ ||S(s1,s2)|| q(x) :- R(x,y) || {} || ||
-||   || b    ||           ||                || q(y) :- R(x,y) || {} || ||
-||   || c    ||           ||                || q(x) :- R(x,x) || {} || ||
-||   || d    ||           ||                || q(x,y) :- R(x,y) || {} || ||
-||  || e    ||           ||                || q(x) :- S(x,y) || {s1} || ||
-||   || f    ||           ||                || q(y) :- S(x,y) || {s2} || ||
-||  || g    ||           ||                || q(x) :- S(x,x) || {} || ||
-||  || h     ||           ||                || q(x,y) :- S(x,y) || {(s1,s2)} || ||
-||  || i     ||           ||                || q() :- R(x,y) || {false} || ||
-||  || j     ||           ||                || q() :- R(x,x) || {false} || ||
-||   || k    ||           ||                || q() :- S(x,y) || {true} || ||
-||   || l    ||           ||                || q() :- S(x,x) || {false} || ||
-|| 27||a || ER^^-^^ ISA ES^^-^^ ||R(r1,r2) S(s1,s2)|| q(x) :- R(x,y) || {r1} || ||
-||  || b     ||           ||                || q(y) :- R(x,y) || {r2} || ||
-||  || c     ||           ||                || q(x) :- R(x,x) || {} || ||
-||  || d     ||           ||                || q(x,y) :- R(x,y) || {(r1,r2)} || ||
-||  || e     ||           ||                || q(x) :- S(x,y) || {s1} || ||
-||   || f    ||           ||                || q(y) :- S(x,y) || {r2 s2} || ||
-||  || g    ||           ||                || q(x) :- S(x,x) || {} || ||
-||  || h     ||           ||                || q(x,y) :- S(x,y) || {(s1,s2)} ||     ||
-||  || i     ||           ||                || q() :- R(x,y) || {true} || ||
-||  || j     ||           ||                || q() :- R(x,x) || {false} || ||
-||  || k     ||           ||                || q() :- S(x,y) || {true} || ||
-||   || l    ||           ||                || q() :- S(x,x) || {false} || ||
+|| 65||a || ER^^-^^ ISA B || R(r1,r2)        || q(x) :- R(x,<r2>) || {r1} || ||
+|| || b || ||                                || q(y) :- R(<r1>,y) || {r2} || ||
+|| || c || ||                                || q() :- B(<r1>) || {false} || ||
+|| || d || ||                                || q() :- B(<r2>) || {true} || ||
+|| || e || ||                                || q() :- R(<r1>,<r2>) || {true} || ||
+|| || f || ||                                || q() :- R(<2>,<r1>) || {false}   || ||
+|| 66 ||a || ER^^-^^ ISA B || B(b)            || q(x) :- R(x,<b>) || {} || ||
+|| || b || ||                                || q(y) :- R(<b>,y) || {} || ||
+|| || c || ||                                || q() :- R(<b>,<b>) || {false}   || ||
+|| || d || ||                                || q() :- B(<b>) || {true} || ||
+|| || e || ||                                || q() :- R(<b>,<b>) || {false}   || ||
+|| || f || ||                                || q() :- B(<b>) || {true} || ||
+|| 67 ||a || ER^^-^^ ISA B || R(r1,r2) B(b)  || q() :- B(<r2>) || {true} || ||
+|| || b || ||                                || q() :- B(<b>) || {true} || ||
+|| || c || ||                                || q() :- B(<r1>) || {false}   || ||
+|| 68 ||a || ER^^-^^ ISA ES ||      R(r1,r2)  || q() :- S(<r2>,y) || {true} || ||
+||    || b    ||           ||                 || q() :- S(<r1>,y) || {false} || ||
+||   || c    ||           ||                 || q() :- S(x,<r1>) || {false} || ||
+||   || d    ||           ||                 || q() :- S(x,<r2>) || {false} || ||
+|| 69||a || ER^^-^^ ISA ES ||        S(s1,s2)|| q() :- S(<s1>,<s2>) || {true} || ||
+||    || b     ||           ||                || q() :-R(x,<s2>) || {false} || ||
+||    || c     ||           ||                || q() :- R(<s1>,x) || {false} || ||
+||    || d     ||           ||                || q() :- R(<s2>,y) || {false} || ||
+||    || e      ||           ||                || q() :- R(x,<s1>) || {false} || ||
+|| 70||a || ER^^-^^ ISA ES ||R(r1,r2) S(s1,s2)|| q() :- S(<r1>,<r2>) || {false} || ||
+||   || b    ||           ||                || q() :- S(<r2>,<r1>) || {false} || ||
+||   || c    ||           ||                || q() :- S(x,<r1>) || {false} || ||
+||   || d    ||           ||                || q() :- S(x,<r2>) || {false} || ||
+||   || e    ||           ||                || q() :- S(<r1>,x) || {false} || ||
+||   || f    ||           ||                || q() :- S(<r2>,x) || {true} || ||
+|| 71||a || ER^^-^^ ISA ES^^-^^ ||  R(r1,r2)  || q() :- S(<r1>,y) || {false} || ||
+||  || b     ||           ||                || q() :- S(<r2>,y) || {false} || ||
+||  || c     ||           ||                || q() :- S(x,<r1>) || {false} || ||
+||  || d     ||           ||                || q() :- S(x,<r2>) || {true} || ||
+||  || e     ||           ||                || q() :- S(<r1>,<r2>) || {false} || ||
+||  || f     ||           ||                || q() :- S(<r2>,<r1>) || {false} || ||
+|| 72||a || ER^^-^^ ISA ES^^-^^ ||S(s1,s2)  || q() :- R(<s1>,y) || {false} || ||
+||  || b     ||           ||                || q() :- R(<s2>,y) || {false} || ||
+||  || c     ||           ||                || q() :- R(x,<s1>) || {false} || ||
+||   || d    ||           ||                || q() :- R(x,<s2>) || {false} || ||
+||   || e    ||           ||                || q() :- R(<s1>,<s2>) || {false} || ||
+||   || f    ||           ||                || q() :- R(<s2>,<s1>) || {false} || ||
+|| 73||a || ER^^-^^ ISA ES^^-^^ ||R(r1,r2) S(s1,s2)|| q() :- R(<s1>,y) || {false} || ||
+||  || b     ||           ||                || q() :- R(<s2>,y) || {false} || ||
+||  || c     ||           ||                || q() :- R(x,<s1>) || {false} || ||
+||   || d    ||           ||                || q() :- R(x,<s2>) || {false} || ||
+||   || e    ||           ||                || q() :- R(<s1>,<s2>) || {false} || ||
+||   || f    ||           ||                || q() :- R(<s2>,<s1>) || {false} || ||
+||   || g     ||           ||                || q() :- S(<r1>,y) || {false} || ||
+||  || h     ||           ||                || q() :- S(<r2>,y) || {false} || ||
+||  || i     ||           ||                || q() :- S(x,<r1>) || {false} || ||
+||  || j     ||           ||                || q() :- S(x,<r2>) || {true} || ||
+||  || k     ||           ||                || q() :- S(<r1>,<r2>) || {false} || ||
+||  || l     ||           ||                || q() :- S(<r2>,<r1>) || {false} || ||
+
+#END# Correct tests end here, ignore the ones bellow
