@@ -10,10 +10,7 @@ import java.net.URI;
 
 /**
  * Provides an interface for storing the URI constant.
- *
- * @author Josef Hardi <josef.hardi@gmail.com>
  */
 public interface URIConstant extends Constant {
-
 	public URI getURI();
 }
