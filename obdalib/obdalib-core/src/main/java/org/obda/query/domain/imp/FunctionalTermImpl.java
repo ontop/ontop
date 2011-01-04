@@ -14,6 +14,13 @@ public class FunctionalTermImpl implements Function {
 	private List<Term> terms = null;
 	private int identifier = -1;
 
+	/**
+	 * The default constructor.
+	 *
+	 * @param functor the function symbol name. It is defined the same as a
+	 * predicate.
+	 * @param terms the list of arguments.
+	 */
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
 		this.functor = functor;
 		this.terms = terms;
@@ -21,7 +28,7 @@ public class FunctionalTermImpl implements Function {
 	}
 
 	/**
-	 * Replace the existing terms with the new terms.
+	 * Replace the existing arguments with the new term arguments.
 	 *
 	 * @param terms the new terms.
 	 */
@@ -87,7 +94,7 @@ public class FunctionalTermImpl implements Function {
 	}
 
 	/**
-	 * Check whether the function contains a particular term or not.
+	 * Check whether the function contains a particular term argument or not.
 	 *
 	 * @param t the term in question.
 	 * @return true if the function contains the term, or false otherwise.
