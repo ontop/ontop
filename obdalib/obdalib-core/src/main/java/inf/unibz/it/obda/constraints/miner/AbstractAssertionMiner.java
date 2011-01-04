@@ -33,7 +33,6 @@ import java.util.Vector;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class AbstractAssertionMiner {
@@ -49,7 +48,7 @@ public class AbstractAssertionMiner {
 	private List<OBDAMappingAxiom> queriesWithJoins = null;
 	private final String tableNamePattern = "%";
 	private final String schemaPattern = "%";
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	public AbstractAssertionMiner(APIController con){
 

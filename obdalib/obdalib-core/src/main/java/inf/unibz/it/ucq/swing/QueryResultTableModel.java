@@ -22,7 +22,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import org.obda.query.domain.Constant;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.ValueConstantImpl;
 
@@ -46,7 +45,7 @@ public class QueryResultTableModel implements TableModel {
 	Vector<Constant[]> 	resultsTable	= null;
 	HashSet<String> mergeSet = null;
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -69,7 +68,7 @@ public class QueryResultTableModel implements TableModel {
 			Constant[] crow = new ValueConstantImpl[numcols];
 			for (int j = 0; j < numcols; j++) {
 				XSDatatype stringType = StringType.theInstance;
-				crow[j] = (ValueConstantImpl) termFactory.createValueConstant(results.getConstantFromColumn(j).toString(), stringType);
+				crow[j] = termFactory.createValueConstant(results.getConstantFromColumn(j).toString(), stringType);
 			}
 			resultsTable.add(crow);
 			i += 1;

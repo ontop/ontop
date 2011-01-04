@@ -38,7 +38,6 @@ import java.util.concurrent.CountDownLatch;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
 
@@ -87,8 +86,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 
 	private MiningException exception = null;
 
-	private final TermFactoryImpl termFactory =
-		(TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	/**
 	 * The construction creates a new instance of the
