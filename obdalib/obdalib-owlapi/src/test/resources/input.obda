@@ -19,5 +19,9 @@
             <CQ string=":hasAddress(:getCompanyObj($id),:getAddressObj($addressid))"/>
             <SQLQuery string="select id, addressid from company"/>
         </mapping>
+        <mapping id="mapping-company-addresses2">
+            <CQ string="hasAddress(getCompanyObj($id),getAddressObj($addressid))"/>
+            <SQLQuery string="select id, addressid from company"/>
+        </mapping>
     </mappings>
 </OBDA>

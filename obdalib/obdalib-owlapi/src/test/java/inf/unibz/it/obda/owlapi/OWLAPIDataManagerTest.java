@@ -29,11 +29,14 @@ public class OWLAPIDataManagerTest extends TestCase {
 		 ":- hasAddress(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), " +
 		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))",
 		 ":- hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
-		 "http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))"
+		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))",
+		 ":- hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
+		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))"
 		},
 		// The answer for the source queries.
 		{"select id, name, lastname, dateofbirth, ssn from client",
 		 "select id, name, lastname, addressid from client",
+		 "select id, addressid from company",
 		 "select id, addressid from company"
 		}
 	};
