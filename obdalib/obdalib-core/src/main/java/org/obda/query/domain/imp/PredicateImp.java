@@ -35,7 +35,10 @@ public class PredicateImp implements Predicate{
 		if(obj == null|| !(obj instanceof PredicateImp)){
 			return false;
 		}else{
-			return this.identfier == obj.hashCode();
+			PredicateImp pred2 =(PredicateImp)obj;
+			if (pred2.arity != arity)
+				return false;
+			return this.identfier == pred2.identfier;
 		}
 	}
 

@@ -57,17 +57,16 @@ public class DLRPerfectReformulator implements QueryRewriter {
 				CQIE cqie = it.next();
 				newRules.add(cqie.hashCode());
 				List<Atom> body = cqie.getBody();
-				Iterator<Atom> bit = body.iterator();
 				// Part A
-				while (bit.hasNext()) {
-					Atom currentAtom = bit.next();
+				for (int atomidx = 0; atomidx < body.size(); atomidx++) {
+					Atom currentAtom = body.get(atomidx);
 					Iterator<Assertion> ait = assertions.iterator();
 					while (ait.hasNext()) {
 						Assertion ass = ait.next();
 						if (ass instanceof PositiveInclusion) {
 							PositiveInclusion pi = (PositiveInclusion) ass;
 							if (piApplicator.isPIApplicable(pi, currentAtom)) {
-								CQIE newquery = piApplicator.applyPI(cqie, pi);
+								CQIE newquery = piApplicator.applyPI(cqie, pi, atomidx);
 								if (newRules.add(newquery.hashCode())) {
 									newSet.add(newquery);
 									loopagain = true;

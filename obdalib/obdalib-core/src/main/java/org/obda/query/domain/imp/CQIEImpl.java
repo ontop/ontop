@@ -40,57 +40,7 @@ public class CQIEImpl implements CQIE {
 
 	@Override
 	public int hashCode() {
-
-		StringBuffer sb = new StringBuffer();
-		Atom head = this.getHead();
-		StringBuffer headString = new StringBuffer();
-		headString.append(head.getPredicate().getName());
-		List<Term> list = head.getTerms();
-		Iterator<Term> it = list.iterator();
-		StringBuffer var = new StringBuffer();
-		while (it.hasNext()) {
-			Term t = it.next();
-			if (var.length() > 0) {
-				var.append(",");
-			}
-			var.append(t.getName());
-		}
-		headString.append("(");
-		headString.append(var.toString());
-		headString.append(") -: ");
-
-		List<Atom> body = this.getBody();
-		StringBuffer bodyString = new StringBuffer();
-		Iterator<Atom> bit = body.iterator();
-		while (bit.hasNext()) {
-			Atom a = bit.next();
-			if (bodyString.length() > 0) {
-				bodyString.append(",");
-			}
-			StringBuffer atomString = new StringBuffer();
-			URI atomuri = a.getPredicate().getName();
-			atomString.append(atomuri.toString());
-			atomString.append("(");
-			List<Term> para = a.getTerms();
-			Iterator<Term> pit = para.iterator();
-			StringBuffer atomvar = new StringBuffer();
-			while (pit.hasNext()) {
-				Term t = pit.next();
-				if (atomvar.length() > 0) {
-					atomvar.append(",");
-				}
-				atomvar.append(t.getName());
-			}
-			atomString.append(atomvar);
-			atomString.append(")");
-			bodyString.append(atomString);
-		}
-
-		sb.append(headString);
-		sb.append(bodyString);
-		String s = sb.toString();
-
-		return s.hashCode();
+		return toString().hashCode();
 	}
 
 	@Override
