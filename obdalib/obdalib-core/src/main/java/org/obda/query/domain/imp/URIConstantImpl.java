@@ -1,35 +1,42 @@
-/*
- * @(#)URIConstantImpl 3/11/2010
- *
- * Copyright 2010 OBDA-API. All rights reserved.
- * Use is subject to license terms.
- */
 package org.obda.query.domain.imp;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 
 /**
  * Provides a storage to put the URI constant.
- *
- * @author Josef Hardi <josef.hardi@gmail.com>
  */
 public class URIConstantImpl implements URIConstant {
 
-	private final URI uri;
-	
-	private String string = null;
+	private URI uri = null;
+	private int identifier = -1;
 
 	/**
 	 * The default constructor.
 	 *
 	 * @param uri URI from a term.
 	 */
-	public URIConstantImpl(URI uri) {
+	protected URIConstantImpl(URI uri) {
 		this.uri = uri;
-		this.string = "<" + uri.toString() + ">";
+		this.identifier = uri.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj){
+
+		if(obj == null || !(obj instanceof URIConstantImpl))
+			return false;
+
+		URIConstantImpl uri2 = (URIConstantImpl) obj;
+		return this.identifier == uri2.identifier;
+	}
+
+	@Override
+	public int hashCode(){
+		return identifier;
 	}
 
 	@Override
@@ -44,10 +51,17 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public Term copy() {
-		return new URIConstantImpl(uri);
+		try {
+			return new URIConstantImpl(new URI(uri.toString()));
+		}
+		catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
-	
+
+	@Override
 	public String toString() {
-		return "<" + getName() + ">";
+		return getName();
 	}
 }
