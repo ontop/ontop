@@ -10,19 +10,10 @@ public class PredicateImp implements Predicate{
 	private URI name = null;
 	private int identfier = -1;
 
-	//TODO PredicateImp remove identifier
-	protected PredicateImp (URI name, int identifier, int arity){
+	protected PredicateImp (URI name, int arity){
 		this.name = name;
 		this.identfier = name.toString().hashCode();
 		this.arity = arity;
-	}
-
-	public int getArity() {
-		return arity;
-	}
-
-	public URI getName() {
-		return name;
 	}
 
 	public void setName(URI name) {
@@ -30,16 +21,26 @@ public class PredicateImp implements Predicate{
 	}
 
 	@Override
-	public boolean equals(Object obj){
+	public int getArity() {
+		return arity;
+	}
 
-		if(obj == null|| !(obj instanceof PredicateImp)){
+	@Override
+	public URI getName() {
+		return name;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == null|| !(obj instanceof PredicateImp))
 			return false;
-		}else{
-			PredicateImp pred2 =(PredicateImp)obj;
-			if (pred2.arity != arity)
-				return false;
-			return this.identfier == pred2.identfier;
-		}
+
+		PredicateImp pred2 = (PredicateImp) obj;
+		if (pred2.arity != arity)
+			return false;
+
+		return this.identfier == pred2.identfier;
 	}
 
 	@Override
@@ -47,11 +48,13 @@ public class PredicateImp implements Predicate{
 		return identfier;
 	}
 
+	@Override
 	public Predicate copy() {
-		return new PredicateImp(this.name, this.identfier, this.arity);
+		return new PredicateImp(this.name, this.arity);
 	}
-	
+
+	@Override
 	public String toString() {
-		return this.name.toString();
+		return getName().toString();
 	}
 }
