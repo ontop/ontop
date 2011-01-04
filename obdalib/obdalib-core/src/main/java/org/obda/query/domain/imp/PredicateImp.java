@@ -8,11 +8,11 @@ public class PredicateImp implements Predicate{
 
 	private int arity = -1;
 	private URI name = null;
-	private int identfier = -1;
+	private int identifier = -1;
 
 	protected PredicateImp (URI name, int arity){
 		this.name = name;
-		this.identfier = name.toString().hashCode();
+		this.identifier = name.toString().hashCode();
 		this.arity = arity;
 	}
 
@@ -40,12 +40,12 @@ public class PredicateImp implements Predicate{
 		if (pred2.arity != arity)
 			return false;
 
-		return this.identfier == pred2.identfier;
+		return this.identifier == pred2.identifier;
 	}
 
 	@Override
 	public int hashCode(){
-		return identfier;
+		return identifier;
 	}
 
 	@Override
