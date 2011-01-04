@@ -3,58 +3,58 @@ package org.obda.query.domain.imp;
 import java.net.URI;
 import java.util.List;
 
-import org.obda.query.domain.FunctionSymbol;
+import org.obda.query.domain.Function;
+import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
+import org.obda.query.domain.Variable;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-public class TermFactoryImpl extends TermFactory{
+public class TermFactoryImpl implements TermFactory {
 
-	//TODO check what is this being used for, this seems like it can be a problem with HASH
-	private int identifier = 1;
+	protected static TermFactoryImpl instance = null;
 
-	@Override
-	public Term createObjectConstant(FunctionSymbol functor, List<ValueConstant> terms) {
+	protected TermFactoryImpl() {
+		// protected constructor prevents instantiation from other classes.
+	}
 
-		return new ObjectConstantImpl(functor, terms);
+	public static TermFactoryImpl getInstance() {
+		if (instance == null) {
+			instance = new TermFactoryImpl();
+		}
+		return instance;
 	}
 
 	@Override
-	public Term createValueConstant(String name) {
-
-		return new ValueConstantImpl(name, identifier++, null);
-	}
-
-	@Override
-	public Term createValueConstant(String name, XSDatatype type) {
-		return new ValueConstantImpl(name, identifier++, type);
-	}
-
-	@Override
-	public Term createVariable(String name) {
-		return new VariableImpl(name, identifier++, null);
-	}
-
-	@Override
-	public Term createVariable(String name, XSDatatype type) {
-		return new VariableImpl(name, identifier++, type);
-	}
-
-	@Override
-	public FunctionSymbol getFunctionSymbol(String name) {
-		return new FunctionSymbolImpl(name, identifier++);
-	}
-
-	@Override
-	public Term createObjectTerm(FunctionSymbol fs, List<Term> vars){
-		return new ObjectVariableImpl(fs, vars);
-	}
-
-	@Override
-	public Term createURIConstant(URI uri) {
+	public URIConstant createURIConstant(URI uri) {
 		return new URIConstantImpl(uri);
 	}
 
+	@Override
+	public ValueConstant createValueConstant(String value) {
+		return new ValueConstantImpl(value, null);
+	}
+
+	@Override
+	public ValueConstant createValueConstant(String value, XSDatatype type) {
+		return new ValueConstantImpl(value, type);
+	}
+
+	@Override
+	public Variable createVariable(String name) {
+		return new VariableImpl(name, null);
+	}
+
+	@Override
+	public Variable createVariable(String name, XSDatatype type) {
+		return new VariableImpl(name, type);
+	}
+
+	@Override
+	public Function createFunctionalTerm(Predicate functor, List<Term> arguments){
+		return new FunctionalTermImpl(functor, arguments);
+	}
 }
