@@ -10,7 +10,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
@@ -102,8 +102,8 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 					if(term_sb.length()>0){
 						term_sb.append(",");
 					}
-					if(qt instanceof ObjectVariableImpl){
-						ObjectVariableImpl ft = (ObjectVariableImpl) qt;
+					if(qt instanceof FunctionalTermImpl){
+						FunctionalTermImpl ft = (FunctionalTermImpl) qt;
 						String fname = apic.getEntityNameRenderer().getFunctionName(ft);
 						term_sb.append(fname);
 						term_sb.append("(");

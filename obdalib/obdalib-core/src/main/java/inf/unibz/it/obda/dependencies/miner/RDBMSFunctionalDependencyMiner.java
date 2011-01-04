@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.ValueConstantImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
@@ -166,7 +166,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 			Iterator<Term> t_it = terms.iterator();
 			while(t_it.hasNext()){
 				Term term = t_it.next();
-				if(term instanceof ObjectVariableImpl){
+				if(term instanceof FunctionalTermImpl){
 					candidates.add(term);
 				}
 			}
@@ -218,7 +218,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 	 */
 	private String produceSQL(String sql, Term candidate, Set<Term> terms){
 
-		ObjectVariableImpl ft = (ObjectVariableImpl) candidate;
+		FunctionalTermImpl ft = (FunctionalTermImpl) candidate;
 		List<Term> vars = ft.getTerms();
 		Iterator<Term> it = vars.iterator();
 		String selection = "";
@@ -246,8 +246,8 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 						test = test + " OR ";
 					}
 					test = test + "alias1." + name + " <> alias2."+ name+ " ";
-				}else if(qt instanceof ObjectVariableImpl){
-					ObjectVariableImpl t = (ObjectVariableImpl) qt;
+				}else if(qt instanceof FunctionalTermImpl){
+					FunctionalTermImpl t = (FunctionalTermImpl) qt;
 					List<Term> list = t.getTerms();
 					Iterator<Term> l_it = list.iterator();
 					while(l_it.hasNext()){

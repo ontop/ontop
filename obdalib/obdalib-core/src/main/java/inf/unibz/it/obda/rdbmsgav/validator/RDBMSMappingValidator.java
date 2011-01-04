@@ -27,7 +27,7 @@ import java.util.Vector;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 public class RDBMSMappingValidator extends MappingValidator {
@@ -107,9 +107,9 @@ public class RDBMSMappingValidator extends MappingValidator {
 			if (arity == 1) {  // it's a concept query atom
 				List<Term> terms = at.getTerms();
 				Term t = terms.get(0);
-				if(t instanceof ObjectVariableImpl){
+				if(t instanceof FunctionalTermImpl){
 
-					ObjectVariableImpl f = (ObjectVariableImpl) t;
+					FunctionalTermImpl f = (FunctionalTermImpl) t;
 					List<Term> para = f.getTerms();
 					Iterator para_it = para.iterator();
 					while (para_it.hasNext()){
@@ -133,9 +133,9 @@ public class RDBMSMappingValidator extends MappingValidator {
 				while (terms_it.hasNext()){
 
 					Term t = (Term) terms_it.next();
-					if(t instanceof ObjectVariableImpl){
+					if(t instanceof FunctionalTermImpl){
 
-						ObjectVariableImpl f = (ObjectVariableImpl) t;
+						FunctionalTermImpl f = (FunctionalTermImpl) t;
 						List<Term> para = f.getTerms();
 						Iterator para_it = para.iterator();
 						while (para_it.hasNext()){

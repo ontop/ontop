@@ -9,7 +9,7 @@ import java.net.URL;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 
 
 /**
@@ -88,7 +88,7 @@ public class EntityNameRenderer {
 	 * @param ft the function term to display
 	 * @return the name to display
 	 */
-	public String getFunctionName(ObjectVariableImpl term){
+	public String getFunctionName(FunctionalTermImpl term){
 		URI uri = URI.create(term.getName());
 		String prefix = coupler.getPrefixForUri(uri);
 		boolean validPrefix = false;

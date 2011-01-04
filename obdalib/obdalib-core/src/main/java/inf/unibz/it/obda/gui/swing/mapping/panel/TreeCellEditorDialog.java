@@ -51,7 +51,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
@@ -281,7 +281,7 @@ public class TreeCellEditorDialog extends JDialog {
 				List<Term> terms = atom.getTerms();
 				Term t2 = terms.get(1);
 				boolean found = false;
-				if(t2 instanceof ObjectVariableImpl){
+				if(t2 instanceof FunctionalTermImpl){
 					found =coup.isObjectProperty(onto_uri,new URI(propUri));
 				}else{
 					found =coup.isDatatypeProperty(onto_uri,new URI(propUri));

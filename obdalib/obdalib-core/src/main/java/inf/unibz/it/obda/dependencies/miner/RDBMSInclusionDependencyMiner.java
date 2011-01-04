@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 /**
@@ -242,9 +242,9 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 			String var2 = vt2.getName();
 			return produceSQL(m1, m2, var1, var2);
 
-		}else if(tm1 instanceof ObjectVariableImpl && tm2 instanceof ObjectVariableImpl){
-			ObjectVariableImpl ft1 = (ObjectVariableImpl) tm1;
-			ObjectVariableImpl ft2 = (ObjectVariableImpl)tm2;
+		}else if(tm1 instanceof FunctionalTermImpl && tm2 instanceof FunctionalTermImpl){
+			FunctionalTermImpl ft1 = (FunctionalTermImpl) tm1;
+			FunctionalTermImpl ft2 = (FunctionalTermImpl)tm2;
 			if(ft1.getName().equals(ft2.getName())){
 				return produceSQL(m1,m2,ft1,ft2);
 			}else {
@@ -276,7 +276,7 @@ public class RDBMSInclusionDependencyMiner implements IMiner{
 	 * Returns the query which can be use to check the dependency on the
 	 * data in the source if the involved terms are functional terms.
 	 */
-	private String produceSQL(String candidate, String container, ObjectVariableImpl ft1, ObjectVariableImpl ft2){
+	private String produceSQL(String candidate, String container, FunctionalTermImpl ft1, FunctionalTermImpl ft2){
 
 		List<Term> termsOfFT1 = ft1.getTerms();
 		List<Term> termsOfFT2 = ft2.getTerms();

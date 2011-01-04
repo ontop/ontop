@@ -11,7 +11,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.ValueConstantImpl;
 import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.Logger;
@@ -165,11 +165,11 @@ public class OBDADIGCodec {
 			// new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, term.getName());
 			// dig_term = new_term;
 
-		} else if (term instanceof ObjectVariableImpl) {
+		} else if (term instanceof FunctionalTermImpl) {
 
 			Element new_term = parentdoc.createElement(DIG12Coupler.ASKS_QUERY_FUNCTION);
-			new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, apic.getEntityNameRenderer().getFunctionName((ObjectVariableImpl) term));
-			ObjectVariableImpl function_term = (ObjectVariableImpl) term;
+			new_term.setAttribute(DIG12Coupler.ASKS_QUERY_NAME, apic.getEntityNameRenderer().getFunctionName((FunctionalTermImpl) term));
+			FunctionalTermImpl function_term = (FunctionalTermImpl) term;
 			List<Term> parameters = function_term.getTerms();
 			for (int i = 0; i < parameters.size(); i++) {
 				Element parameter = getDIG(parameters.get(i), parentdoc);

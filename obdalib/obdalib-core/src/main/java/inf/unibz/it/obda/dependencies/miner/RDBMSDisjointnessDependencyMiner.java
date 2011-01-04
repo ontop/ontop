@@ -31,7 +31,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -300,9 +300,9 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 		if(m1.equals(m2)){
 			return null;
 		}
-		if(tm1 instanceof ObjectVariableImpl && tm2 instanceof ObjectVariableImpl){
-			ObjectVariableImpl ft1 = (ObjectVariableImpl) tm1;
-			ObjectVariableImpl ft2 = (ObjectVariableImpl) tm2;
+		if(tm1 instanceof FunctionalTermImpl && tm2 instanceof FunctionalTermImpl){
+			FunctionalTermImpl ft1 = (FunctionalTermImpl) tm1;
+			FunctionalTermImpl ft2 = (FunctionalTermImpl) tm2;
 			if(ft1.getName().equals(ft2.getName()) && ft1.getTerms().size() == ft2.getTerms().size()){ // TODO Check getName is a URI.
 
 				if(currentDriver.equals(DB2_DRIVER)){
@@ -326,7 +326,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 	 * Returns the query which can be use to check the dependency on the
 	 * data in the source if the involved terms are functional terms.
 	 */
-	private String produceSQLForDB2(String candidate, String container, ObjectVariableImpl ft1, ObjectVariableImpl ft2){
+	private String produceSQLForDB2(String candidate, String container, FunctionalTermImpl ft1, FunctionalTermImpl ft2){
 
 		List<Term> termsOfFT1 = ft1.getTerms();
 		List<Term> termsOfFT2 = ft2.getTerms();
@@ -352,7 +352,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 		return query;
 	}
 
-	private String produceSQLForOracle(String candidate, String container, ObjectVariableImpl ft1, ObjectVariableImpl ft2){
+	private String produceSQLForOracle(String candidate, String container, FunctionalTermImpl ft1, FunctionalTermImpl ft2){
 
 		List<Term> termsOfFT1 =ft1.getTerms();
 		List<Term> termsOfFT2 =ft2.getTerms();
@@ -379,7 +379,7 @@ public class RDBMSDisjointnessDependencyMiner implements IMiner {
 	}
 
 
-	private String produceSQLForPostgres(String candidate, String container, ObjectVariableImpl ft1, ObjectVariableImpl ft2){
+	private String produceSQLForPostgres(String candidate, String container, FunctionalTermImpl ft1, FunctionalTermImpl ft2){
 
 		List<Term> termsOfFT1 = ft1.getTerms();
 		List<Term> termsOfFT2 = ft2.getTerms();

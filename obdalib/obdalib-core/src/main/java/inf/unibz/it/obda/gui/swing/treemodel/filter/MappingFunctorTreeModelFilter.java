@@ -8,7 +8,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 /**
@@ -52,8 +52,8 @@ public class MappingFunctorTreeModelFilter implements
 			for (int j = 0; j < queryTerms.size(); j++) {
 				Term term = queryTerms.get(j);
 
-				if (term instanceof ObjectVariableImpl) {
-					ObjectVariableImpl functionTerm = (ObjectVariableImpl) term;
+				if (term instanceof FunctionalTermImpl) {
+					FunctionalTermImpl functionTerm = (FunctionalTermImpl) term;
 					if(functionTerm.getName().indexOf(strMappingFunctor)!= -1)
 					{
 						filterValue = true;

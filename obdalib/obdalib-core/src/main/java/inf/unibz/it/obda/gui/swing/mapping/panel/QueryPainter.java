@@ -32,7 +32,7 @@ import javax.swing.text.StyleConstants;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 public class QueryPainter {
@@ -207,9 +207,9 @@ public class QueryPainter {
 								List<Term> terms = at.getTerms();
 									Term t = terms.get(0);
 
-									if(t instanceof ObjectVariableImpl){
+									if(t instanceof FunctionalTermImpl){
 
-										ObjectVariableImpl f = (ObjectVariableImpl) t;
+										FunctionalTermImpl f = (FunctionalTermImpl) t;
 										String function = apic.getEntityNameRenderer().getFunctionName(f);
 
 										List<Term> para = f.getTerms();
@@ -242,9 +242,9 @@ public class QueryPainter {
 
 								List<Term> terms = at.getTerms();
 
-								if (terms.get(0) instanceof ObjectVariableImpl){
+								if (terms.get(0) instanceof FunctionalTermImpl){
 
-									ObjectVariableImpl f = (ObjectVariableImpl) terms.get(0);
+									FunctionalTermImpl f = (FunctionalTermImpl) terms.get(0);
 									String function = apic.getEntityNameRenderer().getFunctionName(f);
 									List<Term> para = f.getTerms();
 									Iterator para_it = para.iterator();
@@ -268,9 +268,9 @@ public class QueryPainter {
 									tasks.add(task);
 
 								}
-								if (terms.get(1) instanceof ObjectVariableImpl){
+								if (terms.get(1) instanceof FunctionalTermImpl){
 
-									ObjectVariableImpl f = (ObjectVariableImpl) terms.get(1);
+									FunctionalTermImpl f = (FunctionalTermImpl) terms.get(1);
 									String function = apic.getEntityNameRenderer().getFunctionName(f);
 //
 									List<Term> para = f.getTerms();
@@ -371,7 +371,7 @@ public class QueryPainter {
 				List<Term> terms = atom.getTerms();
 				Term t2 = terms.get(1);
 				boolean found = false;
-				if(t2 instanceof ObjectVariableImpl){
+				if(t2 instanceof FunctionalTermImpl){
 					found =coup.isObjectProperty(onto_uri,new URI(name));
 				}else{
 					found =coup.isDatatypeProperty(onto_uri,new URI(name));
