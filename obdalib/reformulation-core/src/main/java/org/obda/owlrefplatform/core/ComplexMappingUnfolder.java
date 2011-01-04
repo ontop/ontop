@@ -20,7 +20,7 @@ import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.obda.query.domain.imp.FunctionSymbolImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
@@ -146,8 +146,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		LinkedList<Term> headTerms = new LinkedList<Term>();
 		for (int i = 0; i < mappingsBodyAtom.getTerms().size(); i++) {
 			Term currentTerm = mappingsBodyAtom.getTerms().get(i);
-			if (currentTerm instanceof ObjectVariableImpl) {
-				ObjectVariableImpl ft = (ObjectVariableImpl) currentTerm;
+			if (currentTerm instanceof FunctionalTermImpl) {
+				FunctionalTermImpl ft = (FunctionalTermImpl) currentTerm;
 				List<Term> innerTerms = ft.getTerms();
 				Iterator<Term> innerTermsIterator = innerTerms.iterator();
 				LinkedList<Term> funvec = new LinkedList<Term>();
@@ -276,8 +276,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			if (term instanceof VariableImpl) {
 				VariableImpl variable = (VariableImpl) term;
 				newTerm = (VariableImpl) termFactory.createVariable(variable.getName() + "_" + count);
-			} else if (term instanceof ObjectVariableImpl) {
-				ObjectVariableImpl functionalTerm = (ObjectVariableImpl) term;
+			} else if (term instanceof FunctionalTermImpl) {
+				FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
 				List<Term> innerTerms = functionalTerm.getTerms();
 				List<Term> newInnerTerms = new LinkedList<Term>();
 				for (int j = 0; j < innerTerms.size(); j++) {
@@ -289,7 +289,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 					}
 				}
 				FunctionSymbol newFunctionSymbol = new FunctionSymbolImpl(functionalTerm.getName(), functionalTerm.getName().hashCode());
-				ObjectVariableImpl newFunctionalTerm = (ObjectVariableImpl) termFactory.createObjectTerm(newFunctionSymbol, newInnerTerms);
+				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createObjectTerm(newFunctionSymbol, newInnerTerms);
 				newTerm = newFunctionalTerm;
 			}
 			if (newTerm != null)
@@ -306,8 +306,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				if (term instanceof VariableImpl) {
 					VariableImpl variable = (VariableImpl) term;
 					newTerm = (VariableImpl) termFactory.createVariable(variable.getName() + "_" + count);
-				} else if (term instanceof ObjectVariableImpl) {
-					ObjectVariableImpl functionalTerm = (ObjectVariableImpl) term;
+				} else if (term instanceof FunctionalTermImpl) {
+					FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
 					List<Term> innerTerms = functionalTerm.getTerms();
 					List<Term> newInnerTerms = new LinkedList<Term>();
 					for (int j = 0; j < innerTerms.size(); j++) {
@@ -319,7 +319,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 						}
 					}
 					FunctionSymbol newFunctionSymbol = new FunctionSymbolImpl(functionalTerm.getName(), functionalTerm.getName().hashCode());
-					ObjectVariableImpl newFunctionalTerm = (ObjectVariableImpl) termFactory.createObjectTerm(newFunctionSymbol,
+					FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createObjectTerm(newFunctionSymbol,
 							newInnerTerms);
 					newTerm = newFunctionalTerm;
 				}

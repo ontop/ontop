@@ -16,7 +16,7 @@ import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.ObjectConstantImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
@@ -295,7 +295,7 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = termFactory.createVariable("y");	
 			List<Term> vars = new Vector<Term>();
 			vars.add((VariableImpl) t2);
-			ObjectVariableImpl ot =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
+			FunctionalTermImpl ot =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
@@ -321,7 +321,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = termFactory.createVariable("x");	
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		ObjectVariableImpl ot =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
+		FunctionalTermImpl ot =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
 		Term t2 = termFactory.createVariable("x");
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
@@ -345,7 +345,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = termFactory.createVariable("x");	
 		List<Term> vars = new Vector<Term>();
 		vars.add((VariableImpl) t);
-		ObjectVariableImpl ot =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
+		FunctionalTermImpl ot =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
 		Term t2 = termFactory.createVariable("y");
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
@@ -363,7 +363,7 @@ public class ThetaGenerationTest extends TestCase {
 		assertEquals(1, s.size());
 		
 		Substitution sub = s.get(0);
-		ObjectVariableImpl term = (ObjectVariableImpl) sub.getTerm();
+		FunctionalTermImpl term = (FunctionalTermImpl) sub.getTerm();
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 		
@@ -379,11 +379,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -406,11 +406,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -433,11 +433,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("y");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -467,13 +467,13 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("y");
 		Term t3 = termFactory.createVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
 		vars2.add((VariableImpl) t3);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -496,11 +496,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -530,13 +530,13 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		Term t3 = termFactory.createVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -559,11 +559,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -589,11 +589,11 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
 		vars1.add((VariableImpl) t3);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -617,7 +617,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = termFactory.createVariable("x");	
 		List<Term> vars = new Vector<Term>();
 		vars.add((VariableImpl) t);
-		ObjectVariableImpl ot =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
+		FunctionalTermImpl ot =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
 		Term t2 = termFactory.createVariable("x");
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
@@ -641,7 +641,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = termFactory.createVariable("x");	
 		List<Term> vars = new Vector<Term>();
 		vars.add((VariableImpl) t);
-		ObjectVariableImpl ot =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
+		FunctionalTermImpl ot =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
 		Term t2 = termFactory.createVariable("y");
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
@@ -659,7 +659,7 @@ public class ThetaGenerationTest extends TestCase {
 		assertEquals(1, s.size());
 		
 		Substitution sub = s.get(0);
-		ObjectVariableImpl term = (ObjectVariableImpl) sub.getTerm();
+		FunctionalTermImpl term = (FunctionalTermImpl) sub.getTerm();
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 		
@@ -675,11 +675,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -702,11 +702,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("y");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -736,13 +736,13 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createVariable("y");
 		Term t3 = termFactory.createVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add((VariableImpl) t2);
 		vars2.add((VariableImpl) t3);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -765,11 +765,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -799,13 +799,13 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		Term t3 = termFactory.createVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add((VariableImpl) t3);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -828,11 +828,11 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = termFactory.createVariable("x");	
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
@@ -858,11 +858,11 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add((VariableImpl) t1);
 		vars1.add((VariableImpl) t3);
-		ObjectVariableImpl ot1 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
+		FunctionalTermImpl ot1 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars1);
 		Term t2 = termFactory.createValueConstant("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("q"), vars2);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();

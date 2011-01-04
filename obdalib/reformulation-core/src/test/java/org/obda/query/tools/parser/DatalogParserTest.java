@@ -14,7 +14,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.URIConstantImpl;
 import org.obda.query.domain.imp.ValueConstantImpl;
 import org.obda.query.domain.imp.VariableImpl;
@@ -343,13 +343,13 @@ public class DatalogParserTest {
 
 		term = terms.get(0);
 		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
-				term instanceof ObjectVariableImpl);
+				term instanceof FunctionalTermImpl);
 		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
-				((ObjectVariableImpl)term).getName(),
+				((FunctionalTermImpl)term).getName(),
 				"http://base.org/stuff/1.0/s");
 
 		//------ Object term
-		List<Term> objVarTerms = ((ObjectVariableImpl)term).getTerms();
+		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("@rule/1/body/atoms/2/terms/1/object/: Mismatch term size!",
 				objVarTerms.size(), 2);
 
@@ -539,13 +539,13 @@ public class DatalogParserTest {
 
 		term = terms.get(1);
 		assertTrue("@rule/3/body/atoms/1/terms/2/: Mismatch term type!",
-				term instanceof ObjectVariableImpl);
+				term instanceof FunctionalTermImpl);
 		assertEquals("@rule/3/body/atoms/1/terms/2/: Mismatch variable name!",
-				((ObjectVariableImpl)term).getName(),
+				((FunctionalTermImpl)term).getName(),
 				"http://base.org/stuff/1.0/f");
 
 		//------- Object term
-		List<Term> objVarTerms = ((ObjectVariableImpl)term).getTerms();
+		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("@rule/3/body/atoms/1/terms/2/object/: Mismatch term size!",
 				objVarTerms.size(), 2);
 
@@ -623,13 +623,13 @@ public class DatalogParserTest {
 
 		term = terms.get(1);
 		assertTrue("@rule/1/body/atoms/1/terms/2/: Mismatch term type!",
-				term instanceof ObjectVariableImpl);
+				term instanceof FunctionalTermImpl);
 		assertEquals("@rule/1/body/atoms/1/terms/2/: Mismatch variable name!",
-				((ObjectVariableImpl)term).getName(),
+				((FunctionalTermImpl)term).getName(),
 				"http://example.org/stuff/1.0/r");
 
 		//------ Object term I1
-		List<Term> objVarTerms = ((ObjectVariableImpl)term).getTerms();
+		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("@rule/1/body/atoms/2/terms/2/object/: Mismatch term size!",
 				objVarTerms.size(), 2);
 
@@ -642,13 +642,13 @@ public class DatalogParserTest {
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("@rule/1/body/atoms/2/terms/2/object/terms/2/: Mismatch term type!",
-				objVarTerm instanceof ObjectVariableImpl);
+				objVarTerm instanceof FunctionalTermImpl);
 		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/2/: Mismatch variable name!",
-				((ObjectVariableImpl)objVarTerm).getName(),
+				((FunctionalTermImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term I2
-		objVarTerms = ((ObjectVariableImpl)objVarTerm).getTerms();
+		objVarTerms = ((FunctionalTermImpl)objVarTerm).getTerms();
 		assertEquals("@rule/*/object/terms/2/object/: Mismatch term size!",
 				objVarTerms.size(), 2);
 
@@ -661,13 +661,13 @@ public class DatalogParserTest {
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("@rule/*/object/terms/2/object/terms/2/: Mismatch term type!",
-				objVarTerm instanceof ObjectVariableImpl);
+				objVarTerm instanceof FunctionalTermImpl);
 		assertEquals("@rule/*/object/terms/2/object/terms/2/: Mismatch variable name!",
-				((ObjectVariableImpl)objVarTerm).getName(),
+				((FunctionalTermImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.0/t");
 
 		//------ Object term I3
-		objVarTerms = ((ObjectVariableImpl)objVarTerm).getTerms();
+		objVarTerms = ((FunctionalTermImpl)objVarTerm).getTerms();
 		assertEquals("@rule/*/*/object/terms/3/: Mismatch term size!",
 				objVarTerms.size(), 2);
 
@@ -1078,13 +1078,13 @@ public class DatalogParserTest {
 
 		term = terms.get(0);
 		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
-				term instanceof ObjectVariableImpl);
+				term instanceof FunctionalTermImpl);
 		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
-				((ObjectVariableImpl)term).getName(),
+				((FunctionalTermImpl)term).getName(),
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term
-		List<Term> objVarTerms = ((ObjectVariableImpl)term).getTerms();
+		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
 		assertEquals("@rule/1/body/atoms/2/terms/1/object/: Mismatch term size!",
 				objVarTerms.size(), 2);
 

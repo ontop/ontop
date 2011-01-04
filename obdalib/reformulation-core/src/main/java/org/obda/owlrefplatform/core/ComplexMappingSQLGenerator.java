@@ -19,7 +19,7 @@ import org.obda.query.domain.ObjectConstant;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
 import org.obda.reformulation.domain.DLLiterOntology;
@@ -98,8 +98,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					}
 					aux.add(o);
 					termoccurenceIndex.put(t.getName(), aux);
-				} else if (t instanceof ObjectVariableImpl) {
-					ObjectVariableImpl ov = (ObjectVariableImpl) t;
+				} else if (t instanceof FunctionalTermImpl) {
+					FunctionalTermImpl ov = (FunctionalTermImpl) t;
 					List<Term> vars = ov.getTerms();
 					Iterator<Term> vit = vars.iterator();
 					while (vit.hasNext()) {
@@ -257,9 +257,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 									equ.append(".");
 									equ.append(sqlVar_N);
 									equalities.add(equ.toString());
-								} else if (term_N instanceof ObjectVariableImpl && term_0 instanceof ObjectVariableImpl) {
-									ObjectVariableImpl ov1 = (ObjectVariableImpl) term_0;
-									ObjectVariableImpl ov2 = (ObjectVariableImpl) term_N;
+								} else if (term_N instanceof FunctionalTermImpl && term_0 instanceof FunctionalTermImpl) {
+									FunctionalTermImpl ov1 = (FunctionalTermImpl) term_0;
+									FunctionalTermImpl ov2 = (FunctionalTermImpl) term_N;
 									if (ov1.getTerms().size() == ov2.getTerms().size()) {
 										for (int j = 0; j < ov1.getTerms().size(); j++) {
 											Term t0 = ov1.getTerms().get(j);
@@ -327,8 +327,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					equ.append(ct.getURI());
 					equ.append("'");
 					equalities.add(equ.toString());
-				} else if (term instanceof ObjectVariableImpl) {
-					ObjectVariableImpl ov = (ObjectVariableImpl) term;
+				} else if (term instanceof FunctionalTermImpl) {
+					FunctionalTermImpl ov = (FunctionalTermImpl) term;
 					List<Term> vars = ov.getTerms();
 					Iterator<Term> vit = vars.iterator();
 					while (vit.hasNext()) {
@@ -364,9 +364,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 										equ.append(".");
 										equ.append(sqlVar_N);
 										equalities.add(equ.toString());
-									} else if (term_N instanceof ObjectVariableImpl && term_0 instanceof ObjectVariableImpl) {
-										ObjectVariableImpl ov1 = (ObjectVariableImpl) term_0;
-										ObjectVariableImpl ov2 = (ObjectVariableImpl) term_N;
+									} else if (term_N instanceof FunctionalTermImpl && term_0 instanceof FunctionalTermImpl) {
+										FunctionalTermImpl ov1 = (FunctionalTermImpl) term_0;
+										FunctionalTermImpl ov2 = (FunctionalTermImpl) term_N;
 										if (ov1.getTerms().size() == ov2.getTerms().size()) {
 											for (int j = 0; j < ov1.getTerms().size(); j++) {
 												Term t0 = ov1.getTerms().get(j);
@@ -453,9 +453,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					sb.append(sqlvar);
 					sb.append(" as ");
 					sb.append(viewManager.getOrgHeadVariableName(hpos));
-				} else if (ht instanceof ObjectVariableImpl) {
+				} else if (ht instanceof FunctionalTermImpl) {
 					//TODO ComplexMappingSQLGenerator: This code is probably wrong, we need unit test to check it
-					ObjectVariableImpl ov = (ObjectVariableImpl) ht;
+					FunctionalTermImpl ov = (FunctionalTermImpl) ht;
 					String name = ov.getName();
 					List<Term> terms = ov.getTerms();
 					Iterator<Term> it = terms.iterator();

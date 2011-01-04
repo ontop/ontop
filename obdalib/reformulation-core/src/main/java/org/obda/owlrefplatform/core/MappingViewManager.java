@@ -21,7 +21,7 @@ import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
@@ -110,8 +110,8 @@ public class MappingViewManager implements ViewManager {
 					Iterator<Term> tit = terms.iterator();
 					while (tit.hasNext()) {
 						Term t = tit.next();
-						if (t instanceof ObjectVariableImpl) {
-							ObjectVariableImpl ft = (ObjectVariableImpl) t;
+						if (t instanceof FunctionalTermImpl) {
+							FunctionalTermImpl ft = (FunctionalTermImpl) t;
 							List<Term> para = ft.getTerms();
 							Iterator<Term> pit = para.iterator();
 							while (pit.hasNext()) {

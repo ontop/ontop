@@ -29,7 +29,7 @@ import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.ObjectConstantImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.URIConstantImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
@@ -163,8 +163,8 @@ public class AtomUnifier {
 				Term replacement = unifier.get(t);
 				if (replacement != null)
 					atom.getTerms().set(i, replacement);
-			} else if (t instanceof ObjectVariableImpl) {
-				List<Term> innerterms = ((ObjectVariableImpl) t).getTerms();
+			} else if (t instanceof FunctionalTermImpl) {
+				List<Term> innerterms = ((FunctionalTermImpl) t).getTerms();
 				for (int j = 0; j < innerterms.size(); j++) {
 					Term innert = innerterms.get(j);
 					/*
@@ -235,14 +235,14 @@ public class AtomUnifier {
 			 * nested.
 			 */
 
-			if ((term1 instanceof ObjectVariableImpl) && (term2 instanceof ObjectVariableImpl)) {
+			if ((term1 instanceof FunctionalTermImpl) && (term2 instanceof FunctionalTermImpl)) {
 				/*
 				 * if both of them are a function term then we need to do some
 				 * check in the inner terms, else we can give it to the MGU
 				 * calculator directly
 				 */
-				ObjectVariableImpl fterm1 = (ObjectVariableImpl) term1;
-				ObjectVariableImpl fterm2 = (ObjectVariableImpl) term2;
+				FunctionalTermImpl fterm1 = (FunctionalTermImpl) term1;
+				FunctionalTermImpl fterm2 = (FunctionalTermImpl) term2;
 				if (!fterm1.getName().equals(fterm2.getName())) {
 					return null;
 				}
@@ -382,8 +382,8 @@ public class AtomUnifier {
 			return new Substitution(t1, t2);
 		} else if (t2 instanceof ObjectConstant) {
 			return new Substitution(t1, t2);
-		} else if (t2 instanceof ObjectVariableImpl) {
-			ObjectVariableImpl fterm = (ObjectVariableImpl) t2;
+		} else if (t2 instanceof FunctionalTermImpl) {
+			FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
 			if (fterm.containsTerm(t1))
 				return null;
 			else
@@ -421,9 +421,9 @@ public class AtomUnifier {
 			// UndistinguishedVariable ct1 = (UndistinguishedVariable) t1;
 			// UndistinguishedVariable ct2 = (UndistinguishedVariable) t2;
 			return true;
-		} else if (t1 instanceof ObjectVariableImpl) {
-			ObjectVariableImpl ct1 = (ObjectVariableImpl) t1;
-			ObjectVariableImpl ct2 = (ObjectVariableImpl) t2;
+		} else if (t1 instanceof FunctionalTermImpl) {
+			FunctionalTermImpl ct1 = (FunctionalTermImpl) t1;
+			FunctionalTermImpl ct2 = (FunctionalTermImpl) t2;
 			return ct1.toString().equals(ct2.toString());
 		} else if (t1 instanceof ValueConstantImpl) {
 			ValueConstantImpl ct1 = (ValueConstantImpl) t1;

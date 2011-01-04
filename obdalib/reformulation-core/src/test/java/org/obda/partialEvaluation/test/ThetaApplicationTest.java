@@ -28,7 +28,7 @@ import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
 import org.obda.reformulation.dllite.AtomUnifier;
@@ -54,14 +54,14 @@ public class ThetaApplicationTest extends TestCase {
 		Term t4 = termFactory.createVariable("x");	
 		List<Term> vars = new Vector<Term>();
 		vars.add((VariableImpl) t4);
-		ObjectVariableImpl ot =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
+		FunctionalTermImpl ot =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars);
 		
 		Term t5 = termFactory.createValueConstant("con");
 		Term t51 = termFactory.createValueConstant("st");
 		List<Term> vars5 = new Vector<Term>();
 		vars5.add(t5);
 		vars5.add(t51);
-		ObjectVariableImpl ot2 =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars5);
+		FunctionalTermImpl ot2 =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("p"), vars5);
 		
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 5);
 		List<Term> terms1 = new Vector<Term>();
@@ -83,7 +83,7 @@ public class ThetaApplicationTest extends TestCase {
 		Term t12 = termFactory.createVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add((VariableImpl) t12);
-		ObjectVariableImpl otx =(ObjectVariableImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("uri"), vars3);
+		FunctionalTermImpl otx =(FunctionalTermImpl) termFactory.createObjectTerm(termFactory.getFunctionSymbol("uri"), vars3);
 		
 		Predicate head = predFactory.getPredicate(URI.create("q"), 1);
 		List<Term> terms2 = new Vector<Term>();
@@ -112,10 +112,10 @@ public class ThetaApplicationTest extends TestCase {
 		assertEquals(5,terms.size());
 		
 		VariableImpl term1 = (VariableImpl) terms.get(0);
-		ObjectVariableImpl term2 = (ObjectVariableImpl) terms.get(1);
+		FunctionalTermImpl term2 = (FunctionalTermImpl) terms.get(1);
 		ValueConstant term3 = (ValueConstant) terms.get(2);
-		ObjectVariableImpl term4 = (ObjectVariableImpl) terms.get(3);
-		ObjectVariableImpl term5 = (ObjectVariableImpl) terms.get(4);
+		FunctionalTermImpl term4 = (FunctionalTermImpl) terms.get(3);
+		FunctionalTermImpl term5 = (FunctionalTermImpl) terms.get(4);
 		
 		assertEquals("t", term1.getName());
 		assertEquals("elf", term3.getName());

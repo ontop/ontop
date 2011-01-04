@@ -20,7 +20,7 @@ import java.util.Set;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.NamespaceManager;
 import org.semanticweb.owl.model.OWLClass;
@@ -116,7 +116,7 @@ public class AboxMaterializer {
 						while (res.next()) {
 							Iterator<Term> teit = terms.iterator();
 							while (teit.hasNext()) {
-								ObjectVariableImpl ft = (ObjectVariableImpl) teit.next();
+								FunctionalTermImpl ft = (FunctionalTermImpl) teit.next();
 								StringBuffer sb = new StringBuffer();
 								sb.append(ft.getName());
 								sb.append("-");
@@ -149,7 +149,7 @@ public class AboxMaterializer {
 					if (dataProperties.contains(uri)) {
 						while (res.next()) {
 							String valueVar = atom.getTerms().get(1).getName();
-							ObjectVariableImpl ft = (ObjectVariableImpl) atom.getTerms().get(0);
+							FunctionalTermImpl ft = (FunctionalTermImpl) atom.getTerms().get(0);
 							StringBuffer sb = new StringBuffer();
 							sb.append(ft.getName());
 							sb.append("-");
@@ -176,7 +176,7 @@ public class AboxMaterializer {
 					}
 					else if (objectProperties.contains(uri)) {
 						while (res.next()) {
-							ObjectVariableImpl ft1 = (ObjectVariableImpl) atom.getTerms().get(0);
+							FunctionalTermImpl ft1 = (FunctionalTermImpl) atom.getTerms().get(0);
 							StringBuffer sb1 = new StringBuffer();
 							sb1.append(ft1.getName());
 							sb1.append("-");
@@ -193,7 +193,7 @@ public class AboxMaterializer {
 							}
 							sb1.append(aux.toString());
 //							System.out.println(sb1.toString());
-							ObjectVariableImpl ft2 = (ObjectVariableImpl) atom.getTerms().get(1);
+							FunctionalTermImpl ft2 = (FunctionalTermImpl) atom.getTerms().get(1);
 							StringBuffer sb2 = new StringBuffer();
 							sb2.append(ft2.getName());
 							sb2.append("-");
