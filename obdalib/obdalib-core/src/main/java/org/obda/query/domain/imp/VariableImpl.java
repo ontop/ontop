@@ -4,43 +4,45 @@ import org.obda.query.domain.Variable;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-public class VariableImpl implements Variable{
+public class VariableImpl implements Variable {
 
-	private String name= null;
-	private int identifier = Integer.MIN_VALUE;
+	private String name = null;
 	private XSDatatype type = null;
+	private int identifier = -1;
 
-	
-	protected VariableImpl(String name, int identifier, XSDatatype type){
+	protected VariableImpl(String name, XSDatatype type) {
 		this.name = name;
-//		this.identifier = identifier;
-		this.identifier = name.hashCode();
 		this.type = type;
+		this.identifier = name.hashCode();
 	}
 
-	 public boolean equals(Object obj){
-		 if(obj == null || !(obj instanceof Variable)){
+	@Override
+	public boolean equals(Object obj) {
+
+		if(obj == null || !(obj instanceof VariableImpl))
 			 return false;
-		 }
-		 //return this.hash() == ((VariableImpl)obj).hash();
-		 return this.hashCode() == ((VariableImpl)obj).hashCode();
+
+		VariableImpl name2 = (VariableImpl) obj;
+		return this.identifier == name2.identifier;
 	 }
 
-	 public int hashCode(){
+	@Override
+	public int hashCode() {
 		 return identifier;
-	 }
+	}
 
-	
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}
-	
+
+	@Override
 	public Variable copy() {
-		return new VariableImpl(new String(name), identifier, type);
+		return new VariableImpl(new String(name), this.type);
 	}
-	
 }
