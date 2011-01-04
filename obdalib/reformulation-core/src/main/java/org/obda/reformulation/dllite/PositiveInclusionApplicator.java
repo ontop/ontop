@@ -1,17 +1,15 @@
 package org.obda.reformulation.dllite;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.reformulation.domain.ConceptDescription;
 import org.obda.reformulation.domain.PositiveInclusion;
@@ -21,7 +19,6 @@ import org.obda.reformulation.domain.imp.AtomicRoleDescriptionImpl;
 import org.obda.reformulation.domain.imp.DLLiterConceptInclusionImpl;
 import org.obda.reformulation.domain.imp.DLLiterRoleInclusionImpl;
 import org.obda.reformulation.domain.imp.ExistentialConceptDescriptionImpl;
-import org.obda.reformulation.domain.imp.NegatedRoleDescriptionImpl;
 
 public class PositiveInclusionApplicator {
 
@@ -94,6 +91,41 @@ public class PositiveInclusionApplicator {
 		} else {
 			throw new RuntimeException("PositiveInclusionApplicator: Unknown postive inclusion type: " + pi);
 		}
+	}
+
+	public List<CQIE> apply(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) {
+		List<CQIE> newqueries = new LinkedList<CQIE>();
+		for (CQIE cq : cqs) {
+			newqueries.addAll(apply(cq, pis));
+		}
+		return newqueries;
+	}
+
+	//TODO
+	public List<CQIE> apply(CQIE cq, Collection<PositiveInclusion> pis) {
+		List<CQIE> newqueries = new LinkedList<CQIE>();
+		List<Atom> body = cq.getBody();
+		for (int atomindex = 0; atomindex < body.size(); atomindex++) {
+			Atom atom = body.get(atomindex);
+			for (PositiveInclusion pi : pis) {
+				if (isPIApplicable(pi, atom)) {
+					newqueries.add(applyPI(cq, pi, atomindex));
+				}
+			}
+		}
+		return newqueries;
+	}
+
+	public List<CQIE> applyExistentialInclusions(CQIE cq, Collection<PositiveInclusion> pis) {
+		List<CQIE> newqueries = new LinkedList<CQIE>();
+		List<Atom> body = cq.getBody();
+		for (PositiveInclusion pi : pis) {
+			DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl)pi;
+			Predicate relevantPredicate = inc.getIncluded().getPredicate();
+			
+			
+		}
+		return newqueries;
 	}
 
 	public CQIE applyPI(CQIE q, PositiveInclusion inclusion, int atomindex) {

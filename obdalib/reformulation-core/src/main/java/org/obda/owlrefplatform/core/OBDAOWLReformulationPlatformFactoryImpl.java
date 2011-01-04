@@ -25,6 +25,7 @@ import org.obda.owlrefplatform.exception.OBDAOWLReformulaionPlatformFactoryExcep
 import org.obda.reformulation.dllite.DLRPerfectReformulator;
 import org.obda.reformulation.dllite.DirectMappingUnfolder;
 import org.obda.reformulation.dllite.QueryRewriter;
+import org.obda.reformulation.dllite.TreeRedReformulator;
 import org.obda.reformulation.domain.DLLiterOntology;
 import org.obda.reformulation.domain.imp.DLLiterOntologyImpl;
 import org.obda.reformulation.domain.imp.OWLAPITranslator;
@@ -241,7 +242,9 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 			ds = source;
 		}
 		// ds = apic.getDatasourcesController().getCurrentDataSource();
-		QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
+		
+//		QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
+		QueryRewriter rew = new TreeRedReformulator(ontology.getAssertions());
 		
 		List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
 		
@@ -288,7 +291,9 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 			ontology.addAssertions(aux.getAssertions());
 		}
 
-		QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
+		//QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
+		
+		QueryRewriter rew = new TreeRedReformulator(ontology.getAssertions());
 		
 		log.debug("Instantiating a SimpleDirectQueryGenrator");
 		SourceQueryGenerator gen = new SimpleDirectQueryGenrator(apic.getIOManager().getPrefixManager(), ontology, uris);

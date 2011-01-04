@@ -3,13 +3,12 @@ package org.obda.reformulation.domain.imp;
 import org.obda.query.domain.Predicate;
 import org.obda.reformulation.domain.BasicRoleDescription;
 
-public class AtomicRoleDescriptionImpl implements BasicRoleDescription{
+public class AtomicRoleDescriptionImpl implements BasicRoleDescription {
 
-	private boolean inverse = false;
-	private Predicate predicate = null;
+	private boolean		inverse		= false;
+	private Predicate	predicate	= null;
 
-
-	protected AtomicRoleDescriptionImpl(Predicate p, boolean isInverse){
+	protected AtomicRoleDescriptionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
 		this.inverse = isInverse;
 	}
@@ -17,8 +16,30 @@ public class AtomicRoleDescriptionImpl implements BasicRoleDescription{
 	public boolean isInverse() {
 		return inverse;
 	}
-	 public Predicate getPredicate(){
-		 return predicate;
-	 }
+
+	public Predicate getPredicate() {
+		return predicate;
+	}
+
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
+	public boolean equals(Object obj) {
+		if (!(obj instanceof AtomicRoleDescriptionImpl))
+			return false;
+		AtomicRoleDescriptionImpl concept2 = (AtomicRoleDescriptionImpl)obj;
+		if (inverse != concept2.inverse)
+			return false;
+		return (predicate.equals(concept2));
+	}
+
+	public String toString() {
+		StringBuffer bf = new StringBuffer();
+		bf.append(predicate.toString());
+		if (inverse)
+			bf.append("^-");
+		return bf.toString();
+	}
 
 }

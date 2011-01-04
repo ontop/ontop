@@ -20,5 +20,21 @@ public class AtomicConceptDescriptionImpl implements BasicConceptDescription{
 	public Predicate getPredicate() {
 		return predicate;
 	}
+	
+	
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
+	public boolean equals(Object obj) {
+		if (!(obj instanceof AtomicConceptDescriptionImpl))
+			return false;
+		AtomicConceptDescriptionImpl concept2 = (AtomicConceptDescriptionImpl)obj;
+		return (predicate.equals(concept2));
+	}
+
+	public String toString() {
+		return predicate.toString();
+	}
 
 }

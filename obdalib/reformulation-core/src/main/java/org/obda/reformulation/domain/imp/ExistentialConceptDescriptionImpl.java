@@ -20,5 +20,27 @@ public class ExistentialConceptDescriptionImpl implements BasicConceptDescriptio
 	public Predicate getPredicate() {
 		return predicate;
 	}
+	
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ExistentialConceptDescriptionImpl))
+			return false;
+		ExistentialConceptDescriptionImpl concept2 = (ExistentialConceptDescriptionImpl)obj;
+		if (isInverse != concept2.isInverse)
+			return false;
+		return (predicate.equals(concept2));
+	}
+
+	public String toString() {
+		StringBuffer bf = new StringBuffer();
+		bf.append("E");
+		bf.append(predicate.toString());
+		if (isInverse)
+			bf.append("^-");
+		return bf.toString();
+	}
 
 }

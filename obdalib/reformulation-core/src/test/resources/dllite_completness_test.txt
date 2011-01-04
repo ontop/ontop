@@ -813,7 +813,9 @@ These are the first cases which tests the effects of unification and positive in
 = Combined tests with booleans and constants =
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
-||91 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n3) (n1,n2,n3)} || ||
+|| 91 || a || A ISA ER, ER^^-^^ ISA ER || A(a1) A(a2) R(a2,r1) R(r1,r2) R(r2,r3) || q(x) :- A(x) R(x,y) R(y,z) R(z,m) || {a1 a2}|| ||
+|| 92 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n3) (n1,n2,n3)} || ||
+|| 93 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n3) (n1,n2,n3)} || ||
 
 
 #END# Correct tests end here, ignore the ones bellow
