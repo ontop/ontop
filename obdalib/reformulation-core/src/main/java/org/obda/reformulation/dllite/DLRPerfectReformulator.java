@@ -12,7 +12,6 @@ import org.obda.query.domain.Query;
 import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.obda.reformulation.domain.Assertion;
 import org.obda.reformulation.domain.PositiveInclusion;
-import org.obda.reformulation.domain.imp.ApplicabilityChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,6 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	private AtomUnifier					unifier			= null;
 	private PositiveInclusionApplicator	piApplicator	= null;
 	private List<Assertion>				assertions		= null;
-	ApplicabilityChecker				checker			= new ApplicabilityChecker();
 
 	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
@@ -68,7 +66,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 						Assertion ass = ait.next();
 						if (ass instanceof PositiveInclusion) {
 							PositiveInclusion pi = (PositiveInclusion) ass;
-							if (checker.isPIApplicable(pi, currentAtom)) {
+							if (piApplicator.isPIApplicable(pi, currentAtom)) {
 								CQIE newquery = piApplicator.applyPI(cqie, pi);
 								if (newRules.add(newquery.hashCode())) {
 									newSet.add(newquery);
@@ -84,7 +82,8 @@ public class DLRPerfectReformulator implements QueryRewriter {
 						if (i != j) {
 							CQIE newQuery = unifier.unify(cqie, i, j);
 							if (newQuery != null) {
-								newSet.add(anonymizer.anonymize(newQuery));
+								anonymizer.anonymize(newQuery,i);
+								newSet.add(newQuery);
 								loopagain = true;
 							}
 						}
