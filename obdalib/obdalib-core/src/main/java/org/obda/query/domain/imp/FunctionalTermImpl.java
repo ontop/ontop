@@ -47,7 +47,7 @@ public class FunctionalTermImpl implements Function {
 
 	@Override
 	public int hashCode() {
-		return functor.hashCode();
+		return identifier;
 	}
 
 	@Override
