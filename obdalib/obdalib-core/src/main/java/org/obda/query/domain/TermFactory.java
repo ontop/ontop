@@ -3,41 +3,95 @@ package org.obda.query.domain;
 import java.net.URI;
 import java.util.List;
 
-import org.obda.query.domain.imp.TermFactoryImpl;
-
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-public abstract class TermFactory {
+public interface TermFactory {
 
-	// TODO Add create undistinguished variable to this interface and to the
-	// implemenation
+	/**
+	 * Construct a {@link URIConstant} object. This type of term is written
+	 * as a usual URI construction following the generic URI syntax
+	 * specification (RFC 3986).
+	 * <p>
+	 * <code>
+	 * scheme://host:port/path#fragment
+	 * </code>
+	 * <p>
+ 	 * Examples:
+ 	 * <p>
+	 * <code>
+	 * http://example.org/some/paths <br />
+	 * http://example.org/some/paths/to/resource#frag01 <br />
+	 * ftp://example.org/resource.txt <br />
+	 * </code>
+	 * <p>
+	 * are all well-formed URI strings.
+	 *
+	 * @param uri the URI.
+	 * @return a URI constant.
+	 */
+	public abstract URIConstant createURIConstant(URI uri);
 
-	private static TermFactory	instance	= null;
+	/**
+	 * Construct a {@link ValueConstant} object.
+	 *
+	 * @param value the value of the constant.
+	 * @return the value constant.
+	 */
+	public abstract ValueConstant createValueConstant(String value);
 
-	public TermFactory() {
-		instance = this;
-	}
+	/**
+	 * Construct a {@link ValueConstant} object with a type definition.
+	 * <p>
+	 * Example:
+	 * <p>
+	 * <code>
+	 * "Person"^^xsd:String <br />
+	 * 22^^xsd:Integer
+	 * </code>
+	 *
+	 * @param value the value of the constant.
+	 * @param type the type of the constant.
+	 * @return the value constant.
+	 */
+	public abstract ValueConstant createValueConstant(String value, XSDatatype type);
 
-	public abstract Term createURIConstant(URI uri);
+	/**
+	 * Construct a {@link Variable} object. The variable name is started by
+	 * a dollar sign ('$') or a question mark sign ('?'), e.g.:
+	 * <p>
+	 * <code>
+	 * pred($x) <br />
+	 * func(?x, ?y)
+	 * </code>
+	 *
+	 * @param name the name of the variable.
+	 * @return the variable object.
+	 */
+	public abstract Variable createVariable(String name);
 
-	public abstract Term createObjectConstant(FunctionSymbol functor, List<ValueConstant> terms);
+	/**
+	 * Construct a {@link Variable} object with a type definition. The variable
+	 * name is started by a dollar sign ('$') or a question mark sign ('?'),
+	 * e.g.:
+	 * <p>
+	 * <code>
+	 * pred($x) <br />
+	 * func(?x, ?y)
+	 * </code>
+	 *
+	 * @param name the name of the variable.
+	 * @return the variable object.
+	 */
+	public abstract Variable createVariable(String name, XSDatatype type);
 
-	public abstract Term createValueConstant(String name);
-
-	public abstract Term createValueConstant(String name, XSDatatype type);
-
-	public abstract Term createVariable(String name);
-
-	public abstract Term createVariable(String name, XSDatatype type);
-
-	public abstract FunctionSymbol getFunctionSymbol(String name);
-
-	public abstract Term createObjectTerm(FunctionSymbol fs, List<Term> vars);
-
-	public static TermFactory getInstance() {
-		if (instance == null) {
-			instance = new TermFactoryImpl();
-		}
-		return instance;
-	}
+	/**
+	 * Construct a {@link Function} object. A function expression consists
+	 * of functional symbol (or functor) and one or more arguments.
+	 *
+	 * @param functor the function symbol name.
+	 * @param arguments a list of arguments.
+	 * @return the function object.
+	 */
+	public abstract Function createFunctionalTerm(Predicate functor,
+			List<Term> arguments);
 }
