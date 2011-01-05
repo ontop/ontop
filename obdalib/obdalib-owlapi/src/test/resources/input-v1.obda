@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<OBDA version="1.0">
+    <mappings
+        bodyclass="class inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery"
+        headclass="class inf.unibz.it.obda.api.domain.ucq.ConjunctiveQuery" sourceuri="RandBStockExchange">
+        <mapping id="mapping-investors">
+            <CQ string="Investor(getPersonObj($id)), firstName(getPersonObj($id),$name), lastName(getPersonObj($id),$lastname), dateOfBirth(getPersonObj($id),$dateofbirth), ssn(getPersonObj($id),$ssn)"/>
+            <SQLQuery string="select id, name, lastname, dateofbirth, ssn from client"/>
+        </mapping>
+        <mapping id="mapping-investor-address">
+            <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+            <SQLQuery string="select id, name, lastname, addressid from client"/>
+        </mapping>
+        <mapping id="mapping-company-addresses">
+            <CQ string="hasAddress(getCompanyObj($id),getAddressObj($addressid))"/>
+            <SQLQuery string="select id, addressid from company"/>
+        </mapping>
+        <mapping id="mapping-company-base">
+            <CQ string="hasBase(getCompanyObj($id), baseCity($city))"/>
+            <SQLQuery string="select id, baseCity from company"/>
+        </mapping>
+    </mappings>
+</OBDA>
