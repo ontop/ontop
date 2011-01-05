@@ -1,88 +1,90 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 Datalog.g 2010-12-16 17:26:29
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 Datalog.g 2011-01-04 16:36:54
 
 package org.obda.query.tools.parser;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Vector;
 
 import org.antlr.runtime.BitSet;
-import org.antlr.runtime.EarlyExitException;
 import org.antlr.runtime.MismatchedSetException;
 import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
+
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.FunctionSymbol;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.FunctionSymbolImpl;
+import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
+
+
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 public class DatalogParser extends Parser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "PREFIX", "LESS", "GREATER", "BASE", "INV_IMPLIES", "IMPLIES", "COMMA", "CARET", "LPAREN", "RPAREN", "DOLLAR", "QUESTION", "ASTERISK", "STRING_URI", "ID_PLAIN", "STRING_PREFIX", "COLON", "STRING_LITERAL", "STRING_LITERAL2", "REFERENCE", "SEMI", "DOT", "LSQ_BRACKET", "RSQ_BRACKET", "QUOTE_DOUBLE", "QUOTE_SINGLE", "APOSTROPHE", "UNDERSCORE", "DASH", "AMPERSAND", "AT", "EXCLAMATION", "HASH", "PERCENT", "PLUS", "EQUALS", "SLASH", "DOUBLE_SLASH", "BACKSLASH", "TILDE", "ALPHA", "DIGIT", "ALPHANUM", "ID_START", "ID_CORE", "SCHEMA", "URI_PATH", "ID", "WS"
     };
-    public static final int DOLLAR=14;
-    public static final int INV_IMPLIES=8;
-    public static final int PREFIX=4;
-    public static final int ID_PLAIN=18;
-    public static final int DOUBLE_SLASH=41;
-    public static final int URI_PATH=50;
-    public static final int EQUALS=39;
-    public static final int ID=51;
     public static final int EOF=-1;
-    public static final int ASTERISK=16;
-    public static final int LPAREN=12;
-    public static final int AT=34;
-    public static final int RPAREN=13;
+    public static final int PREFIX=4;
+    public static final int LESS=5;
     public static final int GREATER=6;
-    public static final int STRING_LITERAL=21;
-    public static final int SLASH=40;
-    public static final int EXCLAMATION=35;
+    public static final int BASE=7;
+    public static final int INV_IMPLIES=8;
+    public static final int IMPLIES=9;
     public static final int COMMA=10;
     public static final int CARET=11;
-    public static final int LESS=5;
-    public static final int TILDE=43;
-    public static final int BASE=7;
-    public static final int PLUS=38;
-    public static final int DIGIT=45;
-    public static final int APOSTROPHE=30;
-    public static final int DOT=25;
-    public static final int RSQ_BRACKET=27;
-    public static final int STRING_URI=17;
-    public static final int IMPLIES=9;
-    public static final int PERCENT=37;
-    public static final int DASH=32;
-    public static final int ID_CORE=48;
-    public static final int QUOTE_DOUBLE=28;
-    public static final int HASH=36;
-    public static final int AMPERSAND=33;
-    public static final int REFERENCE=23;
-    public static final int UNDERSCORE=31;
-    public static final int LSQ_BRACKET=26;
-    public static final int SEMI=24;
-    public static final int ALPHANUM=46;
-    public static final int ALPHA=44;
-    public static final int COLON=20;
-    public static final int WS=52;
-    public static final int SCHEMA=49;
+    public static final int LPAREN=12;
+    public static final int RPAREN=13;
+    public static final int DOLLAR=14;
     public static final int QUESTION=15;
-    public static final int STRING_LITERAL2=22;
-    public static final int QUOTE_SINGLE=29;
-    public static final int ID_START=47;
+    public static final int ASTERISK=16;
+    public static final int STRING_URI=17;
+    public static final int ID_PLAIN=18;
     public static final int STRING_PREFIX=19;
+    public static final int COLON=20;
+    public static final int STRING_LITERAL=21;
+    public static final int STRING_LITERAL2=22;
+    public static final int REFERENCE=23;
+    public static final int SEMI=24;
+    public static final int DOT=25;
+    public static final int LSQ_BRACKET=26;
+    public static final int RSQ_BRACKET=27;
+    public static final int QUOTE_DOUBLE=28;
+    public static final int QUOTE_SINGLE=29;
+    public static final int APOSTROPHE=30;
+    public static final int UNDERSCORE=31;
+    public static final int DASH=32;
+    public static final int AMPERSAND=33;
+    public static final int AT=34;
+    public static final int EXCLAMATION=35;
+    public static final int HASH=36;
+    public static final int PERCENT=37;
+    public static final int PLUS=38;
+    public static final int EQUALS=39;
+    public static final int SLASH=40;
+    public static final int DOUBLE_SLASH=41;
     public static final int BACKSLASH=42;
+    public static final int TILDE=43;
+    public static final int ALPHA=44;
+    public static final int DIGIT=45;
+    public static final int ALPHANUM=46;
+    public static final int ID_START=47;
+    public static final int ID_CORE=48;
+    public static final int SCHEMA=49;
+    public static final int URI_PATH=50;
+    public static final int ID=51;
+    public static final int WS=52;
 
     // delegates
     // delegators
@@ -93,14 +95,12 @@ public class DatalogParser extends Parser {
         }
         public DatalogParser(TokenStream input, RecognizerSharedState state) {
             super(input, state);
-
+             
         }
+        
 
-
-    @Override
-	public String[] getTokenNames() { return DatalogParser.tokenNames; }
-    @Override
-	public String getGrammarFileName() { return "Datalog.g"; }
+    public String[] getTokenNames() { return DatalogParser.tokenNames; }
+    public String getGrammarFileName() { return "Datalog.g"; }
 
 
     /** Constants */
@@ -109,13 +109,13 @@ public class DatalogParser extends Parser {
     private static final String OBDA_SELECT_ALL = "obda-select-all";
 
     /** Map of directives */
-    private final HashMap<String, String> directives = new HashMap<String, String>();
+    private HashMap<String, String> directives = new HashMap<String, String>();
 
     /** A factory to construct the subject and object terms */
-    private final TermFactory termFactory = TermFactory.getInstance();
+    private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
     /** A factory to construct the predicates */
-    private final PredicateFactory predicateFactory = BasicPredicateFactoryImpl.getInstance();
+    private BasicPredicateFactoryImpl predicateFactory = BasicPredicateFactoryImpl.getInstance();
 
     /** Select all flag */
     private boolean isSelectAll = false;
@@ -134,18 +134,18 @@ public class DatalogParser extends Parser {
                     variableTerms.add(term);
             }
         }
-
+        
         Atom head = rule.getHead();
         head.updateTerms(variableTerms);
         rule.updateHead(head);
-
-        return rule;
+         
+        return rule; 
     }
 
 
 
     // $ANTLR start "parse"
-    // Datalog.g:116:1: parse returns [DatalogProgramImpl value] : prog EOF ;
+    // Datalog.g:113:1: parse returns [DatalogProgramImpl value] : prog EOF ;
     public final DatalogProgramImpl parse() throws RecognitionException {
         DatalogProgramImpl value = null;
 
@@ -153,8 +153,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:117:3: ( prog EOF )
-            // Datalog.g:117:5: prog EOF
+            // Datalog.g:114:3: ( prog EOF )
+            // Datalog.g:114:5: prog EOF
             {
             pushFollow(FOLLOW_prog_in_parse52);
             prog1=prog();
@@ -165,16 +165,16 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
 
                     value = prog1;
-
+                  
             }
 
             }
 
         }
         catch (RecognitionException e) {
-
+             
                   throw e;
-
+                
         }
         finally {
         }
@@ -184,7 +184,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "prog"
-    // Datalog.g:124:1: prog returns [DatalogProgramImpl value] : ( base )? ( directive )* ( rule )+ ;
+    // Datalog.g:121:1: prog returns [DatalogProgramImpl value] : ( base )? ( directive )* ( rule )+ ;
     public final DatalogProgramImpl prog() throws RecognitionException {
         DatalogProgramImpl value = null;
 
@@ -196,10 +196,10 @@ public class DatalogParser extends Parser {
           CQIE rule = null;
 
         try {
-            // Datalog.g:129:3: ( ( base )? ( directive )* ( rule )+ )
-            // Datalog.g:129:5: ( base )? ( directive )* ( rule )+
+            // Datalog.g:126:3: ( ( base )? ( directive )* ( rule )+ )
+            // Datalog.g:126:5: ( base )? ( directive )* ( rule )+
             {
-            // Datalog.g:129:5: ( base )?
+            // Datalog.g:126:5: ( base )?
             int alt1=2;
             int LA1_0 = input.LA(1);
 
@@ -208,7 +208,7 @@ public class DatalogParser extends Parser {
             }
             switch (alt1) {
                 case 1 :
-                    // Datalog.g:129:5: base
+                    // Datalog.g:126:5: base
                     {
                     pushFollow(FOLLOW_base_in_prog86);
                     base();
@@ -221,7 +221,7 @@ public class DatalogParser extends Parser {
 
             }
 
-            // Datalog.g:130:5: ( directive )*
+            // Datalog.g:127:5: ( directive )*
             loop2:
             do {
                 int alt2=2;
@@ -234,7 +234,7 @@ public class DatalogParser extends Parser {
 
                 switch (alt2) {
             	case 1 :
-            	    // Datalog.g:130:5: directive
+            	    // Datalog.g:127:5: directive
             	    {
             	    pushFollow(FOLLOW_directive_in_prog93);
             	    directive();
@@ -250,7 +250,7 @@ public class DatalogParser extends Parser {
                 }
             } while (true);
 
-            // Datalog.g:131:5: ( rule )+
+            // Datalog.g:128:5: ( rule )+
             int cnt3=0;
             loop3:
             do {
@@ -264,7 +264,7 @@ public class DatalogParser extends Parser {
 
                 switch (alt3) {
             	case 1 :
-            	    // Datalog.g:131:6: rule
+            	    // Datalog.g:128:6: rule
             	    {
             	    pushFollow(FOLLOW_rule_in_prog102);
             	    rule2=rule();
@@ -276,11 +276,11 @@ public class DatalogParser extends Parser {
             	            rule = rule2;
             	            if (isSelectAll) {
             	              rule = identifyAllVariables(rule);
-            	              isSelectAll = false;
+            	              isSelectAll = false;  
             	            }
-
+            	              
             	            value.appendRule(rule);
-
+            	          
             	    }
 
             	    }
@@ -312,7 +312,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "directive"
-    // Datalog.g:142:1: directive : PREFIX prefix LESS uriref GREATER ;
+    // Datalog.g:139:1: directive : PREFIX prefix LESS uriref GREATER ;
     public final void directive() throws RecognitionException {
         DatalogParser.prefix_return prefix3 = null;
 
@@ -324,8 +324,8 @@ public class DatalogParser extends Parser {
           String uriref = "";
 
         try {
-            // Datalog.g:147:3: ( PREFIX prefix LESS uriref GREATER )
-            // Datalog.g:147:5: PREFIX prefix LESS uriref GREATER
+            // Datalog.g:144:3: ( PREFIX prefix LESS uriref GREATER )
+            // Datalog.g:144:5: PREFIX prefix LESS uriref GREATER
             {
             match(input,PREFIX,FOLLOW_PREFIX_in_directive126); if (state.failed) return ;
             pushFollow(FOLLOW_prefix_in_directive128);
@@ -343,14 +343,14 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
 
                     prefix = (prefix3!=null?input.toString(prefix3.start,prefix3.stop):null);
-                    prefix = prefix.substring(0, prefix.length()-1);
+                    prefix = prefix.substring(0, prefix.length()-1);  
                     if (prefix == null || prefix == "") // if there is no prefix id put the default name.
                       prefix = OBDA_DEFAULT_URI;
 
                     uriref = (uriref4!=null?input.toString(uriref4.start,uriref4.stop):null);
-
+                    
                     directives.put(prefix, uriref);
-
+                  
             }
 
             }
@@ -368,7 +368,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "base"
-    // Datalog.g:159:1: base : BASE LESS uriref GREATER ;
+    // Datalog.g:156:1: base : BASE LESS uriref GREATER ;
     public final void base() throws RecognitionException {
         DatalogParser.uriref_return uriref5 = null;
 
@@ -378,8 +378,8 @@ public class DatalogParser extends Parser {
           String uriref = "";
 
         try {
-            // Datalog.g:164:3: ( BASE LESS uriref GREATER )
-            // Datalog.g:164:5: BASE LESS uriref GREATER
+            // Datalog.g:161:3: ( BASE LESS uriref GREATER )
+            // Datalog.g:161:5: BASE LESS uriref GREATER
             {
             match(input,BASE,FOLLOW_BASE_in_base154); if (state.failed) return ;
             match(input,LESS,FOLLOW_LESS_in_base156); if (state.failed) return ;
@@ -391,9 +391,9 @@ public class DatalogParser extends Parser {
             match(input,GREATER,FOLLOW_GREATER_in_base160); if (state.failed) return ;
             if ( state.backtracking==0 ) {
 
-                    uriref = (uriref5!=null?input.toString(uriref5.start,uriref5.stop):null);
+                    uriref = (uriref5!=null?input.toString(uriref5.start,uriref5.stop):null);      
                     directives.put(prefix, uriref);
-
+                  
             }
 
             }
@@ -411,7 +411,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "rule"
-    // Datalog.g:170:1: rule returns [CQIE value] : ( ( ( head )? INV_IMPLIES )=> datalog_syntax_rule | ( ( body )? IMPLIES )=> swirl_syntax_rule );
+    // Datalog.g:167:1: rule returns [CQIE value] : ( ( ( head )? INV_IMPLIES )=> datalog_syntax_rule | ( ( body )? IMPLIES )=> swirl_syntax_rule );
     public final CQIE rule() throws RecognitionException {
         CQIE value = null;
 
@@ -421,7 +421,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:171:3: ( ( ( head )? INV_IMPLIES )=> datalog_syntax_rule | ( ( body )? IMPLIES )=> swirl_syntax_rule )
+            // Datalog.g:168:3: ( ( ( head )? INV_IMPLIES )=> datalog_syntax_rule | ( ( body )? IMPLIES )=> swirl_syntax_rule )
             int alt4=2;
             int LA4_0 = input.LA(1);
 
@@ -491,7 +491,7 @@ public class DatalogParser extends Parser {
             }
             switch (alt4) {
                 case 1 :
-                    // Datalog.g:171:5: ( ( head )? INV_IMPLIES )=> datalog_syntax_rule
+                    // Datalog.g:168:5: ( ( head )? INV_IMPLIES )=> datalog_syntax_rule
                     {
                     pushFollow(FOLLOW_datalog_syntax_rule_in_rule189);
                     datalog_syntax_rule6=datalog_syntax_rule();
@@ -499,15 +499,15 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-
+                       
                             value = datalog_syntax_rule6;
-
+                          
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:174:5: ( ( body )? IMPLIES )=> swirl_syntax_rule
+                    // Datalog.g:171:5: ( ( body )? IMPLIES )=> swirl_syntax_rule
                     {
                     pushFollow(FOLLOW_swirl_syntax_rule_in_rule205);
                     swirl_syntax_rule7=swirl_syntax_rule();
@@ -517,7 +517,7 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = swirl_syntax_rule7;
-
+                          
                     }
 
                     }
@@ -537,7 +537,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "datalog_syntax_rule"
-    // Datalog.g:179:1: datalog_syntax_rule returns [CQIE value] : ( INV_IMPLIES body | datalog_syntax_alt );
+    // Datalog.g:176:1: datalog_syntax_rule returns [CQIE value] : ( INV_IMPLIES body | datalog_syntax_alt );
     public final CQIE datalog_syntax_rule() throws RecognitionException {
         CQIE value = null;
 
@@ -547,7 +547,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:180:3: ( INV_IMPLIES body | datalog_syntax_alt )
+            // Datalog.g:177:3: ( INV_IMPLIES body | datalog_syntax_alt )
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -566,7 +566,7 @@ public class DatalogParser extends Parser {
             }
             switch (alt5) {
                 case 1 :
-                    // Datalog.g:180:5: INV_IMPLIES body
+                    // Datalog.g:177:5: INV_IMPLIES body
                     {
                     match(input,INV_IMPLIES,FOLLOW_INV_IMPLIES_in_datalog_syntax_rule224); if (state.failed) return value;
                     pushFollow(FOLLOW_body_in_datalog_syntax_rule226);
@@ -577,13 +577,13 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = new CQIEImpl(null, body8, true);
-
+                          
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:183:5: datalog_syntax_alt
+                    // Datalog.g:180:5: datalog_syntax_alt
                     {
                     pushFollow(FOLLOW_datalog_syntax_alt_in_datalog_syntax_rule234);
                     datalog_syntax_alt9=datalog_syntax_alt();
@@ -593,7 +593,7 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = datalog_syntax_alt9;
-
+                          
                     }
 
                     }
@@ -613,7 +613,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "datalog_syntax_alt"
-    // Datalog.g:188:1: datalog_syntax_alt returns [CQIE value] : ( ( head INV_IMPLIES body )=> head INV_IMPLIES body | head INV_IMPLIES );
+    // Datalog.g:185:1: datalog_syntax_alt returns [CQIE value] : ( ( head INV_IMPLIES body )=> head INV_IMPLIES body | head INV_IMPLIES );
     public final CQIE datalog_syntax_alt() throws RecognitionException {
         CQIE value = null;
 
@@ -625,7 +625,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:189:3: ( ( head INV_IMPLIES body )=> head INV_IMPLIES body | head INV_IMPLIES )
+            // Datalog.g:186:3: ( ( head INV_IMPLIES body )=> head INV_IMPLIES body | head INV_IMPLIES )
             int alt6=2;
             switch ( input.LA(1) ) {
             case STRING_URI:
@@ -696,7 +696,7 @@ public class DatalogParser extends Parser {
 
             switch (alt6) {
                 case 1 :
-                    // Datalog.g:189:5: ( head INV_IMPLIES body )=> head INV_IMPLIES body
+                    // Datalog.g:186:5: ( head INV_IMPLIES body )=> head INV_IMPLIES body
                     {
                     pushFollow(FOLLOW_head_in_datalog_syntax_alt262);
                     head10=head();
@@ -712,13 +712,13 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = new CQIEImpl(head10, body11, true);
-
+                          
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:192:5: head INV_IMPLIES
+                    // Datalog.g:189:5: head INV_IMPLIES
                     {
                     pushFollow(FOLLOW_head_in_datalog_syntax_alt274);
                     head12=head();
@@ -729,7 +729,7 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = new CQIEImpl(head12, null, true);
-
+                          
                     }
 
                     }
@@ -749,7 +749,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "swirl_syntax_rule"
-    // Datalog.g:197:1: swirl_syntax_rule returns [CQIE value] : ( IMPLIES head | swirl_syntax_alt );
+    // Datalog.g:194:1: swirl_syntax_rule returns [CQIE value] : ( IMPLIES head | swirl_syntax_alt );
     public final CQIE swirl_syntax_rule() throws RecognitionException {
         CQIE value = null;
 
@@ -759,7 +759,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:198:3: ( IMPLIES head | swirl_syntax_alt )
+            // Datalog.g:195:3: ( IMPLIES head | swirl_syntax_alt )
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -778,7 +778,7 @@ public class DatalogParser extends Parser {
             }
             switch (alt7) {
                 case 1 :
-                    // Datalog.g:198:5: IMPLIES head
+                    // Datalog.g:195:5: IMPLIES head
                     {
                     match(input,IMPLIES,FOLLOW_IMPLIES_in_swirl_syntax_rule295); if (state.failed) return value;
                     pushFollow(FOLLOW_head_in_swirl_syntax_rule297);
@@ -789,13 +789,13 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = new CQIEImpl(head13, null, true);
-
+                          
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:201:5: swirl_syntax_alt
+                    // Datalog.g:198:5: swirl_syntax_alt
                     {
                     pushFollow(FOLLOW_swirl_syntax_alt_in_swirl_syntax_rule305);
                     swirl_syntax_alt14=swirl_syntax_alt();
@@ -805,7 +805,7 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = swirl_syntax_alt14;
-
+                          
                     }
 
                     }
@@ -825,7 +825,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "swirl_syntax_alt"
-    // Datalog.g:206:1: swirl_syntax_alt returns [CQIE value] : ( ( body IMPLIES head )=> body IMPLIES head | body IMPLIES );
+    // Datalog.g:203:1: swirl_syntax_alt returns [CQIE value] : ( ( body IMPLIES head )=> body IMPLIES head | body IMPLIES );
     public final CQIE swirl_syntax_alt() throws RecognitionException {
         CQIE value = null;
 
@@ -837,7 +837,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:207:3: ( ( body IMPLIES head )=> body IMPLIES head | body IMPLIES )
+            // Datalog.g:204:3: ( ( body IMPLIES head )=> body IMPLIES head | body IMPLIES )
             int alt8=2;
             switch ( input.LA(1) ) {
             case STRING_URI:
@@ -908,7 +908,7 @@ public class DatalogParser extends Parser {
 
             switch (alt8) {
                 case 1 :
-                    // Datalog.g:207:5: ( body IMPLIES head )=> body IMPLIES head
+                    // Datalog.g:204:5: ( body IMPLIES head )=> body IMPLIES head
                     {
                     pushFollow(FOLLOW_body_in_swirl_syntax_alt333);
                     body16=body();
@@ -924,13 +924,13 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = new CQIEImpl(head15, body16, true);
-
+                          
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:210:5: body IMPLIES
+                    // Datalog.g:207:5: body IMPLIES
                     {
                     pushFollow(FOLLOW_body_in_swirl_syntax_alt345);
                     body17=body();
@@ -941,7 +941,7 @@ public class DatalogParser extends Parser {
                     if ( state.backtracking==0 ) {
 
                             value = new CQIEImpl(null, body17, true);
-
+                          
                     }
 
                     }
@@ -961,7 +961,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "head"
-    // Datalog.g:215:1: head returns [Atom value] : atom ;
+    // Datalog.g:212:1: head returns [Atom value] : atom ;
     public final Atom head() throws RecognitionException {
         Atom value = null;
 
@@ -972,8 +972,8 @@ public class DatalogParser extends Parser {
           value = null;
 
         try {
-            // Datalog.g:219:3: ( atom )
-            // Datalog.g:219:5: atom
+            // Datalog.g:216:3: ( atom )
+            // Datalog.g:216:5: atom
             {
             pushFollow(FOLLOW_atom_in_head371);
             atom18=atom();
@@ -983,7 +983,7 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
 
                     value = atom18;
-
+                  
             }
 
             }
@@ -1001,7 +1001,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "body"
-    // Datalog.g:224:1: body returns [Vector<Atom> value] : a1= atom ( ( COMMA | CARET ) a2= atom )* ;
+    // Datalog.g:221:1: body returns [Vector<Atom> value] : a1= atom ( ( COMMA | CARET ) a2= atom )* ;
     public final Vector<Atom> body() throws RecognitionException {
         Vector<Atom> value = null;
 
@@ -1014,8 +1014,8 @@ public class DatalogParser extends Parser {
           value = new Vector<Atom>();
 
         try {
-            // Datalog.g:228:3: (a1= atom ( ( COMMA | CARET ) a2= atom )* )
-            // Datalog.g:228:5: a1= atom ( ( COMMA | CARET ) a2= atom )*
+            // Datalog.g:225:3: (a1= atom ( ( COMMA | CARET ) a2= atom )* )
+            // Datalog.g:225:5: a1= atom ( ( COMMA | CARET ) a2= atom )*
             {
             pushFollow(FOLLOW_atom_in_body397);
             a1=atom();
@@ -1023,9 +1023,9 @@ public class DatalogParser extends Parser {
             state._fsp--;
             if (state.failed) return value;
             if ( state.backtracking==0 ) {
-               value.add(a1);
+               value.add(a1); 
             }
-            // Datalog.g:228:40: ( ( COMMA | CARET ) a2= atom )*
+            // Datalog.g:225:40: ( ( COMMA | CARET ) a2= atom )*
             loop9:
             do {
                 int alt9=2;
@@ -1038,7 +1038,7 @@ public class DatalogParser extends Parser {
 
                 switch (alt9) {
             	case 1 :
-            	    // Datalog.g:228:41: ( COMMA | CARET ) a2= atom
+            	    // Datalog.g:225:41: ( COMMA | CARET ) a2= atom
             	    {
             	    if ( (input.LA(1)>=COMMA && input.LA(1)<=CARET) ) {
             	        input.consume();
@@ -1056,7 +1056,7 @@ public class DatalogParser extends Parser {
             	    state._fsp--;
             	    if (state.failed) return value;
             	    if ( state.backtracking==0 ) {
-            	       value.add(a2);
+            	       value.add(a2); 
             	    }
 
             	    }
@@ -1083,7 +1083,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "atom"
-    // Datalog.g:231:1: atom returns [Atom value] : predicate LPAREN ( terms )? RPAREN ;
+    // Datalog.g:228:1: atom returns [Atom value] : predicate LPAREN ( terms )? RPAREN ;
     public final Atom atom() throws RecognitionException {
         Atom value = null;
 
@@ -1093,8 +1093,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:232:3: ( predicate LPAREN ( terms )? RPAREN )
-            // Datalog.g:232:5: predicate LPAREN ( terms )? RPAREN
+            // Datalog.g:229:3: ( predicate LPAREN ( terms )? RPAREN )
+            // Datalog.g:229:5: predicate LPAREN ( terms )? RPAREN
             {
             pushFollow(FOLLOW_predicate_in_atom431);
             predicate19=predicate();
@@ -1102,7 +1102,7 @@ public class DatalogParser extends Parser {
             state._fsp--;
             if (state.failed) return value;
             match(input,LPAREN,FOLLOW_LPAREN_in_atom433); if (state.failed) return value;
-            // Datalog.g:232:22: ( terms )?
+            // Datalog.g:229:22: ( terms )?
             int alt10=2;
             int LA10_0 = input.LA(1);
 
@@ -1111,7 +1111,7 @@ public class DatalogParser extends Parser {
             }
             switch (alt10) {
                 case 1 :
-                    // Datalog.g:232:22: terms
+                    // Datalog.g:229:22: terms
                     {
                     pushFollow(FOLLOW_terms_in_atom435);
                     terms20=terms();
@@ -1128,18 +1128,18 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
 
                     URI uri = URI.create(predicate19);
-
+                    
                     Vector<Term> elements = terms20;
                     if (elements == null)
                       elements = new Vector<Term>();
-                    Predicate predicate = predicateFactory.getPredicate(uri, elements.size());
-
+                    Predicate predicate = predicateFactory.createPredicate(uri, elements.size());
+                    
                     Vector<Term> terms = terms20;
                     if (terms == null)
                       terms = new Vector<Term>();
-
+                      
                     value = new AtomImpl(predicate, terms);
-
+                  
             }
 
             }
@@ -1157,7 +1157,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "predicate"
-    // Datalog.g:248:1: predicate returns [String value] : ( full_name | plain_name | qualified_name );
+    // Datalog.g:245:1: predicate returns [String value] : ( full_name | plain_name | qualified_name );
     public final String predicate() throws RecognitionException {
         String value = null;
 
@@ -1169,7 +1169,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:249:3: ( full_name | plain_name | qualified_name )
+            // Datalog.g:246:3: ( full_name | plain_name | qualified_name )
             int alt11=3;
             switch ( input.LA(1) ) {
             case STRING_URI:
@@ -1198,7 +1198,7 @@ public class DatalogParser extends Parser {
 
             switch (alt11) {
                 case 1 :
-                    // Datalog.g:249:5: full_name
+                    // Datalog.g:246:5: full_name
                     {
                     pushFollow(FOLLOW_full_name_in_predicate458);
                     full_name21=full_name();
@@ -1206,13 +1206,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = full_name21;
+                       value = full_name21; 
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:250:5: plain_name
+                    // Datalog.g:247:5: plain_name
                     {
                     pushFollow(FOLLOW_plain_name_in_predicate471);
                     plain_name22=plain_name();
@@ -1220,13 +1220,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = plain_name22;
+                       value = plain_name22; 
                     }
 
                     }
                     break;
                 case 3 :
-                    // Datalog.g:251:5: qualified_name
+                    // Datalog.g:248:5: qualified_name
                     {
                     pushFollow(FOLLOW_qualified_name_in_predicate483);
                     qualified_name23=qualified_name();
@@ -1234,7 +1234,7 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = qualified_name23;
+                       value = qualified_name23; 
                     }
 
                     }
@@ -1254,7 +1254,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "terms"
-    // Datalog.g:254:1: terms returns [Vector<Term> elements] : t1= term ( COMMA t2= term )* ;
+    // Datalog.g:251:1: terms returns [Vector<Term> elements] : t1= term ( COMMA t2= term )* ;
     public final Vector<Term> terms() throws RecognitionException {
         Vector<Term> elements = null;
 
@@ -1267,8 +1267,8 @@ public class DatalogParser extends Parser {
           elements = new Vector<Term>();
 
         try {
-            // Datalog.g:258:3: (t1= term ( COMMA t2= term )* )
-            // Datalog.g:258:5: t1= term ( COMMA t2= term )*
+            // Datalog.g:255:3: (t1= term ( COMMA t2= term )* )
+            // Datalog.g:255:5: t1= term ( COMMA t2= term )*
             {
             pushFollow(FOLLOW_term_in_terms509);
             t1=term();
@@ -1276,9 +1276,9 @@ public class DatalogParser extends Parser {
             state._fsp--;
             if (state.failed) return elements;
             if ( state.backtracking==0 ) {
-               elements.add(t1);
+               elements.add(t1); 
             }
-            // Datalog.g:258:43: ( COMMA t2= term )*
+            // Datalog.g:255:43: ( COMMA t2= term )*
             loop12:
             do {
                 int alt12=2;
@@ -1291,7 +1291,7 @@ public class DatalogParser extends Parser {
 
                 switch (alt12) {
             	case 1 :
-            	    // Datalog.g:258:44: COMMA t2= term
+            	    // Datalog.g:255:44: COMMA t2= term
             	    {
             	    match(input,COMMA,FOLLOW_COMMA_in_terms514); if (state.failed) return elements;
             	    pushFollow(FOLLOW_term_in_terms518);
@@ -1300,7 +1300,7 @@ public class DatalogParser extends Parser {
             	    state._fsp--;
             	    if (state.failed) return elements;
             	    if ( state.backtracking==0 ) {
-            	       elements.add(t2);
+            	       elements.add(t2); 
             	    }
 
             	    }
@@ -1327,7 +1327,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "term"
-    // Datalog.g:261:1: term returns [Term value] : ( variable_term | literal_term | object_term | uri_term );
+    // Datalog.g:258:1: term returns [Term value] : ( variable_term | literal_term | object_term | uri_term );
     public final Term term() throws RecognitionException {
         Term value = null;
 
@@ -1341,7 +1341,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:262:3: ( variable_term | literal_term | object_term | uri_term )
+            // Datalog.g:259:3: ( variable_term | literal_term | object_term | uri_term )
             int alt13=4;
             switch ( input.LA(1) ) {
             case DOLLAR:
@@ -1361,11 +1361,11 @@ public class DatalogParser extends Parser {
                 {
                 int LA13_3 = input.LA(2);
 
-                if ( (LA13_3==COMMA||LA13_3==RPAREN) ) {
-                    alt13=4;
-                }
-                else if ( (LA13_3==LPAREN) ) {
+                if ( (LA13_3==LPAREN) ) {
                     alt13=3;
+                }
+                else if ( (LA13_3==COMMA||LA13_3==RPAREN) ) {
+                    alt13=4;
                 }
                 else {
                     if (state.backtracking>0) {state.failed=true; return value;}
@@ -1393,7 +1393,7 @@ public class DatalogParser extends Parser {
 
             switch (alt13) {
                 case 1 :
-                    // Datalog.g:262:5: variable_term
+                    // Datalog.g:259:5: variable_term
                     {
                     pushFollow(FOLLOW_variable_term_in_term541);
                     variable_term24=variable_term();
@@ -1401,13 +1401,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = variable_term24;
+                       value = variable_term24; 
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:263:5: literal_term
+                    // Datalog.g:260:5: literal_term
                     {
                     pushFollow(FOLLOW_literal_term_in_term549);
                     literal_term25=literal_term();
@@ -1415,13 +1415,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = literal_term25;
+                       value = literal_term25; 
                     }
 
                     }
                     break;
                 case 3 :
-                    // Datalog.g:264:5: object_term
+                    // Datalog.g:261:5: object_term
                     {
                     pushFollow(FOLLOW_object_term_in_term558);
                     object_term26=object_term();
@@ -1429,13 +1429,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = object_term26;
+                       value = object_term26; 
                     }
 
                     }
                     break;
                 case 4 :
-                    // Datalog.g:265:5: uri_term
+                    // Datalog.g:262:5: uri_term
                     {
                     pushFollow(FOLLOW_uri_term_in_term568);
                     uri_term27=uri_term();
@@ -1443,7 +1443,7 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = uri_term27;
+                       value = uri_term27; 
                     }
 
                     }
@@ -1463,7 +1463,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "variable_term"
-    // Datalog.g:268:1: variable_term returns [Term value] : ( ( DOLLAR | QUESTION ) id | ASTERISK );
+    // Datalog.g:265:1: variable_term returns [Term value] : ( ( DOLLAR | QUESTION ) id | ASTERISK );
     public final Term variable_term() throws RecognitionException {
         Term value = null;
 
@@ -1471,7 +1471,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:269:3: ( ( DOLLAR | QUESTION ) id | ASTERISK )
+            // Datalog.g:266:3: ( ( DOLLAR | QUESTION ) id | ASTERISK )
             int alt14=2;
             int LA14_0 = input.LA(1);
 
@@ -1490,7 +1490,7 @@ public class DatalogParser extends Parser {
             }
             switch (alt14) {
                 case 1 :
-                    // Datalog.g:269:5: ( DOLLAR | QUESTION ) id
+                    // Datalog.g:266:5: ( DOLLAR | QUESTION ) id
                     {
                     if ( (input.LA(1)>=DOLLAR && input.LA(1)<=QUESTION) ) {
                         input.consume();
@@ -1508,22 +1508,22 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-
+                       
                             value = termFactory.createVariable((id28!=null?input.toString(id28.start,id28.stop):null));
-
+                          
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:272:5: ASTERISK
+                    // Datalog.g:269:5: ASTERISK
                     {
                     match(input,ASTERISK,FOLLOW_ASTERISK_in_variable_term607); if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
                             value = termFactory.createVariable(OBDA_SELECT_ALL);
                             isSelectAll = true;
-
+                          
                     }
 
                     }
@@ -1543,7 +1543,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "literal_term"
-    // Datalog.g:278:1: literal_term returns [Term value] : string ;
+    // Datalog.g:275:1: literal_term returns [Term value] : string ;
     public final Term literal_term() throws RecognitionException {
         Term value = null;
 
@@ -1554,8 +1554,8 @@ public class DatalogParser extends Parser {
           String literal = "";
 
         try {
-            // Datalog.g:282:3: ( string )
-            // Datalog.g:282:5: string
+            // Datalog.g:279:3: ( string )
+            // Datalog.g:279:5: string
             {
             pushFollow(FOLLOW_string_in_literal_term631);
             string29=string();
@@ -1567,7 +1567,7 @@ public class DatalogParser extends Parser {
                     literal = (string29!=null?input.toString(string29.start,string29.stop):null);
                     literal = literal.substring(1, literal.length()-1); // removes the quote signs.
                     value = termFactory.createValueConstant(literal);
-
+                  
             }
 
             }
@@ -1585,7 +1585,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "object_term"
-    // Datalog.g:289:1: object_term returns [Term value] : function LPAREN terms RPAREN ;
+    // Datalog.g:286:1: object_term returns [Term value] : function LPAREN terms RPAREN ;
     public final Term object_term() throws RecognitionException {
         Term value = null;
 
@@ -1595,8 +1595,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:290:3: ( function LPAREN terms RPAREN )
-            // Datalog.g:290:5: function LPAREN terms RPAREN
+            // Datalog.g:287:3: ( function LPAREN terms RPAREN )
+            // Datalog.g:287:5: function LPAREN terms RPAREN
             {
             pushFollow(FOLLOW_function_in_object_term653);
             function30=function();
@@ -1612,9 +1612,10 @@ public class DatalogParser extends Parser {
             match(input,RPAREN,FOLLOW_RPAREN_in_object_term659); if (state.failed) return value;
             if ( state.backtracking==0 ) {
 
-                    FunctionSymbol function = new FunctionSymbolImpl(function30, terms31.size());
-                    value = termFactory.createObjectTerm(function, terms31);
-
+                    URI uri = URI.create(function30);
+                    Predicate fs = predicateFactory.createPredicate(uri, terms31.size());
+                    value = termFactory.createFunctionalTerm(fs, terms31);
+                  
             }
 
             }
@@ -1632,7 +1633,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "uri_term"
-    // Datalog.g:296:1: uri_term returns [Term value] : uri ;
+    // Datalog.g:294:1: uri_term returns [Term value] : uri ;
     public final Term uri_term() throws RecognitionException {
         Term value = null;
 
@@ -1643,8 +1644,8 @@ public class DatalogParser extends Parser {
           String uriText = "";
 
         try {
-            // Datalog.g:300:3: ( uri )
-            // Datalog.g:300:5: uri
+            // Datalog.g:298:3: ( uri )
+            // Datalog.g:298:5: uri
             {
             pushFollow(FOLLOW_uri_in_uri_term685);
             uri32=uri();
@@ -1652,11 +1653,11 @@ public class DatalogParser extends Parser {
             state._fsp--;
             if (state.failed) return value;
             if ( state.backtracking==0 ) {
-
-                    uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);
+               
+                    uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);      
                     URI uri = URI.create(uriText);
                     value = termFactory.createURIConstant(uri);
-
+                  
             }
 
             }
@@ -1674,7 +1675,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "function"
-    // Datalog.g:307:1: function returns [String value] : ( full_name | plain_name | qualified_name );
+    // Datalog.g:305:1: function returns [String value] : ( full_name | plain_name | qualified_name );
     public final String function() throws RecognitionException {
         String value = null;
 
@@ -1686,7 +1687,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:308:3: ( full_name | plain_name | qualified_name )
+            // Datalog.g:306:3: ( full_name | plain_name | qualified_name )
             int alt15=3;
             switch ( input.LA(1) ) {
             case STRING_URI:
@@ -1715,7 +1716,7 @@ public class DatalogParser extends Parser {
 
             switch (alt15) {
                 case 1 :
-                    // Datalog.g:308:5: full_name
+                    // Datalog.g:306:5: full_name
                     {
                     pushFollow(FOLLOW_full_name_in_function706);
                     full_name33=full_name();
@@ -1723,13 +1724,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = full_name33;
+                       value = full_name33; 
                     }
 
                     }
                     break;
                 case 2 :
-                    // Datalog.g:309:5: plain_name
+                    // Datalog.g:307:5: plain_name
                     {
                     pushFollow(FOLLOW_plain_name_in_function719);
                     plain_name34=plain_name();
@@ -1737,13 +1738,13 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = plain_name34;
+                       value = plain_name34; 
                     }
 
                     }
                     break;
                 case 3 :
-                    // Datalog.g:310:5: qualified_name
+                    // Datalog.g:308:5: qualified_name
                     {
                     pushFollow(FOLLOW_qualified_name_in_function731);
                     qualified_name35=qualified_name();
@@ -1751,7 +1752,7 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-                       value = qualified_name35;
+                       value = qualified_name35; 
                     }
 
                     }
@@ -1771,7 +1772,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "qualified_name"
-    // Datalog.g:313:1: qualified_name returns [String value] : prefix id ;
+    // Datalog.g:311:1: qualified_name returns [String value] : prefix id ;
     public final String qualified_name() throws RecognitionException {
         String value = null;
 
@@ -1785,8 +1786,8 @@ public class DatalogParser extends Parser {
           String uriref = "";
 
         try {
-            // Datalog.g:318:3: ( prefix id )
-            // Datalog.g:318:5: prefix id
+            // Datalog.g:316:3: ( prefix id )
+            // Datalog.g:316:5: prefix id
             {
             pushFollow(FOLLOW_prefix_in_qualified_name755);
             prefix36=prefix();
@@ -1806,10 +1807,10 @@ public class DatalogParser extends Parser {
                       uriref = directives.get(prefix);
                     else
                       uriref = directives.get(OBDA_DEFAULT_URI);
-
+                    
                     String uri = uriref + (id37!=null?input.toString(id37.start,id37.stop):null); // creates the complete Uri string
                     value = uri;
-
+                  
             }
 
             }
@@ -1827,7 +1828,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "plain_name"
-    // Datalog.g:331:1: plain_name returns [String value] : id ;
+    // Datalog.g:329:1: plain_name returns [String value] : id ;
     public final String plain_name() throws RecognitionException {
         String value = null;
 
@@ -1835,8 +1836,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:332:3: ( id )
-            // Datalog.g:332:5: id
+            // Datalog.g:330:3: ( id )
+            // Datalog.g:330:5: id
             {
             pushFollow(FOLLOW_id_in_plain_name776);
             id38=id();
@@ -1845,10 +1846,10 @@ public class DatalogParser extends Parser {
             if (state.failed) return value;
             if ( state.backtracking==0 ) {
 
-                    String uriref = directives.get(OBDA_BASE_URI);
+                    String uriref = directives.get(OBDA_BASE_URI);      
                     String uri = uriref + (id38!=null?input.toString(id38.start,id38.stop):null); // creates the complete Uri string
                     value = uri;
-
+                  
             }
 
             }
@@ -1866,7 +1867,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "full_name"
-    // Datalog.g:339:1: full_name returns [String value] : uri ;
+    // Datalog.g:337:1: full_name returns [String value] : uri ;
     public final String full_name() throws RecognitionException {
         String value = null;
 
@@ -1874,8 +1875,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // Datalog.g:340:3: ( uri )
-            // Datalog.g:340:5: uri
+            // Datalog.g:338:3: ( uri )
+            // Datalog.g:338:5: uri
             {
             pushFollow(FOLLOW_uri_in_full_name795);
             uri39=uri();
@@ -1885,7 +1886,7 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
 
                     value = (uri39!=null?input.toString(uri39.start,uri39.stop):null);
-
+                  
             }
 
             }
@@ -1905,14 +1906,14 @@ public class DatalogParser extends Parser {
     };
 
     // $ANTLR start "uri"
-    // Datalog.g:345:1: uri : STRING_URI ;
+    // Datalog.g:343:1: uri : STRING_URI ;
     public final DatalogParser.uri_return uri() throws RecognitionException {
         DatalogParser.uri_return retval = new DatalogParser.uri_return();
         retval.start = input.LT(1);
 
         try {
-            // Datalog.g:346:3: ( STRING_URI )
-            // Datalog.g:346:5: STRING_URI
+            // Datalog.g:344:3: ( STRING_URI )
+            // Datalog.g:344:5: STRING_URI
             {
             match(input,STRING_URI,FOLLOW_STRING_URI_in_uri810); if (state.failed) return retval;
 
@@ -1935,14 +1936,14 @@ public class DatalogParser extends Parser {
     };
 
     // $ANTLR start "uriref"
-    // Datalog.g:349:1: uriref : STRING_URI ;
+    // Datalog.g:347:1: uriref : STRING_URI ;
     public final DatalogParser.uriref_return uriref() throws RecognitionException {
         DatalogParser.uriref_return retval = new DatalogParser.uriref_return();
         retval.start = input.LT(1);
 
         try {
-            // Datalog.g:350:3: ( STRING_URI )
-            // Datalog.g:350:5: STRING_URI
+            // Datalog.g:348:3: ( STRING_URI )
+            // Datalog.g:348:5: STRING_URI
             {
             match(input,STRING_URI,FOLLOW_STRING_URI_in_uriref823); if (state.failed) return retval;
 
@@ -1965,14 +1966,14 @@ public class DatalogParser extends Parser {
     };
 
     // $ANTLR start "id"
-    // Datalog.g:353:1: id : ID_PLAIN ;
+    // Datalog.g:351:1: id : ID_PLAIN ;
     public final DatalogParser.id_return id() throws RecognitionException {
         DatalogParser.id_return retval = new DatalogParser.id_return();
         retval.start = input.LT(1);
 
         try {
-            // Datalog.g:354:3: ( ID_PLAIN )
-            // Datalog.g:354:5: ID_PLAIN
+            // Datalog.g:352:3: ( ID_PLAIN )
+            // Datalog.g:352:5: ID_PLAIN
             {
             match(input,ID_PLAIN,FOLLOW_ID_PLAIN_in_id836); if (state.failed) return retval;
 
@@ -1995,13 +1996,13 @@ public class DatalogParser extends Parser {
     };
 
     // $ANTLR start "prefix"
-    // Datalog.g:357:1: prefix : ( STRING_PREFIX | COLON );
+    // Datalog.g:355:1: prefix : ( STRING_PREFIX | COLON );
     public final DatalogParser.prefix_return prefix() throws RecognitionException {
         DatalogParser.prefix_return retval = new DatalogParser.prefix_return();
         retval.start = input.LT(1);
 
         try {
-            // Datalog.g:358:3: ( STRING_PREFIX | COLON )
+            // Datalog.g:356:3: ( STRING_PREFIX | COLON )
             // Datalog.g:
             {
             if ( (input.LA(1)>=STRING_PREFIX && input.LA(1)<=COLON) ) {
@@ -2034,13 +2035,13 @@ public class DatalogParser extends Parser {
     };
 
     // $ANTLR start "string"
-    // Datalog.g:362:1: string : ( STRING_LITERAL | STRING_LITERAL2 );
+    // Datalog.g:360:1: string : ( STRING_LITERAL | STRING_LITERAL2 );
     public final DatalogParser.string_return string() throws RecognitionException {
         DatalogParser.string_return retval = new DatalogParser.string_return();
         retval.start = input.LT(1);
 
         try {
-            // Datalog.g:363:3: ( STRING_LITERAL | STRING_LITERAL2 )
+            // Datalog.g:361:3: ( STRING_LITERAL | STRING_LITERAL2 )
             // Datalog.g:
             {
             if ( (input.LA(1)>=STRING_LITERAL && input.LA(1)<=STRING_LITERAL2) ) {
@@ -2070,11 +2071,11 @@ public class DatalogParser extends Parser {
     // $ANTLR end "string"
 
     // $ANTLR start synpred1_Datalog
-    public final void synpred1_Datalog_fragment() throws RecognitionException {
-        // Datalog.g:171:5: ( ( head )? INV_IMPLIES )
-        // Datalog.g:171:6: ( head )? INV_IMPLIES
+    public final void synpred1_Datalog_fragment() throws RecognitionException {   
+        // Datalog.g:168:5: ( ( head )? INV_IMPLIES )
+        // Datalog.g:168:6: ( head )? INV_IMPLIES
         {
-        // Datalog.g:171:6: ( head )?
+        // Datalog.g:168:6: ( head )?
         int alt16=2;
         int LA16_0 = input.LA(1);
 
@@ -2083,7 +2084,7 @@ public class DatalogParser extends Parser {
         }
         switch (alt16) {
             case 1 :
-                // Datalog.g:171:6: head
+                // Datalog.g:168:6: head
                 {
                 pushFollow(FOLLOW_head_in_synpred1_Datalog182);
                 head();
@@ -2103,11 +2104,11 @@ public class DatalogParser extends Parser {
     // $ANTLR end synpred1_Datalog
 
     // $ANTLR start synpred2_Datalog
-    public final void synpred2_Datalog_fragment() throws RecognitionException {
-        // Datalog.g:174:5: ( ( body )? IMPLIES )
-        // Datalog.g:174:6: ( body )? IMPLIES
+    public final void synpred2_Datalog_fragment() throws RecognitionException {   
+        // Datalog.g:171:5: ( ( body )? IMPLIES )
+        // Datalog.g:171:6: ( body )? IMPLIES
         {
-        // Datalog.g:174:6: ( body )?
+        // Datalog.g:171:6: ( body )?
         int alt17=2;
         int LA17_0 = input.LA(1);
 
@@ -2116,7 +2117,7 @@ public class DatalogParser extends Parser {
         }
         switch (alt17) {
             case 1 :
-                // Datalog.g:174:6: body
+                // Datalog.g:171:6: body
                 {
                 pushFollow(FOLLOW_body_in_synpred2_Datalog198);
                 body();
@@ -2136,9 +2137,9 @@ public class DatalogParser extends Parser {
     // $ANTLR end synpred2_Datalog
 
     // $ANTLR start synpred3_Datalog
-    public final void synpred3_Datalog_fragment() throws RecognitionException {
-        // Datalog.g:189:5: ( head INV_IMPLIES body )
-        // Datalog.g:189:6: head INV_IMPLIES body
+    public final void synpred3_Datalog_fragment() throws RecognitionException {   
+        // Datalog.g:186:5: ( head INV_IMPLIES body )
+        // Datalog.g:186:6: head INV_IMPLIES body
         {
         pushFollow(FOLLOW_head_in_synpred3_Datalog254);
         head();
@@ -2157,9 +2158,9 @@ public class DatalogParser extends Parser {
     // $ANTLR end synpred3_Datalog
 
     // $ANTLR start synpred4_Datalog
-    public final void synpred4_Datalog_fragment() throws RecognitionException {
-        // Datalog.g:207:5: ( body IMPLIES head )
-        // Datalog.g:207:6: body IMPLIES head
+    public final void synpred4_Datalog_fragment() throws RecognitionException {   
+        // Datalog.g:204:5: ( body IMPLIES head )
+        // Datalog.g:204:6: body IMPLIES head
         {
         pushFollow(FOLLOW_body_in_synpred4_Datalog325);
         body();
@@ -2237,7 +2238,7 @@ public class DatalogParser extends Parser {
     }
 
 
-
+ 
 
     public static final BitSet FOLLOW_prog_in_parse52 = new BitSet(new long[]{0x0000000000000000L});
     public static final BitSet FOLLOW_EOF_in_parse54 = new BitSet(new long[]{0x0000000000000002L});

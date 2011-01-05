@@ -35,17 +35,14 @@ import org.antlr.runtime.TokenStream;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
+import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
-import org.obda.query.domain.FunctionSymbol;
-import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.FunctionSymbolImpl;
+import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
+import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
+import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
-import org.obda.reformulation.domain.Predicate;
-import org.obda.reformulation.domain.PredicateFactory;
-import org.obda.reformulation.domain.imp.BasicPredicateFactoryImpl;
 }
 
 @lexer::header {
@@ -78,10 +75,10 @@ private static final String OBDA_SELECT_ALL = "obda-select-all";
 private HashMap<String, String> directives = new HashMap<String, String>();
 
 /** A factory to construct the subject and object terms */
-private TermFactory termFactory = TermFactory.getInstance();
+private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 /** A factory to construct the predicates */
-private PredicateFactory predicateFactory = BasicPredicateFactoryImpl.getInstance();
+private BasicPredicateFactoryImpl predicateFactory = BasicPredicateFactoryImpl.getInstance();
 
 /** Select all flag */
 private boolean isSelectAll = false;
@@ -235,7 +232,7 @@ atom returns [Atom value]
       Vector<Term> elements = $terms.elements;
       if (elements == null)
         elements = new Vector<Term>();
-      Predicate predicate = predicateFactory.getPredicate(uri, elements.size());
+      Predicate predicate = predicateFactory.createPredicate(uri, elements.size());
       
       Vector<Term> terms = $terms.elements;
       if (terms == null)
@@ -288,8 +285,9 @@ literal_term returns [Term value]
   
 object_term returns [Term value]
   : function LPAREN terms RPAREN {
-      FunctionSymbol function = new FunctionSymbolImpl($function.value, $terms.elements.size());
-      $value = termFactory.createObjectTerm(function, $terms.elements);
+      URI uri = URI.create($function.value);
+      Predicate fs = predicateFactory.createPredicate(uri, $terms.elements.size());
+      $value = termFactory.createFunctionalTerm(fs, $terms.elements);
     }
   ;
   
