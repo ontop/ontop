@@ -2,6 +2,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Vector;
 
+import junit.framework.TestCase;
+
 import org.junit.Test;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
@@ -9,18 +11,14 @@ import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.reformulation.dllite.DLRPerfectReformulator;
 import org.obda.reformulation.dllite.QueryRewriter;
 import org.obda.reformulation.domain.Assertion;
-
-import junit.framework.TestCase;
 
 public class UnificationTest2 extends TestCase {
 
@@ -28,37 +26,37 @@ public class UnificationTest2 extends TestCase {
 	 * Test method for
 	 * {@link org.obda.reformulation.dllite.DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
 	 * .
-	 * 
+	 *
 	 * Check if MGU generation/application works properly with multiple atoms sharing variables
-	 * 
+	 *
 	 * q(x,y) :- R(x,#) R(#,y), S(x,#)
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void test_1() throws Exception {
 
-		TermFactory factory = TermFactoryImpl.getInstance();
+		TermFactoryImpl factory = TermFactoryImpl.getInstance();
 		PredicateFactory predFac = BasicPredicateFactoryImpl.getInstance();
 
 		Term t1 = factory.createVariable("x");
 		Term t2 = factory.createVariable("y");
 		Term t3 = factory.createVariable("x");
 
-		Predicate r1 = predFac.getPredicate(URI.create("R"), 2);
-		Predicate r2 = predFac.getPredicate(URI.create("R"), 2);
-		Predicate s = predFac.getPredicate(URI.create("S"), 2);
-		Predicate p = predFac.getPredicate(URI.create("p"), 2);
+		Predicate r1 = predFac.createPredicate(URI.create("R"), 2);
+		Predicate r2 = predFac.createPredicate(URI.create("R"), 2);
+		Predicate s = predFac.createPredicate(URI.create("S"), 2);
+		Predicate p = predFac.createPredicate(URI.create("p"), 2);
 
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
-		terms1.add(new UndistinguishedVariable());
+		terms1.add(factory.createUndistinguishedVariable());
 		List<Term> terms2 = new Vector<Term>();
-		terms2.add(new UndistinguishedVariable());
+		terms2.add(factory.createUndistinguishedVariable());
 		terms2.add(t2);
 		List<Term> terms3 = new Vector<Term>();
 		terms3.add(t3);
-		terms3.add(new UndistinguishedVariable());
+		terms3.add(factory.createUndistinguishedVariable());
 		List<Term> terms4 = new Vector<Term>();
 		terms4.add(t3.copy());
 		terms4.add(t2.copy());
