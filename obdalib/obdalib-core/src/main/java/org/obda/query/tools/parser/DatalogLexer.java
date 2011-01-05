@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:50:56 Datalog.g 2011-01-04 16:36:55
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 Datalog.g 2011-01-05 16:12:30
 
 package org.obda.query.tools.parser;
 
@@ -93,8 +93,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = PREFIX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:369:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-            // Datalog.g:369:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
+            // Datalog.g:367:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
+            // Datalog.g:367:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
                 input.consume();
@@ -166,8 +166,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = BASE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:371:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // Datalog.g:371:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // Datalog.g:369:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // Datalog.g:369:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
@@ -221,8 +221,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = IMPLIES;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:373:8: ( '->' )
-            // Datalog.g:373:16: '->'
+            // Datalog.g:371:8: ( '->' )
+            // Datalog.g:371:16: '->'
             {
             match("->"); 
 
@@ -242,8 +242,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = INV_IMPLIES;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:374:12: ( ':-' )
-            // Datalog.g:374:16: ':-'
+            // Datalog.g:372:12: ( ':-' )
+            // Datalog.g:372:16: ':-'
             {
             match(":-"); 
 
@@ -263,8 +263,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = REFERENCE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:375:10: ( '^^' )
-            // Datalog.g:375:16: '^^'
+            // Datalog.g:373:10: ( '^^' )
+            // Datalog.g:373:16: '^^'
             {
             match("^^"); 
 
@@ -284,8 +284,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:376:5: ( ';' )
-            // Datalog.g:376:16: ';'
+            // Datalog.g:374:5: ( ';' )
+            // Datalog.g:374:16: ';'
             {
             match(';'); 
 
@@ -304,8 +304,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:377:4: ( '.' )
-            // Datalog.g:377:16: '.'
+            // Datalog.g:375:4: ( '.' )
+            // Datalog.g:375:16: '.'
             {
             match('.'); 
 
@@ -324,8 +324,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:378:6: ( ',' )
-            // Datalog.g:378:16: ','
+            // Datalog.g:376:6: ( ',' )
+            // Datalog.g:376:16: ','
             {
             match(','); 
 
@@ -344,8 +344,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:379:12: ( '[' )
-            // Datalog.g:379:16: '['
+            // Datalog.g:377:12: ( '[' )
+            // Datalog.g:377:16: '['
             {
             match('['); 
 
@@ -364,8 +364,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:380:12: ( ']' )
-            // Datalog.g:380:16: ']'
+            // Datalog.g:378:12: ( ']' )
+            // Datalog.g:378:16: ']'
             {
             match(']'); 
 
@@ -384,8 +384,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:381:7: ( '(' )
-            // Datalog.g:381:16: '('
+            // Datalog.g:379:7: ( '(' )
+            // Datalog.g:379:16: '('
             {
             match('('); 
 
@@ -404,8 +404,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:382:7: ( ')' )
-            // Datalog.g:382:16: ')'
+            // Datalog.g:380:7: ( ')' )
+            // Datalog.g:380:16: ')'
             {
             match(')'); 
 
@@ -424,8 +424,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:383:9: ( '?' )
-            // Datalog.g:383:16: '?'
+            // Datalog.g:381:9: ( '?' )
+            // Datalog.g:381:16: '?'
             {
             match('?'); 
 
@@ -444,8 +444,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:384:7: ( '$' )
-            // Datalog.g:384:16: '$'
+            // Datalog.g:382:7: ( '$' )
+            // Datalog.g:382:16: '$'
             {
             match('$'); 
 
@@ -464,8 +464,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:385:13: ( '\"' )
-            // Datalog.g:385:16: '\"'
+            // Datalog.g:383:13: ( '\"' )
+            // Datalog.g:383:16: '\"'
             {
             match('\"'); 
 
@@ -484,8 +484,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:386:13: ( '\\'' )
-            // Datalog.g:386:16: '\\''
+            // Datalog.g:384:13: ( '\\'' )
+            // Datalog.g:384:16: '\\''
             {
             match('\''); 
 
@@ -504,8 +504,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:387:11: ( '`' )
-            // Datalog.g:387:16: '`'
+            // Datalog.g:385:11: ( '`' )
+            // Datalog.g:385:16: '`'
             {
             match('`'); 
 
@@ -524,8 +524,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:388:11: ( '_' )
-            // Datalog.g:388:16: '_'
+            // Datalog.g:386:11: ( '_' )
+            // Datalog.g:386:16: '_'
             {
             match('_'); 
 
@@ -544,8 +544,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:389:5: ( '-' )
-            // Datalog.g:389:16: '-'
+            // Datalog.g:387:5: ( '-' )
+            // Datalog.g:387:16: '-'
             {
             match('-'); 
 
@@ -564,8 +564,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:390:9: ( '*' )
-            // Datalog.g:390:16: '*'
+            // Datalog.g:388:9: ( '*' )
+            // Datalog.g:388:16: '*'
             {
             match('*'); 
 
@@ -584,8 +584,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:391:10: ( '&' )
-            // Datalog.g:391:16: '&'
+            // Datalog.g:389:10: ( '&' )
+            // Datalog.g:389:16: '&'
             {
             match('&'); 
 
@@ -604,8 +604,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:392:3: ( '@' )
-            // Datalog.g:392:16: '@'
+            // Datalog.g:390:3: ( '@' )
+            // Datalog.g:390:16: '@'
             {
             match('@'); 
 
@@ -624,8 +624,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:393:12: ( '!' )
-            // Datalog.g:393:16: '!'
+            // Datalog.g:391:12: ( '!' )
+            // Datalog.g:391:16: '!'
             {
             match('!'); 
 
@@ -644,8 +644,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:394:5: ( '#' )
-            // Datalog.g:394:16: '#'
+            // Datalog.g:392:5: ( '#' )
+            // Datalog.g:392:16: '#'
             {
             match('#'); 
 
@@ -664,8 +664,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:395:8: ( '%' )
-            // Datalog.g:395:16: '%'
+            // Datalog.g:393:8: ( '%' )
+            // Datalog.g:393:16: '%'
             {
             match('%'); 
 
@@ -684,8 +684,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:396:5: ( '+' )
-            // Datalog.g:396:16: '+'
+            // Datalog.g:394:5: ( '+' )
+            // Datalog.g:394:16: '+'
             {
             match('+'); 
 
@@ -704,8 +704,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:397:7: ( '=' )
-            // Datalog.g:397:16: '='
+            // Datalog.g:395:7: ( '=' )
+            // Datalog.g:395:16: '='
             {
             match('='); 
 
@@ -724,8 +724,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:398:6: ( ':' )
-            // Datalog.g:398:16: ':'
+            // Datalog.g:396:6: ( ':' )
+            // Datalog.g:396:16: ':'
             {
             match(':'); 
 
@@ -744,8 +744,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:399:5: ( '<' )
-            // Datalog.g:399:16: '<'
+            // Datalog.g:397:5: ( '<' )
+            // Datalog.g:397:16: '<'
             {
             match('<'); 
 
@@ -764,8 +764,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:400:8: ( '>' )
-            // Datalog.g:400:16: '>'
+            // Datalog.g:398:8: ( '>' )
+            // Datalog.g:398:16: '>'
             {
             match('>'); 
 
@@ -784,8 +784,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:401:6: ( '/' )
-            // Datalog.g:401:16: '/'
+            // Datalog.g:399:6: ( '/' )
+            // Datalog.g:399:16: '/'
             {
             match('/'); 
 
@@ -804,8 +804,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:402:13: ( '//' )
-            // Datalog.g:402:16: '//'
+            // Datalog.g:400:13: ( '//' )
+            // Datalog.g:400:16: '//'
             {
             match("//"); 
 
@@ -825,8 +825,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:403:10: ( '\\\\' )
-            // Datalog.g:403:16: '\\\\'
+            // Datalog.g:401:10: ( '\\\\' )
+            // Datalog.g:401:16: '\\\\'
             {
             match('\\'); 
 
@@ -845,8 +845,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:404:6: ( '~' )
-            // Datalog.g:404:16: '~'
+            // Datalog.g:402:6: ( '~' )
+            // Datalog.g:402:16: '~'
             {
             match('~'); 
 
@@ -865,8 +865,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:405:6: ( '^' )
-            // Datalog.g:405:16: '^'
+            // Datalog.g:403:6: ( '^' )
+            // Datalog.g:403:16: '^'
             {
             match('^'); 
 
@@ -883,8 +883,8 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // Datalog.g:407:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
-            // Datalog.g:407:17: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // Datalog.g:405:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // Datalog.g:405:17: ( 'a' .. 'z' | 'A' .. 'Z' )
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -907,8 +907,8 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // Datalog.g:409:15: ( '0' .. '9' )
-            // Datalog.g:409:17: '0' .. '9'
+            // Datalog.g:407:15: ( '0' .. '9' )
+            // Datalog.g:407:17: '0' .. '9'
             {
             matchRange('0','9'); 
 
@@ -923,8 +923,8 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // Datalog.g:411:18: ( ( ALPHA | DIGIT ) )
-            // Datalog.g:411:20: ( ALPHA | DIGIT )
+            // Datalog.g:409:18: ( ( ALPHA | DIGIT ) )
+            // Datalog.g:409:20: ( ALPHA | DIGIT )
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -947,8 +947,8 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ID_START"
     public final void mID_START() throws RecognitionException {
         try {
-            // Datalog.g:413:18: ( ( ALPHA | UNDERSCORE ) )
-            // Datalog.g:413:20: ( ALPHA | UNDERSCORE )
+            // Datalog.g:411:18: ( ( ALPHA | UNDERSCORE ) )
+            // Datalog.g:411:20: ( ALPHA | UNDERSCORE )
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -971,8 +971,8 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ID_CORE"
     public final void mID_CORE() throws RecognitionException {
         try {
-            // Datalog.g:415:17: ( ( ID_START | DIGIT ) )
-            // Datalog.g:415:19: ( ID_START | DIGIT )
+            // Datalog.g:413:17: ( ( ID_START | DIGIT ) )
+            // Datalog.g:413:19: ( ID_START | DIGIT )
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -995,11 +995,11 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "SCHEMA"
     public final void mSCHEMA() throws RecognitionException {
         try {
-            // Datalog.g:417:16: ( ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )* )
-            // Datalog.g:417:18: ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )*
+            // Datalog.g:415:16: ( ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )* )
+            // Datalog.g:415:18: ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )*
             {
             mALPHA(); 
-            // Datalog.g:417:24: ( ALPHA | DIGIT | PLUS | DASH | DOT )*
+            // Datalog.g:415:24: ( ALPHA | DIGIT | PLUS | DASH | DOT )*
             loop1:
             do {
                 int alt1=2;
@@ -1044,8 +1044,8 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "URI_PATH"
     public final void mURI_PATH() throws RecognitionException {
         try {
-            // Datalog.g:419:18: ( ( ALPHANUM | UNDERSCORE | DASH | COLON | DOT | HASH | QUESTION | SLASH ) )
-            // Datalog.g:419:20: ( ALPHANUM | UNDERSCORE | DASH | COLON | DOT | HASH | QUESTION | SLASH )
+            // Datalog.g:417:18: ( ( ALPHANUM | UNDERSCORE | DASH | COLON | DOT | HASH | QUESTION | SLASH ) )
+            // Datalog.g:417:20: ( ALPHANUM | UNDERSCORE | DASH | COLON | DOT | HASH | QUESTION | SLASH )
             {
             if ( input.LA(1)=='#'||(input.LA(1)>='-' && input.LA(1)<=':')||input.LA(1)=='?'||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -1068,11 +1068,11 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ID"
     public final void mID() throws RecognitionException {
         try {
-            // Datalog.g:421:12: ( ID_START ( ID_CORE )* )
-            // Datalog.g:421:14: ID_START ( ID_CORE )*
+            // Datalog.g:419:12: ( ID_START ( ID_CORE )* )
+            // Datalog.g:419:14: ID_START ( ID_CORE )*
             {
             mID_START(); 
-            // Datalog.g:421:23: ( ID_CORE )*
+            // Datalog.g:419:23: ( ID_CORE )*
             loop2:
             do {
                 int alt2=2;
@@ -1085,7 +1085,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt2) {
             	case 1 :
-            	    // Datalog.g:421:24: ID_CORE
+            	    // Datalog.g:419:24: ID_CORE
             	    {
             	    mID_CORE(); 
 
@@ -1111,11 +1111,11 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = ID_PLAIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:423:9: ( ID_START ( ID_CORE )* )
-            // Datalog.g:423:11: ID_START ( ID_CORE )*
+            // Datalog.g:421:9: ( ID_START ( ID_CORE )* )
+            // Datalog.g:421:11: ID_START ( ID_CORE )*
             {
             mID_START(); 
-            // Datalog.g:423:20: ( ID_CORE )*
+            // Datalog.g:421:20: ( ID_CORE )*
             loop3:
             do {
                 int alt3=2;
@@ -1128,7 +1128,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt3) {
             	case 1 :
-            	    // Datalog.g:423:21: ID_CORE
+            	    // Datalog.g:421:21: ID_CORE
             	    {
             	    mID_CORE(); 
 
@@ -1156,11 +1156,11 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_LITERAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:426:3: ( QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE )
-            // Datalog.g:426:5: QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE
+            // Datalog.g:424:3: ( QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE )
+            // Datalog.g:424:5: QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE
             {
             mQUOTE_DOUBLE(); 
-            // Datalog.g:426:18: ( options {greedy=false; } : . )*
+            // Datalog.g:424:18: ( options {greedy=false; } : . )*
             loop4:
             do {
                 int alt4=2;
@@ -1176,7 +1176,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt4) {
             	case 1 :
-            	    // Datalog.g:426:45: .
+            	    // Datalog.g:424:45: .
             	    {
             	    matchAny(); 
 
@@ -1205,11 +1205,11 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_LITERAL2;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:430:3: ( QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE )
-            // Datalog.g:430:5: QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE
+            // Datalog.g:428:3: ( QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE )
+            // Datalog.g:428:5: QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE
             {
             mQUOTE_SINGLE(); 
-            // Datalog.g:430:18: ( options {greedy=false; } : . )*
+            // Datalog.g:428:18: ( options {greedy=false; } : . )*
             loop5:
             do {
                 int alt5=2;
@@ -1225,7 +1225,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt5) {
             	case 1 :
-            	    // Datalog.g:430:45: .
+            	    // Datalog.g:428:45: .
             	    {
             	    matchAny(); 
 
@@ -1254,13 +1254,13 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_URI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:434:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
-            // Datalog.g:434:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
+            // Datalog.g:432:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
+            // Datalog.g:432:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
             {
             mSCHEMA(); 
             mCOLON(); 
             mDOUBLE_SLASH(); 
-            // Datalog.g:434:31: ( URI_PATH )*
+            // Datalog.g:432:31: ( URI_PATH )*
             loop6:
             do {
                 int alt6=2;
@@ -1273,7 +1273,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // Datalog.g:434:32: URI_PATH
+            	    // Datalog.g:432:32: URI_PATH
             	    {
             	    mURI_PATH(); 
 
@@ -1301,8 +1301,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_PREFIX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:438:3: ( ID COLON )
-            // Datalog.g:438:5: ID COLON
+            // Datalog.g:436:3: ( ID COLON )
+            // Datalog.g:436:5: ID COLON
             {
             mID(); 
             mCOLON(); 
@@ -1322,10 +1322,10 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // Datalog.g:441:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // Datalog.g:441:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // Datalog.g:439:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // Datalog.g:439:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // Datalog.g:441:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // Datalog.g:439:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt8=0;
             loop8:
             do {
@@ -1352,23 +1352,23 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // Datalog.g:441:6: ' '
+            	    // Datalog.g:439:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // Datalog.g:441:10: '\\t'
+            	    // Datalog.g:439:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // Datalog.g:441:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // Datalog.g:439:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // Datalog.g:441:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // Datalog.g:439:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt7=2;
             	    int LA7_0 = input.LA(1);
 
@@ -1386,18 +1386,18 @@ public class DatalogLexer extends Lexer {
             	    }
             	    switch (alt7) {
             	        case 1 :
-            	            // Datalog.g:441:16: '\\n'
+            	            // Datalog.g:439:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // Datalog.g:441:21: '\\r' ( '\\n' )
+            	            // Datalog.g:439:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
-            	            // Datalog.g:441:25: ( '\\n' )
-            	            // Datalog.g:441:26: '\\n'
+            	            // Datalog.g:439:25: ( '\\n' )
+            	            // Datalog.g:439:26: '\\n'
             	            {
             	            match('\n'); 
 

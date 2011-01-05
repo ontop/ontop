@@ -24,6 +24,7 @@ package org.obda.query.tools.parser;
 
 import java.net.URI;
 import java.util.Vector;
+import java.util.HashSet;
 
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.MismatchedSetException;
@@ -37,6 +38,10 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
+import org.obda.query.domain.URIConstant;
+import org.obda.query.domain.ValueConstant;
+import org.obda.query.domain.Variable;
+import org.obda.query.domain.Function;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
@@ -74,6 +79,9 @@ private static final String OBDA_SELECT_ALL = "obda-select-all";
 /** Map of directives */
 private HashMap<String, String> directives = new HashMap<String, String>();
 
+/** Set of variable terms */
+private HashSet<Variable> variables = new HashSet<Variable>();
+
 /** A factory to construct the subject and object terms */
 private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
@@ -85,24 +93,6 @@ private boolean isSelectAll = false;
 
 public HashMap<String, String> getDirectives() {
     return directives;
-}
-
-private CQIE identifyAllVariables(CQIE rule) {
-    List<Term> variableTerms = new Vector<Term>();
-    List<Atom> body = rule.getBody();
-    for (Atom atom : body) {
-        List<Term> terms = atom.getTerms();
-        for (Term term : terms) {
-            if (term instanceof VariableImpl)
-                variableTerms.add(term);
-        }
-    }
-    
-    Atom head = rule.getHead();
-    head.updateTerms(variableTerms);
-    rule.updateHead(head);
-     
-    return rule; 
 }
 }
 
@@ -128,7 +118,14 @@ prog returns [DatalogProgramImpl value]
     (rule {
       rule = $rule.value;
       if (isSelectAll) {
-        rule = identifyAllVariables(rule);
+        List<Term> variableList = new Vector<Term>();
+        variableList.addAll(variables); // we need a List because of the
+                                        // API specification. Therefore,
+                                        // we are going to import all the
+                                        // data from the Set to a Vector.        
+        Atom head = rule.getHead();
+        head.updateTerms(variableList);
+        rule.updateHead(head);
         isSelectAll = false;  
       }
         
@@ -262,9 +259,10 @@ term returns [Term value]
   | uri_term      { $value = $uri_term.value; }
   ;
 
-variable_term returns [Term value] 
+variable_term returns [Variable value] 
   : (DOLLAR|QUESTION) id { 
       $value = termFactory.createVariable($id.text);
+      variables.add($value); // collect the variable terms.
     }
   | ASTERISK {
       $value = termFactory.createVariable(OBDA_SELECT_ALL);
@@ -272,7 +270,7 @@ variable_term returns [Term value]
     }
   ;
 
-literal_term returns [Term value]
+literal_term returns [ValueConstant value]
 @init {
   String literal = "";
 }
@@ -283,7 +281,7 @@ literal_term returns [Term value]
     }
   ; 
   
-object_term returns [Term value]
+object_term returns [Function value]
   : function LPAREN terms RPAREN {
       URI uri = URI.create($function.value);
       Predicate fs = predicateFactory.createPredicate(uri, $terms.elements.size());
@@ -291,7 +289,7 @@ object_term returns [Term value]
     }
   ;
   
-uri_term returns [Term value]
+uri_term returns [URIConstant value]
 @init {
   String uriText = "";
 }

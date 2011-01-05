@@ -20,17 +20,20 @@ public class OWLAPIDataManagerTest extends TestCase {
 
 	private final String[][] ORACLE = {
 		// The answer for the target queries.
-		{"name, lastname, dateofbirth, ssn :- " +
-			"Investor(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id)), " +
-			"firstName(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), name), " +
-			"lastName(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), lastname), " +
-			"dateOfBirth(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), dateofbirth), " +
-			"ssn(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), ssn)",
-		 ":- hasAddress(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), " +
+		{"http://obda.org/mapping/predicates/q(id, name, ssn, lastname, dateofbirth) :- " +
+			"http://www.owl-ontologies.com/ontology.owl#Investor(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id)), " +
+			"http://www.owl-ontologies.com/ontology.owl#firstName(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), name), " +
+			"http://www.owl-ontologies.com/ontology.owl#lastName(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), lastname), " +
+			"http://www.owl-ontologies.com/ontology.owl#dateOfBirth(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), dateofbirth), " +
+			"http://www.owl-ontologies.com/ontology.owl#ssn(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), ssn)",
+		 "http://obda.org/mapping/predicates/q(id, addressid) :- " +
+		 	"http://www.owl-ontologies.com/ontology.owl#hasAddress(http://www.owl-ontologies.com/ontology.owl#getPersonObj(id), " +
 		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))",
-		 ":- hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
+		 "http://obda.org/mapping/predicates/q(id, addressid) :- " +
+		 	"http://www.owl-ontologies.com/ontology.owl#hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
 		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))",
-		 ":- hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
+		 "http://obda.org/mapping/predicates/q(id, addressid) :- " +
+		 	"http://www.owl-ontologies.com/ontology.owl#hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
 		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))"
 		},
 		// The answer for the source queries.

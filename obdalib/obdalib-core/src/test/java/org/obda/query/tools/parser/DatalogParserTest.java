@@ -804,13 +804,13 @@ public class DatalogParserTest {
 		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
 				term instanceof VariableImpl);
 		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
-				((VariableImpl)term).getName(), "x");
+				((VariableImpl)term).getName(), "y");
 
 		term = terms.get(1);
 		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
 				term instanceof VariableImpl);
 		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
-				((VariableImpl)term).getName(), "y");
+				((VariableImpl)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
