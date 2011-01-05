@@ -10,6 +10,7 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.AtomImpl;
+import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.reformulation.domain.ConceptDescription;
 import org.obda.reformulation.domain.PositiveInclusion;
@@ -22,10 +23,12 @@ import org.obda.reformulation.domain.imp.ExistentialConceptDescriptionImpl;
 
 public class PositiveInclusionApplicator {
 
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
+
 	/**
 	 * Check whether the given positive inclusion is applicable to the given
 	 * atom
-	 * 
+	 *
 	 * @param pi
 	 *            the positive inclusion
 	 * @param atom
@@ -122,8 +125,8 @@ public class PositiveInclusionApplicator {
 		for (PositiveInclusion pi : pis) {
 			DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl)pi;
 			Predicate relevantPredicate = inc.getIncluded().getPredicate();
-			
-			
+
+
 		}
 		return newqueries;
 	}
@@ -156,7 +159,7 @@ public class PositiveInclusionApplicator {
 				} else if (lefthandside instanceof ExistentialConceptDescriptionImpl) {
 
 					Term t = a.getTerms().get(0);
-					Term anonym = new UndistinguishedVariable();
+					Term anonym = termFactory.createUndistinguishedVariable();
 					AtomImpl newatom = null;
 
 					if (((ExistentialConceptDescriptionImpl) lefthandside).isInverse()) {

@@ -13,10 +13,12 @@ import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
+import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 public class QueryAnonymizer {
+
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	public DatalogProgram anonymize(DatalogProgram prog) {
 
@@ -36,7 +38,7 @@ public class QueryAnonymizer {
 	 * Note that this will actually change the query terms by calling
 	 * body.getTerms().set(i, new UndisintguishedVariable()) for each position i
 	 * in the atom that can be anonymized.
-	 * 
+	 *
 	 * @param q
 	 * @param focusatomIndex
 	 */
@@ -84,7 +86,7 @@ public class QueryAnonymizer {
 				 * anonymize it
 				 */
 				if (!isSharedTerm) {
-					atom.getTerms().set(i, new UndistinguishedVariable());
+					atom.getTerms().set(i, termFactory.createUndistinguishedVariable());
 				}
 			}
 		}
@@ -126,7 +128,7 @@ public class QueryAnonymizer {
 				Term t = term_it.next();
 				List<Object[]> list = auxmap.get(t.getName());
 				if (list != null && list.size() < 2 && !isVariableInHead(q, t)) {
-					vex.add(new UndistinguishedVariable());
+					vex.add(termFactory.createUndistinguishedVariable());
 				} else {
 					vex.add(t);
 				}
