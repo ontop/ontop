@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<results>
+    <result queryid="c">
+        <head>
+            <variable>x</variable>
+            <variable>y</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>s1,s2</constant>
+            </tuple>
+            <tuple>
+                <constant>r1,r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="b">
+        <head>
+            <variable>y</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>s2</constant>
+            </tuple>
+            <tuple>
+                <constant>r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="a">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>s1</constant>
+            </tuple>
+            <tuple>
+                <constant>r1</constant>
+            </tuple>
+            <tuple>
+                <constant>a</constant>
+            </tuple>
+        </tuples>
+    </result>
+</results>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <results>
-    <result queryid="c">
+    <result queryid="g">
         <head>
             <variable>x</variable>
             <variable>y</variable>
@@ -11,6 +11,23 @@
             </tuple>
             <tuple>
                 <constant>r1,r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="d">
+        <head>
+            <variable>x</variable>
+            <variable>y</variable>
+        </head>
+        <tuples/>
+    </result>
+    <result queryid="c">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>a</constant>
             </tuple>
         </tuples>
     </result>
@@ -42,5 +59,22 @@
                 <constant>a</constant>
             </tuple>
         </tuples>
+    </result>
+    <result queryid="e">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>a</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="f">
+        <head>
+            <variable>x</variable>
+            <variable>y</variable>
+        </head>
+        <tuples/>
     </result>
 </results>

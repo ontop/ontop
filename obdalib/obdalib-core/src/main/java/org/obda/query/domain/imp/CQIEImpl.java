@@ -78,4 +78,12 @@ public class CQIEImpl implements CQIE {
 
 		return new CQIEImpl(copyHead, copyBody, copyIsBoolean);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof CQIEImpl))
+			return false;
+		CQIEImpl q2 = (CQIEImpl)obj;
+		return toString().equals(q2.toString());
+	}
 }

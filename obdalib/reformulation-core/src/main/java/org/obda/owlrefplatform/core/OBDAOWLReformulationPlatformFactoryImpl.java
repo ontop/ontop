@@ -291,7 +291,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 			ontology.addAssertions(aux.getAssertions());
 		}
 
-		//QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
+//		QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
 		
 		QueryRewriter rew = new TreeRedReformulator(ontology.getAssertions());
 		

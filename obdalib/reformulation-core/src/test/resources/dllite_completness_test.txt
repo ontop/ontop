@@ -382,10 +382,15 @@ These are the first cases which tests the effects of unification and positive in
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 ||45 || a || R RISA S, A ISA ER || A(a) R(r1,r2) S(s1,s2) || q(x)   :- S(x,y) || {s1 r1 a} || ||
 ||   || b ||            ||              || q(y)   :- S(x,y) || {s2 r2} || ||
-||   || c ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||
+||   || c ||            ||              || q(x)   :- A(x) S(x,y) || {a} || ||
+||   || d ||            ||              || q(x,y)   :- A(x) S(x,y) || {} || ||
+||   || e ||            ||              || q(x)   :- A(x) R(x,y) || {a} || ||
+||   || f ||            ||              || q(x,y)   :- A(x) R(x,y) || {} || ||
+||   || g ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||
 ||46 || a || R RISA S, A ISA ER^^-^^ || A(a) R(r1,r2) S(s1,s2) || q(x)   :- S(x,y) || {s1 r1} || ||
 ||   || b ||            ||              || q(y)   :- S(x,y) || {s2 r2 a} || ||
 ||   || c ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||   
+
 
 === With object constants in the queries ===
  
@@ -814,8 +819,10 @@ These are the first cases which tests the effects of unification and positive in
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 || 91 || a || A ISA ER, ER^^-^^ ISA ER || A(a1) A(a2) R(a2,r1) R(r1,r2) R(r2,r3) || q(x) :- A(x) R(x,y) R(y,z) R(z,m) || {a1 a2}|| ||
-|| 92 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n3) (n1,n2,n3)} || ||
-|| 93 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n3) (n1,n2,n3)} || ||
+|| 92 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) || {a} || ||
+|| 93 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) R(x,y3) A(y3) R(y3,z2) || {a} || ||
+|| 94 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
+|| 95 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
 
 
 #END# Correct tests end here, ignore the ones bellow

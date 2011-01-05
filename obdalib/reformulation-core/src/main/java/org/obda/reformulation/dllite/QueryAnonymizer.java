@@ -1,6 +1,8 @@
 package org.obda.reformulation.dllite;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,6 +94,15 @@ public class QueryAnonymizer {
 		}
 	}
 
+	
+	public Collection<CQIE> anonymize(Collection<CQIE> cqs) {
+		HashSet<CQIE> anonymous = new HashSet<CQIE>(1000);
+		for (CQIE cq: cqs) {
+			anonymous.add(anonymize(cq));
+		}
+		return anonymous;
+	}
+	
 	public CQIE anonymize(CQIE q) {
 		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
 		List<Atom> body = q.getBody();

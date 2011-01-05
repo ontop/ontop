@@ -3,15 +3,10 @@
     <result queryid="a">
         <head>
             <variable>x</variable>
-            <variable>y</variable>
-            <variable>z</variable>
         </head>
         <tuples>
             <tuple>
-                <constant>a,n2,n3</constant>
-            </tuple>
-            <tuple>
-                <constant>n1,n2,n3</constant>
+                <constant>a</constant>
             </tuple>
         </tuples>
     </result>

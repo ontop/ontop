@@ -76,37 +76,104 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		DatalogProgram anonymizedProgram = anonymizer.anonymize(prog);
 
-		HashSet<CQIE> oldqueries = new HashSet<CQIE>();
+		
+		
+		/* Simpliying the query by removing redundant atoms w.r.t. to CQC */
+		HashSet<CQIE> oldqueries = new HashSet<CQIE>(5000);
+		for (CQIE q: anonymizedProgram.getRules()) {
+			oldqueries.add(piApplicator.removeRundantAtoms(q));
+		}
 		oldqueries.addAll(anonymizedProgram.getRules());
 
-		HashSet<CQIE> result = new HashSet<CQIE>();
+		
+		
+		HashSet<CQIE> result = new HashSet<CQIE>(5000);
 		result.addAll(oldqueries);
+		
+			
 
+		/*
+		 * Main loop of the rewriter
+		 */
+		
 		boolean loop = true;
 		while (loop) {
 			loop = false;
-			HashSet<CQIE> newqueries = new HashSet<CQIE>();
+			HashSet<CQIE> newqueries = new HashSet<CQIE>(1000);
 
+			/*
+			 * Handling simple inclusions, none involves existentials on the
+			 * right side of an inclusion
+			 */
 			for (CQIE oldquery : oldqueries) {
 
-				HashSet<PositiveInclusion> relevantInclusions = new HashSet<PositiveInclusion>();
+				HashSet<PositiveInclusion> relevantInclusions = new HashSet<PositiveInclusion>(1000);
 				for (Atom atom : oldquery.getBody()) {
-					relevantInclusions.addAll(getRight(atom.getPredicate()));
+					relevantInclusions.addAll(getRightNotExistential(atom.getPredicate()));
 				}
 
-				newqueries.addAll(piApplicator.apply(oldquery, relevantInclusions));
+				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
+					newqueries.add(anonymizer.anonymize(newcq));
+				}
 
-			}
-
-			for (CQIE newquery : newqueries) {
-				loop = loop | result.add(anonymizer.anonymize(newquery));
 			}
 			
-			if (loop) {
-				oldqueries = new HashSet<CQIE>();
-				for (CQIE newquery : newqueries) {
-					oldqueries.add(anonymizer.anonymize(newquery));
+			
+			newqueries = piApplicator.removeDuplicateAtoms(newqueries);
+
+			/*
+			 * Handling existential inclusions, and unification We will collect
+			 * all predicates mantioned in the old queries, we will collect all
+			 * the existential inclusions relevant for those predicates and sort
+			 * them by inverse and not inverse. Last we apply these groups of
+			 * inclusions at the same time. All of them will share one single
+			 * unification atempt.
+			 */
+
+			// Collecting relevant predicates
+
+			HashSet<Predicate> predicates = new HashSet<Predicate>(1000);
+			for (CQIE oldquery : oldqueries) {
+				for (Atom atom : oldquery.getBody()) {
+					predicates.add(atom.getPredicate());
 				}
+			}
+
+			// Collecting relevant inclusion
+			for (Predicate predicate : predicates) {
+				Set<PositiveInclusion> relevantInclusion = getRightExistential(predicate);
+				// sorting inverse and not inverse
+				Set<PositiveInclusion> relevantinverse = new HashSet<PositiveInclusion>(1000);
+				Set<PositiveInclusion> relevantnotinverse = new HashSet<PositiveInclusion>(1000);
+				for (PositiveInclusion inc : relevantInclusion) {
+					DLLiterConceptInclusionImpl samplepi = (DLLiterConceptInclusionImpl) inc;
+					ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) samplepi.getIncluding();
+					if (ex.isInverse())
+						relevantinverse.add(inc);
+					else
+						relevantnotinverse.add(inc);
+				}
+
+				Set<CQIE> relevantQueries = new HashSet<CQIE>(1000);
+				for (CQIE query : oldqueries) {
+					if (containsPredicate(query, predicate))
+						relevantQueries.add(query);
+				}
+
+				newqueries.addAll(piApplicator.applyExistentialInclusions(relevantQueries, relevantinverse));
+				newqueries.addAll(piApplicator.applyExistentialInclusions(relevantQueries, relevantnotinverse));
+			}
+
+			int f = 0;
+			/*
+			 * Removing duplicated atoms in each of the queries to simplify
+			 */
+			newqueries = piApplicator.removeDuplicateAtoms(newqueries);
+
+			loop = loop | result.addAll(newqueries);
+
+			if (loop) {
+				oldqueries = newqueries;
 			}
 		}
 		LinkedList<CQIE> resultlist = new LinkedList<CQIE>();
@@ -115,6 +182,16 @@ public class TreeRedReformulator implements QueryRewriter {
 		DatalogProgram resultprogram = new DatalogProgramImpl();
 		resultprogram.appendRule(resultlist);
 		return resultprogram;
+	}
+
+
+
+	private boolean containsPredicate(CQIE q, Predicate predicate) {
+		for (Atom atom : q.getBody()) {
+			if (atom.getPredicate().equals(predicate))
+				return true;
+		}
+		return q.getHead().getPredicate().equals(predicate);
 	}
 
 	/***

@@ -15,7 +15,6 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Constant;
 import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.ObjectConstant;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
@@ -286,21 +285,6 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							}
 						}
 					}
-				} else if (term instanceof ObjectConstant) {
-					Constant ct = (Constant) term;
-					String alias = localAliasMap.get(a.hashCode());
-					AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
-					String sqlVar = map.getSQLVariableAt(p);
-					StringBuilder equ = new StringBuilder();
-					equ.append(alias);
-					equ.append(".");
-					equ.append(sqlVar);
-					equ.append("='");
-					equ.append(onto.getUri().toString());
-					equ.append("#");
-					equ.append(ct.getName());
-					equ.append("'");
-					equalities.add(equ.toString());
 				} else if (term instanceof ValueConstant) {
 					Constant ct = (Constant) term;
 					String alias = localAliasMap.get(a.hashCode());
