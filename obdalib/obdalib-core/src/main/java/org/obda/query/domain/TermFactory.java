@@ -85,6 +85,13 @@ public interface TermFactory {
 	public abstract Variable createVariable(String name, XSDatatype type);
 
 	/**
+	 * Construct a {@link Variable} object with empty name.
+	 *
+	 * @return the variable object.
+	 */
+	public abstract Variable createUndistinguishedVariable();
+
+	/**
 	 * Construct a {@link Function} object. A function expression consists
 	 * of functional symbol (or functor) and one or more arguments.
 	 *

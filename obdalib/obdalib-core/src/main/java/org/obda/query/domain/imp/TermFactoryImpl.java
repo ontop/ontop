@@ -54,6 +54,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public Variable createUndistinguishedVariable() {
+		return new UndistinguishedVariable();
+	}
+
+	@Override
 	public Function createFunctionalTerm(Predicate functor, List<Term> arguments){
 		return new FunctionalTermImpl(functor, arguments);
 	}
