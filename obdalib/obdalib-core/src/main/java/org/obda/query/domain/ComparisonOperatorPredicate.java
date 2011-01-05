@@ -1,7 +1,7 @@
 package org.obda.query.domain;
 
 
-public abstract class ComparisonOperatorPredicate implements BinaryPredicate, OperatorPredicate {
+public abstract class ComparisonOperatorPredicate implements OperatorPredicate {
 
-	private int arity = 2;
+	protected int arity = 2;
 }
