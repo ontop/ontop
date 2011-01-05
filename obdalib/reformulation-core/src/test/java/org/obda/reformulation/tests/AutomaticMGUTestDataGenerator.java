@@ -3,31 +3,29 @@ package org.obda.reformulation.tests;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import junit.framework.TestCase;
 
 import org.obda.query.domain.Atom;
+import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
-import org.obda.reformulation.dllite.AtomUnifier;
 import org.obda.reformulation.dllite.Substitution;
 
 /***
- * This is an auxiliary class for the MGU generation test. This clase is in
+ * This is an auxiliary class for the MGU generation test. This class is in
  * charge of taking a test case string, e.g.,
- * 
+ *
  * A(x) | A(f(y,z)) = {x/f(y,z)}
- * 
+ *
  * And producing the objects that are needed to execute the query, i.e., atoms,
  * terms, expected mgu list, etc.
- * 
+ *
  * @author Mariano Rodriguez Muro
- * 
+ *
  */
 public class AutomaticMGUTestDataGenerator extends TestCase {
 
@@ -36,7 +34,7 @@ public class AutomaticMGUTestDataGenerator extends TestCase {
 
 	/***
 	 * Checks if all substitutions in unifier1 are also in unifier2.
-	 * 
+	 *
 	 * @param unifier1
 	 * @param unifier2
 	 * @return
@@ -66,8 +64,8 @@ public class AutomaticMGUTestDataGenerator extends TestCase {
 	}
 
 	/***
-	 * Checks if two substitutions are equal (sintactic)
-	 * 
+	 * Checks if two substitutions are equal (syntactic)
+	 *
 	 * @param s1
 	 * @param s2
 	 * @return
@@ -82,7 +80,7 @@ public class AutomaticMGUTestDataGenerator extends TestCase {
 	/***
 	 * Gets list of substitutions encoded in the string mgustr. mgustr is
 	 * normally used to encode the expected MGU for a test.
-	 * 
+	 *
 	 * @param mgustr
 	 * @return
 	 */
@@ -108,7 +106,7 @@ public class AutomaticMGUTestDataGenerator extends TestCase {
 	/***
 	 * Gets the list of size 2, of the two atoms in the string atomstr. Only
 	 * supports 2 atoms!.
-	 * 
+	 *
 	 * @param atomstrs
 	 * @return
 	 */
@@ -133,7 +131,7 @@ public class AutomaticMGUTestDataGenerator extends TestCase {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Atom atom = new AtomImpl(predFac.getPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
+		Atom atom = new AtomImpl(predFac.createPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
 		return atom;
 	}
 
@@ -150,14 +148,14 @@ public class AutomaticMGUTestDataGenerator extends TestCase {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-
-			return termFac.createObjectTerm(termFac.getFunctionSymbol(termstr.substring(0, 1)), fuctTerms);
+			Predicate fs = predFac.createPredicate(URI.create(termstr.substring(0, 1)), fuctTerms.size());
+			return termFac.createFunctionalTerm(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
 			return termFac.createValueConstant(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
 			return termFac.createURIConstant(URI.create(termstr.substring(1, termstr.length() - 1)));
 		} else if (termstr.equals("#")) {
-			return new UndistinguishedVariable();
+			return termFac.createUndistinguishedVariable();
 		} else {
 			return termFac.createVariable(termstr);
 			/* variable */
