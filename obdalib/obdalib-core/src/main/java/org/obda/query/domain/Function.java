@@ -31,8 +31,16 @@ public interface Function extends Term {
 	public List<Term> getTerms();
 
 	/**
+	 * Get the function symbol.
+	 *
+	 * @return the predicate object.
+	 */
+	public Predicate getFunctionSymbol();
+
+	/**
 	 * Get the number of terms (or arguments) in the function symbol.
-	 * @return
+	 *
+	 * @return the arity.
 	 */
 	public int getArity();
 }

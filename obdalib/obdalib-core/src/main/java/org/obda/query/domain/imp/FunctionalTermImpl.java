@@ -56,6 +56,11 @@ public class FunctionalTermImpl implements Function {
 	}
 
 	@Override
+	public Predicate getFunctionSymbol() {
+		return functor;
+	}
+
+	@Override
 	public List<Term> getTerms() {
 		return terms;
 	}
