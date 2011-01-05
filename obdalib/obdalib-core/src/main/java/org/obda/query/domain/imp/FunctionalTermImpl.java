@@ -72,12 +72,12 @@ public class FunctionalTermImpl implements Function {
 
 	@Override
 	public FunctionalTermImpl copy() {
-		Vector<Term> terms = new Vector<Term>();
+		Vector<Term> copyTerms = new Vector<Term>();
 		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {
-			terms.add(it.next().copy());
+			copyTerms.add(it.next().copy());
 		}
-		return new FunctionalTermImpl(functor.copy(), terms);
+		return new FunctionalTermImpl(functor.copy(), copyTerms);
 	}
 
 	@Override
