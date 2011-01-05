@@ -7,7 +7,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -17,20 +16,17 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
-import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 /**
  * The mapping view manager is the module which allows us to translate CQIEs
  * into sql queries using the provided mappings.
- * 
+ *
  * @author Manfred Gerstgrasser
- * 
+ *
  */
 
 public class MappingViewManager implements ViewManager {
@@ -46,8 +42,6 @@ public class MappingViewManager implements ViewManager {
 	private Map<URI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
 	private Atom									head						= null;
-
-	private TermFactory								termFactory					= new TermFactoryImpl();
 
 	public MappingViewManager(List<OBDAMappingAxiom> mappings) {
 		this.mappings = mappings;
@@ -75,7 +69,7 @@ public class MappingViewManager implements ViewManager {
 	 * obda mappings with their corresponding auxilary predicate, it creates the
 	 * Auxiliary Mappings, it produces the global aliases for the sql queries,
 	 * etc.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	private void prepareIndexes() throws Exception {
@@ -138,7 +132,7 @@ public class MappingViewManager implements ViewManager {
 				vars = sqlVars.toArray(vars);
 				AuxSQLMapping auxmap = new AuxSQLMapping(vars);
 				URI preduri = URI.create(name);
-				Predicate p = predFactory.getPredicate(preduri, vars.length);
+				Predicate p = predFactory.createPredicate(preduri, vars.length);
 				mappingToNarysetMap.put(sql, p);
 				predicateAuxMappingMap.put(preduri, auxmap);
 				predicateToSQLMap.put(preduri, sql);
@@ -149,7 +143,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Return the Predicate associated the given SQL query.
-	 * 
+	 *
 	 * @param ax
 	 *            the obda mapping
 	 * @return the associated predicate
@@ -158,11 +152,11 @@ public class MappingViewManager implements ViewManager {
 		return mappingToNarysetMap.get(sqlquery);
 	}
 
-	
+
 
 	/**
 	 * Returns the auxiliary mapping associated to the given predicate
-	 * 
+	 *
 	 * @param preduri
 	 *            the predicate identifier
 	 * @return the associated aux mapping
@@ -173,7 +167,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Returns the sql query associated the given predicate as String
-	 * 
+	 *
 	 * @param uri
 	 *            the predicate identifier
 	 * @return the associated sql
@@ -184,7 +178,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Returns the alias associated to the given sql query
-	 * 
+	 *
 	 * @param sql
 	 *            sql query
 	 * @return the associated alias
@@ -206,7 +200,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Returns the original head variable for the given position
-	 * 
+	 *
 	 * @param pos
 	 *            the position
 	 * @return the original variable name at the given position

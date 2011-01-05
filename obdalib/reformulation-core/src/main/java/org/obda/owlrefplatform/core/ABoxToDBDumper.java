@@ -25,10 +25,10 @@ import org.obda.query.domain.Predicate;
 import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
+import org.obda.query.domain.imp.TermFactoryImpl;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
@@ -48,9 +48,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class dumps the abox of a given ontology into a data base.
- * 
+ *
  * @author Manfred Gerstgrasser
- * 
+ *
  */
 
 // TODO ABoxDumper document in the class description the schemas created by this
@@ -81,11 +81,11 @@ public class ABoxToDBDumper {
 	private int									mapcounter				= 1;
 
 	private final PredicateFactory				predicateFactory		= BasicPredicateFactoryImpl.getInstance();
-	private final TermFactory					termFactory				= TermFactory.getInstance();
+	private final TermFactoryImpl				termFactory				= TermFactoryImpl.getInstance();
 
 	private static ABoxToDBDumper				instance				= null;
 
-	private Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
+	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
 
 	public ABoxToDBDumper() {
 		listener = new Vector<ABoxDumpListener>();
@@ -99,7 +99,7 @@ public class ABoxToDBDumper {
 	/**
 	 * Materializes the Abox of the given ontologies using the given sql
 	 * connection.
-	 * 
+	 *
 	 * @param ontologies
 	 *            the ontolgies
 	 * @param c
@@ -166,11 +166,11 @@ public class ABoxToDBDumper {
 							Term qt = termFactory.createVariable("x");
 							List<Term> terms = new Vector<Term>();
 							terms.add(qt);
-							Predicate predicate = predicateFactory.getPredicate(name, terms.size());
+							Predicate predicate = predicateFactory.createPredicate(name, terms.size());
 							Atom bodyAtom = new AtomImpl(predicate, terms);
 							List<Atom> body = new Vector<Atom>();
 							body.add(bodyAtom); // the body
-							predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
+							predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
 							Atom head = new AtomImpl(predicate, terms); // the
 							// head
 							Query cq = new CQIEImpl(head, body, false);
@@ -187,9 +187,9 @@ public class ABoxToDBDumper {
 					String alias = getOPAlias();
 					String tablename = ontoname + "_" + alias;
 					objectporpertyMapper.put(entity.toString(), alias);
-					
+
 					createTable(tablename, 2);
-					
+
 					if (createMappings) {
 						OWLObjectProperty oop = (OWLObjectProperty) entity;
 						Term qt1 = termFactory.createVariable("x");
@@ -197,11 +197,11 @@ public class ABoxToDBDumper {
 						List<Term> terms = new Vector<Term>();
 						terms.add(qt1);
 						terms.add(qt2);
-						Predicate predicate = predicateFactory.getPredicate(oop.getURI(), terms.size());
+						Predicate predicate = predicateFactory.createPredicate(oop.getURI(), terms.size());
 						Atom bodyAtom = new AtomImpl(predicate, terms);
 						List<Atom> body = new Vector<Atom>();
 						body.add(bodyAtom); // the body
-						predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
+						predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
 						Atom head = new AtomImpl(predicate, terms); // the head
 						Query cq = new CQIEImpl(head, body, false);
 						String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
@@ -219,9 +219,9 @@ public class ABoxToDBDumper {
 					String alias = getDPAlias();
 					String tablename = ontoname + "_" + alias;
 					datapropertyMapper.put(entity.toString(), alias);
-					
+
 					createTable(tablename, 2);
-					
+
 					if (createMappings) {
 						OWLDataProperty oop = (OWLDataProperty) entity;
 						Term qt1 = termFactory.createVariable("x");
@@ -229,20 +229,20 @@ public class ABoxToDBDumper {
 						List<Term> terms = new Vector<Term>();
 						terms.add(qt1);
 						terms.add(qt2);
-						Predicate predicate = predicateFactory.getPredicate(oop.getURI(), terms.size());
+						Predicate predicate = predicateFactory.createPredicate(oop.getURI(), terms.size());
 						Atom bodyAtom = new AtomImpl(predicate, terms);
 						List<Atom> body = new Vector<Atom>();
 						body.add(bodyAtom); // the body
-						predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
+						predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
 						Atom head = new AtomImpl(predicate, terms); // the head
 						Query cq = new CQIEImpl(head, body, false);
 						String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
 						OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
 						ax.setTargetQuery(cq);
 						ax.setSourceQuery(new RDBMSSQLQuery(sql));
-						
+
 						log.debug("Mapping created: {}", ax.toString());
-						
+
 						apic.getMappingController().insertMapping(dsUri, ax);
 					}
 				}
@@ -250,10 +250,10 @@ public class ABoxToDBDumper {
 		}
 
 		/* Inserting the data */
-		
+
 		log.debug("Preparing the data to insert");
 		int tupleCounter = 0;
-		
+
 		Iterator<OWLOntology> it = ontologies.iterator();
 		while (it.hasNext()) {
 			OWLOntology onto = it.next();
@@ -261,9 +261,9 @@ public class ABoxToDBDumper {
 			Set<OWLIndividualAxiom> ind = onto.getIndividualAxioms();
 			Iterator<OWLIndividualAxiom> ind_it = ind.iterator();
 			while (ind_it.hasNext()) {
-				
+
 				tupleCounter += 1;
-				
+
 				OWLIndividualAxiom ax = ind_it.next();
 				if (ax instanceof OWLClassAssertionAxiom) {
 
@@ -302,14 +302,14 @@ public class ABoxToDBDumper {
 		}
 		log.debug("Tuples to be inserted: {}", tupleCounter);
 
-		
+
 		insertData();
 		createIndexes();
 	}
 
 	/**
 	 * Dumps the abox into the data source with the given identifier.
-	 * 
+	 *
 	 * @param ontologies
 	 *            the ontologies
 	 * @param dsname
@@ -338,12 +338,12 @@ public class ABoxToDBDumper {
 	/**
 	 * Inserts the data into the abox. Note: its creates one SQL statement per
 	 * table
-	 * 
+	 *
 	 * @throws SQLException
 	 */
 	private void insertData() throws SQLException {
 		log.debug("Inserting data into DB. ");
-		
+
 		Statement st = conn.createStatement();
 		Set<String> keys = inserts.keySet();// keys are table names
 		Iterator<String> it = keys.iterator();
@@ -391,7 +391,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * adds a new value for a table with one column to the insert map
-	 * 
+	 *
 	 * @param tablename
 	 *            the table name where the values should go
 	 * @param value
@@ -411,9 +411,9 @@ public class ABoxToDBDumper {
 	}
 
 	/**
-	 * 
+	 *
 	 * adds a new value for a table with two columns to the insert map
-	 * 
+	 *
 	 * @param tablename
 	 *            the table name where the values should go
 	 * @param sub
@@ -437,7 +437,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Creates a table with the given name an the given number of columns
-	 * 
+	 *
 	 * @param tablename
 	 *            the table name
 	 * @param columns
@@ -484,7 +484,7 @@ public class ABoxToDBDumper {
 	/**
 	 * This method takes the ontology name out from its uri. Its not actually
 	 * necessary to do but keeps the names shorter
-	 * 
+	 *
 	 * @param onto
 	 *            the ontology uri
 	 * @return the onotlogy name
@@ -497,7 +497,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * creates a sql connection with the default data source
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	private void createConnection() throws Exception {
@@ -525,7 +525,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * creates SQL statements to create indexes over the created tables
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	private void createIndexes() throws Exception {
@@ -543,7 +543,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Adds the given the listener
-	 * 
+	 *
 	 * @param l
 	 *            the listener
 	 */
@@ -553,7 +553,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Removes the given the listener
-	 * 
+	 *
 	 * @param l
 	 *            the listener
 	 */
@@ -563,7 +563,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Returns the given api controller
-	 * 
+	 *
 	 * @return the api controller
 	 */
 	public APIController getController() {
@@ -577,7 +577,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Returns the current instance of the class
-	 * 
+	 *
 	 * @return
 	 */
 
@@ -593,7 +593,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * creates an alias for each ontology
-	 * 
+	 *
 	 * @return the alias
 	 */
 	private String getOntologyAlias() {
@@ -602,7 +602,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * creates an alias for each class
-	 * 
+	 *
 	 * @return the alias
 	 */
 	private String getClassAlias() {
@@ -611,7 +611,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * creates an alias for each object property
-	 * 
+	 *
 	 * @return the alias
 	 */
 	private String getOPAlias() {
@@ -620,7 +620,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * creates an alias for each data property
-	 * 
+	 *
 	 * @return the alias
 	 */
 	private String getDPAlias() {
@@ -629,7 +629,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Returns a map between original ontology names and alias
-	 * 
+	 *
 	 * @return a map
 	 */
 	public Map<String, String> getOntolgyMapper() {
@@ -638,7 +638,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Returns a map between original class names and alias
-	 * 
+	 *
 	 * @return a map
 	 */
 	public Map<String, String> getClassMapper() {
@@ -647,7 +647,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Returns a map between original object property names and alias
-	 * 
+	 *
 	 * @return a map
 	 */
 	public Map<String, String> getObjectPropertyMapper() {
@@ -656,7 +656,7 @@ public class ABoxToDBDumper {
 
 	/**
 	 * Returns a map between original data property names and alias
-	 * 
+	 *
 	 * @return a map
 	 */
 	public Map<String, String> getDataPropertyMapper() {

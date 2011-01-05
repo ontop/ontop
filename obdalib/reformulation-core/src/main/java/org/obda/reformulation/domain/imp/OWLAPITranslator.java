@@ -86,7 +86,7 @@ public class OWLAPITranslator {
 			if(entity instanceof OWLClass){
 
 				URI uri = entity.getURI();
-				Predicate p = predicateFactory.getPredicate(uri, 1);
+				Predicate p = predicateFactory.createPredicate(uri, 1);
 				ConceptDescription cd =descFactory.getConceptDescription(p);
 				dl_onto.addConcept(cd);
 
@@ -94,7 +94,7 @@ public class OWLAPITranslator {
 
 				URI uri = entity.getURI();
 				objectproperties.add(uri.toString());
-				Predicate p = predicateFactory.getPredicate(uri, 2);
+				Predicate p = predicateFactory.createPredicate(uri, 2);
 				RoleDescription rd = descFactory.getRoleDescription(p);
 				if(dataproperties.contains(uri.toString())){
 					throw new Exception("Please avoid using the same name for object and data properties.");
@@ -105,7 +105,7 @@ public class OWLAPITranslator {
 			}else if(entity instanceof OWLDataProperty){
 				URI uri = entity.getURI();
 				dataproperties.add(uri.toString());
-				Predicate p = predicateFactory.getPredicate(uri, 2);
+				Predicate p = predicateFactory.createPredicate(uri, 2);
 				RoleDescription rd = descFactory.getRoleDescription(p);
 				if(objectproperties.contains(uri.toString())){
 					throw new Exception("Please avoid using the same name for object and data properties.");
@@ -250,7 +250,7 @@ public class OWLAPITranslator {
 
 					OWLFunctionalDataPropertyAxiom aux = (OWLFunctionalDataPropertyAxiom) axiom;
 					URI uri = aux.getProperty().asOWLDataProperty().getURI();
-					Predicate p = predicateFactory.getPredicate(uri, 2);
+					Predicate p = predicateFactory.createPredicate(uri, 2);
 					RoleDescription role = descFactory.getRoleDescription(p);
 					DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 					dl_onto.addAssertion(func);
@@ -260,8 +260,8 @@ public class OWLAPITranslator {
 					OWLDataPropertyDomainAxiom aux = (OWLDataPropertyDomainAxiom) axiom;
 					URI dom = aux.getDomain().asOWLClass().getURI();
 					URI prop = aux.getProperty().asOWLDataProperty().getURI();
-					Predicate p = predicateFactory.getPredicate(prop, 2);
-					Predicate d = predicateFactory.getPredicate(dom,1);
+					Predicate p = predicateFactory.createPredicate(prop, 2);
+					Predicate d = predicateFactory.createPredicate(dom,1);
 					ConceptDescription exist = descFactory.getConceptDescription(p, false, false);
 					ConceptDescription concept = descFactory.getConceptDescription(d,false,false);
 					DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(exist, concept);
@@ -272,8 +272,8 @@ public class OWLAPITranslator {
 					OWLDataSubPropertyAxiom aux = (OWLDataSubPropertyAxiom) axiom;
 					URI sub_uri = aux.getSubProperty().asOWLDataProperty().getURI();
 					URI super_uri = aux.getSuperProperty().asOWLDataProperty().getURI();
-					Predicate sub = predicateFactory.getPredicate(sub_uri, 2);
-					Predicate superR = predicateFactory.getPredicate(super_uri, 2);
+					Predicate sub = predicateFactory.createPredicate(sub_uri, 2);
+					Predicate superR = predicateFactory.createPredicate(super_uri, 2);
 					RoleDescription subrole = descFactory.getRoleDescription(sub);
 					RoleDescription superrole = descFactory.getRoleDescription(superR);
 					DLLiterRoleInclusionImpl roleinc = new DLLiterRoleInclusionImpl(subrole, superrole);
@@ -287,7 +287,7 @@ public class OWLAPITranslator {
 					Vector<RoleDescription> vec = new Vector<RoleDescription>();
 					while(pit.hasNext()){
 						URI uri = pit.next().asOWLDataProperty().getURI();
-						Predicate prop = predicateFactory.getPredicate(uri, 2);
+						Predicate prop = predicateFactory.createPredicate(uri, 2);
 						RoleDescription role = descFactory.getRoleDescription(prop);
 						vec.add(role);
 					}
@@ -301,7 +301,7 @@ public class OWLAPITranslator {
 					Vector<RoleDescription> vec = new Vector<RoleDescription>();
 					while(pit.hasNext()){
 						URI uri = pit.next().asOWLDataProperty().getURI();
-						Predicate prop = predicateFactory.getPredicate(uri, 2);
+						Predicate prop = predicateFactory.createPredicate(uri, 2);
 						RoleDescription role = descFactory.getRoleDescription(prop);
 						vec.add(role);
 					}
@@ -325,7 +325,7 @@ public class OWLAPITranslator {
 						Vector<RoleDescription> vec = new Vector<RoleDescription>();
 						while(pit.hasNext()){
 							URI uri = pit.next().asOWLDataProperty().getURI();
-							Predicate prop = predicateFactory.getPredicate(uri, 2);
+							Predicate prop = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(prop);
 							vec.add(role);
 						}
@@ -349,7 +349,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = pit.next().asOWLObjectProperty().getURI();
 							}
-							Predicate prop = predicateFactory.getPredicate(uri, 2);
+							Predicate prop = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(prop, isInverse, false);
 							vec.add(role);
 						}
@@ -364,7 +364,7 @@ public class OWLAPITranslator {
 						Vector<RoleDescription> vec = new Vector<RoleDescription>();
 						while(pit.hasNext()){
 							URI uri = pit.next().asOWLDataProperty().getURI();
-							Predicate prop = predicateFactory.getPredicate(uri, 2);
+							Predicate prop = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(prop);
 							vec.add(role);
 						}
@@ -388,7 +388,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = pit.next().asOWLObjectProperty().getURI();
 							}
-							Predicate prop = predicateFactory.getPredicate(uri, 2);
+							Predicate prop = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(prop, isInverse, false);
 							vec.add(role);
 						}
@@ -418,8 +418,8 @@ public class OWLAPITranslator {
 						}else{
 							uri2 = exp2.asOWLObjectProperty().getURI();
 						}
-						Predicate p1 = predicateFactory.getPredicate(uri1, 2);
-						Predicate p2 = predicateFactory.getPredicate(uri2, 2);
+						Predicate p1 = predicateFactory.createPredicate(uri1, 2);
+						Predicate p2 = predicateFactory.createPredicate(uri2, 2);
 						RoleDescription role1 = descFactory.getRoleDescription(p1, isInverse1, false);
 						RoleDescription role2 = descFactory.getRoleDescription(p2,!isInverse2,false);
 						RoleDescription role3 = descFactory.getRoleDescription(p2,isInverse2, false);
@@ -448,7 +448,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = pit.next().asOWLObjectProperty().getURI();
 							}
-							Predicate prop = predicateFactory.getPredicate(uri, 2);
+							Predicate prop = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(prop, isInverse, false);
 							vec.add(role);
 						}
@@ -472,7 +472,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = pit.next().asOWLObjectProperty().getURI();
 							}
-							Predicate prop = predicateFactory.getPredicate(uri, 2);
+							Predicate prop = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(prop, isInverse, false);
 							vec.add(role);
 						}
@@ -502,8 +502,8 @@ public class OWLAPITranslator {
 						}else{
 							uri2 = exp2.asOWLObjectProperty().getURI();
 						}
-						Predicate p1 = predicateFactory.getPredicate(uri1, 2);
-						Predicate p2 = predicateFactory.getPredicate(uri2, 2);
+						Predicate p1 = predicateFactory.createPredicate(uri1, 2);
+						Predicate p2 = predicateFactory.createPredicate(uri2, 2);
 						RoleDescription role1 = descFactory.getRoleDescription(p1, isInverse1, false);
 						RoleDescription role2 = descFactory.getRoleDescription(p2,isInverse2,true);
 						RoleDescription role3 = descFactory.getRoleDescription(p2,isInverse2,false);
@@ -519,7 +519,7 @@ public class OWLAPITranslator {
 
 							OWLFunctionalDataPropertyAxiom aux = (OWLFunctionalDataPropertyAxiom) axiom;
 							URI uri = aux.getProperty().asOWLDataProperty().getURI();
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -537,7 +537,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp1.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p, isInverse, false);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -555,7 +555,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp1.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p,isInverse,true);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -573,7 +573,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp1.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p, isInverse, false);
 							DLLiterSymmetricRoleAssertion symm = new DLLiterSymmetricRoleAssertion(role);
 							dl_onto.addAssertion(symm);
@@ -617,8 +617,8 @@ public class OWLAPITranslator {
 						}else{
 							prop = exp1.asOWLObjectProperty().getURI();
 						}
-						Predicate p = predicateFactory.getPredicate(prop, 2);
-						Predicate d = predicateFactory.getPredicate(dom,arity);
+						Predicate p = predicateFactory.createPredicate(prop, 2);
+						Predicate d = predicateFactory.createPredicate(dom,arity);
 						ConceptDescription exist = descFactory.getConceptDescription(p, false, isInverse);
 						ConceptDescription concept = descFactory.getConceptDescription(d,false,domIsInverse);
 						DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(exist, concept);
@@ -660,8 +660,8 @@ public class OWLAPITranslator {
 						}else{
 							u = exp1.asOWLObjectProperty().getURI();
 						}
-						Predicate p = predicateFactory.getPredicate(u, 2);
-						Predicate d = predicateFactory.getPredicate(rangeuri,arity);
+						Predicate p = predicateFactory.createPredicate(u, 2);
+						Predicate d = predicateFactory.createPredicate(rangeuri,arity);
 						ConceptDescription exist = descFactory.getConceptDescription(p, false, !isInverse);
 						ConceptDescription concept = descFactory.getConceptDescription(d,false,rangeIsInverse);
 						DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(exist, concept);
@@ -690,8 +690,8 @@ public class OWLAPITranslator {
 						}else{
 							super_uri = superexp.asOWLObjectProperty().getURI();
 						}
-						Predicate sub = predicateFactory.getPredicate(sub_uri, 2);
-						Predicate superR = predicateFactory.getPredicate(super_uri, 2);
+						Predicate sub = predicateFactory.createPredicate(sub_uri, 2);
+						Predicate superR = predicateFactory.createPredicate(super_uri, 2);
 						RoleDescription subrole = descFactory.getRoleDescription(sub, isSubInverse, false);
 						RoleDescription superrole = descFactory.getRoleDescription(superR, isSuperInverse, false);
 						DLLiterRoleInclusionImpl roleinc = new DLLiterRoleInclusionImpl(subrole, superrole);
@@ -708,8 +708,8 @@ public class OWLAPITranslator {
 						OWLDataSubPropertyAxiom aux = (OWLDataSubPropertyAxiom) axiom;
 						URI sub_uri = aux.getSubProperty().asOWLDataProperty().getURI();
 						URI super_uri = aux.getSuperProperty().asOWLDataProperty().getURI();
-						Predicate sub = predicateFactory.getPredicate(sub_uri, 2);
-						Predicate superR = predicateFactory.getPredicate(super_uri, 2);
+						Predicate sub = predicateFactory.createPredicate(sub_uri, 2);
+						Predicate superR = predicateFactory.createPredicate(super_uri, 2);
 						RoleDescription subrole = descFactory.getRoleDescription(sub);
 						RoleDescription superrole = descFactory.getRoleDescription(superR);
 						DLLiterRoleInclusionImpl roleinc = new DLLiterRoleInclusionImpl(subrole, superrole);
@@ -738,8 +738,8 @@ public class OWLAPITranslator {
 						}else{
 							super_uri = superexp.asOWLObjectProperty().getURI();
 						}
-						Predicate sub = predicateFactory.getPredicate(sub_uri, 2);
-						Predicate superR = predicateFactory.getPredicate(super_uri, 2);
+						Predicate sub = predicateFactory.createPredicate(sub_uri, 2);
+						Predicate superR = predicateFactory.createPredicate(super_uri, 2);
 						RoleDescription subrole = descFactory.getRoleDescription(sub, isSubInverse, false);
 						RoleDescription superrole = descFactory.getRoleDescription(superR, isSuperInverse, false);
 						DLLiterRoleInclusionImpl roleinc = new DLLiterRoleInclusionImpl(subrole, superrole);
@@ -754,7 +754,7 @@ public class OWLAPITranslator {
 
 							OWLFunctionalDataPropertyAxiom aux = (OWLFunctionalDataPropertyAxiom) axiom;
 							URI uri = aux.getProperty().asOWLDataProperty().getURI();
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -772,7 +772,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p, isInverse, false);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -790,7 +790,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p,isInverse,true);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -808,7 +808,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p, isInverse, false);
 							DLLiterSymmetricRoleAssertion symm = new DLLiterSymmetricRoleAssertion(role);
 							dl_onto.addAssertion(symm);
@@ -823,7 +823,7 @@ public class OWLAPITranslator {
 
 							OWLFunctionalDataPropertyAxiom aux = (OWLFunctionalDataPropertyAxiom) axiom;
 							URI uri = aux.getProperty().asOWLDataProperty().getURI();
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -841,7 +841,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p, isInverse,false);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -859,7 +859,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p,isInverse,true);
 							DLLiterFunctionalAssertion func = new DLLiterFunctionalAssertion(role);
 							dl_onto.addAssertion(func);
@@ -877,7 +877,7 @@ public class OWLAPITranslator {
 							}else{
 								uri = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(uri, 2);
+							Predicate p = predicateFactory.createPredicate(uri, 2);
 							RoleDescription role = descFactory.getRoleDescription(p,isInverse, false);
 							DLLiterSymmetricRoleAssertion symm = new DLLiterSymmetricRoleAssertion(role);
 							dl_onto.addAssertion(symm);
@@ -924,8 +924,8 @@ public class OWLAPITranslator {
 							}else{
 								prop = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(prop, 2);
-							Predicate d = predicateFactory.getPredicate(dom,arity);
+							Predicate p = predicateFactory.createPredicate(prop, 2);
+							Predicate d = predicateFactory.createPredicate(dom,arity);
 							ConceptDescription exist = descFactory.getConceptDescription(p, false, isInverse);
 							ConceptDescription concept = descFactory.getConceptDescription(d,false,isDomInverse);
 							DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(exist, concept);
@@ -955,8 +955,8 @@ public class OWLAPITranslator {
 								dom = domain.asOWLClass().getURI();
 							}
 							URI prop = aux.getProperty().asOWLDataProperty().getURI();
-							Predicate p = predicateFactory.getPredicate(prop, 2);
-							Predicate d = predicateFactory.getPredicate(dom,arity);
+							Predicate p = predicateFactory.createPredicate(prop, 2);
+							Predicate d = predicateFactory.createPredicate(dom,arity);
 							ConceptDescription exist = descFactory.getConceptDescription(p, false, false);
 							ConceptDescription concept = descFactory.getConceptDescription(d,false,false);
 							DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(exist, concept);
@@ -1004,8 +1004,8 @@ public class OWLAPITranslator {
 							}else{
 								prop = exp.asOWLObjectProperty().getURI();
 							}
-							Predicate p = predicateFactory.getPredicate(prop, 2);
-							Predicate d = predicateFactory.getPredicate(rangeuri,arity);
+							Predicate p = predicateFactory.createPredicate(prop, 2);
+							Predicate d = predicateFactory.createPredicate(rangeuri,arity);
 							ConceptDescription exist = descFactory.getConceptDescription(p, false, !isInverse);
 							ConceptDescription concept = descFactory.getConceptDescription(d,false,rangeIsInverse);
 							DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(exist, concept);
@@ -1056,7 +1056,7 @@ public class OWLAPITranslator {
 
 		if(d instanceof  OWLClass){
 			URI uri = ((OWLClass)d).getURI();
-			Predicate p = predicateFactory.getPredicate(uri, 1);
+			Predicate p = predicateFactory.createPredicate(uri, 1);
 			ConceptDescription cd =descFactory.getConceptDescription(p);
 			return cd;
 		}else if(d instanceof OWLDataMinCardinalityRestriction){
@@ -1068,7 +1068,7 @@ public class OWLAPITranslator {
 				return null;
 			}else{
 				URI uri = rest.getProperty().asOWLDataProperty().getURI();
-				Predicate p = predicateFactory.getPredicate(uri, 2);
+				Predicate p = predicateFactory.createPredicate(uri, 2);
 				ConceptDescription cd =descFactory.getConceptDescription(p);
 				return cd;
 			}
@@ -1082,7 +1082,7 @@ public class OWLAPITranslator {
 				if(filler.isOWLThing()){
 					OWLObjectPropertyExpression propExp = rest.getProperty();
 					URI uri = propExp.getNamedProperty().getURI();
-					Predicate p = predicateFactory.getPredicate(uri, 2);
+					Predicate p = predicateFactory.createPredicate(uri, 2);
 					ConceptDescription cd;
 					if(propExp instanceof OWLObjectPropertyInverse){
 						cd = descFactory.getConceptDescription(p,false,true);
@@ -1100,7 +1100,7 @@ public class OWLAPITranslator {
 						}else{
 							prop = exp.asOWLObjectProperty().getURI();
 						}
-						Predicate p = predicateFactory.getPredicate(prop, 2);
+						Predicate p = predicateFactory.createPredicate(prop, 2);
 						Vector<Predicate> vec = new Vector<Predicate>();
 						vec.add(p);
 						ConceptDescription cd =descFactory.getConceptDescription(vec);
@@ -1126,12 +1126,12 @@ public class OWLAPITranslator {
 			}
 			URI uri = owlpro.getURI();
 			if(filler.isOWLThing()){
-				Predicate p = predicateFactory.getPredicate(uri, 2);
+				Predicate p = predicateFactory.createPredicate(uri, 2);
 				ConceptDescription cd =descFactory.getConceptDescription(p,false, isInverse);
 				return cd;
 			}else{
 				if(!(filler instanceof OWLObjectComplementOf)){
-					Predicate p = predicateFactory.getPredicate(uri, 2);
+					Predicate p = predicateFactory.createPredicate(uri, 2);
 					Vector<Predicate> vec = new Vector<Predicate>();
 					vec.add(p);
 					ConceptDescription cd =descFactory.getConceptDescription(vec);
