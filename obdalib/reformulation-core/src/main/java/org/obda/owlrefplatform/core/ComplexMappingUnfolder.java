@@ -12,14 +12,12 @@ import java.util.Set;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.FunctionSymbol;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.FunctionSymbolImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
@@ -30,9 +28,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implements the partial evaluation algorithm with obda mappings
- * 
+ *
  * @author Manfred Gerstgrasser
- * 
+ *
  */
 
 public class ComplexMappingUnfolder implements UnfoldingMechanism {
@@ -43,7 +41,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	// private Map<String, LinkedList<OBDAMappingAxiom>> mappingsIndex = null;
 
 	private MappingViewManager	viewManager			= null;
-	private TermFactory			termFactory			= null;
+	private TermFactoryImpl		termFactory			= null;
 	private ResolutionEngine	resolutionEngine	= null;
 
 	/*
@@ -60,7 +58,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		log.debug("Mappings recreived: {}", mappings.size());
 
 		this.mappings = mappings;
-		this.termFactory = TermFactory.getInstance();
+		this.termFactory = TermFactoryImpl.getInstance();
 		this.viewManager = man;
 		resolutionEngine = new ResolutionEngine();
 
@@ -107,16 +105,16 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	/***
 	 * Creates a rule for a mapping at can be used to create the program to be
 	 * used for the computatino of partial evaluations.
-	 * 
+	 *
 	 * Given a Mapping sql1 -> C(p(x))
-	 * 
+	 *
 	 * This method will return a rule
-	 * 
+	 *
 	 * C(p(aux_1) :- Aux(aux_1, aux_2)
-	 * 
+	 *
 	 * Where Aux is the auxiliary predicate assocaited to the view for the SQL
 	 * query sql1.
-	 * 
+	 *
 	 * @param mapping
 	 * @return
 	 */
@@ -157,7 +155,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 					Term t = termFactory.createVariable(ruleBodyAtom.getTerms().get(pos).getName());
 					funvec.add(t);
 				}
-				Term t = termFactory.createObjectTerm(termFactory.getFunctionSymbol(ft.getName().toString()), funvec);
+				Term t = termFactory.createFunctionalTerm(ft.getFunctionSymbol(), funvec);
 				headTerms.add(t);
 			} else {
 				String n = currentTerm.getName();
@@ -249,18 +247,18 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	/***
 	 * Replaces each variable 'v' in the query for a new variable constructed
 	 * using the name of the original variable plus the counter. For example
-	 * 
+	 *
 	 * q(x) :- C(x)
-	 * 
+	 *
 	 * results in
-	 * 
+	 *
 	 * q(x_1) :- C(x_1)
-	 * 
+	 *
 	 * if counter = 1.
-	 * 
+	 *
 	 * This method can be used to generate "fresh" rules from a datalog program
 	 * that is going to be used during a resolution procedure.
-	 * 
+	 *
 	 * @param rule
 	 * @param count
 	 * @return
@@ -275,7 +273,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			Term newTerm = null;
 			if (term instanceof VariableImpl) {
 				VariableImpl variable = (VariableImpl) term;
-				newTerm = (VariableImpl) termFactory.createVariable(variable.getName() + "_" + count);
+				newTerm = termFactory.createVariable(variable.getName() + "_" + count);
 			} else if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
 				List<Term> innerTerms = functionalTerm.getTerms();
@@ -288,8 +286,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 						newInnerTerms.add(innerTerm.copy());
 					}
 				}
-				FunctionSymbol newFunctionSymbol = new FunctionSymbolImpl(functionalTerm.getName(), functionalTerm.getName().hashCode());
-				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createObjectTerm(newFunctionSymbol, newInnerTerms);
+				Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
+				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createFunctionalTerm(newFunctionSymbol, newInnerTerms);
 				newTerm = newFunctionalTerm;
 			}
 			if (newTerm != null)
@@ -305,7 +303,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				Term newTerm = null;
 				if (term instanceof VariableImpl) {
 					VariableImpl variable = (VariableImpl) term;
-					newTerm = (VariableImpl) termFactory.createVariable(variable.getName() + "_" + count);
+					newTerm = termFactory.createVariable(variable.getName() + "_" + count);
 				} else if (term instanceof FunctionalTermImpl) {
 					FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
 					List<Term> innerTerms = functionalTerm.getTerms();
@@ -318,8 +316,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 							newInnerTerms.add(innerTerm.copy());
 						}
 					}
-					FunctionSymbol newFunctionSymbol = new FunctionSymbolImpl(functionalTerm.getName(), functionalTerm.getName().hashCode());
-					FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createObjectTerm(newFunctionSymbol,
+					Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
+					FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createFunctionalTerm(newFunctionSymbol,
 							newInnerTerms);
 					newTerm = newFunctionalTerm;
 				}
@@ -337,7 +335,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	 * UndisinguishedVariable and replace them by instance of Variable
 	 * (enumerated as mentioned before). This step is needed to ensure that the
 	 * algorithm treats each undistinguished variable as a unique variable.
-	 * 
+	 *
 	 * @param dp
 	 */
 	private void deAnonymize(DatalogProgram dp) {
@@ -391,7 +389,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	/**
 	 * Counts the occurrences of the given predicate in the given CQIE until the
 	 * given position.
-	 * 
+	 *
 	 * @param pred
 	 * @param q
 	 * @param pos
