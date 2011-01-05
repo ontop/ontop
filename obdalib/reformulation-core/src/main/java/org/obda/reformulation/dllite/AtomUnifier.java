@@ -11,26 +11,16 @@ package org.obda.reformulation.dllite;
  */
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Constant;
-import org.obda.query.domain.FunctionSymbol;
-import org.obda.query.domain.ObjectConstant;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.ObjectConstantImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.URIConstantImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.ValueConstantImpl;
@@ -59,13 +49,13 @@ public class AtomUnifier {
 	 * Unifies two atoms in a conjunctive query returning a new conjunctive
 	 * query. To to this we calculate the MGU for atoms, duplicate the query q
 	 * into q', remove i and j from q', apply the mgu to q', and
-	 * 
+	 *
 	 * @param q
 	 * @param i
 	 * @param j
 	 * @return null if the two atoms are not unifiable, else a new conjunctive
 	 *         query produced by the unification of j and i
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public CQIE unify(CQIE q, int i, int j) throws Exception {
@@ -77,8 +67,8 @@ public class AtomUnifier {
 		CQIE unifiedQ = applyUnifier(q, mgu);
 		unifiedQ.getBody().remove(i);
 		unifiedQ.getBody().remove(j - 1);
-		
-		
+
+
 		Atom atom1 = q.getBody().get(i);
 		Atom atom2 = q.getBody().get(j);
 		Atom newatom = unify(atom1, atom2, mgu);
@@ -93,12 +83,12 @@ public class AtomUnifier {
 	 * after with the given unifier. Note that this method takes into account
 	 * that a unifier doesn't include substitutions for instances of
 	 * UndistinguishedVariables.
-	 * 
+	 *
 	 * That is, given 2 terms t1 in atom1, and t2 in atom2 in position i, such
 	 * that t1 or t2 are instances of UndistinguishedVariable, then atom a will
 	 * have in position i the term t1 or t2 that is NOT an undistinguished
 	 * variable, compensating for the missing substitutions.
-	 * 
+	 *
 	 * @param atom1
 	 * @param atom2
 	 * @param unifier
@@ -122,7 +112,7 @@ public class AtomUnifier {
 	 * the unifier to the original query q. To do this, we will call the clone()
 	 * method of the original query and then will call applyUnifier to each atom
 	 * of the cloned query.
-	 * 
+	 *
 	 * @param q
 	 * @param unifier
 	 * @return
@@ -143,11 +133,11 @@ public class AtomUnifier {
 	 * This method will apply the substitution in the unifier to all the terms
 	 * of the atom. If nested terms occur, it will apply the unifier to ONLY the
 	 * first level of nesting.
-	 * 
+	 *
 	 * Note that this method will actually change the list of terms of the atom,
-	 * replacing variables in the domain of the unfier with their substuttion
+	 * replacing variables in the domain of the unifier with their substitution
 	 * term.
-	 * 
+	 *
 	 * @param atom
 	 * @param unifier
 	 */
@@ -172,7 +162,7 @@ public class AtomUnifier {
 					 * functional terms
 					 */
 					if (innert instanceof VariableImpl) {
-						Term replacement = unifier.get(t);
+						Term replacement = unifier.get(innert);
 						if (replacement != null)
 							innerterms.set(j, replacement);
 					}
@@ -186,7 +176,7 @@ public class AtomUnifier {
 	 * atoms with terms: Variable, URIConstant, ValueLiteral, ObjectVariableImpl
 	 * If a term is an ObjectVariableImpl it can't have nested
 	 * ObjectVariableImpl terms.
-	 * 
+	 *
 	 * @param firstAtom
 	 * @param secondAtom
 	 * @return
@@ -297,11 +287,11 @@ public class AtomUnifier {
 	/***
 	 * This will compose the unfier with the substitution. Note that the unifier
 	 * will be modified in this process.
-	 * 
+	 *
 	 * The operation is as follows
-	 * 
+	 *
 	 * {x/y, m/y} composed with y/z is equal to {x/z, m/z, y/z}
-	 * 
+	 *
 	 * @param The
 	 *            unifier that will be composed
 	 * @param The
@@ -332,7 +322,7 @@ public class AtomUnifier {
 	 * class ObjectVariableImpl are not supported. This would require the
 	 * analysis of the terms in each of these, this operation is not supported
 	 * at the moment.
-	 * 
+	 *
 	 * @param term1
 	 * @param term2
 	 * @return
@@ -380,8 +370,6 @@ public class AtomUnifier {
 			return new Substitution(t1, t2);
 		} else if (t2 instanceof URIConstantImpl) {
 			return new Substitution(t1, t2);
-		} else if (t2 instanceof ObjectConstant) {
-			return new Substitution(t1, t2);
 		} else if (t2 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
 			if (fterm.containsTerm(t1))
@@ -401,7 +389,7 @@ public class AtomUnifier {
 	 * variables (if the substitution is going to be used later for atom
 	 * unification then the unifier must be aware of this special treatment of
 	 * UndistinguishedVariable instances).
-	 * 
+	 *
 	 * @param t1
 	 * @param t2
 	 * @return
@@ -429,10 +417,6 @@ public class AtomUnifier {
 			ValueConstantImpl ct1 = (ValueConstantImpl) t1;
 			ValueConstantImpl ct2 = (ValueConstantImpl) t2;
 			return ct1.getName().equals(ct2.getName());
-		} else if (t1 instanceof ObjectConstantImpl) {
-			ObjectConstantImpl ct1 = (ObjectConstantImpl) t1;
-			ObjectConstantImpl ct2 = (ObjectConstantImpl) t2;
-			return ct1.toString().equals(ct2.toString());
 		} else if (t1 instanceof URIConstantImpl) {
 			URIConstantImpl ct1 = (URIConstantImpl) t1;
 			URIConstantImpl ct2 = (URIConstantImpl) t2;
