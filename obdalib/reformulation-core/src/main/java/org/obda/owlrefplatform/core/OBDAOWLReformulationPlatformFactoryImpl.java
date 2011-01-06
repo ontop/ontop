@@ -21,6 +21,15 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 
 import org.obda.owlreformulationplatform.preferences.ReformulationPlatformPreferences;
+import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import org.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
+import org.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
+import org.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
+import org.obda.owlrefplatform.core.srcquerygeneration.SimpleDirectQueryGenrator;
+import org.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import org.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
+import org.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
+import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import org.obda.owlrefplatform.exception.OBDAOWLReformulaionPlatformFactoryException;
 import org.obda.reformulation.dllite.DLRPerfectReformulator;
 import org.obda.reformulation.dllite.DirectMappingUnfolder;

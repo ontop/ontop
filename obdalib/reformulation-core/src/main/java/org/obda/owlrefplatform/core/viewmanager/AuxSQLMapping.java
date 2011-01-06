@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.viewmanager;
 
 /**
  * A class representing a mapping between the variables of the CQIE and 

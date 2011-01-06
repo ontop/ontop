@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.queryevaluation;
 
 import java.util.List;
 

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.obda.query.domain.Atom;
@@ -13,7 +12,6 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
-import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
@@ -122,57 +120,6 @@ public class PositiveInclusionApplicator {
 					newqueries.add(applyPI(cq, pi, atomindex));
 				}
 			}
-		}
-		return newqueries;
-	}
-
-	/***
-	 * Removes all atoms that are redundant w.r.t to query containment.This is
-	 * done by going through all unifyiable atoms, attempting to unify them. If
-	 * they unify with a MGU that is empty, then one of the atoms is redundant.
-	 * 
-	 * @param q
-	 * @throws Exception
-	 */
-	public CQIE removeRundantAtoms(CQIE q) throws Exception {
-		CQIE result = q;
-		for (int i = 0; i < result.getBody().size(); i++) {
-			Atom currentAtom = result.getBody().get(i);
-			for (int j = i + 1; j < result.getBody().size(); j++) {
-				Atom nextAtom = result.getBody().get(j);
-				Map<Variable, Term> map = unifier.getMGU(currentAtom, nextAtom);
-				if (map != null && map.isEmpty()) {
-					result = unifier.unify(result, i, j);
-				}
-			}
-
-		}
-		return result;
-	}
-	
-	/**
-	 * Removes all atoms that are equalt (syntactically) and then all the atoms that are 
-	 * redundant due to CQC.
-	 * 
-	 * @param queries
-	 * @throws Exception 
-	 */
-	public HashSet<CQIE> removeDuplicateAtoms(Collection<CQIE> queries) throws Exception {
-		HashSet<CQIE> newqueries = new HashSet<CQIE>(queries.size()*2);
-		for (CQIE cq : queries) {
-			List<Atom> body = cq.getBody();
-			for (int i = 0; i < body.size(); i++) {
-				Atom currentAtom = body.get(i);
-				for (int j = i + 1; j < body.size(); j++) {
-					Atom comparisonAtom = body.get(j);
-					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
-						if (currentAtom.toString().equals(comparisonAtom.toString())) {
-							body.remove(j);
-						}
-					}
-				}
-			}
-			newqueries.add(anonymizer.anonymize(removeRundantAtoms(cq)));
 		}
 		return newqueries;
 	}

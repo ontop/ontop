@@ -38,7 +38,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	PositiveInclusionApplicator	piapplicator	= new PositiveInclusionApplicator();
 
 	PredicateFactory			pfac			= BasicPredicateFactoryImpl.getInstance();
-	TermFactory				tfac			= TermFactoryImpl.getInstance();
+	TermFactory					tfac			= TermFactoryImpl.getInstance();
 
 	Predicate					r				= pfac.createPredicate(URI.create("R"), 2);
 	Predicate					s				= pfac.createPredicate(URI.create("S"), 2);
@@ -128,9 +128,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		head = new AtomImpl(q, termshead);
 
 		initialquery3 = new CQIEImpl(head, body, false);
-		
-		
-		
+
 		terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(u1);
@@ -231,7 +229,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		Set<CQIE> saturatedset = piapplicator.saturateByUnification(initialset, r, false);
 		assertTrue(saturatedset.size() == 2);
 	}
-	
+
 	/***
 	 * Checking that non distinguisehd variables are also unified
 	 * 
@@ -239,8 +237,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	 * 
 	 * should produce
 	 * 
-	 * q(x) :- R(#, x), R(y, x) 
-	 * q(x) :- R(#, x)
+	 * q(x) :- R(#, x), R(y, x) q(x) :- R(#, x)
 	 * 
 	 * @throws Exception
 	 */

@@ -8,6 +8,9 @@ import java.net.URI;
 import java.util.Set;
 
 import org.antlr.runtime.RecognitionException;
+import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import org.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import org.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.SPARQLDatalogTranslator;

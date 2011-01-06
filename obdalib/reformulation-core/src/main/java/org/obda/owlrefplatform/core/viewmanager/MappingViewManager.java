@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.viewmanager;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;

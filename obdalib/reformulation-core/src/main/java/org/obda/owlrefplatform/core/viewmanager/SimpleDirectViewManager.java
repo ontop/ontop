@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.viewmanager;
 
 import inf.unibz.it.obda.api.io.PrefixManager;
 
@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.obda.owlrefplatform.core.ABoxToDBDumper;
 import org.obda.query.domain.Atom;
 import org.obda.reformulation.domain.DLLiterOntology;
 

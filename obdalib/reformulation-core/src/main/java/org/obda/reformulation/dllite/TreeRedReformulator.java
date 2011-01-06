@@ -1,6 +1,8 @@
 package org.obda.reformulation.dllite;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -76,26 +78,20 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		DatalogProgram anonymizedProgram = anonymizer.anonymize(prog);
 
-		
-		
 		/* Simpliying the query by removing redundant atoms w.r.t. to CQC */
 		HashSet<CQIE> oldqueries = new HashSet<CQIE>(5000);
-		for (CQIE q: anonymizedProgram.getRules()) {
-			oldqueries.add(piApplicator.removeRundantAtoms(q));
+		for (CQIE q : anonymizedProgram.getRules()) {
+			oldqueries.add(CQCUtilities.removeRundantAtoms(q));
 		}
 		oldqueries.addAll(anonymizedProgram.getRules());
 
-		
-		
 		HashSet<CQIE> result = new HashSet<CQIE>(5000);
 		result.addAll(oldqueries);
-		
-			
 
 		/*
 		 * Main loop of the rewriter
 		 */
-		
+
 		boolean loop = true;
 		while (loop) {
 			loop = false;
@@ -117,9 +113,12 @@ public class TreeRedReformulator implements QueryRewriter {
 				}
 
 			}
-			
-			
-			newqueries = piApplicator.removeDuplicateAtoms(newqueries);
+
+			/*
+			 * Optimizing the set
+			 */
+
+			newqueries = CQCUtilities.removeDuplicateAtoms(newqueries);
 
 			/*
 			 * Handling existential inclusions, and unification We will collect
@@ -164,27 +163,103 @@ public class TreeRedReformulator implements QueryRewriter {
 				newqueries.addAll(piApplicator.applyExistentialInclusions(relevantQueries, relevantnotinverse));
 			}
 
-			int f = 0;
 			/*
 			 * Removing duplicated atoms in each of the queries to simplify
 			 */
-			newqueries = piApplicator.removeDuplicateAtoms(newqueries);
 
-			loop = loop | result.addAll(newqueries);
+			newqueries = CQCUtilities.removeDuplicateAtoms(newqueries);
+
+			/* Removing trivially redundant queries */
+			LinkedList<CQIE> newquerieslist = new LinkedList<CQIE>();
+			newquerieslist.addAll(newqueries);
+			removeContainedQueriesSyntacticSorter(newquerieslist);
+			log.debug("Removing trivially redundant queries from this iteration. Initial set size: {} Resulting size: {}", newqueries
+					.size(), newquerieslist.size());
+
+			/*
+			 * Preparing the set of queries for the next iteration.
+			 */
+
+			// loop = loop | result.addAll(newqueries);
+
+			oldqueries = new HashSet<CQIE>(newquerieslist.size() * 2);
+			for (CQIE newquery : newquerieslist) {
+				if (result.add(newquery)) {
+					loop = true;
+					oldqueries.add(newquery);
+				}
+			}
 
 			if (loop) {
 				oldqueries = newqueries;
 			}
 		}
+		
 		LinkedList<CQIE> resultlist = new LinkedList<CQIE>();
 		resultlist.addAll(result);
 
+		/* One last pass of the syntactic containment checker */
+		removeContainedQueriesSyntacticSorter(resultlist);
+		
 		DatalogProgram resultprogram = new DatalogProgramImpl();
 		resultprogram.appendRule(resultlist);
+
+		log.debug("Computed reformulation: \n{}", resultprogram);
+
 		return resultprogram;
 	}
 
+	private void removeContainedQueriesSyntacticSorter(List<CQIE> queries) {
+		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
+			@Override
+			public int compare(CQIE o1, CQIE o2) {
+				return o2.getBody().size() - o1.getBody().size();
+			}
+		};
+
+		Collections.sort(queries, lenghtComparator);
+
+	}
+
+	private boolean isContainedSyntactic(CQIE cq1, CQIE cq2) {
+		if (!cq2.getHead().toString().equals(cq1.getHead().toString())) {
+			return false;
+		}
+
+		for (Atom atom : cq2.getBody()) {
+			if (!cq1.getBody().contains(atom))
+				return false;
+		}
+
+		return true;
+
+	}
+
+	private HashSet<CQIE> removeContainedQueries(Collection<CQIE> queries) {
+		HashSet<CQIE> result = new HashSet<CQIE>(queries.size());
+
+		LinkedList<CQIE> workingcopy = new LinkedList<CQIE>();
+		workingcopy.addAll(queries);
+
+		for (int i = 0; i < workingcopy.size(); i++) {
+			CQCUtilities cqcutil = new CQCUtilities(workingcopy.get(i));
+			for (int j = i + 1; j < workingcopy.size(); j++) {
+				if (cqcutil.isContainedIn(workingcopy.get(j))) {
+					workingcopy.remove(i);
+					i = -1;
+					break;
+				}
+
+				CQCUtilities cqcutil2 = new CQCUtilities(workingcopy.get(j));
+				if (cqcutil2.isContainedIn(workingcopy.get(i)))
+					workingcopy.remove(j);
+
+			}
+		}
+		result.addAll(workingcopy);
+		return result;
+	}
 
 	private boolean containsPredicate(CQIE q, Predicate predicate) {
 		for (Atom atom : q.getBody()) {

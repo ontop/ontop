@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.queryevaluation;
 
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;

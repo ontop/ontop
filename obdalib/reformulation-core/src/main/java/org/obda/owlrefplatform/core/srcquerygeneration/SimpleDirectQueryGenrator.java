@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.srcquerygeneration;
 
 import inf.unibz.it.obda.api.io.PrefixManager;
 
@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.obda.owlrefplatform.core.viewmanager.SimpleDirectViewManager;
+import org.obda.owlrefplatform.core.viewmanager.ViewManager;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Constant;

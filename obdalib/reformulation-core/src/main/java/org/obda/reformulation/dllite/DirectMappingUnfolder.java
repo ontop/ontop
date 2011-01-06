@@ -1,6 +1,6 @@
 package org.obda.reformulation.dllite;
 
-import org.obda.owlrefplatform.core.UnfoldingMechanism;
+import org.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.obda.query.domain.DatalogProgram;
 
 /**

@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.resultset;
 
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 
