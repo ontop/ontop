@@ -6,7 +6,7 @@ import inf.unibz.it.obda.queryanswering.Statement;
 import java.net.URI;
 import java.util.Set;
 
-import org.obda.reformulation.domain.DLLiterOntology;
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 
 /**
  * The technique wrapper interface can be used to implement different 

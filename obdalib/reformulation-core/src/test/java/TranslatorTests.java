@@ -3,15 +3,15 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.obda.reformulation.domain.Assertion;
-import org.obda.reformulation.domain.ConceptDescription;
-import org.obda.reformulation.domain.DLLiterOntology;
-import org.obda.reformulation.domain.RoleDescription;
-import org.obda.reformulation.domain.imp.AtomicConceptDescriptionImpl;
-import org.obda.reformulation.domain.imp.DLLiterConceptInclusionImpl;
-import org.obda.reformulation.domain.imp.DLLiterRoleInclusionImpl;
-import org.obda.reformulation.domain.imp.ExistentialConceptDescriptionImpl;
-import org.obda.reformulation.domain.imp.OWLAPITranslator;
+import org.obda.owlrefplatform.core.ontology.Assertion;
+import org.obda.owlrefplatform.core.ontology.ConceptDescription;
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import org.obda.owlrefplatform.core.ontology.RoleDescription;
+import org.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
+import org.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
+import org.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
+import org.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import org.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;

@@ -6,6 +6,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
@@ -13,7 +14,6 @@ import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.reformulation.dllite.Substitution;
 
 /***
  * This is an auxiliary class for the MGU generation test. This class is in

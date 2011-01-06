@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
@@ -25,7 +26,6 @@ import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
-import org.obda.reformulation.domain.DLLiterOntology;
 
 /**
  * Generates the SQL query for a given Datalog program using the OBDA mappings

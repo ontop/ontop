@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.obda.owlrefplatform.core.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.query.domain.Atom;
-import org.obda.reformulation.domain.DLLiterOntology;
 
 /**
 * The SimpleDirectViewManager is the module which allows us 

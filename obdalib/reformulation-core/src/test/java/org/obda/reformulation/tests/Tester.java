@@ -22,8 +22,8 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.obda.owlreformulationplatform.preferences.ReformulationPlatformPreferences;
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyCreationException;

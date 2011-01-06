@@ -14,9 +14,9 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.obda.owlreformulationplatform.preferences.ReformulationPlatformPreferences;
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;

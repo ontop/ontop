@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
@@ -21,7 +22,6 @@ import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
-import org.obda.reformulation.dllite.PositiveInclusionApplicator;
 
 public class PositiveInclusionApplicatorTest extends TestCase {
 

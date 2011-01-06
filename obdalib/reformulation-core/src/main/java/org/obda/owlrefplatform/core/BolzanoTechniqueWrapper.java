@@ -8,14 +8,14 @@ import java.net.URI;
 import java.util.Set;
 
 import org.antlr.runtime.RecognitionException;
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import org.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import org.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import org.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.SPARQLDatalogTranslator;
-import org.obda.reformulation.dllite.QueryRewriter;
-import org.obda.reformulation.domain.DLLiterOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

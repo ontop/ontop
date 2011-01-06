@@ -5,9 +5,9 @@ import inf.unibz.it.obda.api.io.PrefixManager;
 import java.net.URI;
 import java.util.Set;
 
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
 import org.obda.query.domain.DatalogProgram;
-import org.obda.reformulation.domain.DLLiterOntology;
 
 /**
  * A general interface which should be use to implement new

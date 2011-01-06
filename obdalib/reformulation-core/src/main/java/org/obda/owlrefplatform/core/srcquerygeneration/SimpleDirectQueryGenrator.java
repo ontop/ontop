@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.viewmanager.SimpleDirectViewManager;
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
 import org.obda.query.domain.Atom;
@@ -22,7 +23,6 @@ import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
-import org.obda.reformulation.domain.DLLiterOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
 import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import org.obda.query.domain.Atom;
@@ -24,7 +25,6 @@ import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
-import org.obda.reformulation.dllite.ResolutionEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

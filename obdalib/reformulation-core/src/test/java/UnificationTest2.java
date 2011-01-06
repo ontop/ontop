@@ -5,6 +5,9 @@ import java.util.Vector;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.obda.owlrefplatform.core.ontology.Assertion;
+import org.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
+import org.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
@@ -16,15 +19,12 @@ import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.reformulation.dllite.DLRPerfectReformulator;
-import org.obda.reformulation.dllite.QueryRewriter;
-import org.obda.reformulation.domain.Assertion;
 
 public class UnificationTest2 extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.obda.reformulation.dllite.DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
+	 * {@link org.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
 	 * .
 	 *
 	 * Check if MGU generation/application works properly with multiple atoms sharing variables

@@ -7,6 +7,8 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.junit.Before;
+import org.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import org.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
@@ -18,8 +20,6 @@ import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.reformulation.dllite.CQCUtilities;
-import org.obda.reformulation.dllite.PositiveInclusionApplicator;
 
 public class CQCUtilitiesTest extends TestCase {
 

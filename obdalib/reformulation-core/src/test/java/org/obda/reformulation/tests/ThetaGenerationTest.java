@@ -7,6 +7,8 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
+import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
+import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
@@ -17,8 +19,6 @@ import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.reformulation.dllite.AtomUnifier;
-import org.obda.reformulation.dllite.Substitution;
 
 public class ThetaGenerationTest extends TestCase {
 

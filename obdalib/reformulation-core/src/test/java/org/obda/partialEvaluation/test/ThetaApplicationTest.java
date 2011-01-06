@@ -8,6 +8,8 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
+import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
+import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
@@ -22,8 +24,6 @@ import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
-import org.obda.reformulation.dllite.AtomUnifier;
-import org.obda.reformulation.dllite.Substitution;
 
 public class ThetaApplicationTest extends TestCase {
 

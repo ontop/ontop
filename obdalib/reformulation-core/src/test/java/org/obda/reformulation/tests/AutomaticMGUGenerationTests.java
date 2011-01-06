@@ -15,11 +15,11 @@ import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
+import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.Variable;
-import org.obda.reformulation.dllite.AtomUnifier;
-import org.obda.reformulation.dllite.Substitution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.obda.reformulation.dllite.AtomUnifier#getMGU(org.obda.query.domain.Atom, org.obda.query.domain.Atom)}
+	 * {@link org.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(org.obda.query.domain.Atom, org.obda.query.domain.Atom)}
 	 * .
 	 * 
 	 * @throws Exception

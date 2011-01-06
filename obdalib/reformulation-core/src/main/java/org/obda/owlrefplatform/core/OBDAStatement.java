@@ -8,8 +8,8 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.obda.owlrefplatform.codecs.DatalogProgramToTextCodec;
 import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import org.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import org.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 import org.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
@@ -17,7 +17,7 @@ import org.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
-import org.obda.reformulation.dllite.QueryRewriter;
+import org.obda.query.tools.renderer.DatalogProgramToTextCodec;
 
 /**
  * The obda statement provides the implementations necessary to query 
