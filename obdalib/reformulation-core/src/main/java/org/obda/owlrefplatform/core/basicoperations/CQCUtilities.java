@@ -1,6 +1,8 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +20,8 @@ import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.VariableImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /***
  * A class that allows you to perform different operations related to query
@@ -41,6 +45,8 @@ public class CQCUtilities {
 	Atom							canonicalhead		= null;
 
 	Set<Predicate>					canonicalpredicates	= new HashSet<Predicate>(50);
+
+	static Logger					log					= LoggerFactory.getLogger(CQCUtilities.class);
 
 	public CQCUtilities(CQIE query) {
 		this.canonicalQuery = getCanonicalQuery(query);
@@ -179,7 +185,7 @@ public class CQCUtilities {
 					satisfiedquery.getBody().remove(atomidx);
 
 					if (satisfiedquery.getBody().size() == 0)
-						if (canonicalhead.toString().equals(satisfiedquery.getHead().toString()))
+						if (canonicalhead.equals(satisfiedquery.getHead()))
 							return true;
 
 					if (hasAnswer(satisfiedquery))
@@ -206,7 +212,7 @@ public class CQCUtilities {
 				for (int j = i + 1; j < body.size(); j++) {
 					Atom comparisonAtom = body.get(j);
 					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
-						if (currentAtom.toString().equals(comparisonAtom.toString())) {
+						if (currentAtom.equals(comparisonAtom)) {
 							body.remove(j);
 						}
 					}
@@ -241,5 +247,160 @@ public class CQCUtilities {
 		}
 		return result;
 	}
+
+	/***
+	 * Removes queries that are contained syntactically, using the method
+	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
+	 * efficient, we first sort the list of queries as to have longer queries
+	 * first and shorter queries last.
+	 * 
+	 * Removal of queries is done in two main double scans. The first scan goes
+	 * top-down/down-top, the second scan goes down-top/top-down
+	 * 
+	 * @param queries
+	 */
+	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
+		int initialsize = queries.size();
+		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
+
+			@Override
+			public int compare(CQIE o1, CQIE o2) {
+				return o2.getBody().size() - o1.getBody().size();
+			}
+		};
+
+		Collections.sort(queries, lenghtComparator);
+
+		for (int i = 0; i < queries.size(); i++) {
+			for (int j = queries.size() - 1; j > i; j--) {
+				if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
+					queries.remove(i);
+					i = -1;
+					break;
+				}
+			}
+		}
+
+		if (twopasses) {
+			for (int i = queries.size() - 1; i > 0; i--) {
+				for (int j = 0; j < i; j++) {
+					if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
+						queries.remove(i);
+						i = +1;
+						break;
+					}
+				}
+			}
+		}
+
+		int newsize = queries.size();
+		int queriesremoved = initialsize - newsize;
+		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
+		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
+
+	}
+
+	/***
+	 * Check if query cq1 is contained in cq2, sintactically. That is, if the
+	 * head of cq1 and cq2 are equal according to toString().equals and each
+	 * atom in cq2 is also in the body of cq1 (also by means of
+	 * toString().equals().
+	 * 
+	 * @param cq1
+	 * @param cq2
+	 * @return
+	 */
+	public static boolean isContainedInSyntactic(CQIE cq1, CQIE cq2) {
+		if (!cq2.getHead().equals(cq1.getHead())) {
+			return false;
+		}
+
+		for (Atom atom : cq2.getBody()) {
+			if (!cq1.getBody().contains(atom))
+				return false;
+		}
+		return true;
+	}
+	
+	
+	/***
+	 * Removes queries that are contained syntactically, using the method
+	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
+	 * efficient, we first sort the list of queries as to have longer queries
+	 * first and shorter queries last.
+	 * 
+	 * Removal of queries is done in two main double scans. The first scan goes
+	 * top-down/down-top, the second scan goes down-top/top-down
+	 * 
+	 * @param queries
+	 */
+	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
+		int initialsize = queries.size();
+		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
+
+			@Override
+			public int compare(CQIE o1, CQIE o2) {
+				return o2.getBody().size() - o1.getBody().size();
+			}
+		};
+
+		Collections.sort(queries, lenghtComparator);
+
+		for (int i = 0; i < queries.size(); i++) {
+			CQCUtilities cqc = new CQCUtilities(queries.get(i));
+			for (int j = queries.size() - 1; j > i; j--) {
+				if (cqc.isContainedIn(queries.get(j))) {
+					queries.remove(i);
+					i = -1;
+					break;
+				}
+			}
+		}
+
+		if (twopasses) {
+			for (int i = queries.size() - 1; i > 0; i--) {
+				CQCUtilities cqc = new CQCUtilities(queries.get(i));
+				for (int j = 0; j < i; j++) {
+					if (cqc.isContainedIn(queries.get(j))) {
+						queries.remove(i);
+						i = +1;
+						break;
+					}
+				}
+			}
+		}
+
+		int newsize = queries.size();
+		int queriesremoved = initialsize - newsize;
+		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
+		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
+
+	}
+	
+//
+//	private HashSet<CQIE> removeContainedQueries(Collection<CQIE> queries) {
+//		HashSet<CQIE> result = new HashSet<CQIE>(queries.size());
+//
+//		LinkedList<CQIE> workingcopy = new LinkedList<CQIE>();
+//		workingcopy.addAll(queries);
+//
+//		for (int i = 0; i < workingcopy.size(); i++) {
+//			CQCUtilities cqcutil = new CQCUtilities(workingcopy.get(i));
+//			for (int j = i + 1; j < workingcopy.size(); j++) {
+//				if (cqcutil.isContainedIn(workingcopy.get(j))) {
+//					workingcopy.remove(i);
+//					i = -1;
+//					break;
+//				}
+//
+//				CQCUtilities cqcutil2 = new CQCUtilities(workingcopy.get(j));
+//				if (cqcutil2.isContainedIn(workingcopy.get(i)))
+//					workingcopy.remove(j);
+//
+//			}
+//		}
+//		result.addAll(workingcopy);
+//		return result;
+//	}
 
 }

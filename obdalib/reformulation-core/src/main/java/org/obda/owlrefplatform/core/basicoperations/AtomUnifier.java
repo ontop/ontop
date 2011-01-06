@@ -28,19 +28,6 @@ import org.obda.query.domain.imp.VariableImpl;
 
 public class AtomUnifier {
 
-	// TODO we have to make all these variables local variables instead of field
-	// variables. If we keep them like this they will give us problems when we
-	// implement parallel algorithms.
-
-	// Vector<Substitution> result = null;
-	// Atom firstAtom = null;
-	// Atom secondAtom =null;
-	// Map<String, Vector<Integer>> firstAtomIndex = null;
-	// Map<String, Vector<Integer>> secondAtomIndex = null;
-	// Map<String, Term> replacedVariables = null;
-
-	// returns null if its impossible to unify them
-
 	public Map<Variable, Term> getMGU(CQIE q, int position1, int position2) throws Exception {
 		return getMGU(q.getBody().get(position1), q.getBody().get(position2));
 	}
@@ -187,7 +174,7 @@ public class AtomUnifier {
 		 * Basic case, predicates are different or their arity is different,
 		 * then no unifier
 		 */
-		if (!(firstAtom.getPredicate().getName().toString().equals(secondAtom.getPredicate().getName().toString()))
+		if (!(firstAtom.getPredicate().equals(secondAtom.getPredicate()))
 				|| firstAtom.getArity() != secondAtom.getArity()) {
 			return null;
 
@@ -233,7 +220,7 @@ public class AtomUnifier {
 				 */
 				FunctionalTermImpl fterm1 = (FunctionalTermImpl) term1;
 				FunctionalTermImpl fterm2 = (FunctionalTermImpl) term2;
-				if (!fterm1.getName().equals(fterm2.getName())) {
+				if (!fterm1.equals(fterm2)) {
 					return null;
 				}
 				if (fterm1.getTerms().size() != fterm2.getTerms().size()) {
@@ -404,23 +391,21 @@ public class AtomUnifier {
 		if (t1 instanceof VariableImpl) {
 			VariableImpl ct1 = (VariableImpl) t1;
 			VariableImpl ct2 = (VariableImpl) t2;
-			return ct1.getName().equals(ct2.getName());
+			return ct1.equals(ct2);
 		} else if (t1 instanceof UndistinguishedVariable) {
-			// UndistinguishedVariable ct1 = (UndistinguishedVariable) t1;
-			// UndistinguishedVariable ct2 = (UndistinguishedVariable) t2;
 			return true;
 		} else if (t1 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl ct1 = (FunctionalTermImpl) t1;
 			FunctionalTermImpl ct2 = (FunctionalTermImpl) t2;
-			return ct1.toString().equals(ct2.toString());
+			return ct1.equals(ct2);
 		} else if (t1 instanceof ValueConstantImpl) {
 			ValueConstantImpl ct1 = (ValueConstantImpl) t1;
 			ValueConstantImpl ct2 = (ValueConstantImpl) t2;
-			return ct1.getName().equals(ct2.getName());
+			return ct1.equals(ct2);
 		} else if (t1 instanceof URIConstantImpl) {
 			URIConstantImpl ct1 = (URIConstantImpl) t1;
 			URIConstantImpl ct2 = (URIConstantImpl) t2;
-			return ct1.getName().equals(ct2.getName());
+			return ct1.equals(ct2);
 		} else {
 			throw new RuntimeException("Exception comparing two terms, unknown term class " + t1 + " " + t2);
 		}

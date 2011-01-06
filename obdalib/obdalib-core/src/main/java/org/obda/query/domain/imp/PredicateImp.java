@@ -55,6 +55,6 @@ public class PredicateImp implements Predicate{
 
 	@Override
 	public String toString() {
-		return getName().toString();
+		return name.toString();
 	}
 }

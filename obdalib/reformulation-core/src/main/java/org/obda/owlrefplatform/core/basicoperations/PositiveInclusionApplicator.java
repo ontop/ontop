@@ -222,10 +222,10 @@ public class PositiveInclusionApplicator {
 						boolean unify = false;
 						unify = unify
 								|| (!leftTermEqual && (ta11 instanceof UndistinguishedVariable || ta21 instanceof UndistinguishedVariable || ta11
-										.getName().equals(ta21.getName())));
+										.equals(ta21)));
 						unify = unify
 								|| (leftTermEqual && (ta10 instanceof UndistinguishedVariable || ta20 instanceof UndistinguishedVariable || ta10
-										.getName().equals(ta20.getName())));
+										.equals(ta20)));
 
 						if (unify) {
 							CQIE unifiedQuery = unifier.unify(currentcq, i, j);

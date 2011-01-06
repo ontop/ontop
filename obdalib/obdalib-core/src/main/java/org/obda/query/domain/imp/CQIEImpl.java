@@ -1,6 +1,5 @@
 package org.obda.query.domain.imp;
 
-import java.net.URI;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,18 +7,34 @@ import java.util.List;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
+import org.obda.query.tools.util.EventGeneratingLinkedList;
+import org.obda.query.tools.util.ListListener;
 
-public class CQIEImpl implements CQIE {
+public class CQIEImpl implements CQIE, ListListener {
 
 	private Atom		head		= null;
 	private List<Atom>	body		= null;
 	private boolean		isBoolean	= false;
 
+	private int			hash		= -1;
+
+	private boolean		rehash		= true;
+
+	private String		string		= null;
+
 	// TODO Remove isBoolean from the signature and from any method
 	public CQIEImpl(Atom head, List<Atom> body, boolean isBoolean) {
 		this.head = head;
-		this.body = body;
+		
+		EventGeneratingLinkedList<Atom> eventbody = new EventGeneratingLinkedList<Atom>();
+		eventbody.addAll(body);
+		
+		this.body = eventbody;
 		this.isBoolean = isBoolean;
+		
+		eventbody.addListener(this);
+		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>)head.getTerms();
+		headterms.addListener(this);
 	}
 
 	public List<Atom> getBody() {
@@ -31,40 +46,53 @@ public class CQIEImpl implements CQIE {
 	}
 
 	public void updateHead(Atom head) {
+		
+		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>)head.getTerms();
+		headterms.removeListener(this);
+		
 		this.head = head;
+		
+		rehash = true;
+		string = null;
 	}
 
 	public void updateBody(List<Atom> body) {
-		this.body = body;
+		this.body.clear();
+		this.body.addAll(body);
 	}
 
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		if (rehash) {
+			hash = toString().hashCode();
+			rehash = false;
+		}
+		return hash;
 	}
 
 	@Override
 	public boolean isBoolean() {
-		// TODO Auto-generated method stub
 		return isBoolean;
 	}
 
 	@Override
 	public String toString() {
+		if (string == null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(head.toString());
+			sb.append(":-");
 
-		StringBuilder sbHead = new StringBuilder();
-		sbHead.append(head.toString());
-		sbHead.append(" "); // ending character.
-		StringBuilder sbBody = new StringBuilder();
-		Iterator<Atom> bit = body.iterator();
-		while (bit.hasNext()) {
-			Atom a = bit.next();
-			if (sbBody.length() > 0) {
-				sbBody.append(", ");
+			Iterator<Atom> bit = body.iterator();
+			while (bit.hasNext()) {
+				Atom atom = bit.next();
+				if (bit.hasNext()) {
+					sb.append(", ");
+				}
+				sb.append(atom.toString());
 			}
-			sbBody.append(a.toString());
+			string = sb.toString();
 		}
-		return sbHead + ":- " + sbBody;
+		return string;
 	}
 
 	@Override
@@ -78,12 +106,19 @@ public class CQIEImpl implements CQIE {
 
 		return new CQIEImpl(copyHead, copyBody, copyIsBoolean);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof CQIEImpl))
 			return false;
-		CQIEImpl q2 = (CQIEImpl)obj;
-		return toString().equals(q2.toString());
+		CQIEImpl q2 = (CQIEImpl) obj;
+		return hashCode() == q2.hashCode();
+	}
+
+	@Override
+	public void listChanged() {
+		rehash = true;
+		string = null;
+
 	}
 }

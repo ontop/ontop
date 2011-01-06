@@ -388,28 +388,4 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		}
 	}
 
-	/**
-	 * Counts the occurrences of the given predicate in the given CQIE until the
-	 * given position.
-	 *
-	 * @param pred
-	 * @param q
-	 * @param pos
-	 * @return the number of occurrences
-	 */
-	private int getNrOfOccurences(Predicate pred, CQIE q, int pos) {
-
-		int occ = 0;
-		Iterator<Atom> it = q.getBody().iterator();
-		int i = 0;
-		while (it.hasNext() && i < pos) {
-			Atom a = it.next();
-			if (a.getPredicate().getName().toString().equals(pred.getName().toString())) {
-				occ++;
-			}
-			i++;
-		}
-		return occ;
-	}
-
 }

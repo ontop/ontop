@@ -55,9 +55,8 @@ public class URIConstantImpl implements URIConstant {
 			return new URIConstantImpl(new URI(uri.toString()));
 		}
 		catch (URISyntaxException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return null;
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class VariableImpl implements Variable {
 
 	@Override
 	public String toString() {
-		return getName();
+		return name;
 	}
 
 	@Override

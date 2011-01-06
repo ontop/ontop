@@ -159,7 +159,7 @@ public class QueryAnonymizer {
 		boolean found = false;
 		while (it.hasNext() && !found) {
 			Term headterm = it.next();
-			if (headterm.getName().equals(t.getName())) {
+			if (headterm.equals(t)) {
 				found = true;
 			}
 		}

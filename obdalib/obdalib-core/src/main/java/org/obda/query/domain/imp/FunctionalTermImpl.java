@@ -7,12 +7,21 @@ import java.util.Vector;
 import org.obda.query.domain.Function;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
+import org.obda.query.tools.util.EventGeneratingLinkedList;
+import org.obda.query.tools.util.ListListener;
 
-public class FunctionalTermImpl implements Function {
+public class FunctionalTermImpl implements Function, ListListener {
 
 	private Predicate functor = null;
 	private List<Term> terms = null;
 	private int identifier = -1;
+	
+	// true when the list of terms has been modified
+	boolean rehash = true;
+	
+	
+	// null when the list of terms has been modified
+	String string = null;
 
 	/**
 	 * The default constructor.
@@ -23,17 +32,13 @@ public class FunctionalTermImpl implements Function {
 	 */
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
 		this.functor = functor;
-		this.terms = terms;
-		this.identifier = functor.hashCode();
-	}
-
-	/**
-	 * Replace the existing arguments with the new term arguments.
-	 *
-	 * @param terms the new terms.
-	 */
-	public void setTerms(List<Term> terms) {
-		this.terms = terms;
+		
+		EventGeneratingLinkedList<Term> eventlist = new EventGeneratingLinkedList<Term>();
+		eventlist.addAll(terms);
+		
+		this.terms = eventlist;
+		
+		eventlist.addListener(this);
 	}
 
 	@Override
@@ -42,14 +47,19 @@ public class FunctionalTermImpl implements Function {
 			return false;
 
 		FunctionalTermImpl functor2 = (FunctionalTermImpl) obj;
-		return this.identifier == functor2.identifier;
+		return this.hashCode() == functor2.hashCode();
 	}
 
 	@Override
 	public int hashCode() {
+		if (rehash) {
+			identifier = toString().hashCode();
+			rehash = false;
+		}
 		return identifier;
 	}
 
+	//TODO FunctionalTerm: getName doesn't make sense in this class
 	@Override
 	public String getName() {
 		return functor.getName().toString();
@@ -72,7 +82,7 @@ public class FunctionalTermImpl implements Function {
 
 	@Override
 	public FunctionalTermImpl copy() {
-		Vector<Term> copyTerms = new Vector<Term>();
+		EventGeneratingLinkedList<Term> copyTerms = new EventGeneratingLinkedList<Term>();
 		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {
 			copyTerms.add(it.next().copy());
@@ -82,6 +92,9 @@ public class FunctionalTermImpl implements Function {
 
 	@Override
 	public String toString() {
+		if (string != null)
+			return string;
+		
 		StringBuffer sb_t = new StringBuffer();
 		for (int i = 0; i < terms.size(); i++) {
 			if (sb_t.length() > 0) {
@@ -95,7 +108,8 @@ public class FunctionalTermImpl implements Function {
 		sb_name.append(sb_t);
 		sb_name.append(")");
 
-		return sb_name.toString();
+		string = sb_name.toString();
+		return string;
 	}
 
 	/**
@@ -107,9 +121,15 @@ public class FunctionalTermImpl implements Function {
 	public boolean containsTerm(Term t) {
 		for (int i = 0; i < terms.size(); i++) {
 			Term t2 = terms.get(i);
-			if (t2.toString().equals(t.toString()))
+			if (t2.equals(t))
 				return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void listChanged() {
+		rehash = true;
+		string = null;
 	}
 }

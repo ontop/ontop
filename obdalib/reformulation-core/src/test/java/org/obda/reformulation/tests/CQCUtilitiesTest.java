@@ -164,8 +164,7 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
 
 		CQIE q3 = new CQIEImpl(head, body, false);
-		
-		
+
 		// Query 4 - q(m,n) :- S(m,n) R(m,n)
 
 		headTerms = new LinkedList<Term>();
@@ -180,14 +179,13 @@ public class CQCUtilitiesTest extends TestCase {
 		terms.add(tfac.createVariable("m"));
 		terms.add(tfac.createVariable("n"));
 		body.add(new AtomImpl(pfac.createPredicate(URI.create("S"), 2), terms));
-		
+
 		terms = new LinkedList<Term>();
 		terms.add(tfac.createVariable("m"));
 		terms.add(tfac.createVariable("n"));
 		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
 
 		CQIE q4 = new CQIEImpl(head, body, false);
-		
 
 		// Checking contaiment q2 <= q1
 
@@ -208,8 +206,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 		cqcu = new CQCUtilities(q3);
 		assertFalse(cqcu.isContainedIn(q1));
-		
-		
+
 		// Checking contaiment q1 <= q4
 
 		cqcu = new CQCUtilities(q1);
@@ -219,7 +216,174 @@ public class CQCUtilitiesTest extends TestCase {
 
 		cqcu = new CQCUtilities(q4);
 		assertFalse(cqcu.isContainedIn(q1));
+	}
+
+	public void testSyntacticContainmentCheck() {
+		// Query 1 - q(x) :- R(x,y), R(y,z), A(x)
+		// Query 2 - q(x) :- R(x,y)
+		// Query 3 - q(x) :- A(x)
+
+		List<Term> headTerms = new LinkedList<Term>();
+		headTerms.add(x);
+
+		Atom head = new AtomImpl(pfac.createPredicate(URI.create("q"), 1), headTerms);
+
+		List<Atom> body = new LinkedList<Atom>();
+
+		List<Term> terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		terms.add(tfac.createVariable("y"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("y"));
+		terms.add(tfac.createVariable("z"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("A"), 1), terms));
+
+		CQIE q1 = new CQIEImpl(head, body, false);
+
+		// Query 2 - q(x) :- R(x,y)
+
+		headTerms = new LinkedList<Term>();
+		headTerms.add(tfac.createVariable("x"));
+
+		head = new AtomImpl(pfac.createPredicate(URI.create("q"), 1), headTerms);
+
+		body = new LinkedList<Atom>();
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		terms.add(tfac.createVariable("y"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
+
+		CQIE q2 = new CQIEImpl(head, body, false);
+
+		// Query 3 - q(x) :- A(x)
+
+		headTerms = new LinkedList<Term>();
+		headTerms.add(tfac.createVariable("x"));
+
+		head = new AtomImpl(pfac.createPredicate(URI.create("q"), 1), headTerms);
+
+		body = new LinkedList<Atom>();
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("A"), 1), terms));
+
+		CQIE q3 = new CQIEImpl(head, body, false);
+
+		assertTrue(CQCUtilities.isContainedInSyntactic(q1, q2));
+
+		assertTrue(CQCUtilities.isContainedInSyntactic(q1, q3));
+
+		assertFalse(CQCUtilities.isContainedInSyntactic(q2, q1));
+
+		assertFalse(CQCUtilities.isContainedInSyntactic(q3, q1));
 
 	}
 
+	public void testRemovalOfSyntacticContainmentCheck() {
+		/*
+		 * Putting all queries in a list, in the end, query 1 must be removed
+		 */
+
+		// Query 1 - q(x) :- R(x,y), R(y,z), A(x)
+		// Query 2 - q(x) :- R(x,y)
+		// Query 3 - q(x) :- A(x)
+
+		List<Term> headTerms = new LinkedList<Term>();
+		headTerms.add(x);
+
+		Atom head = new AtomImpl(pfac.createPredicate(URI.create("q"), 1), headTerms);
+
+		List<Atom> body = new LinkedList<Atom>();
+
+		List<Term> terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		terms.add(tfac.createVariable("y"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("y"));
+		terms.add(tfac.createVariable("z"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("A"), 1), terms));
+
+		CQIE q1 = new CQIEImpl(head, body, false);
+
+		// Query 2 - q(x) :- R(x,y)
+
+		headTerms = new LinkedList<Term>();
+		headTerms.add(tfac.createVariable("x"));
+
+		head = new AtomImpl(pfac.createPredicate(URI.create("q"), 1), headTerms);
+
+		body = new LinkedList<Atom>();
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		terms.add(tfac.createVariable("y"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("R"), 2), terms));
+
+		CQIE q2 = new CQIEImpl(head, body, false);
+
+		// Query 3 - q(x) :- A(x)
+
+		headTerms = new LinkedList<Term>();
+		headTerms.add(tfac.createVariable("x"));
+
+		head = new AtomImpl(pfac.createPredicate(URI.create("q"), 1), headTerms);
+
+		body = new LinkedList<Atom>();
+
+		terms = new LinkedList<Term>();
+		terms.add(tfac.createVariable("x"));
+		body.add(new AtomImpl(pfac.createPredicate(URI.create("A"), 1), terms));
+
+		CQIE q3 = new CQIEImpl(head, body, false);
+		
+		LinkedList<CQIE> queries = new LinkedList<CQIE>();
+		queries.add(q1);
+		queries.add(q2);
+		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		
+		assertTrue(queries.size()==1);
+		assertTrue(queries.contains(q2));
+		
+		
+		queries = new LinkedList<CQIE>();
+		queries.add(q1);
+		queries.add(q3);
+		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		
+		assertTrue(queries.size()==1);
+		assertTrue(queries.contains(q3));
+		
+		queries = new LinkedList<CQIE>();
+		queries.add(q2);
+		queries.add(q3);
+		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		
+		assertTrue(queries.size()==2);
+		assertTrue(queries.contains(q2));
+		assertTrue(queries.contains(q3));
+		
+		queries = new LinkedList<CQIE>();
+		queries.add(q1);
+		queries.add(q2);
+		queries.add(q3);
+		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+
+		assertTrue(queries.size()==2);
+		assertTrue(queries.contains(q2));
+		assertTrue(queries.contains(q3));
+	}
 }
