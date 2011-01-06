@@ -30,7 +30,8 @@ Logger										log				= LoggerFactory.getLogger(this.getClass());
 			String id = qit.next();
 log.debug("Testing query: {}", id);
 			Set<String> exp = tester.getExpectedResult(id);
-			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			Set<String> res = tester.executeQuery(id);			
+			assertTrue(exp.size() == res.size());
 			for (String realResult : res) {
 				assertTrue(exp.contains(realResult));
 			}
@@ -9028,8 +9029,1572 @@ log.debug("Testing query: {}", id);
 		}
 	}
 
+	public void test_91_1() throws Exception{
+		String ontoname = "test_91_1";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_2() throws Exception{
+		String ontoname = "test_91_2";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_3() throws Exception{
+		String ontoname = "test_91_3";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_4() throws Exception{
+		String ontoname = "test_91_4";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_5() throws Exception{
+		String ontoname = "test_91_5";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_6() throws Exception{
+		String ontoname = "test_91_6";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_7() throws Exception{
+		String ontoname = "test_91_7";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_8() throws Exception{
+		String ontoname = "test_91_8";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_9() throws Exception{
+		String ontoname = "test_91_9";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_10() throws Exception{
+		String ontoname = "test_91_10";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_91_11() throws Exception{
+		String ontoname = "test_91_11";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
 	public void test_92_0() throws Exception{
 		String ontoname = "test_92_0";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_1() throws Exception{
+		String ontoname = "test_92_1";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_2() throws Exception{
+		String ontoname = "test_92_2";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_3() throws Exception{
+		String ontoname = "test_92_3";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_4() throws Exception{
+		String ontoname = "test_92_4";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_5() throws Exception{
+		String ontoname = "test_92_5";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_6() throws Exception{
+		String ontoname = "test_92_6";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_7() throws Exception{
+		String ontoname = "test_92_7";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_8() throws Exception{
+		String ontoname = "test_92_8";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_9() throws Exception{
+		String ontoname = "test_92_9";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_10() throws Exception{
+		String ontoname = "test_92_10";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_11() throws Exception{
+		String ontoname = "test_92_11";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_12() throws Exception{
+		String ontoname = "test_92_12";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_13() throws Exception{
+		String ontoname = "test_92_13";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_14() throws Exception{
+		String ontoname = "test_92_14";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_15() throws Exception{
+		String ontoname = "test_92_15";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_16() throws Exception{
+		String ontoname = "test_92_16";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_17() throws Exception{
+		String ontoname = "test_92_17";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_18() throws Exception{
+		String ontoname = "test_92_18";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_19() throws Exception{
+		String ontoname = "test_92_19";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_20() throws Exception{
+		String ontoname = "test_92_20";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_21() throws Exception{
+		String ontoname = "test_92_21";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_22() throws Exception{
+		String ontoname = "test_92_22";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_23() throws Exception{
+		String ontoname = "test_92_23";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_24() throws Exception{
+		String ontoname = "test_92_24";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_25() throws Exception{
+		String ontoname = "test_92_25";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_26() throws Exception{
+		String ontoname = "test_92_26";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_27() throws Exception{
+		String ontoname = "test_92_27";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_28() throws Exception{
+		String ontoname = "test_92_28";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_29() throws Exception{
+		String ontoname = "test_92_29";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_30() throws Exception{
+		String ontoname = "test_92_30";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_31() throws Exception{
+		String ontoname = "test_92_31";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_32() throws Exception{
+		String ontoname = "test_92_32";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_33() throws Exception{
+		String ontoname = "test_92_33";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_34() throws Exception{
+		String ontoname = "test_92_34";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_92_35() throws Exception{
+		String ontoname = "test_92_35";
 
 		log.debug("Test case: {}", ontoname);
 		log.debug("Testing in-memory db/direct-mappings");
@@ -9096,6 +10661,1196 @@ log.debug("Testing query: {}", id);
 		}
 	}
 
+	public void test_93_1() throws Exception{
+		String ontoname = "test_93_1";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_2() throws Exception{
+		String ontoname = "test_93_2";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_3() throws Exception{
+		String ontoname = "test_93_3";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_4() throws Exception{
+		String ontoname = "test_93_4";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_5() throws Exception{
+		String ontoname = "test_93_5";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_6() throws Exception{
+		String ontoname = "test_93_6";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_7() throws Exception{
+		String ontoname = "test_93_7";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_8() throws Exception{
+		String ontoname = "test_93_8";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_9() throws Exception{
+		String ontoname = "test_93_9";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_10() throws Exception{
+		String ontoname = "test_93_10";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_11() throws Exception{
+		String ontoname = "test_93_11";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_12() throws Exception{
+		String ontoname = "test_93_12";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_13() throws Exception{
+		String ontoname = "test_93_13";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_14() throws Exception{
+		String ontoname = "test_93_14";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_15() throws Exception{
+		String ontoname = "test_93_15";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_16() throws Exception{
+		String ontoname = "test_93_16";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_17() throws Exception{
+		String ontoname = "test_93_17";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_18() throws Exception{
+		String ontoname = "test_93_18";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_19() throws Exception{
+		String ontoname = "test_93_19";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_20() throws Exception{
+		String ontoname = "test_93_20";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_21() throws Exception{
+		String ontoname = "test_93_21";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_22() throws Exception{
+		String ontoname = "test_93_22";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_23() throws Exception{
+		String ontoname = "test_93_23";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_24() throws Exception{
+		String ontoname = "test_93_24";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_25() throws Exception{
+		String ontoname = "test_93_25";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_26() throws Exception{
+		String ontoname = "test_93_26";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_27() throws Exception{
+		String ontoname = "test_93_27";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_28() throws Exception{
+		String ontoname = "test_93_28";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_29() throws Exception{
+		String ontoname = "test_93_29";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_30() throws Exception{
+		String ontoname = "test_93_30";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_31() throws Exception{
+		String ontoname = "test_93_31";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_32() throws Exception{
+		String ontoname = "test_93_32";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_33() throws Exception{
+		String ontoname = "test_93_33";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_34() throws Exception{
+		String ontoname = "test_93_34";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_93_35() throws Exception{
+		String ontoname = "test_93_35";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
 	public void test_94_0() throws Exception{
 		String ontoname = "test_94_0";
 
@@ -9130,8 +11885,1572 @@ log.debug("Testing query: {}", id);
 		}
 	}
 
+	public void test_94_1() throws Exception{
+		String ontoname = "test_94_1";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_2() throws Exception{
+		String ontoname = "test_94_2";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_3() throws Exception{
+		String ontoname = "test_94_3";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_4() throws Exception{
+		String ontoname = "test_94_4";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_5() throws Exception{
+		String ontoname = "test_94_5";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_6() throws Exception{
+		String ontoname = "test_94_6";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_7() throws Exception{
+		String ontoname = "test_94_7";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_8() throws Exception{
+		String ontoname = "test_94_8";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_9() throws Exception{
+		String ontoname = "test_94_9";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_10() throws Exception{
+		String ontoname = "test_94_10";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_11() throws Exception{
+		String ontoname = "test_94_11";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_12() throws Exception{
+		String ontoname = "test_94_12";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_13() throws Exception{
+		String ontoname = "test_94_13";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_14() throws Exception{
+		String ontoname = "test_94_14";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_15() throws Exception{
+		String ontoname = "test_94_15";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_16() throws Exception{
+		String ontoname = "test_94_16";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_17() throws Exception{
+		String ontoname = "test_94_17";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_18() throws Exception{
+		String ontoname = "test_94_18";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_19() throws Exception{
+		String ontoname = "test_94_19";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_20() throws Exception{
+		String ontoname = "test_94_20";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_21() throws Exception{
+		String ontoname = "test_94_21";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_22() throws Exception{
+		String ontoname = "test_94_22";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_94_23() throws Exception{
+		String ontoname = "test_94_23";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
 	public void test_95_0() throws Exception{
 		String ontoname = "test_95_0";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_1() throws Exception{
+		String ontoname = "test_95_1";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_2() throws Exception{
+		String ontoname = "test_95_2";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_3() throws Exception{
+		String ontoname = "test_95_3";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_4() throws Exception{
+		String ontoname = "test_95_4";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_5() throws Exception{
+		String ontoname = "test_95_5";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_6() throws Exception{
+		String ontoname = "test_95_6";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_7() throws Exception{
+		String ontoname = "test_95_7";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_8() throws Exception{
+		String ontoname = "test_95_8";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_9() throws Exception{
+		String ontoname = "test_95_9";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_10() throws Exception{
+		String ontoname = "test_95_10";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_11() throws Exception{
+		String ontoname = "test_95_11";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_12() throws Exception{
+		String ontoname = "test_95_12";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_13() throws Exception{
+		String ontoname = "test_95_13";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_14() throws Exception{
+		String ontoname = "test_95_14";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_15() throws Exception{
+		String ontoname = "test_95_15";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_16() throws Exception{
+		String ontoname = "test_95_16";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_17() throws Exception{
+		String ontoname = "test_95_17";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_18() throws Exception{
+		String ontoname = "test_95_18";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_19() throws Exception{
+		String ontoname = "test_95_19";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_20() throws Exception{
+		String ontoname = "test_95_20";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_21() throws Exception{
+		String ontoname = "test_95_21";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_22() throws Exception{
+		String ontoname = "test_95_22";
+
+		log.debug("Test case: {}", ontoname);
+		log.debug("Testing in-memory db/direct-mappings");
+		tester.load(ontoname, false, false);
+		Set<String> queryids = tester.getQueryIds();
+		log.debug("Testing {} queries", queryids.size());		Iterator<String> qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+
+		log.debug("Testing in-memory db/complex-mappings");
+		tester.load(ontoname, true, true);
+		queryids = tester.getQueryIds();
+		qit = queryids.iterator();
+		while(qit.hasNext()){
+			String id = qit.next();
+		log.debug("Testing query: {}", id);
+			Set<String> exp = tester.getExpectedResult(id);
+			Set<String> res = tester.executeQuery(id);
+			assertTrue(exp.size() == res.size());
+			for (String realResult : res) {
+				assertTrue(exp.contains(realResult));
+			}
+		}
+	}
+
+	public void test_95_23() throws Exception{
+		String ontoname = "test_95_23";
 
 		log.debug("Test case: {}", ontoname);
 		log.debug("Testing in-memory db/direct-mappings");

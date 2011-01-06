@@ -220,7 +220,7 @@ public class AtomUnifier {
 				 */
 				FunctionalTermImpl fterm1 = (FunctionalTermImpl) term1;
 				FunctionalTermImpl fterm2 = (FunctionalTermImpl) term2;
-				if (!fterm1.equals(fterm2)) {
+				if (!fterm1.getFunctionSymbol().equals(fterm2.getFunctionSymbol())) {
 					return null;
 				}
 				if (fterm1.getTerms().size() != fterm2.getTerms().size()) {

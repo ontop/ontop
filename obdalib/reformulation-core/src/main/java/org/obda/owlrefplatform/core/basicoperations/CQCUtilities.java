@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -184,7 +185,7 @@ public class CQCUtilities {
 					CQIE satisfiedquery = unifier.applyUnifier(query.clone(), mgu);
 					satisfiedquery.getBody().remove(atomidx);
 
-					if (satisfiedquery.getBody().size() == 0)
+					if (satisfiedquery.getBody().size() == 0) 
 						if (canonicalhead.equals(satisfiedquery.getHead()))
 							return true;
 
@@ -193,6 +194,42 @@ public class CQCUtilities {
 				}
 			}
 		}
+		return false;
+	}
+
+	private boolean hasAnswer2(CQIE query2) {
+
+		LinkedList<CQIE> querystack = new LinkedList<CQIE>();
+		querystack.addLast(query2);
+		LinkedList<Integer> lastAttemptIndexStack = new LinkedList<Integer>();
+		lastAttemptIndexStack.addLast(0);
+
+		while (!querystack.isEmpty()) {
+
+			CQIE currentquery = querystack.pop();
+			List<Atom> body = currentquery.getBody();
+			int atomidx = lastAttemptIndexStack.pop();
+			Atom currentAtomTry = body.get(atomidx);
+
+			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
+				Atom currentGroundAtom = canonicalbody.get(groundatomidx);
+
+				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
+				if (mgu != null) {
+					CQIE satisfiedquery = unifier.applyUnifier(currentquery.clone(), mgu);
+					satisfiedquery.getBody().remove(atomidx);
+
+					if (satisfiedquery.getBody().size() == 0) { 
+						if (canonicalhead.equals(satisfiedquery.getHead())) {
+							return true;
+						}
+					}
+					 
+				}
+			}
+			
+		}
+
 		return false;
 	}
 
@@ -321,8 +358,7 @@ public class CQCUtilities {
 		}
 		return true;
 	}
-	
-	
+
 	/***
 	 * Removes queries that are contained syntactically, using the method
 	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
@@ -376,31 +412,31 @@ public class CQCUtilities {
 		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
 	}
-	
-//
-//	private HashSet<CQIE> removeContainedQueries(Collection<CQIE> queries) {
-//		HashSet<CQIE> result = new HashSet<CQIE>(queries.size());
-//
-//		LinkedList<CQIE> workingcopy = new LinkedList<CQIE>();
-//		workingcopy.addAll(queries);
-//
-//		for (int i = 0; i < workingcopy.size(); i++) {
-//			CQCUtilities cqcutil = new CQCUtilities(workingcopy.get(i));
-//			for (int j = i + 1; j < workingcopy.size(); j++) {
-//				if (cqcutil.isContainedIn(workingcopy.get(j))) {
-//					workingcopy.remove(i);
-//					i = -1;
-//					break;
-//				}
-//
-//				CQCUtilities cqcutil2 = new CQCUtilities(workingcopy.get(j));
-//				if (cqcutil2.isContainedIn(workingcopy.get(i)))
-//					workingcopy.remove(j);
-//
-//			}
-//		}
-//		result.addAll(workingcopy);
-//		return result;
-//	}
+
+	//
+	// private HashSet<CQIE> removeContainedQueries(Collection<CQIE> queries) {
+	// HashSet<CQIE> result = new HashSet<CQIE>(queries.size());
+	//
+	// LinkedList<CQIE> workingcopy = new LinkedList<CQIE>();
+	// workingcopy.addAll(queries);
+	//
+	// for (int i = 0; i < workingcopy.size(); i++) {
+	// CQCUtilities cqcutil = new CQCUtilities(workingcopy.get(i));
+	// for (int j = i + 1; j < workingcopy.size(); j++) {
+	// if (cqcutil.isContainedIn(workingcopy.get(j))) {
+	// workingcopy.remove(i);
+	// i = -1;
+	// break;
+	// }
+	//
+	// CQCUtilities cqcutil2 = new CQCUtilities(workingcopy.get(j));
+	// if (cqcutil2.isContainedIn(workingcopy.get(i)))
+	// workingcopy.remove(j);
+	//
+	// }
+	// }
+	// result.addAll(workingcopy);
+	// return result;
+	// }
 
 }

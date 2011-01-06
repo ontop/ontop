@@ -25,15 +25,16 @@ public class CQIEImpl implements CQIE, ListListener {
 	// TODO Remove isBoolean from the signature and from any method
 	public CQIEImpl(Atom head, List<Atom> body, boolean isBoolean) {
 		this.head = head;
+
 		
 		EventGeneratingLinkedList<Atom> eventbody = new EventGeneratingLinkedList<Atom>();
 		eventbody.addAll(body);
-		
+
 		this.body = eventbody;
 		this.isBoolean = isBoolean;
-		
+
 		eventbody.addListener(this);
-		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>)head.getTerms();
+		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
 		headterms.addListener(this);
 	}
 
@@ -46,12 +47,12 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	public void updateHead(Atom head) {
-		
-		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>)head.getTerms();
+
+		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
 		headterms.removeListener(this);
-		
+
 		this.head = head;
-		
+
 		rehash = true;
 		string = null;
 	}

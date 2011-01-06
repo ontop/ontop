@@ -14,7 +14,6 @@
 % the same (up to non distinguished variables)
 
 
-
 A(x) | B(x) = NULL
 A(x) | A(y) = {x/y}
 A(x) | A(x) = {}

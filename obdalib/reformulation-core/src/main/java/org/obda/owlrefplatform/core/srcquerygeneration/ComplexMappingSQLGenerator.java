@@ -421,9 +421,6 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					throw new RuntimeException("ComplexMappingSQLGenerator: Found an non-distinguished variable in the head: " + ht);
 				}
 				
-				if (sb.length() > 0) {
-					sb.append(", ");
-				}
 				if (ht instanceof VariableImpl) {
 					List<Object[]> list = termoccurenceIndex.get(ht.getName());
 					if (list == null) {
@@ -463,9 +460,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
 							String sqlvar = map.getSQLVariableAt(pos);
 							StringBuilder var = new StringBuilder();
-							if (sb.length() > 0) {
-								sb.append(", ");
-							}
+//							if (it.hasNext()) {
+//								sb.append(", ");
+//							}
 							var.append(alias);
 							var.append(".");
 							var.append(sqlvar);
@@ -489,6 +486,10 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					sb.append(viewManager.getOrgHeadVariableName(hpos));
 				}
 
+				if (hit.hasNext()) {
+					sb.append(", ");
+				}
+				
 				hpos++;
 			}
 		} else {
