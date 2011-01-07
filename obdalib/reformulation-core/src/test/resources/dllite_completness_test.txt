@@ -62,6 +62,7 @@ With A on the left
 || ||f ||          ||        || q() :- R(x,y)  || {true}  || ||
 || ||g ||          ||        || q() :- R(x,x)  || {false} || ||
 
+
 With exists R on the left
 
 
@@ -823,6 +824,7 @@ These are the first cases which tests the effects of unification and positive in
 || 93 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) R(x,y3) A(y3) R(y3,z2) || {a} || ||
 || 94 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
 || 95 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
+|| 96 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
 
 
 #END# Correct tests end here, ignore the ones bellow

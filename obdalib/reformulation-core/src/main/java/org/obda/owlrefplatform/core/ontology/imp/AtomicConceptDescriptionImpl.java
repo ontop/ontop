@@ -30,7 +30,7 @@ public class AtomicConceptDescriptionImpl implements BasicConceptDescription{
 		if (!(obj instanceof AtomicConceptDescriptionImpl))
 			return false;
 		AtomicConceptDescriptionImpl concept2 = (AtomicConceptDescriptionImpl)obj;
-		return (predicate.equals(concept2));
+		return (predicate.equals(concept2.getPredicate()));
 	}
 
 	public String toString() {

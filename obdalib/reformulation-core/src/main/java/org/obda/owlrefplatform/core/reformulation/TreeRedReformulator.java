@@ -52,6 +52,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	public TreeRedReformulator(List<Assertion> assertions) {
 		this.originalassertions = assertions;
+		log.debug("Reformulator assertions: {}", assertions);
 
 		/*
 		 * Our strategy requires that for every aciom R ISA S, we also have the
@@ -268,7 +269,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
 
 		log.debug("Removing CQC contained queries");
-		CQCUtilities.removeContainedQueriesSorted(resultlist, false);
+		CQCUtilities.removeContainedQueriesSorted(resultlist, true);
 
 		DatalogProgram resultprogram = new DatalogProgramImpl();
 		resultprogram.appendRule(resultlist);
@@ -331,6 +332,10 @@ public class TreeRedReformulator implements QueryRewriter {
 						DLLiterConceptInclusionImpl ci2 = (DLLiterConceptInclusionImpl) pi2;
 						if (ci1.getIncluding().equals(ci2.getIncluded())) {
 							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci1.getIncluded(), ci2
+									.getIncluding());
+							newInclusions.add(newinclusion);
+						} else if (ci1.getIncluded().equals(ci2.getIncluding())) {
+							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci2.getIncluded(), ci1
 									.getIncluding());
 							newInclusions.add(newinclusion);
 						}

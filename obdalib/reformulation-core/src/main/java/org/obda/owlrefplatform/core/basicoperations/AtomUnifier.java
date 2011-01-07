@@ -288,7 +288,7 @@ public class AtomUnifier {
 		List<Variable> forRemoval = new LinkedList<Variable>();
 		for (Variable v : unifier.keySet()) {
 			Term t = unifier.get(v);
-			if (isEqual(t, s.getVariable()))
+			if (isEqual(t, s.getVariable())) {
 				if (isEqual(v, s.getTerm())) {
 					/*
 					 * The substitution for the current variable has become
@@ -299,6 +299,24 @@ public class AtomUnifier {
 				} else {
 					unifier.put(v, s.getTerm());
 				}
+			} else if (t instanceof FunctionalTermImpl) {
+				FunctionalTermImpl function = (FunctionalTermImpl)t;
+				List<Term> innerTerms = function.getTerms();
+				FunctionalTermImpl fclone = function.copy();
+				boolean innerchanges = false;
+				//TODO this ways of changing inner terms in functions is not optimal, modify
+				
+				for (int i = 0; i < innerTerms.size(); i++) {
+					Term innerTerm = innerTerms.get(i);
+					
+					if (isEqual(innerTerm, s.getVariable())) {
+						fclone.getTerms().set(i, s.getTerm());
+						innerchanges = true;
+					}
+				}
+				if (innerchanges)
+					unifier.put(v, fclone);
+			}
 		}
 		unifier.keySet().removeAll(forRemoval);
 		unifier.put((Variable) s.getVariable(), s.getTerm());

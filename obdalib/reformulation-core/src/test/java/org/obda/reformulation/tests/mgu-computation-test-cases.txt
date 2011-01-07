@@ -13,6 +13,7 @@
 % the atoms do not unify, an empty MGU means the atoms are syntactically
 % the same (up to non distinguished variables)
 
+R(f(x) x) | R(z y) = {z/f(y) x/y}
 
 A(x) | B(x) = NULL
 A(x) | A(y) = {x/y}

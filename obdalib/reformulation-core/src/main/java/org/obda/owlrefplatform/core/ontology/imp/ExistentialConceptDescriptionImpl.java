@@ -31,7 +31,7 @@ public class ExistentialConceptDescriptionImpl implements BasicConceptDescriptio
 		ExistentialConceptDescriptionImpl concept2 = (ExistentialConceptDescriptionImpl)obj;
 		if (isInverse != concept2.isInverse)
 			return false;
-		return (predicate.equals(concept2));
+		return (predicate.equals(concept2.getPredicate()));
 	}
 
 	public String toString() {
