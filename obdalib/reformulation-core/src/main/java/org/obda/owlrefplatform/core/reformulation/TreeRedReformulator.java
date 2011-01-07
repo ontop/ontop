@@ -1,8 +1,6 @@
 package org.obda.owlrefplatform.core.reformulation;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -55,12 +53,46 @@ public class TreeRedReformulator implements QueryRewriter {
 	public TreeRedReformulator(List<Assertion> assertions) {
 		this.originalassertions = assertions;
 
+		/*
+		 * Our strategy requires that for every aciom R ISA S, we also have the
+		 * axioms \exists R ISA \exist S and \exists R- ISA \exists S- this
+		 * allows us to keep the cycles to a minimum
+		 */
+		originalassertions.addAll(computeExistentials());
+
+		/*
+		 * Our strategy requires saturation to minimize the number of cycles
+		 * that will be necessary to compute reformulation.
+		 */
 		saturateAssertions();
 
 		piApplicator = new PositiveInclusionApplicator();
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
 
+	}
+
+	private Set<Assertion> computeExistentials() {
+		HashSet<Assertion> newassertion = new HashSet<Assertion>(1000);
+		for (Assertion assertion : originalassertions) {
+			if (assertion instanceof DLLiterRoleInclusionImpl) {
+				DLLiterRoleInclusionImpl rinclusion = (DLLiterRoleInclusionImpl) assertion;
+				RoleDescription r1 = rinclusion.getIncluded();
+				RoleDescription r2 = rinclusion.getIncluding();
+
+				ExistentialConceptDescriptionImpl e11 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), r1.isInverse());;
+				ExistentialConceptDescriptionImpl e12 = new ExistentialConceptDescriptionImpl(r2.getPredicate(), r2.isInverse());
+				ExistentialConceptDescriptionImpl e21 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), !r1.isInverse());
+				ExistentialConceptDescriptionImpl e22 = new ExistentialConceptDescriptionImpl(r2.getPredicate(), !r2.isInverse());
+
+				
+				DLLiterConceptInclusionImpl inc1 = new DLLiterConceptInclusionImpl(e11, e12);
+				DLLiterConceptInclusionImpl inc2 = new DLLiterConceptInclusionImpl(e21, e22);
+				newassertion.add(inc1);
+				newassertion.add(inc2);
+			}
+		}
+		return newassertion;
 	}
 
 	public Query rewrite(Query input) throws Exception {
@@ -98,12 +130,12 @@ public class TreeRedReformulator implements QueryRewriter {
 		/*
 		 * Main loop of the rewriter
 		 */
-		
+
 		log.debug("Starting maing rewriting loop");
 		boolean loop = true;
 		while (loop) {
 			loop = false;
-			HashSet<CQIE> newqueries = new HashSet<CQIE>(1000);
+			HashSet<CQIE> newqueriesbyPI = new HashSet<CQIE>(1000);
 
 			/*
 			 * Handling simple inclusions, none involves existentials on the
@@ -117,7 +149,7 @@ public class TreeRedReformulator implements QueryRewriter {
 				}
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
-					newqueries.add(anonymizer.anonymize(newcq));
+					newqueriesbyPI.add(anonymizer.anonymize(newcq));
 				}
 
 			}
@@ -125,8 +157,7 @@ public class TreeRedReformulator implements QueryRewriter {
 			/*
 			 * Optimizing the set
 			 */
-
-			newqueries = CQCUtilities.removeDuplicateAtoms(newqueries);
+			newqueriesbyPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyPI);
 
 			/*
 			 * Handling existential inclusions, and unification We will collect
@@ -137,10 +168,18 @@ public class TreeRedReformulator implements QueryRewriter {
 			 * unification atempt.
 			 */
 
+			HashSet<CQIE> newqueriesbyunificationandPI = new HashSet<CQIE>(1000);
+
 			// Collecting relevant predicates
 
 			HashSet<Predicate> predicates = new HashSet<Predicate>(1000);
 			for (CQIE oldquery : oldqueries) {
+				for (Atom atom : oldquery.getBody()) {
+					predicates.add(atom.getPredicate());
+				}
+			}
+
+			for (CQIE oldquery : newqueriesbyPI) {
 				for (Atom atom : oldquery.getBody()) {
 					predicates.add(atom.getPredicate());
 				}
@@ -161,54 +200,73 @@ public class TreeRedReformulator implements QueryRewriter {
 						relevantnotinverse.add(inc);
 				}
 
+				/*
+				 * Collecting the relevant queries from the old set, and the
+				 * queries that have been just produced
+				 */
 				Set<CQIE> relevantQueries = new HashSet<CQIE>(1000);
 				for (CQIE query : oldqueries) {
 					if (containsPredicate(query, predicate))
 						relevantQueries.add(query);
 				}
 
-				newqueries.addAll(piApplicator.applyExistentialInclusions(relevantQueries, relevantinverse));
-				newqueries.addAll(piApplicator.applyExistentialInclusions(relevantQueries, relevantnotinverse));
+				for (CQIE query : newqueriesbyPI) {
+					if (containsPredicate(query, predicate))
+						relevantQueries.add(query);
+				}
+
+				/*
+				 * Applying the existential inclusions and unifications
+				 * (targeted) removing duplicate atoms before adding the queries
+				 * to the set.
+				 */
+
+				newqueriesbyunificationandPI.addAll(CQCUtilities.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
+						relevantQueries, relevantinverse)));
+				newqueriesbyunificationandPI.addAll(CQCUtilities.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
+						relevantQueries, relevantnotinverse)));
 			}
 
 			/*
 			 * Removing duplicated atoms in each of the queries to simplify
 			 */
 
-			newqueries = CQCUtilities.removeDuplicateAtoms(newqueries);
+			newqueriesbyPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyPI);
+			newqueriesbyunificationandPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyunificationandPI);
 
 			/* Removing trivially redundant queries */
 			LinkedList<CQIE> newquerieslist = new LinkedList<CQIE>();
-			newquerieslist.addAll(newqueries);
-
-			// CQCUtilities.removeContainedQueriesSyntacticSorter(newquerieslist);
+			// newquerieslist.addAll(newqueriesbyPI);
+			newquerieslist.addAll(newqueriesbyunificationandPI);
 
 			/*
 			 * Preparing the set of queries for the next iteration.
 			 */
 
-			 oldqueries = new HashSet<CQIE>(newquerieslist.size() * 2);
-			 for (CQIE newquery : newquerieslist) {
-			 if (result.add(newquery)) {
-			 loop = true;
-			 oldqueries.add(newquery);
-			 }
-			 }
+			result.addAll(newqueriesbyPI);
 
-//			loop = loop | result.addAll(newqueries);
-//			if (loop) {
-//				oldqueries = newqueries;
-//			}
+			oldqueries = new HashSet<CQIE>(newquerieslist.size() * 2);
+			for (CQIE newquery : newquerieslist) {
+				if (result.add(newquery)) {
+					loop = true;
+					oldqueries.add(newquery);
+				}
+			}
+
+			// loop = loop | result.addAll(newqueries);
+			// if (loop) {
+			// oldqueries = newqueries;
+			// }
 		}
 		log.debug("Main loop ended");
 		LinkedList<CQIE> resultlist = new LinkedList<CQIE>();
 		resultlist.addAll(result);
 
 		/* One last pass of the syntactic containment checker */
-		
+
 		log.debug("Removing trivially contained queries");
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
-		
+
 		log.debug("Removing CQC contained queries");
 		CQCUtilities.removeContainedQueriesSorted(resultlist, false);
 

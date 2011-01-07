@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
@@ -181,17 +182,25 @@ public class CQCUtilities {
 				Atom currentGroundAtom = canonicalbody.get(groundatomidx);
 
 				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
-				if (mgu != null) {
-					CQIE satisfiedquery = unifier.applyUnifier(query.clone(), mgu);
-					satisfiedquery.getBody().remove(atomidx);
+				if (mgu == null)
+					continue;
 
-					if (satisfiedquery.getBody().size() == 0) 
-						if (canonicalhead.equals(satisfiedquery.getHead()))
-							return true;
+				CQIE satisfiedquery = unifier.applyUnifier(query.clone(), mgu);
+				satisfiedquery.getBody().remove(atomidx);
 
-					if (hasAnswer(satisfiedquery))
+				if (satisfiedquery.getBody().size() == 0)
+					if (canonicalhead.equals(satisfiedquery.getHead()))
 						return true;
+				/*
+				 * Stopping early if we have chosen an MGU that has no
+				 * possibility of being successful because of the head.
+				 */
+				if (unifier.getMGU(canonicalhead, satisfiedquery.getHead()) == null) {
+					continue;
 				}
+				if (hasAnswer(satisfiedquery))
+					return true;
+
 			}
 		}
 		return false;
@@ -219,15 +228,15 @@ public class CQCUtilities {
 					CQIE satisfiedquery = unifier.applyUnifier(currentquery.clone(), mgu);
 					satisfiedquery.getBody().remove(atomidx);
 
-					if (satisfiedquery.getBody().size() == 0) { 
+					if (satisfiedquery.getBody().size() == 0) {
 						if (canonicalhead.equals(satisfiedquery.getHead())) {
 							return true;
 						}
 					}
-					 
+
 				}
 			}
-			
+
 		}
 
 		return false;
@@ -298,6 +307,9 @@ public class CQCUtilities {
 	 */
 	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
 		int initialsize = queries.size();
+		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
+		long startime = System.currentTimeMillis();
+		
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
 			@Override
@@ -330,9 +342,12 @@ public class CQCUtilities {
 			}
 		}
 
+		
 		int newsize = queries.size();
 		int queriesremoved = initialsize - newsize;
-		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
+		long endtime = System.currentTimeMillis();
+		long time = (endtime - startime)/1000;
+		log.debug("Done. Time elapse: {}s", time);
 		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
 	}
@@ -371,7 +386,15 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
+
+		boolean threaded = false;
+		
 		int initialsize = queries.size();
+		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
+		
+		long startime = System.currentTimeMillis();
+		
+		
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
 			@Override
@@ -384,11 +407,43 @@ public class CQCUtilities {
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQCUtilities cqc = new CQCUtilities(queries.get(i));
-			for (int j = queries.size() - 1; j > i; j--) {
-				if (cqc.isContainedIn(queries.get(j))) {
+			if (!threaded || queries.size() < 6) {
+				for (int j = queries.size() - 1; j > i; j--) {
+					if (cqc.isContainedIn(queries.get(j))) {
+						queries.remove(i);
+						i = -1;
+						break;
+					}
+				}
+			} else {
+				/*
+				 * Executing a multithreaded check over the queries in the list
+				 * 
+				 * NOTE: NOT TESTED DONT USE
+				 */
+				CountDownLatch startSignal = new CountDownLatch(1);
+				CountDownLatch doneSignal = new CountDownLatch(2);
+				boolean[] stopflag = new boolean[] { false };
+				int middle = queries.size() / 2;
+
+				/* Preparing working threads */
+				new Thread(new CQCWorkerThread(startSignal, doneSignal, queries.size(), middle, queries, cqc, stopflag), "CQCWorkerThread1")
+						.start();
+				new Thread(new CQCWorkerThread(startSignal, doneSignal, middle, i, queries, cqc, stopflag), "CQCWorkerThread2").start();
+
+				/* Starting them up */
+				startSignal.countDown();
+
+				try {
+					doneSignal.await();
+				} catch (InterruptedException e) {
+					throw new RuntimeException("CQCUtilities: error with threaded CQC", e);
+				}
+
+				if (stopflag[0] == true) {
 					queries.remove(i);
 					i = -1;
-					break;
+					continue;
 				}
 			}
 		}
@@ -408,7 +463,11 @@ public class CQCUtilities {
 
 		int newsize = queries.size();
 		int queriesremoved = initialsize - newsize;
-		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
+		
+		
+		long endtime = System.currentTimeMillis();
+		long time = (endtime - startime)/1000;
+		log.debug("Done. Time elapse: {}s", time);
 		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
 	}
