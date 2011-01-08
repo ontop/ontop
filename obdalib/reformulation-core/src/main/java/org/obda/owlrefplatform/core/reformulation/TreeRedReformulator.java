@@ -52,7 +52,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	public TreeRedReformulator(List<Assertion> assertions) {
 		this.originalassertions = assertions;
-		log.debug("Reformulator assertions: {}", assertions);
+		log.debug("Given assertions: {}", assertions);
 
 		/*
 		 * Our strategy requires that for every aciom R ISA S, we also have the
@@ -66,6 +66,8 @@ public class TreeRedReformulator implements QueryRewriter {
 		 * that will be necessary to compute reformulation.
 		 */
 		saturateAssertions();
+
+		log.debug("Computed assertions: {}", this.assertions);
 
 		piApplicator = new PositiveInclusionApplicator();
 		unifier = new AtomUnifier();
@@ -81,12 +83,12 @@ public class TreeRedReformulator implements QueryRewriter {
 				RoleDescription r1 = rinclusion.getIncluded();
 				RoleDescription r2 = rinclusion.getIncluding();
 
-				ExistentialConceptDescriptionImpl e11 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), r1.isInverse());;
+				ExistentialConceptDescriptionImpl e11 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), r1.isInverse());
+				;
 				ExistentialConceptDescriptionImpl e12 = new ExistentialConceptDescriptionImpl(r2.getPredicate(), r2.isInverse());
 				ExistentialConceptDescriptionImpl e21 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), !r1.isInverse());
 				ExistentialConceptDescriptionImpl e22 = new ExistentialConceptDescriptionImpl(r2.getPredicate(), !r2.isInverse());
 
-				
 				DLLiterConceptInclusionImpl inc1 = new DLLiterConceptInclusionImpl(e11, e12);
 				DLLiterConceptInclusionImpl inc2 = new DLLiterConceptInclusionImpl(e21, e22);
 				newassertion.add(inc1);
@@ -268,8 +270,10 @@ public class TreeRedReformulator implements QueryRewriter {
 		log.debug("Removing trivially contained queries");
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
 
-		log.debug("Removing CQC contained queries");
-		CQCUtilities.removeContainedQueriesSorted(resultlist, true);
+		if (resultlist.size() < 300) {
+			log.debug("Removing CQC contained queries");
+			CQCUtilities.removeContainedQueriesSorted(resultlist, true);
+		}
 
 		DatalogProgram resultprogram = new DatalogProgramImpl();
 		resultprogram.appendRule(resultlist);
@@ -279,7 +283,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		log.debug("Computed reformulation: \n{}", resultprogram);
 		log.debug("Final size of the reformulation: {}", resultlist.size());
 		double seconds = (endtime - starttime) / 1000;
-		log.debug("Time elapsed for reformulation: {}s", seconds);
+		log.info("Time elapsed for reformulation: {}s", seconds);
 		return resultprogram;
 	}
 
@@ -344,6 +348,9 @@ public class TreeRedReformulator implements QueryRewriter {
 						DLLiterRoleInclusionImpl ci2 = (DLLiterRoleInclusionImpl) pi2;
 						if (ci1.getIncluding().equals(ci2.getIncluded())) {
 							DLLiterRoleInclusionImpl newinclusion = new DLLiterRoleInclusionImpl(ci1.getIncluded(), ci2.getIncluding());
+							newInclusions.add(newinclusion);
+						} else if (ci1.getIncluded().equals(ci2.getIncluding())) {
+							DLLiterRoleInclusionImpl newinclusion = new DLLiterRoleInclusionImpl(ci2.getIncluded(), ci1.getIncluding());
 							newInclusions.add(newinclusion);
 						}
 					}

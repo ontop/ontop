@@ -16,13 +16,13 @@
     </encoder>
   </appender>
 
-	<logger name="ch.qos.logback" level="WARN" />
+	<logger name="ch.qos.logback" level="WARN" /><!--
 	
 	<logger name="org.obda.owlrefplatform.core.reformulation" level="DEBUG" />
 	<logger name="org.obda.owlrefplatform.core.basicoperations" level="DEBUG"/>
 	
 
-	<root level="DEBUG">
+	--><root level="INFO">
 		<appender-ref ref="STDOUT" />
 		
 	</root>

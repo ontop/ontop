@@ -69,6 +69,8 @@ public class OntologyLoader {
 	            QueryController queryCon = controller.getQueryController();
 	            Vector<QueryControllerEntity> s = queryCon.getElements();
 	            Vector<String> queryStrings = new Vector<String>();
+	            Vector<String> queryIds = new Vector<String>();
+	            
 	            Iterator<QueryControllerEntity> qit = s.iterator();
 	            while(qit.hasNext()){
 	            	QueryControllerEntity entity = qit.next();
@@ -79,16 +81,22 @@ public class OntologyLoader {
 	            		while(it.hasNext()){
 	            			QueryControllerQuery query = it.next();
 	            			queryStrings.add(query.getQuery());
+	            			queryIds.add(query.getID());
 	            		}
 	            	}else{
 	            		QueryControllerQuery query = (QueryControllerQuery) entity;
             			queryStrings.add(query.getQuery());
+            			queryIds.add(query.getID());
 	            	}
 	            }
 	            
 	            Iterator<String> query_it = queryStrings.iterator();
+	            Iterator<String> queryid = queryIds.iterator();
 	            while(query_it.hasNext()){
+	            	int resultcount = 0;
 	            	String query =query_it.next();
+	            	System.out.println("ID: " + queryid.next());
+	            	
 	            	String sparqlstr = prefix+query;
 		            Statement statement = reasoner.getStatement(sparqlstr);
 		            QueryResultSet result = statement.getResultSet();
@@ -96,7 +104,7 @@ public class OntologyLoader {
 		            // Printing the results
 		            System.out.println("Results:");
 		            if(result == null){
-		            	System.out.print("no answers");
+		            	System.out.print("no answers\n\n");
 		            }else{
 			            int cols = result.getColumCount();
 			            while (result.nextRow()) {
@@ -104,8 +112,10 @@ public class OntologyLoader {
 			                            System.out.print(result.getAsString(i+1) + " ");
 			                    }
 			                    System.out.println("");
+			                    resultcount +=1;
 			            }
-			            System.out.println("-------------------");
+			            System.out.println("Result count: " + resultcount);
+			            System.out.println("-------------------\n");
 		            }
 	            }
 

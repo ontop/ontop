@@ -11,8 +11,8 @@
 ]>
 
 
-<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_92_4.owl#"
-     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_92_4.owl"
+<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_97_0.owl#"
+     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_97_0.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
@@ -34,9 +34,15 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#SSN -->
 
-    <owl:ObjectProperty rdf:about="&test;R"/>
+    <owl:ObjectProperty rdf:about="&test;SSN"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#WF -->
+
+    <owl:ObjectProperty rdf:about="&test;WF"/>
     
 
 
@@ -51,15 +57,32 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#P -->
 
-    <owl:Class rdf:about="&test;A">
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
-                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+    <owl:Class rdf:about="&test;P"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#PP -->
+
+    <owl:Class rdf:about="&test;PP">
+        <rdfs:subClassOf rdf:resource="&test;P"/>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#SB -->
+
+    <owl:Class rdf:about="&test;SB">
+        <rdfs:subClassOf rdf:resource="&test;SEM"/>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#SEM -->
+
+    <owl:Class rdf:about="&test;SEM">
+        <rdfs:subClassOf rdf:resource="&test;P"/>
     </owl:Class>
     
 
@@ -81,11 +104,26 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#a -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#c -->
 
-    <test:A rdf:about="&test;a">
+    <owl:Thing rdf:about="&test;c">
+        <test:SSN rdf:resource="&test;ssn1"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#m -->
+
+    <test:SB rdf:about="&test;m">
         <rdf:type rdf:resource="&owl;Thing"/>
-    </test:A>
+        <test:WF rdf:resource="&test;c"/>
+    </test:SB>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#ssn1 -->
+
+    <owl:Thing rdf:about="&test;ssn1"/>
     
 
 
@@ -98,26 +136,8 @@
      -->
 
     <owl:Restriction>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
-                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <owl:onProperty>
-            <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;R"/>
-            </owl:ObjectProperty>
-        </owl:onProperty>
-        <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
-    </owl:Restriction>
-    <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;A"/>
-        <owl:onProperty>
-            <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;R"/>
-            </owl:ObjectProperty>
-        </owl:onProperty>
+        <rdfs:subClassOf rdf:resource="&test;PP"/>
+        <owl:onProperty rdf:resource="&test;SSN"/>
         <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
     </owl:Restriction>
 </rdf:RDF>

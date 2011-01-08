@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,8 +29,8 @@ public class PositiveInclusionApplicator {
 
 	AtomUnifier		unifier		= new AtomUnifier();
 	QueryAnonymizer	anonymizer	= new QueryAnonymizer();
-	
-	TermFactory termFactory = TermFactoryImpl.getInstance();
+
+	TermFactory		termFactory	= TermFactoryImpl.getInstance();
 
 	/**
 	 * Check whether the given positive inclusion is applicable to the given
@@ -110,18 +111,28 @@ public class PositiveInclusionApplicator {
 		return newqueries;
 	}
 
-	public List<CQIE> apply(CQIE cq, Collection<PositiveInclusion> pis) {
-		List<CQIE> newqueries = new LinkedList<CQIE>();
-		List<Atom> body = cq.getBody();
-		for (int atomindex = 0; atomindex < body.size(); atomindex++) {
-			Atom atom = body.get(atomindex);
-			for (PositiveInclusion pi : pis) {
-				if (isPIApplicable(pi, atom)) {
-					newqueries.add(applyPI(cq, pi, atomindex));
+	public List<CQIE> apply(CQIE query, Collection<PositiveInclusion> pis) {
+		int bodysize = query.getBody().size();
+		HashSet<CQIE> newqueries = new HashSet<CQIE>(bodysize * pis.size() * 2);
+		newqueries.add(query);
+
+		for (int atomindex = 0; atomindex < bodysize; atomindex++) {
+			HashSet<CQIE> currentatomresults = new HashSet<CQIE>(bodysize * pis.size() * 2);
+			for (CQIE cq : newqueries) {
+				List<Atom> body = cq.getBody();
+				Atom atom = body.get(atomindex);
+				
+				for (PositiveInclusion pi : pis) {
+					if (isPIApplicable(pi, atom)) {
+						currentatomresults.addAll(Collections.singletonList(applyPI(cq, pi, atomindex)));
+					}
 				}
 			}
+			newqueries.addAll(currentatomresults);
 		}
-		return newqueries;
+		LinkedList<CQIE> result = new LinkedList<CQIE>();
+		result.addAll(newqueries);
+		return result;
 	}
 
 	/***
