@@ -21,8 +21,12 @@
 	<logger name="org.obda.owlrefplatform.core.reformulation" level="DEBUG" />
 	<logger name="org.obda.owlrefplatform.core.basicoperations" level="DEBUG"/>
 	
+	<logger name="org.obda.owlrefplatform.core.srcquerygeneration" level="DEBUG"/>
+	<logger name="org.obda.owlrefplatform.core.unfolding" level="DEBUG"/>
+	-->
+	
 
-	--><root level="INFO">
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 		
 	</root>

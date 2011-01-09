@@ -95,7 +95,9 @@ public class OntologyLoader {
 	            while(query_it.hasNext()){
 	            	int resultcount = 0;
 	            	String query =query_it.next();
-	            	System.out.println("ID: " + queryid.next());
+	            	String id = queryid.next();
+	            		
+	            	System.out.println("ID: " + id);
 	            	
 	            	String sparqlstr = prefix+query;
 		            Statement statement = reasoner.getStatement(sparqlstr);
