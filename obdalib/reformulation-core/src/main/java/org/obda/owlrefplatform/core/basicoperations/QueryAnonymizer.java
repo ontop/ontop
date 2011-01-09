@@ -15,12 +15,16 @@ import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
+import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
+
+//TODO This class needs to be restructured
 
 public class QueryAnonymizer {
 
-	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
+	private final TermFactoryImpl	termFactory	= TermFactoryImpl.getInstance();
 
 	public DatalogProgram anonymize(DatalogProgram prog) {
 
@@ -40,7 +44,7 @@ public class QueryAnonymizer {
 	 * Note that this will actually change the query terms by calling
 	 * body.getTerms().set(i, new UndisintguishedVariable()) for each position i
 	 * in the atom that can be anonymized.
-	 *
+	 * 
 	 * @param q
 	 * @param focusatomIndex
 	 */
@@ -94,15 +98,14 @@ public class QueryAnonymizer {
 		}
 	}
 
-	
 	public Collection<CQIE> anonymize(Collection<CQIE> cqs) {
 		HashSet<CQIE> anonymous = new HashSet<CQIE>(1000);
-		for (CQIE cq: cqs) {
+		for (CQIE cq : cqs) {
 			anonymous.add(anonymize(cq));
 		}
 		return anonymous;
 	}
-	
+
 	public CQIE anonymize(CQIE q) {
 		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
 		List<Atom> body = q.getBody();
@@ -152,17 +155,19 @@ public class QueryAnonymizer {
 	}
 
 	private boolean isVariableInHead(CQIE q, Term t) {
+		if (t instanceof UndistinguishedVariable)
+			return false;
 
 		Atom head = q.getHead();
 		List<Term> headterms = head.getTerms();
-		Iterator<Term> it = headterms.iterator();
-		boolean found = false;
-		while (it.hasNext() && !found) {
-			Term headterm = it.next();
-			if (headterm.equals(t)) {
-				found = true;
-			}
+		for (Term headterm : headterms) {
+			if (headterm instanceof FunctionalTermImpl) {
+				FunctionalTermImpl fterm = (FunctionalTermImpl)headterm;
+				if (fterm.containsTerm(t))
+					return true;
+			} else if (headterm.equals(t))
+				return true;
 		}
-		return found;
+		return false;
 	}
 }

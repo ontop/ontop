@@ -26,6 +26,7 @@ import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates the SQL query for a given Datalog program using the OBDA mappings
@@ -33,6 +34,7 @@ import org.obda.query.domain.imp.VariableImpl;
  * @author Manfred Gerstgrasser
  * 
  */
+//TODO This class needs to be restructured
 
 public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
@@ -43,6 +45,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	private JDBCUtility					util					= null;
 	private Map<Integer, String>		localAliasMap			= null;
 	private DLLiterOntology				onto					= null;
+
+	org.slf4j.Logger								log						= LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
 
 	public ComplexMappingSQLGenerator(DLLiterOntology onto, MappingViewManager man, JDBCUtility util) {
 		viewManager = man;
@@ -90,7 +94,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			int i = 0;
 			while (tit.hasNext()) {
 				Term t = tit.next();
-				if (t instanceof VariableImpl) {
+				if (t instanceof UndistinguishedVariable) {
+					i++;
+				} else if (t instanceof VariableImpl) {
 					Object[] o = new Object[2];
 					o[0] = a;
 					o[1] = i;
@@ -136,6 +142,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
 	@Override
 	public String generateSourceQuery(DatalogProgram query) throws Exception {
+		log.info("Generating source query");
 		List<CQIE> queries = query.getRules();
 		Iterator<CQIE> it = queries.iterator();
 		sqlqueries = new Vector<String>();
@@ -166,7 +173,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			finalquery.append(sb.toString());
 			finalquery.append(")");
 		}
-		return finalquery.toString();
+		String result = finalquery.toString();
+		log.debug("Resulting SQL query: \n{}:", result);
+		return result;
 	}
 
 	@Override
@@ -218,11 +227,11 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	 */
 	private String getWhereClause(CQIE q) throws Exception {
 		List<Atom> atoms = q.getBody();
-		Iterator<Atom> ait = atoms.iterator();
+		Iterator<Atom> atomIterator = atoms.iterator();
 		HashSet<String> equalities = new HashSet<String>();
 		HashSet<String> processedTerms = new HashSet<String>();
-		while (ait.hasNext()) {
-			Atom a = ait.next();
+		while (atomIterator.hasNext()) {
+			Atom a = atomIterator.next();
 			List<Term> terms = a.getTerms();
 			Iterator<Term> term_it = terms.iterator();
 			int p = 0;
@@ -284,7 +293,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 									}
 								} else {
 									return "0=1"; // since this query can never
-													// be satisfied;
+									// be satisfied;
 								}
 							}
 						}
@@ -376,12 +385,17 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 										}
 									} else {
 										return "0=1"; // since this query can
-														// never be satisfied;
+										// never be satisfied;
 									}
 								}
 							}
 						}
 					}
+				} else if (term instanceof UndistinguishedVariable) {
+					/*
+					 * Ignore these during where generation
+					 */
+
 				} else {
 					throw new IllegalArgumentException("Error during SQL geration: Unsupported type of term " + term.getClass());
 				}
@@ -420,7 +434,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 				if (ht instanceof UndistinguishedVariable) {
 					throw new RuntimeException("ComplexMappingSQLGenerator: Found an non-distinguished variable in the head: " + ht);
 				}
-				
+
 				if (ht instanceof VariableImpl) {
 					List<Object[]> list = termoccurenceIndex.get(ht.getName());
 					if (list == null) {
@@ -439,7 +453,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					sb.append(" as ");
 					sb.append(viewManager.getOrgHeadVariableName(hpos));
 				} else if (ht instanceof FunctionalTermImpl) {
-					//TODO ComplexMappingSQLGenerator: This code is probably wrong, we need unit test to check it
+					// TODO ComplexMappingSQLGenerator: This code is probably
+					// wrong, we need unit test to check it
 					FunctionalTermImpl ov = (FunctionalTermImpl) ht;
 					String name = ov.getName();
 					List<Term> terms = ov.getTerms();
@@ -450,7 +465,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 						if (v instanceof VariableImpl) {
 							List<Object[]> list = termoccurenceIndex.get(v.getName());
 							if (list == null) {
-								throw new Exception("Unknown term in head");
+								throw new Exception("Unknown term in head:" + v + " The query was: " + q);
 							}
 							Object[] o = list.get(0);
 							Atom a = (Atom) o[0];
@@ -460,9 +475,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
 							String sqlvar = map.getSQLVariableAt(pos);
 							StringBuilder var = new StringBuilder();
-//							if (it.hasNext()) {
-//								sb.append(", ");
-//							}
+							// if (it.hasNext()) {
+							// sb.append(", ");
+							// }
 							var.append(alias);
 							var.append(".");
 							var.append(sqlvar);
@@ -489,7 +504,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 				if (hit.hasNext()) {
 					sb.append(", ");
 				}
-				
+
 				hpos++;
 			}
 		} else {

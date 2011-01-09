@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
 import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
@@ -176,6 +177,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 	@Override
 	public DatalogProgram unfold(DatalogProgram inputquery) throws Exception {
+		log.info("Computing unfolding for query of size: {}", inputquery.getRules().size());
+		long startime = System.currentTimeMillis();
 		log.debug("Computing partial evaluation for: \n{}", inputquery);
 		deAnonymize(inputquery);
 		LinkedList<CQIE> evaluation = new LinkedList<CQIE>();
@@ -203,6 +206,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			for (CQIE currentQuery : partialEvaluation) {
 				if (pos < currentQuery.getBody().size()) {
 					List<CQIE> currentPartialEvaluation = unfoldAtom(pos, currentQuery);
+//					newPartialEvaluation.addAll(CQCUtilities.removeDuplicateAtoms(currentPartialEvaluation));
 					newPartialEvaluation.addAll(currentPartialEvaluation);
 				} else {
 					newPartialEvaluation.add(currentQuery);
@@ -211,11 +215,25 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			pos++;
 			partialEvaluation.clear();
 			partialEvaluation.addAll(newPartialEvaluation);
+			//CQCUtilities.removeContainedQueriesSyntacticSorter(partialEvaluation, false);
+			
 		}
+		HashSet<CQIE> cleanset = CQCUtilities.removeDuplicateAtoms(partialEvaluation);
+		partialEvaluation.clear();
+		partialEvaluation.addAll(cleanset);
+		CQCUtilities.removeContainedQueriesSyntacticSorter(partialEvaluation, true);
+		
+		
+		
+		
+		
 		DatalogProgram dp = new DatalogProgramImpl();
 		dp.appendRule(partialEvaluation);
-
+		
 		log.debug("Computed partial evaluation: \n{}", dp);
+		long endtime = System.currentTimeMillis();
+		long timeelapsedseconds = (endtime - startime)/1000;
+		log.info("Final size of unfolding: {}   Time elapsed: {}s", dp.getRules().size(), timeelapsedseconds);
 		return dp;
 	}
 
