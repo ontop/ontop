@@ -111,72 +111,72 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 	}
 
@@ -192,72 +192,72 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 	}
 
@@ -273,103 +273,103 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/body/atoms/1/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof ValueConstantImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((ValueConstantImpl)term).getName(), "Person");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((FunctionalTermImpl)term).getName(),
 				"http://base.org/stuff/1.0/s");
 
 		//------ Object term
 		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
 		Term objVarTerm = objVarTerms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/object/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)objVarTerm).getName(), "y");
 
 		objVarTerm = objVarTerms.get(1);
-		assertTrue("@rule/1/body/atoms/2/terms/1/object/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((ValueConstantImpl)objVarTerm).getName(), "Student");
 		//------ Object term ends.
 
 		term = terms.get(1);
-		assertTrue("@rule/1/body/atoms/2/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof URIConstantImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)term).getName(),
 				"http://example.org/stuff/1.1/FUB");
 	}
@@ -386,7 +386,7 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 3;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		//----------//
@@ -394,50 +394,50 @@ public class DatalogParserTest {
 		//----------//
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 1;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/body/atoms/1/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof ValueConstantImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((ValueConstantImpl)term).getName(), "Person");
 
 		//----------//
@@ -445,50 +445,50 @@ public class DatalogParserTest {
 		//----------//
 		//-- The Head
 	    head = rules.get(1).getHead();
-		assertNotNull("@rule/2/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/2/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#r");
 
 		EXPECTED_HEAD_TERM_SIZE = 1;
 		terms = head.getTerms();
-		assertEquals("@rule/2/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/2/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/2/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		body = rules.get(1).getBody();
-		assertNotNull("@rule/2/body/: Body is null!", body);
-		assertTrue("@rule/2/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/2/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/s");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/2/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/2/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/2/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		term = terms.get(1);
-		assertTrue("@rule/2/body/atoms/1/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof URIConstantImpl);
-		assertEquals("@rule/2/body/atoms/1/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)term).getName(),
 				"http://example.org/stuff/1.1/FUB");
 
@@ -497,69 +497,69 @@ public class DatalogParserTest {
 		//----------//
 		//-- The Head
 	    head = rules.get(2).getHead();
-		assertNotNull("@rule/3/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/3/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#t");
 
 		EXPECTED_HEAD_TERM_SIZE = 1;
 		terms = head.getTerms();
-		assertEquals("@rule/3/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/3/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/3/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "z");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		body = rules.get(2).getBody();
-		assertNotNull("@rule/3/body/: Body is null!", body);
-		assertTrue("@rule/3/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/3/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/u");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/3/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/3/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/3/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "z");
 
 		term = terms.get(1);
-		assertTrue("@rule/3/body/atoms/1/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
-		assertEquals("@rule/3/body/atoms/1/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((FunctionalTermImpl)term).getName(),
 				"http://base.org/stuff/1.0/f");
 
 		//------- Object term
 		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
-		assertEquals("@rule/3/body/atoms/1/terms/2/object/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
 		Term objVarTerm = objVarTerms.get(0);
-		assertTrue("@rule/3/body/atoms/1/terms/2/object/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
-		assertEquals("@rule/3/body/atoms/1/terms/2/object/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.2/Occupation");
 
 		objVarTerm = objVarTerms.get(1);
-		assertTrue("@rule/3/body/atoms/1/terms/2/object/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
-		assertEquals("@rule/3/body/atoms/1/terms/2/object/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((ValueConstantImpl)objVarTerm).getName(), "Student");
 	}
 
@@ -575,113 +575,113 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 1;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/body/atoms/1/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((FunctionalTermImpl)term).getName(),
 				"http://example.org/stuff/1.0/r");
 
 		//------ Object term I1
 		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
-		assertEquals("@rule/1/body/atoms/2/terms/2/object/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
 		Term objVarTerm = objVarTerms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/2/object/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.1/FUB");
 
 		objVarTerm = objVarTerms.get(1);
-		assertTrue("@rule/1/body/atoms/2/terms/2/object/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof FunctionalTermImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((FunctionalTermImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term I2
 		objVarTerms = ((FunctionalTermImpl)objVarTerm).getTerms();
-		assertEquals("@rule/*/object/terms/2/object/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
 		objVarTerm = objVarTerms.get(0);
-		assertTrue("@rule/*/object/terms/2/object/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
-		assertEquals("@rule/*/object/terms/2/object/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.2/Occupation");
 
 		objVarTerm = objVarTerms.get(1);
-		assertTrue("@rule/*/object/terms/2/object/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof FunctionalTermImpl);
-		assertEquals("@rule/*/object/terms/2/object/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((FunctionalTermImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.0/t");
 
 		//------ Object term I3
 		objVarTerms = ((FunctionalTermImpl)objVarTerm).getTerms();
-		assertEquals("@rule/*/*/object/terms/3/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
 		objVarTerm = objVarTerms.get(0);
-		assertTrue("@rule/*/*/object/terms/3/object/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
-		assertEquals("@rule/*/*/object/terms/3/object/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)objVarTerm).getName(),
 				"http://example.org/stuff/1.3/Degree");
 
 		objVarTerm = objVarTerms.get(1);
-		assertTrue("@rule/*/*/object/terms/3/object/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
-		assertEquals("@rule/*/*/object/terms/3/object/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((ValueConstantImpl)objVarTerm).getName(),
 				"Master");
 	}
@@ -698,35 +698,35 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNull("@rule/1/head/: Head is not null!", head);
+		assertNull("Head is not null!", head);
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 	}
 
@@ -742,33 +742,33 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 1;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		List<Atom> body = rules.get(0).getBody();
-		assertNull("@rule/1/body/: Body is not null!", body);
+		assertNull("Body is not null!", body);
 	}
 
 	/**
@@ -783,72 +783,72 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 	}
 
@@ -864,72 +864,72 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 	}
 
@@ -945,60 +945,60 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 0;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 	}
 
@@ -1014,97 +1014,97 @@ public class DatalogParserTest {
 
 		EXPECTED_RULE_SIZE = 1;
 		List<CQIE> rules = datalog.getRules();
-		assertTrue("@rule/1/: Mismatch rule size!",
+		assertTrue("Mismatch rule size!",
 				rules.size() == EXPECTED_RULE_SIZE);
 
 		// Rule #1
 		//-- The Head
 		Atom head = rules.get(0).getHead();
-		assertNotNull("@rule/1/head/: Head is null!", head);
+		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
-		assertEquals("@rule/1/head/: Mismatch predicate name!", uri,
+		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
-		assertEquals("@rule/1/head/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_HEAD_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/head/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/1: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		term = terms.get(1);
-		assertTrue("@rule/1/head/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/head/terms/2: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "y");
 
 		//-- The Body
 		EXPECTED_BODY_SIZE = 2;
 		List<Atom> body = rules.get(0).getBody();
-		assertNotNull("@rule/1/body/: Body is null!", body);
-		assertTrue("@rule/1/body/: Mismatch body size!",
+		assertNotNull("Body is null!", body);
+		assertTrue("Mismatch body size!",
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
 		uri = body.get(0).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
 		terms = body.get(0).getTerms();
-		assertEquals("@rule/1/body/atoms/1/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/1/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/1/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch predicate name!",
+		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
 		terms = body.get(1).getTerms();
-		assertEquals("@rule/1/body/atoms/2/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
 		term = terms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((FunctionalTermImpl)term).getName(),
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term
 		List<Term> objVarTerms = ((FunctionalTermImpl)term).getTerms();
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/: Mismatch term size!",
+		assertEquals("Mismatch term size!",
 				objVarTerms.size(), 2);
 
 		Term objVarTerm = objVarTerms.get(0);
-		assertTrue("@rule/1/body/atoms/2/terms/1/object/terms/1/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof VariableImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/1/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((VariableImpl)objVarTerm).getName(), "y");
 
 		objVarTerm = objVarTerms.get(1);
-		assertTrue("@rule/1/body/atoms/2/terms/1/object/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/1/object/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((ValueConstantImpl)objVarTerm).getName(), "Student");
 		//------ Object term ends.
 
 		term = terms.get(1);
-		assertTrue("@rule/1/body/atoms/2/terms/2/: Mismatch term type!",
+		assertTrue("Mismatch term type!",
 				term instanceof URIConstantImpl);
-		assertEquals("@rule/1/body/atoms/2/terms/2/: Mismatch variable name!",
+		assertEquals("Mismatch variable name!",
 				((URIConstantImpl)term).getName(),
 				"http://example.org/stuff/1.1/FUB");
 	}
