@@ -139,7 +139,10 @@ public class ObdaFileCompatibilityRepair {
 	/* Construct the name-spaces based on the command line input arguments */
 	private static void constructNamespaces() {
 
-		nsDeclaration = "<OBDA";
+		nsDeclaration = "<OBDA ";
+		nsDeclaration +=
+			(useDepreciatedVersion())? "version=\"2.0\"" : "version=\"3.0\"";
+
 		if (cmd.hasOption("base")) {
 			nsDeclaration += "\n\t" + XML + ":" + BASE_PREFIX + "=\"" +
 				cmd.getOptionValue("base") + "\"";
