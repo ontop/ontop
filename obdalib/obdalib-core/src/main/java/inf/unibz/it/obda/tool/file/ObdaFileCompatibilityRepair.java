@@ -22,7 +22,7 @@ import org.apache.commons.cli.ParseException;
  *
  * @author Josef Hardi <josef.hardi@gmail.com>
  */
-public class ObdaFileCompatibiltyRepair {
+public class ObdaFileCompatibilityRepair {
 
 	/** Constants */
 	private static final String XML = "xml";
