@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,7 @@ public class ObdaFileCompatibiltyRepair {
 	private static CommandLine cmd = null;
 	private static String nsDeclaration = "";
 	private static String doctypeDeclaration = "";
+	private static Vector<String> doctypeEntities = new Vector<String>();
 
 	public static void main(String[] args) {
 
@@ -58,7 +60,7 @@ public class ObdaFileCompatibiltyRepair {
 
 			constructNamespaces();
 
-			if (!useDepreciatedVersion())	// look at the option -v2
+			if (!useDepreciatedVersion())	// look at the option -depreciated
 				constructDoctype();
 
 			String[] targetFiles = cmd.getArgs(); // the target files
@@ -86,12 +88,32 @@ public class ObdaFileCompatibiltyRepair {
 			.hasArg()
 			.withDescription("Define the URI reference for the BASE namespace.")
 			.create("base"));
-		options.addOption("v2", false,
-				"Convert to the depreciated OBDA file version 2.");
+		options.addOption(
+			OptionBuilder.withArgName("prefix=uri,...")
+			.hasArgs()
+			.withValueSeparator(',')
+			.withDescription("Define one or more URI reference for custom " +
+					"namespace. Separate each namespace definition with " +
+					"a comma. For example: -N bk=http://example.org/ns/books/," +
+					"foaf=http://xmlns.com/foaf/0.1/.")
+			.create("N"));
+		options.addOption(
+			OptionBuilder.withArgName("prefix=uri,...")
+			.hasArgs()
+			.withValueSeparator(',')
+			.withDescription("Define one or more URI reference for custom " +
+					"doctype. Separate each doctype definition with " +
+					"a comma. For example: -D fub=http://www.unibz.it/," +
+					"krdb=http://www.unibz.it/krdb/.")
+			.create("D"));
+		options.addOption("depreciated", false,
+				"Convert to the depreciated OBDA file v2.");
 		options.addOption("owl", false,
 				"Add the URI reference for the OWL namespace.");
 		options.addOption("owl2xml", false,
-				"Add the URI reference for the OWL2XML namespace.");
+				"Add the URI reference for the OWL2XML namespace (only if " +
+				"-depreciated is added, or otherwise it becomes a DOCTYPE " +
+				"entity).");
 		options.addOption("rdf", false,
 				"Add the URI reference for the RDF namespace.");
 		options.addOption("rdfs", false,
@@ -99,14 +121,20 @@ public class ObdaFileCompatibiltyRepair {
 		options.addOption("xsd", false,
 				"Add the URI reference for the XSD namespace.");
 		options.addOption("obdap", false,
-				"Add the URI reference for the OBDA namespace.");
+				"Add the URI reference for the OBDA namespace (only if " +
+				"-depreciated is added, or otherwise it becomes a DOCTYPE " +
+				"entity).");
 		options.addOption("keepOriginal", false,
 				"Retain the copy of the original file.");
 
 		// Help for the program script.
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(
-				"java ObdaFileCompatibiltyRepair [OPTIONS] FILE1 [FILE2, ...]",
+				"java ObdaFileCompatibiltyRepair [OPTIONS] FILE1 [FILE2]...\n" +
+				"Convert one or more old OBDA file (v1) to a newer standard. " +
+				"Currently, the API accepts OBDA file v2 and v3 that support " +
+				"namespace and doctype definitions. Thus, the conversion can " +
+				"be to either version.",
 				options);
 	}
 
@@ -126,7 +154,7 @@ public class ObdaFileCompatibiltyRepair {
 				OWL_URI + "\"";
 		}
 
-		if (cmd.hasOption("owl2xml")) {
+		if (cmd.hasOption("owl2xml") && useDepreciatedVersion()) { // not in v3
 			nsDeclaration += "\n\t" + XMLNS + ":" + OWL2XML_PREFIX + "=\"" +
 				OWL2XML_URI + "\"";
 		}
@@ -146,9 +174,18 @@ public class ObdaFileCompatibiltyRepair {
 				XSD_URI + "\"";
 		}
 
-		if (cmd.hasOption("obdap")) {
+		if (cmd.hasOption("obdap") && useDepreciatedVersion()) { // not in v3
 			nsDeclaration += "\n\t" + XMLNS + ":" + OBDAP_PREFIX + "=\"" +
 				OBDAP_URI + "\"";
+		}
+
+		if (cmd.hasOption("N")) {
+			String[] namespaces = cmd.getOptionValues("N");
+			for (int i = 0; i < namespaces.length; i++) {
+				String[] tokens = namespaces[i].split("=");
+				nsDeclaration += "\n\t" + XMLNS + ":" + tokens[0] + "=\"" +
+					tokens[1] + "\"";
+			}
 		}
 
 		nsDeclaration += " />";
@@ -169,9 +206,22 @@ public class ObdaFileCompatibiltyRepair {
 				"'" + OBDAP_URI + "'>";
 		}
 
+		if (cmd.hasOption("D") && !useDepreciatedVersion()) { // only for v3
+			String[] entities = cmd.getOptionValues("D");
+			for (int i = 0; i < entities.length; i++) {
+				String[] tokens = entities[i].split("=");
+				doctypeDeclaration += "\n\t<!ENTITY " + tokens[0] + " " +
+					"'" + tokens[1] + "'>";
+
+				// Save the doctype entities for later transformation.
+				doctypeEntities.add(tokens[0]);
+			}
+		}
+
 		doctypeDeclaration += "\n]>";
 	}
 
+	/* Does the user want to keep the original file? */
 	private static boolean keepOriginal() {
 		if (cmd.hasOption("keepOriginal"))
 			return true;
@@ -179,8 +229,9 @@ public class ObdaFileCompatibiltyRepair {
 		return false;
 	}
 
+	/* Does the user want to convert the file to a depreciated version? */
 	private static boolean useDepreciatedVersion() {
-		if (cmd.hasOption("v2"))
+		if (cmd.hasOption("depreciated"))
 			return true;
 
 		return false;
@@ -215,7 +266,8 @@ public class ObdaFileCompatibiltyRepair {
 				String line = null;
 				while((line = reader.readLine()) != null) {
 					// For the beginning of the file
-					if (line.contains("<?xml")) {
+					if (line.contains("<?xml") &&
+							!useDepreciatedVersion()) { // only for v3
 						line = doctypeDeclaration;
 					}
 					// For the case adding prefixes in the <OBDA> tag.
@@ -227,6 +279,20 @@ public class ObdaFileCompatibiltyRepair {
 						line = line.replace(
 							"inf.unibz.it.obda.api.domain.ucq.ConjunctiveQuery",
 							"org.obda.query.domain.imp.CQIEImpl");
+					}
+					// For the case adding doctype entity in the CQ string.
+					else if (line.contains("<CQ string=") &&
+							!useDepreciatedVersion()) { // only for v3
+						// add the head
+						line = line.replace(
+								"<CQ string=\"",
+								"<CQ string=\"&obdap;p(*) :- ");
+						// replace the prefixes in the body
+						for (int i = 0; i < doctypeEntities.size(); i++) {
+							line = line.replaceAll(
+									doctypeEntities.get(i) + ":",
+									"&" + doctypeEntities.get(i) + ";");
+						}
 					}
 					// For the case replacing the rdf:type string.
 					else {
