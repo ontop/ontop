@@ -94,8 +94,7 @@ public class ObdaFileCompatibiltyRepair {
 			.withValueSeparator(',')
 			.withDescription("Define one or more URI reference for custom " +
 					"namespace. Separate each namespace definition with " +
-					"a comma. For example: -N bk=http://example.org/ns/books/," +
-					"foaf=http://xmlns.com/foaf/0.1/.")
+					"a comma.")
 			.create("N"));
 		options.addOption(
 			OptionBuilder.withArgName("prefix=uri,...")
@@ -103,8 +102,7 @@ public class ObdaFileCompatibiltyRepair {
 			.withValueSeparator(',')
 			.withDescription("Define one or more URI reference for custom " +
 					"doctype. Separate each doctype definition with " +
-					"a comma. For example: -D fub=http://www.unibz.it/," +
-					"krdb=http://www.unibz.it/krdb/.")
+					"a comma.")
 			.create("D"));
 		options.addOption("depreciated", false,
 				"Convert to the depreciated OBDA file v2.");
@@ -131,10 +129,10 @@ public class ObdaFileCompatibiltyRepair {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(
 				"java ObdaFileCompatibiltyRepair [OPTIONS] FILE1 [FILE2]...\n" +
-				"Convert one or more old OBDA file (v1) to a newer standard. " +
+				"Convert one or more old OBDA file (v1) to the newer standard. " +
 				"Currently, the API accepts OBDA file v2 and v3 that support " +
 				"namespace and doctype definitions. Thus, the conversion can " +
-				"be to either version.",
+				"be to the either version.",
 				options);
 	}
 
