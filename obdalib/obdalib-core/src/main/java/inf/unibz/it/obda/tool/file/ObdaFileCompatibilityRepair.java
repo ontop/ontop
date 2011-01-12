@@ -43,6 +43,8 @@ public class ObdaFileCompatibilityRepair {
 	private static final String XSD_URI = "http://www.w3.org/2001/XMLSchema#";
 	private static final String OBDAP_URI = "http://obda.org/mapping/predicates/";
 
+	private static final String BACKUP_FILE_EXTENSION = ".old";
+
 	/** Fields */
 	private static Options options = new Options();
 	private static CommandLine cmd = null;
@@ -189,7 +191,7 @@ public class ObdaFileCompatibilityRepair {
 			}
 		}
 
-		nsDeclaration += " />";
+		nsDeclaration += ">";
 	}
 
 	private static void constructDoctype() {
@@ -202,7 +204,7 @@ public class ObdaFileCompatibilityRepair {
 				"'" + OWL2XML_URI + "'>";
 		}
 
-		if (cmd.hasOption("obdap")) {
+		if (cmd.hasOption("obdap") || !useDepreciatedVersion()) { // default in v3
 			doctypeDeclaration += "\n\t<!ENTITY " + OBDAP_PREFIX + " " +
 				"'" + OBDAP_URI + "'>";
 		}
@@ -287,7 +289,7 @@ public class ObdaFileCompatibilityRepair {
 						// add the head
 						line = line.replace(
 								"<CQ string=\"",
-								"<CQ string=\"&obdap;p(*) :- ");
+								"<CQ string=\"&obdap;q(*) :- ");
 						// replace the prefixes in the body
 						for (int i = 0; i < doctypeEntities.size(); i++) {
 							line = line.replaceAll(
@@ -319,8 +321,8 @@ public class ObdaFileCompatibilityRepair {
 
 	/* Create a backup for the original file. */
 	private static File copyFile(File file) throws IOException {
-		String oldFileName = file.toString();
-		String newFileName = oldFileName + ".orig";
+		String backupFileName = file.toString();
+		String newFileName = backupFileName + BACKUP_FILE_EXTENSION;
 		File newFile = new File(newFileName);
 
 		FileReader in = new FileReader(file);
