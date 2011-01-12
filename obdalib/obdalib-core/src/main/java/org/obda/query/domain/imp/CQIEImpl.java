@@ -22,6 +22,10 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	private String		string		= null;
 
+	private static final String SPACE = " ";
+	private static final String COMMA = ",";
+	private static final String INV_IMPLIES = ":-";
+
 	// TODO Remove isBoolean from the signature and from any method
 	public CQIEImpl(Atom head, List<Atom> body, boolean isBoolean) {
 
@@ -91,15 +95,16 @@ public class CQIEImpl implements CQIE, ListListener {
 		if (string == null) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(head.toString());
-			sb.append(":-");
+			sb.append(SPACE + INV_IMPLIES + SPACE); // print " :- "
 
 			Iterator<Atom> bit = body.iterator();
 			while (bit.hasNext()) {
 				Atom atom = bit.next();
-				if (bit.hasNext()) {
-					sb.append(", ");
-				}
 				sb.append(atom.toString());
+
+				if (bit.hasNext()) { // if there is a next atom.
+					sb.append(COMMA + SPACE); // print ", "
+				}
 			}
 			string = sb.toString();
 		}
