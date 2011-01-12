@@ -121,7 +121,7 @@ public class ObdaFileCompatibilityRepair {
 		options.addOption("xsd", false,
 				"Add the URI reference for the XSD namespace.");
 		options.addOption("obdap", false,
-				"Add the URI reference for the OBDA namespace (only if " +
+				"Add the URI reference for the OBDAP namespace (only if " +
 				"-depreciated is added, or otherwise it becomes a DOCTYPE " +
 				"entity).");
 		options.addOption("keepOriginal", false,
@@ -133,8 +133,8 @@ public class ObdaFileCompatibilityRepair {
 				"java ObdaFileCompatibiltyRepair [OPTIONS] FILE1 [FILE2]...\n" +
 				"Convert one or more old OBDA file (v1) to the newer standard. " +
 				"Currently, the API accepts OBDA file v2 and v3 that support " +
-				"namespace and doctype definitions. Thus, the conversion can " +
-				"be to the either version.",
+				"namespace and doctype definitions. Thus, the conversion is " +
+				"intended for creating to the either version.",
 				options);
 	}
 
