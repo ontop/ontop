@@ -53,12 +53,14 @@ import org.slf4j.LoggerFactory;
 public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
 
 	protected APIController		apic			= null;
+	private ReformulationPlatformPreferences preference = null;
 	private String				id;
 	private String				name;
 	private OWLOntologyManager	owlOntologyManager;
 	private boolean				useInMemoryDB	= false;
 	private boolean				createMappings	= false;
 	private String				unfoldingMode	= null;
+	private String				reformulationTechnique = "";
 
 	private Logger				log				= LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
 
@@ -95,28 +97,50 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 	public String getReasonerId() {
 		return id;
 	}
+	
+	@Override
+	public void setOBDAController(APIController apic) {
+		this.apic = apic;
+		ABoxToDBDumper.getInstance().setAPIController(apic);
+	}
+
+	@Override
+	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
+		this.preference = preference;
+	}
 
 	/**
 	 * Creates a new reformulation platform reasoner.
 	 */
 	public OWLReasoner createReasoner(OWLOntologyManager manager) {
 		log.debug("Creating a new instance of the BolzanoTechniqueWrapper");
+		
 		if (apic == null) {
 			throw new NullPointerException(
-					"The APIController for this OBDAOWLReformulationFactory has not been set. Call setAPIController(APIController apic) before instantiating a reasoner.");
+					"The APIController for this OBDAOWLReformulationFactory " +
+					"has not been set. Call setAPIController(APIController " +
+					"apic) before instantiating a reasoner.");
 		}
-
-		ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-		String useMem = (String) pref.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB);
-		unfoldingMode = (String) pref.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
-		String createMap = (String) pref.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
-
+		
+		if (preference == null) {
+			throw new NullPointerException(
+					"The preferences for this OBDAOWLReformulationFactory " +
+					"has not been set. Call setPreferenceHolder(" +
+					"ReformulationPlatformPreferences preference) before " +
+					"instantiating a reasoner.");
+		}
+		
+		String useMem = (String) preference.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB);
+		unfoldingMode = (String) preference.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
+		String createMap = (String) preference.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
+		reformulationTechnique = (String) preference.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+		
 		log.debug("Parameters: ");
-		log.debug("{}={}", ReformulationPlatformPreferences.USE_INMEMORY_DB, (String) pref
+		log.debug("{}={}", ReformulationPlatformPreferences.USE_INMEMORY_DB, (String) preference
 				.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB));
-		log.debug("{}={}", ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, (String) pref
+		log.debug("{}={}", ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, (String) preference
 				.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM));
-		log.debug("{}={}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, (String) pref
+		log.debug("{}={}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, (String) preference
 				.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS));
 
 		createMappings = createMap.equals("true");
@@ -172,10 +196,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 		DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
 
 		Iterator<OWLOntology> it = ontologies.iterator();
-		Set<URI> uris = new HashSet<URI>();
 		while (it.hasNext()) {
 			OWLOntology o = it.next();
-			uris.add(o.getURI());
 			DLLiterOntology aux = translator.translate(o);
 			ontology.addAssertions(aux.getAssertions());
 		}
@@ -251,8 +273,13 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 		}
 		// ds = apic.getDatasourcesController().getCurrentDataSource();
 		
-//		QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
-		QueryRewriter rew = new TreeRedReformulator(ontology.getAssertions());
+		QueryRewriter rew = null;
+		if (reformulationTechnique.equals("dlr")) {
+			rew = new DLRPerfectReformulator(ontology.getAssertions());
+		}
+		else if (reformulationTechnique.equals("improved")) {
+			rew = new TreeRedReformulator(ontology.getAssertions());
+		}
 		
 		List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
 		
@@ -299,29 +326,25 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 			ontology.addAssertions(aux.getAssertions());
 		}
 
-//		QueryRewriter rew = new DLRPerfectReformulator(ontology.getAssertions());
-		
-		QueryRewriter rew = new TreeRedReformulator(ontology.getAssertions());
+		QueryRewriter rew = null;
+		if (reformulationTechnique.equals("dlr")) {
+			rew = new DLRPerfectReformulator(ontology.getAssertions());
+		}
+		else if (reformulationTechnique.equals("improved")) {
+			rew = new TreeRedReformulator(ontology.getAssertions());
+		}
 		
 		log.debug("Instantiating a SimpleDirectQueryGenrator");
 		SourceQueryGenerator gen = new SimpleDirectQueryGenrator(apic.getIOManager().getPrefixManager(), ontology, uris);
 		
-		DataSource ds = null;
 		EvaluationEngine eng = null;
 		if (!useInMemoryDB) {
 			log.debug("Using a persistent RDBMS");
 			Iterator<DataSource> dit = apic.getDatasourcesController().getAllSources().values().iterator();
-			while (dit.hasNext()) {
-				DataSource d = dit.next();
-				String s = d.getParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
-				if (s != null && s.equals("true")) {
-					log.debug("Using source: {}", d.getParameter(RDBMSsourceParameterConstants.DATABASE_URL));
-					ds = d;
-					break;
-				}
-			}
+			DataSource ds = dit.next();  // Take the first data source on the list.
+			
 			if (ds == null) {
-				throw new Exception("No Aboxdump found. Please do a manual abox dump or select the in memory mode");
+				throw new Exception("No suitable data source found! Please do a manual abox dump or select the in memory mode");
 			}
 			eng = new JDBCEngine(ds);
 		} else {
@@ -400,11 +423,5 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 		} else {
 			return apic;
 		}
-	}
-
-	@Override
-	public void setOBDAController(APIController arg0) {
-		this.apic = arg0;
-		ABoxToDBDumper.getInstance().setAPIController(arg0);
 	}
 }

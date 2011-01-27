@@ -61,7 +61,7 @@ public class SimpleDirectViewManager implements ViewManager {
 		String aux =atom.getPredicate().getName().toString();
 		String frag = atom.getPredicate().getName().getFragment();
 		int i = aux.lastIndexOf("#");
-		String uri = aux.substring(0,i+1);
+		String uri = aux.substring(0,i);
 		String ontoname = prefixMap.get(uri);
 		if(ontoname == null){
 			uri = baseuri;

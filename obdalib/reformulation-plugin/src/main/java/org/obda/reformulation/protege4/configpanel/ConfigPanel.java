@@ -11,7 +11,7 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
-import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
 
 /**
  *
@@ -19,9 +19,15 @@ import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
  */
 public class ConfigPanel extends javax.swing.JPanel {
 
-    /** Creates new form ConfigPanel */
-    public ConfigPanel() {
+	private ReformulationPlatformPreferences preference = null;
+	
+    /** 
+	 * The constructor.
+     */
+    public ConfigPanel(ReformulationPlatformPreferences preference) {
+    	this.preference = preference;
         initComponents();
+        applyPreferences();
     }
 
     /** This method is called from within the constructor to
@@ -38,91 +44,161 @@ public class ConfigPanel extends javax.swing.JPanel {
         mapping = new javax.swing.ButtonGroup();
         DB = new javax.swing.ButtonGroup();
         mapper = new javax.swing.ButtonGroup();
-        jPanel5 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
-        jRadioButton3 = new javax.swing.JRadioButton();
-        jRadioButton4 = new javax.swing.JRadioButton();
-        jRadioButton5 = new javax.swing.JRadioButton();
-        jRadioButton6 = new javax.swing.JRadioButton();
-        jRadioButton7 = new javax.swing.JRadioButton();
-        jRadioButton8 = new javax.swing.JRadioButton();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
-        jLabel4 = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        pnlTWOption = new javax.swing.JPanel();
+        lblTechniqueWrapper = new javax.swing.JLabel();
+        cmbTechniqueWrapper = new javax.swing.JComboBox();
+        pnlTWConfiguration = new javax.swing.JPanel();
+        pnlReformulationMethods = new javax.swing.JPanel();
+        lblReformulationTechnique = new javax.swing.JLabel();
+        cmbReformulationMethods = new javax.swing.JComboBox();
+        pnlABoxConfiguration = new javax.swing.JPanel();
+        pnlMappingOptions = new javax.swing.JPanel();
+        optDirectMapping = new javax.swing.JRadioButton();
+        optSimpleMethod = new javax.swing.JRadioButton();
+        optHierarchicalMethod = new javax.swing.JRadioButton();
+        optComplexMapping = new javax.swing.JRadioButton();
+        pnlABoxSourceOptions = new javax.swing.JPanel();
+        optReadFromOwlFile = new javax.swing.JRadioButton();
+        optUseInMemoryDB = new javax.swing.JRadioButton();
+        optUseRemoteDB = new javax.swing.JRadioButton();
+        optReadFromDB = new javax.swing.JRadioButton();
 
-        setMinimumSize(new java.awt.Dimension(530, 450));
-        setPreferredSize(new java.awt.Dimension(530, 450));
-        setLayout(new java.awt.GridBagLayout());
+        setMinimumSize(new java.awt.Dimension(525, 450));
+        setPreferredSize(new java.awt.Dimension(525, 450));
+        setLayout(new java.awt.BorderLayout(0, 15));
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Technique Wrapper Configuration"));
-        jPanel5.setMinimumSize(new java.awt.Dimension(500, 350));
-        jPanel5.setPreferredSize(new java.awt.Dimension(600, 350));
-        jPanel5.setLayout(new java.awt.GridBagLayout());
+        pnlTWOption.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Technique Wrapper Options"));
+        pnlTWOption.setMinimumSize(new java.awt.Dimension(590, 80));
+        pnlTWOption.setPreferredSize(new java.awt.Dimension(590, 100));
+        pnlTWOption.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 25));
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("ABox Configuration"));
-        jPanel2.setMinimumSize(new java.awt.Dimension(100, 100));
-        jPanel2.setPreferredSize(new java.awt.Dimension(100, 200));
-        jPanel2.setLayout(new java.awt.GridBagLayout());
+        lblTechniqueWrapper.setText("Technique Wrapper:");
+        lblTechniqueWrapper.setMinimumSize(new java.awt.Dimension(170, 30));
+        lblTechniqueWrapper.setPreferredSize(new java.awt.Dimension(140, 20));
+        pnlTWOption.add(lblTechniqueWrapper);
 
-        mapping.add(jRadioButton1);
-        jRadioButton1.setSelected(true);
-        jRadioButton1.setText("Direct Mapping");
-        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+        cmbTechniqueWrapper.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Bolzano Reformulation Technique" }));
+        cmbTechniqueWrapper.setMaximumSize(new java.awt.Dimension(180, 32767));
+        cmbTechniqueWrapper.setMinimumSize(new java.awt.Dimension(125, 18));
+        cmbTechniqueWrapper.setPreferredSize(new java.awt.Dimension(280, 20));
+        cmbTechniqueWrapper.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton1ActionPerformed(evt);
+                cmbTechniqueWrapperActionPerformed(evt);
+            }
+        });
+        pnlTWOption.add(cmbTechniqueWrapper);
+
+        add(pnlTWOption, java.awt.BorderLayout.NORTH);
+        pnlTWOption.getAccessibleContext().setAccessibleName("Bolzano Reformulation Technique");
+
+        pnlTWConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Technique Wrapper Configuration"));
+        pnlTWConfiguration.setMinimumSize(new java.awt.Dimension(500, 350));
+        pnlTWConfiguration.setPreferredSize(new java.awt.Dimension(600, 350));
+        pnlTWConfiguration.setLayout(new java.awt.GridBagLayout());
+
+        pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Reformulation Methods\n"));
+        pnlReformulationMethods.setMinimumSize(new java.awt.Dimension(590, 100));
+        pnlReformulationMethods.setPreferredSize(new java.awt.Dimension(590, 100));
+        pnlReformulationMethods.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 25));
+
+        lblReformulationTechnique.setText("Reformulation Technique: ");
+        lblReformulationTechnique.setMinimumSize(new java.awt.Dimension(150, 30));
+        lblReformulationTechnique.setPreferredSize(new java.awt.Dimension(180, 20));
+        pnlReformulationMethods.add(lblReformulationTechnique);
+
+        cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "dlr", "improved" }));
+        cmbReformulationMethods.setSelectedIndex(1);
+        cmbReformulationMethods.setPreferredSize(new java.awt.Dimension(220, 20));
+        cmbReformulationMethods.setRenderer(new ReformulationMethodsCellRenderer());
+        cmbReformulationMethods.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbReformulationMethodsActionPerformed(evt);
+            }
+        });
+        pnlReformulationMethods.add(cmbReformulationMethods);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 144;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 6, 0, 6);
+        pnlTWConfiguration.add(pnlReformulationMethods, gridBagConstraints);
+
+        pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "ABox Configuration"));
+        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(590, 200));
+        pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(590, 180));
+        pnlABoxConfiguration.setLayout(new java.awt.BorderLayout());
+
+        pnlMappingOptions.setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
+        pnlMappingOptions.setMinimumSize(new java.awt.Dimension(215, 50));
+        pnlMappingOptions.setPreferredSize(new java.awt.Dimension(215, 50));
+        pnlMappingOptions.setLayout(new java.awt.GridBagLayout());
+
+        mapping.add(optDirectMapping);
+        optDirectMapping.setText("Direct Mapping");
+        optDirectMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                optDirectMappingActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(13, 18, 0, 18);
-        jPanel2.add(jRadioButton1, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 18, 0, 18);
+        pnlMappingOptions.add(optDirectMapping, gridBagConstraints);
 
-        mapper.add(jRadioButton2);
-        jRadioButton2.setSelected(true);
-        jRadioButton2.setText("Simple Method");
+        mapper.add(optSimpleMethod);
+        optSimpleMethod.setSelected(true);
+        optSimpleMethod.setText("Simple Method");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 48, 0, 18);
-        jPanel2.add(jRadioButton2, gridBagConstraints);
+        pnlMappingOptions.add(optSimpleMethod, gridBagConstraints);
 
-        mapper.add(jRadioButton3);
-        jRadioButton3.setText("Hirachical Method");
+        mapper.add(optHierarchicalMethod);
+        optHierarchicalMethod.setText("Hierarchical Method");
+        optHierarchicalMethod.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 48, 0, 18);
-        jPanel2.add(jRadioButton3, gridBagConstraints);
+        pnlMappingOptions.add(optHierarchicalMethod, gridBagConstraints);
 
-        mapping.add(jRadioButton4);
-        jRadioButton4.setText("Complex Mapping");
+        mapping.add(optComplexMapping);
+        optComplexMapping.setSelected(true);
+        optComplexMapping.setText("Complex Mapping");
+        optComplexMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                optComplexMappingActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 18, 0, 18);
-        jPanel2.add(jRadioButton4, gridBagConstraints);
+        pnlMappingOptions.add(optComplexMapping, gridBagConstraints);
 
-        abox.add(jRadioButton5);
-        jRadioButton5.setSelected(true);
-        jRadioButton5.setText("Read ABox from OWL file");
-        jRadioButton5.addActionListener(new java.awt.event.ActionListener() {
+        pnlABoxConfiguration.add(pnlMappingOptions, java.awt.BorderLayout.WEST);
+
+        pnlABoxSourceOptions.setMinimumSize(new java.awt.Dimension(290, 80));
+        pnlABoxSourceOptions.setPreferredSize(new java.awt.Dimension(290, 100));
+        pnlABoxSourceOptions.setLayout(new java.awt.GridBagLayout());
+
+        abox.add(optReadFromOwlFile);
+        optReadFromOwlFile.setText("Read ABox from the OWL file");
+        optReadFromOwlFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton5ActionPerformed(evt);
+                optReadFromOwlFileActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -130,25 +206,30 @@ public class ConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(13, 100, 0, 18);
-        jPanel2.add(jRadioButton5, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 100, 0, 18);
+        pnlABoxSourceOptions.add(optReadFromOwlFile, gridBagConstraints);
 
-        DB.add(jRadioButton6);
-        jRadioButton6.setSelected(true);
-        jRadioButton6.setText("use in-memory data base");
+        DB.add(optUseInMemoryDB);
+        optUseInMemoryDB.setSelected(true);
+        optUseInMemoryDB.setText("use in-memory database");
+        optUseInMemoryDB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                optUseInMemoryDBActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 130, 0, 18);
-        jPanel2.add(jRadioButton6, gridBagConstraints);
+        pnlABoxSourceOptions.add(optUseInMemoryDB, gridBagConstraints);
 
-        DB.add(jRadioButton7);
-        jRadioButton7.setText("use remote data base");
-        jRadioButton7.addActionListener(new java.awt.event.ActionListener() {
+        DB.add(optUseRemoteDB);
+        optUseRemoteDB.setText("use remote database");
+        optUseRemoteDB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton7ActionPerformed(evt);
+                optUseRemoteDBActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -157,17 +238,28 @@ public class ConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 130, 0, 18);
-        jPanel2.add(jRadioButton7, gridBagConstraints);
+        pnlABoxSourceOptions.add(optUseRemoteDB, gridBagConstraints);
 
-        abox.add(jRadioButton8);
-        jRadioButton8.setText("ABox is already stored in a data base");
+        abox.add(optReadFromDB);
+        optReadFromDB.setSelected(true);
+        optReadFromDB.setText("ABox is already stored in the database");
+        optReadFromDB.setMaximumSize(new java.awt.Dimension(300, 23));
+        optReadFromDB.setMinimumSize(new java.awt.Dimension(350, 23));
+        optReadFromDB.setPreferredSize(new java.awt.Dimension(310, 23));
+        optReadFromDB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                optReadFromDBActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 100, 0, 18);
-        jPanel2.add(jRadioButton8, gridBagConstraints);
+        pnlABoxSourceOptions.add(optReadFromDB, gridBagConstraints);
+
+        pnlABoxConfiguration.add(pnlABoxSourceOptions, java.awt.BorderLayout.EAST);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -177,162 +269,116 @@ public class ConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(20, 6, 7, 6);
-        jPanel5.add(jPanel2, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(15, 6, 7, 6);
+        pnlTWConfiguration.add(pnlABoxConfiguration, gridBagConstraints);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Reformulation Methods\n"));
-        jPanel1.setMinimumSize(new java.awt.Dimension(100, 100));
-        jPanel1.setPreferredSize(new java.awt.Dimension(560, 70));
-        jPanel1.setLayout(new java.awt.GridBagLayout());
-
-        jLabel1.setText("Reformulation Technique: ");
-        jLabel1.setMinimumSize(new java.awt.Dimension(150, 30));
-        jLabel1.setPreferredSize(new java.awt.Dimension(170, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(20, 20, 0, 40);
-        jPanel1.add(jLabel1, gridBagConstraints);
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Perfect Reformulation" }));
-        jComboBox1.setPreferredSize(new java.awt.Dimension(180, 20));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.ipadx = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(18, 0, 0, 18);
-        jPanel1.add(jComboBox1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        jPanel1.add(jLabel4, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 144;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(20, 6, 0, 6);
-        jPanel5.add(jPanel1, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipady = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(24, 14, 15, 3);
-        add(jPanel5, gridBagConstraints);
-
-        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Choose Technique Wrapper"));
-        jPanel6.setLayout(new java.awt.GridBagLayout());
-
-        jLabel2.setText("Technique Wrapper:");
-        jLabel2.setMinimumSize(new java.awt.Dimension(170, 30));
-        jLabel2.setPreferredSize(new java.awt.Dimension(560, 70));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(20, 25, 7, 0);
-        jPanel6.add(jLabel2, gridBagConstraints);
-
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Bolzano Technique Wrapper" }));
-        jComboBox2.setMaximumSize(new java.awt.Dimension(180, 32767));
-        jComboBox2.setMinimumSize(new java.awt.Dimension(125, 18));
-        jComboBox2.setPreferredSize(new java.awt.Dimension(150, 20));
-        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox2ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 145;
-        gridBagConstraints.ipady = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(20, 40, 7, 56);
-        jPanel6.add(jComboBox2, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        jPanel6.add(jLabel5, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(24, 14, 12, 0);
-        add(jPanel6, gridBagConstraints);
-        jPanel6.getAccessibleContext().setAccessibleName("Bolzano Reformulation Technique");
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 1;
-        gridBagConstraints.ipady = 1;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(jLabel3, gridBagConstraints);
+        add(pnlTWConfiguration, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
+    private void applyPreferences() {
+    	
+    	String method = (String) preference.getCurrentValue(
+    			ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+    	
+    	cmbReformulationMethods.setSelectedItem(method);
+    	
+    	String value = (String) preference.getCurrentValue(
+    			ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
+    	
+    	if (value.equals("direct")) {
+    		optDirectMapping.setSelected(true);
+    	}
+    	else if (value.equals("complex")) {
+    		optComplexMapping.setSelected(true);
+    		optSimpleMethod.setEnabled(false);
+    	}
+    	
+    	boolean useInMemoryDB = preference.getCurrentBooleanValueFor(
+    			ReformulationPlatformPreferences.USE_INMEMORY_DB);
+    	
+    	if (useInMemoryDB) {
+    		optReadFromOwlFile.setSelected(true);
+    		optUseInMemoryDB.setSelected(true);
+    	}
+    	else {
+    		optReadFromDB.setSelected(true);
+    		optUseInMemoryDB.setEnabled(false);
+    		optUseRemoteDB.setEnabled(false);
+    	}
+    }
+    
+    private void cmbTechniqueWrapperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTechniqueWrapperActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButton1ActionPerformed
+    }//GEN-LAST:event_cmbTechniqueWrapperActionPerformed
+    
+    private void cmbReformulationMethodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbReformulationMethodsActionPerformed
+        javax.swing.JComboBox cb = (javax.swing.JComboBox) evt.getSource();
+        String optValue = (String) cb.getSelectedItem();
+        preference.setCurrentValueOf(
+        		ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, optValue);
+    }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
+    
+    private void optDirectMappingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optDirectMappingActionPerformed
+    	preference.setCurrentValueOf(
+                ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "direct");
+    	optSimpleMethod.setEnabled(true);
+    	optSimpleMethod.setSelected(true);
+    	optSimpleMethod.doClick();
+    }//GEN-LAST:event_optDirectMappingActionPerformed
 
-    private void jRadioButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton5ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButton5ActionPerformed
+    private void optComplexMappingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optComplexMappingActionPerformed
+        preference.setCurrentValueOf(
+                ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+        optSimpleMethod.setEnabled(false);
+    }//GEN-LAST:event_optComplexMappingActionPerformed
+    
+    private void optReadFromOwlFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optReadFromOwlFileActionPerformed
+        optUseInMemoryDB.setEnabled(true);
+        optUseRemoteDB.setEnabled(true);
+        optUseInMemoryDB.setSelected(true);
+        optUseInMemoryDB.doClick();
+    }//GEN-LAST:event_optReadFromOwlFileActionPerformed
 
-    private void jRadioButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton7ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButton7ActionPerformed
-
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
-    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
-        // TODO add your handling code here:
-}//GEN-LAST:event_jComboBox2ActionPerformed
-
+    private void optUseInMemoryDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optUseInMemoryDBActionPerformed
+        preference.setCurrentValueOf(
+                ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
+    }//GEN-LAST:event_optUseInMemoryDBActionPerformed
+    
+    private void optUseRemoteDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optUseRemoteDBActionPerformed
+        preference.setCurrentValueOf(
+                ReformulationPlatformPreferences.USE_INMEMORY_DB, "false");
+    }//GEN-LAST:event_optUseRemoteDBActionPerformed
+   
+    private void optReadFromDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optReadFromDBActionPerformed
+        preference.setCurrentValueOf(
+                ReformulationPlatformPreferences.USE_INMEMORY_DB, "false");
+        optUseInMemoryDB.setEnabled(false);
+        optUseRemoteDB.setEnabled(false);
+    }//GEN-LAST:event_optReadFromDBActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup DB;
     private javax.swing.ButtonGroup abox;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JComboBox jComboBox2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
-    private javax.swing.JRadioButton jRadioButton3;
-    private javax.swing.JRadioButton jRadioButton4;
-    private javax.swing.JRadioButton jRadioButton5;
-    private javax.swing.JRadioButton jRadioButton6;
-    private javax.swing.JRadioButton jRadioButton7;
-    private javax.swing.JRadioButton jRadioButton8;
+    private javax.swing.JComboBox cmbReformulationMethods;
+    private javax.swing.JComboBox cmbTechniqueWrapper;
+    private javax.swing.JLabel lblReformulationTechnique;
+    private javax.swing.JLabel lblTechniqueWrapper;
     private javax.swing.ButtonGroup mapper;
     private javax.swing.ButtonGroup mapping;
+    private javax.swing.JRadioButton optComplexMapping;
+    private javax.swing.JRadioButton optDirectMapping;
+    private javax.swing.JRadioButton optHierarchicalMethod;
+    private javax.swing.JRadioButton optReadFromDB;
+    private javax.swing.JRadioButton optReadFromOwlFile;
+    private javax.swing.JRadioButton optSimpleMethod;
+    private javax.swing.JRadioButton optUseInMemoryDB;
+    private javax.swing.JRadioButton optUseRemoteDB;
+    private javax.swing.JPanel pnlABoxConfiguration;
+    private javax.swing.JPanel pnlABoxSourceOptions;
+    private javax.swing.JPanel pnlMappingOptions;
+    private javax.swing.JPanel pnlReformulationMethods;
+    private javax.swing.JPanel pnlTWConfiguration;
+    private javax.swing.JPanel pnlTWOption;
     // End of variables declaration//GEN-END:variables
 
 }
