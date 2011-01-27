@@ -15,6 +15,7 @@ import inf.unibz.it.obda.gui.swing.constraints.panel.CheckConstraintsPanel;
 import inf.unibz.it.obda.gui.swing.constraints.panel.ForeignKeyConstraintsPanel;
 import inf.unibz.it.obda.gui.swing.constraints.panel.PrimaryKeyConstraintPanel;
 import inf.unibz.it.obda.gui.swing.constraints.panel.UniquenessConstraintPanel;
+import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 
 import java.awt.Dimension;
 
@@ -26,11 +27,6 @@ import java.awt.Dimension;
  */
 public class DependencyTabPane extends javax.swing.JPanel {
 
-	
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -4286552797252744764L;
 //	private javax.swing.JPanel jPanelFunctionalDepEditor;
     private javax.swing.JPanel jPanelFunctionalDepTree;
 //    private javax.swing.JPanel jPanelInclusionDepEditor;
@@ -38,18 +34,21 @@ public class DependencyTabPane extends javax.swing.JPanel {
 //    private javax.swing.JPanel jPanelDisjoinednessEditor;
     private javax.swing.JPanel jPanelDisjoinednessTree;
     
-    private javax.swing.JPanel ccConstraintsPanel;
-    private javax.swing.JPanel fkConstraintsPanel;
-    private javax.swing.JPanel pkConstraintsPanel;
-    private javax.swing.JPanel uqConstraintsPanel;
-    /**
-     * the API controller
-     */
+    private CheckConstraintsPanel ccConstraintsPanel;
+    private ForeignKeyConstraintsPanel fkConstraintsPanel;
+    private PrimaryKeyConstraintPanel pkConstraintsPanel;
+    private UniquenessConstraintPanel uqConstraintsPanel;
+
 	private APIController apic = null;
+	private OBDAPreferences preference = null;
     
-    /** Creates new form DependencyTabPane */
-    public DependencyTabPane(APIController apic) {
+    /**
+     * The constructor.
+     */
+    public DependencyTabPane(APIController apic, OBDAPreferences preference) {
     	this.apic = apic;
+    	this.preference = preference;
+    	
         initComponents();
         fillTabs();
     }
@@ -67,17 +66,16 @@ public class DependencyTabPane extends javax.swing.JPanel {
     	
     	java.awt.GridBagConstraints gridBagConstraints;
 //        jPanelDisjoinednessEditor = new InsertDisjoinednessAssertionPane(apic);
-        jPanelDisjoinednessTree= new DisjoinednessAssertionTreePane(apic);
+        jPanelDisjoinednessTree = new DisjoinednessAssertionTreePane(apic, preference);
 //        jPanelFunctionalDepEditor =new FunctionalDependencyEditorPane(apic);
-        jPanelFunctionalDepTree =new FunctionalDepTreePane(apic);
+        jPanelFunctionalDepTree = new FunctionalDepTreePane(apic, preference);
 //        jPanelInclusionDepEditor = new InsertInclusionDependencyPane(apic);
-        jPanelInclusionDepTree = new InclusionDependencyTreePane(apic);
+        jPanelInclusionDepTree = new InclusionDependencyTreePane(apic, preference);
         
-        ccConstraintsPanel = new CheckConstraintsPanel(apic);
-        fkConstraintsPanel = new ForeignKeyConstraintsPanel(apic);
-        pkConstraintsPanel = new PrimaryKeyConstraintPanel(apic);
-        uqConstraintsPanel = new UniquenessConstraintPanel(apic);
-        
+        ccConstraintsPanel = new CheckConstraintsPanel(apic, preference);        
+        fkConstraintsPanel = new ForeignKeyConstraintsPanel(apic, preference);
+        pkConstraintsPanel = new PrimaryKeyConstraintPanel(apic, preference);
+        uqConstraintsPanel = new UniquenessConstraintPanel(apic, preference);
         
 //        gridBagConstraints = new java.awt.GridBagConstraints();
 //        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;

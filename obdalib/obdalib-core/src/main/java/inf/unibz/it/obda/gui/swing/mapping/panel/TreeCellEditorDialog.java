@@ -68,7 +68,6 @@ public class TreeCellEditorDialog extends JDialog {
 	private JDialog						myself				= null;
 	private JTextPane					area				= null;
 	private JTree						tree				= null;
-	private MappingManagerPreferences	pref				= null;
 	private boolean						update				= true;
 
 	private static TreeCellEditorDialog	instance			= null;
@@ -88,7 +87,6 @@ public class TreeCellEditorDialog extends JDialog {
 		this.mapc = mapc;
 		myself = this;
 		instance = this;
-		pref =  OBDAPreferences.getOBDAPreferences().getMappingsPreference();
 		createDialog();
 	}
 
@@ -106,8 +104,8 @@ public class TreeCellEditorDialog extends JDialog {
 		tree = t;
 		update = true;
 
-		int width = pref.inputPanelWidth;
-		int hight = pref.inputPanelHeight;
+		int width = 800;  // TODO Put to a global object.
+		int hight = 75;
 		this.setMinimumSize(new Dimension(450, 40));
 		int maxwidth = (int) t.getParent().getSize().getWidth() - 20;
 		this.setMaximumSize(new Dimension(maxwidth, 80));

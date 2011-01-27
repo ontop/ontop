@@ -58,18 +58,18 @@ public class PrimaryKeyConstraintPanel extends javax.swing.JPanel implements Map
 	private JPanel myself = null;
 	
     /** Creates new form PrimaryKeyConstraintPanel */
-    public PrimaryKeyConstraintPanel(APIController apic) {
+    public PrimaryKeyConstraintPanel(APIController apic, OBDAPreferences preference) {
     	this.apic = apic;
     	myself = this;
         initComponents();
         addListener();
         addMenu();
-        pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+    	pref = preference.getMappingsPreference();
         pkController =(RDBMSPrimaryKeyConstraintController) apic.getController(RDBMSPrimaryKeyConstraint.class);
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Disjoinedness Constraints");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         PrimaryKeyConstraintTreeModel model = new PrimaryKeyConstraintTreeModel(root, pkController, renderer);
-        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic);
+        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
         jTreePKConstraints.setCellRenderer(tcr);
         jTreePKConstraints.setModel(model);
         jTreePKConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSPrimaryKeyConstraint.RDBMSPRIMARYKEYCONSTRAINT));

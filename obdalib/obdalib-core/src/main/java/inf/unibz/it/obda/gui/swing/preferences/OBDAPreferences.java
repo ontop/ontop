@@ -44,14 +44,6 @@ public class OBDAPreferences {
 		obdaPref.put(JODS_RESULTSET_FETCHSIZE, 100);
 	}
 	
-	public static OBDAPreferences getOBDAPreferences(){
-		
-		if(instance == null){
-			instance = new OBDAPreferences();
-		}
-		return instance;
-	}
-	
 	public MappingManagerPreferences getMappingsPreference(){
 		if(mmpInstance == null){
 			mmpInstance = new MappingManagerPreferences();
@@ -211,9 +203,6 @@ public class OBDAPreferences {
 		public int head_maxHeight = 35;
 		public int head_minWight = 500;
 		public int head_minHeight = 30;
-		
-		public int inputPanelWidth = 800;
-		public int inputPanelHeight = 75;
 		
 		public int getFontSize(String key){
 			Integer size = sizeMap.get(key);

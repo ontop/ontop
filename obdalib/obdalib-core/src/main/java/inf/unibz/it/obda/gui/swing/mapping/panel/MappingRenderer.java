@@ -74,14 +74,14 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingRenderer(APIController apic) {
+	public MappingRenderer(APIController apic, OBDAPreferences preference) {
 		this.apic = apic;
 		mappingIcon = IconLoader.getImageIcon(PATH_MAPPING_ICON);
 		invalidmappingIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPING_ICON);
 		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
 		invalidmappingheadIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPINGHEAD_ICON);
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
-		pref =  OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+		pref =  preference.getMappingsPreference();
 	}
 
 	@Override
@@ -154,13 +154,13 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 
 			String txt = ((String) node.getUserObject());
 
-			MappingStyledDocument styledDoc = new MappingStyledDocument(context, apic);
+			MappingStyledDocument styledDoc = new MappingStyledDocument(context, apic, pref); // TODO change this to OBDAPreferences later
 			try {
 				styledDoc.insertString(0, txt, styledDoc.default_style);
 			} catch (BadLocationException e) {
 				e.printStackTrace();
 			}
-			QueryPainter p = new QueryPainter(apic);
+			QueryPainter p = new QueryPainter(apic, pref); // TODO change this to OBDAPreferences later
 			p.doRecoloring(styledDoc);
 			while (p.isAlreadyColoring()) {
 			}

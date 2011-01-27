@@ -56,17 +56,17 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
 	private RDBMSCheckConstraintController ccController = null;
 	
     /** Creates new form CheckConstraintsPanel */
-    public CheckConstraintsPanel(APIController apic) {
+    public CheckConstraintsPanel(APIController apic, OBDAPreferences preference) {
     	this.apic = apic;
         initComponents();
         addListener();
         addMenu();
-        pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+        pref = preference.getMappingsPreference();
         ccController =(RDBMSCheckConstraintController) apic.getController(RDBMSCheckConstraint.class);
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Check Constraints");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         CheckConstraintTreeModel model = new CheckConstraintTreeModel(root, ccController, renderer);
-        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic);
+        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
         jTreeCheckConstraints.setCellRenderer(tcr);
         jTreeCheckConstraints.setModel(model);
         jTreeCheckConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT));
@@ -76,7 +76,6 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
         jTreeCheckConstraints.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
     }
-
     
     private void addListener(){
     	

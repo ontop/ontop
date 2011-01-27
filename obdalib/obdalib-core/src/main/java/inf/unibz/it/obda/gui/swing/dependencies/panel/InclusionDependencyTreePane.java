@@ -78,17 +78,17 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 	private MappingManagerPreferences pref = null;
 
     /** Creates new form InclusionDependencyTreePane */
-    public InclusionDependencyTreePane(APIController apic) {
+    public InclusionDependencyTreePane(APIController apic, OBDAPreferences preference) {
     	instance = this;
     	this.apic = apic;
     	incController = (RDBMSInclusionDependencyController) apic.getController(RDBMSInclusionDependency.class);
-    	pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+    	pref = preference.getMappingsPreference();
         initComponents();
         addMenu();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Inclusion Dependencies");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         InclusionDependencyTreeModel model = new InclusionDependencyTreeModel(root, incController, renderer);
-        DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic);
+        DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic, preference);
         jTree1.setCellRenderer(tcr);
         jTree1.setModel(model);
         jTree1.setEditable(true);

@@ -67,17 +67,17 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 	private MappingManagerPreferences pref = null;
 
     /** Creates new form FunctionalDepTreePane */
-    public FunctionalDepTreePane(APIController apic) {
+    public FunctionalDepTreePane(APIController apic, OBDAPreferences preference) {
 
     	this.apic = apic;
-    	pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+    	pref = preference.getMappingsPreference();
     	fdController = (RDBMSFunctionalDependencyController) apic.getController(RDBMSFunctionalDependency.class);
         initComponents();
         addMenu();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Functional Dependencies");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         FunctionalDependenciesTreeModel model = new FunctionalDependenciesTreeModel(root, fdController, renderer);
-        DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic);
+        DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic, preference);
         jTree1.setCellRenderer(tcr);
         jTree1.setModel(model);
         jTree1.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY));

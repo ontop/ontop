@@ -14,6 +14,7 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -36,13 +37,14 @@ public class MappingStyledDocument extends DefaultStyledDocument implements
 	public Style				default_style	= null;
 
 	private QueryPainter painter = null;
-	private APIController	apic;
+	private APIController apic = null;
 	
-	public MappingStyledDocument(StyleContext context, APIController apic) {
+	public MappingStyledDocument(StyleContext context, APIController apic,
+			MappingManagerPreferences pref) {
 		super(context);
 		this.apic = apic;
-
-		painter = new QueryPainter(apic);
+		
+		painter = new QueryPainter(apic, pref);
 		default_style = context.getStyle(StyleContext.DEFAULT_STYLE);
 		StyleConstants.setFontFamily(default_style, "Arial");
 		StyleConstants.setFontSize(default_style, 14);

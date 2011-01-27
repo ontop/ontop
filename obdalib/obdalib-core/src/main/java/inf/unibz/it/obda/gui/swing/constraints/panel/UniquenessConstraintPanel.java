@@ -51,17 +51,17 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
 	private RDBMSUniquenessConstraintController uqController = null;
 	
     /** Creates new form UniquenessConstraintPanel */
-    public UniquenessConstraintPanel(APIController apic) {
+    public UniquenessConstraintPanel(APIController apic, OBDAPreferences preference) {
     	this.apic = apic;
         initComponents();
         addListener();
         addMenu();
-        pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+    	pref = preference.getMappingsPreference();
         uqController =(RDBMSUniquenessConstraintController) apic.getController(RDBMSUniquenessConstraint.class);
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Disjoinedness Constraints");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         UniquenessConstraintTreeModel model = new UniquenessConstraintTreeModel(root, uqController, renderer);
-        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic);
+        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
         jTreeUniquenessConstraints.setCellRenderer(tcr);
         jTreeUniquenessConstraints.setModel(model);
         jTreeUniquenessConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSUniquenessConstraint.RDBMSUNIQUENESSCONSTRAINT));
@@ -72,7 +72,6 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
         pref.registerPreferenceChangedListener(this);
     }
 
-    
     private void addListener(){
     	
         jButtonAdd.addActionListener(new ActionListener(){

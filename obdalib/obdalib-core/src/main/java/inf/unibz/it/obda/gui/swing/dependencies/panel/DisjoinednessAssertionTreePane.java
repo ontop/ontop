@@ -75,16 +75,16 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 	MappingManagerPreferences pref = null;
 
     /** Creates new form DisjoinednessAssertionTreePane */
-    public DisjoinednessAssertionTreePane(APIController apic) {
+    public DisjoinednessAssertionTreePane(APIController apic, OBDAPreferences preference) {
         initComponents();
         addMenu();
         this.apic = apic;
-        pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+        pref = preference.getMappingsPreference();
         disController =(RDBMSDisjointnessDependencyController) apic.getController(RDBMSDisjointnessDependency.class);
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Disjoinedness Constraints");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         DisjoinednessAssertionTreeModel model = new DisjoinednessAssertionTreeModel(root, disController, renderer);
-        DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic);
+        DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic, preference);
         jTree1.setCellRenderer(tcr);
         jTree1.setModel(model);
         jTree1.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION));

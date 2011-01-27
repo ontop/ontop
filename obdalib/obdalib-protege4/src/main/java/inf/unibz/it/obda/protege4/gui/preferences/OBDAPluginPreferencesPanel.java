@@ -13,24 +13,28 @@ import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 
-public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel implements MappingManagerPreferenceChangeListener {
+public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel 
+		implements MappingManagerPreferenceChangeListener {
 		
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5041996765493979793L;
-	private Preferences pref = null;
+	private Preferences preference = null;
+	private OBDAPreferences obdaPreference = null;
 	
 	@Override
 	public void applyChanges() {
 		// TODO Auto-generated method stub
-		
 	}
 
-	public void initialise() throws Exception {
+	@Override
+	public void initialise() throws Exception {		
+		// Global preference settings using the Protege framework.
 		PreferencesManager man = PreferencesManager.getInstance();
-		pref = man.getApplicationPreferences("OBDA Plugin");
-		OBDAPreferencesPanel pane = new OBDAPreferencesPanel();
+		preference = man.getApplicationPreferences("OBDA Plugin");
+		
+		// Preference settings using the OBDA API framework
+		obdaPreference = (OBDAPreferences)
+				getEditorKit().get(OBDAPreferences.class.getName());
+		OBDAPreferencesPanel panel = new OBDAPreferencesPanel(obdaPreference);
+		
 		setLayout(new java.awt.GridBagLayout());
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -38,7 +42,7 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel implements M
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        add(pane, gridBagConstraints);
+        add(panel, gridBagConstraints);
         
         JLabel placeholder = new JLabel();
         gridBagConstraints.gridx = 0;
@@ -51,38 +55,30 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel implements M
 	}
 
 	public void dispose() throws Exception {
-		// TODO Auto-generated method stub
-		OBDAPreferences.getOBDAPreferences().getMappingsPreference().removePreferenceChangedListener(this);
+		obdaPreference.getMappingsPreference().removePreferenceChangedListener(this);
 	}
 
-	public void colorPeferenceChanged(String preference, Color col) {
-	
-		pref.putInt(preference, col.getRGB());
+	public void colorPeferenceChanged(String key, Color col) {
+		preference.putInt(key, col.getRGB());
 	}
 
-	public void fontFamilyPreferenceChanged(String preference, String font) {
-		
-		pref.putString(preference, font);
+	public void fontFamilyPreferenceChanged(String key, String font) {
+		preference.putString(key, font);
 	}
 
-	public void fontSizePreferenceChanged(String preference, int size) {
-		
-		pref.putInt(preference, size);
+	public void fontSizePreferenceChanged(String key, int size) {
+		preference.putInt(key, size);
 	}
 
-	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		
-		pref.putBoolean(preference, isBold.booleanValue());
+	public void isBoldPreferenceChanged(String key, Boolean isBold) {
+		preference.putBoolean(key, isBold.booleanValue());
 	}
 
-	public void shortCutChanged(String preference, String shortcut) {
-		
-		pref.putString(preference, shortcut);
+	public void shortCutChanged(String key, String shortcut) {
+		preference.putString(key, shortcut);
 	}
 
-	public void preferenceChanged(String preference, String value) {
-		pref.putString(preference, value);
+	public void preferenceChanged(String key, String value) {
+		preference.putString(key, value);
 	}
-
-
 }

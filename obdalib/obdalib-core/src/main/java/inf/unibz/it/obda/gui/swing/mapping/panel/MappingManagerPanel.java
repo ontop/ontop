@@ -110,11 +110,12 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/** Creates new form MappingManagerPanel */
-	public MappingManagerPanel(APIController apic, MappingController mapc, DatasourcesController dsc) {
+	public MappingManagerPanel(APIController apic, MappingController mapc, 
+			DatasourcesController dsc, OBDAPreferences preference) {
 		this.apic = apic;
 		this.mapc = mapc;
 		this.dsc = dsc;
-		pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+		pref = preference.getMappingsPreference();
 		initComponents();
 		registerAction();
 		addMenu();
@@ -126,7 +127,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		mapc.addMappingControllerListener(maptreemodel);
 		treeMappingsTree.setRootVisible(false);
 		treeMappingsTree.setModel(maptreemodel);
-		MappingRenderer map_renderer = new MappingRenderer(apic);
+		MappingRenderer map_renderer = new MappingRenderer(apic, preference);
 		treeMappingsTree.setCellRenderer(map_renderer);
 		treeMappingsTree.setEditable(true);
 		treeMappingsTree.setCellEditor(new MappingTreeNodeCellEditor(treeMappingsTree, this, apic));

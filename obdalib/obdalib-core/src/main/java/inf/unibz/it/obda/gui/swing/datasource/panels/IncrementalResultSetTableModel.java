@@ -12,7 +12,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-public class IncrementalResultSetTableModel implements TableModel{
+public class IncrementalResultSetTableModel implements TableModel {
 
 	
 	ResultSet set; // The ResultSet to interpret
@@ -38,14 +38,8 @@ public class IncrementalResultSetTableModel implements TableModel{
 		metadata = set.getMetaData(); // Get metadata on them
 		numcols = metadata.getColumnCount(); // How many columns?
 		listener = new Vector<TableModelListener>();
-		Object o = OBDAPreferences.getOBDAPreferences().getOBDAPreference(OBDAPreferences.JODS_RESULTSET_FETCHSIZE);
-		if(o != null){
-			numrows = (Integer) o;
-			fetchsize = (Integer) o;
-		}else{
-			numrows = 100;
-			fetchsize = 100;
-		}
+		numrows = 100;
+		fetchsize = 100;
 		
 		results = new Vector<Vector<String>>();
 		int i=1;

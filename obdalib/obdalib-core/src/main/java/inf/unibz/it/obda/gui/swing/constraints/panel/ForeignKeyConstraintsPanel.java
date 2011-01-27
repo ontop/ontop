@@ -58,18 +58,18 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
 	private JPanel myself = null;
 	
     /** Creates new form ForeignKeyConstraintsPanel */
-    public ForeignKeyConstraintsPanel(APIController apic) {
+    public ForeignKeyConstraintsPanel(APIController apic, OBDAPreferences preference) {
     	this.apic = apic;
     	myself = this;
         initComponents();
         addListener();
         addMenu();
-        pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+    	pref = preference.getMappingsPreference();
         fkController =(RDBMSForeignKeyConstraintController) apic.getController(RDBMSForeignKeyConstraint.class);
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Disjoinedness Constraints");
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         ForeignKeyConstraintTreeModel model = new ForeignKeyConstraintTreeModel(root, fkController, renderer);
-        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic);
+        ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
         jTreeFKConstraints.setCellRenderer(tcr);
         jTreeFKConstraints.setModel(model);
         jTreeFKConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSForeignKeyConstraint.RDBMSFOREIGNKEYCONSTRAINT));
@@ -80,7 +80,6 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
         pref.registerPreferenceChangedListener(this);
     }
 
-    
     private void addListener(){
     	
         jButtonAdd.addActionListener(new ActionListener(){

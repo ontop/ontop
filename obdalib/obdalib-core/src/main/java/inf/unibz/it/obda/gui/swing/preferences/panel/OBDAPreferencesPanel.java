@@ -35,52 +35,29 @@ import javax.swing.KeyStroke;
  * @author Manfred Gerstgrasser
  */
 public class OBDAPreferencesPanel extends javax.swing.JPanel {
-
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 715907443527650509L;
 	
 	private static final String add = "add.Mapping";
 	private static final String delete = "delete.Mapping";
 	private static final String editHead = "edit.Mapping.Head";
 	private static final String editBody = "edit.Mapping.Body";
 	private static final String editId = "edit.Mapping.id";
+	
 	private MappingManagerPreferences pref = null;
-	private OBDAPreferences obdaPref = null;
-	private JFrame protegeFrame = null;
-	private HashMap<String, KeyStroke> shortCuts = null;
-	/** Creates new form OBDAPreferencesPanel */
-    public OBDAPreferencesPanel() {
-    	pref =  OBDAPreferences.getOBDAPreferences().getMappingsPreference();
-    	obdaPref = OBDAPreferences.getOBDAPreferences();
-    	shortCuts = new HashMap<String, KeyStroke>();
+	private HashMap<String, KeyStroke> shortCuts = new HashMap<String, KeyStroke>();
+	
+	/**
+	 * The constructor 
+	 */
+    public OBDAPreferencesPanel(OBDAPreferences preference) {
+    	pref = preference.getMappingsPreference();
         initComponents();
         addListener();
-        showPreferences();
-
-    }
-    
-    public OBDAPreferencesPanel(JFrame frame) {
-    	pref =  OBDAPreferences.getOBDAPreferences().getMappingsPreference();
-    	this.protegeFrame = frame;
-        initComponents();
-        addListener();
-        showPreferences();
-
+        applyPreferences();
     }
 
     private boolean isKeyStrokeAlreadyAssigned(KeyStroke stroke){
     	
     	return shortCuts.containsValue(stroke);
-    }
-    
-    public static void main(String[] args){
-    	
-    	JFrame frame = new JFrame();
-    	frame.add(new OBDAPreferencesPanel());
-    	frame.setSize(400,400);
-    	frame.setVisible(true);
     }
     
     private void addListener(){
@@ -93,28 +70,28 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 //    		
 //    	});
     	
-    	jButtonClassColour.addActionListener(new ActionListener(){
+    	cmdClassColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonClassColour, MappingManagerPreferences.CLASS_COLOR);
+				ColorChooser cc = new ColorChooser(cmdClassColor, MappingManagerPreferences.CLASS_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	
-    	jButtonDataPropertyColour.addActionListener(new ActionListener(){
+    	cmdDataPropertyColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonDataPropertyColour, MappingManagerPreferences.DATAPROPERTY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, MappingManagerPreferences.DATAPROPERTY_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	
-    	jButtonFunctorPropertyColour1.addActionListener(new ActionListener(){
+    	cmdFunctorColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonFunctorPropertyColour1, MappingManagerPreferences.FUCNTOR_COLOR);
+				ColorChooser cc = new ColorChooser(cmdFunctorColor, MappingManagerPreferences.FUCNTOR_COLOR);
 				cc.setVisible(true);
 			}
     		
@@ -129,50 +106,50 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 //    		
 //    	});
     	
-    	jButtonObjectPropertyColour.addActionListener(new ActionListener(){
+    	cmdObjectPropertyColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonObjectPropertyColour, MappingManagerPreferences.OBJECTPROPTERTY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, MappingManagerPreferences.OBJECTPROPTERTY_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	
-    	jButtonParameterColour.addActionListener(new ActionListener(){
+    	cmdParameterColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonParameterColour, MappingManagerPreferences.PARAMETER_COLOR);
+				ColorChooser cc = new ColorChooser(cmdParameterColor, MappingManagerPreferences.PARAMETER_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	
-    	jButtonVariableColour1.addActionListener(new ActionListener(){
+    	cmdVariableColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonVariableColour1, MappingManagerPreferences.VARIABLE_COLOR);
+				ColorChooser cc = new ColorChooser(cmdVariableColor, MappingManagerPreferences.VARIABLE_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	
-    	jButtonInvalidQueryColour.addActionListener(new ActionListener(){
+    	cmdInvalidQueryColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(jButtonInvalidQueryColour, MappingManagerPreferences.INVALIDQUERY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdInvalidQueryColor, MappingManagerPreferences.INVALIDQUERY_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	String aux = pref.getShortCut(add);
     	KeyStroke ks = KeyStroke.getKeyStroke(aux);
-    	jLabelAddKey.setText(KeyEvent.getKeyModifiersText(ks.getModifiers()) + " + "+ KeyEvent.getKeyText(ks.getKeyCode()));
-    	jLabelAddKey.addMouseListener(new MouseListener(){
+    	lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(ks.getModifiers()) + " + "+ KeyEvent.getKeyText(ks.getKeyCode()));
+    	lblAddMappingKey.addMouseListener(new MouseListener(){
 
 			public void mouseClicked(MouseEvent e) {
 				
-				jLabelAddKey.setText("");
-				jLabelAddKey.requestFocus();
+				lblAddMappingKey.setText("");
+				lblAddMappingKey.requestFocus();
 			}
 			public void mouseEntered(MouseEvent e) {}
 			public void mouseExited(MouseEvent e) {}
@@ -180,7 +157,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			public void mouseReleased(MouseEvent e) {}
     		
     	});
-    	jLabelAddKey.addKeyListener(new KeyListener(){
+    	lblAddMappingKey.addKeyListener(new KeyListener(){
 
 			public void keyPressed(KeyEvent e) {
 				
@@ -194,13 +171,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(add, stroke);
-				    jLabelAddKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
-					jLabelAddKey.setToolTipText(stroke.toString());
+				    lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
+					lblAddMappingKey.setToolTipText(stroke.toString());
 					pref.setShortcut(add, stroke.toString());
 				}else{
 					KeyStroke oldValue = shortCuts.get(add);
 					if(oldValue != null){
-						jLabelAddKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
+						lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
@@ -257,13 +234,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	
     	String aux2 = pref.getShortCut(editBody);
     	KeyStroke ks2 = KeyStroke.getKeyStroke(aux2);
-    	jLabelEditBodyKey.setText(KeyEvent.getKeyModifiersText(ks2.getModifiers()) + " + "+ KeyEvent.getKeyText(ks2.getKeyCode()));
-    	jLabelEditBodyKey.addMouseListener(new MouseListener(){
+    	lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(ks2.getModifiers()) + " + "+ KeyEvent.getKeyText(ks2.getKeyCode()));
+    	lblEditMappingBodyKey.addMouseListener(new MouseListener(){
 
 			public void mouseClicked(MouseEvent e) {
 				
-				jLabelEditBodyKey.setText("");
-				jLabelEditBodyKey.requestFocus();
+				lblEditMappingBodyKey.setText("");
+				lblEditMappingBodyKey.requestFocus();
 			}
 			public void mouseEntered(MouseEvent e) {}
 			public void mouseExited(MouseEvent e) {}
@@ -271,7 +248,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			public void mouseReleased(MouseEvent e) {}
     		
     	});
-    	jLabelEditBodyKey.addKeyListener(new KeyListener(){
+    	lblEditMappingBodyKey.addKeyListener(new KeyListener(){
 
 			public void keyPressed(KeyEvent e) {
 				int mod = e.getModifiers();
@@ -284,13 +261,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(editBody, stroke);
-					jLabelEditBodyKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
-					jLabelEditBodyKey.setToolTipText(stroke.toString());
+					lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
+					lblEditMappingBodyKey.setToolTipText(stroke.toString());
 					pref.setShortcut(editBody, stroke.toString());
 				}else{
 					KeyStroke oldValue = shortCuts.get(editBody);
 					if(oldValue != null){
-						jLabelEditBodyKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
+						lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
@@ -302,13 +279,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	
     	String aux3 = pref.getShortCut(editHead);
     	KeyStroke ks3 = KeyStroke.getKeyStroke(aux3);
-    	jLabelEditHeadKey.setText(KeyEvent.getKeyModifiersText(ks3.getModifiers()) + " + "+ KeyEvent.getKeyText(ks3.getKeyCode()));
-    	jLabelEditHeadKey.addMouseListener(new MouseListener(){
+    	lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(ks3.getModifiers()) + " + "+ KeyEvent.getKeyText(ks3.getKeyCode()));
+    	lblEditMappingHeadKey.addMouseListener(new MouseListener(){
 
 			public void mouseClicked(MouseEvent e) {
 				
-				jLabelEditHeadKey.setText("");
-				jLabelEditHeadKey.requestFocus();
+				lblEditMappingHeadKey.setText("");
+				lblEditMappingHeadKey.requestFocus();
 			}
 			public void mouseEntered(MouseEvent e) {}
 			public void mouseExited(MouseEvent e) {}
@@ -316,7 +293,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			public void mouseReleased(MouseEvent e) {}
     		
     	});
-    	jLabelEditHeadKey.addKeyListener(new KeyListener(){
+    	lblEditMappingHeadKey.addKeyListener(new KeyListener(){
 
 			public void keyPressed(KeyEvent e) {
 				int mod = e.getModifiers();
@@ -329,13 +306,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(editHead, stroke);
-					jLabelEditHeadKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
-					jLabelEditHeadKey.setToolTipText(stroke.toString());
+					lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
+					lblEditMappingHeadKey.setToolTipText(stroke.toString());
 					pref.setShortcut(editHead, stroke.toString());
 				}else{
 					KeyStroke oldValue = shortCuts.get(editHead);
 					if(oldValue != null){
-						jLabelEditHeadKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
+						lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
@@ -347,13 +324,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	
     	String aux4 = pref.getShortCut(editId);
     	KeyStroke ks4 = KeyStroke.getKeyStroke(aux4);
-    	jLabelEditIDKey.setText(KeyEvent.getKeyModifiersText(ks4.getModifiers()) + " + "+ KeyEvent.getKeyText(ks4.getKeyCode()));
-    	jLabelEditIDKey.addMouseListener(new MouseListener(){
+    	lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(ks4.getModifiers()) + " + "+ KeyEvent.getKeyText(ks4.getKeyCode()));
+    	lblMappingIdKey.addMouseListener(new MouseListener(){
 
 			public void mouseClicked(MouseEvent e) {
 				
-				jLabelEditIDKey.setText("");
-				jLabelEditIDKey.requestFocus();
+				lblMappingIdKey.setText("");
+				lblMappingIdKey.requestFocus();
 			}
 			public void mouseEntered(MouseEvent e) {}
 			public void mouseExited(MouseEvent e) {}
@@ -361,7 +338,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			public void mouseReleased(MouseEvent e) {}
     		
     	});
-    	jLabelEditIDKey.addKeyListener(new KeyListener(){
+    	lblMappingIdKey.addKeyListener(new KeyListener(){
 
 			public void keyPressed(KeyEvent e) {
 				int mod = e.getModifiers();
@@ -374,13 +351,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(editHead, stroke);
-					jLabelEditIDKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
-					jLabelEditIDKey.setToolTipText(stroke.toString());
+					lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
+					lblMappingIdKey.setToolTipText(stroke.toString());
 					pref.setShortcut(editId, stroke.toString());
 				}else{
 					KeyStroke oldValue = shortCuts.get(editId);
 					if(oldValue != null){
-						jLabelEditIDKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
+						lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
 					JOptionPane.showMessageDialog(null, "Key stroke already assigned. Please choose an other combination.", "ERROR", JOptionPane.ERROR_MESSAGE);
 				}
@@ -391,26 +368,32 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	});
     }
     
-    private void showPreferences(){
+    private void applyPreferences(){
  
     	Color clazz = pref.getColor(MappingManagerPreferences.CLASS_COLOR);
-    	jButtonClassColour.setBackground(clazz);
-    	jButtonClassColour.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdClassColor.setBackground(clazz);
+    	cmdClassColor.setOpaque(true);
+    	cmdClassColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	Color dp = pref.getColor(MappingManagerPreferences.DATAPROPERTY_COLOR);
-    	jButtonDataPropertyColour.setBackground(dp);
-    	jButtonDataPropertyColour.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdDataPropertyColor.setBackground(dp);
+    	cmdDataPropertyColor.setOpaque(true);
+    	cmdDataPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	Color op = pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR);
-    	jButtonObjectPropertyColour.setBackground(op);
-    	jButtonObjectPropertyColour.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdObjectPropertyColor.setBackground(op);
+    	cmdObjectPropertyColor.setOpaque(true);
+    	cmdObjectPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	Color var = pref.getColor(MappingManagerPreferences.VARIABLE_COLOR);
-    	jButtonVariableColour1.setBackground(var);
-    	jButtonVariableColour1.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdVariableColor.setBackground(var);
+    	cmdVariableColor.setOpaque(true);
+    	cmdVariableColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	Color par = pref.getColor(MappingManagerPreferences.PARAMETER_COLOR);
-    	jButtonParameterColour.setBackground(par);
-    	jButtonParameterColour.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdParameterColor.setBackground(par);
+    	cmdParameterColor.setOpaque(true);
+    	cmdParameterColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	Color fun = pref.getColor(MappingManagerPreferences.FUCNTOR_COLOR);
-    	jButtonFunctorPropertyColour1.setBackground(fun);
-    	jButtonFunctorPropertyColour1.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdFunctorColor.setBackground(fun);
+    	cmdFunctorColor.setOpaque(true);
+    	cmdFunctorColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
 //    	Color body = pref.getColor(MappingManagerPreferences.MAPPING_BODY_COLOR);
 //    	jButtonBodyPropertyColour1.setBackground(body);
 //    	jButtonBodyPropertyColour1.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
@@ -418,58 +401,59 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 //    	jButtonIDColour2.setBackground(id);
 //    	jButtonIDColour2.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	Color iq = pref.getColor(MappingManagerPreferences.INVALIDQUERY_COLOR);
-    	jButtonInvalidQueryColour.setBackground(iq);
-    	jButtonInvalidQueryColour.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
+    	cmdInvalidQueryColor.setBackground(iq);
+    	cmdInvalidQueryColor.setOpaque(true);
+    	cmdInvalidQueryColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
     	String fontClassFam = pref.getFontFamily(MappingManagerPreferences.CLASS_FONTFAMILY);
     	int classSize = pref.getFontSize(MappingManagerPreferences.CLASS_FONTSIZE);
-    	jButtonClassFont.setText(fontClassFam + ", " + classSize);
-    	jButtonClassFont.setToolTipText(fontClassFam + ", " + classSize);
+    	cmdClassFont.setText(fontClassFam + ", " + classSize);
+    	cmdClassFont.setToolTipText(fontClassFam + ", " + classSize);
     	
     	String fontDP = pref.getFontFamily(MappingManagerPreferences.DATAPROPERTY_FONTFAMILY);
     	int sizeDP = pref.getFontSize(MappingManagerPreferences.DATAPROPERTY_FONTSIZE);
-    	jButtonDataPropertyFont.setText(fontDP + ", " + sizeDP);
-    	jButtonDataPropertyFont.setToolTipText(fontDP + ", " + sizeDP);
+    	cmdDataPropertyFont.setText(fontDP + ", " + sizeDP);
+    	cmdDataPropertyFont.setToolTipText(fontDP + ", " + sizeDP);
     	
     	String fontOP = pref.getFontFamily(MappingManagerPreferences.OBJECTPROPTERTY_FONTFAMILY);
     	int sizeOP = pref.getFontSize(MappingManagerPreferences.OBJECTPROPTERTY_FONTSIZE);
-    	jButtonObjectPropertyFont.setText(fontOP + ", " + sizeOP);
-    	jButtonObjectPropertyFont.setToolTipText(fontOP + ", " + sizeOP);
+    	cmdObjectPropertyFont.setText(fontOP + ", " + sizeOP);
+    	cmdObjectPropertyFont.setToolTipText(fontOP + ", " + sizeOP);
     	
     	String fontVar = pref.getFontFamily(MappingManagerPreferences.VARIABLE_FONTFAMILY);
     	int varSize = pref.getFontSize(MappingManagerPreferences.VARIABLE_FONTSIZE);
-    	jButtonVariableFont1.setText(fontVar + ", " + varSize);
-    	jButtonVariableFont1.setToolTipText(fontVar + ", " + varSize);
+    	cmdVariableFonr.setText(fontVar + ", " + varSize);
+    	cmdVariableFonr.setToolTipText(fontVar + ", " + varSize);
     	
     	String fontPara = pref.getFontFamily(MappingManagerPreferences.PARAMETER_FONTFAMILY);
     	int paraSize = pref.getFontSize(MappingManagerPreferences.PARAMETER_FONTSIZE);
-    	jButtonParameterFont1.setText(fontPara + ", "+ paraSize);
-    	jButtonParameterFont1.setToolTipText(fontPara + ", "+ paraSize);
+    	cmdParameterFont.setText(fontPara + ", "+ paraSize);
+    	cmdParameterFont.setToolTipText(fontPara + ", "+ paraSize);
     	
     	String fontFunc = pref.getFontFamily(MappingManagerPreferences.FUCNTOR_FONTFAMILY);
     	int funcSize = pref.getFontSize(MappingManagerPreferences.FUCNTOR_FONTSIZE);
-    	jButtonFunctorPropertyFont1.setText(fontFunc + ", " +funcSize);
-    	jButtonFunctorPropertyFont1.setToolTipText(fontFunc + ", " +funcSize);
+    	cmdFunctorFont.setText(fontFunc + ", " +funcSize);
+    	cmdFunctorFont.setToolTipText(fontFunc + ", " +funcSize);
     	
     	String fontBody = pref.getFontFamily(MappingManagerPreferences.MAPPING_BODY_FONTFAMILY);
     	int bodySize = pref.getFontSize(MappingManagerPreferences.MAPPING_BODY_FONTSIZE);
-    	jButtonbodyPropertyFont2.setText(fontBody + ", " + bodySize);
-    	jButtonbodyPropertyFont2.setToolTipText(fontBody + ", " + bodySize);
+    	cmdMappingBodyFont.setText(fontBody + ", " + bodySize);
+    	cmdMappingBodyFont.setToolTipText(fontBody + ", " + bodySize);
     	
     	String fontID = pref.getFontFamily(MappingManagerPreferences.MAPPING_ID_FONTFAMILY);
     	int idSize = pref.getFontSize(MappingManagerPreferences.MAPPING_ID_FONTSIZE);
-    	jButtonIDFont2.setText(fontID + ", "+ idSize);
-    	jButtonIDFont2.setToolTipText(fontID + ", "+ idSize);
+    	cmdMappingIdFont.setText(fontID + ", "+ idSize);
+    	cmdMappingIdFont.setToolTipText(fontID + ", "+ idSize);
     	
     	String fontIQ= pref.getFontFamily(MappingManagerPreferences.INVALIDQUERY_FONTFAMILY);
     	int iqSize = pref.getFontSize(MappingManagerPreferences.INVALIDQUERY_FONTSIZE);
-    	jButtonInvalidQueryFont.setText(fontIQ + ", "+ iqSize);
-    	jButtonInvalidQueryFont.setToolTipText(fontIQ + ", "+ iqSize);
+    	cmdInvalidQueryFont.setText(fontIQ + ", "+ iqSize);
+    	cmdInvalidQueryFont.setToolTipText(fontIQ + ", "+ iqSize);
     	
     	String fontDep = pref.getFontFamily(MappingManagerPreferences.DEPENDENCIES_FONTFAMILY);
     	int depSize = pref.getFontSize(MappingManagerPreferences.DEPENDENCIES_FONTSIZE);
-    	jButtonDependenciesFont.setText(fontDep + ", " + depSize);
-    	jButtonDependenciesFont.setToolTipText(fontDep + ", " + depSize);
+    	cmdDependencyFont.setText(fontDep + ", " + depSize);
+    	cmdDependencyFont.setToolTipText(fontDep + ", " + depSize);
     	
     }
     
@@ -483,131 +467,104 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jLabel5 = new javax.swing.JLabel();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jPanel1 = new javax.swing.JPanel();
-        jPanelClassPreferences = new javax.swing.JPanel();
-        jLabelClass = new javax.swing.JLabel();
-        jButtonClassColour = new javax.swing.JButton();
-        jButtonClassFont = new javax.swing.JButton();
-        jButtonDataPropertyFont = new javax.swing.JButton();
-        jButtonDataPropertyColour = new javax.swing.JButton();
-        jLabelDataProperty = new javax.swing.JLabel();
-        jButtonObjectPropertyFont = new javax.swing.JButton();
-        jButtonObjectPropertyColour = new javax.swing.JButton();
-        jLabelObjectProperty = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
-        jPanelVariablePreferences = new javax.swing.JPanel();
-        jLabelFunctors = new javax.swing.JLabel();
-        jButtonVariableColour1 = new javax.swing.JButton();
-        jButtonVariableFont1 = new javax.swing.JButton();
-        jLabelVariables = new javax.swing.JLabel();
-        jButtonParameterColour = new javax.swing.JButton();
-        jButtonParameterFont1 = new javax.swing.JButton();
-        jButtonFunctorPropertyFont1 = new javax.swing.JButton();
-        jButtonFunctorPropertyColour1 = new javax.swing.JButton();
-        jLabelParameters = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jPanelBodyProperty1 = new javax.swing.JPanel();
-        jButtonbodyPropertyFont2 = new javax.swing.JButton();
-        jButtonBodyPropertyColour1 = new javax.swing.JButton();
-        jLabelID = new javax.swing.JLabel();
-        jLabelBody = new javax.swing.JLabel();
-        jButtonIDColour2 = new javax.swing.JButton();
-        jButtonIDFont2 = new javax.swing.JButton();
-        jLabel3 = new javax.swing.JLabel();
-        jLabelPlaceHolder = new javax.swing.JLabel();
-        jPanelInvalidQuery = new javax.swing.JPanel();
-        jButtonInvalidQueryFont = new javax.swing.JButton();
-        jButtonInvalidQueryColour = new javax.swing.JButton();
-        jLabelInvalidQuery = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jPanelInvalidDependencies = new javax.swing.JPanel();
-        jButtonDependenciesFont = new javax.swing.JButton();
-        jButtonDependenciesColour = new javax.swing.JButton();
-        jLabelDependencies = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jPanel3 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        jLabelAdd = new javax.swing.JLabel();
-        jLabelAddKey = new javax.swing.JLabel();
-        jLabelPH = new javax.swing.JLabel();
-        jLabelDelete = new javax.swing.JLabel();
-        jLabelDeleteKey = new javax.swing.JLabel();
-        jLabelPH1 = new javax.swing.JLabel();
-        jLabelEditID = new javax.swing.JLabel();
-        jLabelEditIDKey = new javax.swing.JLabel();
-        jLabelPH2 = new javax.swing.JLabel();
-        jLabelPH3 = new javax.swing.JLabel();
-        jLabelEditBodyKey = new javax.swing.JLabel();
-        jLabelEditBody = new javax.swing.JLabel();
-        jLabelPH4 = new javax.swing.JLabel();
-        jLabelEditHeadKey = new javax.swing.JLabel();
-        jLabelEditHead = new javax.swing.JLabel();
-        jLabelPlaceHolder1 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        tabMainPanel = new javax.swing.JTabbedPane();
+        pnlDisplayPreferencesTab = new javax.swing.JPanel();
+        pnlClassPreferences = new javax.swing.JPanel();
+        lblClass = new javax.swing.JLabel();
+        cmdClassColor = new javax.swing.JButton();
+        cmdClassFont = new javax.swing.JButton();
+        lblDataProperty = new javax.swing.JLabel();
+        cmdDataPropertyFont = new javax.swing.JButton();
+        cmdDataPropertyColor = new javax.swing.JButton();
+        lblObjectProperty = new javax.swing.JLabel();
+        cmdObjectPropertyFont = new javax.swing.JButton();
+        cmdObjectPropertyColor = new javax.swing.JButton();
+        pnlVariablePreferences = new javax.swing.JPanel();
+        lblParameter = new javax.swing.JLabel();
+        cmdParameterColor = new javax.swing.JButton();
+        cmdParameterFont = new javax.swing.JButton();
+        lblVariable = new javax.swing.JLabel();
+        cmdVariableColor = new javax.swing.JButton();
+        cmdVariableFonr = new javax.swing.JButton();
+        lblFunctors = new javax.swing.JLabel();
+        cmdFunctorColor = new javax.swing.JButton();
+        cmdFunctorFont = new javax.swing.JButton();
+        pnlMappingPreferences = new javax.swing.JPanel();
+        lblMappingBody = new javax.swing.JLabel();
+        cmdMappingBodyColor = new javax.swing.JButton();
+        cmdMappingBodyFont = new javax.swing.JButton();
+        lblMappingId = new javax.swing.JLabel();
+        cmdMappingIdColor = new javax.swing.JButton();
+        cmdMappingIdFont = new javax.swing.JButton();
+        pnlDataSourceDependencies = new javax.swing.JPanel();
+        cmdDependencyFont = new javax.swing.JButton();
+        cmdDependencyColor = new javax.swing.JButton();
+        lblDependency = new javax.swing.JLabel();
+        pnlInvalidQueries = new javax.swing.JPanel();
+        cmdInvalidQueryFont = new javax.swing.JButton();
+        cmdInvalidQueryColor = new javax.swing.JButton();
+        lblInvalidQuery = new javax.swing.JLabel();
+        pnlEditingShortcutTab = new javax.swing.JPanel();
+        pnlShortcutSettings = new javax.swing.JPanel();
+        lblAddMapping = new javax.swing.JLabel();
+        lblAddMappingKey = new javax.swing.JLabel();
+        lblDeleteMapping = new javax.swing.JLabel();
+        lblDeleteMappingKey = new javax.swing.JLabel();
+        lblEditMappingHead = new javax.swing.JLabel();
+        lblEditMappingHeadKey = new javax.swing.JLabel();
+        lblEditMappingBody = new javax.swing.JLabel();
+        lblEditMappingBodyKey = new javax.swing.JLabel();
+        lblEditMappingId = new javax.swing.JLabel();
+        lblMappingIdKey = new javax.swing.JLabel();
+        lblInfo = new javax.swing.JLabel();
 
-        setBorder(null);
-        setMinimumSize(new java.awt.Dimension(400, 400));
-        setPreferredSize(new java.awt.Dimension(500, 800));
-        setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        add(jLabel5, gridBagConstraints);
+        setMinimumSize(new java.awt.Dimension(520, 600));
+        setPreferredSize(new java.awt.Dimension(520, 600));
+        setLayout(new java.awt.BorderLayout());
 
-        jTabbedPane1.setBorder(null);
-        jTabbedPane1.setMinimumSize(new java.awt.Dimension(200, 200));
-        jTabbedPane1.setOpaque(true);
-        jTabbedPane1.setPreferredSize(new java.awt.Dimension(500, 800));
+        tabMainPanel.setMinimumSize(new java.awt.Dimension(200, 200));
+        tabMainPanel.setOpaque(true);
+        tabMainPanel.setPreferredSize(new java.awt.Dimension(500, 800));
 
-        jScrollPane1.setBorder(null);
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(400, 100));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(500, 800));
+        pnlDisplayPreferencesTab.setMinimumSize(new java.awt.Dimension(485, 560));
+        pnlDisplayPreferencesTab.setPreferredSize(new java.awt.Dimension(485, 560));
+        pnlDisplayPreferencesTab.setLayout(new java.awt.GridBagLayout());
 
-        jPanel1.setBorder(null);
-        jPanel1.setMinimumSize(new java.awt.Dimension(894, 491));
-        jPanel1.setPreferredSize(new java.awt.Dimension(450, 750));
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        pnlClassPreferences.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "OWL Entities preferences"));
+        pnlClassPreferences.setMinimumSize(new java.awt.Dimension(475, 110));
+        pnlClassPreferences.setPreferredSize(new java.awt.Dimension(475, 110));
+        pnlClassPreferences.setLayout(new java.awt.GridBagLayout());
 
-        jPanelClassPreferences.setBorder(javax.swing.BorderFactory.createTitledBorder("OWL Entities preferences"));
-        jPanelClassPreferences.setLayout(new java.awt.GridBagLayout());
-
-        jLabelClass.setText("Class:\n\n\n");
-        jLabelClass.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelClass.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelClass.setPreferredSize(new java.awt.Dimension(100, 20));
+        lblClass.setText("Class:\n\n\n");
+        lblClass.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblClass.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblClass.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelClassPreferences.add(jLabelClass, gridBagConstraints);
+        pnlClassPreferences.add(lblClass, gridBagConstraints);
 
-        jButtonClassColour.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonClassColour.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonClassColour.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonClassColour.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonClassColour.setRolloverEnabled(false);
+        cmdClassColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdClassColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdClassColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdClassColor.setPreferredSize(new java.awt.Dimension(60, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
-        jPanelClassPreferences.add(jButtonClassColour, gridBagConstraints);
+        pnlClassPreferences.add(cmdClassColor, gridBagConstraints);
 
-        jButtonClassFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonClassFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonClassFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonClassFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonClassFont.addActionListener(new java.awt.event.ActionListener() {
+        cmdClassFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdClassFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdClassFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdClassFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdClassFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonClassFontActionPerformed(evt);
+                cmdClassFontActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -615,15 +572,27 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelClassPreferences.add(jButtonClassFont, gridBagConstraints);
+        pnlClassPreferences.add(cmdClassFont, gridBagConstraints);
 
-        jButtonDataPropertyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonDataPropertyFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonDataPropertyFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonDataPropertyFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonDataPropertyFont.addActionListener(new java.awt.event.ActionListener() {
+        lblDataProperty.setText("Data Property:");
+        lblDataProperty.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblDataProperty.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblDataProperty.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.ipadx = 80;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlClassPreferences.add(lblDataProperty, gridBagConstraints);
+
+        cmdDataPropertyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdDataPropertyFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdDataPropertyFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdDataPropertyFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdDataPropertyFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDataPropertyFontActionPerformed(evt);
+                cmdDataPropertyFontActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -631,39 +600,38 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelClassPreferences.add(jButtonDataPropertyFont, gridBagConstraints);
+        pnlClassPreferences.add(cmdDataPropertyFont, gridBagConstraints);
 
-        jButtonDataPropertyColour.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonDataPropertyColour.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonDataPropertyColour.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonDataPropertyColour.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonDataPropertyColour.setRolloverEnabled(false);
+        cmdDataPropertyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdDataPropertyColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdDataPropertyColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdDataPropertyColor.setPreferredSize(new java.awt.Dimension(60, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
-        jPanelClassPreferences.add(jButtonDataPropertyColour, gridBagConstraints);
+        pnlClassPreferences.add(cmdDataPropertyColor, gridBagConstraints);
 
-        jLabelDataProperty.setText("Data Properties:");
-        jLabelDataProperty.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelDataProperty.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelDataProperty.setPreferredSize(new java.awt.Dimension(100, 20));
+        lblObjectProperty.setText("Object Property:");
+        lblObjectProperty.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblObjectProperty.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblObjectProperty.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelClassPreferences.add(jLabelDataProperty, gridBagConstraints);
+        pnlClassPreferences.add(lblObjectProperty, gridBagConstraints);
 
-        jButtonObjectPropertyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonObjectPropertyFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonObjectPropertyFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonObjectPropertyFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonObjectPropertyFont.addActionListener(new java.awt.event.ActionListener() {
+        cmdObjectPropertyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdObjectPropertyFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdObjectPropertyFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdObjectPropertyFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdObjectPropertyFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonObjectPropertyFontActionPerformed(evt);
+                cmdObjectPropertyFontActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -671,123 +639,194 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelClassPreferences.add(jButtonObjectPropertyFont, gridBagConstraints);
+        pnlClassPreferences.add(cmdObjectPropertyFont, gridBagConstraints);
 
-        jButtonObjectPropertyColour.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonObjectPropertyColour.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonObjectPropertyColour.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonObjectPropertyColour.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonObjectPropertyColour.setRolloverEnabled(false);
+        cmdObjectPropertyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdObjectPropertyColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdObjectPropertyColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdObjectPropertyColor.setPreferredSize(new java.awt.Dimension(60, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
-        jPanelClassPreferences.add(jButtonObjectPropertyColour, gridBagConstraints);
+        pnlClassPreferences.add(cmdObjectPropertyColor, gridBagConstraints);
 
-        jLabelObjectProperty.setText("Object Properties:");
-        jLabelObjectProperty.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelObjectProperty.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelObjectProperty.setPreferredSize(new java.awt.Dimension(100, 20));
+        pnlDisplayPreferencesTab.add(pnlClassPreferences, new java.awt.GridBagConstraints());
+
+        pnlVariablePreferences.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Variable preferences"));
+        pnlVariablePreferences.setMinimumSize(new java.awt.Dimension(475, 110));
+        pnlVariablePreferences.setPreferredSize(new java.awt.Dimension(475, 110));
+        pnlVariablePreferences.setLayout(new java.awt.GridBagLayout());
+
+        lblParameter.setText("Parameter:");
+        lblParameter.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblParameter.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblParameter.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 80;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlVariablePreferences.add(lblParameter, gridBagConstraints);
+
+        cmdParameterColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdParameterColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdParameterColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdParameterColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlVariablePreferences.add(cmdParameterColor, gridBagConstraints);
+
+        cmdParameterFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdParameterFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdParameterFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdParameterFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdParameterFont.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdParameterFontActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
+        pnlVariablePreferences.add(cmdParameterFont, gridBagConstraints);
+
+        lblVariable.setText("Variable:");
+        lblVariable.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblVariable.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblVariable.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.ipadx = 80;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlVariablePreferences.add(lblVariable, gridBagConstraints);
+
+        cmdVariableColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdVariableColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdVariableColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdVariableColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlVariablePreferences.add(cmdVariableColor, gridBagConstraints);
+
+        cmdVariableFonr.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdVariableFonr.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdVariableFonr.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdVariableFonr.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdVariableFonr.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdVariableFonrActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
+        pnlVariablePreferences.add(cmdVariableFonr, gridBagConstraints);
+
+        lblFunctors.setText("Functor:");
+        lblFunctors.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblFunctors.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblFunctors.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelClassPreferences.add(jLabelObjectProperty, gridBagConstraints);
+        pnlVariablePreferences.add(lblFunctors, gridBagConstraints);
+
+        cmdFunctorColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdFunctorColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdFunctorColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdFunctorColor.setPreferredSize(new java.awt.Dimension(60, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridheight = 3;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlVariablePreferences.add(cmdFunctorColor, gridBagConstraints);
+
+        cmdFunctorFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdFunctorFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdFunctorFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdFunctorFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdFunctorFont.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdFunctorFontActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
+        pnlVariablePreferences.add(cmdFunctorFont, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        jPanelClassPreferences.add(jLabel1, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 25;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
-        jPanel1.add(jPanelClassPreferences, gridBagConstraints);
+        pnlDisplayPreferencesTab.add(pnlVariablePreferences, gridBagConstraints);
 
-        jPanelVariablePreferences.setBorder(javax.swing.BorderFactory.createTitledBorder("Variable preferences"));
-        jPanelVariablePreferences.setLayout(new java.awt.GridBagLayout());
+        pnlMappingPreferences.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Mapping preferences"));
+        pnlMappingPreferences.setMinimumSize(new java.awt.Dimension(475, 90));
+        pnlMappingPreferences.setPreferredSize(new java.awt.Dimension(475, 90));
+        pnlMappingPreferences.setLayout(new java.awt.GridBagLayout());
 
-        jLabelFunctors.setText("Functors:");
-        jLabelFunctors.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelFunctors.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelFunctors.setPreferredSize(new java.awt.Dimension(100, 20));
+        lblMappingBody.setText("Mappings Body:");
+        lblMappingBody.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblMappingBody.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblMappingBody.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelVariablePreferences.add(jLabelFunctors, gridBagConstraints);
+        pnlMappingPreferences.add(lblMappingBody, gridBagConstraints);
 
-        jButtonVariableColour1.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonVariableColour1.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonVariableColour1.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonVariableColour1.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonVariableColour1.setRolloverEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelVariablePreferences.add(jButtonVariableColour1, gridBagConstraints);
-
-        jButtonVariableFont1.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonVariableFont1.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonVariableFont1.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonVariableFont1.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonVariableFont1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonVariableFont1ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelVariablePreferences.add(jButtonVariableFont1, gridBagConstraints);
-
-        jLabelVariables.setText("Varaiables:");
-        jLabelVariables.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelVariables.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelVariables.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelVariablePreferences.add(jLabelVariables, gridBagConstraints);
-
-        jButtonParameterColour.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonParameterColour.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonParameterColour.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonParameterColour.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonParameterColour.setRolloverEnabled(false);
+        cmdMappingBodyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdMappingBodyColor.setEnabled(false);
+        cmdMappingBodyColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdMappingBodyColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdMappingBodyColor.setPreferredSize(new java.awt.Dimension(60, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelVariablePreferences.add(jButtonParameterColour, gridBagConstraints);
+        pnlMappingPreferences.add(cmdMappingBodyColor, gridBagConstraints);
 
-        jButtonParameterFont1.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonParameterFont1.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonParameterFont1.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonParameterFont1.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonParameterFont1.addActionListener(new java.awt.event.ActionListener() {
+        cmdMappingBodyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdMappingBodyFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdMappingBodyFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdMappingBodyFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdMappingBodyFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonParameterFont1ActionPerformed(evt);
+                cmdMappingBodyFontActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -796,146 +835,40 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelVariablePreferences.add(jButtonParameterFont1, gridBagConstraints);
+        pnlMappingPreferences.add(cmdMappingBodyFont, gridBagConstraints);
 
-        jButtonFunctorPropertyFont1.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonFunctorPropertyFont1.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonFunctorPropertyFont1.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonFunctorPropertyFont1.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonFunctorPropertyFont1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonFunctorPropertyFont1ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelVariablePreferences.add(jButtonFunctorPropertyFont1, gridBagConstraints);
-
-        jButtonFunctorPropertyColour1.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonFunctorPropertyColour1.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonFunctorPropertyColour1.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonFunctorPropertyColour1.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonFunctorPropertyColour1.setRolloverEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelVariablePreferences.add(jButtonFunctorPropertyColour1, gridBagConstraints);
-
-        jLabelParameters.setText("Parameters:");
-        jLabelParameters.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelParameters.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelParameters.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelVariablePreferences.add(jLabelParameters, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        jPanelVariablePreferences.add(jLabel2, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 25;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(jPanelVariablePreferences, gridBagConstraints);
-
-        jPanelBodyProperty1.setBorder(javax.swing.BorderFactory.createTitledBorder("Mapping Preferences"));
-        jPanelBodyProperty1.setLayout(new java.awt.GridBagLayout());
-
-        jButtonbodyPropertyFont2.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonbodyPropertyFont2.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonbodyPropertyFont2.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonbodyPropertyFont2.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonbodyPropertyFont2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonbodyPropertyFont2ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelBodyProperty1.add(jButtonbodyPropertyFont2, gridBagConstraints);
-
-        jButtonBodyPropertyColour1.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonBodyPropertyColour1.setEnabled(false);
-        jButtonBodyPropertyColour1.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonBodyPropertyColour1.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonBodyPropertyColour1.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonBodyPropertyColour1.setRolloverEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelBodyProperty1.add(jButtonBodyPropertyColour1, gridBagConstraints);
-
-        jLabelID.setText("Mappings ID:");
-        jLabelID.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelID.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelID.setPreferredSize(new java.awt.Dimension(100, 20));
+        lblMappingId.setText("Mappings ID:");
+        lblMappingId.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblMappingId.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblMappingId.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelBodyProperty1.add(jLabelID, gridBagConstraints);
+        pnlMappingPreferences.add(lblMappingId, gridBagConstraints);
 
-        jLabelBody.setText("Mappings Body:");
-        jLabelBody.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelBody.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelBody.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelBodyProperty1.add(jLabelBody, gridBagConstraints);
-
-        jButtonIDColour2.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonIDColour2.setEnabled(false);
-        jButtonIDColour2.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonIDColour2.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonIDColour2.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonIDColour2.setRolloverEnabled(false);
+        cmdMappingIdColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdMappingIdColor.setEnabled(false);
+        cmdMappingIdColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdMappingIdColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdMappingIdColor.setPreferredSize(new java.awt.Dimension(60, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelBodyProperty1.add(jButtonIDColour2, gridBagConstraints);
+        pnlMappingPreferences.add(cmdMappingIdColor, gridBagConstraints);
 
-        jButtonIDFont2.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonIDFont2.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonIDFont2.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonIDFont2.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonIDFont2.addActionListener(new java.awt.event.ActionListener() {
+        cmdMappingIdFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdMappingIdFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdMappingIdFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdMappingIdFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdMappingIdFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonIDFont2ActionPerformed(evt);
+                cmdMappingIdFontActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -944,470 +877,364 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelBodyProperty1.add(jButtonIDFont2, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        jPanelBodyProperty1.add(jLabel3, gridBagConstraints);
+        pnlMappingPreferences.add(cmdMappingIdFont, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 25;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(jPanelBodyProperty1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        jPanel1.add(jLabelPlaceHolder, gridBagConstraints);
-
-        jPanelInvalidQuery.setBorder(javax.swing.BorderFactory.createTitledBorder("Invalid Queries"));
-        jPanelInvalidQuery.setLayout(new java.awt.GridBagLayout());
-
-        jButtonInvalidQueryFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonInvalidQueryFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonInvalidQueryFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonInvalidQueryFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonInvalidQueryFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonInvalidQueryFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelInvalidQuery.add(jButtonInvalidQueryFont, gridBagConstraints);
-
-        jButtonInvalidQueryColour.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonInvalidQueryColour.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonInvalidQueryColour.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonInvalidQueryColour.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonInvalidQueryColour.setRolloverEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelInvalidQuery.add(jButtonInvalidQueryColour, gridBagConstraints);
-
-        jLabelInvalidQuery.setText("Query:");
-        jLabelInvalidQuery.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelInvalidQuery.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelInvalidQuery.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelInvalidQuery.add(jLabelInvalidQuery, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        jPanelInvalidQuery.add(jLabel4, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 25;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(jPanelInvalidQuery, gridBagConstraints);
-
-        jPanelInvalidDependencies.setBorder(javax.swing.BorderFactory.createTitledBorder("Data Source Dependencies"));
-        jPanelInvalidDependencies.setLayout(new java.awt.GridBagLayout());
-
-        jButtonDependenciesFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonDependenciesFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        jButtonDependenciesFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        jButtonDependenciesFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        jButtonDependenciesFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDependenciesFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        jPanelInvalidDependencies.add(jButtonDependenciesFont, gridBagConstraints);
-
-        jButtonDependenciesColour.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        jButtonDependenciesColour.setEnabled(false);
-        jButtonDependenciesColour.setMaximumSize(new java.awt.Dimension(90, 17));
-        jButtonDependenciesColour.setMinimumSize(new java.awt.Dimension(60, 17));
-        jButtonDependenciesColour.setPreferredSize(new java.awt.Dimension(60, 17));
-        jButtonDependenciesColour.setRolloverEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelInvalidDependencies.add(jButtonDependenciesColour, gridBagConstraints);
-
-        jLabelDependencies.setText("Dependencies:");
-        jLabelDependencies.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelDependencies.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelDependencies.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanelInvalidDependencies.add(jLabelDependencies, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        jPanelInvalidDependencies.add(jLabel7, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 25;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(jPanelInvalidDependencies, gridBagConstraints);
-
-        jScrollPane1.setViewportView(jPanel1);
-
-        jTabbedPane1.addTab("Display Preferences", jScrollPane1);
-
-        jScrollPane2.setBorder(null);
-        jScrollPane2.setMinimumSize(new java.awt.Dimension(400, 493));
-        jScrollPane2.setPreferredSize(new java.awt.Dimension(600, 800));
-
-        jPanel3.setBorder(null);
-        jPanel3.setMinimumSize(new java.awt.Dimension(212, 236));
-        jPanel3.setPreferredSize(new java.awt.Dimension(450, 550));
-        jPanel3.setLayout(new java.awt.GridBagLayout());
-
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Shortcut Settings"));
-        jPanel2.setLayout(new java.awt.GridBagLayout());
-
-        jLabelAdd.setText("Add Mapping: *");
-        jLabelAdd.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelAdd.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelAdd.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.ipadx = 170;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelAdd, gridBagConstraints);
-
-        jLabelAddKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jLabelAddKey.setMaximumSize(new java.awt.Dimension(120, 20));
-        jLabelAddKey.setMinimumSize(new java.awt.Dimension(120, 20));
-        jLabelAddKey.setPreferredSize(new java.awt.Dimension(120, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelAddKey, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelPH, gridBagConstraints);
-
-        jLabelDelete.setText("Delete Mapping: *");
-        jLabelDelete.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelDelete.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelDelete.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.ipadx = 170;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelDelete, gridBagConstraints);
-
-        jLabelDeleteKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jLabelDeleteKey.setEnabled(false);
-        jLabelDeleteKey.setMaximumSize(new java.awt.Dimension(120, 20));
-        jLabelDeleteKey.setMinimumSize(new java.awt.Dimension(120, 20));
-        jLabelDeleteKey.setPreferredSize(new java.awt.Dimension(120, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelDeleteKey, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelPH1, gridBagConstraints);
-
-        jLabelEditID.setText("Edit Mapping ID: *");
-        jLabelEditID.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelEditID.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelEditID.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.ipadx = 170;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelEditID, gridBagConstraints);
-
-        jLabelEditIDKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jLabelEditIDKey.setMaximumSize(new java.awt.Dimension(120, 20));
-        jLabelEditIDKey.setMinimumSize(new java.awt.Dimension(120, 20));
-        jLabelEditIDKey.setPreferredSize(new java.awt.Dimension(120, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelEditIDKey, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelPH2, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelPH3, gridBagConstraints);
-
-        jLabelEditBodyKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jLabelEditBodyKey.setMaximumSize(new java.awt.Dimension(120, 20));
-        jLabelEditBodyKey.setMinimumSize(new java.awt.Dimension(120, 20));
-        jLabelEditBodyKey.setPreferredSize(new java.awt.Dimension(120, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelEditBodyKey, gridBagConstraints);
-
-        jLabelEditBody.setText("Edit Mapping Body: *");
-        jLabelEditBody.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelEditBody.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelEditBody.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.ipadx = 170;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelEditBody, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelPH4, gridBagConstraints);
-
-        jLabelEditHeadKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        jLabelEditHeadKey.setMaximumSize(new java.awt.Dimension(120, 20));
-        jLabelEditHeadKey.setMinimumSize(new java.awt.Dimension(120, 20));
-        jLabelEditHeadKey.setPreferredSize(new java.awt.Dimension(120, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelEditHeadKey, gridBagConstraints);
-
-        jLabelEditHead.setText("Edit Mapping Head: *");
-        jLabelEditHead.setMaximumSize(new java.awt.Dimension(100, 20));
-        jLabelEditHead.setMinimumSize(new java.awt.Dimension(100, 20));
-        jLabelEditHead.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.ipadx = 170;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        jPanel2.add(jLabelEditHead, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 25;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
-        jPanel3.add(jPanel2, gridBagConstraints);
+        pnlDisplayPreferencesTab.add(pnlMappingPreferences, gridBagConstraints);
+
+        pnlDataSourceDependencies.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Datasource dependencies"));
+        pnlDataSourceDependencies.setMinimumSize(new java.awt.Dimension(475, 70));
+        pnlDataSourceDependencies.setPreferredSize(new java.awt.Dimension(475, 70));
+        pnlDataSourceDependencies.setLayout(new java.awt.GridBagLayout());
+
+        cmdDependencyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdDependencyFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdDependencyFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdDependencyFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdDependencyFont.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDependencyFontActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
+        pnlDataSourceDependencies.add(cmdDependencyFont, gridBagConstraints);
+
+        cmdDependencyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
+        cmdDependencyColor.setEnabled(false);
+        cmdDependencyColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdDependencyColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdDependencyColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlDataSourceDependencies.add(cmdDependencyColor, gridBagConstraints);
+
+        lblDependency.setText("Dependency:");
+        lblDependency.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblDependency.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblDependency.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 80;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlDataSourceDependencies.add(lblDependency, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
+        pnlDisplayPreferencesTab.add(pnlDataSourceDependencies, gridBagConstraints);
+
+        pnlInvalidQueries.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Invalid queries"));
+        pnlInvalidQueries.setMinimumSize(new java.awt.Dimension(475, 70));
+        pnlInvalidQueries.setPreferredSize(new java.awt.Dimension(475, 70));
+        pnlInvalidQueries.setLayout(new java.awt.GridBagLayout());
+
+        cmdInvalidQueryFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdInvalidQueryFont.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdInvalidQueryFont.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdInvalidQueryFont.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdInvalidQueryFont.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdInvalidQueryFontActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
+        pnlInvalidQueries.add(cmdInvalidQueryFont, gridBagConstraints);
+
+        cmdInvalidQueryColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdInvalidQueryColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdInvalidQueryColor.setMinimumSize(new java.awt.Dimension(60, 17));
+        cmdInvalidQueryColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlInvalidQueries.add(cmdInvalidQueryColor, gridBagConstraints);
+
+        lblInvalidQuery.setText("Query:");
+        lblInvalidQuery.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblInvalidQuery.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblInvalidQuery.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 80;
+        gridBagConstraints.ipady = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlInvalidQueries.add(lblInvalidQuery, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
+        pnlDisplayPreferencesTab.add(pnlInvalidQueries, gridBagConstraints);
+
+        tabMainPanel.addTab("Display Preference", pnlDisplayPreferencesTab);
+
+        pnlEditingShortcutTab.setMinimumSize(new java.awt.Dimension(212, 150));
+        pnlEditingShortcutTab.setPreferredSize(new java.awt.Dimension(450, 150));
+        pnlEditingShortcutTab.setLayout(new java.awt.GridBagLayout());
+
+        pnlShortcutSettings.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Shortcut Settings"));
+        pnlShortcutSettings.setMinimumSize(new java.awt.Dimension(475, 165));
+        pnlShortcutSettings.setPreferredSize(new java.awt.Dimension(475, 165));
+        pnlShortcutSettings.setLayout(new java.awt.GridBagLayout());
+
+        lblAddMapping.setText("Add Mapping: *");
+        lblAddMapping.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblAddMapping.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblAddMapping.setPreferredSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 170;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlShortcutSettings.add(lblAddMapping, gridBagConstraints);
+
+        lblAddMappingKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lblAddMappingKey.setMaximumSize(new java.awt.Dimension(120, 20));
+        lblAddMappingKey.setMinimumSize(new java.awt.Dimension(120, 20));
+        lblAddMappingKey.setPreferredSize(new java.awt.Dimension(120, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+        pnlShortcutSettings.add(lblAddMappingKey, gridBagConstraints);
+
+        lblDeleteMapping.setText("Delete Mapping: *");
+        lblDeleteMapping.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblDeleteMapping.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblDeleteMapping.setPreferredSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 170;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlShortcutSettings.add(lblDeleteMapping, gridBagConstraints);
+
+        lblDeleteMappingKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lblDeleteMappingKey.setEnabled(false);
+        lblDeleteMappingKey.setMaximumSize(new java.awt.Dimension(120, 20));
+        lblDeleteMappingKey.setMinimumSize(new java.awt.Dimension(120, 20));
+        lblDeleteMappingKey.setPreferredSize(new java.awt.Dimension(120, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+        pnlShortcutSettings.add(lblDeleteMappingKey, gridBagConstraints);
+
+        lblEditMappingHead.setText("Edit Mapping Head: *");
+        lblEditMappingHead.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblEditMappingHead.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblEditMappingHead.setPreferredSize(new java.awt.Dimension(50, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 170;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel3.add(jLabelPlaceHolder1, gridBagConstraints);
+        pnlShortcutSettings.add(lblEditMappingHead, gridBagConstraints);
 
-        jLabel6.setText("* changing the shortcut requires a new start of the program.");
+        lblEditMappingHeadKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lblEditMappingHeadKey.setMaximumSize(new java.awt.Dimension(120, 20));
+        lblEditMappingHeadKey.setMinimumSize(new java.awt.Dimension(120, 20));
+        lblEditMappingHeadKey.setPreferredSize(new java.awt.Dimension(120, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+        pnlShortcutSettings.add(lblEditMappingHeadKey, gridBagConstraints);
+
+        lblEditMappingBody.setText("Edit Mapping Body: *");
+        lblEditMappingBody.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblEditMappingBody.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblEditMappingBody.setPreferredSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 170;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlShortcutSettings.add(lblEditMappingBody, gridBagConstraints);
+
+        lblEditMappingBodyKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lblEditMappingBodyKey.setMaximumSize(new java.awt.Dimension(120, 20));
+        lblEditMappingBodyKey.setMinimumSize(new java.awt.Dimension(120, 20));
+        lblEditMappingBodyKey.setPreferredSize(new java.awt.Dimension(120, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+        pnlShortcutSettings.add(lblEditMappingBodyKey, gridBagConstraints);
+
+        lblEditMappingId.setText("Edit Mapping ID: *");
+        lblEditMappingId.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblEditMappingId.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblEditMappingId.setPreferredSize(new java.awt.Dimension(50, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 170;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        pnlShortcutSettings.add(lblEditMappingId, gridBagConstraints);
+
+        lblMappingIdKey.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lblMappingIdKey.setMaximumSize(new java.awt.Dimension(120, 20));
+        lblMappingIdKey.setMinimumSize(new java.awt.Dimension(120, 20));
+        lblMappingIdKey.setPreferredSize(new java.awt.Dimension(120, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+        pnlShortcutSettings.add(lblMappingIdKey, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipady = 25;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlEditingShortcutTab.add(pnlShortcutSettings, gridBagConstraints);
+
+        lblInfo.setText("* Having the effect of the new shortcut requires a program restart.");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel3.add(jLabel6, gridBagConstraints);
+        pnlEditingShortcutTab.add(lblInfo, gridBagConstraints);
 
-        jScrollPane2.setViewportView(jPanel3);
+        tabMainPanel.addTab("Mapping Editing Shortcut", pnlEditingShortcutTab);
 
-        jTabbedPane1.addTab("Mapping Editing Shortcuts", jScrollPane2);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        add(jTabbedPane1, gridBagConstraints);
+        add(tabMainPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonClassFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClassFontActionPerformed
+    private void cmdClassFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdClassFontActionPerformed
 
-    	FontChooser2 fe =new FontChooser2(jButtonClassFont, MappingManagerPreferences.CLASS_FONTFAMILY, MappingManagerPreferences.CLASS_FONTSIZE, MappingManagerPreferences.CLASS_ISBOLD);
-    }//GEN-LAST:event_jButtonClassFontActionPerformed
+    	FontChooser2 fe =new FontChooser2(cmdClassFont, MappingManagerPreferences.CLASS_FONTFAMILY, MappingManagerPreferences.CLASS_FONTSIZE, MappingManagerPreferences.CLASS_ISBOLD);
+    }//GEN-LAST:event_cmdClassFontActionPerformed
 
-    private void jButtonDataPropertyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDataPropertyFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonDataPropertyFont, MappingManagerPreferences.DATAPROPERTY_FONTFAMILY, MappingManagerPreferences.DATAPROPERTY_FONTSIZE, MappingManagerPreferences.DATAPROPERTY_ISBOLD);
-    }//GEN-LAST:event_jButtonDataPropertyFontActionPerformed
+    private void cmdDataPropertyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDataPropertyFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdDataPropertyFont, MappingManagerPreferences.DATAPROPERTY_FONTFAMILY, MappingManagerPreferences.DATAPROPERTY_FONTSIZE, MappingManagerPreferences.DATAPROPERTY_ISBOLD);
+    }//GEN-LAST:event_cmdDataPropertyFontActionPerformed
 
-    private void jButtonObjectPropertyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonObjectPropertyFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonObjectPropertyFont, MappingManagerPreferences.OBJECTPROPTERTY_FONTFAMILY, MappingManagerPreferences.OBJECTPROPTERTY_FONTSIZE, MappingManagerPreferences.OBJECTPROPTERTY_ISBOLD);
+    private void cmdObjectPropertyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdObjectPropertyFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdObjectPropertyFont, MappingManagerPreferences.OBJECTPROPTERTY_FONTFAMILY, MappingManagerPreferences.OBJECTPROPTERTY_FONTSIZE, MappingManagerPreferences.OBJECTPROPTERTY_ISBOLD);
     	
-    }//GEN-LAST:event_jButtonObjectPropertyFontActionPerformed
+    }//GEN-LAST:event_cmdObjectPropertyFontActionPerformed
 
-    private void jButtonVariableFont1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonVariableFont1ActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonVariableFont1, MappingManagerPreferences.VARIABLE_FONTFAMILY, MappingManagerPreferences.VARIABLE_FONTSIZE, MappingManagerPreferences.VARIABLE_ISBOLD);
+    private void cmdVariableFonrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdVariableFonrActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdVariableFonr, MappingManagerPreferences.VARIABLE_FONTFAMILY, MappingManagerPreferences.VARIABLE_FONTSIZE, MappingManagerPreferences.VARIABLE_ISBOLD);
     	
-    }//GEN-LAST:event_jButtonVariableFont1ActionPerformed
+    }//GEN-LAST:event_cmdVariableFonrActionPerformed
 
-    private void jButtonParameterFont1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonParameterFont1ActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonParameterFont1, MappingManagerPreferences.PARAMETER_FONTFAMILY, MappingManagerPreferences.PARAMETER_FONTSIZE, MappingManagerPreferences.PARAMETER_ISBOLD);
+    private void cmdParameterFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdParameterFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdParameterFont, MappingManagerPreferences.PARAMETER_FONTFAMILY, MappingManagerPreferences.PARAMETER_FONTSIZE, MappingManagerPreferences.PARAMETER_ISBOLD);
     	;
-    }//GEN-LAST:event_jButtonParameterFont1ActionPerformed
+    }//GEN-LAST:event_cmdParameterFontActionPerformed
 
-    private void jButtonFunctorPropertyFont1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFunctorPropertyFont1ActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonFunctorPropertyFont1, MappingManagerPreferences.FUCNTOR_FONTFAMILY, MappingManagerPreferences.FUCNTOR_FONTSIZE, MappingManagerPreferences.FUCNTOR_ISBOLD);
+    private void cmdFunctorFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFunctorFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdFunctorFont, MappingManagerPreferences.FUCNTOR_FONTFAMILY, MappingManagerPreferences.FUCNTOR_FONTSIZE, MappingManagerPreferences.FUCNTOR_ISBOLD);
     	
-    }//GEN-LAST:event_jButtonFunctorPropertyFont1ActionPerformed
+    }//GEN-LAST:event_cmdFunctorFontActionPerformed
 
-    private void jButtonbodyPropertyFont2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonbodyPropertyFont2ActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonbodyPropertyFont2, MappingManagerPreferences.MAPPING_BODY_FONTFAMILY, MappingManagerPreferences.MAPPING_BODY_FONTSIZE, MappingManagerPreferences.MAPPING_BODY_ISBOLD);
+    private void cmdMappingBodyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMappingBodyFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdMappingBodyFont, MappingManagerPreferences.MAPPING_BODY_FONTFAMILY, MappingManagerPreferences.MAPPING_BODY_FONTSIZE, MappingManagerPreferences.MAPPING_BODY_ISBOLD);
     	
-    }//GEN-LAST:event_jButtonbodyPropertyFont2ActionPerformed
+    }//GEN-LAST:event_cmdMappingBodyFontActionPerformed
 
-    private void jButtonIDFont2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonIDFont2ActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonIDFont2, MappingManagerPreferences.MAPPING_ID_FONTFAMILY, MappingManagerPreferences.MAPPING_ID_FONTSIZE, MappingManagerPreferences.MAPPING_ID_ISBOLD);
+    private void cmdMappingIdFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMappingIdFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdMappingIdFont, MappingManagerPreferences.MAPPING_ID_FONTFAMILY, MappingManagerPreferences.MAPPING_ID_FONTSIZE, MappingManagerPreferences.MAPPING_ID_ISBOLD);
     	
-    }//GEN-LAST:event_jButtonIDFont2ActionPerformed
+    }//GEN-LAST:event_cmdMappingIdFontActionPerformed
 
-    private void jButtonInvalidQueryFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonInvalidQueryFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonInvalidQueryFont, MappingManagerPreferences.INVALIDQUERY_FONTFAMILY, MappingManagerPreferences.INVALIDQUERY_FONTSIZE, MappingManagerPreferences.INVALIDQUERY_ISBOLD);
-    }//GEN-LAST:event_jButtonInvalidQueryFontActionPerformed
+    private void cmdInvalidQueryFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdInvalidQueryFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdInvalidQueryFont, MappingManagerPreferences.INVALIDQUERY_FONTFAMILY, MappingManagerPreferences.INVALIDQUERY_FONTSIZE, MappingManagerPreferences.INVALIDQUERY_ISBOLD);
+    }//GEN-LAST:event_cmdInvalidQueryFontActionPerformed
 
-    private void jButtonDependenciesFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDependenciesFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(jButtonDependenciesFont, MappingManagerPreferences.DEPENDENCIES_FONTFAMILY, MappingManagerPreferences.DEPENDENCIES_FONTSIZE, MappingManagerPreferences.DEPENDENCIES_ISBOLD);
-    }//GEN-LAST:event_jButtonDependenciesFontActionPerformed
+    private void cmdDependencyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDependencyFontActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdDependencyFont, MappingManagerPreferences.DEPENDENCIES_FONTFAMILY, MappingManagerPreferences.DEPENDENCIES_FONTSIZE, MappingManagerPreferences.DEPENDENCIES_ISBOLD);
+    }//GEN-LAST:event_cmdDependencyFontActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonBodyPropertyColour1;
-    private javax.swing.JButton jButtonClassColour;
-    private javax.swing.JButton jButtonClassFont;
-    private javax.swing.JButton jButtonDataPropertyColour;
-    private javax.swing.JButton jButtonDataPropertyFont;
-    private javax.swing.JButton jButtonDependenciesColour;
-    private javax.swing.JButton jButtonDependenciesFont;
-    private javax.swing.JButton jButtonFunctorPropertyColour1;
-    private javax.swing.JButton jButtonFunctorPropertyFont1;
-    private javax.swing.JButton jButtonIDColour2;
-    private javax.swing.JButton jButtonIDFont2;
-    private javax.swing.JButton jButtonInvalidQueryColour;
-    private javax.swing.JButton jButtonInvalidQueryFont;
-    private javax.swing.JButton jButtonObjectPropertyColour;
-    private javax.swing.JButton jButtonObjectPropertyFont;
-    private javax.swing.JButton jButtonParameterColour;
-    private javax.swing.JButton jButtonParameterFont1;
-    private javax.swing.JButton jButtonVariableColour1;
-    private javax.swing.JButton jButtonVariableFont1;
-    private javax.swing.JButton jButtonbodyPropertyFont2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabelAdd;
-    private javax.swing.JLabel jLabelAddKey;
-    private javax.swing.JLabel jLabelBody;
-    private javax.swing.JLabel jLabelClass;
-    private javax.swing.JLabel jLabelDataProperty;
-    private javax.swing.JLabel jLabelDelete;
-    private javax.swing.JLabel jLabelDeleteKey;
-    private javax.swing.JLabel jLabelDependencies;
-    private javax.swing.JLabel jLabelEditBody;
-    private javax.swing.JLabel jLabelEditBodyKey;
-    private javax.swing.JLabel jLabelEditHead;
-    private javax.swing.JLabel jLabelEditHeadKey;
-    private javax.swing.JLabel jLabelEditID;
-    private javax.swing.JLabel jLabelEditIDKey;
-    private javax.swing.JLabel jLabelFunctors;
-    private javax.swing.JLabel jLabelID;
-    private javax.swing.JLabel jLabelInvalidQuery;
-    private javax.swing.JLabel jLabelObjectProperty;
-    private javax.swing.JLabel jLabelPH;
-    private javax.swing.JLabel jLabelPH1;
-    private javax.swing.JLabel jLabelPH2;
-    private javax.swing.JLabel jLabelPH3;
-    private javax.swing.JLabel jLabelPH4;
-    private javax.swing.JLabel jLabelParameters;
-    private javax.swing.JLabel jLabelPlaceHolder;
-    private javax.swing.JLabel jLabelPlaceHolder1;
-    private javax.swing.JLabel jLabelVariables;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanelBodyProperty1;
-    private javax.swing.JPanel jPanelClassPreferences;
-    private javax.swing.JPanel jPanelInvalidDependencies;
-    private javax.swing.JPanel jPanelInvalidQuery;
-    private javax.swing.JPanel jPanelVariablePreferences;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JButton cmdClassColor;
+    private javax.swing.JButton cmdClassFont;
+    private javax.swing.JButton cmdDataPropertyColor;
+    private javax.swing.JButton cmdDataPropertyFont;
+    private javax.swing.JButton cmdDependencyColor;
+    private javax.swing.JButton cmdDependencyFont;
+    private javax.swing.JButton cmdFunctorColor;
+    private javax.swing.JButton cmdFunctorFont;
+    private javax.swing.JButton cmdInvalidQueryColor;
+    private javax.swing.JButton cmdInvalidQueryFont;
+    private javax.swing.JButton cmdMappingBodyColor;
+    private javax.swing.JButton cmdMappingBodyFont;
+    private javax.swing.JButton cmdMappingIdColor;
+    private javax.swing.JButton cmdMappingIdFont;
+    private javax.swing.JButton cmdObjectPropertyColor;
+    private javax.swing.JButton cmdObjectPropertyFont;
+    private javax.swing.JButton cmdParameterColor;
+    private javax.swing.JButton cmdParameterFont;
+    private javax.swing.JButton cmdVariableColor;
+    private javax.swing.JButton cmdVariableFonr;
+    private javax.swing.JLabel lblAddMapping;
+    private javax.swing.JLabel lblAddMappingKey;
+    private javax.swing.JLabel lblClass;
+    private javax.swing.JLabel lblDataProperty;
+    private javax.swing.JLabel lblDeleteMapping;
+    private javax.swing.JLabel lblDeleteMappingKey;
+    private javax.swing.JLabel lblDependency;
+    private javax.swing.JLabel lblEditMappingBody;
+    private javax.swing.JLabel lblEditMappingBodyKey;
+    private javax.swing.JLabel lblEditMappingHead;
+    private javax.swing.JLabel lblEditMappingHeadKey;
+    private javax.swing.JLabel lblEditMappingId;
+    private javax.swing.JLabel lblFunctors;
+    private javax.swing.JLabel lblInfo;
+    private javax.swing.JLabel lblInvalidQuery;
+    private javax.swing.JLabel lblMappingBody;
+    private javax.swing.JLabel lblMappingId;
+    private javax.swing.JLabel lblMappingIdKey;
+    private javax.swing.JLabel lblObjectProperty;
+    private javax.swing.JLabel lblParameter;
+    private javax.swing.JLabel lblVariable;
+    private javax.swing.JPanel pnlClassPreferences;
+    private javax.swing.JPanel pnlDataSourceDependencies;
+    private javax.swing.JPanel pnlDisplayPreferencesTab;
+    private javax.swing.JPanel pnlEditingShortcutTab;
+    private javax.swing.JPanel pnlInvalidQueries;
+    private javax.swing.JPanel pnlMappingPreferences;
+    private javax.swing.JPanel pnlShortcutSettings;
+    private javax.swing.JPanel pnlVariablePreferences;
+    private javax.swing.JTabbedPane tabMainPanel;
     // End of variables declaration//GEN-END:variables
     
     
@@ -1473,6 +1300,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         	Color aux = jColorChooser1.getSelectionModel().getSelectedColor();
         	pref.setColor(key, aux);
         	button.setBackground(aux);
+        	button.setOpaque(true);
         }
 
 
@@ -1581,13 +1409,15 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	  private void init(){
     		  
     		  java.awt.GridBagConstraints gridBagConstraints;
-
-    	        jScrollPane1 = new javax.swing.JScrollPane();
+			  javax.swing.JScrollPane scrFontNameList;
+			  javax.swing.JScrollPane scrFontSizeList;
+				
     	        fontNameChoice = new javax.swing.JList();
-    	        jScrollPane2 = new javax.swing.JScrollPane();
     	        fontSizeChoice = new javax.swing.JList();
+    	        scrFontNameList = new javax.swing.JScrollPane();
+    	        scrFontSizeList = new javax.swing.JScrollPane();
     	        bold = new javax.swing.JCheckBox();
-    	        jPanel1 = new javax.swing.JPanel();
+    	        pnlDisplayPreferencesTab = new javax.swing.JPanel();
 //    	        jButtonCancel = new javax.swing.JButton();
 //    	        jButtonOK = new javax.swing.JButton();
 
@@ -1599,7 +1429,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	            public int getSize() { return strings.length; }
     	            public Object getElementAt(int i) { return strings[i]; }
     	        });
-    	        jScrollPane1.setViewportView(fontNameChoice);
+    	        scrFontNameList.setViewportView(fontNameChoice);
 
     	        gridBagConstraints = new java.awt.GridBagConstraints();
     	        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -1607,7 +1437,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	        gridBagConstraints.weightx = 1.0;
     	        gridBagConstraints.weighty = 1.0;
     	        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    	        add(jScrollPane1, gridBagConstraints);
+    	        add(scrFontNameList, gridBagConstraints);
 
     	        fontSizeChoice.setModel(new javax.swing.AbstractListModel() {
     	            String[] strings = { "8", "10", "11", "12", "14", "16", "18", "20", "24", "30", "36", "40", "48", "60", "72" };
@@ -1617,7 +1447,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	        fontSizeChoice.setMaximumSize(new java.awt.Dimension(50, 285));
     	        fontSizeChoice.setMinimumSize(new java.awt.Dimension(50, 285));
     	        fontSizeChoice.setPreferredSize(new java.awt.Dimension(50, 285));
-    	        jScrollPane2.setViewportView(fontSizeChoice);
+    	        scrFontSizeList.setViewportView(fontSizeChoice);
 
     	        gridBagConstraints = new java.awt.GridBagConstraints();
     	        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -1625,7 +1455,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	        gridBagConstraints.weightx = 1.0;
     	        gridBagConstraints.weighty = 1.0;
     	        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-    	        add(jScrollPane2, gridBagConstraints);
+    	        add(scrFontSizeList, gridBagConstraints);
 
     	        bold.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
     	        bold.setText("Bold");
@@ -1636,7 +1466,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
     	        add(bold, gridBagConstraints);
 
-    	        jPanel1.setLayout(new java.awt.GridBagLayout());
+    	        pnlDisplayPreferencesTab.setLayout(new java.awt.GridBagLayout());
     		  
     	        String currentFont = pref.getFontFamily(fontfamily);
     	        int currentSize = pref.getFontSize(fontsize);

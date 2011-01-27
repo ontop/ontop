@@ -42,11 +42,11 @@ public class QueryPainter {
 	private MappingManagerPreferences pref= null;
 	private final APIController	apic;
 
-	public QueryPainter(APIController apic){
+	public QueryPainter(APIController apic, MappingManagerPreferences pref) {
 		this.apic = apic;
+		this.pref =  pref;
 
 		tasks= new Vector<ColorTask>();
-		pref =  OBDAPreferences.getOBDAPreferences().getMappingsPreference();
 	}
 
 	public boolean isAlreadyColoring(){

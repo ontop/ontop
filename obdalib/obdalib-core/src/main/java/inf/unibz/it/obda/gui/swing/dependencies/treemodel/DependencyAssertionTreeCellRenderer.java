@@ -74,10 +74,10 @@ public class DependencyAssertionTreeCellRenderer extends
 	 * Creates a new instance of the DependencyAssertionTreeCellRenderer
 	 * @param apic
 	 */
-	public DependencyAssertionTreeCellRenderer(APIController apic){
+	public DependencyAssertionTreeCellRenderer(APIController apic, OBDAPreferences preference){
 		
 		this.apic = apic;
-		pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+		pref = preference.getMappingsPreference();
 		inclusionDependency = IconLoader.getImageIcon("images/inclusion_16.png");
 		functionalDependency = IconLoader.getImageIcon("images/functional_16.png");
 		disjoinetnessAssertion = IconLoader.getImageIcon("images/disjoint_16.png");

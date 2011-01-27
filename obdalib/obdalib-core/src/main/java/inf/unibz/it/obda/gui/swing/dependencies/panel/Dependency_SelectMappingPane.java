@@ -33,11 +33,13 @@ import inf.unibz.it.obda.gui.swing.dependencies.treemodel.InclusionDependencyTre
 import inf.unibz.it.obda.gui.swing.mapping.panel.MappingRenderer;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeSelectionModel;
+import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -96,6 +98,8 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 	 */
 	private boolean miningCanceled = false;
 
+	private OBDAPreferences preference = null;
+	
 	/**
 	 * A list of assertion added during the mining. Only used to
 	 * remove those assertion in case the mining is canceled.
@@ -107,8 +111,9 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 	private JTree assertionTree = null;
 
     /** Creates new form Dependency_SelectMappingPane */
-    public Dependency_SelectMappingPane(APIController apic) {
+    public Dependency_SelectMappingPane(APIController apic, OBDAPreferences preference) {
     	this.apic = apic;
+    	this.preference = preference;
     	instance = this;
         initComponents();
         adjustTree();
@@ -575,7 +580,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
      *  to it.
      */
     private void adjustTree(){
-    	MappingRenderer map_renderer = new MappingRenderer(apic);
+    	MappingRenderer map_renderer = new MappingRenderer(apic, preference);
     	jTree1.setModel(apic.getMappingController().getTreeModel());
     	jTree1.setSelectionModel(new MappingTreeSelectionModel());
     	jTree1.setCellRenderer(map_renderer);
