@@ -1,39 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<VSNode splits="0.25 0.75">
-		
-			<HSNode splits="0.20 0.80">
-				<CNode>
-					<Component label="Datasources Selector">
-						<Property id="pluginId"
-							value="inf.unibz.it.obda.protege4.obdaplugin.DatasourcesManagerViewComponent"/>
-					</Component>
-				</CNode>
-				<CNode>
-					<Component label="Datasource parameter editor">
-						<Property id="pluginId"
-							value="inf.unibz.it.obda.protege4.obdaplugin.DatasourceParameterEditorViewComponent"/>
-					</Component>
-				</CNode>
-			</HSNode>
-		
+  <VSNode splits="1.0">
 		<CNode>
-			<Component label="Mappings Manager">
-				<Property id="pluginId"
-					value="inf.unibz.it.obda.protege4.obdaplugin.MappingsManagerViewComponent"/>
-			</Component>
-			<Component label="RDBMS source schema inspector">
-				<Property id="pluginId"
-					value="inf.unibz.it.obda.protege4.obdaplugin.RDBMSInspectorViewComponent"/>
-			</Component>
-			<Component label="Data Source Dependency Manager">
-				<Property id="pluginId"
-					value="inf.unibz.it.obda.protege4.obdaplugin.DependencyInterfaceViewComponent"/>
-			</Component>
-			<Component label="SQL query interface">
-				<Property id="pluginId"
-					value="inf.unibz.it.obda.protege4.obdaplugin.SQLQueryInterfaceViewComponent"/>
-			</Component>
+		  <Component label="Datasources Selector">
+		    <Property id="pluginId"
+		      value="inf.unibz.it.obda.protege4.obdaplugin.DatasourcesManagerViewComponent"/>
+		  </Component>
+		  <Component label="Mappings Manager">
+		    <Property id="pluginId"
+		      value="inf.unibz.it.obda.protege4.obdaplugin.MappingsManagerViewComponent"/>
+		  </Component>
+		  <Component label="RDBMS source schema inspector">
+		    <Property id="pluginId"
+		      value="inf.unibz.it.obda.protege4.obdaplugin.RDBMSInspectorViewComponent"/>
+		  </Component>
+		  <Component label="Data Source Dependency Manager">
+		    <Property id="pluginId"
+		      value="inf.unibz.it.obda.protege4.obdaplugin.DependencyInterfaceViewComponent"/>
+		  </Component>
+		  <Component label="SQL query interface">
+		    <Property id="pluginId"
+		      value="inf.unibz.it.obda.protege4.obdaplugin.SQLQueryInterfaceViewComponent"/>
+		  </Component>
 		</CNode>
 	</VSNode>
 </layout>

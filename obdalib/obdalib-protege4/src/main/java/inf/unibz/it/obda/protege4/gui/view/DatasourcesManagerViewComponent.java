@@ -2,6 +2,7 @@ package inf.unibz.it.obda.protege4.gui.view;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceManagerPanel;
+import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceParameterEditorPanel;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;
@@ -22,24 +23,12 @@ public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent {
 
     @Override
     protected void initialiseOWLView() throws Exception {
-//    	List<Bundle> plugins = ProtegeApplication.getBundleManager().getPlugins();
-//    	Bundle obdaBundle = null;
-//    	for(Bundle plugin: plugins) {
-//    		String name = plugin.getSymbolicName();
-//    		if (name.equals("inf.unibz.it.obda.protege4")) {
-//    			obdaBundle =  plugin;
-//    		}
-//    	}
-//    	if (obdaBundle == null)
-//    		throw new Exception("Error initializing SQLQuery interface view, couldnt find OBDA Bundle");
-//    	
-//    	ServiceReference apicServiceReference = obdaBundle.getBundleContext().getServiceReference(APIController.class.getName().getName());
-//    	OBDAPluginController apic = (OBDAPluginController)obdaBundle.getBundleContext().getService(apicServiceReference);
-    	
     	OBDAPluginController apic = getOWLEditorKit().get(APIController.class.getName());
     	
         setLayout(new BorderLayout());
         add(new DatasourceManagerPanel(apic), BorderLayout.CENTER);
+        add(new DatasourceParameterEditorPanel(apic), BorderLayout.EAST);
+        
         log.info("Datasource browser initialized");
     }
 

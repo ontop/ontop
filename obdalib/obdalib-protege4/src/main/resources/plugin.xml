@@ -14,16 +14,6 @@
 		<category value="OBDA"></category>
 	</extension>
 	
-	<extension id="DatasourceParameterEditorViewComponent"
-		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Datasource parameter editor"></label>
-		<class
-			value="inf.unibz.it.obda.protege4.gui.view.DatasourceParametersEditorView">
-		</class>
-		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
-	</extension>
-	
 	<extension id="MappingsManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mappings manager"></label>
@@ -143,59 +133,59 @@
     </extension>-->
     
 
-    <extension id="OBDAIOListener" point="org.protege.editor.owl.io.listener">
-        <class value="inf.unibz.it.obda.protege4.core.OBDAIOListenerPlugin"/>
-    </extension>
+  <extension id="OBDAIOListener" point="org.protege.editor.owl.io.listener">
+    <class value="inf.unibz.it.obda.protege4.core.OBDAIOListenerPlugin"/>
+  </extension>
     
-    <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
-    	<class value="inf.unibz.it.obda.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
-    </extension>
+  <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
+  	<class value="inf.unibz.it.obda.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
+  </extension>
     
 
 	<!-- A type of plugin which defines a new assertion controller type which should 
 	be taken into account by the main APIController when it is setup during the 
 	creation of an OWLEditorKit -->
     
-    <extension-point id="obda.controller" name="Assertion Controller"/>
+  <extension-point id="obda.controller" name="Assertion Controller"/>
     
     
-    <!-- OBDA preferences -->
+  <!-- OBDA preferences -->
     
-    <extension id="preferences.obdaplugin"
-               point="org.protege.editor.core.application.preferencespanel">
-        <label value="OBDA Plugin"/>
-        <class value="inf.unibz.it.obda.protege4.gui.preferences.OBDAPluginPreferencesPanel"/>
-    </extension>
+  <extension id="preferences.obdaplugin"
+             point="org.protege.editor.core.application.preferencespanel">
+    <label value="OBDA Plugin"/>
+    <class value="inf.unibz.it.obda.protege4.gui.preferences.OBDAPluginPreferencesPanel"/>
+  </extension>
     
-    <!--Dependency Assertion Factory Plugins-->
-    
-    <extension id="InclusionDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSInclusionDependencyAssertionFactoryPlugin"/>
-    </extension>
-    
-    <extension id="DisjointnessDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSDisjointnessDependencyFactoryPlugin"/>
-    </extension>
-    
-    <extension id="FunctionalDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSFunctionalDependencyAssertionFactoryPlugin"/>
-    </extension>
-    
-        <extension id="CheckConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSCheckConstraintFactoryPlugin"/>
-    </extension>
-    
-    <extension id="ForeignKeyConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSForeignKeyConstraintFactoryPlugin"/>
-    </extension>
-    
-    <extension id="PrimaryKeyConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSPrimaryKeyConstraintFactoryPlugin"/>
-    </extension>
-    
-    <extension id="UniquenessConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
-    	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSUniquenessConstraintFactoryPlugin"/>
-    </extension>
+  <!--Dependency Assertion Factory Plugins-->
+  
+  <extension id="InclusionDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSInclusionDependencyAssertionFactoryPlugin"/>
+  </extension>
+  
+  <extension id="DisjointnessDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSDisjointnessDependencyFactoryPlugin"/>
+  </extension>
+  
+  <extension id="FunctionalDependencyFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.dependencies.RDBMSFunctionalDependencyAssertionFactoryPlugin"/>
+  </extension>
+  
+      <extension id="CheckConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSCheckConstraintFactoryPlugin"/>
+  </extension>
+  
+  <extension id="ForeignKeyConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSForeignKeyConstraintFactoryPlugin"/>
+  </extension>
+  
+  <extension id="PrimaryKeyConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSPrimaryKeyConstraintFactoryPlugin"/>
+  </extension>
+  
+  <extension id="UniquenessConstraintFactoryPlugin" point="inf.unibz.it.obda.protege4.obdaplugin.obda.controller">
+  	<class value="inf.unibz.it.obda.protege4.constraints.RDBMSUniquenessConstraintFactoryPlugin"/>
+  </extension>
 	
 	<extension id="menu.tools.OBDA" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Materialize Abox"/> 
@@ -204,5 +194,31 @@
 		<path value="org.protege.editor.owl.menu.tools/SlotZ-Z"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
-		
+	
+	<!-- Reasoner plugins -->
+
+	<extension id="quonto.reasoner.factory"
+             point="org.protege.editor.owl.inference.reasonerfactory">
+    <name value="OBDAOWLReformulationPlatform"/>
+    <class value="org.obda.reformulation.protege4.ProtegeOBDAOWLReformulationPlatformFactory"/>
+  </extension>
+
+  <extension id="menu.tools.OBDA" point="org.protege.editor.core.application.EditorKitMenuAction">
+    <name value="Dump Abox to DB"/> 
+    <toolTip value="Stores all ABox values in a data base"/>
+    <class value="org.obda.reformulation.protege4.action.AboxToDBAction"/>
+    <path value="org.protege.editor.owl.menu.tools/SlotZ-Z"></path>
+    <editorKitId value="OWLEditorKit"/>
+  </extension>
+
+  <extension id="reformulation-configuration"
+             point="org.protege.editor.core.application.preferencespanel">
+    <label value="Reformulation Plugin"/>
+    <class value="org.obda.reformulation.protege4.configpanel.OBDAOWLReformulationPlatformConfigPanel"/>
+  </extension>
+
+  <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
+    <class value="org.obda.reformulation.protege4.OBDAOWLReformulationEditorKitStarter"/>
+  </extension>
+	
 </plugin>
