@@ -102,17 +102,18 @@ public class Tester {
 		fac.setOBDAController(apic);
 		ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
 		if (createMappings)
-			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+			pref.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
 		else
-			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
+			pref.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
 
-		ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
+		pref.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
 
 		if (complexUnfolding)
-			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+			pref.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
 		else
-			ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "direct");
+			pref.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "direct");
 
+		fac.setPreferenceHolder(pref);
 		reasoner = (DataQueryReasoner) fac.createReasoner(manager);
 
 		queryMap = new HashMap<String, String>();

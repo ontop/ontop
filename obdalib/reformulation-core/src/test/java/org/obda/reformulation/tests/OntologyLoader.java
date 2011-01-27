@@ -50,22 +50,21 @@ public class OntologyLoader {
 	            factory.setOBDAController(controller);
 
 	            ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-	            ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
-	            ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "false");
-	            ReformulationPlatformPreferences.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+	            pref.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+	            pref.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
+	            pref.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+	            pref.setDefaultValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
+	            factory.setPreferenceHolder(pref);
 
 	            reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
 	            reasoner.loadOntologies(manager.getOntologies());
 	            reasoner.classify();
-	            String prefix = "PREFIX :		<http://www.owl-ontologies.com/Ontology1207768242.owl#> \n" +
-	            					"PREFIX onto:		<http://www.owl-ontologies.com/Ontology1207768242.owl#> \n"+
-	    						   "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" ;
-//	    						   "SELECT ?x WHERE { ?x rdf:type onto:Investor }";
-
-
-
+	            String prefix = "BASE <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n" +
+	            		        "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> \n" +
+	            				"PREFIX dllite: <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>"+
+	    						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n";
+	            
 	            // Executing the query
-
 	            QueryController queryCon = controller.getQueryController();
 	            Vector<QueryControllerEntity> s = queryCon.getElements();
 	            Vector<String> queryStrings = new Vector<String>();
