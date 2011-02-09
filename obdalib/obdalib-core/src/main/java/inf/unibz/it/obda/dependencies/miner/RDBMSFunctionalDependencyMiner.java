@@ -125,10 +125,10 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		while(it.hasNext()){
 			OBDAMappingAxiom axiom = it.next();
 			HashSet<Term> terms = getTerms(axiom);
-			HashSet<Term> candidates = findCandidates(axiom);
-			Iterator<Term> can_it = candidates.iterator();
+			HashSet<FunctionalTermImpl> candidates = findCandidates(axiom);
+			Iterator<FunctionalTermImpl> can_it = candidates.iterator();
 			while(can_it.hasNext()){
-				Term candidate = can_it.next();
+				FunctionalTermImpl candidate = can_it.next();
 				String sql = produceSQL(axiom.getSourceQuery().toString(), candidate, terms);
 				Job aux = new Job(sql, axiom.getId(), (RDBMSSQLQuery)axiom.getSourceQuery(), candidate, terms);
 				queue.add(aux);
@@ -155,11 +155,11 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		return aux;
 	}
 
-	private HashSet<Term> findCandidates(OBDAMappingAxiom ax){
+	private HashSet<FunctionalTermImpl> findCandidates(OBDAMappingAxiom ax){
 		CQIEImpl q = (CQIEImpl) ax.getTargetQuery();
 		List<Atom> atoms = q.getBody();
 		Iterator<Atom> it = atoms.iterator();
-		HashSet<Term> candidates = new HashSet<Term>();
+		HashSet<FunctionalTermImpl> candidates = new HashSet<FunctionalTermImpl>();
 		while(it.hasNext()){
 			Atom atom = it.next();
 			List<Term> terms = atom.getTerms();
@@ -167,7 +167,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 			while(t_it.hasNext()){
 				Term term = t_it.next();
 				if(term instanceof FunctionalTermImpl){
-					candidates.add(term);
+					candidates.add((FunctionalTermImpl)term);
 				}
 			}
 		}
@@ -216,9 +216,9 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 	 * Returns the query which can be use to check the dependency on the
 	 * data in the source if the involved terms are functional terms.
 	 */
-	private String produceSQL(String sql, Term candidate, Set<Term> terms){
+	private String produceSQL(String sql, FunctionalTermImpl candidate, Set<Term> terms){
 
-		FunctionalTermImpl ft = (FunctionalTermImpl) candidate;
+		FunctionalTermImpl ft = candidate;
 		List<Term> vars = ft.getTerms();
 		Iterator<Term> it = vars.iterator();
 		String selection = "";
@@ -301,7 +301,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		/**
 		 * the query term associated to the first query
 		 */
-		private Term dependent = null;
+		private FunctionalTermImpl dependent = null;
 		/**
 		 * the query term associated to the second query
 		 */
@@ -322,7 +322,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		 * @param map2	second query
 		 * @param pos2	term associated to the second query
 		 */
-		private FunctionalDependencyMiningResult(String id, RDBMSSQLQuery map, Term can,
+		private FunctionalDependencyMiningResult(String id, RDBMSSQLQuery map, FunctionalTermImpl can,
 				Set<Term> terms){
 
 			mappingId = id;
@@ -337,7 +337,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		}
 
 
-		public Term getDependent() {
+		public FunctionalTermImpl getDependent() {
 			return dependent;
 		}
 
@@ -374,7 +374,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		/**
 		 * the term associated to the first query
 		 */
-		private Term candidateTerm = null;
+		private FunctionalTermImpl candidateTerm = null;
 		/**
 		 * the term associated to the second query
 		 */
@@ -388,14 +388,13 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 		 * Returns a new Job object
 		 *
 		 * @param sql	the query to execute
-		 * @param id1	id of first mapping
-		 * @param id2	id of second mapping
+		 * @param id	id of the mapping
 		 * @param can	the first query
 		 * @param posCan term associated to first query
 		 * @param con	the second query
 		 * @param posCon	term associated to second query
 		 */
-		private Job(String sql, String id, RDBMSSQLQuery can, Term posCan,
+		private Job(String sql, String id, RDBMSSQLQuery can, FunctionalTermImpl posCan,
 				Set<Term> dep){
 
 			sqlquery = sql;
@@ -417,7 +416,7 @@ public class RDBMSFunctionalDependencyMiner implements IMiner {
 			return sourceQuery;
 		}
 
-		public Term getCandidateTerm() {
+		public FunctionalTermImpl getCandidateTerm() {
 			return candidateTerm;
 		}
 

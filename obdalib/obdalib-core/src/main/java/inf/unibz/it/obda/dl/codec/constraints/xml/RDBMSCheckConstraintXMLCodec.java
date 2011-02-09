@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Vector;
 
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.obda.query.domain.imp.ValueConstantImpl;
 import org.w3c.dom.Element;
@@ -38,7 +37,7 @@ public class RDBMSCheckConstraintXMLCodec extends AssertionXMLCodec<RDBMSCheckCo
 	private static final String	OP	= "operator";
 	private static final String	MAPPING	= "mapping";
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	@Override
 	public RDBMSCheckConstraint decode(Element input) {
@@ -77,7 +76,7 @@ public class RDBMSCheckConstraintXMLCodec extends AssertionXMLCodec<RDBMSCheckCo
 		}
 
 		try {
-			return ConstraintsRenderer.getInstance().createRDBMSCheckConstraint(id, list);
+			return ConstraintsRenderer.getInstance(apic).createRDBMSCheckConstraint(id, list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

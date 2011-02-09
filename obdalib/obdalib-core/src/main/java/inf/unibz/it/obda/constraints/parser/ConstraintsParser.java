@@ -1,6 +1,17 @@
-// $ANTLR 3.1.2 /home/obda/Constraints.g 2009-11-14 10:44:45
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 Constraints.g 2011-01-19 14:13:15
 
 package inf.unibz.it.obda.constraints.parser;
+
+import java.net.URI;
+import java.util.Vector;
+
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.MismatchedSetException;
+import org.antlr.runtime.Parser;
+import org.antlr.runtime.ParserRuleReturnScope;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.TokenStream;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
@@ -12,55 +23,57 @@ import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+
 import inf.unibz.it.ucq.typing.CheckOperationTerm;
 import inf.unibz.it.ucq.typing.UnknownXSDTypeException;
 import inf.unibz.it.ucq.typing.XSDTypingController;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
+import org.obda.query.domain.imp.TermFactoryImpl;
+import org.obda.query.domain.Variable;
+import org.obda.query.domain.Term;
+import org.obda.query.domain.ValueConstant;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
+
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
+
 public class ConstraintsParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "NUMBER", "BOOL", "ALPHAVAR", "ALPHA", "DIGIT", "CHAR", "INTEGER", "WS", "'CHECK'", "','", "'UNIQUE ('", "')'", "'('", "') REFERENCES'", "'PRIMARY KEY ('", "'\\''", "'$'", "'<'", "'>'", "'='", "'<='", "'>='"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "CHECK", "LPAREN", "RPAREN", "COMMA", "UNIQUE", "REFERENCES", "PRIMARY_KEY", "STRING_LITERAL", "STRING_LITERAL2", "NUMBER", "TRUE", "FALSE", "DOLLAR", "STRING", "LESS", "GREATER", "EQUALS", "LESS_OR_EQUAL", "GREATER_OR_EQUAL", "DOT", "QUOTE_DOUBLE", "QUOTE_SINGLE", "UNDERSCORE", "DASH", "ALPHA", "DIGIT", "ALPHANUM", "WS"
     };
-    public static final int INTEGER=10;
-    public static final int T__25=25;
-    public static final int T__24=24;
-    public static final int T__23=23;
-    public static final int T__22=22;
-    public static final int T__21=21;
-    public static final int T__20=20;
-    public static final int NUMBER=4;
-    public static final int BOOL=5;
-    public static final int CHAR=9;
     public static final int EOF=-1;
-    public static final int ALPHA=7;
-    public static final int T__19=19;
-    public static final int WS=11;
-    public static final int T__16=16;
-    public static final int T__15=15;
-    public static final int T__18=18;
-    public static final int T__17=17;
-    public static final int T__12=12;
-    public static final int T__14=14;
-    public static final int T__13=13;
-    public static final int ALPHAVAR=6;
-    public static final int DIGIT=8;
+    public static final int CHECK=4;
+    public static final int LPAREN=5;
+    public static final int RPAREN=6;
+    public static final int COMMA=7;
+    public static final int UNIQUE=8;
+    public static final int REFERENCES=9;
+    public static final int PRIMARY_KEY=10;
+    public static final int STRING_LITERAL=11;
+    public static final int STRING_LITERAL2=12;
+    public static final int NUMBER=13;
+    public static final int TRUE=14;
+    public static final int FALSE=15;
+    public static final int DOLLAR=16;
+    public static final int STRING=17;
+    public static final int LESS=18;
+    public static final int GREATER=19;
+    public static final int EQUALS=20;
+    public static final int LESS_OR_EQUAL=21;
+    public static final int GREATER_OR_EQUAL=22;
+    public static final int DOT=23;
+    public static final int QUOTE_DOUBLE=24;
+    public static final int QUOTE_SINGLE=25;
+    public static final int UNDERSCORE=26;
+    public static final int DASH=27;
+    public static final int ALPHA=28;
+    public static final int DIGIT=29;
+    public static final int ALPHANUM=30;
+    public static final int WS=31;
 
     // delegates
     // delegators
@@ -76,110 +89,42 @@ public class ConstraintsParser extends Parser {
         
 
     public String[] getTokenNames() { return ConstraintsParser.tokenNames; }
-    public String getGrammarFileName() { return "/home/obda/Constraints.g"; }
+    public String getGrammarFileName() { return "Constraints.g"; }
 
 
+    /** The API controller */
+    private APIController apic = null;
 
-        	    private List<String> errors = new LinkedList<String>();
-        	    public void displayRecognitionError(String[] tokenNames,
-        	                                        RecognitionException e) {
-        	        String hdr = getErrorHeader(e);
-        	        String msg = getErrorMessage(e, tokenNames);
-        	        errors.add(hdr + " " + msg);
-        	    }
-        	    public List<String> getErrors() {
-        	        return errors;
-        	    }
+    /** A factory to construct the subject and object terms */
+    private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
-
-            	boolean error1 = false;
-
-            	ArrayList<QueryTerm> term_collector = new ArrayList<QueryTerm>();
-            	ArrayList<QueryTerm> terms_ofMappingOne= new ArrayList<QueryTerm>();
-            	ArrayList<QueryTerm>terms_ofMappingTwo = new ArrayList<QueryTerm>();
-            	String tmpId = null;
-            	String idForMappingOne = null;
-            	String idForMappingTwo = null;
-            	QueryTerm firstTerm = null;
-            	QueryTerm secondTerm = null;
-            	Vector<CheckOperationTerm> checks = new Vector<CheckOperationTerm>();
-            	
-            	private APIController apic = null;
-            	
-            	AbstractConstraintAssertion constraint = null;
-
-            	public void resetErrorFlag() {
-            		error1 = false;
-            	}
-            	
-            	public boolean getErrorFlag() {
-            		return error1;
-            	}
-            	
-            	public AbstractConstraintAssertion getConstraintAssertion() {
-            		return constraint;
-            	}
-            	
-            	public void setController(APIController con){
-            		apic = con;
-            	}
-
-            	private void resetValues(){
-            		terms_ofMappingOne = null;
-            		terms_ofMappingTwo =null;
-            		idForMappingOne = null;
-            		idForMappingTwo = null;
-            	}
+    public void setController(APIController apic) {
+      this.apic = apic;
+    }
 
 
 
     // $ANTLR start "parse"
-    // /home/obda/Constraints.g:120:1: parse returns [boolean value] : prog EOF ;
-    public final boolean parse() throws RecognitionException {
-        boolean value = false;
+    // Constraints.g:77:1: parse returns [AbstractConstraintAssertion constraint] : prog EOF ;
+    public final AbstractConstraintAssertion parse() throws RecognitionException {
+        AbstractConstraintAssertion constraint = null;
+
+        AbstractConstraintAssertion prog1 = null;
+
 
         try {
-            // /home/obda/Constraints.g:121:1: ( prog EOF )
-            // /home/obda/Constraints.g:121:3: prog EOF
+            // Constraints.g:78:3: ( prog EOF )
+            // Constraints.g:78:5: prog EOF
             {
-            pushFollow(FOLLOW_prog_in_parse47);
-            prog();
+            pushFollow(FOLLOW_prog_in_parse52);
+            prog1=prog();
 
             state._fsp--;
 
-            match(input,EOF,FOLLOW_EOF_in_parse49); 
-             
-            		value = !error1; 
-            		
+            match(input,EOF,FOLLOW_EOF_in_parse54); 
 
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		value = false; 
-            		throw ex; 
-            	
-        }
-        finally {
-        }
-        return value;
-    }
-    // $ANTLR end "parse"
-
-
-    // $ANTLR start "prog"
-    // /home/obda/Constraints.g:129:1: prog : exp ;
-    public final void prog() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:129:6: ( exp )
-            // /home/obda/Constraints.g:129:9: exp
-            {
-            pushFollow(FOLLOW_exp_in_prog69);
-            exp();
-
-            state._fsp--;
-
+                  constraint = prog1;
+                
 
             }
 
@@ -190,37 +135,83 @@ public class ConstraintsParser extends Parser {
         }
         finally {
         }
-        return ;
+        return constraint;
+    }
+    // $ANTLR end "parse"
+
+
+    // $ANTLR start "prog"
+    // Constraints.g:83:1: prog returns [AbstractConstraintAssertion value] : expression ;
+    public final AbstractConstraintAssertion prog() throws RecognitionException {
+        AbstractConstraintAssertion value = null;
+
+        AbstractConstraintAssertion expression2 = null;
+
+
+        try {
+            // Constraints.g:84:3: ( expression )
+            // Constraints.g:84:5: expression
+            {
+            pushFollow(FOLLOW_expression_in_prog75);
+            expression2=expression();
+
+            state._fsp--;
+
+
+                  value = expression2;
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
     }
     // $ANTLR end "prog"
 
 
-    // $ANTLR start "exp"
-    // /home/obda/Constraints.g:130:1: exp : ( exp1 | exp2 | exp3 | exp4 );
-    public final void exp() throws RecognitionException {
+    // $ANTLR start "expression"
+    // Constraints.g:89:1: expression returns [AbstractConstraintAssertion value] : ( check_constraint | unique_constraint | foreign_key_constraint | primary_key_constraint );
+    public final AbstractConstraintAssertion expression() throws RecognitionException {
+        AbstractConstraintAssertion value = null;
+
+        RDBMSCheckConstraint check_constraint3 = null;
+
+        RDBMSUniquenessConstraint unique_constraint4 = null;
+
+        RDBMSForeignKeyConstraint foreign_key_constraint5 = null;
+
+        RDBMSPrimaryKeyConstraint primary_key_constraint6 = null;
+
+
         try {
-            // /home/obda/Constraints.g:130:6: ( exp1 | exp2 | exp3 | exp4 )
+            // Constraints.g:90:3: ( check_constraint | unique_constraint | foreign_key_constraint | primary_key_constraint )
             int alt1=4;
             int LA1_0 = input.LA(1);
 
-            if ( (LA1_0==ALPHAVAR) ) {
+            if ( (LA1_0==STRING) ) {
                 switch ( input.LA(2) ) {
-                case 12:
+                case CHECK:
                     {
                     alt1=1;
                     }
                     break;
-                case 16:
-                    {
-                    alt1=3;
-                    }
-                    break;
-                case 14:
+                case UNIQUE:
                     {
                     alt1=2;
                     }
                     break;
-                case 18:
+                case LPAREN:
+                    {
+                    alt1=3;
+                    }
+                    break;
+                case PRIMARY_KEY:
                     {
                     alt1=4;
                     }
@@ -241,46 +232,50 @@ public class ConstraintsParser extends Parser {
             }
             switch (alt1) {
                 case 1 :
-                    // /home/obda/Constraints.g:130:8: exp1
+                    // Constraints.g:90:5: check_constraint
                     {
-                    pushFollow(FOLLOW_exp1_in_exp77);
-                    exp1();
+                    pushFollow(FOLLOW_check_constraint_in_expression96);
+                    check_constraint3=check_constraint();
 
                     state._fsp--;
 
+                     value = check_constraint3; 
 
                     }
                     break;
                 case 2 :
-                    // /home/obda/Constraints.g:130:13: exp2
+                    // Constraints.g:91:5: unique_constraint
                     {
-                    pushFollow(FOLLOW_exp2_in_exp79);
-                    exp2();
+                    pushFollow(FOLLOW_unique_constraint_in_expression111);
+                    unique_constraint4=unique_constraint();
 
                     state._fsp--;
 
+                     value = unique_constraint4; 
 
                     }
                     break;
                 case 3 :
-                    // /home/obda/Constraints.g:130:18: exp3
+                    // Constraints.g:92:5: foreign_key_constraint
                     {
-                    pushFollow(FOLLOW_exp3_in_exp81);
-                    exp3();
+                    pushFollow(FOLLOW_foreign_key_constraint_in_expression125);
+                    foreign_key_constraint5=foreign_key_constraint();
 
                     state._fsp--;
 
+                     value = foreign_key_constraint5; 
 
                     }
                     break;
                 case 4 :
-                    // /home/obda/Constraints.g:130:23: exp4
+                    // Constraints.g:93:5: primary_key_constraint
                     {
-                    pushFollow(FOLLOW_exp4_in_exp83);
-                    exp4();
+                    pushFollow(FOLLOW_primary_key_constraint_in_expression134);
+                    primary_key_constraint6=primary_key_constraint();
 
                     state._fsp--;
 
+                     value = primary_key_constraint6; 
 
                     }
                     break;
@@ -293,161 +288,72 @@ public class ConstraintsParser extends Parser {
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "exp"
+    // $ANTLR end "expression"
 
 
-    // $ANTLR start "exp1"
-    // /home/obda/Constraints.g:131:1: exp1 : cc ;
-    public final void exp1() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:131:6: ( cc )
-            // /home/obda/Constraints.g:131:8: cc
-            {
-            pushFollow(FOLLOW_cc_in_exp190);
-            cc();
+    // $ANTLR start "check_constraint"
+    // Constraints.g:96:1: check_constraint returns [RDBMSCheckConstraint value] : table_name CHECK LPAREN c1= condition RPAREN ( COMMA LPAREN c2= condition RPAREN )* ;
+    public final RDBMSCheckConstraint check_constraint() throws RecognitionException {
+        RDBMSCheckConstraint value = null;
 
-            state._fsp--;
+        CheckOperationTerm c1 = null;
 
+        CheckOperationTerm c2 = null;
 
-            }
-
-        }
-        catch (RecognitionException re) {
-            reportError(re);
-            recover(input,re);
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "exp1"
+        ConstraintsParser.table_name_return table_name7 = null;
 
 
-    // $ANTLR start "exp2"
-    // /home/obda/Constraints.g:132:1: exp2 : uni ;
-    public final void exp2() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:132:6: ( uni )
-            // /home/obda/Constraints.g:132:8: uni
-            {
-            pushFollow(FOLLOW_uni_in_exp297);
-            uni();
 
-            state._fsp--;
-
-
-            }
-
-        }
-        catch (RecognitionException re) {
-            reportError(re);
-            recover(input,re);
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "exp2"
-
-
-    // $ANTLR start "exp3"
-    // /home/obda/Constraints.g:133:1: exp3 : fkc ;
-    public final void exp3() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:133:6: ( fkc )
-            // /home/obda/Constraints.g:133:8: fkc
-            {
-            pushFollow(FOLLOW_fkc_in_exp3104);
-            fkc();
-
-            state._fsp--;
-
-
-            }
-
-        }
-        catch (RecognitionException re) {
-            reportError(re);
-            recover(input,re);
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "exp3"
-
-
-    // $ANTLR start "exp4"
-    // /home/obda/Constraints.g:134:1: exp4 : pkc ;
-    public final void exp4() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:134:6: ( pkc )
-            // /home/obda/Constraints.g:134:8: pkc
-            {
-            pushFollow(FOLLOW_pkc_in_exp4111);
-            pkc();
-
-            state._fsp--;
-
-
-            }
-
-        }
-        catch (RecognitionException re) {
-            reportError(re);
-            recover(input,re);
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "exp4"
-
-
-    // $ANTLR start "cc"
-    // /home/obda/Constraints.g:135:1: cc : id 'CHECK' check ( ',' check )* ;
-    public final void cc() throws RecognitionException {
-        String id1 = null;
-
+          Vector<CheckOperationTerm> conditions = new Vector<CheckOperationTerm>();
+          MappingController mc = apic.getMappingController();
+          DatasourcesController dc = apic.getDatasourcesController();
+          URI sourceUri = dc.getCurrentDataSource().getSourceID();
+          OBDAMappingAxiom axiom = null;
 
         try {
-            // /home/obda/Constraints.g:135:4: ( id 'CHECK' check ( ',' check )* )
-            // /home/obda/Constraints.g:135:6: id 'CHECK' check ( ',' check )*
+            // Constraints.g:104:3: ( table_name CHECK LPAREN c1= condition RPAREN ( COMMA LPAREN c2= condition RPAREN )* )
+            // Constraints.g:104:5: table_name CHECK LPAREN c1= condition RPAREN ( COMMA LPAREN c2= condition RPAREN )*
             {
-            pushFollow(FOLLOW_id_in_cc118);
-            id1=id();
+            pushFollow(FOLLOW_table_name_in_check_constraint161);
+            table_name7=table_name();
 
             state._fsp--;
 
-            match(input,12,FOLLOW_12_in_cc120); 
-            pushFollow(FOLLOW_check_in_cc122);
-            check();
+            match(input,CHECK,FOLLOW_CHECK_in_check_constraint163); 
+            match(input,LPAREN,FOLLOW_LPAREN_in_check_constraint165); 
+            pushFollow(FOLLOW_condition_in_check_constraint169);
+            c1=condition();
 
             state._fsp--;
 
-            // /home/obda/Constraints.g:135:23: ( ',' check )*
+             conditions.add(c1); 
+            match(input,RPAREN,FOLLOW_RPAREN_in_check_constraint173); 
+            // Constraints.g:105:9: ( COMMA LPAREN c2= condition RPAREN )*
             loop2:
             do {
                 int alt2=2;
                 int LA2_0 = input.LA(1);
 
-                if ( (LA2_0==13) ) {
+                if ( (LA2_0==COMMA) ) {
                     alt2=1;
                 }
 
 
                 switch (alt2) {
             	case 1 :
-            	    // /home/obda/Constraints.g:135:24: ',' check
+            	    // Constraints.g:105:10: COMMA LPAREN c2= condition RPAREN
             	    {
-            	    match(input,13,FOLLOW_13_in_cc125); 
-            	    pushFollow(FOLLOW_check_in_cc126);
-            	    check();
+            	    match(input,COMMA,FOLLOW_COMMA_in_check_constraint185); 
+            	    match(input,LPAREN,FOLLOW_LPAREN_in_check_constraint187); 
+            	    pushFollow(FOLLOW_condition_in_check_constraint191);
+            	    c2=condition();
 
             	    state._fsp--;
 
+            	     conditions.add(c2); 
+            	    match(input,RPAREN,FOLLOW_RPAREN_in_check_constraint195); 
 
             	    }
             	    break;
@@ -458,269 +364,11 @@ public class ConstraintsParser extends Parser {
             } while (true);
 
 
-            			MappingController con = apic.getMappingController();
-            	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
-            	                      	 OBDAMappingAxiom map1 = con.getMapping(source_uri, id1);
-            	                      	 if(map1 != null){	
-            				constraint = new RDBMSCheckConstraint(id1,(RDBMSSQLQuery)map1.getSourceQuery(),  checks);
-            			}else{
-            				error1 = true;
-            				try{
-            					throw new Exception("Invalid Mapping ID");
-            				}catch (Exception e){
-            					e.printStackTrace();
-            				}
-            			}
-            		
 
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "cc"
-
-
-    // $ANTLR start "uni"
-    // /home/obda/Constraints.g:155:1: uni : id 'UNIQUE (' parameter1 ')' ;
-    public final void uni() throws RecognitionException {
-        String id2 = null;
-
-
-        try {
-            // /home/obda/Constraints.g:155:5: ( id 'UNIQUE (' parameter1 ')' )
-            // /home/obda/Constraints.g:155:7: id 'UNIQUE (' parameter1 ')'
-            {
-            pushFollow(FOLLOW_id_in_uni147);
-            id2=id();
-
-            state._fsp--;
-
-            match(input,14,FOLLOW_14_in_uni149); 
-            pushFollow(FOLLOW_parameter1_in_uni151);
-            parameter1();
-
-            state._fsp--;
-
-            match(input,15,FOLLOW_15_in_uni153); 
-
-            			MappingController con = apic.getMappingController();
-            	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
-            	                      	 OBDAMappingAxiom map1 = con.getMapping(source_uri, id2);
-            	                      	 if(map1 != null){	
-            				constraint = new RDBMSUniquenessConstraint(id2,(RDBMSSQLQuery)map1.getSourceQuery(),  terms_ofMappingOne);
-            			}else{
-            				error1 = true;
-            				try{
-            					throw new Exception("Invalid Mapping ID");
-            				}catch (Exception e){
-            					e.printStackTrace();
-            				}
-            			}
-            		
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "uni"
-
-
-    // $ANTLR start "fkc"
-    // /home/obda/Constraints.g:175:1: fkc : id1 '(' parameter1 ') REFERENCES' id2 ( '(' parameter2 ')' )? ;
-    public final void fkc() throws RecognitionException {
-        String id13 = null;
-
-        String id24 = null;
-
-
-        try {
-            // /home/obda/Constraints.g:175:5: ( id1 '(' parameter1 ') REFERENCES' id2 ( '(' parameter2 ')' )? )
-            // /home/obda/Constraints.g:175:7: id1 '(' parameter1 ') REFERENCES' id2 ( '(' parameter2 ')' )?
-            {
-            pushFollow(FOLLOW_id1_in_fkc171);
-            id13=id1();
-
-            state._fsp--;
-
-            match(input,16,FOLLOW_16_in_fkc173); 
-            pushFollow(FOLLOW_parameter1_in_fkc174);
-            parameter1();
-
-            state._fsp--;
-
-            match(input,17,FOLLOW_17_in_fkc175); 
-            pushFollow(FOLLOW_id2_in_fkc177);
-            id24=id2();
-
-            state._fsp--;
-
-            // /home/obda/Constraints.g:175:43: ( '(' parameter2 ')' )?
-            int alt3=2;
-            int LA3_0 = input.LA(1);
-
-            if ( (LA3_0==16) ) {
-                alt3=1;
-            }
-            switch (alt3) {
-                case 1 :
-                    // /home/obda/Constraints.g:175:45: '(' parameter2 ')'
-                    {
-                    match(input,16,FOLLOW_16_in_fkc181); 
-                    pushFollow(FOLLOW_parameter2_in_fkc183);
-                    parameter2();
-
-                    state._fsp--;
-
-                    match(input,15,FOLLOW_15_in_fkc185); 
-
-                    }
-                    break;
-
-            }
-
-
-            			MappingController con = apic.getMappingController();
-            	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
-            	                      	 OBDAMappingAxiom map1 = con.getMapping(source_uri, id13);
-            	                      	 OBDAMappingAxiom map2 = con.getMapping(source_uri, id24);
-            	                      	 if(map1 != null && map2 != null){	
-            				constraint = new RDBMSForeignKeyConstraint(id13,id24,(RDBMSSQLQuery)map1.getSourceQuery(), (RDBMSSQLQuery)map2.getSourceQuery(), terms_ofMappingOne,terms_ofMappingTwo);
-            			}else{
-            				error1 = true;
-            				try{
-            					throw new Exception("Invalid Mapping ID");
-            				}catch (Exception e){
-            					e.printStackTrace();
-            				}
-            			}
-            		
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "fkc"
-
-
-    // $ANTLR start "pkc"
-    // /home/obda/Constraints.g:197:1: pkc : id 'PRIMARY KEY (' parameter1 ')' ;
-    public final void pkc() throws RecognitionException {
-        String id5 = null;
-
-
-        try {
-            // /home/obda/Constraints.g:197:5: ( id 'PRIMARY KEY (' parameter1 ')' )
-            // /home/obda/Constraints.g:197:7: id 'PRIMARY KEY (' parameter1 ')'
-            {
-            pushFollow(FOLLOW_id_in_pkc207);
-            id5=id();
-
-            state._fsp--;
-
-            match(input,18,FOLLOW_18_in_pkc209); 
-            pushFollow(FOLLOW_parameter1_in_pkc211);
-            parameter1();
-
-            state._fsp--;
-
-            match(input,15,FOLLOW_15_in_pkc213); 
-
-            			 MappingController con = apic.getMappingController();
-            	                        	DatasourcesController dscon = apic.getDatasourcesController();
-            	                        	URI source_uri = dscon.getCurrentDataSource().getSourceID();
-            	                      	 OBDAMappingAxiom map = con.getMapping(source_uri, id5);
-            	                      	 if(map != null){	
-            				constraint = new RDBMSPrimaryKeyConstraint(id5,(RDBMSSQLQuery)map.getSourceQuery(), terms_ofMappingOne);
-            			}else{
-            				error1 = true;
-            				try{
-            					throw new Exception("Invalid Mapping ID");
-            				}catch (Exception e){
-            					e.printStackTrace();
-            				}
-            			}
-            		
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "pkc"
-
-
-    // $ANTLR start "check"
-    // /home/obda/Constraints.g:217:1: check : '(' var op aux ')' ;
-    public final void check() throws RecognitionException {
-        String var6 = null;
-
-        ConstraintsParser.op_return op7 = null;
-
-
-        try {
-            // /home/obda/Constraints.g:217:7: ( '(' var op aux ')' )
-            // /home/obda/Constraints.g:217:9: '(' var op aux ')'
-            {
-            match(input,16,FOLLOW_16_in_check231); 
-            pushFollow(FOLLOW_var_in_check233);
-            var6=var();
-
-            state._fsp--;
-
-            pushFollow(FOLLOW_op_in_check235);
-            op7=op();
-
-            state._fsp--;
-
-            pushFollow(FOLLOW_aux_in_check237);
-            aux();
-
-            state._fsp--;
-
-            match(input,15,FOLLOW_15_in_check239); 
-
-            		CheckOperationTerm op = new CheckOperationTerm(new VariableTerm(var6), (op7!=null?input.toString(op7.start,op7.stop):null), term_collector.get(0)); 
-            		checks.add(op);
-            		term_collector = new ArrayList<QueryTerm>(); 
-            		
+                  axiom = mc.getMapping(sourceUri, (table_name7!=null?input.toString(table_name7.start,table_name7.stop):null));
+                  value = new RDBMSCheckConstraint(
+                      (table_name7!=null?input.toString(table_name7.start,table_name7.stop):null), (RDBMSSQLQuery)axiom.getSourceQuery(), conditions);
+                
 
             }
 
@@ -731,104 +379,307 @@ public class ConstraintsParser extends Parser {
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "check"
+    // $ANTLR end "check_constraint"
 
 
-    // $ANTLR start "parameter1"
-    // /home/obda/Constraints.g:222:1: parameter1 : parameter ;
-    public final void parameter1() throws RecognitionException {
+    // $ANTLR start "unique_constraint"
+    // Constraints.g:113:1: unique_constraint returns [RDBMSUniquenessConstraint value] : table_name UNIQUE LPAREN parameter RPAREN ;
+    public final RDBMSUniquenessConstraint unique_constraint() throws RecognitionException {
+        RDBMSUniquenessConstraint value = null;
+
+        ConstraintsParser.table_name_return table_name8 = null;
+
+        Vector<Variable> parameter9 = null;
+
+
+
+          MappingController mc = apic.getMappingController();
+          DatasourcesController dc = apic.getDatasourcesController();
+          URI sourceUri = dc.getCurrentDataSource().getSourceID();
+          OBDAMappingAxiom axiom = null;
+
         try {
-            // /home/obda/Constraints.g:222:12: ( parameter )
-            // /home/obda/Constraints.g:222:14: parameter
+            // Constraints.g:120:3: ( table_name UNIQUE LPAREN parameter RPAREN )
+            // Constraints.g:120:5: table_name UNIQUE LPAREN parameter RPAREN
             {
-            pushFollow(FOLLOW_parameter_in_parameter1247);
-            parameter();
+            pushFollow(FOLLOW_table_name_in_unique_constraint223);
+            table_name8=table_name();
 
             state._fsp--;
 
-            terms_ofMappingOne = term_collector; term_collector =  new ArrayList<QueryTerm>(); idForMappingOne = tmpId; tmpId = null;
+            match(input,UNIQUE,FOLLOW_UNIQUE_in_unique_constraint225); 
+            match(input,LPAREN,FOLLOW_LPAREN_in_unique_constraint227); 
+            pushFollow(FOLLOW_parameter_in_unique_constraint229);
+            parameter9=parameter();
+
+            state._fsp--;
+
+            match(input,RPAREN,FOLLOW_RPAREN_in_unique_constraint231); 
+
+                  
+                  axiom = mc.getMapping(sourceUri, (table_name8!=null?input.toString(table_name8.start,table_name8.stop):null));
+                  value = new RDBMSUniquenessConstraint(
+                      (table_name8!=null?input.toString(table_name8.start,table_name8.stop):null), (RDBMSSQLQuery)axiom.getSourceQuery(), 
+                      parameter9);
+                
 
             }
 
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "parameter1"
+    // $ANTLR end "unique_constraint"
 
 
-    // $ANTLR start "parameter2"
-    // /home/obda/Constraints.g:227:1: parameter2 : parameter ;
-    public final void parameter2() throws RecognitionException {
+    // $ANTLR start "foreign_key_constraint"
+    // Constraints.g:129:1: foreign_key_constraint returns [RDBMSForeignKeyConstraint value] : t1= table_name LPAREN p1= parameter RPAREN REFERENCES t2= table_name ( LPAREN p2= parameter RPAREN )? ;
+    public final RDBMSForeignKeyConstraint foreign_key_constraint() throws RecognitionException {
+        RDBMSForeignKeyConstraint value = null;
+
+        ConstraintsParser.table_name_return t1 = null;
+
+        Vector<Variable> p1 = null;
+
+        ConstraintsParser.table_name_return t2 = null;
+
+        Vector<Variable> p2 = null;
+
+
+
+          MappingController mc = apic.getMappingController();
+          DatasourcesController dc = apic.getDatasourcesController();
+          URI sourceUri = dc.getCurrentDataSource().getSourceID();
+          OBDAMappingAxiom axiom1 = null;
+          OBDAMappingAxiom axiom2 = null;
+
         try {
-            // /home/obda/Constraints.g:227:12: ( parameter )
-            // /home/obda/Constraints.g:227:14: parameter
+            // Constraints.g:137:3: (t1= table_name LPAREN p1= parameter RPAREN REFERENCES t2= table_name ( LPAREN p2= parameter RPAREN )? )
+            // Constraints.g:137:5: t1= table_name LPAREN p1= parameter RPAREN REFERENCES t2= table_name ( LPAREN p2= parameter RPAREN )?
             {
-            pushFollow(FOLLOW_parameter_in_parameter2264);
-            parameter();
+            pushFollow(FOLLOW_table_name_in_foreign_key_constraint259);
+            t1=table_name();
 
             state._fsp--;
 
-            terms_ofMappingTwo = term_collector; term_collector =  new ArrayList<QueryTerm>(); idForMappingTwo = tmpId; tmpId = null; 
+            match(input,LPAREN,FOLLOW_LPAREN_in_foreign_key_constraint261); 
+            pushFollow(FOLLOW_parameter_in_foreign_key_constraint265);
+            p1=parameter();
+
+            state._fsp--;
+
+            match(input,RPAREN,FOLLOW_RPAREN_in_foreign_key_constraint267); 
+            match(input,REFERENCES,FOLLOW_REFERENCES_in_foreign_key_constraint269); 
+            pushFollow(FOLLOW_table_name_in_foreign_key_constraint273);
+            t2=table_name();
+
+            state._fsp--;
+
+            // Constraints.g:137:71: ( LPAREN p2= parameter RPAREN )?
+            int alt3=2;
+            int LA3_0 = input.LA(1);
+
+            if ( (LA3_0==LPAREN) ) {
+                alt3=1;
+            }
+            switch (alt3) {
+                case 1 :
+                    // Constraints.g:137:72: LPAREN p2= parameter RPAREN
+                    {
+                    match(input,LPAREN,FOLLOW_LPAREN_in_foreign_key_constraint276); 
+                    pushFollow(FOLLOW_parameter_in_foreign_key_constraint280);
+                    p2=parameter();
+
+                    state._fsp--;
+
+                    match(input,RPAREN,FOLLOW_RPAREN_in_foreign_key_constraint282); 
+
+                    }
+                    break;
+
+            }
+
+
+              
+                  axiom1 = mc.getMapping(sourceUri, (t1!=null?input.toString(t1.start,t1.stop):null));
+                  axiom2 = mc.getMapping(sourceUri, (t2!=null?input.toString(t2.start,t2.stop):null));
+                  value = new RDBMSForeignKeyConstraint(
+                    (t1!=null?input.toString(t1.start,t1.stop):null), (t2!=null?input.toString(t2.start,t2.stop):null), 
+                    (RDBMSSQLQuery)axiom1.getSourceQuery(), 
+                    (RDBMSSQLQuery)axiom2.getSourceQuery(), 
+                    p1, p2);
+                
 
             }
 
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "parameter2"
+    // $ANTLR end "foreign_key_constraint"
+
+
+    // $ANTLR start "primary_key_constraint"
+    // Constraints.g:149:1: primary_key_constraint returns [RDBMSPrimaryKeyConstraint value] : table_name PRIMARY_KEY LPAREN parameter RPAREN ;
+    public final RDBMSPrimaryKeyConstraint primary_key_constraint() throws RecognitionException {
+        RDBMSPrimaryKeyConstraint value = null;
+
+        ConstraintsParser.table_name_return table_name10 = null;
+
+        Vector<Variable> parameter11 = null;
+
+
+
+          MappingController mc = apic.getMappingController();
+          DatasourcesController dc = apic.getDatasourcesController();
+          URI sourceUri = dc.getCurrentDataSource().getSourceID();
+          OBDAMappingAxiom axiom = null;
+
+        try {
+            // Constraints.g:156:3: ( table_name PRIMARY_KEY LPAREN parameter RPAREN )
+            // Constraints.g:156:5: table_name PRIMARY_KEY LPAREN parameter RPAREN
+            {
+            pushFollow(FOLLOW_table_name_in_primary_key_constraint310);
+            table_name10=table_name();
+
+            state._fsp--;
+
+            match(input,PRIMARY_KEY,FOLLOW_PRIMARY_KEY_in_primary_key_constraint312); 
+            match(input,LPAREN,FOLLOW_LPAREN_in_primary_key_constraint314); 
+            pushFollow(FOLLOW_parameter_in_primary_key_constraint316);
+            parameter11=parameter();
+
+            state._fsp--;
+
+            match(input,RPAREN,FOLLOW_RPAREN_in_primary_key_constraint318); 
+
+              
+                  axiom = mc.getMapping(sourceUri, (table_name10!=null?input.toString(table_name10.start,table_name10.stop):null));
+                  value = new RDBMSPrimaryKeyConstraint(
+                      (table_name10!=null?input.toString(table_name10.start,table_name10.stop):null), (RDBMSSQLQuery)axiom.getSourceQuery(), 
+                      parameter11);
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "primary_key_constraint"
+
+
+    // $ANTLR start "condition"
+    // Constraints.g:165:1: condition returns [CheckOperationTerm value] : variable op range ;
+    public final CheckOperationTerm condition() throws RecognitionException {
+        CheckOperationTerm value = null;
+
+        Variable variable12 = null;
+
+        ConstraintsParser.op_return op13 = null;
+
+        Term range14 = null;
+
+
+        try {
+            // Constraints.g:166:3: ( variable op range )
+            // Constraints.g:166:5: variable op range
+            {
+            pushFollow(FOLLOW_variable_in_condition339);
+            variable12=variable();
+
+            state._fsp--;
+
+            pushFollow(FOLLOW_op_in_condition341);
+            op13=op();
+
+            state._fsp--;
+
+            pushFollow(FOLLOW_range_in_condition343);
+            range14=range();
+
+            state._fsp--;
+
+
+                  value = new CheckOperationTerm(variable12, (op13!=null?input.toString(op13.start,op13.stop):null), range14);
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "condition"
 
 
     // $ANTLR start "parameter"
-    // /home/obda/Constraints.g:232:1: parameter : term ( ',' term )* ;
-    public final void parameter() throws RecognitionException {
+    // Constraints.g:171:1: parameter returns [Vector<Variable> values] : v1= variable ( COMMA v2= variable )* ;
+    public final Vector<Variable> parameter() throws RecognitionException {
+        Vector<Variable> values = null;
+
+        Variable v1 = null;
+
+        Variable v2 = null;
+
+
+
+          values = new Vector<Variable>();
+
         try {
-            // /home/obda/Constraints.g:232:11: ( term ( ',' term )* )
-            // /home/obda/Constraints.g:232:13: term ( ',' term )*
+            // Constraints.g:175:3: (v1= variable ( COMMA v2= variable )* )
+            // Constraints.g:175:5: v1= variable ( COMMA v2= variable )*
             {
-            pushFollow(FOLLOW_term_in_parameter281);
-            term();
+            pushFollow(FOLLOW_variable_in_parameter371);
+            v1=variable();
 
             state._fsp--;
 
-            // /home/obda/Constraints.g:232:18: ( ',' term )*
+             values.add(v1); 
+            // Constraints.g:175:45: ( COMMA v2= variable )*
             loop4:
             do {
                 int alt4=2;
                 int LA4_0 = input.LA(1);
 
-                if ( (LA4_0==13) ) {
+                if ( (LA4_0==COMMA) ) {
                     alt4=1;
                 }
 
 
                 switch (alt4) {
             	case 1 :
-            	    // /home/obda/Constraints.g:232:19: ',' term
+            	    // Constraints.g:175:46: COMMA v2= variable
             	    {
-            	    match(input,13,FOLLOW_13_in_parameter284); 
-            	    pushFollow(FOLLOW_term_in_parameter286);
-            	    term();
+            	    match(input,COMMA,FOLLOW_COMMA_in_parameter376); 
+            	    pushFollow(FOLLOW_variable_in_parameter380);
+            	    v2=variable();
 
             	    state._fsp--;
 
+            	     values.add(v2); 
 
             	    }
             	    break;
@@ -842,574 +693,414 @@ public class ConstraintsParser extends Parser {
             }
 
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return values;
     }
     // $ANTLR end "parameter"
 
 
-    // $ANTLR start "aux"
-    // /home/obda/Constraints.g:237:1: aux : ( auxterm | constant );
-    public final void aux() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:237:5: ( auxterm | constant )
-            int alt5=2;
-            int LA5_0 = input.LA(1);
+    // $ANTLR start "range"
+    // Constraints.g:178:1: range returns [Term value] : ( variable | string_constant | numeric_constant | boolean_constant );
+    public final Term range() throws RecognitionException {
+        Term value = null;
 
-            if ( (LA5_0==20) ) {
+        Variable variable15 = null;
+
+        ValueConstant string_constant16 = null;
+
+        ValueConstant numeric_constant17 = null;
+
+        ValueConstant boolean_constant18 = null;
+
+
+        try {
+            // Constraints.g:179:3: ( variable | string_constant | numeric_constant | boolean_constant )
+            int alt5=4;
+            switch ( input.LA(1) ) {
+            case DOLLAR:
+                {
                 alt5=1;
-            }
-            else if ( ((LA5_0>=NUMBER && LA5_0<=BOOL)||LA5_0==19) ) {
+                }
+                break;
+            case STRING_LITERAL:
+            case STRING_LITERAL2:
+                {
                 alt5=2;
-            }
-            else {
+                }
+                break;
+            case NUMBER:
+                {
+                alt5=3;
+                }
+                break;
+            case TRUE:
+            case FALSE:
+                {
+                alt5=4;
+                }
+                break;
+            default:
                 NoViableAltException nvae =
                     new NoViableAltException("", 5, 0, input);
 
                 throw nvae;
             }
+
             switch (alt5) {
                 case 1 :
-                    // /home/obda/Constraints.g:237:7: auxterm
+                    // Constraints.g:179:5: variable
                     {
-                    pushFollow(FOLLOW_auxterm_in_aux304);
-                    auxterm();
+                    pushFollow(FOLLOW_variable_in_range403);
+                    variable15=variable();
 
                     state._fsp--;
 
+                     value = variable15; 
 
                     }
                     break;
                 case 2 :
-                    // /home/obda/Constraints.g:237:17: constant
+                    // Constraints.g:180:5: string_constant
                     {
-                    pushFollow(FOLLOW_constant_in_aux308);
-                    constant();
+                    pushFollow(FOLLOW_string_constant_in_range419);
+                    string_constant16=string_constant();
 
                     state._fsp--;
 
+                     value = string_constant16; 
+
+                    }
+                    break;
+                case 3 :
+                    // Constraints.g:181:5: numeric_constant
+                    {
+                    pushFollow(FOLLOW_numeric_constant_in_range428);
+                    numeric_constant17=numeric_constant();
+
+                    state._fsp--;
+
+                     value = numeric_constant17; 
+
+                    }
+                    break;
+                case 4 :
+                    // Constraints.g:182:5: boolean_constant
+                    {
+                    pushFollow(FOLLOW_boolean_constant_in_range436);
+                    boolean_constant18=boolean_constant();
+
+                    state._fsp--;
+
+                     value = boolean_constant18; 
 
                     }
                     break;
 
             }
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "aux"
+    // $ANTLR end "range"
 
 
-    // $ANTLR start "constant"
-    // /home/obda/Constraints.g:242:1: constant : ( stringconstant | numericconstant | booleanconstant );
-    public final void constant() throws RecognitionException {
+    // $ANTLR start "string_constant"
+    // Constraints.g:185:1: string_constant returns [ValueConstant value] : ( STRING_LITERAL | STRING_LITERAL2 );
+    public final ValueConstant string_constant() throws RecognitionException {
+        ValueConstant value = null;
+
+        Token STRING_LITERAL19=null;
+        Token STRING_LITERAL220=null;
+
+
+          XSDatatype type = null;
+          try {
+            type = XSDTypingController.getInstance().getType("xsd:string");
+          }
+          catch (UnknownXSDTypeException e) {
+            // Do nothing.
+          }  
+
         try {
-            // /home/obda/Constraints.g:242:10: ( stringconstant | numericconstant | booleanconstant )
-            int alt6=3;
-            switch ( input.LA(1) ) {
-            case 19:
-                {
+            // Constraints.g:195:3: ( STRING_LITERAL | STRING_LITERAL2 )
+            int alt6=2;
+            int LA6_0 = input.LA(1);
+
+            if ( (LA6_0==STRING_LITERAL) ) {
                 alt6=1;
-                }
-                break;
-            case NUMBER:
-                {
+            }
+            else if ( (LA6_0==STRING_LITERAL2) ) {
                 alt6=2;
-                }
-                break;
-            case BOOL:
-                {
-                alt6=3;
-                }
-                break;
-            default:
+            }
+            else {
                 NoViableAltException nvae =
                     new NoViableAltException("", 6, 0, input);
 
                 throw nvae;
             }
-
             switch (alt6) {
                 case 1 :
-                    // /home/obda/Constraints.g:242:12: stringconstant
+                    // Constraints.g:195:5: STRING_LITERAL
                     {
-                    pushFollow(FOLLOW_stringconstant_in_constant324);
-                    stringconstant();
+                    STRING_LITERAL19=(Token)match(input,STRING_LITERAL,FOLLOW_STRING_LITERAL_in_string_constant462); 
 
-                    state._fsp--;
-
+                          value = termFactory.createValueConstant((STRING_LITERAL19!=null?STRING_LITERAL19.getText():null), type);
+                        
 
                     }
                     break;
                 case 2 :
-                    // /home/obda/Constraints.g:242:29: numericconstant
+                    // Constraints.g:198:5: STRING_LITERAL2
                     {
-                    pushFollow(FOLLOW_numericconstant_in_constant328);
-                    numericconstant();
+                    STRING_LITERAL220=(Token)match(input,STRING_LITERAL2,FOLLOW_STRING_LITERAL2_in_string_constant470); 
 
-                    state._fsp--;
-
-
-                    }
-                    break;
-                case 3 :
-                    // /home/obda/Constraints.g:242:47: booleanconstant
-                    {
-                    pushFollow(FOLLOW_booleanconstant_in_constant332);
-                    booleanconstant();
-
-                    state._fsp--;
-
+                          value = termFactory.createValueConstant((STRING_LITERAL220!=null?STRING_LITERAL220.getText():null), type);
+                        
 
                     }
                     break;
 
             }
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "constant"
+    // $ANTLR end "string_constant"
 
 
-    // $ANTLR start "auxterm"
-    // /home/obda/Constraints.g:247:1: auxterm : var ;
-    public final void auxterm() throws RecognitionException {
-        String var8 = null;
+    // $ANTLR start "numeric_constant"
+    // Constraints.g:203:1: numeric_constant returns [ValueConstant value] : NUMBER ;
+    public final ValueConstant numeric_constant() throws RecognitionException {
+        ValueConstant value = null;
+
+        Token NUMBER21=null;
+
+
+          String constant = "";
+          XSDatatype type = null;
+          try {
+        	  type = (constant.contains(".")) ? 
+        	     XSDTypingController.getInstance().getType("xsd:double") :
+        		   XSDTypingController.getInstance().getType("xsd:int");
+          }
+          catch (UnknownXSDTypeException e) {
+            // Do nothing.
+          }  
+
+        try {
+            // Constraints.g:216:3: ( NUMBER )
+            // Constraints.g:216:5: NUMBER
+            {
+            NUMBER21=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_numeric_constant496); 
+
+                  constant = (NUMBER21!=null?NUMBER21.getText():null);
+                  value = termFactory.createValueConstant(constant, type);
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "numeric_constant"
+
+
+    // $ANTLR start "boolean_constant"
+    // Constraints.g:222:1: boolean_constant returns [ValueConstant value] : ( TRUE | FALSE );
+    public final ValueConstant boolean_constant() throws RecognitionException {
+        ValueConstant value = null;
+
+
+          XSDatatype type = null;
+          try {
+            type = XSDTypingController.getInstance().getType("xsd:boolean");
+          }
+          catch (UnknownXSDTypeException e) {
+            // Do nothing.
+          }  
+
+        try {
+            // Constraints.g:232:3: ( TRUE | FALSE )
+            int alt7=2;
+            int LA7_0 = input.LA(1);
+
+            if ( (LA7_0==TRUE) ) {
+                alt7=1;
+            }
+            else if ( (LA7_0==FALSE) ) {
+                alt7=2;
+            }
+            else {
+                NoViableAltException nvae =
+                    new NoViableAltException("", 7, 0, input);
+
+                throw nvae;
+            }
+            switch (alt7) {
+                case 1 :
+                    // Constraints.g:232:5: TRUE
+                    {
+                    match(input,TRUE,FOLLOW_TRUE_in_boolean_constant522); 
+
+                          value = termFactory.createValueConstant("true", type);
+                        
+
+                    }
+                    break;
+                case 2 :
+                    // Constraints.g:235:5: FALSE
+                    {
+                    match(input,FALSE,FOLLOW_FALSE_in_boolean_constant530); 
+
+                          value = termFactory.createValueConstant("false", type);
+                        
+
+                    }
+                    break;
+
+            }
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "boolean_constant"
+
+
+    // $ANTLR start "variable"
+    // Constraints.g:240:1: variable returns [Variable value] : DOLLAR var_name ;
+    public final Variable variable() throws RecognitionException {
+        Variable value = null;
+
+        ConstraintsParser.var_name_return var_name22 = null;
 
 
         try {
-            // /home/obda/Constraints.g:248:2: ( var )
-            // /home/obda/Constraints.g:248:4: var
+            // Constraints.g:241:3: ( DOLLAR var_name )
+            // Constraints.g:241:5: DOLLAR var_name
             {
-            pushFollow(FOLLOW_var_in_auxterm351);
-            var8=var();
+            match(input,DOLLAR,FOLLOW_DOLLAR_in_variable552); 
+            pushFollow(FOLLOW_var_name_in_variable554);
+            var_name22=var_name();
 
             state._fsp--;
 
-            VariableTerm t = new VariableTerm(var8); secondTerm = t;term_collector.add(t);
+
+                  value = termFactory.createVariable((var_name22!=null?input.toString(var_name22.start,var_name22.stop):null));
+                
 
             }
 
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "auxterm"
+    // $ANTLR end "variable"
 
+    public static class var_name_return extends ParserRuleReturnScope {
+    };
 
-    // $ANTLR start "stringconstant"
-    // /home/obda/Constraints.g:254:1: stringconstant : '\\'' string '\\'' ;
-    public final void stringconstant() throws RecognitionException {
-        String string9 = null;
-
+    // $ANTLR start "var_name"
+    // Constraints.g:246:1: var_name : STRING ;
+    public final ConstraintsParser.var_name_return var_name() throws RecognitionException {
+        ConstraintsParser.var_name_return retval = new ConstraintsParser.var_name_return();
+        retval.start = input.LT(1);
 
         try {
-            // /home/obda/Constraints.g:254:15: ( '\\'' string '\\'' )
-            // /home/obda/Constraints.g:254:17: '\\'' string '\\''
+            // Constraints.g:247:3: ( STRING )
+            // Constraints.g:247:5: STRING
             {
-            match(input,19,FOLLOW_19_in_stringconstant370); 
-            pushFollow(FOLLOW_string_in_stringconstant371);
-            string9=string();
-
-            state._fsp--;
-
-            match(input,19,FOLLOW_19_in_stringconstant372); 
-            XSDatatype type = XSDTypingController.getInstance().getType("xsd:string"); 
-            		TypedConstantTerm tct = new TypedConstantTerm(string9, type); term_collector.add(tct); secondTerm = tct;
+            match(input,STRING,FOLLOW_STRING_in_var_name569); 
 
             }
 
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        catch (UnknownXSDTypeException e) {
+            retval.stop = input.LT(-1);
 
-            			e.printStackTrace();
-            		
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return retval;
     }
-    // $ANTLR end "stringconstant"
+    // $ANTLR end "var_name"
 
+    public static class table_name_return extends ParserRuleReturnScope {
+    };
 
-    // $ANTLR start "numericconstant"
-    // /home/obda/Constraints.g:262:1: numericconstant : number ;
-    public final void numericconstant() throws RecognitionException {
-        String number10 = null;
-
+    // $ANTLR start "table_name"
+    // Constraints.g:250:1: table_name : STRING ;
+    public final ConstraintsParser.table_name_return table_name() throws RecognitionException {
+        ConstraintsParser.table_name_return retval = new ConstraintsParser.table_name_return();
+        retval.start = input.LT(1);
 
         try {
-            // /home/obda/Constraints.g:262:16: ( number )
-            // /home/obda/Constraints.g:262:18: number
+            // Constraints.g:251:3: ( STRING )
+            // Constraints.g:251:5: STRING
             {
-            pushFollow(FOLLOW_number_in_numericconstant393);
-            number10=number();
-
-            state._fsp--;
-
-
-            		String n = number10;
-            		if(n.contains(".")){
-            		XSDatatype type = XSDTypingController.getInstance().getType("xsd:double"); 
-            		TypedConstantTerm tct = new TypedConstantTerm(n, type); term_collector.add(tct); secondTerm = tct;
-            		}else{
-            		XSDatatype type = XSDTypingController.getInstance().getType("xsd:int"); 
-            		TypedConstantTerm tct = new TypedConstantTerm(n, type); term_collector.add(tct); secondTerm = tct;
-            		}
-            		
+            match(input,STRING,FOLLOW_STRING_in_table_name582); 
 
             }
 
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        catch (UnknownXSDTypeException e) {
+            retval.stop = input.LT(-1);
 
-            			e.printStackTrace();
-            		
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return retval;
     }
-    // $ANTLR end "numericconstant"
-
-
-    // $ANTLR start "booleanconstant"
-    // /home/obda/Constraints.g:279:1: booleanconstant : boolean_ ;
-    public final void booleanconstant() throws RecognitionException {
-        boolean boolean_11 = false;
-
-
-        try {
-            // /home/obda/Constraints.g:279:16: ( boolean_ )
-            // /home/obda/Constraints.g:279:18: boolean_
-            {
-            pushFollow(FOLLOW_boolean__in_booleanconstant417);
-            boolean_11=boolean_();
-
-            state._fsp--;
-
-            XSDatatype type = XSDTypingController.getInstance().getType("xsd:boolean"); 	
-            		TypedConstantTerm tct = new TypedConstantTerm(boolean_11 +"", type); term_collector.add(tct); secondTerm = tct;
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        catch (UnknownXSDTypeException e) {
-
-            			e.printStackTrace();
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "booleanconstant"
-
-
-    // $ANTLR start "term"
-    // /home/obda/Constraints.g:287:1: term : var ;
-    public final void term() throws RecognitionException {
-        String var12 = null;
-
-
-        try {
-            // /home/obda/Constraints.g:287:6: ( var )
-            // /home/obda/Constraints.g:287:8: var
-            {
-            pushFollow(FOLLOW_var_in_term441);
-            var12=var();
-
-            state._fsp--;
-
-            VariableTerm t = new VariableTerm(var12); term_collector.add(t);
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "term"
-
-
-    // $ANTLR start "number"
-    // /home/obda/Constraints.g:292:1: number returns [String d] : NUMBER ;
-    public final String number() throws RecognitionException {
-        String d = null;
-
-        Token NUMBER13=null;
-
-        try {
-            // /home/obda/Constraints.g:292:27: ( NUMBER )
-            // /home/obda/Constraints.g:292:29: NUMBER
-            {
-            NUMBER13=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_number465); 
-            d = (NUMBER13!=null?NUMBER13.getText():null);
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return d;
-    }
-    // $ANTLR end "number"
-
-
-    // $ANTLR start "boolean_"
-    // /home/obda/Constraints.g:297:1: boolean_ returns [boolean b] : BOOL ;
-    public final boolean boolean_() throws RecognitionException {
-        boolean b = false;
-
-        Token BOOL14=null;
-
-        try {
-            // /home/obda/Constraints.g:297:30: ( BOOL )
-            // /home/obda/Constraints.g:297:32: BOOL
-            {
-            BOOL14=(Token)match(input,BOOL,FOLLOW_BOOL_in_boolean_486); 
-            b = new Boolean((BOOL14!=null?BOOL14.getText():null)).booleanValue();
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return b;
-    }
-    // $ANTLR end "boolean_"
-
-
-    // $ANTLR start "string"
-    // /home/obda/Constraints.g:302:1: string returns [String s] : ALPHAVAR ;
-    public final String string() throws RecognitionException {
-        String s = null;
-
-        Token ALPHAVAR15=null;
-
-        try {
-            // /home/obda/Constraints.g:302:27: ( ALPHAVAR )
-            // /home/obda/Constraints.g:302:29: ALPHAVAR
-            {
-            ALPHAVAR15=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_string507); 
-            s = (ALPHAVAR15!=null?ALPHAVAR15.getText():null);
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return s;
-    }
-    // $ANTLR end "string"
-
-
-    // $ANTLR start "var"
-    // /home/obda/Constraints.g:307:1: var returns [String v] : '$' ALPHAVAR ;
-    public final String var() throws RecognitionException {
-        String v = null;
-
-        Token ALPHAVAR16=null;
-
-        try {
-            // /home/obda/Constraints.g:307:24: ( '$' ALPHAVAR )
-            // /home/obda/Constraints.g:307:26: '$' ALPHAVAR
-            {
-            match(input,20,FOLLOW_20_in_var529); 
-            ALPHAVAR16=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_var531); 
-            v = (ALPHAVAR16!=null?ALPHAVAR16.getText():null);
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return v;
-    }
-    // $ANTLR end "var"
-
-
-    // $ANTLR start "id"
-    // /home/obda/Constraints.g:312:1: id returns [String mid] : ALPHAVAR ;
-    public final String id() throws RecognitionException {
-        String mid = null;
-
-        Token ALPHAVAR17=null;
-
-        try {
-            // /home/obda/Constraints.g:312:25: ( ALPHAVAR )
-            // /home/obda/Constraints.g:312:27: ALPHAVAR
-            {
-            ALPHAVAR17=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_id553); 
-            mid = (ALPHAVAR17!=null?ALPHAVAR17.getText():null); 
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return mid;
-    }
-    // $ANTLR end "id"
-
-
-    // $ANTLR start "id1"
-    // /home/obda/Constraints.g:317:1: id1 returns [String mid] : ALPHAVAR ;
-    public final String id1() throws RecognitionException {
-        String mid = null;
-
-        Token ALPHAVAR18=null;
-
-        try {
-            // /home/obda/Constraints.g:317:26: ( ALPHAVAR )
-            // /home/obda/Constraints.g:317:28: ALPHAVAR
-            {
-            ALPHAVAR18=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_id1575); 
-            mid = (ALPHAVAR18!=null?ALPHAVAR18.getText():null);
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return mid;
-    }
-    // $ANTLR end "id1"
-
-
-    // $ANTLR start "id2"
-    // /home/obda/Constraints.g:322:1: id2 returns [String mid] : ALPHAVAR ;
-    public final String id2() throws RecognitionException {
-        String mid = null;
-
-        Token ALPHAVAR19=null;
-
-        try {
-            // /home/obda/Constraints.g:322:26: ( ALPHAVAR )
-            // /home/obda/Constraints.g:322:28: ALPHAVAR
-            {
-            ALPHAVAR19=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_id2597); 
-            mid = (ALPHAVAR19!=null?ALPHAVAR19.getText():null); 
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return mid;
-    }
-    // $ANTLR end "id2"
+    // $ANTLR end "table_name"
 
     public static class op_return extends ParserRuleReturnScope {
     };
 
     // $ANTLR start "op"
-    // /home/obda/Constraints.g:327:1: op : ( '<' | '>' | '=' | '<=' | '>=' );
+    // Constraints.g:254:1: op : ( LESS | GREATER | EQUALS | LESS_OR_EQUAL | GREATER_OR_EQUAL );
     public final ConstraintsParser.op_return op() throws RecognitionException {
         ConstraintsParser.op_return retval = new ConstraintsParser.op_return();
         retval.start = input.LT(1);
 
         try {
-            // /home/obda/Constraints.g:327:4: ( '<' | '>' | '=' | '<=' | '>=' )
-            // /home/obda/Constraints.g:
+            // Constraints.g:255:3: ( LESS | GREATER | EQUALS | LESS_OR_EQUAL | GREATER_OR_EQUAL )
+            // Constraints.g:
             {
-            if ( (input.LA(1)>=21 && input.LA(1)<=25) ) {
+            if ( (input.LA(1)>=LESS && input.LA(1)<=GREATER_OR_EQUAL) ) {
                 input.consume();
                 state.errorRecovery=false;
             }
@@ -1424,11 +1115,9 @@ public class ConstraintsParser extends Parser {
             retval.stop = input.LT(-1);
 
         }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
@@ -1441,68 +1130,60 @@ public class ConstraintsParser extends Parser {
 
  
 
-    public static final BitSet FOLLOW_prog_in_parse47 = new BitSet(new long[]{0x0000000000000000L});
-    public static final BitSet FOLLOW_EOF_in_parse49 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_exp_in_prog69 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_exp1_in_exp77 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_exp2_in_exp79 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_exp3_in_exp81 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_exp4_in_exp83 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_cc_in_exp190 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_uni_in_exp297 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_fkc_in_exp3104 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_pkc_in_exp4111 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_id_in_cc118 = new BitSet(new long[]{0x0000000000001000L});
-    public static final BitSet FOLLOW_12_in_cc120 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_check_in_cc122 = new BitSet(new long[]{0x0000000000002002L});
-    public static final BitSet FOLLOW_13_in_cc125 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_check_in_cc126 = new BitSet(new long[]{0x0000000000002002L});
-    public static final BitSet FOLLOW_id_in_uni147 = new BitSet(new long[]{0x0000000000004000L});
-    public static final BitSet FOLLOW_14_in_uni149 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_parameter1_in_uni151 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_uni153 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_id1_in_fkc171 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_16_in_fkc173 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_parameter1_in_fkc174 = new BitSet(new long[]{0x0000000000020000L});
-    public static final BitSet FOLLOW_17_in_fkc175 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_id2_in_fkc177 = new BitSet(new long[]{0x0000000000010002L});
-    public static final BitSet FOLLOW_16_in_fkc181 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_parameter2_in_fkc183 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_fkc185 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_id_in_pkc207 = new BitSet(new long[]{0x0000000000040000L});
-    public static final BitSet FOLLOW_18_in_pkc209 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_parameter1_in_pkc211 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_pkc213 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_16_in_check231 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_var_in_check233 = new BitSet(new long[]{0x0000000003E00000L});
-    public static final BitSet FOLLOW_op_in_check235 = new BitSet(new long[]{0x0000000000180030L});
-    public static final BitSet FOLLOW_aux_in_check237 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_check239 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_parameter_in_parameter1247 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_parameter_in_parameter2264 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_term_in_parameter281 = new BitSet(new long[]{0x0000000000002002L});
-    public static final BitSet FOLLOW_13_in_parameter284 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_term_in_parameter286 = new BitSet(new long[]{0x0000000000002002L});
-    public static final BitSet FOLLOW_auxterm_in_aux304 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_constant_in_aux308 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_stringconstant_in_constant324 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_numericconstant_in_constant328 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_booleanconstant_in_constant332 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_in_auxterm351 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_19_in_stringconstant370 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_string_in_stringconstant371 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_19_in_stringconstant372 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_number_in_numericconstant393 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_boolean__in_booleanconstant417 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_in_term441 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NUMBER_in_number465 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_BOOL_in_boolean_486 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_string507 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_20_in_var529 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_var531 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_id553 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_id1575 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_id2597 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_prog_in_parse52 = new BitSet(new long[]{0x0000000000000000L});
+    public static final BitSet FOLLOW_EOF_in_parse54 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_expression_in_prog75 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_check_constraint_in_expression96 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_unique_constraint_in_expression111 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_foreign_key_constraint_in_expression125 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_primary_key_constraint_in_expression134 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_table_name_in_check_constraint161 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_CHECK_in_check_constraint163 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_check_constraint165 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_condition_in_check_constraint169 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RPAREN_in_check_constraint173 = new BitSet(new long[]{0x0000000000000082L});
+    public static final BitSet FOLLOW_COMMA_in_check_constraint185 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_check_constraint187 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_condition_in_check_constraint191 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RPAREN_in_check_constraint195 = new BitSet(new long[]{0x0000000000000082L});
+    public static final BitSet FOLLOW_table_name_in_unique_constraint223 = new BitSet(new long[]{0x0000000000000100L});
+    public static final BitSet FOLLOW_UNIQUE_in_unique_constraint225 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_unique_constraint227 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_parameter_in_unique_constraint229 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RPAREN_in_unique_constraint231 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_table_name_in_foreign_key_constraint259 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_foreign_key_constraint261 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_parameter_in_foreign_key_constraint265 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RPAREN_in_foreign_key_constraint267 = new BitSet(new long[]{0x0000000000000200L});
+    public static final BitSet FOLLOW_REFERENCES_in_foreign_key_constraint269 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_table_name_in_foreign_key_constraint273 = new BitSet(new long[]{0x0000000000000022L});
+    public static final BitSet FOLLOW_LPAREN_in_foreign_key_constraint276 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_parameter_in_foreign_key_constraint280 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RPAREN_in_foreign_key_constraint282 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_table_name_in_primary_key_constraint310 = new BitSet(new long[]{0x0000000000000400L});
+    public static final BitSet FOLLOW_PRIMARY_KEY_in_primary_key_constraint312 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_primary_key_constraint314 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_parameter_in_primary_key_constraint316 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RPAREN_in_primary_key_constraint318 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_variable_in_condition339 = new BitSet(new long[]{0x00000000007C0000L});
+    public static final BitSet FOLLOW_op_in_condition341 = new BitSet(new long[]{0x000000000001F800L});
+    public static final BitSet FOLLOW_range_in_condition343 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_variable_in_parameter371 = new BitSet(new long[]{0x0000000000000082L});
+    public static final BitSet FOLLOW_COMMA_in_parameter376 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_variable_in_parameter380 = new BitSet(new long[]{0x0000000000000082L});
+    public static final BitSet FOLLOW_variable_in_range403 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_string_constant_in_range419 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_numeric_constant_in_range428 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_boolean_constant_in_range436 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_LITERAL_in_string_constant462 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_LITERAL2_in_string_constant470 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NUMBER_in_numeric_constant496 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TRUE_in_boolean_constant522 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FALSE_in_boolean_constant530 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_DOLLAR_in_variable552 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_var_name_in_variable554 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_var_name569 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_table_name582 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_set_in_op0 = new BitSet(new long[]{0x0000000000000002L});
 
 }

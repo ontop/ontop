@@ -7,20 +7,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.obda.query.domain.Query;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 public class RDBMSUniquenessConstraint extends UniquenessConstraint{
 
 	public final static String RDBMSUNIQUENESSCONSTRAINT = "RDBMSUniquenessConstraint";
 
 	private RDBMSSQLQuery query = null;
-	private List<Term> terms = null;
+	private List<Variable> variables = null;
 	private String mappingid = null;
 
-	public RDBMSUniquenessConstraint (String id ,RDBMSSQLQuery sq, List<Term> t){
+	public RDBMSUniquenessConstraint (String id ,RDBMSSQLQuery sq, List<Variable> vars){
 		mappingid = id;
 		query = sq;
-		terms = t;
+		variables = vars;
 	}
 
 	@Override
@@ -29,9 +29,8 @@ public class RDBMSUniquenessConstraint extends UniquenessConstraint{
 	}
 
 	@Override
-	public List<Term> getTerms() {
-		// TODO Auto-generated method stub
-		return terms;
+	public List<Variable> getVariables() {
+		return variables;
 	}
 
 	public String getMappingID(){
@@ -42,14 +41,14 @@ public class RDBMSUniquenessConstraint extends UniquenessConstraint{
 	public String toString(){
 
 		String s = mappingid + " UNIQUE ";
-		Iterator<Term> it = terms.iterator();
+		Iterator<Variable> it = variables.iterator();
 		String aux = "";
 		while(it.hasNext()){
 			if(aux.length() >0){
 				aux = aux +",";
 			}
-			Term t = it.next();
-			aux = aux + t.toString();
+			Variable var = it.next();
+			aux = aux + "$" + var.getName();  // TODO Remove $ later
 		}
 		s=s+"(" + aux +")";
 
@@ -71,7 +70,7 @@ public class RDBMSUniquenessConstraint extends UniquenessConstraint{
 		int code = mappingid.hashCode() + query.toString().hashCode();
 
 		int c =0;
-		Iterator<Term> it = terms.iterator();
+		Iterator<Variable> it = variables.iterator();
 		while(it.hasNext()){
 			int aux2 = (int) Math.pow(it.next().getName().hashCode(), c);
 			code = code + aux2;

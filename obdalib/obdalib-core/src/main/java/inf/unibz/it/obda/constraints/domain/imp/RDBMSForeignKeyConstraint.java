@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.obda.query.domain.Query;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 
@@ -24,11 +24,11 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 	/**
 	 * A list of terms associated to the first query involved in this disjointness dependency assertion
 	 */
-	private List<Term> termsOfQueryOne = null;
+	private List<Variable> variablesOfQueryOne = null;
 	/**
 	 * A list of terms associated to the second query involved in this disjointness dependency assertion
 	 */
-	private List<Term> termsOfQueryTwo = null;
+	private List<Variable> variablesOfQueryTwo = null;
 	/**
 	 * The mapping id from which the first query comes from
 	 */
@@ -42,20 +42,20 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 	 */
 	private final String datasourceUri = null;
 
-	public RDBMSForeignKeyConstraint(String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,List<Term> l1, List<Term> l2){
+	public RDBMSForeignKeyConstraint(String id1, String id2,RDBMSSQLQuery q1, RDBMSSQLQuery q2,List<Variable> l1, List<Variable> l2){
 		mappingID1 = id1;
 		mappingID2 = id2;
 		queryOne = q1;
 		queryTwo = q2;
-		termsOfQueryOne = l1;
-		termsOfQueryTwo = l2;
+		variablesOfQueryOne = l1;
+		variablesOfQueryTwo = l2;
 	}
 
-	public RDBMSForeignKeyConstraint(String id1, String id2, RDBMSSQLQuery q1, RDBMSSQLQuery q2,List<Term> l1){
+	public RDBMSForeignKeyConstraint(String id1, String id2, RDBMSSQLQuery q1, RDBMSSQLQuery q2,List<Variable> l1){
 		queryOne = q1;
 		queryTwo = q2;
-		termsOfQueryOne = l1;
-		termsOfQueryTwo = null;
+		variablesOfQueryOne = l1;
+		variablesOfQueryTwo = null;
 	}
 
 	@Override
@@ -69,16 +69,16 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 	}
 
 	@Override
-	public List<Term> getTermsOfQueryOne() {
-		return termsOfQueryOne;
+	public List<Variable> getVariablesOfQueryOne() {
+		return variablesOfQueryOne;
 	}
 
 	@Override
-	public List<Term> getTermsOfQueryTwo() {
-		if(termsOfQueryTwo == null){
-			return termsOfQueryOne;
+	public List<Variable> getVariablesOfQueryTwo() {
+		if(variablesOfQueryTwo == null){
+			return variablesOfQueryOne;
 		}else{
-			return termsOfQueryTwo;
+			return variablesOfQueryTwo;
 		}
 	}
 
@@ -95,37 +95,37 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 
 		String s = "";
 		s = s + mappingID1 +" ";
-		if(termsOfQueryOne.size() == 1){
-			Term t = termsOfQueryOne.get(0);
-			s = s + "("+ t.toString()+ ")";
+		if(variablesOfQueryOne.size() == 1){
+			Variable var = variablesOfQueryOne.get(0);
+			s = s + "("+ "$" + var.getName()+ ")";  // TODO Remove $ later
 		}else{
 			String aux = "";
-			Iterator<Term> it = termsOfQueryOne.iterator();
+			Iterator<Variable> it = variablesOfQueryOne.iterator();
 			while(it.hasNext()){
-				Term t = it.next();
+				Variable var = it.next();
 				if(aux.length() >0){
 					aux = aux+ ",";
 				}
-				aux = aux + t.toString();
+				aux = aux + "$" + var.getName();
 			}
 			s =s+ "(" + aux + ")";
 		}
 
 		s = s +" REFERENCES " + mappingID2 +" ";
 
-		if(termsOfQueryTwo != null){
-			if(termsOfQueryTwo.size() == 1){
-				Term t = termsOfQueryTwo.get(0);
-				s = s + "(" + t.toString() +")";
+		if(variablesOfQueryTwo != null){
+			if(variablesOfQueryTwo.size() == 1){
+				Variable var = variablesOfQueryTwo.get(0);
+				s = s + "(" + "$" + var.getName() +")";
 			}else{
 				String aux = "";
-				Iterator<Term> it = termsOfQueryTwo.iterator();
+				Iterator<Variable> it = variablesOfQueryTwo.iterator();
 				while(it.hasNext()){
-					Term t = it.next();
+					Variable var = it.next();
 					if(aux.length() >0){
 						aux = aux+ ",";
 					}
-					aux = aux + t.toString();
+					aux = aux + "$" + var.getName();
 				}
 				if(aux.length()>0){
 					s =s+ "(" + aux + ")";
@@ -141,7 +141,7 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 		int code = mappingID1.hashCode();
 		code = code + queryOne.toString().hashCode();
 		int c = 1;
-		Iterator<Term> it = termsOfQueryOne.iterator();
+		Iterator<Variable> it = variablesOfQueryOne.iterator();
 		while(it.hasNext()){
 			int aux2 = (int) Math.pow(it.next().getName().hashCode(), c);
 			code = code + aux2;
@@ -150,7 +150,7 @@ public class RDBMSForeignKeyConstraint extends ForeignKeyConstraint {
 
 		code = code + mappingID2.hashCode() + queryTwo.toString().hashCode();
 		int d = 1;
-		Iterator<Term> it1 = termsOfQueryTwo.iterator();
+		Iterator<Variable> it1 = variablesOfQueryTwo.iterator();
 		while(it1.hasNext()){
 			int aux2 = (int) Math.pow(it1.next().getName().hashCode(), d);
 			code = code + aux2;

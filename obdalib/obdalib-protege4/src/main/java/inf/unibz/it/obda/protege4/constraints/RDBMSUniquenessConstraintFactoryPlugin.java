@@ -5,7 +5,7 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.controller.RDBMSUniquenessConstraintController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
-import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSUniquenessConstraintXMLCodec;
+//import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSUniquenessConstraintXMLCodec;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
 
 public class RDBMSUniquenessConstraintFactoryPlugin  extends AssertionControllerFactoryPluginInstance {
@@ -24,8 +24,8 @@ public class RDBMSUniquenessConstraintFactoryPlugin  extends AssertionController
 
 	@Override
 	public AssertionXMLCodec<?> getXMLCodec() {
-		
-		return new RDBMSUniquenessConstraintXMLCodec();
+		return null; // TODO Constraint codec: Fix this!
+//		return new RDBMSUniquenessConstraintXMLCodec();
 	}
 
 	@Override

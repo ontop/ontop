@@ -24,8 +24,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Vector;
 
-import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
 /*
@@ -64,7 +63,7 @@ public class CreateDependencyDialog extends javax.swing.JDialog {
 
 	private CreateDependencyDialog myself = null;
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
     /** Creates new form CreateDependencyDialog */
     public CreateDependencyDialog(java.awt.Frame parent, boolean modal, APIController apic, String id1, String id2, String assertion) {
@@ -312,8 +311,8 @@ public class CreateDependencyDialog extends javax.swing.JDialog {
         	DatasourcesController dscon = apic.getDatasourcesController();
         	OBDAMappingAxiom map1 = mapcon.getMapping(dscon.getCurrentDataSource().getSourceID(), idOfMapping1);
         	OBDAMappingAxiom map2 = mapcon.getMapping(dscon.getCurrentDataSource().getSourceID(), idOfMapping2);
-        	Vector<Term> termOfM1 = new Vector<Term>();
-        	Vector<Term> termOfM2 = new Vector<Term>();
+        	Vector<Variable> termOfM1 = new Vector<Variable>();
+        	Vector<Variable> termOfM2 = new Vector<Variable>();
         	for(int i=0;i<variablesMap1.length;i++){
         		termOfM1.add(termFactory.createVariable(variablesMap1[i]));
         		termOfM2.add(termFactory.createVariable(variablesMap2[i]));

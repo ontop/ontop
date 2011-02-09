@@ -37,7 +37,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
 /**
@@ -310,8 +310,8 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner {
 										   Set<String> set_fk = k.getForeignKeys();
 										   Iterator<String> pk_it = set_pk.iterator();
 										   Iterator<String> fk_it = set_fk.iterator();
-										   Vector<Term> aux1 = new Vector<Term>();
-										   Vector<Term> aux2 = new Vector<Term>();
+										   Vector<Variable> aux1 = new Vector<Variable>();
+										   Vector<Variable> aux2 = new Vector<Variable>();
 										   while(pk_it.hasNext() && fk_it.hasNext()){
 
 											   String pkName = pk_it.next();

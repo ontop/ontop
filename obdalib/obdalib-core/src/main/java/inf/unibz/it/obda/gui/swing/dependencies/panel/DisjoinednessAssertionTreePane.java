@@ -42,7 +42,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 /**
  *The Tree Pane showing the disjointness dependency assertion of the
@@ -369,11 +369,11 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
             		RDBMSDisjointnessDependency inc = (RDBMSDisjointnessDependency)node.getUserObject();
         			RDBMSSQLQuery query1 = (RDBMSSQLQuery) inc.getSourceQueryOne();
             		RDBMSSQLQuery query2 = (RDBMSSQLQuery) inc.getSourceQueryTwo();
-            		List<Term> terms1 = inc.getTermsOfQueryOne();
-            		List<Term> terms2 = inc.getTermsOfQueryTwo();
+            		List<Variable> vars1 = inc.getVariablesOfQueryOne();
+            		List<Variable> vars2 = inc.getVariablesOfQueryTwo();
             		dialog.addText(inc.toString() +"... ", dialog.NORMAL);
             		String aux1 = "";
-            		Iterator<Term> it1 = terms1.iterator();
+            		Iterator<Variable> it1 = vars1.iterator();
             		while(it1.hasNext()){
             			if(aux1.length() > 0){
             				aux1 = aux1 + ",";
@@ -381,7 +381,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
             			aux1= aux1 + "table1." + it1.next().getName();
             		}
             		String aux2 = "";
-            		Iterator<Term> it2 = terms2.iterator();
+            		Iterator<Variable> it2 = vars2.iterator();
             		while(it2.hasNext()){
             			if(aux2.length() > 0){
             				aux2 = aux2 + ",";

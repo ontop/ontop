@@ -80,7 +80,7 @@ public class InsertInclusionDependencyPane extends javax.swing.JPanel {
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
         String text = jTextPaneInclusionEditor.getText();
         try {
-			Vector<RDBMSInclusionDependency> vec = DependencyAssertionRenderer.getInstance().renderRBMSInclusionDependency(text);
+			Vector<RDBMSInclusionDependency> vec = DependencyAssertionRenderer.getInstance(apic).renderRBMSInclusionDependency(text);
 			Iterator<RDBMSInclusionDependency> it = vec.iterator();
 			while(it.hasNext()){
 				incController.addAssertion(it.next());

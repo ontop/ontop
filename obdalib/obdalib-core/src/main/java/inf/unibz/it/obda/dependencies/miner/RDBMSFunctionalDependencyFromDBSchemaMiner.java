@@ -37,7 +37,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
 
@@ -251,7 +251,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 	    	while(ax_it.hasNext()){
 	    		OBDAMappingAxiom ax = ax_it.next();
 	    		HashMap<String,String> aliasMap =tablesAliasMap.get(ax);
-		    	Vector<Term> aux1 = new Vector<Term>();
+		    	Vector<Variable> aux1 = new Vector<Variable>();
 		    	Iterator<String> columns_it = keyColumns.iterator();
 		    	while(columns_it.hasNext()){
 		    		String alias = aliasMap.get(columns_it.next());
@@ -261,7 +261,7 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 		    	}
 		    	Set<String> keyset = aliasMap.keySet();
 		    	Iterator<String> keyset_it = keyset.iterator();
-		    	Vector<Term> aux2 = new Vector<Term>();
+		    	Vector<Variable> aux2 = new Vector<Variable>();
 		    	while(keyset_it.hasNext()){
 		    		String column = keyset_it.next();
 		    		if(!keyColumns.contains(column)){

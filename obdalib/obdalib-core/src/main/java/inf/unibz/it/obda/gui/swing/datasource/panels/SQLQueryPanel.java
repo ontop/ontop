@@ -18,6 +18,8 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
 
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -71,6 +73,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         queryTable = new javax.swing.JTable();
+        datasourceSelector = new javax.swing.JComboBox();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -133,6 +136,14 @@ public class SQLQueryPanel extends javax.swing.JPanel {
         jSplitPane1.setRightComponent(jPanel2);
 
         add(jSplitPane1, java.awt.BorderLayout.CENTER);
+        
+        DataSource[] datasources = 
+			dsc.getAllSources().values().toArray(new DataSource[0]);
+		DatasourceComboBoxModel dsComboModel = new DatasourceComboBoxModel(datasources);
+		DatasourceCellRenderer dsComboBoxRenderer = new DatasourceCellRenderer();
+		datasourceSelector.setModel(dsComboModel);
+		datasourceSelector.setRenderer(dsComboBoxRenderer);
+		add(datasourceSelector, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
 
     private void executeButtonActionPerformed(java.awt.event.ActionEvent evt) {                                               
@@ -258,6 +269,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTextArea queryField;
     private javax.swing.JTable queryTable;
+    private javax.swing.JComboBox datasourceSelector;
     // End of variables declaration//GEN-END:variables
     
 }

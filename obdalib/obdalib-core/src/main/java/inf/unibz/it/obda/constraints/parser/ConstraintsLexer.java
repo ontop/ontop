@@ -1,56 +1,57 @@
-// $ANTLR 3.1.2 /home/obda/Constraints.g 2009-11-14 10:44:45
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 Constraints.g 2011-01-19 14:13:15
 
 package inf.unibz.it.obda.constraints.parser;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Vector;
 
-import org.antlr.runtime.BaseRecognizer;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.DFA;
-import org.antlr.runtime.EarlyExitException;
-import org.antlr.runtime.Lexer;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
+
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ConstraintsLexer extends Lexer {
-    public static final int INTEGER=10;
-    public static final int T__25=25;
-    public static final int T__24=24;
-    public static final int T__23=23;
-    public static final int T__22=22;
-    public static final int T__21=21;
-    public static final int T__20=20;
-    public static final int NUMBER=4;
-    public static final int BOOL=5;
-    public static final int CHAR=9;
     public static final int EOF=-1;
-    public static final int ALPHA=7;
-    public static final int T__19=19;
-    public static final int WS=11;
-    public static final int T__16=16;
-    public static final int T__15=15;
-    public static final int T__18=18;
-    public static final int T__17=17;
-    public static final int T__12=12;
-    public static final int T__14=14;
-    public static final int T__13=13;
-    public static final int ALPHAVAR=6;
-    public static final int DIGIT=8;
+    public static final int CHECK=4;
+    public static final int LPAREN=5;
+    public static final int RPAREN=6;
+    public static final int COMMA=7;
+    public static final int UNIQUE=8;
+    public static final int REFERENCES=9;
+    public static final int PRIMARY_KEY=10;
+    public static final int STRING_LITERAL=11;
+    public static final int STRING_LITERAL2=12;
+    public static final int NUMBER=13;
+    public static final int TRUE=14;
+    public static final int FALSE=15;
+    public static final int DOLLAR=16;
+    public static final int STRING=17;
+    public static final int LESS=18;
+    public static final int GREATER=19;
+    public static final int EQUALS=20;
+    public static final int LESS_OR_EQUAL=21;
+    public static final int GREATER_OR_EQUAL=22;
+    public static final int DOT=23;
+    public static final int QUOTE_DOUBLE=24;
+    public static final int QUOTE_SINGLE=25;
+    public static final int UNDERSCORE=26;
+    public static final int DASH=27;
+    public static final int ALPHA=28;
+    public static final int DIGIT=29;
+    public static final int ALPHANUM=30;
+    public static final int WS=31;
 
+    private Vector<String> errors = new Vector<String>();
 
-        private List<String> errors = new LinkedList<String>();
-        public void displayRecognitionError(String[] tokenNames,
-                                            RecognitionException e) {
-            String hdr = getErrorHeader(e);
-            String msg = getErrorMessage(e, tokenNames);
-            errors.add(hdr + " " + msg);
-        }
-        public List<String> getErrors() {
-            return errors;
-        }
+    public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        errors.add(hdr + " " + msg);
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }   
 
 
     // delegates
@@ -64,17 +65,60 @@ public class ConstraintsLexer extends Lexer {
         super(input,state);
 
     }
-    public String getGrammarFileName() { return "/home/obda/Constraints.g"; }
+    public String getGrammarFileName() { return "Constraints.g"; }
 
-    // $ANTLR start "T__12"
-    public final void mT__12() throws RecognitionException {
+    // $ANTLR start "CHECK"
+    public final void mCHECK() throws RecognitionException {
         try {
-            int _type = T__12;
+            int _type = CHECK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:23:7: ( 'CHECK' )
-            // /home/obda/Constraints.g:23:9: 'CHECK'
+            // Constraints.g:266:6: ( ( 'C' | 'c' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'K' | 'k' ) )
+            // Constraints.g:266:8: ( 'C' | 'c' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'K' | 'k' )
             {
-            match("CHECK"); 
+            if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='H'||input.LA(1)=='h' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='K'||input.LA(1)=='k' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
 
 
             }
@@ -85,15 +129,452 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__12"
+    // $ANTLR end "CHECK"
 
-    // $ANTLR start "T__13"
-    public final void mT__13() throws RecognitionException {
+    // $ANTLR start "UNIQUE"
+    public final void mUNIQUE() throws RecognitionException {
         try {
-            int _type = T__13;
+            int _type = UNIQUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:24:7: ( ',' )
-            // /home/obda/Constraints.g:24:9: ','
+            // Constraints.g:268:7: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'Q' | 'q' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // Constraints.g:268:9: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'Q' | 'q' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            {
+            if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='Q'||input.LA(1)=='q' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "UNIQUE"
+
+    // $ANTLR start "REFERENCES"
+    public final void mREFERENCES() throws RecognitionException {
+        try {
+            int _type = REFERENCES;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:270:11: ( ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'E' | 'e' ) ( 'S' | 's' ) )
+            // Constraints.g:270:13: ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'E' | 'e' ) ( 'S' | 's' )
+            {
+            if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "REFERENCES"
+
+    // $ANTLR start "PRIMARY_KEY"
+    public final void mPRIMARY_KEY() throws RecognitionException {
+        try {
+            int _type = PRIMARY_KEY;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:272:12: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) ( ' ' ) ( 'K' | 'k' ) ( 'E' | 'e' ) ( 'Y' | 'y' ) )
+            // Constraints.g:272:14: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) ( ' ' ) ( 'K' | 'k' ) ( 'E' | 'e' ) ( 'Y' | 'y' )
+            {
+            if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            // Constraints.g:272:77: ( ' ' )
+            // Constraints.g:272:78: ' '
+            {
+            match(' '); 
+
+            }
+
+            if ( input.LA(1)=='K'||input.LA(1)=='k' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "PRIMARY_KEY"
+
+    // $ANTLR start "TRUE"
+    public final void mTRUE() throws RecognitionException {
+        try {
+            int _type = TRUE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:274:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // Constraints.g:274:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            {
+            if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "TRUE"
+
+    // $ANTLR start "FALSE"
+    public final void mFALSE() throws RecognitionException {
+        try {
+            int _type = FALSE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:276:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // Constraints.g:276:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            {
+            if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "FALSE"
+
+    // $ANTLR start "DOT"
+    public final void mDOT() throws RecognitionException {
+        try {
+            int _type = DOT;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:278:4: ( '.' )
+            // Constraints.g:278:18: '.'
+            {
+            match('.'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "DOT"
+
+    // $ANTLR start "COMMA"
+    public final void mCOMMA() throws RecognitionException {
+        try {
+            int _type = COMMA;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:279:6: ( ',' )
+            // Constraints.g:279:18: ','
             {
             match(','); 
 
@@ -105,56 +586,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__13"
+    // $ANTLR end "COMMA"
 
-    // $ANTLR start "T__14"
-    public final void mT__14() throws RecognitionException {
+    // $ANTLR start "LPAREN"
+    public final void mLPAREN() throws RecognitionException {
         try {
-            int _type = T__14;
+            int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:25:7: ( 'UNIQUE (' )
-            // /home/obda/Constraints.g:25:9: 'UNIQUE ('
-            {
-            match("UNIQUE ("); 
-
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__14"
-
-    // $ANTLR start "T__15"
-    public final void mT__15() throws RecognitionException {
-        try {
-            int _type = T__15;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:26:7: ( ')' )
-            // /home/obda/Constraints.g:26:9: ')'
-            {
-            match(')'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__15"
-
-    // $ANTLR start "T__16"
-    public final void mT__16() throws RecognitionException {
-        try {
-            int _type = T__16;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:27:7: ( '(' )
-            // /home/obda/Constraints.g:27:9: '('
+            // Constraints.g:280:7: ( '(' )
+            // Constraints.g:280:18: '('
             {
             match('('); 
 
@@ -166,18 +606,17 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__16"
+    // $ANTLR end "LPAREN"
 
-    // $ANTLR start "T__17"
-    public final void mT__17() throws RecognitionException {
+    // $ANTLR start "RPAREN"
+    public final void mRPAREN() throws RecognitionException {
         try {
-            int _type = T__17;
+            int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:28:7: ( ') REFERENCES' )
-            // /home/obda/Constraints.g:28:9: ') REFERENCES'
+            // Constraints.g:281:7: ( ')' )
+            // Constraints.g:281:18: ')'
             {
-            match(") REFERENCES"); 
-
+            match(')'); 
 
             }
 
@@ -187,56 +626,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__17"
+    // $ANTLR end "RPAREN"
 
-    // $ANTLR start "T__18"
-    public final void mT__18() throws RecognitionException {
+    // $ANTLR start "DOLLAR"
+    public final void mDOLLAR() throws RecognitionException {
         try {
-            int _type = T__18;
+            int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:29:7: ( 'PRIMARY KEY (' )
-            // /home/obda/Constraints.g:29:9: 'PRIMARY KEY ('
-            {
-            match("PRIMARY KEY ("); 
-
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__18"
-
-    // $ANTLR start "T__19"
-    public final void mT__19() throws RecognitionException {
-        try {
-            int _type = T__19;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:30:7: ( '\\'' )
-            // /home/obda/Constraints.g:30:9: '\\''
-            {
-            match('\''); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__19"
-
-    // $ANTLR start "T__20"
-    public final void mT__20() throws RecognitionException {
-        try {
-            int _type = T__20;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:31:7: ( '$' )
-            // /home/obda/Constraints.g:31:9: '$'
+            // Constraints.g:282:7: ( '$' )
+            // Constraints.g:282:18: '$'
             {
             match('$'); 
 
@@ -248,15 +646,95 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__20"
+    // $ANTLR end "DOLLAR"
 
-    // $ANTLR start "T__21"
-    public final void mT__21() throws RecognitionException {
+    // $ANTLR start "QUOTE_DOUBLE"
+    public final void mQUOTE_DOUBLE() throws RecognitionException {
         try {
-            int _type = T__21;
+            int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:32:7: ( '<' )
-            // /home/obda/Constraints.g:32:9: '<'
+            // Constraints.g:283:13: ( '\"' )
+            // Constraints.g:283:18: '\"'
+            {
+            match('\"'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "QUOTE_DOUBLE"
+
+    // $ANTLR start "QUOTE_SINGLE"
+    public final void mQUOTE_SINGLE() throws RecognitionException {
+        try {
+            int _type = QUOTE_SINGLE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:284:13: ( '\\'' )
+            // Constraints.g:284:18: '\\''
+            {
+            match('\''); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "QUOTE_SINGLE"
+
+    // $ANTLR start "UNDERSCORE"
+    public final void mUNDERSCORE() throws RecognitionException {
+        try {
+            int _type = UNDERSCORE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:285:11: ( '_' )
+            // Constraints.g:285:18: '_'
+            {
+            match('_'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "UNDERSCORE"
+
+    // $ANTLR start "DASH"
+    public final void mDASH() throws RecognitionException {
+        try {
+            int _type = DASH;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:286:5: ( '-' )
+            // Constraints.g:286:18: '-'
+            {
+            match('-'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "DASH"
+
+    // $ANTLR start "LESS"
+    public final void mLESS() throws RecognitionException {
+        try {
+            int _type = LESS;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:287:5: ( '<' )
+            // Constraints.g:287:18: '<'
             {
             match('<'); 
 
@@ -268,15 +746,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__21"
+    // $ANTLR end "LESS"
 
-    // $ANTLR start "T__22"
-    public final void mT__22() throws RecognitionException {
+    // $ANTLR start "GREATER"
+    public final void mGREATER() throws RecognitionException {
         try {
-            int _type = T__22;
+            int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:33:7: ( '>' )
-            // /home/obda/Constraints.g:33:9: '>'
+            // Constraints.g:288:8: ( '>' )
+            // Constraints.g:288:18: '>'
             {
             match('>'); 
 
@@ -288,15 +766,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__22"
+    // $ANTLR end "GREATER"
 
-    // $ANTLR start "T__23"
-    public final void mT__23() throws RecognitionException {
+    // $ANTLR start "EQUALS"
+    public final void mEQUALS() throws RecognitionException {
         try {
-            int _type = T__23;
+            int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:34:7: ( '=' )
-            // /home/obda/Constraints.g:34:9: '='
+            // Constraints.g:289:7: ( '=' )
+            // Constraints.g:289:18: '='
             {
             match('='); 
 
@@ -308,15 +786,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__23"
+    // $ANTLR end "EQUALS"
 
-    // $ANTLR start "T__24"
-    public final void mT__24() throws RecognitionException {
+    // $ANTLR start "LESS_OR_EQUAL"
+    public final void mLESS_OR_EQUAL() throws RecognitionException {
         try {
-            int _type = T__24;
+            int _type = LESS_OR_EQUAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:35:7: ( '<=' )
-            // /home/obda/Constraints.g:35:9: '<='
+            // Constraints.g:290:14: ( '<=' )
+            // Constraints.g:290:18: '<='
             {
             match("<="); 
 
@@ -329,15 +807,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__24"
+    // $ANTLR end "LESS_OR_EQUAL"
 
-    // $ANTLR start "T__25"
-    public final void mT__25() throws RecognitionException {
+    // $ANTLR start "GREATER_OR_EQUAL"
+    public final void mGREATER_OR_EQUAL() throws RecognitionException {
         try {
-            int _type = T__25;
+            int _type = GREATER_OR_EQUAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:36:7: ( '>=' )
-            // /home/obda/Constraints.g:36:9: '>='
+            // Constraints.g:291:17: ( '>=' )
+            // Constraints.g:291:18: '>='
             {
             match(">="); 
 
@@ -350,155 +828,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__25"
+    // $ANTLR end "GREATER_OR_EQUAL"
 
-    // $ANTLR start "ALPHAVAR"
-    public final void mALPHAVAR() throws RecognitionException {
+    // $ANTLR start "ALPHA"
+    public final void mALPHA() throws RecognitionException {
         try {
-            int _type = ALPHAVAR;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:334:11: ( ALPHA ( ALPHA | DIGIT | CHAR )* )
-            // /home/obda/Constraints.g:334:13: ALPHA ( ALPHA | DIGIT | CHAR )*
+            // Constraints.g:293:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // Constraints.g:293:17: ( 'a' .. 'z' | 'A' .. 'Z' )
             {
-            mALPHA(); 
-            // /home/obda/Constraints.g:334:20: ( ALPHA | DIGIT | CHAR )*
-            loop1:
-            do {
-                int alt1=4;
-                switch ( input.LA(1) ) {
-                case 'A':
-                case 'B':
-                case 'C':
-                case 'D':
-                case 'E':
-                case 'F':
-                case 'G':
-                case 'H':
-                case 'I':
-                case 'J':
-                case 'K':
-                case 'L':
-                case 'M':
-                case 'N':
-                case 'O':
-                case 'P':
-                case 'Q':
-                case 'R':
-                case 'S':
-                case 'T':
-                case 'U':
-                case 'V':
-                case 'W':
-                case 'X':
-                case 'Y':
-                case 'Z':
-                case 'a':
-                case 'b':
-                case 'c':
-                case 'd':
-                case 'e':
-                case 'f':
-                case 'g':
-                case 'h':
-                case 'i':
-                case 'j':
-                case 'k':
-                case 'l':
-                case 'm':
-                case 'n':
-                case 'o':
-                case 'p':
-                case 'q':
-                case 'r':
-                case 's':
-                case 't':
-                case 'u':
-                case 'v':
-                case 'w':
-                case 'x':
-                case 'y':
-                case 'z':
-                    {
-                    alt1=1;
-                    }
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    {
-                    alt1=2;
-                    }
-                    break;
-                case '!':
-                case '#':
-                case '%':
-                case '&':
-                case '*':
-                case '+':
-                case '-':
-                case ':':
-                case '@':
-                case '_':
-                    {
-                    alt1=3;
-                    }
-                    break;
-
-                }
-
-                switch (alt1) {
-            	case 1 :
-            	    // /home/obda/Constraints.g:334:21: ALPHA
-            	    {
-            	    mALPHA(); 
-
-            	    }
-            	    break;
-            	case 2 :
-            	    // /home/obda/Constraints.g:334:29: DIGIT
-            	    {
-            	    mDIGIT(); 
-
-            	    }
-            	    break;
-            	case 3 :
-            	    // /home/obda/Constraints.g:334:37: CHAR
-            	    {
-            	    mCHAR(); 
-
-            	    }
-            	    break;
-
-            	default :
-            	    break loop1;
-                }
-            } while (true);
-
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "ALPHAVAR"
-
-    // $ANTLR start "CHAR"
-    public final void mCHAR() throws RecognitionException {
-        try {
-            // /home/obda/Constraints.g:338:8: ( ( '_' | '-' | '*' | '&' | '@' | '!' | '#' | '%' | '+' | ':' ) )
-            // /home/obda/Constraints.g:338:10: ( '_' | '-' | '*' | '&' | '@' | '!' | '#' | '%' | '+' | ':' )
-            {
-            if ( input.LA(1)=='!'||input.LA(1)=='#'||(input.LA(1)>='%' && input.LA(1)<='&')||(input.LA(1)>='*' && input.LA(1)<='+')||input.LA(1)=='-'||input.LA(1)==':'||input.LA(1)=='@'||input.LA(1)=='_' ) {
+            if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
 
             }
@@ -514,52 +852,15 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "CHAR"
+    // $ANTLR end "ALPHA"
 
-    // $ANTLR start "ALPHA"
-    public final void mALPHA() throws RecognitionException {
+    // $ANTLR start "DIGIT"
+    public final void mDIGIT() throws RecognitionException {
         try {
-            // /home/obda/Constraints.g:341:9: ( ( 'a' .. 'z' | 'A' .. 'Z' )+ )
-            // /home/obda/Constraints.g:341:13: ( 'a' .. 'z' | 'A' .. 'Z' )+
+            // Constraints.g:295:15: ( '0' .. '9' )
+            // Constraints.g:295:17: '0' .. '9'
             {
-            // /home/obda/Constraints.g:341:13: ( 'a' .. 'z' | 'A' .. 'Z' )+
-            int cnt2=0;
-            loop2:
-            do {
-                int alt2=2;
-                int LA2_0 = input.LA(1);
-
-                if ( ((LA2_0>='A' && LA2_0<='Z')||(LA2_0>='a' && LA2_0<='z')) ) {
-                    alt2=1;
-                }
-
-
-                switch (alt2) {
-            	case 1 :
-            	    // /home/obda/Constraints.g:
-            	    {
-            	    if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
-            	        input.consume();
-
-            	    }
-            	    else {
-            	        MismatchedSetException mse = new MismatchedSetException(null,input);
-            	        recover(mse);
-            	        throw mse;}
-
-
-            	    }
-            	    break;
-
-            	default :
-            	    if ( cnt2 >= 1 ) break loop2;
-                        EarlyExitException eee =
-                            new EarlyExitException(2, input);
-                        throw eee;
-                }
-                cnt2++;
-            } while (true);
-
+            matchRange('0','9'); 
 
             }
 
@@ -567,29 +868,31 @@ public class ConstraintsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "ALPHA"
+    // $ANTLR end "DIGIT"
 
-    // $ANTLR start "INTEGER"
-    public final void mINTEGER() throws RecognitionException {
+    // $ANTLR start "NUMBER"
+    public final void mNUMBER() throws RecognitionException {
         try {
-            // /home/obda/Constraints.g:344:9: ( DIGIT ( DIGIT )* )
-            // /home/obda/Constraints.g:344:11: DIGIT ( DIGIT )*
+            int _type = NUMBER;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:297:7: ( ( DIGIT )+ ( DOT ( DIGIT )+ )? )
+            // Constraints.g:297:9: ( DIGIT )+ ( DOT ( DIGIT )+ )?
             {
-            mDIGIT(); 
-            // /home/obda/Constraints.g:344:16: ( DIGIT )*
-            loop3:
+            // Constraints.g:297:9: ( DIGIT )+
+            int cnt1=0;
+            loop1:
             do {
-                int alt3=2;
-                int LA3_0 = input.LA(1);
+                int alt1=2;
+                int LA1_0 = input.LA(1);
 
-                if ( ((LA3_0>='0' && LA3_0<='9')) ) {
-                    alt3=1;
+                if ( ((LA1_0>='0' && LA1_0<='9')) ) {
+                    alt1=1;
                 }
 
 
-                switch (alt3) {
+                switch (alt1) {
             	case 1 :
-            	    // /home/obda/Constraints.g:344:17: DIGIT
+            	    // Constraints.g:297:9: DIGIT
             	    {
             	    mDIGIT(); 
 
@@ -597,41 +900,56 @@ public class ConstraintsLexer extends Lexer {
             	    break;
 
             	default :
-            	    break loop3;
+            	    if ( cnt1 >= 1 ) break loop1;
+                        EarlyExitException eee =
+                            new EarlyExitException(1, input);
+                        throw eee;
                 }
+                cnt1++;
             } while (true);
 
+            // Constraints.g:297:16: ( DOT ( DIGIT )+ )?
+            int alt3=2;
+            int LA3_0 = input.LA(1);
 
+            if ( (LA3_0=='.') ) {
+                alt3=1;
             }
-
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "INTEGER"
-
-    // $ANTLR start "NUMBER"
-    public final void mNUMBER() throws RecognitionException {
-        try {
-            int _type = NUMBER;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:345:8: ( INTEGER ( '.' INTEGER )? )
-            // /home/obda/Constraints.g:345:10: INTEGER ( '.' INTEGER )?
-            {
-            mINTEGER(); 
-            // /home/obda/Constraints.g:345:17: ( '.' INTEGER )?
-            int alt4=2;
-            int LA4_0 = input.LA(1);
-
-            if ( (LA4_0=='.') ) {
-                alt4=1;
-            }
-            switch (alt4) {
+            switch (alt3) {
                 case 1 :
-                    // /home/obda/Constraints.g:345:18: '.' INTEGER
+                    // Constraints.g:297:17: DOT ( DIGIT )+
                     {
-                    match('.'); 
-                    mINTEGER(); 
+                    mDOT(); 
+                    // Constraints.g:297:21: ( DIGIT )+
+                    int cnt2=0;
+                    loop2:
+                    do {
+                        int alt2=2;
+                        int LA2_0 = input.LA(1);
+
+                        if ( ((LA2_0>='0' && LA2_0<='9')) ) {
+                            alt2=1;
+                        }
+
+
+                        switch (alt2) {
+                    	case 1 :
+                    	    // Constraints.g:297:21: DIGIT
+                    	    {
+                    	    mDIGIT(); 
+
+                    	    }
+                    	    break;
+
+                    	default :
+                    	    if ( cnt2 >= 1 ) break loop2;
+                                EarlyExitException eee =
+                                    new EarlyExitException(2, input);
+                                throw eee;
+                        }
+                        cnt2++;
+                    } while (true);
+
 
                     }
                     break;
@@ -649,104 +967,194 @@ public class ConstraintsLexer extends Lexer {
     }
     // $ANTLR end "NUMBER"
 
-    // $ANTLR start "DIGIT"
-    public final void mDIGIT() throws RecognitionException {
+    // $ANTLR start "ALPHANUM"
+    public final void mALPHANUM() throws RecognitionException {
         try {
-            // /home/obda/Constraints.g:347:9: ( ( '0' .. '9' )+ )
-            // /home/obda/Constraints.g:347:13: ( '0' .. '9' )+
+            // Constraints.g:299:18: ( ( ALPHA | DIGIT ) )
+            // Constraints.g:299:20: ( ALPHA | DIGIT )
             {
-            // /home/obda/Constraints.g:347:13: ( '0' .. '9' )+
-            int cnt5=0;
+            if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "ALPHANUM"
+
+    // $ANTLR start "STRING"
+    public final void mSTRING() throws RecognitionException {
+        try {
+            int _type = STRING;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:301:7: ( ( ALPHANUM | UNDERSCORE | DASH )+ )
+            // Constraints.g:301:9: ( ALPHANUM | UNDERSCORE | DASH )+
+            {
+            // Constraints.g:301:9: ( ALPHANUM | UNDERSCORE | DASH )+
+            int cnt4=0;
+            loop4:
+            do {
+                int alt4=2;
+                int LA4_0 = input.LA(1);
+
+                if ( (LA4_0=='-'||(LA4_0>='0' && LA4_0<='9')||(LA4_0>='A' && LA4_0<='Z')||LA4_0=='_'||(LA4_0>='a' && LA4_0<='z')) ) {
+                    alt4=1;
+                }
+
+
+                switch (alt4) {
+            	case 1 :
+            	    // Constraints.g:
+            	    {
+            	    if ( input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+            	        input.consume();
+
+            	    }
+            	    else {
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;}
+
+
+            	    }
+            	    break;
+
+            	default :
+            	    if ( cnt4 >= 1 ) break loop4;
+                        EarlyExitException eee =
+                            new EarlyExitException(4, input);
+                        throw eee;
+                }
+                cnt4++;
+            } while (true);
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "STRING"
+
+    // $ANTLR start "STRING_LITERAL"
+    public final void mSTRING_LITERAL() throws RecognitionException {
+        try {
+            int _type = STRING_LITERAL;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:304:3: ( QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE )
+            // Constraints.g:304:5: QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE
+            {
+            mQUOTE_DOUBLE(); 
+            // Constraints.g:304:18: ( options {greedy=false; } : . )*
             loop5:
             do {
                 int alt5=2;
                 int LA5_0 = input.LA(1);
 
-                if ( ((LA5_0>='0' && LA5_0<='9')) ) {
+                if ( (LA5_0=='\"') ) {
+                    alt5=2;
+                }
+                else if ( ((LA5_0>='\u0000' && LA5_0<='!')||(LA5_0>='#' && LA5_0<='\uFFFF')) ) {
                     alt5=1;
                 }
 
 
                 switch (alt5) {
             	case 1 :
-            	    // /home/obda/Constraints.g:347:13: '0' .. '9'
+            	    // Constraints.g:304:45: .
             	    {
-            	    matchRange('0','9'); 
+            	    matchAny(); 
 
             	    }
             	    break;
 
             	default :
-            	    if ( cnt5 >= 1 ) break loop5;
-                        EarlyExitException eee =
-                            new EarlyExitException(5, input);
-                        throw eee;
+            	    break loop5;
                 }
-                cnt5++;
             } while (true);
 
+            mQUOTE_DOUBLE(); 
 
             }
 
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end "DIGIT"
+    // $ANTLR end "STRING_LITERAL"
 
-    // $ANTLR start "BOOL"
-    public final void mBOOL() throws RecognitionException {
+    // $ANTLR start "STRING_LITERAL2"
+    public final void mSTRING_LITERAL2() throws RecognitionException {
         try {
-            // /home/obda/Constraints.g:349:6: ( 'true' | 'false' )
-            int alt6=2;
-            int LA6_0 = input.LA(1);
+            int _type = STRING_LITERAL2;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // Constraints.g:308:3: ( QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE )
+            // Constraints.g:308:5: QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE
+            {
+            mQUOTE_SINGLE(); 
+            // Constraints.g:308:18: ( options {greedy=false; } : . )*
+            loop6:
+            do {
+                int alt6=2;
+                int LA6_0 = input.LA(1);
 
-            if ( (LA6_0=='t') ) {
-                alt6=1;
+                if ( (LA6_0=='\'') ) {
+                    alt6=2;
+                }
+                else if ( ((LA6_0>='\u0000' && LA6_0<='&')||(LA6_0>='(' && LA6_0<='\uFFFF')) ) {
+                    alt6=1;
+                }
+
+
+                switch (alt6) {
+            	case 1 :
+            	    // Constraints.g:308:45: .
+            	    {
+            	    matchAny(); 
+
+            	    }
+            	    break;
+
+            	default :
+            	    break loop6;
+                }
+            } while (true);
+
+            mQUOTE_SINGLE(); 
+
             }
-            else if ( (LA6_0=='f') ) {
-                alt6=2;
-            }
-            else {
-                NoViableAltException nvae =
-                    new NoViableAltException("", 6, 0, input);
 
-                throw nvae;
-            }
-            switch (alt6) {
-                case 1 :
-                    // /home/obda/Constraints.g:349:8: 'true'
-                    {
-                    match("true"); 
-
-
-                    }
-                    break;
-                case 2 :
-                    // /home/obda/Constraints.g:349:15: 'false'
-                    {
-                    match("false"); 
-
-
-                    }
-                    break;
-
-            }
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end "BOOL"
+    // $ANTLR end "STRING_LITERAL2"
 
     // $ANTLR start "WS"
     public final void mWS() throws RecognitionException {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/obda/Constraints.g:351:7: ( ( ' ' | '\\t' | ( '\\r' | '\\r\\n' ) )+ )
-            // /home/obda/Constraints.g:351:11: ( ' ' | '\\t' | ( '\\r' | '\\r\\n' ) )+
+            // Constraints.g:311:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // Constraints.g:311:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // /home/obda/Constraints.g:351:11: ( ' ' | '\\t' | ( '\\r' | '\\r\\n' ) )+
+            // Constraints.g:311:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt8=0;
             loop8:
             do {
@@ -762,6 +1170,7 @@ public class ConstraintsLexer extends Lexer {
                     alt8=2;
                     }
                     break;
+                case '\n':
                 case '\r':
                     {
                     alt8=3;
@@ -772,34 +1181,31 @@ public class ConstraintsLexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // /home/obda/Constraints.g:351:12: ' '
+            	    // Constraints.g:311:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // /home/obda/Constraints.g:351:16: '\\t'
+            	    // Constraints.g:311:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // /home/obda/Constraints.g:351:21: ( '\\r' | '\\r\\n' )
+            	    // Constraints.g:311:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // /home/obda/Constraints.g:351:21: ( '\\r' | '\\r\\n' )
+            	    // Constraints.g:311:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt7=2;
             	    int LA7_0 = input.LA(1);
 
-            	    if ( (LA7_0=='\r') ) {
-            	        int LA7_1 = input.LA(2);
-
-            	        if ( (LA7_1=='\n') ) {
-            	            alt7=2;
-            	        }
-            	        else {
-            	            alt7=1;}
+            	    if ( (LA7_0=='\n') ) {
+            	        alt7=1;
+            	    }
+            	    else if ( (LA7_0=='\r') ) {
+            	        alt7=2;
             	    }
             	    else {
             	        NoViableAltException nvae =
@@ -809,16 +1215,22 @@ public class ConstraintsLexer extends Lexer {
             	    }
             	    switch (alt7) {
             	        case 1 :
-            	            // /home/obda/Constraints.g:351:22: '\\r'
+            	            // Constraints.g:311:16: '\\n'
             	            {
-            	            match('\r'); 
+            	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // /home/obda/Constraints.g:351:27: '\\r\\n'
+            	            // Constraints.g:311:21: '\\r' ( '\\n' )
             	            {
-            	            match("\r\n"); 
+            	            match('\r'); 
+            	            // Constraints.g:311:25: ( '\\n' )
+            	            // Constraints.g:311:26: '\\n'
+            	            {
+            	            match('\n'); 
+
+            	            }
 
 
             	            }
@@ -839,7 +1251,7 @@ public class ConstraintsLexer extends Lexer {
                 cnt8++;
             } while (true);
 
-            skip();
+            _channel=HIDDEN;
 
             }
 
@@ -852,124 +1264,180 @@ public class ConstraintsLexer extends Lexer {
     // $ANTLR end "WS"
 
     public void mTokens() throws RecognitionException {
-        // /home/obda/Constraints.g:1:8: ( T__12 | T__13 | T__14 | T__15 | T__16 | T__17 | T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | ALPHAVAR | NUMBER | WS )
-        int alt9=17;
+        // Constraints.g:1:8: ( CHECK | UNIQUE | REFERENCES | PRIMARY_KEY | TRUE | FALSE | DOT | COMMA | LPAREN | RPAREN | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | UNDERSCORE | DASH | LESS | GREATER | EQUALS | LESS_OR_EQUAL | GREATER_OR_EQUAL | NUMBER | STRING | STRING_LITERAL | STRING_LITERAL2 | WS )
+        int alt9=25;
         alt9 = dfa9.predict(input);
         switch (alt9) {
             case 1 :
-                // /home/obda/Constraints.g:1:10: T__12
+                // Constraints.g:1:10: CHECK
                 {
-                mT__12(); 
+                mCHECK(); 
 
                 }
                 break;
             case 2 :
-                // /home/obda/Constraints.g:1:16: T__13
+                // Constraints.g:1:16: UNIQUE
                 {
-                mT__13(); 
+                mUNIQUE(); 
 
                 }
                 break;
             case 3 :
-                // /home/obda/Constraints.g:1:22: T__14
+                // Constraints.g:1:23: REFERENCES
                 {
-                mT__14(); 
+                mREFERENCES(); 
 
                 }
                 break;
             case 4 :
-                // /home/obda/Constraints.g:1:28: T__15
+                // Constraints.g:1:34: PRIMARY_KEY
                 {
-                mT__15(); 
+                mPRIMARY_KEY(); 
 
                 }
                 break;
             case 5 :
-                // /home/obda/Constraints.g:1:34: T__16
+                // Constraints.g:1:46: TRUE
                 {
-                mT__16(); 
+                mTRUE(); 
 
                 }
                 break;
             case 6 :
-                // /home/obda/Constraints.g:1:40: T__17
+                // Constraints.g:1:51: FALSE
                 {
-                mT__17(); 
+                mFALSE(); 
 
                 }
                 break;
             case 7 :
-                // /home/obda/Constraints.g:1:46: T__18
+                // Constraints.g:1:57: DOT
                 {
-                mT__18(); 
+                mDOT(); 
 
                 }
                 break;
             case 8 :
-                // /home/obda/Constraints.g:1:52: T__19
+                // Constraints.g:1:61: COMMA
                 {
-                mT__19(); 
+                mCOMMA(); 
 
                 }
                 break;
             case 9 :
-                // /home/obda/Constraints.g:1:58: T__20
+                // Constraints.g:1:67: LPAREN
                 {
-                mT__20(); 
+                mLPAREN(); 
 
                 }
                 break;
             case 10 :
-                // /home/obda/Constraints.g:1:64: T__21
+                // Constraints.g:1:74: RPAREN
                 {
-                mT__21(); 
+                mRPAREN(); 
 
                 }
                 break;
             case 11 :
-                // /home/obda/Constraints.g:1:70: T__22
+                // Constraints.g:1:81: DOLLAR
                 {
-                mT__22(); 
+                mDOLLAR(); 
 
                 }
                 break;
             case 12 :
-                // /home/obda/Constraints.g:1:76: T__23
+                // Constraints.g:1:88: QUOTE_DOUBLE
                 {
-                mT__23(); 
+                mQUOTE_DOUBLE(); 
 
                 }
                 break;
             case 13 :
-                // /home/obda/Constraints.g:1:82: T__24
+                // Constraints.g:1:101: QUOTE_SINGLE
                 {
-                mT__24(); 
+                mQUOTE_SINGLE(); 
 
                 }
                 break;
             case 14 :
-                // /home/obda/Constraints.g:1:88: T__25
+                // Constraints.g:1:114: UNDERSCORE
                 {
-                mT__25(); 
+                mUNDERSCORE(); 
 
                 }
                 break;
             case 15 :
-                // /home/obda/Constraints.g:1:94: ALPHAVAR
+                // Constraints.g:1:125: DASH
                 {
-                mALPHAVAR(); 
+                mDASH(); 
 
                 }
                 break;
             case 16 :
-                // /home/obda/Constraints.g:1:103: NUMBER
+                // Constraints.g:1:130: LESS
+                {
+                mLESS(); 
+
+                }
+                break;
+            case 17 :
+                // Constraints.g:1:135: GREATER
+                {
+                mGREATER(); 
+
+                }
+                break;
+            case 18 :
+                // Constraints.g:1:143: EQUALS
+                {
+                mEQUALS(); 
+
+                }
+                break;
+            case 19 :
+                // Constraints.g:1:150: LESS_OR_EQUAL
+                {
+                mLESS_OR_EQUAL(); 
+
+                }
+                break;
+            case 20 :
+                // Constraints.g:1:164: GREATER_OR_EQUAL
+                {
+                mGREATER_OR_EQUAL(); 
+
+                }
+                break;
+            case 21 :
+                // Constraints.g:1:181: NUMBER
                 {
                 mNUMBER(); 
 
                 }
                 break;
-            case 17 :
-                // /home/obda/Constraints.g:1:110: WS
+            case 22 :
+                // Constraints.g:1:188: STRING
+                {
+                mSTRING(); 
+
+                }
+                break;
+            case 23 :
+                // Constraints.g:1:195: STRING_LITERAL
+                {
+                mSTRING_LITERAL(); 
+
+                }
+                break;
+            case 24 :
+                // Constraints.g:1:210: STRING_LITERAL2
+                {
+                mSTRING_LITERAL2(); 
+
+                }
+                break;
+            case 25 :
+                // Constraints.g:1:226: WS
                 {
                 mWS(); 
 
@@ -983,67 +1451,104 @@ public class ConstraintsLexer extends Lexer {
 
     protected DFA9 dfa9 = new DFA9(this);
     static final String DFA9_eotS =
-        "\1\uffff\1\14\1\uffff\1\14\1\22\1\uffff\1\14\2\uffff\1\25\1\27\4"+
-        "\uffff\2\14\2\uffff\1\14\4\uffff\6\14\1\41\2\14\1\uffff\2\14\1\uffff"+
-        "\1\14\1\uffff";
+        "\1\uffff\6\24\5\uffff\1\34\1\36\1\40\1\41\1\43\1\45\1\uffff\1\46"+
+        "\2\uffff\6\24\13\uffff\12\24\1\67\1\24\1\71\3\24\1\uffff\1\75\1"+
+        "\uffff\1\76\2\24\2\uffff\3\24\1\uffff\1\24\1\105\1\uffff";
     static final String DFA9_eofS =
-        "\47\uffff";
+        "\106\uffff";
     static final String DFA9_minS =
-        "\1\11\1\110\1\uffff\1\116\1\40\1\uffff\1\122\2\uffff\2\75\4\uffff"+
-        "\1\105\1\111\2\uffff\1\111\4\uffff\1\103\1\121\1\115\1\113\1\125"+
-        "\1\101\1\41\1\105\1\122\1\uffff\1\40\1\131\1\uffff\1\40\1\uffff";
+        "\1\11\1\110\1\116\1\105\2\122\1\101\5\uffff\2\0\2\55\2\75\1\uffff"+
+        "\1\55\2\uffff\1\105\1\111\1\106\1\111\1\125\1\114\13\uffff\1\103"+
+        "\1\121\1\105\1\115\1\105\1\123\1\113\1\125\1\122\1\101\1\55\1\105"+
+        "\1\55\2\105\1\122\1\uffff\1\55\1\uffff\1\55\1\116\1\131\2\uffff"+
+        "\1\103\1\40\1\105\1\uffff\1\123\1\55\1\uffff";
     static final String DFA9_maxS =
-        "\1\172\1\110\1\uffff\1\116\1\40\1\uffff\1\122\2\uffff\2\75\4\uffff"+
-        "\1\105\1\111\2\uffff\1\111\4\uffff\1\103\1\121\1\115\1\113\1\125"+
-        "\1\101\1\172\1\105\1\122\1\uffff\1\40\1\131\1\uffff\1\40\1\uffff";
+        "\1\172\1\150\1\156\1\145\2\162\1\141\5\uffff\2\uffff\2\172\2\75"+
+        "\1\uffff\1\172\2\uffff\1\145\1\151\1\146\1\151\1\165\1\154\13\uffff"+
+        "\1\143\1\161\1\145\1\155\1\145\1\163\1\153\1\165\1\162\1\141\1\172"+
+        "\1\145\1\172\2\145\1\162\1\uffff\1\172\1\uffff\1\172\1\156\1\171"+
+        "\2\uffff\1\143\1\40\1\145\1\uffff\1\163\1\172\1\uffff";
     static final String DFA9_acceptS =
-        "\2\uffff\1\2\2\uffff\1\5\1\uffff\1\10\1\11\2\uffff\1\14\1\17\1\20"+
-        "\1\21\2\uffff\1\6\1\4\1\uffff\1\15\1\12\1\16\1\13\11\uffff\1\1\2"+
-        "\uffff\1\3\1\uffff\1\7";
+        "\7\uffff\1\7\1\10\1\11\1\12\1\13\6\uffff\1\22\1\uffff\1\26\1\31"+
+        "\6\uffff\1\14\1\27\1\15\1\30\1\16\1\17\1\23\1\20\1\24\1\21\1\25"+
+        "\20\uffff\1\5\1\uffff\1\1\3\uffff\1\6\1\2\3\uffff\1\4\2\uffff\1"+
+        "\3";
     static final String DFA9_specialS =
-        "\47\uffff}>";
+        "\14\uffff\1\0\1\1\70\uffff}>";
     static final String[] DFA9_transitionS = {
-            "\1\16\3\uffff\1\16\22\uffff\1\16\3\uffff\1\10\2\uffff\1\7\1"+
-            "\5\1\4\2\uffff\1\2\3\uffff\12\15\2\uffff\1\11\1\13\1\12\2\uffff"+
-            "\2\14\1\1\14\14\1\6\4\14\1\3\5\14\6\uffff\32\14",
-            "\1\17",
-            "",
-            "\1\20",
-            "\1\21",
-            "",
-            "\1\23",
-            "",
-            "",
-            "\1\24",
-            "\1\26",
+            "\2\25\2\uffff\1\25\22\uffff\1\25\1\uffff\1\14\1\uffff\1\13\2"+
+            "\uffff\1\15\1\11\1\12\2\uffff\1\10\1\17\1\7\1\uffff\12\23\2"+
+            "\uffff\1\20\1\22\1\21\2\uffff\2\24\1\1\2\24\1\6\11\24\1\4\1"+
+            "\24\1\3\1\24\1\5\1\2\5\24\4\uffff\1\16\1\uffff\2\24\1\1\2\24"+
+            "\1\6\11\24\1\4\1\24\1\3\1\24\1\5\1\2\5\24",
+            "\1\26\37\uffff\1\26",
+            "\1\27\37\uffff\1\27",
+            "\1\30\37\uffff\1\30",
+            "\1\31\37\uffff\1\31",
+            "\1\32\37\uffff\1\32",
+            "\1\33\37\uffff\1\33",
             "",
             "",
             "",
             "",
-            "\1\30",
-            "\1\31",
             "",
-            "",
-            "\1\32",
-            "",
-            "",
-            "",
-            "",
-            "\1\33",
-            "\1\34",
-            "\1\35",
-            "\1\36",
-            "\1\37",
-            "\1\40",
-            "\1\14\1\uffff\1\14\1\uffff\2\14\3\uffff\2\14\1\uffff\1\14\2"+
-            "\uffff\13\14\5\uffff\33\14\4\uffff\1\14\1\uffff\32\14",
+            "\0\35",
+            "\0\37",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
             "\1\42",
-            "\1\43",
-            "",
             "\1\44",
-            "\1\45",
             "",
-            "\1\46",
+            "\1\24\2\uffff\12\23\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
+            "",
+            "",
+            "\1\47\37\uffff\1\47",
+            "\1\50\37\uffff\1\50",
+            "\1\51\37\uffff\1\51",
+            "\1\52\37\uffff\1\52",
+            "\1\53\37\uffff\1\53",
+            "\1\54\37\uffff\1\54",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "\1\55\37\uffff\1\55",
+            "\1\56\37\uffff\1\56",
+            "\1\57\37\uffff\1\57",
+            "\1\60\37\uffff\1\60",
+            "\1\61\37\uffff\1\61",
+            "\1\62\37\uffff\1\62",
+            "\1\63\37\uffff\1\63",
+            "\1\64\37\uffff\1\64",
+            "\1\65\37\uffff\1\65",
+            "\1\66\37\uffff\1\66",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
+            "\1\70\37\uffff\1\70",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
+            "\1\72\37\uffff\1\72",
+            "\1\73\37\uffff\1\73",
+            "\1\74\37\uffff\1\74",
+            "",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
+            "",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
+            "\1\77\37\uffff\1\77",
+            "\1\100\37\uffff\1\100",
+            "",
+            "",
+            "\1\101\37\uffff\1\101",
+            "\1\102",
+            "\1\103\37\uffff\1\103",
+            "",
+            "\1\104\37\uffff\1\104",
+            "\1\24\2\uffff\12\24\7\uffff\32\24\4\uffff\1\24\1\uffff\32\24",
             ""
     };
 
@@ -1077,7 +1582,37 @@ public class ConstraintsLexer extends Lexer {
             this.transition = DFA9_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( T__12 | T__13 | T__14 | T__15 | T__16 | T__17 | T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | ALPHAVAR | NUMBER | WS );";
+            return "1:1: Tokens : ( CHECK | UNIQUE | REFERENCES | PRIMARY_KEY | TRUE | FALSE | DOT | COMMA | LPAREN | RPAREN | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | UNDERSCORE | DASH | LESS | GREATER | EQUALS | LESS_OR_EQUAL | GREATER_OR_EQUAL | NUMBER | STRING | STRING_LITERAL | STRING_LITERAL2 | WS );";
+        }
+        public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
+            IntStream input = _input;
+        	int _s = s;
+            switch ( s ) {
+                    case 0 : 
+                        int LA9_12 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA9_12>='\u0000' && LA9_12<='\uFFFF')) ) {s = 29;}
+
+                        else s = 28;
+
+                        if ( s>=0 ) return s;
+                        break;
+                    case 1 : 
+                        int LA9_13 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA9_13>='\u0000' && LA9_13<='\uFFFF')) ) {s = 31;}
+
+                        else s = 30;
+
+                        if ( s>=0 ) return s;
+                        break;
+            }
+            NoViableAltException nvae =
+                new NoViableAltException(getDescription(), 9, _s, input);
+            error(nvae);
+            throw nvae;
         }
     }
  

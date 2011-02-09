@@ -10,8 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -26,7 +25,7 @@ import org.w3c.dom.NodeList;
  */
 public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFunctionalDependency> {
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	public RDBMSFunctionalDependencyXMLCodec() {
 		super();
@@ -54,7 +53,7 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 		Element p1 = (Element) nl1.item(0);
 		String id1 = p1.getAttribute("mappingID");
 		NodeList l1 =p1.getElementsByTagName("variable");
-		Vector<Term> aux1 = new Vector<Term>();
+		Vector<Variable> aux1 = new Vector<Variable>();
 		for(int i=0; i< l1.getLength();i++){
 			Element el = (Element)l1.item(i);
 			String name = el.getAttribute("name");
@@ -68,7 +67,7 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 		Element p2 = (Element) nl2.item(0);
 		String id2 = p2.getAttribute("mappingID");
 		NodeList l2 =p2.getElementsByTagName("variable");
-		Vector<Term> aux2 = new Vector<Term>();
+		Vector<Variable> aux2 = new Vector<Variable>();
 		for(int j=0; j< l2.getLength();j++){
 			Element el = (Element)l2.item(j);
 			String name = el.getAttribute("name");
@@ -87,8 +86,8 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 		Element element = createElement(TAG);
 		Element parameter1 = createElement(PARAMETER1);
 		parameter1.setAttribute("mappingID", input.getMappingOneId());
-		List<Term> one = input.getTermsOfQueryOne();
-		Iterator<Term> it = one.iterator();
+		List<Variable> one = input.getVariablesOfQueryOne();
+		Iterator<Variable> it = one.iterator();
 		while(it.hasNext()){
 			Element variable = createElement(VARIABLE);
 			variable.setAttribute("name", it.next().getName());
@@ -98,8 +97,8 @@ public class RDBMSFunctionalDependencyXMLCodec extends AssertionXMLCodec<RDBMSFu
 
 		Element parameter2 = createElement(PARAMETER2);
 		parameter2.setAttribute("mappingID", input.getMappingTwoId());
-		List<Term> two = input.getTermsOfQueryTwo();
-		Iterator<Term> it2 = two.iterator();
+		List<Variable> two = input.getVariablesOfQueryTwo();
+		Iterator<Variable> it2 = two.iterator();
 		while(it2.hasNext()){
 			Element variable = createElement(VARIABLE);
 			variable.setAttribute("name", it2.next().getName());

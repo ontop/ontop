@@ -52,10 +52,10 @@ DefaultTreeCellRenderer {
 	 * Creates a new instance of the DependencyAssertionTreeCellRenderer
 	 * @param apic
 	 */
-	public ConstraintsTreeCellRenderer(APIController apic){
+	public ConstraintsTreeCellRenderer(APIController apic, OBDAPreferences preference){
 		
 		this.apic = apic;
-		pref = OBDAPreferences.getOBDAPreferences().getMappingsPreference();
+		pref = preference.getMappingsPreference();
 	}
 	
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row,

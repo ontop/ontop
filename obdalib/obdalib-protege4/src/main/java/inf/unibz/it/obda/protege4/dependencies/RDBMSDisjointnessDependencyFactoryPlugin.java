@@ -4,7 +4,7 @@ import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.dependencies.controller.RDBMSDisjointnessDependencyController;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSDisjointnessDependency;
-import inf.unibz.it.obda.dl.codec.dependencies.xml.RDBMSDisjointnessDependencyXMLCodec;
+//import inf.unibz.it.obda.dl.codec.dependencies.xml.RDBMSDisjointnessDependencyXMLCodec;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
 
 public class RDBMSDisjointnessDependencyFactoryPlugin extends AssertionControllerFactoryPluginInstance {
@@ -23,8 +23,8 @@ public class RDBMSDisjointnessDependencyFactoryPlugin extends AssertionControlle
 
 	@Override
 	public AssertionXMLCodec<?> getXMLCodec() {
-		
-		return new RDBMSDisjointnessDependencyXMLCodec();
+		return null; // TODO Dependency codec: Fix this!
+//		return new RDBMSDisjointnessDependencyXMLCodec();
 	}
 
 	@Override

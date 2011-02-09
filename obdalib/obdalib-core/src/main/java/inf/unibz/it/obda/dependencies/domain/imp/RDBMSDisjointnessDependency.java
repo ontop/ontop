@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.obda.query.domain.Query;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 /**
  * Class representing a disjointness dependency assertion for a
@@ -35,11 +35,11 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	/**
 	 * A list of terms associated to the first query involved in this disjointness dependency assertion
 	 */
-	private List<Term> termsOfQueryOne = null;
+	private List<Variable> variablesOfQueryOne = null;
 	/**
 	 * A list of terms associated to the second query involved in this disjointness dependency assertion
 	 */
-	private List<Term> termsOfQueryTwo = null;
+	private List<Variable> variablesOfQueryTwo = null;
 	/**
 	 * The mapping id from which the first query comes from
 	 */
@@ -65,13 +65,13 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	 * @param terms2	list of terms associated to the second query
 	 */
 	public RDBMSDisjointnessDependency(URI uri,String id1, String id2, RDBMSSQLQuery q1, RDBMSSQLQuery q2,
-			List<Term> terms1, List<Term> terms2){
+			List<Variable> terms1, List<Variable> terms2){
 
 		datasourceUri = uri;
 		queryOne = q1;
 		queryTwo = q2;
-		termsOfQueryOne = terms1;
-		termsOfQueryTwo = terms2;
+		variablesOfQueryOne = terms1;
+		variablesOfQueryTwo = terms2;
 		mappingOneId = id1;
 		mappingTwoId = id2;
 	}
@@ -94,32 +94,32 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 	 * Returns a list of terms associated to the first query involved in the assertion
 	 */
 	@Override
-	public List<Term> getTermsOfQueryOne() {
-		return termsOfQueryOne;
+	public List<Variable> getVariablesOfQueryOne() {
+		return variablesOfQueryOne;
 	}
 	/**
 	 * Returns a list of terms associated to the second query involved in the assertion
 	 */
 	@Override
-	public List<Term> getTermsOfQueryTwo() {
-		return termsOfQueryTwo;
+	public List<Variable> getVariablesOfQueryTwo() {
+		return variablesOfQueryTwo;
 	}
 
 	@Override
 	public int hashCode(){
 
 		String s = queryOne.toString() + queryTwo.toString();
-		Iterator<Term> it1 = termsOfQueryOne.iterator();
-		Iterator<Term> it2 = termsOfQueryTwo.iterator();
+		Iterator<Variable> it1 = variablesOfQueryOne.iterator();
+		Iterator<Variable> it2 = variablesOfQueryTwo.iterator();
 		int code = s.hashCode();
 		int c = 1;
 		while(it1.hasNext() && it2.hasNext()){
-			int aux1 = (int) Math.pow(it1.next().hashCode(), c);
+			int aux1 = (int) Math.pow(it1.next().getName().hashCode(), c);
 			code = code + aux1 ;
 			c++;
 		}
 		while(it2.hasNext()){
-			int aux2 = (int) Math.pow(it2.next().hashCode(), c);
+			int aux2 = (int) Math.pow(it2.next().getName().hashCode(), c);
 			code = code + aux2;
 			c++;
 		}
@@ -140,23 +140,23 @@ public class RDBMSDisjointnessDependency extends DisjointnessDependencyAssertion
 
 		String output = "disjoint(";
 		String parameter1 = "Body."+mappingOneId + "[";
-		Iterator<Term> it1 = termsOfQueryOne.iterator();
+		Iterator<Variable> it1 = variablesOfQueryOne.iterator();
 		String aux = "";
 		while(it1.hasNext()){
 			if(aux.length() >0){
 				aux = aux + ",";
 			}
-			aux = aux + it1.next();
+			aux = aux + "$" + it1.next().getName();  // TODO Remove $ later
 		}
-		parameter1 = parameter1 +aux +"];";
+		parameter1 = parameter1 +aux +"],";
 		String parameter2 = "Body." + mappingTwoId +"[";
-		Iterator<Term> it2 = termsOfQueryTwo.iterator();
+		Iterator<Variable> it2 = variablesOfQueryTwo.iterator();
 		String aux2 ="";
 		while(it2.hasNext()){
 			if(aux2.length() >0){
 				aux2 = aux2 + ",";
 			}
-			aux2 = aux2 + it2.next();
+			aux2 = aux2 + "$" + it2.next().getName();
 		}
 		parameter2 =  parameter2 +aux2+ "]";
 		output = output + parameter1 + parameter2 +")";

@@ -2,7 +2,6 @@ package org.obda.query.domain.imp;
 
 import java.net.URI;
 
-import org.obda.query.domain.Predicate;
 import org.obda.query.domain.PredicateFactory;
 
 public class BasicPredicateFactoryImpl implements PredicateFactory {
@@ -20,7 +19,7 @@ public class BasicPredicateFactoryImpl implements PredicateFactory {
 		return instance;
 	}
 
-	public Predicate createPredicate(URI name, int arity) {
+	public PredicateImp createPredicate(URI name, int arity) {
 		return new PredicateImp(name, arity);
 	}
 }

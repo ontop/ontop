@@ -41,7 +41,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 /**
  * The tree pane showing all functional dependencies associated the selected data source
@@ -224,11 +224,11 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 	    		RDBMSFunctionalDependency dep = node.getUserObject();
 	    		RDBMSSQLQuery query1 = (RDBMSSQLQuery) dep.getSourceQueryOne();
 	    		RDBMSSQLQuery query2 = (RDBMSSQLQuery) dep.getSourceQueryOne();
-	    		List<Term> terms1 = dep.getTermsOfQueryOne();
-	    		List<Term> terms2 = dep.getTermsOfQueryTwo();
+	    		List<Variable> vars1 = dep.getVariablesOfQueryOne();
+	    		List<Variable> vars2 = dep.getVariablesOfQueryTwo();
 
 	    		String aux1 = "";
-	    		Iterator<Term> it1 = terms1.iterator();
+	    		Iterator<Variable> it1 = vars1.iterator();
 	    		while(it1.hasNext()){
 	    			if(aux1.length() > 0){
 	    				aux1 = aux1 + ",";
@@ -236,7 +236,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 	    			aux1= aux1 + "table1." + it1.next().getName();
 	    		}
 	    		String aux2 = "";
-	    		Iterator<Term> it2 = terms2.iterator();
+	    		Iterator<Variable> it2 = vars2.iterator();
 	    		while(it2.hasNext()){
 	    			if(aux2.length() > 0){
 	    				aux2 = aux2 + ",";

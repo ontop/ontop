@@ -11,7 +11,6 @@ import inf.unibz.it.obda.dependencies.miner.exception.InvalidSyntaxException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -22,7 +21,7 @@ import java.util.Vector;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 /**
  * The dependency assertion renderer dependency assertion from different
@@ -48,16 +47,18 @@ public class DependencyAssertionRenderer {
 	 * creates a new DependencyAssertionRenderer object
 	 * @param apic
 	 */
-	public DependencyAssertionRenderer(APIController apic){
+	protected DependencyAssertionRenderer(APIController apic){
 		this.apic = apic;
-		instance = this;
 	}
 
 	/**
 	 * Returns the current instance of the Dependency Assertion Renderer
 	 * @return an instance
 	 */
-	public static DependencyAssertionRenderer getInstance(){
+	public static DependencyAssertionRenderer getInstance(APIController apic){
+		if (instance == null) {
+			instance = new DependencyAssertionRenderer(apic);
+		}
 		return instance;
 	}
 
@@ -245,7 +246,7 @@ public class DependencyAssertionRenderer {
 		}
 	}
 
-	public RDBMSInclusionDependency createAndValidateRDBMSInclusionDependency(String id1, String id2, Vector<Term> t1, Vector<Term> t2){
+	public RDBMSInclusionDependency createAndValidateRDBMSInclusionDependency(String id1, String id2, Vector<Variable> t1, Vector<Variable> t2){
 
 		DatasourcesController dscon = apic.getDatasourcesController();
 		URI currentds = dscon.getCurrentDataSource().getSourceID();
@@ -266,7 +267,7 @@ public class DependencyAssertionRenderer {
 		}
 	}
 
-	public RDBMSFunctionalDependency createAndValidateRDBMSFunctionalDependency(String id1, String id2, Vector<Term> t1, Vector<Term> t2){
+	public RDBMSFunctionalDependency createAndValidateRDBMSFunctionalDependency(String id1, String id2, Vector<Variable> t1, Vector<Variable> t2){
 
 		DatasourcesController dscon = apic.getDatasourcesController();
 		URI currentds = dscon.getCurrentDataSource().getSourceID();
@@ -287,7 +288,7 @@ public class DependencyAssertionRenderer {
 		}
 	}
 
-	public RDBMSDisjointnessDependency createAndValidateRDBMSDisjointnessDependency(String id1, String id2, Vector<Term> t1, Vector<Term> t2){
+	public RDBMSDisjointnessDependency createAndValidateRDBMSDisjointnessDependency(String id1, String id2, Vector<Variable> t1, Vector<Variable> t2){
 
 		DatasourcesController dscon = apic.getDatasourcesController();
 		URI currentds = dscon.getCurrentDataSource().getSourceID();
@@ -295,9 +296,10 @@ public class DependencyAssertionRenderer {
 		MappingController mapcon = apic.getMappingController();
 		OBDAMappingAxiom axiom1 = mapcon.getMapping(currentds, id1);
 		OBDAMappingAxiom axiom2 = mapcon.getMapping(currentds, id2);
-		if(axiom1 == null || axiom2 == null){
+		if (axiom1 == null || axiom2 == null) {
 			return null;
-		}else{
+		}
+		else {
 			RDBMSDisjointnessDependency dis = new RDBMSDisjointnessDependency(
 					currentds, id1, id2, (RDBMSSQLQuery)axiom1.getSourceQuery(), (RDBMSSQLQuery)axiom2.getSourceQuery(), t1, t2);
 			if(isValid(dis.toString(), RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION)){
@@ -323,23 +325,20 @@ public class DependencyAssertionRenderer {
 		ANTLRInputStream inputst = null;
 		try {
 			inputst = new ANTLRInputStream(byteArrayInputStream);
-
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace(System.err);
 		}
 		DependencyAssertionLexer lexer = new DependencyAssertionLexer(inputst);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		parser = new DependencyAssertionParser(tokens);
 		parser.setController(apic);
-		try {
-			parser.parse();
-		} catch (RecognitionException e) {
-			e.printStackTrace();
-		}
-		if ((parser.getErrors().size() == 0) && (lexer.getErrors().size() == 0)) {
-			return parser.getDependencyAssertion();
-		} else {
-				throw new QueryParseException(parser.getErrors().toString());
-		}
+
+		Vector<AbstractDependencyAssertion> dependencies = parser.parse();
+
+		if (parser.getNumberOfSyntaxErrors() != 0)
+			throw new RecognitionException();
+
+		return dependencies;
 	}
 }

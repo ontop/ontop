@@ -1,6 +1,18 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 C:\\Users\\obda\\Desktop\\DependencyAssertion.g 2010-07-12 17:32:09
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 DependencyAssertion.g 2011-01-19 16:47:22
 
 package inf.unibz.it.obda.dependencies.parser;
+
+import java.net.URI;
+import java.util.Vector;
+
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.MismatchedSetException;
+import org.antlr.runtime.Parser;
+import org.antlr.runtime.ParserRuleReturnScope;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.TokenStream;
+
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
@@ -11,45 +23,40 @@ import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
+import org.obda.query.domain.imp.TermFactoryImpl;
+import org.obda.query.domain.Variable;
 
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-import org.obda.query.domain.VariableTerm;
+
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
 public class DependencyAssertionParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "BODY", "HEAD", "ALPHAVAR", "ALPHA", "INT", "CHAR", "WS", "','", "'('", "';'", "')'", "'includedIn'", "'disjoint'", "'functionOf'", "'['", "']'", "'.'", "'$'"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "SEMI", "LPAREN", "COMMA", "RPAREN", "LSQ_BRACKET", "RSQ_BRACKET", "BODY", "HEAD", "DOT", "DOLLAR", "STRING", "UNDERSCORE", "DASH", "ALPHA", "DIGIT", "ALPHANUM", "WS", "'includedIn'", "'disjoint'", "'functionOf'"
     };
-    public static final int T__21=21;
-    public static final int T__20=20;
-    public static final int HEAD=5;
-    public static final int CHAR=9;
-    public static final int INT=8;
     public static final int EOF=-1;
-    public static final int ALPHA=7;
-    public static final int T__19=19;
-    public static final int WS=10;
-    public static final int T__16=16;
-    public static final int T__15=15;
-    public static final int T__18=18;
-    public static final int T__17=17;
-    public static final int T__12=12;
-    public static final int T__11=11;
-    public static final int T__14=14;
-    public static final int T__13=13;
-    public static final int ALPHAVAR=6;
-    public static final int BODY=4;
+    public static final int T__21=21;
+    public static final int T__22=22;
+    public static final int T__23=23;
+    public static final int SEMI=4;
+    public static final int LPAREN=5;
+    public static final int COMMA=6;
+    public static final int RPAREN=7;
+    public static final int LSQ_BRACKET=8;
+    public static final int RSQ_BRACKET=9;
+    public static final int BODY=10;
+    public static final int HEAD=11;
+    public static final int DOT=12;
+    public static final int DOLLAR=13;
+    public static final int STRING=14;
+    public static final int UNDERSCORE=15;
+    public static final int DASH=16;
+    public static final int ALPHA=17;
+    public static final int DIGIT=18;
+    public static final int ALPHANUM=19;
+    public static final int WS=20;
 
     // delegates
     // delegators
@@ -65,131 +72,114 @@ public class DependencyAssertionParser extends Parser {
         
 
     public String[] getTokenNames() { return DependencyAssertionParser.tokenNames; }
-    public String getGrammarFileName() { return "C:\\Users\\obda\\Desktop\\DependencyAssertion.g"; }
+    public String getGrammarFileName() { return "DependencyAssertion.g"; }
 
 
+    /** The API controller */
+    private APIController apic = null;
 
-        	    private List<String> errors = new LinkedList<String>();
-        	    public void displayRecognitionError(String[] tokenNames,
-        	                                        RecognitionException e) {
-        	        String hdr = getErrorHeader(e);
-        	        String msg = getErrorMessage(e, tokenNames);
-        	        errors.add(hdr + " " + msg);
-        	    }
-        	    public List<String> getErrors() {
-        	        return errors;
-        	    }
+    /** A factory to construct the subject and object terms */
+    private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
+    public void setController(APIController apic) {
+      this.apic = apic;
+    }
 
-            	boolean error1 = false;
-
-            	ArrayList<QueryTerm> term_collector = new ArrayList<QueryTerm>();
-            	ArrayList<QueryTerm> terms_ofMappingOne= new ArrayList<QueryTerm>();
-            	ArrayList<QueryTerm>terms_ofMappingTwo = new ArrayList<QueryTerm>();
-            	String tmpId = null;
-            	String idForMappingOne = null;
-            	String idForMappingTwo = null;
-            	
-            	private APIController apic = null;
-            	
-            	Vector<AbstractDependencyAssertion> dependencyAssertions = new Vector<AbstractDependencyAssertion>();
-
-            	public void resetErrorFlag() {
-            		error1 = false;
-            	}
-            	
-            	public boolean getErrorFlag() {
-            		return error1;
-            	}
-            	
-            	public Vector<AbstractDependencyAssertion> getDependencyAssertion() {
-            		return dependencyAssertions;
-            	}
-            	
-            	public void setController(APIController con){
-            		apic = con;
-            	}
-
-            	private void resetValues(){
-            		terms_ofMappingOne = null;
-            		terms_ofMappingTwo =null;
-            		idForMappingOne = null;
-            		idForMappingTwo = null;
-            	}
+    public class MappingException extends RecognitionException {
+      private String msg = "";
+      
+      public MappingException(String msg) {
+        this.msg = msg;
+      }
+      
+      public String getErrorMessage() {
+        return msg;
+      }
+    }
 
 
 
     // $ANTLR start "parse"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:107:1: parse returns [boolean value] : prog EOF ;
-    public final boolean parse() throws RecognitionException {
-        boolean value = false;
+    // DependencyAssertion.g:79:1: parse returns [Vector<AbstractDependencyAssertion> assertions] : prog EOF ;
+    public final Vector<AbstractDependencyAssertion> parse() throws RecognitionException {
+        Vector<AbstractDependencyAssertion> assertions = null;
+
+        Vector<AbstractDependencyAssertion> prog1 = null;
+
 
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:108:1: ( prog EOF )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:108:3: prog EOF
+            // DependencyAssertion.g:80:3: ( prog EOF )
+            // DependencyAssertion.g:80:5: prog EOF
             {
-            pushFollow(FOLLOW_prog_in_parse47);
-            prog();
+            pushFollow(FOLLOW_prog_in_parse50);
+            prog1=prog();
 
             state._fsp--;
 
-            match(input,EOF,FOLLOW_EOF_in_parse49); 
-             
-            		//System.out.println(query_atoms.toString()); 
-            		value = !error1; 
-            		//System.out.println("test" + value);}
-            		
+            match(input,EOF,FOLLOW_EOF_in_parse52); 
+
+                  assertions = prog1;
+                
 
             }
 
         }
-        catch (RecognitionException ex) {
-             
-            //		reportError(ex); 
-            		value = false; 
-            		throw ex; 
-            	
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return value;
+        return assertions;
     }
     // $ANTLR end "parse"
 
 
     // $ANTLR start "prog"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:120:1: prog : exp ( ',' exp )* ;
-    public final void prog() throws RecognitionException {
+    // DependencyAssertion.g:85:1: prog returns [Vector<AbstractDependencyAssertion> values] : e1= expression ( SEMI e2= expression )* ;
+    public final Vector<AbstractDependencyAssertion> prog() throws RecognitionException {
+        Vector<AbstractDependencyAssertion> values = null;
+
+        AbstractDependencyAssertion e1 = null;
+
+        AbstractDependencyAssertion e2 = null;
+
+
+
+          values = new Vector<AbstractDependencyAssertion>();
+
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:121:7: ( exp ( ',' exp )* )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:121:10: exp ( ',' exp )*
+            // DependencyAssertion.g:89:3: (e1= expression ( SEMI e2= expression )* )
+            // DependencyAssertion.g:89:5: e1= expression ( SEMI e2= expression )*
             {
-            pushFollow(FOLLOW_exp_in_prog79);
-            exp();
+            pushFollow(FOLLOW_expression_in_prog81);
+            e1=expression();
 
             state._fsp--;
 
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:121:14: ( ',' exp )*
+             values.add(e1); 
+            // DependencyAssertion.g:90:5: ( SEMI e2= expression )*
             loop1:
             do {
                 int alt1=2;
                 int LA1_0 = input.LA(1);
 
-                if ( (LA1_0==11) ) {
+                if ( (LA1_0==SEMI) ) {
                     alt1=1;
                 }
 
 
                 switch (alt1) {
             	case 1 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:121:15: ',' exp
+            	    // DependencyAssertion.g:90:6: SEMI e2= expression
             	    {
-            	    match(input,11,FOLLOW_11_in_prog82); 
-            	    pushFollow(FOLLOW_exp_in_prog84);
-            	    exp();
+            	    match(input,SEMI,FOLLOW_SEMI_in_prog91); 
+            	    pushFollow(FOLLOW_expression_in_prog95);
+            	    e2=expression();
 
             	    state._fsp--;
 
+            	     values.add(e2); 
 
             	    }
             	    break;
@@ -203,137 +193,94 @@ public class DependencyAssertionParser extends Parser {
             }
 
         }
-        catch (RecognitionException ex) {
-             
-            		//reportError(ex); 
-            		error1 = true; 
-            		throw ex; 
-            		
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
         }
         finally {
         }
-        return ;
+        return values;
     }
     // $ANTLR end "prog"
 
 
-    // $ANTLR start "exp"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:129:1: exp : function '(' parameter1 ';' parameter2 ')' ;
-    public final void exp() throws RecognitionException {
-        DependencyAssertionParser.function_return function1 = null;
+    // $ANTLR start "expression"
+    // DependencyAssertion.g:93:1: expression returns [AbstractDependencyAssertion value] : ( inclusion_dependency | disjointness_dependency | functional_dependency );
+    public final AbstractDependencyAssertion expression() throws RecognitionException {
+        AbstractDependencyAssertion value = null;
+
+        RDBMSInclusionDependency inclusion_dependency2 = null;
+
+        RDBMSDisjointnessDependency disjointness_dependency3 = null;
+
+        RDBMSFunctionalDependency functional_dependency4 = null;
 
 
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:129:6: ( function '(' parameter1 ';' parameter2 ')' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:129:8: function '(' parameter1 ';' parameter2 ')'
-            {
-            pushFollow(FOLLOW_function_in_exp107);
-            function1=function();
+            // DependencyAssertion.g:94:3: ( inclusion_dependency | disjointness_dependency | functional_dependency )
+            int alt2=3;
+            switch ( input.LA(1) ) {
+            case 21:
+                {
+                alt2=1;
+                }
+                break;
+            case 22:
+                {
+                alt2=2;
+                }
+                break;
+            case 23:
+                {
+                alt2=3;
+                }
+                break;
+            default:
+                NoViableAltException nvae =
+                    new NoViableAltException("", 2, 0, input);
 
-            state._fsp--;
-
-            match(input,12,FOLLOW_12_in_exp109); 
-            pushFollow(FOLLOW_parameter1_in_exp111);
-            parameter1();
-
-            state._fsp--;
-
-            match(input,13,FOLLOW_13_in_exp113); 
-            pushFollow(FOLLOW_parameter2_in_exp115);
-            parameter2();
-
-            state._fsp--;
-
-            match(input,14,FOLLOW_14_in_exp117); 
-
-            		//            		System.out.println(idForMappingOne);
-            //                        System.out.println(idForMappingTwo);
-            //                        Iterator<QueryTerm> it1 = terms_ofMappingOne.iterator();
-            //                        Iterator<QueryTerm> it2 = terms_ofMappingTwo.iterator();
-            //                        while(it1.hasNext() && it2.hasNext()){
-            //                        	System.out.println(it1.next().toString() + ", " + it2.next().toString());
-            //                        }
-                        			if(terms_ofMappingOne.size() != terms_ofMappingTwo.size()){
-                        				error1=true;
-                        				try {
-            								throw new Exception("Both mappings in the assertion must have the same number of terms");
-            							} catch (Exception e) {
-            								e.printStackTrace();
-            							}
-                        			}else{
-            	                        MappingController con = apic.getMappingController();
-            	                        DatasourcesController dscon = apic.getDatasourcesController();
-            	                        URI source_uri = dscon.getCurrentDataSource().getSourceID();
-            	                        OBDAMappingAxiom map1 = con.getMapping(source_uri, idForMappingOne);
-            	                        OBDAMappingAxiom map2 = con.getMapping(source_uri, idForMappingTwo);
-            	                        if(map1 != null && map2 != null){
-            		                        String f = (function1!=null?input.toString(function1.start,function1.stop):null);
-            		                        if(f.equals("includedIn")){
-            		                        	RDBMSInclusionDependency de = new RDBMSInclusionDependency(source_uri,idForMappingOne,idForMappingTwo,(RDBMSSQLQuery)map1.getSourceQuery(),(RDBMSSQLQuery)map2.getSourceQuery(), terms_ofMappingOne, terms_ofMappingTwo);
-            		                        	dependencyAssertions.add(de);
-            		                        }else if(f.equals("functionOf")){
-            		                        	RDBMSFunctionalDependency de = new RDBMSFunctionalDependency(source_uri,idForMappingOne,idForMappingTwo,(RDBMSSQLQuery)map1.getSourceQuery(),(RDBMSSQLQuery)map2.getSourceQuery(), terms_ofMappingOne, terms_ofMappingTwo);
-            		                        	dependencyAssertions.add(de);
-            		                        }else if(f.equals("disjoint")){
-            		                        	RDBMSDisjointnessDependency de = new RDBMSDisjointnessDependency(source_uri,idForMappingOne,idForMappingTwo,(RDBMSSQLQuery)map1.getSourceQuery(),(RDBMSSQLQuery)map2.getSourceQuery(), terms_ofMappingOne, terms_ofMappingTwo);
-            		                        	dependencyAssertions.add(de);
-            		                        }else{
-            		                        	
-            		                        }
-            	                        }else{
-            	                        	error1=true;
-            	            				try {
-            									throw new Exception("Invalid Mapping ID");
-            								} catch (Exception e) {
-            									e.printStackTrace();
-            								}
-            	                        }
-            	                          resetValues();
-                        			}
-            		
-
+                throw nvae;
             }
 
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "exp"
+            switch (alt2) {
+                case 1 :
+                    // DependencyAssertion.g:94:5: inclusion_dependency
+                    {
+                    pushFollow(FOLLOW_inclusion_dependency_in_expression117);
+                    inclusion_dependency2=inclusion_dependency();
 
-    public static class function_return extends ParserRuleReturnScope {
-    };
+                    state._fsp--;
 
-    // $ANTLR start "function"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:180:1: function : ( 'includedIn' | 'disjoint' | 'functionOf' ) ;
-    public final DependencyAssertionParser.function_return function() throws RecognitionException {
-        DependencyAssertionParser.function_return retval = new DependencyAssertionParser.function_return();
-        retval.start = input.LT(1);
+                     value = inclusion_dependency2; 
 
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:181:2: ( ( 'includedIn' | 'disjoint' | 'functionOf' ) )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:181:4: ( 'includedIn' | 'disjoint' | 'functionOf' )
-            {
-            if ( (input.LA(1)>=15 && input.LA(1)<=17) ) {
-                input.consume();
-                state.errorRecovery=false;
+                    }
+                    break;
+                case 2 :
+                    // DependencyAssertion.g:95:5: disjointness_dependency
+                    {
+                    pushFollow(FOLLOW_disjointness_dependency_in_expression128);
+                    disjointness_dependency3=disjointness_dependency();
+
+                    state._fsp--;
+
+                     value = disjointness_dependency3; 
+
+                    }
+                    break;
+                case 3 :
+                    // DependencyAssertion.g:96:5: functional_dependency
+                    {
+                    pushFollow(FOLLOW_functional_dependency_in_expression136);
+                    functional_dependency4=functional_dependency();
+
+                    state._fsp--;
+
+                     value = functional_dependency4; 
+
+                    }
+                    break;
+
             }
-            else {
-                MismatchedSetException mse = new MismatchedSetException(null,input);
-                throw mse;
-            }
-
-
-            }
-
-            retval.stop = input.LT(-1);
-
         }
         catch (RecognitionException re) {
             reportError(re);
@@ -341,161 +288,67 @@ public class DependencyAssertionParser extends Parser {
         }
         finally {
         }
-        return retval;
+        return value;
     }
-    // $ANTLR end "function"
+    // $ANTLR end "expression"
 
 
-    // $ANTLR start "parameter1"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:182:1: parameter1 : parameter ;
-    public final void parameter1() throws RecognitionException {
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:182:12: ( parameter )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:182:14: parameter
-            {
-            pushFollow(FOLLOW_parameter_in_parameter1156);
-            parameter();
+    // $ANTLR start "inclusion_dependency"
+    // DependencyAssertion.g:99:1: inclusion_dependency returns [RDBMSInclusionDependency value] : 'includedIn' LPAREN p1= parameter COMMA p2= parameter RPAREN ;
+    public final RDBMSInclusionDependency inclusion_dependency() throws RecognitionException {
+        RDBMSInclusionDependency value = null;
 
-            state._fsp--;
+        ArrayList<Object> p1 = null;
 
-            terms_ofMappingOne = term_collector; term_collector =  new ArrayList<QueryTerm>(); idForMappingOne = tmpId; tmpId = null;
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "parameter1"
-
-
-    // $ANTLR start "parameter2"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:187:1: parameter2 : parameter ;
-    public final void parameter2() throws RecognitionException {
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:187:12: ( parameter )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:187:14: parameter
-            {
-            pushFollow(FOLLOW_parameter_in_parameter2173);
-            parameter();
-
-            state._fsp--;
-
-            terms_ofMappingTwo = term_collector; term_collector =  new ArrayList<QueryTerm>(); idForMappingTwo = tmpId; tmpId = null; 
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "parameter2"
-
-
-    // $ANTLR start "parameter"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:192:1: parameter : map '[' term ( ',' term )* ']' ;
-    public final void parameter() throws RecognitionException {
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:192:12: ( map '[' term ( ',' term )* ']' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:192:14: map '[' term ( ',' term )* ']'
-            {
-            pushFollow(FOLLOW_map_in_parameter191);
-            map();
-
-            state._fsp--;
-
-            match(input,18,FOLLOW_18_in_parameter193); 
-            pushFollow(FOLLOW_term_in_parameter195);
-            term();
-
-            state._fsp--;
-
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:192:27: ( ',' term )*
-            loop2:
-            do {
-                int alt2=2;
-                int LA2_0 = input.LA(1);
-
-                if ( (LA2_0==11) ) {
-                    alt2=1;
-                }
-
-
-                switch (alt2) {
-            	case 1 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:192:28: ',' term
-            	    {
-            	    match(input,11,FOLLOW_11_in_parameter198); 
-            	    pushFollow(FOLLOW_term_in_parameter200);
-            	    term();
-
-            	    state._fsp--;
-
-
-            	    }
-            	    break;
-
-            	default :
-            	    break loop2;
-                }
-            } while (true);
-
-            match(input,19,FOLLOW_19_in_parameter204); 
-
-            }
-
-        }
-        catch (RecognitionException ex) {
-             
-            		error1 = true; 
-            		throw ex; 
-            		
-        }
-        finally {
-        }
-        return ;
-    }
-    // $ANTLR end "parameter"
-
-
-    // $ANTLR start "map"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:197:1: map returns [String value] : aux '.' id ;
-    public final String map() throws RecognitionException {
-        String value = null;
-
-        DependencyAssertionParser.id_return id2 = null;
+        ArrayList<Object> p2 = null;
 
 
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:197:28: ( aux '.' id )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:197:30: aux '.' id
+            // DependencyAssertion.g:100:3: ( 'includedIn' LPAREN p1= parameter COMMA p2= parameter RPAREN )
+            // DependencyAssertion.g:100:5: 'includedIn' LPAREN p1= parameter COMMA p2= parameter RPAREN
             {
-            pushFollow(FOLLOW_aux_in_map224);
-            aux();
+            match(input,21,FOLLOW_21_in_inclusion_dependency159); 
+            match(input,LPAREN,FOLLOW_LPAREN_in_inclusion_dependency161); 
+            pushFollow(FOLLOW_parameter_in_inclusion_dependency165);
+            p1=parameter();
 
             state._fsp--;
 
-            match(input,20,FOLLOW_20_in_map226); 
-            pushFollow(FOLLOW_id_in_map227);
-            id2=id();
+            match(input,COMMA,FOLLOW_COMMA_in_inclusion_dependency167); 
+            pushFollow(FOLLOW_parameter_in_inclusion_dependency171);
+            p2=parameter();
 
             state._fsp--;
 
-            String s = (id2!=null?input.toString(id2.start,id2.stop):null); tmpId= s;
+            match(input,RPAREN,FOLLOW_RPAREN_in_inclusion_dependency173); 
+
+                  String mapId1 = (String) p1.get(0);
+                  String mapId2 = (String) p2.get(0);
+                  Vector<Variable> mapTerms1 = (Vector<Variable>) p1.get(1);
+                  Vector<Variable> mapTerms2 = (Vector<Variable>) p2.get(1);     
+                  
+                  if (mapTerms1.size() != mapTerms2.size()) {
+                    throw new MappingException("Both mappings in the assertion must " +
+                        "have the same number of terms!");
+                  }
+                  else {
+                    MappingController mc = apic.getMappingController();
+                    DatasourcesController dc = apic.getDatasourcesController();
+                    URI sourceUri = dc.getCurrentDataSource().getSourceID();
+                    OBDAMappingAxiom mapAxiom1 = mc.getMapping(sourceUri, mapId1);
+                    OBDAMappingAxiom mapAxiom2 = mc.getMapping(sourceUri, mapId2);
+                    
+                    if (mapAxiom1 != null && mapAxiom2 != null) {
+                      value = new RDBMSInclusionDependency(sourceUri, mapId1, mapId2,
+                        (RDBMSSQLQuery) mapAxiom1.getSourceQuery(),
+                        (RDBMSSQLQuery) mapAxiom2.getSourceQuery(), 
+                        mapTerms1, mapTerms2);
+                    }
+                    else {
+                      throw new MappingException("Invalid mapping id!");
+                    }
+                  }
+                
 
             }
 
@@ -508,15 +361,245 @@ public class DependencyAssertionParser extends Parser {
         }
         return value;
     }
-    // $ANTLR end "map"
+    // $ANTLR end "inclusion_dependency"
 
 
-    // $ANTLR start "aux"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:198:1: aux : ( BODY | HEAD ) ;
-    public final void aux() throws RecognitionException {
+    // $ANTLR start "disjointness_dependency"
+    // DependencyAssertion.g:130:1: disjointness_dependency returns [RDBMSDisjointnessDependency value] : 'disjoint' LPAREN p1= parameter COMMA p2= parameter RPAREN ;
+    public final RDBMSDisjointnessDependency disjointness_dependency() throws RecognitionException {
+        RDBMSDisjointnessDependency value = null;
+
+        ArrayList<Object> p1 = null;
+
+        ArrayList<Object> p2 = null;
+
+
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:198:6: ( ( BODY | HEAD ) )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:198:8: ( BODY | HEAD )
+            // DependencyAssertion.g:131:3: ( 'disjoint' LPAREN p1= parameter COMMA p2= parameter RPAREN )
+            // DependencyAssertion.g:131:5: 'disjoint' LPAREN p1= parameter COMMA p2= parameter RPAREN
+            {
+            match(input,22,FOLLOW_22_in_disjointness_dependency194); 
+            match(input,LPAREN,FOLLOW_LPAREN_in_disjointness_dependency196); 
+            pushFollow(FOLLOW_parameter_in_disjointness_dependency200);
+            p1=parameter();
+
+            state._fsp--;
+
+            match(input,COMMA,FOLLOW_COMMA_in_disjointness_dependency202); 
+            pushFollow(FOLLOW_parameter_in_disjointness_dependency206);
+            p2=parameter();
+
+            state._fsp--;
+
+            match(input,RPAREN,FOLLOW_RPAREN_in_disjointness_dependency208); 
+
+                  String mapId1 = (String) p1.get(0);
+                  String mapId2 = (String) p2.get(0);
+                  Vector<Variable> mapTerms1 = (Vector<Variable>) p1.get(1);
+                  Vector<Variable> mapTerms2 = (Vector<Variable>) p2.get(1);
+                  
+                  if (mapTerms1.size() != mapTerms2.size()) {
+                    throw new MappingException("Both mappings in the assertion must " +
+                        "have the same number of terms!");
+                  }
+                  else {
+                    MappingController mc = apic.getMappingController();
+                    DatasourcesController dc = apic.getDatasourcesController();
+                    URI sourceUri = dc.getCurrentDataSource().getSourceID();
+                    OBDAMappingAxiom mapAxiom1 = mc.getMapping(sourceUri, mapId1);
+                    OBDAMappingAxiom mapAxiom2 = mc.getMapping(sourceUri, mapId2);
+                    
+                    if (mapAxiom1 != null && mapAxiom2 != null) {
+                      value = new RDBMSDisjointnessDependency(sourceUri, mapId1, mapId2,
+                        (RDBMSSQLQuery) mapAxiom1.getSourceQuery(),
+                        (RDBMSSQLQuery) mapAxiom2.getSourceQuery(), 
+                        mapTerms1, mapTerms2);
+                    }
+                    else {
+                      throw new MappingException("Invalid mapping id!");
+                    }
+                  }
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "disjointness_dependency"
+
+
+    // $ANTLR start "functional_dependency"
+    // DependencyAssertion.g:161:1: functional_dependency returns [RDBMSFunctionalDependency value] : 'functionOf' LPAREN p1= parameter COMMA p2= parameter RPAREN ;
+    public final RDBMSFunctionalDependency functional_dependency() throws RecognitionException {
+        RDBMSFunctionalDependency value = null;
+
+        ArrayList<Object> p1 = null;
+
+        ArrayList<Object> p2 = null;
+
+
+        try {
+            // DependencyAssertion.g:162:3: ( 'functionOf' LPAREN p1= parameter COMMA p2= parameter RPAREN )
+            // DependencyAssertion.g:162:5: 'functionOf' LPAREN p1= parameter COMMA p2= parameter RPAREN
+            {
+            match(input,23,FOLLOW_23_in_functional_dependency229); 
+            match(input,LPAREN,FOLLOW_LPAREN_in_functional_dependency231); 
+            pushFollow(FOLLOW_parameter_in_functional_dependency235);
+            p1=parameter();
+
+            state._fsp--;
+
+            match(input,COMMA,FOLLOW_COMMA_in_functional_dependency237); 
+            pushFollow(FOLLOW_parameter_in_functional_dependency241);
+            p2=parameter();
+
+            state._fsp--;
+
+            match(input,RPAREN,FOLLOW_RPAREN_in_functional_dependency243); 
+
+                  String mapId1 = (String) p1.get(0);
+                  String mapId2 = (String) p2.get(0);
+                  Vector<Variable> mapTerms1 = (Vector<Variable>) p1.get(1);
+                  Vector<Variable> mapTerms2 = (Vector<Variable>) p2.get(1);
+                  
+                  if (mapTerms1.size() != mapTerms2.size()) {
+                    throw new MappingException("Both mappings in the assertion must " +
+                        "have the same number of terms!");
+                  }
+                  else {
+                    MappingController mc = apic.getMappingController();
+                    DatasourcesController dc = apic.getDatasourcesController();
+                    URI sourceUri = dc.getCurrentDataSource().getSourceID();
+                    OBDAMappingAxiom mapAxiom1 = mc.getMapping(sourceUri, mapId1);
+                    OBDAMappingAxiom mapAxiom2 = mc.getMapping(sourceUri, mapId2);
+                    
+                    if (mapAxiom1 != null && mapAxiom2 != null) {
+                      value = new RDBMSFunctionalDependency(sourceUri, mapId1, mapId2,
+                        (RDBMSSQLQuery) mapAxiom1.getSourceQuery(),
+                        (RDBMSSQLQuery) mapAxiom2.getSourceQuery(), 
+                        mapTerms1, mapTerms2);
+                    }
+                    else {
+                      throw new MappingException("Invalid mapping id!");
+                    }
+                  }
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "functional_dependency"
+
+
+    // $ANTLR start "parameter"
+    // DependencyAssertion.g:192:1: parameter returns [ArrayList<Object> values] : rule LSQ_BRACKET v1= variable ( COMMA v2= variable )* RSQ_BRACKET ;
+    public final ArrayList<Object> parameter() throws RecognitionException {
+        ArrayList<Object> values = null;
+
+        Variable v1 = null;
+
+        Variable v2 = null;
+
+        String rule5 = null;
+
+
+
+          values = new ArrayList<Object>();
+          Vector<Variable> terms = new Vector<Variable>();
+
+        try {
+            // DependencyAssertion.g:197:3: ( rule LSQ_BRACKET v1= variable ( COMMA v2= variable )* RSQ_BRACKET )
+            // DependencyAssertion.g:197:5: rule LSQ_BRACKET v1= variable ( COMMA v2= variable )* RSQ_BRACKET
+            {
+            pushFollow(FOLLOW_rule_in_parameter267);
+            rule5=rule();
+
+            state._fsp--;
+
+             values.add(rule5); 
+            match(input,LSQ_BRACKET,FOLLOW_LSQ_BRACKET_in_parameter271); 
+            pushFollow(FOLLOW_variable_in_parameter282);
+            v1=variable();
+
+            state._fsp--;
+
+             terms.add(v1); 
+            // DependencyAssertion.g:199:7: ( COMMA v2= variable )*
+            loop3:
+            do {
+                int alt3=2;
+                int LA3_0 = input.LA(1);
+
+                if ( (LA3_0==COMMA) ) {
+                    alt3=1;
+                }
+
+
+                switch (alt3) {
+            	case 1 :
+            	    // DependencyAssertion.g:199:8: COMMA v2= variable
+            	    {
+            	    match(input,COMMA,FOLLOW_COMMA_in_parameter294); 
+            	    pushFollow(FOLLOW_variable_in_parameter298);
+            	    v2=variable();
+
+            	    state._fsp--;
+
+            	     terms.add(v2); 
+
+            	    }
+            	    break;
+
+            	default :
+            	    break loop3;
+                }
+            } while (true);
+
+            match(input,RSQ_BRACKET,FOLLOW_RSQ_BRACKET_in_parameter304); 
+
+                  values.add(terms);  
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return values;
+    }
+    // $ANTLR end "parameter"
+
+
+    // $ANTLR start "rule"
+    // DependencyAssertion.g:204:1: rule returns [String value] : ( BODY | HEAD ) DOT mapping_id ;
+    public final String rule() throws RecognitionException {
+        String value = null;
+
+        DependencyAssertionParser.mapping_id_return mapping_id6 = null;
+
+
+        try {
+            // DependencyAssertion.g:205:3: ( ( BODY | HEAD ) DOT mapping_id )
+            // DependencyAssertion.g:205:5: ( BODY | HEAD ) DOT mapping_id
             {
             if ( (input.LA(1)>=BODY && input.LA(1)<=HEAD) ) {
                 input.consume();
@@ -527,6 +610,15 @@ public class DependencyAssertionParser extends Parser {
                 throw mse;
             }
 
+            match(input,DOT,FOLLOW_DOT_in_rule332); 
+            pushFollow(FOLLOW_mapping_id_in_rule334);
+            mapping_id6=mapping_id();
+
+            state._fsp--;
+
+
+                  value = (mapping_id6!=null?input.toString(mapping_id6.start,mapping_id6.stop):null);
+                
 
             }
 
@@ -537,28 +629,60 @@ public class DependencyAssertionParser extends Parser {
         }
         finally {
         }
-        return ;
+        return value;
     }
-    // $ANTLR end "aux"
+    // $ANTLR end "rule"
 
-    public static class id_return extends ParserRuleReturnScope {
-    };
 
-    // $ANTLR start "id"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:199:1: id : var ;
-    public final DependencyAssertionParser.id_return id() throws RecognitionException {
-        DependencyAssertionParser.id_return retval = new DependencyAssertionParser.id_return();
-        retval.start = input.LT(1);
+    // $ANTLR start "variable"
+    // DependencyAssertion.g:210:1: variable returns [Variable value] : DOLLAR var_name ;
+    public final Variable variable() throws RecognitionException {
+        Variable value = null;
+
+        DependencyAssertionParser.var_name_return var_name7 = null;
+
 
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:199:5: ( var )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:199:7: var
+            // DependencyAssertion.g:211:3: ( DOLLAR var_name )
+            // DependencyAssertion.g:211:5: DOLLAR var_name
             {
-            pushFollow(FOLLOW_var_in_id251);
-            var();
+            match(input,DOLLAR,FOLLOW_DOLLAR_in_variable354); 
+            pushFollow(FOLLOW_var_name_in_variable356);
+            var_name7=var_name();
 
             state._fsp--;
 
+
+                  value = termFactory.createVariable((var_name7!=null?input.toString(var_name7.start,var_name7.stop):null));
+                
+
+            }
+
+        }
+        catch (RecognitionException re) {
+            reportError(re);
+            recover(input,re);
+        }
+        finally {
+        }
+        return value;
+    }
+    // $ANTLR end "variable"
+
+    public static class mapping_id_return extends ParserRuleReturnScope {
+    };
+
+    // $ANTLR start "mapping_id"
+    // DependencyAssertion.g:216:1: mapping_id : STRING ;
+    public final DependencyAssertionParser.mapping_id_return mapping_id() throws RecognitionException {
+        DependencyAssertionParser.mapping_id_return retval = new DependencyAssertionParser.mapping_id_return();
+        retval.start = input.LT(1);
+
+        try {
+            // DependencyAssertion.g:217:3: ( STRING )
+            // DependencyAssertion.g:217:5: STRING
+            {
+            match(input,STRING,FOLLOW_STRING_in_mapping_id371); 
 
             }
 
@@ -573,30 +697,26 @@ public class DependencyAssertionParser extends Parser {
         }
         return retval;
     }
-    // $ANTLR end "id"
+    // $ANTLR end "mapping_id"
 
+    public static class var_name_return extends ParserRuleReturnScope {
+    };
 
-    // $ANTLR start "term"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:200:1: term returns [QueryTerm value] : '$' var ;
-    public final QueryTerm term() throws RecognitionException {
-        QueryTerm value = null;
-
-        String var3 = null;
-
+    // $ANTLR start "var_name"
+    // DependencyAssertion.g:220:1: var_name : STRING ;
+    public final DependencyAssertionParser.var_name_return var_name() throws RecognitionException {
+        DependencyAssertionParser.var_name_return retval = new DependencyAssertionParser.var_name_return();
+        retval.start = input.LT(1);
 
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:200:32: ( '$' var )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:200:34: '$' var
+            // DependencyAssertion.g:221:3: ( STRING )
+            // DependencyAssertion.g:221:5: STRING
             {
-            match(input,21,FOLLOW_21_in_term262); 
-            pushFollow(FOLLOW_var_in_term263);
-            var3=var();
-
-            state._fsp--;
-
-            VariableTerm t = new VariableTerm(var3); value =t; term_collector.add(t); 
+            match(input,STRING,FOLLOW_STRING_in_var_name385); 
 
             }
+
+            retval.stop = input.LT(-1);
 
         }
         catch (RecognitionException re) {
@@ -605,70 +725,53 @@ public class DependencyAssertionParser extends Parser {
         }
         finally {
         }
-        return value;
+        return retval;
     }
-    // $ANTLR end "term"
-
-
-    // $ANTLR start "var"
-    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:201:1: var returns [String value] : ALPHAVAR ;
-    public final String var() throws RecognitionException {
-        String value = null;
-
-        Token ALPHAVAR4=null;
-
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:202:2: ( ALPHAVAR )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:202:4: ALPHAVAR
-            {
-            ALPHAVAR4=(Token)match(input,ALPHAVAR,FOLLOW_ALPHAVAR_in_var277); 
-            value = (ALPHAVAR4!=null?ALPHAVAR4.getText():null);
-
-            }
-
-        }
-        catch (RecognitionException re) {
-            reportError(re);
-            recover(input,re);
-        }
-        finally {
-        }
-        return value;
-    }
-    // $ANTLR end "var"
+    // $ANTLR end "var_name"
 
     // Delegated rules
 
 
  
 
-    public static final BitSet FOLLOW_prog_in_parse47 = new BitSet(new long[]{0x0000000000000000L});
-    public static final BitSet FOLLOW_EOF_in_parse49 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_exp_in_prog79 = new BitSet(new long[]{0x0000000000000802L});
-    public static final BitSet FOLLOW_11_in_prog82 = new BitSet(new long[]{0x0000000000038000L});
-    public static final BitSet FOLLOW_exp_in_prog84 = new BitSet(new long[]{0x0000000000000802L});
-    public static final BitSet FOLLOW_function_in_exp107 = new BitSet(new long[]{0x0000000000001000L});
-    public static final BitSet FOLLOW_12_in_exp109 = new BitSet(new long[]{0x0000000000000030L});
-    public static final BitSet FOLLOW_parameter1_in_exp111 = new BitSet(new long[]{0x0000000000002000L});
-    public static final BitSet FOLLOW_13_in_exp113 = new BitSet(new long[]{0x0000000000000030L});
-    public static final BitSet FOLLOW_parameter2_in_exp115 = new BitSet(new long[]{0x0000000000004000L});
-    public static final BitSet FOLLOW_14_in_exp117 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_set_in_function143 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_parameter_in_parameter1156 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_parameter_in_parameter2173 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_map_in_parameter191 = new BitSet(new long[]{0x0000000000040000L});
-    public static final BitSet FOLLOW_18_in_parameter193 = new BitSet(new long[]{0x0000000000200000L});
-    public static final BitSet FOLLOW_term_in_parameter195 = new BitSet(new long[]{0x0000000000080800L});
-    public static final BitSet FOLLOW_11_in_parameter198 = new BitSet(new long[]{0x0000000000200000L});
-    public static final BitSet FOLLOW_term_in_parameter200 = new BitSet(new long[]{0x0000000000080800L});
-    public static final BitSet FOLLOW_19_in_parameter204 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_aux_in_map224 = new BitSet(new long[]{0x0000000000100000L});
-    public static final BitSet FOLLOW_20_in_map226 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_id_in_map227 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_set_in_aux239 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_var_in_id251 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_21_in_term262 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_var_in_term263 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ALPHAVAR_in_var277 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_prog_in_parse50 = new BitSet(new long[]{0x0000000000000000L});
+    public static final BitSet FOLLOW_EOF_in_parse52 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_expression_in_prog81 = new BitSet(new long[]{0x0000000000000012L});
+    public static final BitSet FOLLOW_SEMI_in_prog91 = new BitSet(new long[]{0x0000000000E00000L});
+    public static final BitSet FOLLOW_expression_in_prog95 = new BitSet(new long[]{0x0000000000000012L});
+    public static final BitSet FOLLOW_inclusion_dependency_in_expression117 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_disjointness_dependency_in_expression128 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_functional_dependency_in_expression136 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_21_in_inclusion_dependency159 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_inclusion_dependency161 = new BitSet(new long[]{0x0000000000000C00L});
+    public static final BitSet FOLLOW_parameter_in_inclusion_dependency165 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_COMMA_in_inclusion_dependency167 = new BitSet(new long[]{0x0000000000000C00L});
+    public static final BitSet FOLLOW_parameter_in_inclusion_dependency171 = new BitSet(new long[]{0x0000000000000080L});
+    public static final BitSet FOLLOW_RPAREN_in_inclusion_dependency173 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_22_in_disjointness_dependency194 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_disjointness_dependency196 = new BitSet(new long[]{0x0000000000000C00L});
+    public static final BitSet FOLLOW_parameter_in_disjointness_dependency200 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_COMMA_in_disjointness_dependency202 = new BitSet(new long[]{0x0000000000000C00L});
+    public static final BitSet FOLLOW_parameter_in_disjointness_dependency206 = new BitSet(new long[]{0x0000000000000080L});
+    public static final BitSet FOLLOW_RPAREN_in_disjointness_dependency208 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_23_in_functional_dependency229 = new BitSet(new long[]{0x0000000000000020L});
+    public static final BitSet FOLLOW_LPAREN_in_functional_dependency231 = new BitSet(new long[]{0x0000000000000C00L});
+    public static final BitSet FOLLOW_parameter_in_functional_dependency235 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_COMMA_in_functional_dependency237 = new BitSet(new long[]{0x0000000000000C00L});
+    public static final BitSet FOLLOW_parameter_in_functional_dependency241 = new BitSet(new long[]{0x0000000000000080L});
+    public static final BitSet FOLLOW_RPAREN_in_functional_dependency243 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_rule_in_parameter267 = new BitSet(new long[]{0x0000000000000100L});
+    public static final BitSet FOLLOW_LSQ_BRACKET_in_parameter271 = new BitSet(new long[]{0x0000000000002000L});
+    public static final BitSet FOLLOW_variable_in_parameter282 = new BitSet(new long[]{0x0000000000000240L});
+    public static final BitSet FOLLOW_COMMA_in_parameter294 = new BitSet(new long[]{0x0000000000002000L});
+    public static final BitSet FOLLOW_variable_in_parameter298 = new BitSet(new long[]{0x0000000000000240L});
+    public static final BitSet FOLLOW_RSQ_BRACKET_in_parameter304 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_set_in_rule326 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_DOT_in_rule332 = new BitSet(new long[]{0x0000000000004000L});
+    public static final BitSet FOLLOW_mapping_id_in_rule334 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_DOLLAR_in_variable354 = new BitSet(new long[]{0x0000000000004000L});
+    public static final BitSet FOLLOW_var_name_in_variable356 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_mapping_id371 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_var_name385 = new BitSet(new long[]{0x0000000000000002L});
 
 }

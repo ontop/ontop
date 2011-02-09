@@ -17,6 +17,8 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
@@ -88,6 +90,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
         relationsTable = new javax.swing.JTable();
         scrollAttributesTable = new javax.swing.JScrollPane();
         attributesTable = new javax.swing.JTable();
+        datasourceSelector = new javax.swing.JComboBox();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -207,6 +210,14 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
         scrollRDBMExplorer.setViewportView(panelViewSourceSquema1);
 
         add(scrollRDBMExplorer, java.awt.BorderLayout.CENTER);
+        
+        DataSource[] datasources = 
+        	dscontroller.getAllSources().values().toArray(new DataSource[0]);
+		DatasourceComboBoxModel dsComboModel = new DatasourceComboBoxModel(datasources);
+		DatasourceCellRenderer dsComboBoxRenderer = new DatasourceCellRenderer();
+		datasourceSelector.setModel(dsComboModel);
+		datasourceSelector.setRenderer(dsComboBoxRenderer);
+		add(datasourceSelector, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
 
     private void deleteViewsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteViewsButtonActionPerformed
@@ -495,6 +506,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane scrollAttributesTable;
     private javax.swing.JScrollPane scrollRDBMExplorer;
     private javax.swing.JScrollPane scrollRelationsTable;
+    private javax.swing.JComboBox datasourceSelector;
     // End of variables declaration//GEN-END:variables
     
     private class Counter extends Thread{

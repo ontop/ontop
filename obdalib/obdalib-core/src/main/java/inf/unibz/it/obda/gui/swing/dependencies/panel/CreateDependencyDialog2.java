@@ -26,8 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Vector;
 
-import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
 
@@ -65,7 +64,7 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
 
 	private CreateDependencyDialog2 myself = null;
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
     /** Creates new form CreateDependencyDialog */
     public CreateDependencyDialog2(java.awt.Frame parent, boolean modal, APIController apic, Vector<MappingNode> selection, String assertion) {
@@ -280,7 +279,7 @@ public class CreateDependencyDialog2 extends javax.swing.JDialog {
     		MappingController mapcon = apic.getMappingController();
         	DatasourcesController dscon = apic.getDatasourcesController();
 	    	String[] variablesMap = jTextFieldMap1.getText().split(",");
-        	Vector<Term> terms = new Vector<Term>();
+        	Vector<Variable> terms = new Vector<Variable>();
         	for(int i=0;i<variablesMap.length;i++){
         		terms.add(termFactory.createVariable(variablesMap[i]));
         	}

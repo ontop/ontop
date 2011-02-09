@@ -56,7 +56,8 @@ import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.ObjectVariableImpl;
+import org.obda.query.domain.Variable;
+import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.VariableImpl;
 
 
@@ -344,18 +345,13 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			DisjointnessMiningResult r = it.next();
 			Term t1 = r.getFirstElement();
 			Term t2 = r.getSecondElement();
-			List<Term> termsOfT1 = null;
-			List<Term> termsOfT2 = null;
-			if(t1 instanceof ObjectVariableImpl && t2 instanceof ObjectVariableImpl){
-				ObjectVariableImpl ft1 = (ObjectVariableImpl) t1;
-				ObjectVariableImpl ft2 = (ObjectVariableImpl) t2;
-				termsOfT1 = ft1.getTerms();
-				termsOfT2 = ft2.getTerms();
-			}else if(t1 instanceof VariableImpl && t2 instanceof VariableImpl){
-				termsOfT1 = new Vector<Term>();
-				termsOfT2 = new Vector<Term>();
-				termsOfT1.add(t1);
-				termsOfT2.add(t2);
+			List<Variable> termsOfT1 = null;
+			List<Variable> termsOfT2 = null;
+			if(t1 instanceof VariableImpl && t2 instanceof VariableImpl){
+				termsOfT1 = new Vector<Variable>();
+				termsOfT2 = new Vector<Variable>();
+				termsOfT1.add((VariableImpl)t1);
+				termsOfT2.add((VariableImpl)t2);
 			}else{
 				try {
 					throw new Exception("Incompatible QueryTerms!");
@@ -403,18 +399,13 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 			InclusionMiningResult r = it.next();
 			Term t1 = r.getFirstElement();
 			Term t2 = r.getSecondElement();
-			List<Term> termsOfT1 = null;
-			List<Term> termsOfT2 = null;
-			if(t1 instanceof ObjectVariableImpl && t2 instanceof ObjectVariableImpl){
-				ObjectVariableImpl ft1 = (ObjectVariableImpl) t1;
-				ObjectVariableImpl ft2 = (ObjectVariableImpl) t2;
-				termsOfT1 = ft1.getTerms();
-				termsOfT2 = ft2.getTerms();
-			}else if(t1 instanceof VariableImpl && t2 instanceof VariableImpl){
-				termsOfT1 = new Vector<Term>();
-				termsOfT2 = new Vector<Term>();
-				termsOfT1.add(t1);
-				termsOfT2.add(t2);
+			List<Variable> termsOfT1 = null;
+			List<Variable> termsOfT2 = null;
+			if(t1 instanceof VariableImpl && t2 instanceof VariableImpl){
+				termsOfT1 = new Vector<Variable>();
+				termsOfT2 = new Vector<Variable>();
+				termsOfT1.add((VariableImpl)t1);
+				termsOfT2.add((VariableImpl)t2);
 			}else{
 				try {
 					throw new Exception("Incompatible QueryTerms!");
@@ -458,33 +449,37 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel {
 		while(it.hasNext() && !miningCanceled){
 			FunctionalDependencyMiningResult r = it.next();
 			Set<Term> dependees = r.getDependee();
-			Vector<Term> candidate = new Vector<Term>();
-			ObjectVariableImpl ft = (ObjectVariableImpl) r.getDependent();
+			List<Variable> candidate = new ArrayList<Variable>();
+			FunctionalTermImpl ft = r.getDependent();
 			List<Term> list = ft.getTerms();
 			Iterator<Term> l_it = list.iterator();
 			HashSet<String> candidateName = new HashSet<String>();
 			while(l_it.hasNext()){
 				Term t = l_it.next();
-				candidate.add(t);
-				candidateName.add(t.getName());
+				if (t instanceof VariableImpl) {
+					candidate.add((Variable)t);
+					candidateName.add(t.getName());
+				}
 			}
-			Vector<Term> aux = new Vector<Term>();
+			Vector<Variable> aux = new Vector<Variable>();
 			Iterator<Term> s_it = dependees.iterator();
 			HashSet<String> depNames = new HashSet<String>();
 			while(s_it.hasNext()){
 				Term term = s_it.next();
-				if(term instanceof ObjectVariableImpl){
-					ObjectVariableImpl f = (ObjectVariableImpl) term;
+				if(term instanceof FunctionalTermImpl){
+					FunctionalTermImpl f = (FunctionalTermImpl) term;
 					Iterator<Term> f_it = f.getTerms().iterator();
 					while(f_it.hasNext()){
 						Term t = f_it.next();
-						if(!candidateName.contains(t.getName()) &&depNames.add(t.getName())){
-							aux.add(t);
+						if (t instanceof VariableImpl) {
+							if(!candidateName.contains(t.getName()) &&depNames.add(t.getName())){
+								aux.add((Variable)t);
+							}
 						}
 					}
-				}else{
+				}else if (term instanceof VariableImpl) {
 					if(!candidateName.contains(term.getName()) && depNames.add(term.getName())){
-						aux.add(term);
+						aux.add((Variable)term);
 					}
 
 				}

@@ -82,7 +82,7 @@ public class InsertDisjoinednessAssertionPane extends javax.swing.JPanel {
         
     	String text = jTextPaneDisjoinednessEditor.getText();
     	try {
-			Vector<RDBMSDisjointnessDependency> vec = DependencyAssertionRenderer.getInstance().renderRDBMSDisjoinednessAssertion(text);
+			Vector<RDBMSDisjointnessDependency> vec = DependencyAssertionRenderer.getInstance(apic).renderRDBMSDisjoinednessAssertion(text);
 			Iterator<RDBMSDisjointnessDependency> it = vec.iterator();
 			while(it.hasNext()){
 				disController.addAssertion(it.next());

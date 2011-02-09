@@ -81,7 +81,7 @@ public class FunctionalDependencyEditorPane extends javax.swing.JPanel {
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
     	String text = jTextPaneFunctionalDepEditor.getText();
     	try {
-			Vector<RDBMSFunctionalDependency> vec = DependencyAssertionRenderer.getInstance().renderRDBMSFunctionalDependency(text);
+			Vector<RDBMSFunctionalDependency> vec = DependencyAssertionRenderer.getInstance(apic).renderRDBMSFunctionalDependency(text);
 			Iterator<RDBMSFunctionalDependency> it = vec.iterator();
 			while(it.hasNext()){
 				fdController.addAssertion(it.next());

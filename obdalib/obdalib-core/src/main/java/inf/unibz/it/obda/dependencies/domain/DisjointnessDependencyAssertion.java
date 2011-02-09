@@ -5,7 +5,7 @@ import inf.unibz.it.obda.dependencies.AbstractDependencyAssertion;
 import java.util.List;
 
 import org.obda.query.domain.Query;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 /**
  * Abstract class representing a disjointness dependency assertion. All
@@ -20,6 +20,6 @@ public abstract class DisjointnessDependencyAssertion
 		extends AbstractDependencyAssertion {
 	public abstract Query getSourceQueryOne();
 	public abstract Query getSourceQueryTwo();
-	public abstract List<Term> getTermsOfQueryOne();
-	public abstract List<Term> getTermsOfQueryTwo();
+	public abstract List<Variable> getVariablesOfQueryOne();
+	public abstract List<Variable> getVariablesOfQueryTwo();
 }

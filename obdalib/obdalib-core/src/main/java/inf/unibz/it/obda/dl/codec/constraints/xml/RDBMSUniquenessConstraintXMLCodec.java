@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -27,7 +27,7 @@ public class RDBMSUniquenessConstraintXMLCodec extends AssertionXMLCodec<RDBMSUn
 	private static final String	V1	= "variable";
 	private static final String	MAPPING	= "mapping";
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	@Override
 	public RDBMSUniquenessConstraint decode(Element input) {
@@ -35,7 +35,7 @@ public class RDBMSUniquenessConstraintXMLCodec extends AssertionXMLCodec<RDBMSUn
 		Element el = (Element) nl.item(0);
 		String id = el.getAttribute("id");
 		NodeList l1 = el.getElementsByTagName(V1);
-		Vector<Term> v = new Vector<Term>();
+		Vector<Variable> v = new Vector<Variable>();
 		for(int i=0;i<l1.getLength();i++){
 			Element e = (Element) l1.item(i);
 			String name = e.getAttribute("name");
@@ -55,8 +55,8 @@ public class RDBMSUniquenessConstraintXMLCodec extends AssertionXMLCodec<RDBMSUn
 		Element element = createElement(TAG);
 		Element map = createElement(MAPPING);
 		map.setAttribute("id", input.getMappingID());
-		List<Term> list = input.getTerms();
-		Iterator<Term> it = list.iterator();
+		List<Variable> list = input.getVariables();
+		Iterator<Variable> it = list.iterator();
 		while(it.hasNext()){
 			Term t = it.next();
 			Element e = createElement(V1);

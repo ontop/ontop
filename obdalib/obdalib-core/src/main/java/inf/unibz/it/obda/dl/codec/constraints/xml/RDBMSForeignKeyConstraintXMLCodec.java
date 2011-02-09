@@ -10,8 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.TermFactoryImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -26,7 +25,7 @@ public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSFo
 	private static final String	V1	= "variable";
 	private static final String	MAPPING	= "mapping";
 
-	private final TermFactoryImpl termFactory = (TermFactoryImpl) TermFactory.getInstance();
+	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	@Override
 	public RDBMSForeignKeyConstraint decode(Element input) {
@@ -38,13 +37,13 @@ public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSFo
 			String id2 = map2.getAttribute("id");
 			NodeList l1 = map1.getElementsByTagName(V1);
 			NodeList l2 = map2.getElementsByTagName(V1);
-			Vector<Term> v1 = new Vector<Term>();
+			Vector<Variable> v1 = new Vector<Variable>();
 			for(int i=0;i<l1.getLength();i++){
 				Element e = (Element) l1.item(i);
 				String name = e.getAttribute("name");
 				v1.add(termFactory.createVariable(name));
 			}
-			Vector<Term> v2 = new Vector<Term>();
+			Vector<Variable> v2 = new Vector<Variable>();
 			for(int i=0;i<l2.getLength();i++){
 				Element e = (Element) l2.item(i);
 				String name = e.getAttribute("name");
@@ -52,7 +51,7 @@ public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSFo
 			}
 
 			try {
-				return ConstraintsRenderer.getInstance().createRDBMSForeignKeyConstraint(id1, id2, v1, v2);
+				return ConstraintsRenderer.getInstance(apic).createRDBMSForeignKeyConstraint(id1, id2, v1, v2);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -72,20 +71,20 @@ public class RDBMSForeignKeyConstraintXMLCodec extends AssertionXMLCodec<RDBMSFo
 		map1.setAttribute("id", input.getIDForMappingOne());
 		map2.setAttribute("id", input.getIDForMappingTwo());
 
-		List<Term> l1 = input.getTermsOfQueryOne();
-		Iterator<Term> it1 = l1.iterator();
+		List<Variable> l1 = input.getVariablesOfQueryOne();
+		Iterator<Variable> it1 = l1.iterator();
 		while(it1.hasNext()){
-			Term t = it1.next();
+			Variable var = it1.next();
 			Element e = createElement(V1);
-			e.setAttribute("name", t.getName());
+			e.setAttribute("name", var.getName());
 			map1.appendChild(e);
 		}
-		List<Term> l2 =input.getTermsOfQueryTwo();
-		Iterator<Term> it2 = l2.iterator();
+		List<Variable> l2 =input.getVariablesOfQueryTwo();
+		Iterator<Variable> it2 = l2.iterator();
 		while(it2.hasNext()){
-			Term t = it2.next();
+			Variable var = it2.next();
 			Element e = createElement(V1);
-			e.setAttribute("name",t.getName());
+			e.setAttribute("name", var.getName());
 			map2.appendChild(e);
 		}
 		element.appendChild(map1);

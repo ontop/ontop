@@ -72,16 +72,10 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-                    <excludes> 
-                          <exclude>**/dependencies/parser/**/*.java</exclude>      
-                          <exclude>**/dependencies/dig11/**/*.java</exclude>                                                                                                                                                                
-                          <exclude>**/dependencies/xml/**/*.java</exclude>
-                          <exclude>**/constraints/parser/**/*.java</exclude>
-                          <exclude>**/constraints/xml/**/*.java</exclude>
-                          <exclude>**/swing/constraints/**/*.java</exclude>
-                          <exclude>**/swing/dependencies/**/*.java</exclude>                                                                                                                                                                                          
-                      </excludes>
-
+					<excludes> 
+            <exclude>**/codec/constraints/**/*.java</exclude>
+            <exclude>**/codec/dependencies/**/*.java</exclude>
+          </excludes>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -1,52 +1,49 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 C:\\Users\\obda\\Desktop\\DependencyAssertion.g 2010-07-12 17:32:09
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 DependencyAssertion.g 2011-01-19 16:47:23
 
 package inf.unibz.it.obda.dependencies.parser;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Vector;
 
-import org.antlr.runtime.BaseRecognizer;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.DFA;
-import org.antlr.runtime.EarlyExitException;
-import org.antlr.runtime.Lexer;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
+
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
 public class DependencyAssertionLexer extends Lexer {
-    public static final int T__21=21;
-    public static final int T__20=20;
-    public static final int HEAD=5;
-    public static final int CHAR=9;
-    public static final int INT=8;
     public static final int EOF=-1;
-    public static final int ALPHA=7;
-    public static final int T__19=19;
-    public static final int WS=10;
-    public static final int T__16=16;
-    public static final int T__15=15;
-    public static final int T__18=18;
-    public static final int T__17=17;
-    public static final int T__12=12;
-    public static final int T__11=11;
-    public static final int T__14=14;
-    public static final int T__13=13;
-    public static final int ALPHAVAR=6;
-    public static final int BODY=4;
+    public static final int T__21=21;
+    public static final int T__22=22;
+    public static final int T__23=23;
+    public static final int SEMI=4;
+    public static final int LPAREN=5;
+    public static final int COMMA=6;
+    public static final int RPAREN=7;
+    public static final int LSQ_BRACKET=8;
+    public static final int RSQ_BRACKET=9;
+    public static final int BODY=10;
+    public static final int HEAD=11;
+    public static final int DOT=12;
+    public static final int DOLLAR=13;
+    public static final int STRING=14;
+    public static final int UNDERSCORE=15;
+    public static final int DASH=16;
+    public static final int ALPHA=17;
+    public static final int DIGIT=18;
+    public static final int ALPHANUM=19;
+    public static final int WS=20;
 
+    private List<String> errors = new Vector<String>();
 
-        private List<String> errors = new LinkedList<String>();
-        public void displayRecognitionError(String[] tokenNames,
-                                            RecognitionException e) {
-            String hdr = getErrorHeader(e);
-            String msg = getErrorMessage(e, tokenNames);
-            errors.add(hdr + " " + msg);
-        }
-        public List<String> getErrors() {
-            return errors;
-        }
+    public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        errors.add(hdr + " " + msg);
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }   
 
 
     // delegates
@@ -60,95 +57,15 @@ public class DependencyAssertionLexer extends Lexer {
         super(input,state);
 
     }
-    public String getGrammarFileName() { return "C:\\Users\\obda\\Desktop\\DependencyAssertion.g"; }
+    public String getGrammarFileName() { return "DependencyAssertion.g"; }
 
-    // $ANTLR start "T__11"
-    public final void mT__11() throws RecognitionException {
+    // $ANTLR start "T__21"
+    public final void mT__21() throws RecognitionException {
         try {
-            int _type = T__11;
+            int _type = T__21;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:23:7: ( ',' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:23:9: ','
-            {
-            match(','); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__11"
-
-    // $ANTLR start "T__12"
-    public final void mT__12() throws RecognitionException {
-        try {
-            int _type = T__12;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:24:7: ( '(' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:24:9: '('
-            {
-            match('('); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__12"
-
-    // $ANTLR start "T__13"
-    public final void mT__13() throws RecognitionException {
-        try {
-            int _type = T__13;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:25:7: ( ';' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:25:9: ';'
-            {
-            match(';'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__13"
-
-    // $ANTLR start "T__14"
-    public final void mT__14() throws RecognitionException {
-        try {
-            int _type = T__14;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:26:7: ( ')' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:26:9: ')'
-            {
-            match(')'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__14"
-
-    // $ANTLR start "T__15"
-    public final void mT__15() throws RecognitionException {
-        try {
-            int _type = T__15;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:27:7: ( 'includedIn' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:27:9: 'includedIn'
+            // DependencyAssertion.g:22:7: ( 'includedIn' )
+            // DependencyAssertion.g:22:9: 'includedIn'
             {
             match("includedIn"); 
 
@@ -161,15 +78,15 @@ public class DependencyAssertionLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__15"
+    // $ANTLR end "T__21"
 
-    // $ANTLR start "T__16"
-    public final void mT__16() throws RecognitionException {
+    // $ANTLR start "T__22"
+    public final void mT__22() throws RecognitionException {
         try {
-            int _type = T__16;
+            int _type = T__22;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:28:7: ( 'disjoint' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:28:9: 'disjoint'
+            // DependencyAssertion.g:23:7: ( 'disjoint' )
+            // DependencyAssertion.g:23:9: 'disjoint'
             {
             match("disjoint"); 
 
@@ -182,15 +99,15 @@ public class DependencyAssertionLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__16"
+    // $ANTLR end "T__22"
 
-    // $ANTLR start "T__17"
-    public final void mT__17() throws RecognitionException {
+    // $ANTLR start "T__23"
+    public final void mT__23() throws RecognitionException {
         try {
-            int _type = T__17;
+            int _type = T__23;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:29:7: ( 'functionOf' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:29:9: 'functionOf'
+            // DependencyAssertion.g:24:7: ( 'functionOf' )
+            // DependencyAssertion.g:24:9: 'functionOf'
             {
             match("functionOf"); 
 
@@ -203,97 +120,51 @@ public class DependencyAssertionLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "T__17"
-
-    // $ANTLR start "T__18"
-    public final void mT__18() throws RecognitionException {
-        try {
-            int _type = T__18;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:30:7: ( '[' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:30:9: '['
-            {
-            match('['); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__18"
-
-    // $ANTLR start "T__19"
-    public final void mT__19() throws RecognitionException {
-        try {
-            int _type = T__19;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:31:7: ( ']' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:31:9: ']'
-            {
-            match(']'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__19"
-
-    // $ANTLR start "T__20"
-    public final void mT__20() throws RecognitionException {
-        try {
-            int _type = T__20;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:32:7: ( '.' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:32:9: '.'
-            {
-            match('.'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__20"
-
-    // $ANTLR start "T__21"
-    public final void mT__21() throws RecognitionException {
-        try {
-            int _type = T__21;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:33:7: ( '$' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:33:9: '$'
-            {
-            match('$'); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "T__21"
+    // $ANTLR end "T__23"
 
     // $ANTLR start "BODY"
     public final void mBODY() throws RecognitionException {
         try {
             int _type = BODY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:205:7: ( 'Body' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:205:9: 'Body'
+            // DependencyAssertion.g:228:5: ( ( 'B' | 'b' ) ( 'O' | 'o' ) ( 'D' | 'd' ) ( 'Y' | 'y' ) )
+            // DependencyAssertion.g:228:7: ( 'B' | 'b' ) ( 'O' | 'o' ) ( 'D' | 'd' ) ( 'Y' | 'y' )
             {
-            match("Body"); 
+            if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
 
 
             }
@@ -311,10 +182,44 @@ public class DependencyAssertionLexer extends Lexer {
         try {
             int _type = HEAD;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:206:6: ( 'Head' )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:206:8: 'Head'
+            // DependencyAssertion.g:230:5: ( ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'A' | 'a' ) ( 'D' | 'd' ) )
+            // DependencyAssertion.g:230:7: ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'A' | 'a' ) ( 'D' | 'd' )
             {
-            match("Head"); 
+            if ( input.LA(1)=='H'||input.LA(1)=='h' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
 
 
             }
@@ -327,129 +232,303 @@ public class DependencyAssertionLexer extends Lexer {
     }
     // $ANTLR end "HEAD"
 
-    // $ANTLR start "ALPHAVAR"
-    public final void mALPHAVAR() throws RecognitionException {
+    // $ANTLR start "DOT"
+    public final void mDOT() throws RecognitionException {
         try {
-            int _type = ALPHAVAR;
+            int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:208:11: ( ( ALPHA | INT | CHAR )+ )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:208:15: ( ALPHA | INT | CHAR )+
+            // DependencyAssertion.g:232:4: ( '.' )
+            // DependencyAssertion.g:232:16: '.'
             {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:208:15: ( ALPHA | INT | CHAR )+
+            match('.'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "DOT"
+
+    // $ANTLR start "SEMI"
+    public final void mSEMI() throws RecognitionException {
+        try {
+            int _type = SEMI;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:233:5: ( ';' )
+            // DependencyAssertion.g:233:16: ';'
+            {
+            match(';'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "SEMI"
+
+    // $ANTLR start "COMMA"
+    public final void mCOMMA() throws RecognitionException {
+        try {
+            int _type = COMMA;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:234:6: ( ',' )
+            // DependencyAssertion.g:234:16: ','
+            {
+            match(','); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "COMMA"
+
+    // $ANTLR start "LPAREN"
+    public final void mLPAREN() throws RecognitionException {
+        try {
+            int _type = LPAREN;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:235:7: ( '(' )
+            // DependencyAssertion.g:235:16: '('
+            {
+            match('('); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "LPAREN"
+
+    // $ANTLR start "RPAREN"
+    public final void mRPAREN() throws RecognitionException {
+        try {
+            int _type = RPAREN;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:236:7: ( ')' )
+            // DependencyAssertion.g:236:16: ')'
+            {
+            match(')'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "RPAREN"
+
+    // $ANTLR start "LSQ_BRACKET"
+    public final void mLSQ_BRACKET() throws RecognitionException {
+        try {
+            int _type = LSQ_BRACKET;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:237:12: ( '[' )
+            // DependencyAssertion.g:237:16: '['
+            {
+            match('['); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "LSQ_BRACKET"
+
+    // $ANTLR start "RSQ_BRACKET"
+    public final void mRSQ_BRACKET() throws RecognitionException {
+        try {
+            int _type = RSQ_BRACKET;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:238:12: ( ']' )
+            // DependencyAssertion.g:238:16: ']'
+            {
+            match(']'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "RSQ_BRACKET"
+
+    // $ANTLR start "DOLLAR"
+    public final void mDOLLAR() throws RecognitionException {
+        try {
+            int _type = DOLLAR;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:239:7: ( '$' )
+            // DependencyAssertion.g:239:16: '$'
+            {
+            match('$'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "DOLLAR"
+
+    // $ANTLR start "UNDERSCORE"
+    public final void mUNDERSCORE() throws RecognitionException {
+        try {
+            int _type = UNDERSCORE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:240:11: ( '_' )
+            // DependencyAssertion.g:240:16: '_'
+            {
+            match('_'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "UNDERSCORE"
+
+    // $ANTLR start "DASH"
+    public final void mDASH() throws RecognitionException {
+        try {
+            int _type = DASH;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:241:5: ( '-' )
+            // DependencyAssertion.g:241:16: '-'
+            {
+            match('-'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "DASH"
+
+    // $ANTLR start "ALPHA"
+    public final void mALPHA() throws RecognitionException {
+        try {
+            // DependencyAssertion.g:243:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // DependencyAssertion.g:243:17: ( 'a' .. 'z' | 'A' .. 'Z' )
+            {
+            if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "ALPHA"
+
+    // $ANTLR start "DIGIT"
+    public final void mDIGIT() throws RecognitionException {
+        try {
+            // DependencyAssertion.g:245:15: ( '0' .. '9' )
+            // DependencyAssertion.g:245:17: '0' .. '9'
+            {
+            matchRange('0','9'); 
+
+            }
+
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "DIGIT"
+
+    // $ANTLR start "ALPHANUM"
+    public final void mALPHANUM() throws RecognitionException {
+        try {
+            // DependencyAssertion.g:247:18: ( ( ALPHA | DIGIT ) )
+            // DependencyAssertion.g:247:20: ( ALPHA | DIGIT )
+            {
+            if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "ALPHANUM"
+
+    // $ANTLR start "STRING"
+    public final void mSTRING() throws RecognitionException {
+        try {
+            int _type = STRING;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:249:7: ( ( ALPHANUM | UNDERSCORE | DASH )+ )
+            // DependencyAssertion.g:249:9: ( ALPHANUM | UNDERSCORE | DASH )+
+            {
+            // DependencyAssertion.g:249:9: ( ALPHANUM | UNDERSCORE | DASH )+
             int cnt1=0;
             loop1:
             do {
-                int alt1=4;
-                switch ( input.LA(1) ) {
-                case 'A':
-                case 'B':
-                case 'C':
-                case 'D':
-                case 'E':
-                case 'F':
-                case 'G':
-                case 'H':
-                case 'I':
-                case 'J':
-                case 'K':
-                case 'L':
-                case 'M':
-                case 'N':
-                case 'O':
-                case 'P':
-                case 'Q':
-                case 'R':
-                case 'S':
-                case 'T':
-                case 'U':
-                case 'V':
-                case 'W':
-                case 'X':
-                case 'Y':
-                case 'Z':
-                case 'a':
-                case 'b':
-                case 'c':
-                case 'd':
-                case 'e':
-                case 'f':
-                case 'g':
-                case 'h':
-                case 'i':
-                case 'j':
-                case 'k':
-                case 'l':
-                case 'm':
-                case 'n':
-                case 'o':
-                case 'p':
-                case 'q':
-                case 'r':
-                case 's':
-                case 't':
-                case 'u':
-                case 'v':
-                case 'w':
-                case 'x':
-                case 'y':
-                case 'z':
-                    {
-                    alt1=1;
-                    }
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    {
-                    alt1=2;
-                    }
-                    break;
-                case ' ':
-                case '!':
-                case '#':
-                case '%':
-                case '&':
-                case '*':
-                case '+':
-                case ',':
-                case '-':
-                case ':':
-                case '=':
-                case '@':
-                case '_':
-                    {
-                    alt1=3;
-                    }
-                    break;
+                int alt1=2;
+                int LA1_0 = input.LA(1);
 
+                if ( (LA1_0=='-'||(LA1_0>='0' && LA1_0<='9')||(LA1_0>='A' && LA1_0<='Z')||LA1_0=='_'||(LA1_0>='a' && LA1_0<='z')) ) {
+                    alt1=1;
                 }
+
 
                 switch (alt1) {
             	case 1 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:208:16: ALPHA
+            	    // DependencyAssertion.g:
             	    {
-            	    mALPHA(); 
+            	    if ( input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+            	        input.consume();
 
             	    }
-            	    break;
-            	case 2 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:208:24: INT
-            	    {
-            	    mINT(); 
+            	    else {
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;}
 
-            	    }
-            	    break;
-            	case 3 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:208:30: CHAR
-            	    {
-            	    mCHAR(); 
 
             	    }
             	    break;
@@ -472,108 +551,100 @@ public class DependencyAssertionLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end "ALPHAVAR"
+    // $ANTLR end "STRING"
 
-    // $ANTLR start "CHAR"
-    public final void mCHAR() throws RecognitionException {
+    // $ANTLR start "WS"
+    public final void mWS() throws RecognitionException {
         try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:211:8: ( ( '_' | '-' | '*' | '&' | '@' | '!' | '#' | '%' | '+' | '=' | ':' | ' ' | ',' ) )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:211:10: ( '_' | '-' | '*' | '&' | '@' | '!' | '#' | '%' | '+' | '=' | ':' | ' ' | ',' )
+            int _type = WS;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // DependencyAssertion.g:251:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // DependencyAssertion.g:251:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            if ( (input.LA(1)>=' ' && input.LA(1)<='!')||input.LA(1)=='#'||(input.LA(1)>='%' && input.LA(1)<='&')||(input.LA(1)>='*' && input.LA(1)<='-')||input.LA(1)==':'||input.LA(1)=='='||input.LA(1)=='@'||input.LA(1)=='_' ) {
-                input.consume();
-
-            }
-            else {
-                MismatchedSetException mse = new MismatchedSetException(null,input);
-                recover(mse);
-                throw mse;}
-
-
-            }
-
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "CHAR"
-
-    // $ANTLR start "ALPHA"
-    public final void mALPHA() throws RecognitionException {
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:214:9: ( ( 'a' .. 'z' | 'A' .. 'Z' )+ )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:214:13: ( 'a' .. 'z' | 'A' .. 'Z' )+
-            {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:214:13: ( 'a' .. 'z' | 'A' .. 'Z' )+
-            int cnt2=0;
-            loop2:
-            do {
-                int alt2=2;
-                int LA2_0 = input.LA(1);
-
-                if ( ((LA2_0>='A' && LA2_0<='Z')||(LA2_0>='a' && LA2_0<='z')) ) {
-                    alt2=1;
-                }
-
-
-                switch (alt2) {
-            	case 1 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:
-            	    {
-            	    if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
-            	        input.consume();
-
-            	    }
-            	    else {
-            	        MismatchedSetException mse = new MismatchedSetException(null,input);
-            	        recover(mse);
-            	        throw mse;}
-
-
-            	    }
-            	    break;
-
-            	default :
-            	    if ( cnt2 >= 1 ) break loop2;
-                        EarlyExitException eee =
-                            new EarlyExitException(2, input);
-                        throw eee;
-                }
-                cnt2++;
-            } while (true);
-
-
-            }
-
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "ALPHA"
-
-    // $ANTLR start "INT"
-    public final void mINT() throws RecognitionException {
-        try {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:217:7: ( ( '0' .. '9' )+ )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:217:11: ( '0' .. '9' )+
-            {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:217:11: ( '0' .. '9' )+
+            // DependencyAssertion.g:251:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt3=0;
             loop3:
             do {
-                int alt3=2;
-                int LA3_0 = input.LA(1);
-
-                if ( ((LA3_0>='0' && LA3_0<='9')) ) {
+                int alt3=4;
+                switch ( input.LA(1) ) {
+                case ' ':
+                    {
                     alt3=1;
-                }
+                    }
+                    break;
+                case '\t':
+                    {
+                    alt3=2;
+                    }
+                    break;
+                case '\n':
+                case '\r':
+                    {
+                    alt3=3;
+                    }
+                    break;
 
+                }
 
                 switch (alt3) {
             	case 1 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:217:11: '0' .. '9'
+            	    // DependencyAssertion.g:251:6: ' '
             	    {
-            	    matchRange('0','9'); 
+            	    match(' '); 
+
+            	    }
+            	    break;
+            	case 2 :
+            	    // DependencyAssertion.g:251:10: '\\t'
+            	    {
+            	    match('\t'); 
+
+            	    }
+            	    break;
+            	case 3 :
+            	    // DependencyAssertion.g:251:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    {
+            	    // DependencyAssertion.g:251:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    int alt2=2;
+            	    int LA2_0 = input.LA(1);
+
+            	    if ( (LA2_0=='\n') ) {
+            	        alt2=1;
+            	    }
+            	    else if ( (LA2_0=='\r') ) {
+            	        alt2=2;
+            	    }
+            	    else {
+            	        NoViableAltException nvae =
+            	            new NoViableAltException("", 2, 0, input);
+
+            	        throw nvae;
+            	    }
+            	    switch (alt2) {
+            	        case 1 :
+            	            // DependencyAssertion.g:251:16: '\\n'
+            	            {
+            	            match('\n'); 
+
+            	            }
+            	            break;
+            	        case 2 :
+            	            // DependencyAssertion.g:251:21: '\\r' ( '\\n' )
+            	            {
+            	            match('\r'); 
+            	            // DependencyAssertion.g:251:25: ( '\\n' )
+            	            // DependencyAssertion.g:251:26: '\\n'
+            	            {
+            	            match('\n'); 
+
+            	            }
+
+
+            	            }
+            	            break;
+
+            	    }
+
 
             	    }
             	    break;
@@ -587,101 +658,7 @@ public class DependencyAssertionLexer extends Lexer {
                 cnt3++;
             } while (true);
 
-
-            }
-
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "INT"
-
-    // $ANTLR start "WS"
-    public final void mWS() throws RecognitionException {
-        try {
-            int _type = WS;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:7: ( ( '\\t' | ( '\\r' | '\\r\\n' ) )+ )
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:11: ( '\\t' | ( '\\r' | '\\r\\n' ) )+
-            {
-            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:11: ( '\\t' | ( '\\r' | '\\r\\n' ) )+
-            int cnt5=0;
-            loop5:
-            do {
-                int alt5=3;
-                int LA5_0 = input.LA(1);
-
-                if ( (LA5_0=='\t') ) {
-                    alt5=1;
-                }
-                else if ( (LA5_0=='\r') ) {
-                    alt5=2;
-                }
-
-
-                switch (alt5) {
-            	case 1 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:12: '\\t'
-            	    {
-            	    match('\t'); 
-
-            	    }
-            	    break;
-            	case 2 :
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:17: ( '\\r' | '\\r\\n' )
-            	    {
-            	    // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:17: ( '\\r' | '\\r\\n' )
-            	    int alt4=2;
-            	    int LA4_0 = input.LA(1);
-
-            	    if ( (LA4_0=='\r') ) {
-            	        int LA4_1 = input.LA(2);
-
-            	        if ( (LA4_1=='\n') ) {
-            	            alt4=2;
-            	        }
-            	        else {
-            	            alt4=1;}
-            	    }
-            	    else {
-            	        NoViableAltException nvae =
-            	            new NoViableAltException("", 4, 0, input);
-
-            	        throw nvae;
-            	    }
-            	    switch (alt4) {
-            	        case 1 :
-            	            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:18: '\\r'
-            	            {
-            	            match('\r'); 
-
-            	            }
-            	            break;
-            	        case 2 :
-            	            // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:219:23: '\\r\\n'
-            	            {
-            	            match("\r\n"); 
-
-
-            	            }
-            	            break;
-
-            	    }
-
-
-            	    }
-            	    break;
-
-            	default :
-            	    if ( cnt5 >= 1 ) break loop5;
-                        EarlyExitException eee =
-                            new EarlyExitException(5, input);
-                        throw eee;
-                }
-                cnt5++;
-            } while (true);
-
-            skip();
+            _channel=HIDDEN;
 
             }
 
@@ -694,110 +671,124 @@ public class DependencyAssertionLexer extends Lexer {
     // $ANTLR end "WS"
 
     public void mTokens() throws RecognitionException {
-        // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:8: ( T__11 | T__12 | T__13 | T__14 | T__15 | T__16 | T__17 | T__18 | T__19 | T__20 | T__21 | BODY | HEAD | ALPHAVAR | WS )
-        int alt6=15;
-        alt6 = dfa6.predict(input);
-        switch (alt6) {
+        // DependencyAssertion.g:1:8: ( T__21 | T__22 | T__23 | BODY | HEAD | DOT | SEMI | COMMA | LPAREN | RPAREN | LSQ_BRACKET | RSQ_BRACKET | DOLLAR | UNDERSCORE | DASH | STRING | WS )
+        int alt4=17;
+        alt4 = dfa4.predict(input);
+        switch (alt4) {
             case 1 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:10: T__11
-                {
-                mT__11(); 
-
-                }
-                break;
-            case 2 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:16: T__12
-                {
-                mT__12(); 
-
-                }
-                break;
-            case 3 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:22: T__13
-                {
-                mT__13(); 
-
-                }
-                break;
-            case 4 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:28: T__14
-                {
-                mT__14(); 
-
-                }
-                break;
-            case 5 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:34: T__15
-                {
-                mT__15(); 
-
-                }
-                break;
-            case 6 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:40: T__16
-                {
-                mT__16(); 
-
-                }
-                break;
-            case 7 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:46: T__17
-                {
-                mT__17(); 
-
-                }
-                break;
-            case 8 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:52: T__18
-                {
-                mT__18(); 
-
-                }
-                break;
-            case 9 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:58: T__19
-                {
-                mT__19(); 
-
-                }
-                break;
-            case 10 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:64: T__20
-                {
-                mT__20(); 
-
-                }
-                break;
-            case 11 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:70: T__21
+                // DependencyAssertion.g:1:10: T__21
                 {
                 mT__21(); 
 
                 }
                 break;
-            case 12 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:76: BODY
+            case 2 :
+                // DependencyAssertion.g:1:16: T__22
+                {
+                mT__22(); 
+
+                }
+                break;
+            case 3 :
+                // DependencyAssertion.g:1:22: T__23
+                {
+                mT__23(); 
+
+                }
+                break;
+            case 4 :
+                // DependencyAssertion.g:1:28: BODY
                 {
                 mBODY(); 
 
                 }
                 break;
-            case 13 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:81: HEAD
+            case 5 :
+                // DependencyAssertion.g:1:33: HEAD
                 {
                 mHEAD(); 
 
                 }
                 break;
-            case 14 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:86: ALPHAVAR
+            case 6 :
+                // DependencyAssertion.g:1:38: DOT
                 {
-                mALPHAVAR(); 
+                mDOT(); 
+
+                }
+                break;
+            case 7 :
+                // DependencyAssertion.g:1:42: SEMI
+                {
+                mSEMI(); 
+
+                }
+                break;
+            case 8 :
+                // DependencyAssertion.g:1:47: COMMA
+                {
+                mCOMMA(); 
+
+                }
+                break;
+            case 9 :
+                // DependencyAssertion.g:1:53: LPAREN
+                {
+                mLPAREN(); 
+
+                }
+                break;
+            case 10 :
+                // DependencyAssertion.g:1:60: RPAREN
+                {
+                mRPAREN(); 
+
+                }
+                break;
+            case 11 :
+                // DependencyAssertion.g:1:67: LSQ_BRACKET
+                {
+                mLSQ_BRACKET(); 
+
+                }
+                break;
+            case 12 :
+                // DependencyAssertion.g:1:79: RSQ_BRACKET
+                {
+                mRSQ_BRACKET(); 
+
+                }
+                break;
+            case 13 :
+                // DependencyAssertion.g:1:91: DOLLAR
+                {
+                mDOLLAR(); 
+
+                }
+                break;
+            case 14 :
+                // DependencyAssertion.g:1:98: UNDERSCORE
+                {
+                mUNDERSCORE(); 
 
                 }
                 break;
             case 15 :
-                // C:\\Users\\obda\\Desktop\\DependencyAssertion.g:1:95: WS
+                // DependencyAssertion.g:1:109: DASH
+                {
+                mDASH(); 
+
+                }
+                break;
+            case 16 :
+                // DependencyAssertion.g:1:114: STRING
+                {
+                mSTRING(); 
+
+                }
+                break;
+            case 17 :
+                // DependencyAssertion.g:1:121: WS
                 {
                 mWS(); 
 
@@ -809,123 +800,120 @@ public class DependencyAssertionLexer extends Lexer {
     }
 
 
-    protected DFA6 dfa6 = new DFA6(this);
-    static final String DFA6_eotS =
-        "\1\uffff\1\20\3\uffff\3\16\4\uffff\2\16\3\uffff\15\16\1\43\1\44"+
-        "\3\16\2\uffff\7\16\1\57\2\16\1\uffff\1\16\1\63\1\64\2\uffff";
-    static final String DFA6_eofS =
-        "\65\uffff";
-    static final String DFA6_minS =
-        "\1\11\1\40\3\uffff\1\156\1\151\1\165\4\uffff\1\157\1\145\3\uffff"+
-        "\1\143\1\163\1\156\1\144\1\141\1\154\1\152\1\143\1\171\1\144\1\165"+
-        "\1\157\1\164\2\40\1\144\2\151\2\uffff\1\145\1\156\1\157\1\144\1"+
-        "\164\1\156\1\111\1\40\1\117\1\156\1\uffff\1\146\2\40\2\uffff";
-    static final String DFA6_maxS =
-        "\2\172\3\uffff\1\156\1\151\1\165\4\uffff\1\157\1\145\3\uffff\1"+
-        "\143\1\163\1\156\1\144\1\141\1\154\1\152\1\143\1\171\1\144\1\165"+
-        "\1\157\1\164\2\172\1\144\2\151\2\uffff\1\145\1\156\1\157\1\144\1"+
-        "\164\1\156\1\111\1\172\1\117\1\156\1\uffff\1\146\2\172\2\uffff";
-    static final String DFA6_acceptS =
-        "\2\uffff\1\2\1\3\1\4\3\uffff\1\10\1\11\1\12\1\13\2\uffff\1\16\1"+
-        "\17\1\1\22\uffff\1\14\1\15\12\uffff\1\6\3\uffff\1\5\1\7";
-    static final String DFA6_specialS =
-        "\65\uffff}>";
-    static final String[] DFA6_transitionS = {
-            "\1\17\3\uffff\1\17\22\uffff\2\16\1\uffff\1\16\1\13\2\16\1\uffff"+
-            "\1\2\1\4\2\16\1\1\1\16\1\12\1\uffff\13\16\1\3\1\uffff\1\16\2"+
-            "\uffff\2\16\1\14\5\16\1\15\22\16\1\10\1\uffff\1\11\1\uffff\1"+
-            "\16\1\uffff\3\16\1\6\1\16\1\7\2\16\1\5\21\16",
-            "\2\16\1\uffff\1\16\1\uffff\2\16\3\uffff\4\16\2\uffff\13\16"+
-            "\2\uffff\1\16\2\uffff\33\16\4\uffff\1\16\1\uffff\32\16",
-            "",
-            "",
-            "",
-            "\1\21",
+    protected DFA4 dfa4 = new DFA4(this);
+    static final String DFA4_eotS =
+        "\1\uffff\5\20\10\uffff\1\27\1\30\2\uffff\5\20\2\uffff\10\20\1\46"+
+        "\1\47\3\20\2\uffff\7\20\1\62\2\20\1\uffff\1\20\1\66\1\67\2\uffff";
+    static final String DFA4_eofS =
+        "\70\uffff";
+    static final String DFA4_minS =
+        "\1\11\1\156\1\151\1\165\1\117\1\105\10\uffff\2\55\2\uffff\1\143"+
+        "\1\163\1\156\1\104\1\101\2\uffff\1\154\1\152\1\143\1\131\1\104\1"+
+        "\165\1\157\1\164\2\55\1\144\2\151\2\uffff\1\145\1\156\1\157\1\144"+
+        "\1\164\1\156\1\111\1\55\1\117\1\156\1\uffff\1\146\2\55\2\uffff";
+    static final String DFA4_maxS =
+        "\1\172\1\156\1\151\1\165\1\157\1\145\10\uffff\2\172\2\uffff\1\143"+
+        "\1\163\1\156\1\144\1\141\2\uffff\1\154\1\152\1\143\1\171\1\144\1"+
+        "\165\1\157\1\164\2\172\1\144\2\151\2\uffff\1\145\1\156\1\157\1\144"+
+        "\1\164\1\156\1\111\1\172\1\117\1\156\1\uffff\1\146\2\172\2\uffff";
+    static final String DFA4_acceptS =
+        "\6\uffff\1\6\1\7\1\10\1\11\1\12\1\13\1\14\1\15\2\uffff\1\20\1\21"+
+        "\5\uffff\1\16\1\17\15\uffff\1\4\1\5\12\uffff\1\2\3\uffff\1\1\1\3";
+    static final String DFA4_specialS =
+        "\70\uffff}>";
+    static final String[] DFA4_transitionS = {
+            "\2\21\2\uffff\1\21\22\uffff\1\21\3\uffff\1\15\3\uffff\1\11\1"+
+            "\12\2\uffff\1\10\1\17\1\6\1\uffff\12\20\1\uffff\1\7\5\uffff"+
+            "\1\20\1\4\5\20\1\5\22\20\1\13\1\uffff\1\14\1\uffff\1\16\1\uffff"+
+            "\1\20\1\4\1\20\1\2\1\20\1\3\1\20\1\5\1\1\21\20",
             "\1\22",
             "\1\23",
-            "",
-            "",
-            "",
-            "",
             "\1\24",
-            "\1\25",
+            "\1\25\37\uffff\1\25",
+            "\1\26\37\uffff\1\26",
             "",
             "",
             "",
-            "\1\26",
-            "\1\27",
-            "\1\30",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
+            "",
+            "",
             "\1\31",
             "\1\32",
             "\1\33",
-            "\1\34",
-            "\1\35",
+            "\1\34\37\uffff\1\34",
+            "\1\35\37\uffff\1\35",
+            "",
+            "",
             "\1\36",
             "\1\37",
             "\1\40",
-            "\1\41",
-            "\1\42",
-            "\2\16\1\uffff\1\16\1\uffff\2\16\3\uffff\4\16\2\uffff\13\16"+
-            "\2\uffff\1\16\2\uffff\33\16\4\uffff\1\16\1\uffff\32\16",
-            "\2\16\1\uffff\1\16\1\uffff\2\16\3\uffff\4\16\2\uffff\13\16"+
-            "\2\uffff\1\16\2\uffff\33\16\4\uffff\1\16\1\uffff\32\16",
+            "\1\41\37\uffff\1\41",
+            "\1\42\37\uffff\1\42",
+            "\1\43",
+            "\1\44",
             "\1\45",
-            "\1\46",
-            "\1\47",
-            "",
-            "",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
             "\1\50",
             "\1\51",
             "\1\52",
+            "",
+            "",
             "\1\53",
             "\1\54",
             "\1\55",
             "\1\56",
-            "\2\16\1\uffff\1\16\1\uffff\2\16\3\uffff\4\16\2\uffff\13\16"+
-            "\2\uffff\1\16\2\uffff\33\16\4\uffff\1\16\1\uffff\32\16",
+            "\1\57",
             "\1\60",
             "\1\61",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
+            "\1\63",
+            "\1\64",
             "",
-            "\1\62",
-            "\2\16\1\uffff\1\16\1\uffff\2\16\3\uffff\4\16\2\uffff\13\16"+
-            "\2\uffff\1\16\2\uffff\33\16\4\uffff\1\16\1\uffff\32\16",
-            "\2\16\1\uffff\1\16\1\uffff\2\16\3\uffff\4\16\2\uffff\13\16"+
-            "\2\uffff\1\16\2\uffff\33\16\4\uffff\1\16\1\uffff\32\16",
+            "\1\65",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
+            "\1\20\2\uffff\12\20\7\uffff\32\20\4\uffff\1\20\1\uffff\32\20",
             "",
             ""
     };
 
-    static final short[] DFA6_eot = DFA.unpackEncodedString(DFA6_eotS);
-    static final short[] DFA6_eof = DFA.unpackEncodedString(DFA6_eofS);
-    static final char[] DFA6_min = DFA.unpackEncodedStringToUnsignedChars(DFA6_minS);
-    static final char[] DFA6_max = DFA.unpackEncodedStringToUnsignedChars(DFA6_maxS);
-    static final short[] DFA6_accept = DFA.unpackEncodedString(DFA6_acceptS);
-    static final short[] DFA6_special = DFA.unpackEncodedString(DFA6_specialS);
-    static final short[][] DFA6_transition;
+    static final short[] DFA4_eot = DFA.unpackEncodedString(DFA4_eotS);
+    static final short[] DFA4_eof = DFA.unpackEncodedString(DFA4_eofS);
+    static final char[] DFA4_min = DFA.unpackEncodedStringToUnsignedChars(DFA4_minS);
+    static final char[] DFA4_max = DFA.unpackEncodedStringToUnsignedChars(DFA4_maxS);
+    static final short[] DFA4_accept = DFA.unpackEncodedString(DFA4_acceptS);
+    static final short[] DFA4_special = DFA.unpackEncodedString(DFA4_specialS);
+    static final short[][] DFA4_transition;
 
     static {
-        int numStates = DFA6_transitionS.length;
-        DFA6_transition = new short[numStates][];
+        int numStates = DFA4_transitionS.length;
+        DFA4_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA6_transition[i] = DFA.unpackEncodedString(DFA6_transitionS[i]);
+            DFA4_transition[i] = DFA.unpackEncodedString(DFA4_transitionS[i]);
         }
     }
 
-    class DFA6 extends DFA {
+    class DFA4 extends DFA {
 
-        public DFA6(BaseRecognizer recognizer) {
+        public DFA4(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 6;
-            this.eot = DFA6_eot;
-            this.eof = DFA6_eof;
-            this.min = DFA6_min;
-            this.max = DFA6_max;
-            this.accept = DFA6_accept;
-            this.special = DFA6_special;
-            this.transition = DFA6_transition;
+            this.decisionNumber = 4;
+            this.eot = DFA4_eot;
+            this.eof = DFA4_eof;
+            this.min = DFA4_min;
+            this.max = DFA4_max;
+            this.accept = DFA4_accept;
+            this.special = DFA4_special;
+            this.transition = DFA4_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( T__11 | T__12 | T__13 | T__14 | T__15 | T__16 | T__17 | T__18 | T__19 | T__20 | T__21 | BODY | HEAD | ALPHAVAR | WS );";
+            return "1:1: Tokens : ( T__21 | T__22 | T__23 | BODY | HEAD | DOT | SEMI | COMMA | LPAREN | RPAREN | LSQ_BRACKET | RSQ_BRACKET | DOLLAR | UNDERSCORE | DASH | STRING | WS );";
         }
     }
  

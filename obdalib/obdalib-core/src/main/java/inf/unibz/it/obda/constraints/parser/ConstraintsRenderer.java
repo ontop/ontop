@@ -12,7 +12,6 @@ import inf.unibz.it.obda.dependencies.miner.exception.InvalidSyntaxException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.ucq.typing.CheckOperationTerm;
 
 import java.io.ByteArrayInputStream;
@@ -23,7 +22,7 @@ import java.util.List;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.Term;
+import org.obda.query.domain.Variable;
 
 public class ConstraintsRenderer {
 /**
@@ -39,17 +38,18 @@ private static ConstraintsRenderer instance = null;
  * creates a new DependencyAssertionRenderer object
  * @param apic
  */
-public ConstraintsRenderer(APIController apic){
+protected ConstraintsRenderer(APIController apic){
 	this.apic = apic;
-	instance = this;
 }
 
 /**
  * Returns the current instance of the Dependency Assertion Renderer
  * @return an instance
  */
-public static ConstraintsRenderer getInstance(){
-
+public static ConstraintsRenderer getInstance(APIController apic){
+	if (instance == null) {
+		instance = new ConstraintsRenderer(apic);
+	}
 	return instance;
 }
 
@@ -141,7 +141,7 @@ public RDBMSCheckConstraint createRDBMSCheckConstraint(String id, List<CheckOper
 	}
 }
 
-public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, String id2, List<Term> l1, List<Term> l2) throws Exception{
+public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, String id2, List<Variable> l1, List<Variable> l2) throws Exception{
 
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
@@ -156,7 +156,7 @@ public RDBMSForeignKeyConstraint createRDBMSForeignKeyConstraint(String id1, Str
 	}
 }
 
-public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List<Term> list) throws Exception{
+public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List<Variable> list) throws Exception{
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
 
@@ -170,7 +170,7 @@ public RDBMSPrimaryKeyConstraint createRDBMSPrimaryKeyConstraint(String id, List
 	}
 }
 
-public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List<Term> list) throws Exception{
+public RDBMSUniquenessConstraint createRDBMSUniquenessConstraint(String id, List<Variable> list) throws Exception{
 	DatasourcesController dscon = apic.getDatasourcesController();
 	URI currentds = dscon.getCurrentDataSource().getSourceID();
 
@@ -259,16 +259,12 @@ private AbstractConstraintAssertion parse (String input) throws Exception{
 	CommonTokenStream tokens = new CommonTokenStream(lexer);
 	parser = new ConstraintsParser(tokens);
 	parser.setController(apic);
-	try {
-		parser.parse();
-	} catch (RecognitionException e) {
-		e.printStackTrace();
-	}
-	if ((parser.getErrors().size() == 0) && (lexer.getErrors().size() == 0)) {
-		return parser.getConstraintAssertion();
-	} else {
-			throw new QueryParseException(parser.getErrors().toString());
-	}
-}
 
+	AbstractConstraintAssertion constraint = parser.parse();
+
+	if (parser.getNumberOfSyntaxErrors() != 0)
+		throw new RecognitionException();
+
+	return constraint;
+}
 }

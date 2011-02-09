@@ -58,7 +58,7 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 	/**
 	 * the number of clicks needed for starting editing (default is 2)
 	 */
-	private int nrOfClicksToStartEditing = 2;
+	private final int nrOfClicksToStartEditing = 2;
 	/**
 	 * boolean field indicating whether a new node is edited or an
 	 * already existing
@@ -73,14 +73,13 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 	 */
 	private DefaultMutableTreeNode editedNode = null;
 	/**
-	 * the created dependency assertion after the editing is finished 
+	 * the created dependency assertion after the editing is finished
 	 */
 	private AbstractConstraintAssertion output = null;
-	
-	
+
 	/**
 	 * Creates a new instance of the ConstraintsTreeCellEditor
-	 * 
+	 *
 	 * @param apic the api controller
 	 * @param constraint the name of the edited contraint
 	 */
@@ -89,13 +88,13 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 		constraintAssertion = constraint;
 		this.apic = apic;
 	}
-	
-	
+
+
 	@Override
 	public Component getTreeCellEditorComponent(JTree arg0, Object arg1,
 			boolean arg2, boolean arg3, boolean arg4, int arg5) {
-	
-		
+
+
 		Border  aBorder = UIManager.getBorder("Tree.editorBorder");
 		editor = new JTextPane();
 		editor.setBorder(aBorder);
@@ -112,15 +111,15 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 		editor.setText(arg1.toString());
 		JLabel label = new JLabel();
 		label.setIcon(((JLabel) tree.getCellRenderer()).getIcon());
-		
-		
-		
+
+
+
 		java.awt.GridBagConstraints grid;
 		GridBagLayout l = new GridBagLayout();
 		panel = new JPanel();
 		panel.setMinimumSize(new Dimension(tree.getWidth(),15));
 		panel.setLayout(l);
-		
+
 		grid = new java.awt.GridBagConstraints();
 		grid.gridx = 1;
 		grid.gridy = 0;
@@ -129,7 +128,7 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 		grid.weighty = 0;
 		grid.fill = java.awt.GridBagConstraints.VERTICAL;
 		panel.add(label, grid, 0);
-		
+
 
 		grid = new java.awt.GridBagConstraints();
 		grid.gridx = 2;
@@ -139,16 +138,16 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 		grid.weightx = 1.0;
 		grid.weighty = 1.0;
 		panel.add(editor, grid, 1);
-		
+
 		panel.setMinimumSize(new Dimension(tree.getWidth(),50));
 		panel.setPreferredSize(new Dimension(tree.getWidth(),50));
-		
+
 		return panel;
 	}
 
 	@Override
 	public void addCellEditorListener(CellEditorListener arg0) {
-		
+
 		listener.add(arg0);
 	}
 
@@ -158,51 +157,51 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 			DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 			MutableTreeNode root =(MutableTreeNode)model.getRoot();
 			int i = indexOf(model);
-			((MutableTreeNode) root).remove(i);
+			(root).remove(i);
 			model.nodesWereRemoved(root, new int []{i}, new Object[]{editedNode});
 		}
-		
+
 	}
 
 	@Override
 	public Object getCellEditorValue() {
-		
+
 		if(constraintAssertion.equals(RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT)){
 			if(newNode){
-				return (RDBMSCheckConstraint) output;
+				return output;
 			}else{
-				return (RDBMSCheckConstraint) parseInput();
+				return parseInput();
 			}
 		}else if(constraintAssertion.equals(RDBMSForeignKeyConstraint.RDBMSFOREIGNKEYCONSTRAINT)){
 			if(newNode){
-				return (RDBMSForeignKeyConstraint) output;
+				return output;
 			}else{
-				return (RDBMSForeignKeyConstraint) parseInput();
+				return parseInput();
 			}
 		}else if(constraintAssertion.equals(RDBMSPrimaryKeyConstraint.RDBMSPRIMARYKEYCONSTRAINT)){
 			if(newNode){
-				return (RDBMSPrimaryKeyConstraint) output;
+				return output;
 			}else{
-				return (RDBMSPrimaryKeyConstraint) parseInput();
+				return parseInput();
 			}
 		}else if(constraintAssertion.equals(RDBMSUniquenessConstraint.RDBMSUNIQUENESSCONSTRAINT)){
 			if(newNode){
-				return (RDBMSUniquenessConstraint) output;
+				return output;
 			}else{
-				return (RDBMSUniquenessConstraint) parseInput();
+				return parseInput();
 			}
 		}else{
 			return "ERROR";
-		}	
+		}
 	}
 
 	@Override
 	public boolean isCellEditable(EventObject arg0) {
-		
+
 		if(arg0 == null){
 			return true;
 		}
-		 if (arg0 instanceof MouseEvent) { 
+		 if (arg0 instanceof MouseEvent) {
 			return ((MouseEvent)arg0).getClickCount() >= nrOfClicksToStartEditing;
 		 }
 		 return false;
@@ -210,22 +209,22 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 
 	@Override
 	public void removeCellEditorListener(CellEditorListener arg0) {
-		
+
 		listener.remove(arg0);
 	}
 
 	@Override
 	public boolean shouldSelectCell(EventObject arg0) {
-		
+
 		return true;
 	}
 
 	@Override
 	public boolean stopCellEditing() {
-		
+
 		if(newNode){
 			String text = editor.getText();
-			boolean valid = ConstraintsRenderer.getInstance().isValid(text, constraintAssertion);
+			boolean valid = ConstraintsRenderer.getInstance(apic).isValid(text, constraintAssertion);
 			boolean add = addAssertion();
 			if( valid &&  add){
 				return true;
@@ -233,10 +232,10 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 				return false;
 			}
 		}else{
-			return ConstraintsRenderer.getInstance().isValid(editor.getText(), constraintAssertion);
+			return ConstraintsRenderer.getInstance(apic).isValid(editor.getText(), constraintAssertion);
 			}
 	}
-	
+
 	/**
 	 * adds an assertion to its controller
 	 */
@@ -265,7 +264,7 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Returns the index of the new added node in the given model
 	 * @param model the tree model
@@ -282,40 +281,40 @@ public class ConstraintsTreeCellEditor implements TreeCellEditor {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * method to parse the input of the edited node
-	 * 
+	 *
 	 * @return an abstract dependency assertion if the input is correct, null otherwise
 	 */
 	private AbstractConstraintAssertion parseInput(){
-	
+
 		String text =editor.getText();
 		URI uri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		if(constraintAssertion.equals(RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT)){
 			try {
-				return ConstraintsRenderer.getInstance().renderSingleCeckConstraint(text, uri);
+				return ConstraintsRenderer.getInstance(apic).renderSingleCeckConstraint(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
 		}else if(constraintAssertion.equals(RDBMSForeignKeyConstraint.RDBMSFOREIGNKEYCONSTRAINT)){
 			try {
-				return ConstraintsRenderer.getInstance().renderSingleRDBMSForeignKeyConstraint(text, uri);
+				return ConstraintsRenderer.getInstance(apic).renderSingleRDBMSForeignKeyConstraint(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
 		}else if(constraintAssertion.equals(RDBMSPrimaryKeyConstraint.RDBMSPRIMARYKEYCONSTRAINT)){
 			try {
-				return ConstraintsRenderer.getInstance().renderSingleRDBMSPrimaryKeyConstraint(text, uri);
+				return ConstraintsRenderer.getInstance(apic).renderSingleRDBMSPrimaryKeyConstraint(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
 		}else if(constraintAssertion.equals(RDBMSUniquenessConstraint.RDBMSUNIQUENESSCONSTRAINT)){
 			try {
-				return ConstraintsRenderer.getInstance().renderSingleRDBMSUniquenessConstraint(text, uri);
+				return ConstraintsRenderer.getInstance(apic).renderSingleRDBMSUniquenessConstraint(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;

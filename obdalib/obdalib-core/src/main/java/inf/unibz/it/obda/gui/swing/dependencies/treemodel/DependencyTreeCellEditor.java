@@ -184,7 +184,7 @@ public class DependencyTreeCellEditor implements TreeCellEditor {
 			DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 			MutableTreeNode root =(MutableTreeNode)model.getRoot();
 			int i = indexOf(model);
-			((MutableTreeNode) root).remove(i);
+			(root).remove(i);
 			model.nodesWereRemoved(root, new int []{i}, new Object[]{editedNode});
 		}
 	}
@@ -193,21 +193,21 @@ public class DependencyTreeCellEditor implements TreeCellEditor {
 		
 		if(dependencyAssertion.equals(RDBMSInclusionDependency.INCLUSIONDEPENDENCY)){
 			if(newNode){
-				return (RDBMSInclusionDependency) output;
+				return output;
 			}else{
-				return (RDBMSInclusionDependency) parseInput();
+				return parseInput();
 			}
 		}else if(dependencyAssertion.equals(RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY)){
 			if(newNode){
-				return (RDBMSFunctionalDependency) output;
+				return output;
 			}else{
-				return (RDBMSFunctionalDependency) parseInput();
+				return parseInput();
 			}
 		}else if(dependencyAssertion.equals(RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION)){
 			if(newNode){
-				return (RDBMSDisjointnessDependency) output;
+				return output;
 			}else{
-				return (RDBMSDisjointnessDependency) parseInput();
+				return parseInput();
 			}
 		}else{
 			return "ERROR";
@@ -235,13 +235,13 @@ public class DependencyTreeCellEditor implements TreeCellEditor {
 
 	public boolean stopCellEditing() {
 		if(newNode){
-			if(DependencyAssertionRenderer.getInstance().isValid(editor.getText(), dependencyAssertion) && addAssertion()){
+			if(DependencyAssertionRenderer.getInstance(apic).isValid(editor.getText(), dependencyAssertion) && addAssertion()){
 				return true;
 			}else{
 				return false;
 			}
 		}else{
-			return DependencyAssertionRenderer.getInstance().isValid(editor.getText(), dependencyAssertion);
+			return DependencyAssertionRenderer.getInstance(apic).isValid(editor.getText(), dependencyAssertion);
 			}
 	}
 
@@ -313,21 +313,21 @@ public class DependencyTreeCellEditor implements TreeCellEditor {
 		URI uri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
 		if(dependencyAssertion.equals(RDBMSInclusionDependency.INCLUSIONDEPENDENCY)){
 			try {
-				return DependencyAssertionRenderer.getInstance().renderSingleRBMSInclusionDependency(text, uri);
+				return DependencyAssertionRenderer.getInstance(apic).renderSingleRBMSInclusionDependency(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
 		}else if(dependencyAssertion.equals(RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY)){
 			try {
-				return DependencyAssertionRenderer.getInstance().renderSingleRDBMSFunctionalDependency(text, uri);
+				return DependencyAssertionRenderer.getInstance(apic).renderSingleRDBMSFunctionalDependency(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
 		}else if(dependencyAssertion.equals(RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION)){
 			try {
-				return DependencyAssertionRenderer.getInstance().renderSingleRDBMSDisjoinednessAssertion(text, uri);
+				return DependencyAssertionRenderer.getInstance(apic).renderSingleRDBMSDisjoinednessAssertion(text, uri);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
