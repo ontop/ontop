@@ -289,18 +289,15 @@
 							dependencies are packed as .classes (uncompressed, no jars) and
 							the rest is packed as .jars
 						-->
-						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime
-            </Embed-Dependency>
+						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
 						<!-- necessary for protege 4 plugins -->
 						<Bundle-Category>protege</Bundle-Category>
 
 						<!--  general information -->
-						<Bundle-ContactAddress>rodriguez@inf.unibz.it
-            </Bundle-ContactAddress>
+						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
-						<Bundle-Description>The Ontology Based Data Access (OBDA) Plugin
-							for Protege 4</Bundle-Description>
+						<Bundle-Description>The Ontology Based Data Access (OBDA) Plugin for Protege 4</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen Bolzano</Bundle-Vendor>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
@@ -311,8 +308,7 @@
 							The name of the plugin for OSGi dependencies. It has to be
 							singleton or protege wont load it
 						-->
-						<Bundle-SymbolicName>inf.unibz.it.obda.protege4.obdaplugin;singleton:=true
-            </Bundle-SymbolicName>
+						<Bundle-SymbolicName>inf.unibz.it.obda.protege4.obdaplugin;singleton:=true</Bundle-SymbolicName>
 
 						<!--
 							This makes sure ONLY the necessary dependencies are imported. If
@@ -321,8 +317,7 @@
 							lead to class not found exceptions. It's very important to assure
 							only the needed depdencies are imported.
 						-->
-						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*
-            </Import-Package>
+						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*</Import-Package>
 
 						<!--
 							This makes sure all OBDA classes are exported and available in

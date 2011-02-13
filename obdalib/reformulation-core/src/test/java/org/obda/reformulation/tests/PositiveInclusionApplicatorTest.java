@@ -21,7 +21,6 @@ import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
 
 public class PositiveInclusionApplicatorTest extends TestCase {
 

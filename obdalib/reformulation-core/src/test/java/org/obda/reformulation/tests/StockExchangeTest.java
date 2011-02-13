@@ -3,7 +3,6 @@ package org.obda.reformulation.tests;
 import junit.framework.TestCase;
 
 import org.junit.Before;
-import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 
 public class StockExchangeTest extends TestCase {
 	
