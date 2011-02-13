@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package inf.unibz.it.obda.owlapi;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,6 +1,7 @@
 package org.obda.reformulation.protege4.configpanel;
 
-import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
+import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
+
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 
 public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel {

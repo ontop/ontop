@@ -16,7 +16,6 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryCodec;
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 
 import java.awt.Color;

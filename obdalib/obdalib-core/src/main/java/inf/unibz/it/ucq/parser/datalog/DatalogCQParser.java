@@ -8,7 +8,6 @@ import inf.unibz.it.dl.domain.NamedConcept;
 import inf.unibz.it.dl.domain.NamedProperty;
 import inf.unibz.it.dl.domain.ObjectProperty;
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.ucq.domain.BinaryQueryAtom;
 import inf.unibz.it.ucq.domain.ConceptQueryAtom;
 import inf.unibz.it.ucq.domain.ConstantTerm;
@@ -16,14 +15,12 @@ import inf.unibz.it.ucq.domain.FunctionTerm;
 import inf.unibz.it.ucq.domain.QueryAtom;
 import inf.unibz.it.ucq.domain.QueryTerm;
 import inf.unibz.it.ucq.domain.VariableTerm;
-import inf.unibz.it.ucq.parser.datalog.DatalogCQParser;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.antlr.grammar.v3.ANTLRv3Parser.throwsSpec_return;
 import org.antlr.runtime.BaseRecognizer;
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.DFA;
@@ -34,13 +31,6 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
-
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 @Deprecated
 public class DatalogCQParser extends Parser {

@@ -4,7 +4,6 @@ import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.dependencies.controller.RDBMSFunctionalDependencyController;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
-//import inf.unibz.it.obda.dl.codec.dependencies.xml.RDBMSFunctionalDependencyXMLCodec;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
 
 public class RDBMSFunctionalDependencyAssertionFactoryPlugin extends AssertionControllerFactoryPluginInstance {

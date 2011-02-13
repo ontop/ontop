@@ -5,19 +5,16 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
+import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
-import inf.unibz.it.sql.parser.SimpleSQLParser.booleanValue_return;
 
 /*
  * SetParametersDialog.java

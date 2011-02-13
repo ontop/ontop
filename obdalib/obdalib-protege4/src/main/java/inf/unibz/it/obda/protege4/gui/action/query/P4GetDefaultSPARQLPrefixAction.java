@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.protege4.gui.action.query;
 
-import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.gui.swing.action.GetDefaultSPARQLPrefixAction;
 
 import java.util.Iterator;

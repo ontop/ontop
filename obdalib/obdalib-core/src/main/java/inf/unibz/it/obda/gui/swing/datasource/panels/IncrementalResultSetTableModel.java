@@ -1,7 +1,5 @@
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
-
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

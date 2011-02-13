@@ -1,19 +1,12 @@
 package org.obda.reformulation.protege4.action;
 
-import inf.unibz.it.obda.api.controller.APIController;
-
-import java.awt.Container;
 import java.awt.event.ActionEvent;
-import java.net.URI;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.obda.owlrefplatform.core.ABoxToDBDumper;
-import org.obda.reformulation.protege4.ProtegeOBDAOWLReformulationPlatformFactory;
 import org.obda.reformulation.protege4.configpanel.SelectDB;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;

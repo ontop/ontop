@@ -2,17 +2,6 @@
 
 package inf.unibz.it.obda.constraints.parser;
 
-import java.net.URI;
-import java.util.Vector;
-
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.TokenStream;
-
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
@@ -23,23 +12,28 @@ import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSUniquenessConstraint;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-
 import inf.unibz.it.ucq.typing.CheckOperationTerm;
 import inf.unibz.it.ucq.typing.UnknownXSDTypeException;
 import inf.unibz.it.ucq.typing.XSDTypingController;
 
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.Variable;
+import java.net.URI;
+import java.util.Vector;
+
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.MismatchedSetException;
+import org.antlr.runtime.NoViableAltException;
+import org.antlr.runtime.Parser;
+import org.antlr.runtime.ParserRuleReturnScope;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.Token;
+import org.antlr.runtime.TokenStream;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.ValueConstant;
+import org.obda.query.domain.Variable;
+import org.obda.query.domain.imp.TermFactoryImpl;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 public class ConstraintsParser extends Parser {
     public static final String[] tokenNames = new String[] {

@@ -3,6 +3,7 @@ package org.obda.owlrefplatform.core;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
 import java.net.URI;

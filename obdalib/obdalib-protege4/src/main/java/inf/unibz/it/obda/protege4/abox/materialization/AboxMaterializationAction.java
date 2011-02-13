@@ -5,7 +5,6 @@ import inf.unibz.it.obda.owlapi.abox.materialization.AboxMaterializer;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -21,7 +20,6 @@ import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.OWLOntologyMerger;
 import org.semanticweb.owl.util.SimpleURIMapper;
 
 public class AboxMaterializationAction extends ProtegeAction{

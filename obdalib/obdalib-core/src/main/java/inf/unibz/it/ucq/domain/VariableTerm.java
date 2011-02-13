@@ -13,7 +13,6 @@
  */
 package inf.unibz.it.ucq.domain;
 
-import inf.unibz.it.obda.api.controller.APIController;
 
 @Deprecated
 public class VariableTerm extends QueryTerm {

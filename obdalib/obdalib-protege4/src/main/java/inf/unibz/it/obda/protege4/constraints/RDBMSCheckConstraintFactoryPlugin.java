@@ -1,11 +1,9 @@
 package inf.unibz.it.obda.protege4.constraints;
 
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.controller.RDBMSCheckConstraintController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSCheckConstraint;
-//import inf.unibz.it.obda.dl.codec.constraints.xml.RDBMSCheckConstraintXMLCodec;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
 
 public class RDBMSCheckConstraintFactoryPlugin  extends AssertionControllerFactoryPluginInstance {

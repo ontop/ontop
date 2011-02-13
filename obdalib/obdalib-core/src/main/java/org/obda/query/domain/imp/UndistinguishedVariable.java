@@ -16,11 +16,11 @@ public class UndistinguishedVariable implements Variable {
 
 	@Override
 	public boolean equals(Object obj){
-		 if (obj == null || !(obj instanceof Variable)) {
+		 if (obj == null || !(obj instanceof UndistinguishedVariable)) {
 			 return false;
 		 }
 
-		 VariableImpl var2 = (VariableImpl) obj;
+		 UndistinguishedVariable var2 = (UndistinguishedVariable) obj;
 		 return this.identifier == var2.hashCode();
 	 }
 

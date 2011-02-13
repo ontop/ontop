@@ -34,4 +34,10 @@ public class OperatorAtom implements Atom {
 
 	}
 
+	@Override
+	public int getFirstOcurrance(Term t, int i) {
+		// TODO Auto-generated method stub
+		return -1;
+	}
+
 }

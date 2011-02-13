@@ -3,7 +3,6 @@ package org.obda.owlrefplatform.core.basicoperations;
 import java.util.Map;
 
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.Variable;
 

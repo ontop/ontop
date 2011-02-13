@@ -1,6 +1,7 @@
 package org.obda.reformulation.protege4;
 
-import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
+import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
+
 import org.protege.editor.core.Disposable;
 
 public class ProtegeReformulationPlatformPreferences extends

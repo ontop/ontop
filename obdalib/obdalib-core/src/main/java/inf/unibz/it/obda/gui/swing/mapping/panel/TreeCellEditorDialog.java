@@ -19,8 +19,6 @@ import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.awt.Color;

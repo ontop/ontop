@@ -1,7 +1,5 @@
 package inf.unibz.it.ucq.domain;
 
-import inf.unibz.it.obda.api.controller.APIController;
-
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 @Deprecated

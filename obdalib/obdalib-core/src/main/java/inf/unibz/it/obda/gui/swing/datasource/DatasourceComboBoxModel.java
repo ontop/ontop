@@ -1,11 +1,6 @@
 package inf.unibz.it.obda.gui.swing.datasource;
 
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;

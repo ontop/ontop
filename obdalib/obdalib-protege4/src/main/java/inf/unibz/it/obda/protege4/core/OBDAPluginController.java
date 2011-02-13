@@ -17,6 +17,7 @@ import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
+import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPlugin;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
 import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginLoader;
@@ -28,7 +29,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
 import org.obda.reformulation.protege4.ProtegeReformulationPlatformPreferences;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ProtegeApplication;

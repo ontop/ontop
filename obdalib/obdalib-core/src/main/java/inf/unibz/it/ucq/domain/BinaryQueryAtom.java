@@ -15,13 +15,10 @@ package inf.unibz.it.ucq.domain;
 
 
 import inf.unibz.it.dl.domain.DataProperty;
-import inf.unibz.it.dl.domain.NamedConcept;
 import inf.unibz.it.dl.domain.NamedPredicate;
 import inf.unibz.it.dl.domain.NamedProperty;
 import inf.unibz.it.dl.domain.ObjectProperty;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 @Deprecated

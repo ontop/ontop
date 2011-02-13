@@ -1,18 +1,15 @@
 package inf.unibz.it.obda.protege4.gui.view;
 
-import java.awt.BorderLayout;
-import java.awt.Frame;
-
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
-
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.dependencies.panel.DependencyTabPane;
 import inf.unibz.it.obda.gui.swing.dependencies.panel.Dependency_SelectMappingPane;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
-import org.protege.editor.owl.ui.inference.ReasonerProgressUI;
+import java.awt.BorderLayout;
+
+import javax.swing.JSplitPane;
+
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class DependencyInterfaceViewComponent extends AbstractOWLViewComponent {

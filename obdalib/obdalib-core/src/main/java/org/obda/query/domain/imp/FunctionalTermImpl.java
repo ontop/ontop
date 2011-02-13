@@ -2,7 +2,6 @@ package org.obda.query.domain.imp;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.obda.query.domain.Function;
 import org.obda.query.domain.Predicate;
@@ -125,6 +124,24 @@ public class FunctionalTermImpl implements Function, ListListener {
 				return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public int getFirstOcurrance(Term t, int i) {
+		int size = terms.size();
+		for (int j = 0; j < size; j++) {
+			Term t2 = terms.get(j);
+			if (t2 instanceof FunctionalTermImpl) {
+				FunctionalTermImpl f = (FunctionalTermImpl)t2;
+				int newindex = f.getFirstOcurrance(t, 0);
+				if (newindex != -1)
+					return j;
+			} else {
+				if (t2.equals(t))
+					return j;
+			}
+		}
+		return -1;
 	}
 
 	@Override

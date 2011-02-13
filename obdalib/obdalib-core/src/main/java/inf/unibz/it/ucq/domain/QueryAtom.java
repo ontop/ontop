@@ -16,7 +16,6 @@ package inf.unibz.it.ucq.domain;
 
 import inf.unibz.it.dl.domain.NamedPredicate;
 
-import java.net.URI;
 import java.util.ArrayList;
 
 @Deprecated

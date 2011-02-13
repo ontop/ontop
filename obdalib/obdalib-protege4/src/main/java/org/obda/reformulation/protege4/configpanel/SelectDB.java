@@ -11,14 +11,12 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.obda.owlrefplatform.core.ABoxToDBDumper;
 import org.semanticweb.owl.model.OWLOntology;

@@ -9,4 +9,5 @@ public interface Atom {
 	public List<Term> getTerms();
 	public Atom copy();
 	public void updateTerms(List<Term> terms);
+	public int getFirstOcurrance(Term t, int i);
 }

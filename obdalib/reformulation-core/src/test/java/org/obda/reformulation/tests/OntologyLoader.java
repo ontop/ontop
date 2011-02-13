@@ -6,6 +6,7 @@ import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
+import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 
@@ -16,7 +17,6 @@ import java.util.Vector;
 
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
-import org.obda.owlrefplatform.core.ReformulationPlatformPreferences;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;

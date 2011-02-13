@@ -121,7 +121,7 @@ public class PositiveInclusionApplicator {
 			for (CQIE cq : newqueries) {
 				List<Atom> body = cq.getBody();
 				Atom atom = body.get(atomindex);
-				
+
 				for (PositiveInclusion pi : pis) {
 					if (isPIApplicable(pi, atom)) {
 						currentatomresults.addAll(Collections.singletonList(applyPI(cq, pi, atomindex)));
@@ -160,6 +160,11 @@ public class PositiveInclusionApplicator {
 		Set<CQIE> saturatedset = new HashSet<CQIE>();
 		saturatedset.addAll(cqs);
 
+		/*
+		 * We try to saturate by unification, but only saturating if the atoms
+		 * share already a variable, in the left or in the right, depending on
+		 * exist R, or exist R-
+		 */
 		saturatedset = saturateByUnification(saturatedset, ex.getPredicate(), ex.isInverse());
 
 		HashSet<CQIE> results = new HashSet<CQIE>(2500);
@@ -208,7 +213,10 @@ public class PositiveInclusionApplicator {
 		saturatedset.addAll(initialset);
 		HashSet<CQIE> newset = new HashSet<CQIE>(2500);
 
-		/* Saturate by unification and anonymize */
+		/*
+		 * Saturate by unification of every atoms with atom.predicate =
+		 * predicate and anonymize
+		 */
 		boolean loop = true;
 		while (loop) {
 			loop = false;
@@ -216,9 +224,15 @@ public class PositiveInclusionApplicator {
 			for (CQIE currentcq : saturatedset) {
 				List<Atom> body = currentcq.getBody();
 				for (int i = 0; i < body.size(); i++) {
+					/* Predicates are diferent, dont even try to unify */
 					if (!body.get(i).getPredicate().equals(predicate))
 						continue;
+					/*
+					 * We found an atom with the correct predicate, try to unify
+					 * with the rest of the atoms
+					 */
 					for (int j = i + 1; j < body.size(); j++) {
+
 						if (!body.get(j).getPredicate().equals(predicate))
 							continue;
 
@@ -231,12 +245,41 @@ public class PositiveInclusionApplicator {
 						Term ta21 = a2.getTerms().get(1);
 
 						boolean unify = false;
-						unify = unify
-								|| (!leftTermEqual && (ta11 instanceof UndistinguishedVariable || ta21 instanceof UndistinguishedVariable || ta11
-										.equals(ta21)));
-						unify = unify
-								|| (leftTermEqual && (ta10 instanceof UndistinguishedVariable || ta20 instanceof UndistinguishedVariable || ta10
-										.equals(ta20)));
+
+						/*
+						 * We found a candidate, but we should only unify if the
+						 * atoms already share a variable in the same position
+						 * (left or right depends on the exist R. Note that, we
+						 * consider equal also anonymous variables #
+						 * 
+						 * so if left = true we saturate if
+						 * 
+						 * a1 = P(#,x) or a2 = P(#,x) or if a1 = P(x,y) and a2 =
+						 * P(x,z)
+						 * 
+						 * if left = false we saturate if
+						 * 
+						 * a1 = P(x,#) or a2 = P(x,#) or if a1 = P(y,x) and a2 =
+						 * P(z,x)
+						 */
+						if (!leftTermEqual) {
+							unify = ta11 instanceof UndistinguishedVariable || ta21 instanceof UndistinguishedVariable || ta11.equals(ta21);
+
+							/*
+							 * New condition, if left=true, and a1 = P(x,y) and
+							 * a2 = P(x,z) only unify if for each atom ax1 where
+							 * y appears, there is a another atom ax2 that is
+							 * equal to ax1 except for the presence of y instead
+							 * of $z$
+							 */
+//							if (unify)
+//								unify = unify && matchingAtoms(currentcq, ta10, ta20);
+
+						} else {
+							unify = ta10 instanceof UndistinguishedVariable || ta20 instanceof UndistinguishedVariable || ta10.equals(ta20);
+//							if (unify)
+//								unify = unify && matchingAtoms(currentcq, ta11, ta21);
+						}
 
 						if (unify) {
 							CQIE unifiedQuery = unifier.unify(currentcq, i, j);
@@ -251,6 +294,81 @@ public class PositiveInclusionApplicator {
 			loop = loop || saturatedset.addAll(newset);
 		}
 		return saturatedset;
+	}
+
+	/***
+	 * This function is used in an optimization that still needs to be tested
+	 * 
+	 * @param q
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	private boolean matchingAtoms(CQIE q, Term t1, Term t2) {
+		for (Atom a1 : q.getBody()) {
+			int t1idx = a1.getFirstOcurrance(t1, 0);
+			if (t1idx == -1)
+				continue;
+			/* this atom conatains the focus term, t1 */
+
+			for (Atom a2 : q.getBody()) {
+
+				/*
+				 * we dont want to compare against the same atom, not
+				 * interesting
+				 */
+				if (a2.equals(a1))
+					continue;
+
+				int t2idx = a2.getFirstOcurrance(t2, 0);
+				if (t2idx != -1)
+					continue;
+
+				/*
+				 * the atom contains t2, now we need to check that they match,
+				 * except for the t1 and t2
+				 */
+
+				/*
+				 * If the predicates are different, stop, any unification of t1
+				 * and t2 will fail
+				 */
+				if (!a1.getPredicate().equals(a2.getPredicate()))
+					return false;
+
+				List<Term> terms1 = a1.getTerms();
+				List<Term> terms2 = a2.getTerms();
+				for (int m = 0; m < a1.getPredicate().getArity(); m++) {
+					Term a1t = terms1.get(m);
+					Term a2t = terms2.get(m);
+
+					/*
+					 * if the any of the terms are #, its safe to unify, check
+					 * another term
+					 */
+
+					if ((a1t instanceof UndistinguishedVariable) || (a2t instanceof UndistinguishedVariable))
+						continue;
+
+					/*
+					 * If the terms are different, but equal to t1 and t2, its
+					 * also safe
+					 */
+
+					if ((a1t.equals(t1) && (a2t.equals(t2))) || (a1t.equals(t2) && (a2t.equals(t1))))
+						continue;
+
+					/*
+					 * if the terms are actually different, then there is no
+					 * point in unifying
+					 */
+					if (!a1t.equals(a2t))
+						return false;
+				}
+
+			}
+		}
+		return true;
 	}
 
 	public Collection<CQIE> applyExistentialInclusion(CQIE cq, PositiveInclusion pi) throws Exception {
@@ -286,12 +404,19 @@ public class PositiveInclusionApplicator {
 		Atom a = body.get(atomindex);
 
 		if (a.getArity() == 1) {
+
+			/*
+			 * Only concept inclusions
+			 */
+
 			if (inclusion instanceof DLLiterConceptInclusionImpl) {
 				DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl) inclusion;
 				ConceptDescription lefthandside = inc.getIncluded();
 				ConceptDescription righthandside = inc.getIncluding();
 
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
+
+					/* This is the simplest case A(x) generates B(x) */
 
 					List<Term> terms = a.getTerms();
 					LinkedList<Term> v = new LinkedList<Term>();
@@ -305,6 +430,10 @@ public class PositiveInclusionApplicator {
 
 				} else if (lefthandside instanceof ExistentialConceptDescriptionImpl) {
 
+					/*
+					 * Generating a role atom from a concept atom A(x) genrates
+					 * A(x,#)
+					 */
 					Term t = a.getTerms().get(0);
 					Term anonym = termFactory.createUndistinguishedVariable();
 					AtomImpl newatom = null;
@@ -330,6 +459,11 @@ public class PositiveInclusionApplicator {
 			}
 
 		} else if (inclusion instanceof DLLiterConceptInclusionImpl) {
+
+			/*
+			 * These cases cover unification an going from R atoms to C atoms.
+			 */
+
 			DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl) inclusion;
 			ConceptDescription lefthandside = inc.getIncluded();
 			ConceptDescription righthandside = inc.getIncluding();
@@ -340,6 +474,9 @@ public class PositiveInclusionApplicator {
 			Atom newatom = null;
 
 			if (t2 instanceof UndistinguishedVariable && !righthandside.isInverse()) {
+
+				/* These are the cases that go from a P(x,#) to a A(x) */
+
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
@@ -359,6 +496,9 @@ public class PositiveInclusionApplicator {
 
 				}
 			} else if (t1 instanceof UndistinguishedVariable && righthandside.isInverse()) {
+
+				/* These cases go from R(#,x) to A(x), S(x,#) or S(#,x) */
+
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
@@ -384,6 +524,10 @@ public class PositiveInclusionApplicator {
 
 		} else if (inclusion instanceof DLLiterRoleInclusionImpl) {
 
+			/*
+			 * For role inclusion P \ISA S
+			 */
+
 			DLLiterRoleInclusionImpl inc = (DLLiterRoleInclusionImpl) inclusion;
 			RoleDescription lefthandside = inc.getIncluded();
 			RoleDescription righthandside = inc.getIncluding();
@@ -392,6 +536,9 @@ public class PositiveInclusionApplicator {
 
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);
+
+			/* All these cases go from R(x,y) to S(x,y) */
+
 			if ((righthandside.isInverse() && lefthandside.isInverse()) || (!righthandside.isInverse() && !lefthandside.isInverse())) {
 				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t1);

@@ -18,8 +18,8 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
 
 import java.awt.EventQueue;
 import java.awt.Font;

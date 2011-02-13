@@ -43,4 +43,7 @@ public interface Function extends Term {
 	 * @return the arity.
 	 */
 	public int getArity();
+	
+	public int getFirstOcurrance(Term t, int i);
+
 }
