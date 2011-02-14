@@ -14,6 +14,10 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import org.obda.owlrefplatform.core.abox.ABoxDumpListener;
+import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.abox.ABoxDumpListener;
+import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import org.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;

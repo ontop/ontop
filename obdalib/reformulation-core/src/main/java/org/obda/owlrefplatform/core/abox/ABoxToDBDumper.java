@@ -1,4 +1,4 @@
-package org.obda.owlrefplatform.core;
+package org.obda.owlrefplatform.core.abox;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.DataSource;
@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.obda.owlrefplatform.core.abox.ABoxDumpListener;
+import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.PredicateFactory;
