@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.obda.owlrefplatform.core.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.reformulation.protege4.configpanel.SelectDB;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;

@@ -18,7 +18,7 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.obda.owlrefplatform.core.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.semanticweb.owl.model.OWLOntology;
 
 /*
