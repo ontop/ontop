@@ -70,19 +70,19 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         ForeignKeyConstraintTreeModel model = new ForeignKeyConstraintTreeModel(root, fkController, renderer);
         ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
-        jTreeFKConstraints.setCellRenderer(tcr);
-        jTreeFKConstraints.setModel(model);
-        jTreeFKConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSForeignKeyConstraint.RDBMSFOREIGNKEYCONSTRAINT));
-        jTreeFKConstraints.setEditable(true);
-        jTreeFKConstraints.setInvokesStopCellEditing(true);
-        jTreeFKConstraints.setRootVisible(false);
-        jTreeFKConstraints.setRowHeight(0);
+        treFKConstraint.setCellRenderer(tcr);
+        treFKConstraint.setModel(model);
+        treFKConstraint.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSForeignKeyConstraint.RDBMSFOREIGNKEYCONSTRAINT));
+        treFKConstraint.setEditable(true);
+        treFKConstraint.setInvokesStopCellEditing(true);
+        treFKConstraint.setRootVisible(false);
+        treFKConstraint.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
     }
 
     private void addListener(){
     	
-        jButtonAdd.addActionListener(new ActionListener(){
+        cmdAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				
@@ -94,7 +94,7 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
 			}
         	
         });
-        jButtonWizard.addActionListener(new ActionListener(){
+        cmdMine.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 			
@@ -129,12 +129,12 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
         	
         });
         
-        jButtonDelete.addActionListener(new ActionListener(){
+        cmdDelete.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				
 				if(apic.getDatasourcesController().getCurrentDataSource()!= null){
-					TreePath[] selection =jTreeFKConstraints.getSelectionPaths();
+					TreePath[] selection =treFKConstraint.getSelectionPaths();
 					if(selection != null){
 						delete(selection);
 					}
@@ -154,7 +154,7 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
     	del.setToolTipText("deletes all selected Assertions");
     	del.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTreeFKConstraints.getSelectionPaths();
+				TreePath[] selection =treFKConstraint.getSelectionPaths();
 				if(selection != null){
 					
 				}
@@ -172,7 +172,7 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
 
 			public void actionPerformed(ActionEvent e) {
 				
-				TreePath[] paths = jTreeFKConstraints.getSelectionPaths();
+				TreePath[] paths = treFKConstraint.getSelectionPaths();
 				if(paths != null){
 					
 				}
@@ -180,35 +180,35 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
     		
     	});
     	menu.add(validate);
-    	jTreeFKConstraints.setComponentPopupMenu(menu);
+    	treFKConstraint.setComponentPopupMenu(menu);
     }
 
     public void colorPeferenceChanged(String preference, Color col) {
 		
-		DefaultTreeModel model = (DefaultTreeModel)jTreeFKConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFKConstraint.getModel();
 		model.reload();
 	}
 
 	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeFKConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFKConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeFKConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFKConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeFKConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFKConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeFKConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFKConstraint.getModel();
 		model.reload();
 		
 	}
@@ -233,22 +233,22 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
     
     private void addRDBMSForeignKeyConstraint(){
 		apic.getDatasourcesController(); 
-		ForeignKeyConstraintTreeModel model =(ForeignKeyConstraintTreeModel) jTreeFKConstraints.getModel();
+		ForeignKeyConstraintTreeModel model =(ForeignKeyConstraintTreeModel) treFKConstraint.getModel();
 		DefaultAssertionTreeNode<RDBMSForeignKeyConstraint> node = new DefaultAssertionTreeNode<RDBMSForeignKeyConstraint>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
 		int index = ((DefaultMutableTreeNode)model.getRoot()).getChildCount();
 		root.insert(node, index);
 		model.nodesWereInserted(root, new int[]{index});
 		model.nodeStructureChanged(root);
-		jTreeFKConstraints.setVisibleRowCount(index+1);
+		treFKConstraint.setVisibleRowCount(index+1);
 //		model.insertNodeInto(node, (MutableTreeNode) model.getRoot(), ((DefaultMutableTreeNode)model.getRoot()).getChildCount());
-		TreePath path = jTreeFKConstraints.getPathForRow(index);
+		TreePath path = treFKConstraint.getPathForRow(index);
 		if(path == null){
 			root.remove(index);
 			model.nodesWereRemoved(root, new int[] {index}, new Object[]{node});
 		}
-		jTreeFKConstraints.setSelectionPath(path);
-		jTreeFKConstraints.startEditingAtPath(path);
+		treFKConstraint.setSelectionPath(path);
+		treFKConstraint.startEditingAtPath(path);
     }
     
     /** This method is called from within the constructor to
@@ -259,83 +259,54 @@ public class ForeignKeyConstraintsPanel extends javax.swing.JPanel implements Ma
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        jButtonDelete = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTreeFKConstraints = new javax.swing.JTree();
-        jLabel1 = new javax.swing.JLabel();
-        jButtonWizard = new javax.swing.JButton();
-        jButtonAdd = new javax.swing.JButton();
+        pnlButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdDelete = new javax.swing.JButton();
+        cmdMine = new javax.swing.JButton();
+        scrFKConstraint = new javax.swing.JScrollPane();
+        treFKConstraint = new javax.swing.JTree();
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder("Foreign Key Constraints"));
-        setLayout(new java.awt.GridBagLayout());
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Foreign Key Constraint"));
+        setLayout(new java.awt.BorderLayout(0, 5));
 
-        jButtonDelete.setText("Delete");
-        jButtonDelete.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonDelete.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonDelete.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonDelete, gridBagConstraints);
+        pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(700, 600));
+        cmdAdd.setText("Add");
+        cmdAdd.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdAdd);
 
-        jTreeFKConstraints.setBorder(null);
-        jScrollPane1.setViewportView(jTreeFKConstraints);
+        cmdDelete.setText("Delete");
+        cmdDelete.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdDelete);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        add(jLabel1, gridBagConstraints);
+        cmdMine.setText("Mine");
+        cmdMine.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdMine);
 
-        jButtonWizard.setText(" Mine ");
-        jButtonWizard.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonWizard, gridBagConstraints);
+        add(pnlButtons, java.awt.BorderLayout.NORTH);
 
-        jButtonAdd.setText("Add");
-        jButtonAdd.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonAdd, gridBagConstraints);
+        scrFKConstraint.setMinimumSize(new java.awt.Dimension(700, 600));
+        scrFKConstraint.setPreferredSize(new java.awt.Dimension(700, 600));
+        scrFKConstraint.setViewportView(treFKConstraint);
+
+        add(scrFKConstraint, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonAdd;
-    private javax.swing.JButton jButtonDelete;
-    private javax.swing.JButton jButtonWizard;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTreeFKConstraints;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDelete;
+    private javax.swing.JButton cmdMine;
+    private javax.swing.JPanel pnlButtons;
+    private javax.swing.JScrollPane scrFKConstraint;
+    private javax.swing.JTree treFKConstraint;
     // End of variables declaration//GEN-END:variables
 
 }

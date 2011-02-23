@@ -78,18 +78,18 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         FunctionalDependenciesTreeModel model = new FunctionalDependenciesTreeModel(root, fdController, renderer);
         DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic, preference);
-        jTree1.setCellRenderer(tcr);
-        jTree1.setModel(model);
-        jTree1.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY));
-        jTree1.setEditable(true);
-        jTree1.setInvokesStopCellEditing(true);
-        jTree1.setRootVisible(false);
-        jTree1.setRowHeight(0);
+        treFunctionalDependency.setCellRenderer(tcr);
+        treFunctionalDependency.setModel(model);
+        treFunctionalDependency.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSFunctionalDependency.FUNCTIONALDEPENDENCY));
+        treFunctionalDependency.setEditable(true);
+        treFunctionalDependency.setInvokesStopCellEditing(true);
+        treFunctionalDependency.setRootVisible(false);
+        treFunctionalDependency.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
-        jButton1.addActionListener(new ActionListener(){
+        cmdDelete.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTree1.getSelectionPaths();
+				TreePath[] selection =treFunctionalDependency.getSelectionPaths();
 				if(selection != null){
 					delete(selection);
 				}
@@ -97,7 +97,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 
         });
 
-        jButtonAdd.addActionListener(new ActionListener(){
+        cmdAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				addRDBMSFunctionalDependency();
@@ -105,7 +105,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 			}
 
         });
-        jButtonWizard.addActionListener(new ActionListener(){
+        cmdWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
@@ -114,11 +114,11 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 			}
 
         });
-        jButtonMine.addActionListener(new ActionListener(){
+        cmdMine.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
-				Dependency_SelectMappingPane.gestInstance().showFunctionalDependencyMiningDialog(jTree1);
+				Dependency_SelectMappingPane.gestInstance().showFunctionalDependencyMiningDialog(treFunctionalDependency);
 			}
 
         });
@@ -127,22 +127,22 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
     private void addRDBMSFunctionalDependency(){
 
 		apic.getDatasourcesController();
-		FunctionalDependenciesTreeModel model =(FunctionalDependenciesTreeModel) jTree1.getModel();
+		FunctionalDependenciesTreeModel model =(FunctionalDependenciesTreeModel) treFunctionalDependency.getModel();
 		DefaultAssertionTreeNode<RDBMSFunctionalDependency> node = new DefaultAssertionTreeNode<RDBMSFunctionalDependency>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
 		int index = ((DefaultMutableTreeNode)model.getRoot()).getChildCount();
 		root.insert(node, index);
 		model.nodesWereInserted(root, new int[]{index});
 		model.nodeStructureChanged(root);
-		jTree1.setVisibleRowCount(index+1);
+		treFunctionalDependency.setVisibleRowCount(index+1);
 //		model.insertNodeInto(node, (MutableTreeNode) model.getRoot(), ((DefaultMutableTreeNode)model.getRoot()).getChildCount());
-		TreePath path = jTree1.getPathForRow(index);
+		TreePath path = treFunctionalDependency.getPathForRow(index);
 		if(path == null){
 			root.remove(index);
 			model.nodesWereRemoved(root, new int[] {index}, new Object[]{node});
 		}
-		jTree1.setSelectionPath(path);
-		jTree1.startEditingAtPath(path);
+		treFunctionalDependency.setSelectionPath(path);
+		treFunctionalDependency.startEditingAtPath(path);
     }
 
     /**
@@ -156,7 +156,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
     	del.setToolTipText("deletes all selected Assertions");
     	del.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTree1.getSelectionPaths();
+				TreePath[] selection =treFunctionalDependency.getSelectionPaths();
 				if(selection != null){
 					delete(selection);
 				}
@@ -174,7 +174,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 
 			public void actionPerformed(ActionEvent e) {
 
-				TreePath[] paths = jTree1.getSelectionPaths();
+				TreePath[] paths = treFunctionalDependency.getSelectionPaths();
 				if(paths != null){
 					validateRDBMSFunctionalDependencies(paths);
 				}
@@ -182,7 +182,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
 
     	});
     	menu.add(validate);
-    	jTree1.setComponentPopupMenu(menu);
+    	treFunctionalDependency.setComponentPopupMenu(menu);
     }
 
     /**
@@ -218,7 +218,7 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
     	for (int i=0;i<paths.length;i++){
 
     		Object o =  paths[i].getLastPathComponent();
-    		if(!o.equals(jTree1.getModel().getRoot())){
+    		if(!o.equals(treFunctionalDependency.getModel().getRoot())){
 
 	    		DefaultAssertionTreeNode<RDBMSFunctionalDependency> node = (DefaultAssertionTreeNode<RDBMSFunctionalDependency>)o;
 	    		RDBMSFunctionalDependency dep = node.getUserObject();
@@ -269,124 +269,92 @@ public class FunctionalDepTreePane extends JPanel implements MappingManagerPrefe
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
-        jLabel1 = new javax.swing.JLabel();
-        jButtonWizard = new javax.swing.JButton();
-        jButtonAdd = new javax.swing.JButton();
-        jButtonMine = new javax.swing.JButton();
+        pnlButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdDelete = new javax.swing.JButton();
+        cmdMine = new javax.swing.JButton();
+        cmdWizard = new javax.swing.JButton();
+        scrFunctionalDependency = new javax.swing.JScrollPane();
+        treFunctionalDependency = new javax.swing.JTree();
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder("Current Functional Dependencies"));
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Functional Dependency"));
         setMinimumSize(new java.awt.Dimension(70, 70));
         setPreferredSize(new java.awt.Dimension(700, 700));
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout(0, 5));
 
-        jButton1.setText("Delete");
-        jButton1.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButton1.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButton1.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButton1, gridBagConstraints);
+        pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setViewportView(jTree1);
+        cmdAdd.setText("Add");
+        cmdAdd.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdAdd);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        add(jLabel1, gridBagConstraints);
+        cmdDelete.setText("Delete");
+        cmdDelete.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdDelete);
 
-        jButtonWizard.setText(" Add Wizard...");
-        jButtonWizard.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonWizard, gridBagConstraints);
+        cmdMine.setText("Mine");
+        cmdMine.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdMine);
 
-        jButtonAdd.setText("Add");
-        jButtonAdd.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonAdd, gridBagConstraints);
+        cmdWizard.setText("Wizard...");
+        cmdWizard.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdWizard);
 
-        jButtonMine.setText("Mine");
-        jButtonMine.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonMine.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonMine.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonMine, gridBagConstraints);
+        add(pnlButtons, java.awt.BorderLayout.NORTH);
+
+        scrFunctionalDependency.setMinimumSize(new java.awt.Dimension(700, 600));
+        scrFunctionalDependency.setPreferredSize(new java.awt.Dimension(700, 600));
+        scrFunctionalDependency.setViewportView(treFunctionalDependency);
+
+        add(scrFunctionalDependency, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButtonAdd;
-    private javax.swing.JButton jButtonMine;
-    private javax.swing.JButton jButtonWizard;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTree1;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDelete;
+    private javax.swing.JButton cmdMine;
+    private javax.swing.JButton cmdWizard;
+    private javax.swing.JPanel pnlButtons;
+    private javax.swing.JScrollPane scrFunctionalDependency;
+    private javax.swing.JTree treFunctionalDependency;
     // End of variables declaration//GEN-END:variables
 
 	public void colorPeferenceChanged(String preference, Color col) {
 
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFunctionalDependency.getModel();
 		model.reload();
 	}
 
 	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFunctionalDependency.getModel();
 		model.reload();
 
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFunctionalDependency.getModel();
 		model.reload();
 
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFunctionalDependency.getModel();
 		model.reload();
 
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treFunctionalDependency.getModel();
 		model.reload();
 
 	}

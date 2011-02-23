@@ -22,7 +22,6 @@ import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
 
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.sql.ResultSet;
 
 import javax.swing.JOptionPane;
@@ -38,6 +37,10 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 	
 	DatasourcesController dsc=null;
 	String execute_Query;
+
+  private DatasourceComboBoxModel dsComboModel;
+	private DatasourceCellRenderer dsComboBoxRenderer;
+
     /** Creates new form SQLQueryPanel */
     public SQLQueryPanel(DatasourcesController dsc,String execute_Query) {
     	
@@ -49,9 +52,12 @@ public class SQLQueryPanel extends javax.swing.JPanel {
     
     public SQLQueryPanel(DatasourcesController dsc) {
     	this.dsc = dsc;
+
+        DataSource[] datasources = dsc.getAllSources().values().toArray(new DataSource[0]);
+        dsComboModel = new DatasourceComboBoxModel(datasources);
+        dsComboBoxRenderer = new DatasourceCellRenderer();
+
         initComponents();
-        this.queryTable.setFont(new Font("Arial", Font.PLAIN, 18));
-        this.queryTable.setRowHeight(21);
     }
     
     
@@ -64,38 +70,39 @@ public class SQLQueryPanel extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jSplitPane1 = new javax.swing.JSplitPane();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel13 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        queryField = new javax.swing.JTextArea();
-        executeButton = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        queryTable = new javax.swing.JTable();
-        datasourceSelector = new javax.swing.JComboBox();
+        splSqlQuery = new javax.swing.JSplitPane();
+        pnlSqlQuery = new javax.swing.JPanel();
+        lblSqlQuery = new javax.swing.JLabel();
+        scrSqlQuery = new javax.swing.JScrollPane();
+        txtSqlQuery = new javax.swing.JTextArea();
+        cmdExecute = new javax.swing.JButton();
+        pnlQueryResult = new javax.swing.JPanel();
+        scrQueryResult = new javax.swing.JScrollPane();
+        tblQueryResult = new javax.swing.JTable();
+        cmbDatasource = new javax.swing.JComboBox();
 
+        setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         setLayout(new java.awt.BorderLayout());
 
-        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        splSqlQuery.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
-        jPanel1.setMinimumSize(new java.awt.Dimension(156, 100));
-        jPanel1.setPreferredSize(new java.awt.Dimension(156, 100));
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        pnlSqlQuery.setMinimumSize(new java.awt.Dimension(156, 100));
+        pnlSqlQuery.setPreferredSize(new java.awt.Dimension(156, 100));
+        pnlSqlQuery.setLayout(new java.awt.GridBagLayout());
 
-        jLabel13.setText("SQL Query:");
-        jLabel13.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        jLabel13.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        jLabel13.setRequestFocusEnabled(false);
-        jLabel13.setVerifyInputWhenFocusTarget(false);
+        lblSqlQuery.setText("SQL Query:");
+        lblSqlQuery.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        lblSqlQuery.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        lblSqlQuery.setRequestFocusEnabled(false);
+        lblSqlQuery.setVerifyInputWhenFocusTarget(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanel1.add(jLabel13, gridBagConstraints);
+        pnlSqlQuery.add(lblSqlQuery, gridBagConstraints);
 
-        queryField.setColumns(20);
-        queryField.setRows(2);
-        queryField.setBorder(null);
-        jScrollPane2.setViewportView(queryField);
+        txtSqlQuery.setColumns(20);
+        txtSqlQuery.setRows(2);
+        txtSqlQuery.setBorder(null);
+        scrSqlQuery.setViewportView(txtSqlQuery);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridheight = 2;
@@ -103,25 +110,26 @@ public class SQLQueryPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 2.0;
         gridBagConstraints.weighty = 2.0;
-        jPanel1.add(jScrollPane2, gridBagConstraints);
+        pnlSqlQuery.add(scrSqlQuery, gridBagConstraints);
 
-        executeButton.setText("Excecute");
-        executeButton.addActionListener(new java.awt.event.ActionListener() {
+        cmdExecute.setText("Excecute");
+        cmdExecute.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                executeButtonActionPerformed(evt);
+                cmdExecuteActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
         gridBagConstraints.gridheight = java.awt.GridBagConstraints.RELATIVE;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanel1.add(executeButton, gridBagConstraints);
+        pnlSqlQuery.add(cmdExecute, gridBagConstraints);
 
-        jSplitPane1.setLeftComponent(jPanel1);
+        splSqlQuery.setLeftComponent(pnlSqlQuery);
 
-        jPanel2.setLayout(new java.awt.BorderLayout());
+        pnlQueryResult.setLayout(new java.awt.BorderLayout());
 
-        queryTable.setModel(new javax.swing.table.DefaultTableModel(
+        tblQueryResult.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -129,24 +137,21 @@ public class SQLQueryPanel extends javax.swing.JPanel {
                 "Results"
             }
         ));
-        jScrollPane1.setViewportView(queryTable);
+        tblQueryResult.setRowHeight(21);
+        scrQueryResult.setViewportView(tblQueryResult);
 
-        jPanel2.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        pnlQueryResult.add(scrQueryResult, java.awt.BorderLayout.CENTER);
 
-        jSplitPane1.setRightComponent(jPanel2);
+        cmbDatasource.setModel(dsComboModel);
+        cmbDatasource.setRenderer(dsComboBoxRenderer);
+        pnlQueryResult.add(cmbDatasource, java.awt.BorderLayout.PAGE_END);
 
-        add(jSplitPane1, java.awt.BorderLayout.CENTER);
-        
-        DataSource[] datasources = 
-			dsc.getAllSources().values().toArray(new DataSource[0]);
-		DatasourceComboBoxModel dsComboModel = new DatasourceComboBoxModel(datasources);
-		DatasourceCellRenderer dsComboBoxRenderer = new DatasourceCellRenderer();
-		datasourceSelector.setModel(dsComboModel);
-		datasourceSelector.setRenderer(dsComboBoxRenderer);
-		add(datasourceSelector, java.awt.BorderLayout.SOUTH);
+        splSqlQuery.setRightComponent(pnlQueryResult);
+
+        add(splSqlQuery, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void executeButtonActionPerformed(java.awt.event.ActionEvent evt) {                                               
+    private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {                                               
 
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -158,7 +163,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 //					 * get Previous model, if any and close it before
 //					 * proceeding.
 //					 */
-					TableModel oldmodel = queryTable.getModel();
+					TableModel oldmodel = tblQueryResult.getModel();
 					if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
 
 						IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
@@ -183,10 +188,10 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 								}
 							}
 						
-							java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), queryField.getText(),current_ds); 
+							java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), txtSqlQuery.getText(),current_ds);
 							//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), execute_query,current_ds); //EK
 							IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
-							queryTable.setModel(model);
+							tblQueryResult.setModel(model);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -217,8 +222,8 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 //
 //	}
     private void show_Result_Query(){
-    	queryField.setText(execute_Query);
-    	TableModel oldmodel = queryTable.getModel();
+    	txtSqlQuery.setText(execute_Query);
+    	TableModel oldmodel = tblQueryResult.getModel();
     	
 		if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
 
@@ -246,7 +251,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 				//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), queryField.getText(),current_ds); original
 				java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), execute_Query,current_ds); //EK
 				IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
-				queryTable.setModel(model);
+				tblQueryResult.setModel(model);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -260,16 +265,16 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton executeButton;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JTextArea queryField;
-    private javax.swing.JTable queryTable;
-    private javax.swing.JComboBox datasourceSelector;
+    private javax.swing.JComboBox cmbDatasource;
+    private javax.swing.JButton cmdExecute;
+    private javax.swing.JLabel lblSqlQuery;
+    private javax.swing.JPanel pnlQueryResult;
+    private javax.swing.JPanel pnlSqlQuery;
+    private javax.swing.JScrollPane scrQueryResult;
+    private javax.swing.JScrollPane scrSqlQuery;
+    private javax.swing.JSplitPane splSqlQuery;
+    private javax.swing.JTable tblQueryResult;
+    private javax.swing.JTextArea txtSqlQuery;
     // End of variables declaration//GEN-END:variables
     
 }

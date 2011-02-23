@@ -89,20 +89,20 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         InclusionDependencyTreeModel model = new InclusionDependencyTreeModel(root, incController, renderer);
         DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic, preference);
-        jTree1.setCellRenderer(tcr);
-        jTree1.setModel(model);
-        jTree1.setEditable(true);
-        jTree1.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSInclusionDependency.INCLUSIONDEPENDENCY));
-        jTree1.setInvokesStopCellEditing(true);
-        jTree1.setRootVisible(false);
-        jTree1.setRowHeight(0);
+        treInclusionDependency.setCellRenderer(tcr);
+        treInclusionDependency.setModel(model);
+        treInclusionDependency.setEditable(true);
+        treInclusionDependency.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSInclusionDependency.INCLUSIONDEPENDENCY));
+        treInclusionDependency.setInvokesStopCellEditing(true);
+        treInclusionDependency.setRootVisible(false);
+        treInclusionDependency.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
 //        incController.addControllerListener(model);
 
-        jButton1.addActionListener(new ActionListener(){
+        cmdDelete.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTree1.getSelectionPaths();
+				TreePath[] selection =treInclusionDependency.getSelectionPaths();
 				if(selection != null){
 					delete(selection);
 				}
@@ -110,7 +110,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
         });
 
-        jButtonAdd.addActionListener(new ActionListener(){
+        cmdAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
@@ -119,7 +119,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
         });
 
-        jButtonWizard.addActionListener(new ActionListener(){
+        cmdWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
@@ -129,11 +129,11 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
         });
 
-        jButtonMine.addActionListener(new ActionListener(){
+        cmdMine.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
-				Dependency_SelectMappingPane.gestInstance().showInclusionMiningDialog(jTree1);
+				Dependency_SelectMappingPane.gestInstance().showInclusionMiningDialog(treInclusionDependency);
 			}
 
         });
@@ -145,22 +145,22 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 			JOptionPane.showMessageDialog(null, "Please select a data source.", "ERROR", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		InclusionDependencyTreeModel model =(InclusionDependencyTreeModel) jTree1.getModel();
+		InclusionDependencyTreeModel model =(InclusionDependencyTreeModel) treInclusionDependency.getModel();
 		DefaultAssertionTreeNode<RDBMSInclusionDependency> node = new DefaultAssertionTreeNode<RDBMSInclusionDependency>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
 		int index = ((DefaultMutableTreeNode)model.getRoot()).getChildCount();
 		root.insert(node, index);
 		model.nodesWereInserted(root, new int[]{index});
 		model.nodeStructureChanged(root);
-		jTree1.setVisibleRowCount(index+1);
+		treInclusionDependency.setVisibleRowCount(index+1);
 //		model.insertNodeInto(node, (MutableTreeNode) model.getRoot(), ((DefaultMutableTreeNode)model.getRoot()).getChildCount());
-		TreePath path = jTree1.getPathForRow(index);
+		TreePath path = treInclusionDependency.getPathForRow(index);
 		if(path == null){
 			root.remove(index);
 			model.nodesWereRemoved(root, new int[] {index}, new Object[]{node});
 		}
-		jTree1.setSelectionPath(path);
-		jTree1.startEditingAtPath(path);
+		treInclusionDependency.setSelectionPath(path);
+		treInclusionDependency.startEditingAtPath(path);
     }
 
     public static InclusionDependencyTreePane getInstance(){
@@ -168,7 +168,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
     }
 
     public JTree getInclusionDependencyTree(){
-    	return jTree1;
+    	return treInclusionDependency;
     }
     /**
      * adds a popup menu to the tree
@@ -181,7 +181,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
     	del.setToolTipText("deletes all selected Assertions");
     	del.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTree1.getSelectionPaths();
+				TreePath[] selection =treInclusionDependency.getSelectionPaths();
 				if(selection != null){
 					delete(selection);
 				}
@@ -198,7 +198,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
 			public void actionPerformed(ActionEvent e) {
 
-				TreePath[] paths = jTree1.getSelectionPaths();
+				TreePath[] paths = treInclusionDependency.getSelectionPaths();
 				if (paths != null){
 					validateRDBMSInclusionDependencies(paths);
 				}
@@ -206,7 +206,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
     	});
     	menu.add(validate);
-    	jTree1.setComponentPopupMenu(menu);
+    	treInclusionDependency.setComponentPopupMenu(menu);
     }
 
     /**
@@ -215,11 +215,11 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
      */
     private void validateRDBMSInclusionDependencies(TreePath[] paths){
 
-    	final ValidateDepenencyDialog dialog = new ValidateDepenencyDialog(jTree1);
+    	final ValidateDepenencyDialog dialog = new ValidateDepenencyDialog(treInclusionDependency);
     	Runnable action = new Runnable() {
 			public void run() {
 				canceled = false;
-				final TreePath path[] = jTree1.getSelectionPaths();
+				final TreePath path[] = treInclusionDependency.getSelectionPaths();
 
 				dialog.setVisible(true);
 
@@ -329,7 +329,7 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
 
 			}
 		}
-    	jTree1.setSelectionPath(null);
+    	treInclusionDependency.setSelectionPath(null);
     }
 
     private boolean validateAssertion(SQLQueryValidator v){
@@ -356,151 +356,117 @@ public class InclusionDependencyTreePane extends JPanel implements MappingManage
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
-        jButtonAdd = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jButtonWizard = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButtonMine = new javax.swing.JButton();
+        pnlButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdDelete = new javax.swing.JButton();
+        cmdMine = new javax.swing.JButton();
+        cmdWizard = new javax.swing.JButton();
+        cmdValidate = new javax.swing.JButton();
+        scrInclusionDependency = new javax.swing.JScrollPane();
+        treInclusionDependency = new javax.swing.JTree();
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Current Inclusion Dependencies")));
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Inclusion Dependency"));
         setMinimumSize(new java.awt.Dimension(70, 70));
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout(0, 5));
 
-        jButton1.setText("Delete");
-        jButton1.setMaximumSize(null);
-        jButton1.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButton1.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButton1, gridBagConstraints);
+        pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setViewportView(jTree1);
+        cmdAdd.setText("Add");
+        cmdAdd.setMaximumSize(null);
+        cmdAdd.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdAdd);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
+        cmdDelete.setText("Delete");
+        cmdDelete.setMaximumSize(null);
+        cmdDelete.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdDelete);
 
-        jButtonAdd.setText("Add");
-        jButtonAdd.setMaximumSize(null);
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonAdd, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        add(jLabel1, gridBagConstraints);
+        cmdMine.setText("Mine");
+        cmdMine.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdMine);
 
-        jButtonWizard.setText("Add Wizard...");
-        jButtonWizard.setMaximumSize(null);
-        jButtonWizard.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setPreferredSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.addActionListener(new java.awt.event.ActionListener() {
+        cmdWizard.setText("Wizard...");
+        cmdWizard.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setPreferredSize(new java.awt.Dimension(95, 23));
+        cmdWizard.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonWizardActionPerformed(evt);
+                cmdWizardActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonWizard, gridBagConstraints);
+        pnlButtons.add(cmdWizard);
 
-        jButton2.setText("Validate");
-        jButton2.setToolTipText("validates wether the selected dependencies are satisfied by the database");
-        jButton2.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButton2.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButton2.setPreferredSize(new java.awt.Dimension(95, 23));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        cmdValidate.setText("Validate");
+        cmdValidate.setToolTipText("validates wether the selected dependencies are satisfied by the database");
+        cmdValidate.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdValidate.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdValidate.setPreferredSize(new java.awt.Dimension(95, 23));
+        cmdValidate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                cmdValidateActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButton2, gridBagConstraints);
+        pnlButtons.add(cmdValidate);
 
-        jButtonMine.setText("Mine");
-        jButtonMine.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonMine.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonMine.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonMine, gridBagConstraints);
+        add(pnlButtons, java.awt.BorderLayout.NORTH);
+
+        scrInclusionDependency.setMinimumSize(new java.awt.Dimension(700, 600));
+        scrInclusionDependency.setPreferredSize(new java.awt.Dimension(700, 600));
+        scrInclusionDependency.setViewportView(treInclusionDependency);
+
+        add(scrInclusionDependency, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonWizardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonWizardActionPerformed
+    private void cmdWizardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdWizardActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonWizardActionPerformed
+    }//GEN-LAST:event_cmdWizardActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        TreePath[] paths = jTree1.getSelectionPaths();
+    private void cmdValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdValidateActionPerformed
+        TreePath[] paths = treInclusionDependency.getSelectionPaths();
 		if (paths != null){
 			validateRDBMSInclusionDependencies(paths);
 		}
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_cmdValidateActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButtonAdd;
-    private javax.swing.JButton jButtonMine;
-    private javax.swing.JButton jButtonWizard;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTree1;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDelete;
+    private javax.swing.JButton cmdMine;
+    private javax.swing.JButton cmdValidate;
+    private javax.swing.JButton cmdWizard;
+    private javax.swing.JPanel pnlButtons;
+    private javax.swing.JScrollPane scrInclusionDependency;
+    private javax.swing.JTree treInclusionDependency;
     // End of variables declaration//GEN-END:variables
 
 	public void colorPeferenceChanged(String preference, Color col) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treInclusionDependency.getModel();
 		model.reload();
 	}
 
 	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treInclusionDependency.getModel();
 		model.reload();
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treInclusionDependency.getModel();
 		model.reload();
 
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treInclusionDependency.getModel();
 		model.reload();
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treInclusionDependency.getModel();
 		model.reload();
 	}
 }

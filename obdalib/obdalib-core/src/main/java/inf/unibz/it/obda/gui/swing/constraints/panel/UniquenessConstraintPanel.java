@@ -62,19 +62,19 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         UniquenessConstraintTreeModel model = new UniquenessConstraintTreeModel(root, uqController, renderer);
         ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
-        jTreeUniquenessConstraints.setCellRenderer(tcr);
-        jTreeUniquenessConstraints.setModel(model);
-        jTreeUniquenessConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSUniquenessConstraint.RDBMSUNIQUENESSCONSTRAINT));
-        jTreeUniquenessConstraints.setEditable(true);
-        jTreeUniquenessConstraints.setInvokesStopCellEditing(true);
-        jTreeUniquenessConstraints.setRootVisible(false);
-        jTreeUniquenessConstraints.setRowHeight(0);
+        TreUniquenessConstraint.setCellRenderer(tcr);
+        TreUniquenessConstraint.setModel(model);
+        TreUniquenessConstraint.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSUniquenessConstraint.RDBMSUNIQUENESSCONSTRAINT));
+        TreUniquenessConstraint.setEditable(true);
+        TreUniquenessConstraint.setInvokesStopCellEditing(true);
+        TreUniquenessConstraint.setRootVisible(false);
+        TreUniquenessConstraint.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
     }
 
     private void addListener(){
     	
-        jButtonAdd.addActionListener(new ActionListener(){
+        cmdAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				
@@ -86,7 +86,7 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
 			}
         	
         });
-        jButtonWizard.addActionListener(new ActionListener(){
+        cmdWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				if(apic.getDatasourcesController().getCurrentDataSource()!= null){
@@ -98,12 +98,12 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
         	
         });
         
-        jButtonDelete.addActionListener(new ActionListener(){
+        cmdDelete.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				
 				if(apic.getDatasourcesController().getCurrentDataSource()!= null){
-					TreePath[] selection =jTreeUniquenessConstraints.getSelectionPaths();
+					TreePath[] selection =TreUniquenessConstraint.getSelectionPaths();
 					if(selection != null){
 						delete(selection);
 					}
@@ -123,7 +123,7 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
     	del.setToolTipText("deletes all selected Assertions");
     	del.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTreeUniquenessConstraints.getSelectionPaths();
+				TreePath[] selection =TreUniquenessConstraint.getSelectionPaths();
 				if(selection != null){
 					
 				}
@@ -141,7 +141,7 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
 
 			public void actionPerformed(ActionEvent e) {
 				
-				TreePath[] paths = jTreeUniquenessConstraints.getSelectionPaths();
+				TreePath[] paths = TreUniquenessConstraint.getSelectionPaths();
 				if(paths != null){
 					
 				}
@@ -149,36 +149,36 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
     		
     	});
     	menu.add(validate);
-    	jTreeUniquenessConstraints.setComponentPopupMenu(menu);
+    	TreUniquenessConstraint.setComponentPopupMenu(menu);
     }
 
     
     public void colorPeferenceChanged(String preference, Color col) {
 		
-		DefaultTreeModel model = (DefaultTreeModel)jTreeUniquenessConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)TreUniquenessConstraint.getModel();
 		model.reload();
 	}
 
 	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeUniquenessConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)TreUniquenessConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeUniquenessConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)TreUniquenessConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeUniquenessConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)TreUniquenessConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeUniquenessConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)TreUniquenessConstraint.getModel();
 		model.reload();
 		
 	}
@@ -203,22 +203,22 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
     
     private void addRDBMSUniquenessConstraint(){
 		apic.getDatasourcesController(); 
-		UniquenessConstraintTreeModel model =(UniquenessConstraintTreeModel) jTreeUniquenessConstraints.getModel();
+		UniquenessConstraintTreeModel model =(UniquenessConstraintTreeModel) TreUniquenessConstraint.getModel();
 		DefaultAssertionTreeNode<RDBMSUniquenessConstraint> node = new DefaultAssertionTreeNode<RDBMSUniquenessConstraint>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
 		int index = ((DefaultMutableTreeNode)model.getRoot()).getChildCount();
 		root.insert(node, index);
 		model.nodesWereInserted(root, new int[]{index});
 		model.nodeStructureChanged(root);
-		jTreeUniquenessConstraints.setVisibleRowCount(index+1);
+		TreUniquenessConstraint.setVisibleRowCount(index+1);
 //		model.insertNodeInto(node, (MutableTreeNode) model.getRoot(), ((DefaultMutableTreeNode)model.getRoot()).getChildCount());
-		TreePath path = jTreeUniquenessConstraints.getPathForRow(index);
+		TreePath path = TreUniquenessConstraint.getPathForRow(index);
 		if(path == null){
 			root.remove(index);
 			model.nodesWereRemoved(root, new int[] {index}, new Object[]{node});
 		}
-		jTreeUniquenessConstraints.setSelectionPath(path);
-		jTreeUniquenessConstraints.startEditingAtPath(path);
+		TreUniquenessConstraint.setSelectionPath(path);
+		TreUniquenessConstraint.startEditingAtPath(path);
     }
 	
     /** This method is called from within the constructor to
@@ -229,81 +229,54 @@ public class UniquenessConstraintPanel extends javax.swing.JPanel implements Map
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        jButtonDelete = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTreeUniquenessConstraints = new javax.swing.JTree();
-        jLabel1 = new javax.swing.JLabel();
-        jButtonWizard = new javax.swing.JButton();
-        jButtonAdd = new javax.swing.JButton();
+        pnlButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdDelete = new javax.swing.JButton();
+        cmdWizard = new javax.swing.JButton();
+        scrUniquenessConstraint = new javax.swing.JScrollPane();
+        TreUniquenessConstraint = new javax.swing.JTree();
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder("Uniqueness Constraints"));
-        setLayout(new java.awt.GridBagLayout());
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Uniqueness Constraint"));
+        setLayout(new java.awt.BorderLayout(0, 5));
 
-        jButtonDelete.setText("Delete");
-        jButtonDelete.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonDelete.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonDelete.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonDelete, gridBagConstraints);
+        pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setViewportView(jTreeUniquenessConstraints);
+        cmdAdd.setText("Add");
+        cmdAdd.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdAdd);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        add(jLabel1, gridBagConstraints);
+        cmdDelete.setText("Delete");
+        cmdDelete.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdDelete);
 
-        jButtonWizard.setText(" Add Wizard...");
-        jButtonWizard.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonWizard, gridBagConstraints);
+        cmdWizard.setText("Wizard...");
+        cmdWizard.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdWizard);
 
-        jButtonAdd.setText("Add");
-        jButtonAdd.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonAdd, gridBagConstraints);
+        add(pnlButtons, java.awt.BorderLayout.NORTH);
+
+        scrUniquenessConstraint.setMinimumSize(new java.awt.Dimension(700, 600));
+        scrUniquenessConstraint.setPreferredSize(new java.awt.Dimension(700, 600));
+        scrUniquenessConstraint.setViewportView(TreUniquenessConstraint);
+
+        add(scrUniquenessConstraint, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonAdd;
-    private javax.swing.JButton jButtonDelete;
-    private javax.swing.JButton jButtonWizard;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTreeUniquenessConstraints;
+    private javax.swing.JTree TreUniquenessConstraint;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDelete;
+    private javax.swing.JButton cmdWizard;
+    private javax.swing.JPanel pnlButtons;
+    private javax.swing.JScrollPane scrUniquenessConstraint;
     // End of variables declaration//GEN-END:variables
 
 }

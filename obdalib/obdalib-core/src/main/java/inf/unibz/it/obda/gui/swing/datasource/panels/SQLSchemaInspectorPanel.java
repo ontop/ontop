@@ -21,9 +21,13 @@ import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import java.awt.BorderLayout;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -31,13 +35,24 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 /**
@@ -57,18 +72,25 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 
 	
 	private DatasourcesController dscontroller = null;
+
+        private DatasourceComboBoxModel dsComboModel;
+	private DatasourceCellRenderer dsComboBoxRenderer;
 	
     /** Creates new form SQLSchemaInspectorPanel */
     public SQLSchemaInspectorPanel(DatasourcesController dsController) {
     	this.dscontroller = dsController;
+        DataSource[] datasources = dscontroller.getAllSources().values().toArray(new DataSource[0]);
+        dsComboModel = new DatasourceComboBoxModel(datasources);
+        dsComboBoxRenderer = new DatasourceCellRenderer();
+
         initComponents();
         addPopupMenu();
         /***********************************************************************
 		 * Setting up the database utilities
 		 */
 
-		relationsTable.getSelectionModel().setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
-		relationsTable.getSelectionModel().addListSelectionListener(new RowListener());
+		tblRelations.getSelectionModel().setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+		tblRelations.getSelectionModel().addListSelectionListener(new RowListener());
     }
     
     /** This method is called from within the constructor to
@@ -78,72 +100,53 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        scrollRDBMExplorer = new javax.swing.JScrollPane();
-        panelViewSourceSquema1 = new javax.swing.JPanel();
-        panelFiller = new javax.swing.JPanel();
-        refreshButton = new javax.swing.JButton();
-        deleteViewsButton = new javax.swing.JButton();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        scrollRelationsTable = new javax.swing.JScrollPane();
-        relationsTable = new javax.swing.JTable();
-        scrollAttributesTable = new javax.swing.JScrollPane();
-        attributesTable = new javax.swing.JTable();
-        datasourceSelector = new javax.swing.JComboBox();
+        pnlButtons = new JPanel();
+        cmdRefresh = new JButton();
+        cmdDropViews = new JButton();
+        splRelationsColumns = new JSplitPane();
+        scrRelationsTable = new JScrollPane();
+        tblRelations = new JTable();
+        scrAttributesTable = new JScrollPane();
+        tblAttributes = new JTable();
+        cmbDatasource = new JComboBox();
 
-        setLayout(new java.awt.BorderLayout());
+        setLayout(new BorderLayout());
 
-        scrollRDBMExplorer.setBorder(null);
-        scrollRDBMExplorer.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        pnlButtons.setAutoscrolls(true);
+        pnlButtons.setMinimumSize(new Dimension(100, 0));
+        pnlButtons.setPreferredSize(new Dimension(100, 35));
+        pnlButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        panelViewSourceSquema1.setAutoscrolls(true);
-        panelViewSourceSquema1.setMinimumSize(new java.awt.Dimension(100, 0));
-        panelViewSourceSquema1.setPreferredSize(new java.awt.Dimension(100, 100));
-        panelViewSourceSquema1.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 2.0;
-        panelViewSourceSquema1.add(panelFiller, gridBagConstraints);
-
-        refreshButton.setText("Refresh");
-        refreshButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                refreshButtonActionPerformed(evt);
+        cmdRefresh.setText("Refresh");
+        cmdRefresh.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                cmdRefreshActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        panelViewSourceSquema1.add(refreshButton, gridBagConstraints);
+        pnlButtons.add(cmdRefresh);
 
-        deleteViewsButton.setText("Drop views");
-        deleteViewsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteViewsButtonActionPerformed(evt);
+        cmdDropViews.setText("Drop views");
+        cmdDropViews.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                cmdDropViewsActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        panelViewSourceSquema1.add(deleteViewsButton, gridBagConstraints);
+        pnlButtons.add(cmdDropViews);
 
-        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane1.setResizeWeight(0.5);
-        jSplitPane1.setMinimumSize(new java.awt.Dimension(100, 100));
-        jSplitPane1.setPreferredSize(new java.awt.Dimension(100, 100));
+        add(pnlButtons, BorderLayout.NORTH);
 
-        scrollRelationsTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Relations"));
-        scrollRelationsTable.setMinimumSize(new java.awt.Dimension(250, 100));
-        scrollRelationsTable.setOpaque(false);
-        scrollRelationsTable.setPreferredSize(new java.awt.Dimension(250, 100));
+        splRelationsColumns.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        splRelationsColumns.setResizeWeight(0.5);
+        splRelationsColumns.setMinimumSize(new Dimension(100, 100));
+        splRelationsColumns.setPreferredSize(new Dimension(100, 100));
 
-        relationsTable.setModel(new javax.swing.table.DefaultTableModel(
+        scrRelationsTable.setBorder(BorderFactory.createTitledBorder("Relations"));
+        scrRelationsTable.setMinimumSize(new Dimension(250, 100));
+        scrRelationsTable.setOpaque(false);
+        scrRelationsTable.setPreferredSize(new Dimension(250, 100));
+
+        tblRelations.setModel(new DefaultTableModel(
             new Object [][] {
 
             },
@@ -152,7 +155,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class
+                String.class, String.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false
@@ -166,18 +169,18 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        relationsTable.setPreferredSize(new java.awt.Dimension(150, 999999));
-        scrollRelationsTable.setViewportView(relationsTable);
+        tblRelations.setPreferredSize(new Dimension(150, 999999));
+        scrRelationsTable.setViewportView(tblRelations);
 
-        jSplitPane1.setTopComponent(scrollRelationsTable);
+        splRelationsColumns.setTopComponent(scrRelationsTable);
 
-        scrollAttributesTable.setBackground(javax.swing.UIManager.getDefaults().getColor("InternalFrame.borderColor"));
-        scrollAttributesTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Columns"));
-        scrollAttributesTable.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollAttributesTable.setMinimumSize(new java.awt.Dimension(250, 100));
-        scrollAttributesTable.setPreferredSize(new java.awt.Dimension(250, 100));
+        scrAttributesTable.setBackground(UIManager.getDefaults().getColor("InternalFrame.borderColor"));
+        scrAttributesTable.setBorder(BorderFactory.createTitledBorder("Columns"));
+        scrAttributesTable.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrAttributesTable.setMinimumSize(new Dimension(250, 100));
+        scrAttributesTable.setPreferredSize(new Dimension(250, 100));
 
-        attributesTable.setModel(new javax.swing.table.DefaultTableModel(
+        tblAttributes.setModel(new DefaultTableModel(
             new Object [][] {
 
             },
@@ -193,34 +196,19 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        attributesTable.setPreferredSize(new java.awt.Dimension(150, 2000));
-        scrollAttributesTable.setViewportView(attributesTable);
+        tblAttributes.setPreferredSize(new Dimension(150, 2000));
+        scrAttributesTable.setViewportView(tblAttributes);
 
-        jSplitPane1.setBottomComponent(scrollAttributesTable);
+        splRelationsColumns.setBottomComponent(scrAttributesTable);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        panelViewSourceSquema1.add(jSplitPane1, gridBagConstraints);
+        add(splRelationsColumns, BorderLayout.CENTER);
 
-        scrollRDBMExplorer.setViewportView(panelViewSourceSquema1);
-
-        add(scrollRDBMExplorer, java.awt.BorderLayout.CENTER);
-        
-        DataSource[] datasources = 
-        	dscontroller.getAllSources().values().toArray(new DataSource[0]);
-		DatasourceComboBoxModel dsComboModel = new DatasourceComboBoxModel(datasources);
-		DatasourceCellRenderer dsComboBoxRenderer = new DatasourceCellRenderer();
-		datasourceSelector.setModel(dsComboModel);
-		datasourceSelector.setRenderer(dsComboBoxRenderer);
-		add(datasourceSelector, java.awt.BorderLayout.SOUTH);
+        cmbDatasource.setModel(dsComboModel);
+        cmbDatasource.setRenderer(dsComboBoxRenderer);
+        add(cmbDatasource, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void deleteViewsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteViewsButtonActionPerformed
+    private void cmdDropViewsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDropViewsActionPerformed
     	EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -286,7 +274,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 				}
 			}
 		});
-    }//GEN-LAST:event_deleteViewsButtonActionPerformed
+    }//GEN-LAST:event_cmdDropViewsActionPerformed
 
     
 	private void dropview(String viewname, Connection connection) throws NoDatasourceSelectedException, SQLException {
@@ -354,12 +342,12 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 				
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
-							int row = relationsTable.getSelectedRow();
+							int row = tblRelations.getSelectedRow();
 							if(row != -1){
-								String s = relationsTable.getModel().getValueAt(row, 0).toString();
+								String s = tblRelations.getModel().getValueAt(row, 0).toString();
 								try {
 									String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, dscontroller.getCurrentDataSource());
-									relationsTable.getModel().setValueAt(count, row, 1);
+									tblRelations.getModel().setValueAt(count, row, 1);
 								} catch (NoDatasourceSelectedException e1) {
 									e1.printStackTrace();
 								} catch (ClassNotFoundException e1) {
@@ -373,10 +361,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 			}
 		});
 		menu.add(countrow);
-		relationsTable.setComponentPopupMenu(menu);
+		tblRelations.setComponentPopupMenu(menu);
 	}
 	
-    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
+    private void cmdRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
     	EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -398,7 +386,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 					// String password =
 					// current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 					
-					TableModel oldmodel = relationsTable.getModel();
+					TableModel oldmodel = tblRelations.getModel();
 					if ((oldmodel != null) && (oldmodel instanceof RelationsResultSetTableModel)) {
 						RelationsResultSetTableModel model = (RelationsResultSetTableModel)oldmodel;
 						if (model != null) {
@@ -417,8 +405,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 					DataSource ds =dscontroller.getCurrentDataSource();
 					ResultSet set = JDBCConnectionManager.getJDBCConnectionManager().getRelationsResultSet(ds);
 					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, ds);
-					relationsTable.setModel(model);
-					relationsTable.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
+					tblRelations.setModel(model);
+					tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
 							* TABLE_ROW_HEIGHT));
 				} catch (SQLException ex) {
 					// If something goes wrong, clear the message line
@@ -441,7 +429,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 				}
 			}
 		});
-    }//GEN-LAST:event_refreshButtonActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
     
     
     /***************************************************************************
@@ -452,10 +440,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 			if (event.getValueIsAdjusting()) {
 				return;
 			}
-			int row = relationsTable.getSelectedRow();
+			int row = tblRelations.getSelectedRow();
 
 			//final DataSource current_datasource = DatasourcesController.getInstance().getCurrentDataSource();
-			final String relation = (String) relationsTable.getValueAt(row, 0);
+			final String relation = (String) tblRelations.getValueAt(row, 0);
 			if (relation.equals(""))
 				return;
 			EventQueue.invokeLater(new Runnable() {
@@ -464,7 +452,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 
 						JDBCConnectionManager factory = JDBCConnectionManager.getJDBCConnectionManager();
 
-						TableModel oldmodel = attributesTable.getModel();
+						TableModel oldmodel = tblAttributes.getModel();
 
 						if ((oldmodel != null) && (oldmodel instanceof ResultSetTableModel)) {
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
@@ -475,8 +463,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 						// factory.getResultSetTableModel("describe " + relation
 						// + ";");
 						ColumnInspectorTableModel model = factory.getTableDescriptionTableModel(dscontroller.getCurrentDataSource(), relation);
-						attributesTable.setModel(model);
-						attributesTable.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
+						tblAttributes.setModel(model);
+						tblAttributes.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
 								* TABLE_ROW_HEIGHT));
 					} catch (SQLException ex) {
 						ex.printStackTrace(System.err);
@@ -496,28 +484,26 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 	}
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable attributesTable;
-    private javax.swing.JButton deleteViewsButton;
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JPanel panelFiller;
-    private javax.swing.JPanel panelViewSourceSquema1;
-    private javax.swing.JButton refreshButton;
-    private javax.swing.JTable relationsTable;
-    private javax.swing.JScrollPane scrollAttributesTable;
-    private javax.swing.JScrollPane scrollRDBMExplorer;
-    private javax.swing.JScrollPane scrollRelationsTable;
-    private javax.swing.JComboBox datasourceSelector;
+    private JComboBox cmbDatasource;
+    private JButton cmdDropViews;
+    private JButton cmdRefresh;
+    private JPanel pnlButtons;
+    private JScrollPane scrAttributesTable;
+    private JScrollPane scrRelationsTable;
+    private JSplitPane splRelationsColumns;
+    private JTable tblAttributes;
+    private JTable tblRelations;
     // End of variables declaration//GEN-END:variables
     
     private class Counter extends Thread{
     	
     	public void run (){
-    		int rows = relationsTable.getRowCount();
+    		int rows = tblRelations.getRowCount();
 			for(int i=0;i<rows; i++){
-				String s = relationsTable.getModel().getValueAt(i, 0).toString();
+				String s = tblRelations.getModel().getValueAt(i, 0).toString();
 				try {
 					String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, dscontroller.getCurrentDataSource());
-					relationsTable.getModel().setValueAt(count, i, 1);
+					tblRelations.getModel().setValueAt(count, i, 1);
 				} catch (NoDatasourceSelectedException e1) {
 					e1.printStackTrace();
 				} catch (ClassNotFoundException e1) {

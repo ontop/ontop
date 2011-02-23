@@ -85,18 +85,18 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         DisjoinednessAssertionTreeModel model = new DisjoinednessAssertionTreeModel(root, disController, renderer);
         DependencyAssertionTreeCellRenderer tcr = new DependencyAssertionTreeCellRenderer(apic, preference);
-        jTree1.setCellRenderer(tcr);
-        jTree1.setModel(model);
-        jTree1.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION));
-        jTree1.setEditable(true);
-        jTree1.setInvokesStopCellEditing(true);
-        jTree1.setRootVisible(false);
-        jTree1.setRowHeight(0);
+        treDisjointnessDependency.setCellRenderer(tcr);
+        treDisjointnessDependency.setModel(model);
+        treDisjointnessDependency.setCellEditor(new DependencyTreeCellEditor(apic, RDBMSDisjointnessDependency.DISJOINEDNESSASSERTION));
+        treDisjointnessDependency.setEditable(true);
+        treDisjointnessDependency.setInvokesStopCellEditing(true);
+        treDisjointnessDependency.setRootVisible(false);
+        treDisjointnessDependency.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
-        jButton1.addActionListener(new ActionListener(){
+        cmdDelete.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTree1.getSelectionPaths();
+				TreePath[] selection =treDisjointnessDependency.getSelectionPaths();
 				if(selection != null){
 					delete(selection);
 				}
@@ -104,7 +104,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
         });
 
-        jButtonAdd.addActionListener(new ActionListener(){
+        cmdAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				addRDBMSDisjointnessDependency();
@@ -113,7 +113,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
         });
 
-        jButtonWizard.addActionListener(new ActionListener(){
+        cmdWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
@@ -122,11 +122,11 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 			}
 
         });
-        jButtonValidate.addActionListener(new ActionListener(){
+        cmdValidate.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 
-				TreePath[] paths = jTree1.getSelectionPaths();
+				TreePath[] paths = treDisjointnessDependency.getSelectionPaths();
 				if(paths != null){
 					validateRDBMSDisjointnessDependencies(paths);
 				}
@@ -137,22 +137,22 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
     private void addRDBMSDisjointnessDependency(){
 		apic.getDatasourcesController();
-		DisjoinednessAssertionTreeModel model =(DisjoinednessAssertionTreeModel) jTree1.getModel();
+		DisjoinednessAssertionTreeModel model =(DisjoinednessAssertionTreeModel) treDisjointnessDependency.getModel();
 		DefaultAssertionTreeNode<RDBMSDisjointnessDependency> node = new DefaultAssertionTreeNode<RDBMSDisjointnessDependency>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
 		int index = ((DefaultMutableTreeNode)model.getRoot()).getChildCount();
 		root.insert(node, index);
 		model.nodesWereInserted(root, new int[]{index});
 		model.nodeStructureChanged(root);
-		jTree1.setVisibleRowCount(index+1);
+		treDisjointnessDependency.setVisibleRowCount(index+1);
 //		model.insertNodeInto(node, (MutableTreeNode) model.getRoot(), ((DefaultMutableTreeNode)model.getRoot()).getChildCount());
-		TreePath path = jTree1.getPathForRow(index);
+		TreePath path = treDisjointnessDependency.getPathForRow(index);
 		if(path == null){
 			root.remove(index);
 			model.nodesWereRemoved(root, new int[] {index}, new Object[]{node});
 		}
-		jTree1.setSelectionPath(path);
-		jTree1.startEditingAtPath(path);
+		treDisjointnessDependency.setSelectionPath(path);
+		treDisjointnessDependency.startEditingAtPath(path);
     }
     /**
      * adds popup menu to the tree pane
@@ -165,7 +165,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
     	del.setToolTipText("deletes all selected Assertions");
     	del.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTree1.getSelectionPaths();
+				TreePath[] selection =treDisjointnessDependency.getSelectionPaths();
 				if(selection != null){
 					delete(selection);
 				}
@@ -183,7 +183,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
 			public void actionPerformed(ActionEvent e) {
 
-				TreePath[] paths = jTree1.getSelectionPaths();
+				TreePath[] paths = treDisjointnessDependency.getSelectionPaths();
 				if(paths != null){
 					validateRDBMSDisjointnessDependencies(paths);
 				}
@@ -191,7 +191,7 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
 
     	});
     	menu.add(validate);
-    	jTree1.setComponentPopupMenu(menu);
+    	treDisjointnessDependency.setComponentPopupMenu(menu);
     }
 
     /**
@@ -224,108 +224,70 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
-        jButtonAdd = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jButtonWizard = new javax.swing.JButton();
-        jButtonMine = new javax.swing.JButton();
-        jButtonValidate = new javax.swing.JButton();
+        scrDisjointnessDependency = new javax.swing.JScrollPane();
+        treDisjointnessDependency = new javax.swing.JTree();
+        pnlButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdDelete = new javax.swing.JButton();
+        cmdMine = new javax.swing.JButton();
+        cmdWizard = new javax.swing.JButton();
+        cmdValidate = new javax.swing.JButton();
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder("Current Disjoinedness Assertions"));
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Disjointness Dependency"));
         setMinimumSize(new java.awt.Dimension(70, 70));
         setPreferredSize(new java.awt.Dimension(700, 700));
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout(0, 5));
 
-        jButton1.setText("Delete");
-        jButton1.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButton1.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButton1.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButton1, gridBagConstraints);
+        scrDisjointnessDependency.setMinimumSize(new java.awt.Dimension(700, 600));
+        scrDisjointnessDependency.setPreferredSize(new java.awt.Dimension(700, 600));
+        scrDisjointnessDependency.setViewportView(treDisjointnessDependency);
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setViewportView(jTree1);
+        add(scrDisjointnessDependency, java.awt.BorderLayout.CENTER);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 6;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
+        pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jButtonAdd.setText("Add\n");
-        jButtonAdd.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonAdd, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.weightx = 1.0;
-        add(jLabel1, gridBagConstraints);
+        cmdAdd.setText("Add\n");
+        cmdAdd.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdAdd);
 
-        jButtonWizard.setText("Add Wizard...\n");
-        jButtonWizard.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonWizard, gridBagConstraints);
+        cmdDelete.setText("Delete");
+        cmdDelete.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdDelete);
 
-        jButtonMine.setText("Mine");
-        jButtonMine.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonMine.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonMine.setPreferredSize(new java.awt.Dimension(95, 23));
-        jButtonMine.addActionListener(new java.awt.event.ActionListener() {
+        cmdMine.setText("Mine");
+        cmdMine.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdMine.setPreferredSize(new java.awt.Dimension(95, 23));
+        cmdMine.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonMineActionPerformed(evt);
+                cmdMineActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonMine, gridBagConstraints);
+        pnlButtons.add(cmdMine);
 
-        jButtonValidate.setText("Validate");
-        jButtonValidate.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonValidate.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonValidate.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonValidate, gridBagConstraints);
+        cmdWizard.setText("Wizard... ");
+        cmdWizard.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdWizard);
+
+        cmdValidate.setText("Validate");
+        cmdValidate.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdValidate.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdValidate.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdValidate);
+
+        add(pnlButtons, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonMineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonMineActionPerformed
-    	Dependency_SelectMappingPane.gestInstance().startDisjointnessDependencyMining(jTree1);
-    }//GEN-LAST:event_jButtonMineActionPerformed
+    private void cmdMineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMineActionPerformed
+    	Dependency_SelectMappingPane.gestInstance().startDisjointnessDependencyMining(treDisjointnessDependency);
+    }//GEN-LAST:event_cmdMineActionPerformed
 
 
     private boolean validateAssertion(SQLQueryValidator v){
@@ -350,11 +312,11 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
      */
     private void validateRDBMSDisjointnessDependencies(TreePath[] paths){
 
-    	final ValidateDepenencyDialog dialog = new ValidateDepenencyDialog(jTree1);
+    	final ValidateDepenencyDialog dialog = new ValidateDepenencyDialog(treDisjointnessDependency);
     	Runnable action = new Runnable() {
 			public void run() {
 				canceled = false;
-				final TreePath path[] = jTree1.getSelectionPaths();
+				final TreePath path[] = treDisjointnessDependency.getSelectionPaths();
 
 				dialog.setVisible(true);
 
@@ -453,35 +415,35 @@ public class DisjoinednessAssertionTreePane extends JPanel implements MappingMan
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButtonAdd;
-    private javax.swing.JButton jButtonMine;
-    private javax.swing.JButton jButtonValidate;
-    private javax.swing.JButton jButtonWizard;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTree1;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDelete;
+    private javax.swing.JButton cmdMine;
+    private javax.swing.JButton cmdValidate;
+    private javax.swing.JButton cmdWizard;
+    private javax.swing.JPanel pnlButtons;
+    private javax.swing.JScrollPane scrDisjointnessDependency;
+    private javax.swing.JTree treDisjointnessDependency;
     // End of variables declaration//GEN-END:variables
 
 	public void colorPeferenceChanged(String preference, Color col) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treDisjointnessDependency.getModel();
 		model.reload();
 	}
 	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treDisjointnessDependency.getModel();
 		model.reload();
 
 	}
 	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treDisjointnessDependency.getModel();
 		model.reload();
 	}
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treDisjointnessDependency.getModel();
 		model.reload();
 	}
 	public void shortCutChanged(String preference, String shortcut) {
-		DefaultTreeModel model = (DefaultTreeModel)jTree1.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treDisjointnessDependency.getModel();
 		model.reload();
 	}
 

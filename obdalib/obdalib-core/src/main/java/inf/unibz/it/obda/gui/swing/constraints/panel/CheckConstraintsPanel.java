@@ -67,19 +67,19 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
         DefaultAssertionTreeNodeRenderer renderer = new DefaultAssertionTreeNodeRenderer();
         CheckConstraintTreeModel model = new CheckConstraintTreeModel(root, ccController, renderer);
         ConstraintsTreeCellRenderer tcr = new ConstraintsTreeCellRenderer(apic, preference);
-        jTreeCheckConstraints.setCellRenderer(tcr);
-        jTreeCheckConstraints.setModel(model);
-        jTreeCheckConstraints.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT));
-        jTreeCheckConstraints.setEditable(true);
-        jTreeCheckConstraints.setInvokesStopCellEditing(true);
-        jTreeCheckConstraints.setRootVisible(false);
-        jTreeCheckConstraints.setRowHeight(0);
+        treCheckConstraint.setCellRenderer(tcr);
+        treCheckConstraint.setModel(model);
+        treCheckConstraint.setCellEditor(new ConstraintsTreeCellEditor(apic, RDBMSCheckConstraint.RDBMSCHECKSONSTRAINT));
+        treCheckConstraint.setEditable(true);
+        treCheckConstraint.setInvokesStopCellEditing(true);
+        treCheckConstraint.setRootVisible(false);
+        treCheckConstraint.setRowHeight(0);
         pref.registerPreferenceChangedListener(this);
     }
     
     private void addListener(){
     	
-        jButtonAdd.addActionListener(new ActionListener(){
+        cmdAdd.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				if(apic.getDatasourcesController().getCurrentDataSource()!= null){
@@ -90,20 +90,20 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
 			}
         	
         });
-        jButtonWizard.addActionListener(new ActionListener(){
+        cmdWizard.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 			}
         	
         });
         
-        jButtonDelete.addActionListener(new ActionListener(){
+        cmdDelete.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
 				
 
 				if(apic.getDatasourcesController().getCurrentDataSource()!= null){
-					TreePath[] selection =jTreeCheckConstraints.getSelectionPaths();
+					TreePath[] selection =treCheckConstraint.getSelectionPaths();
 					if(selection != null){
 						delete(selection);
 					}
@@ -123,7 +123,7 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
     	del.setToolTipText("deletes all selected Assertions");
     	del.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				TreePath[] selection =jTreeCheckConstraints.getSelectionPaths();
+				TreePath[] selection =treCheckConstraint.getSelectionPaths();
 				if(selection != null){
 					
 				}
@@ -141,7 +141,7 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
 
 			public void actionPerformed(ActionEvent e) {
 				
-				TreePath[] paths = jTreeCheckConstraints.getSelectionPaths();
+				TreePath[] paths = treCheckConstraint.getSelectionPaths();
 				if(paths != null){
 					
 				}
@@ -149,7 +149,7 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
     		
     	});
     	menu.add(validate);
-    	jTreeCheckConstraints.setComponentPopupMenu(menu);
+    	treCheckConstraint.setComponentPopupMenu(menu);
     }
     
     /** This method is called from within the constructor to
@@ -160,100 +160,76 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        jButtonDelete = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTreeCheckConstraints = new javax.swing.JTree();
-        jLabel1 = new javax.swing.JLabel();
-        jButtonWizard = new javax.swing.JButton();
-        jButtonAdd = new javax.swing.JButton();
+        pnlButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdDelete = new javax.swing.JButton();
+        cmdWizard = new javax.swing.JButton();
+        scrCheckConstraint = new javax.swing.JScrollPane();
+        treCheckConstraint = new javax.swing.JTree();
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Check Constraints")));
-        setLayout(new java.awt.GridBagLayout());
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Check Constraint"));
+        setMaximumSize(new java.awt.Dimension(79, 76));
+        setMinimumSize(new java.awt.Dimension(0, 0));
+        setPreferredSize(new java.awt.Dimension(79, 76));
+        setLayout(new java.awt.BorderLayout(0, 5));
 
-        jButtonDelete.setText("Delete");
-        jButtonDelete.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonDelete.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonDelete.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonDelete, gridBagConstraints);
+        pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        jScrollPane1.setMinimumSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(700, 600));
-        jScrollPane1.setViewportView(jTreeCheckConstraints);
+        cmdAdd.setText("Add");
+        cmdAdd.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdAdd);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jScrollPane1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        add(jLabel1, gridBagConstraints);
+        cmdDelete.setText("Delete");
+        cmdDelete.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdDelete.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdDelete);
 
-        jButtonWizard.setText(" Add Wizard...");
-        jButtonWizard.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonWizard.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonWizard, gridBagConstraints);
+        cmdWizard.setLabel("Wizard...");
+        cmdWizard.setMaximumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setMinimumSize(new java.awt.Dimension(95, 23));
+        cmdWizard.setPreferredSize(new java.awt.Dimension(95, 23));
+        pnlButtons.add(cmdWizard);
 
-        jButtonAdd.setText("Add");
-        jButtonAdd.setMaximumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(95, 23));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(95, 23));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jButtonAdd, gridBagConstraints);
+        add(pnlButtons, java.awt.BorderLayout.NORTH);
+
+        scrCheckConstraint.setMinimumSize(new java.awt.Dimension(700, 600));
+        scrCheckConstraint.setPreferredSize(new java.awt.Dimension(700, 600));
+        scrCheckConstraint.setViewportView(treCheckConstraint);
+
+        add(scrCheckConstraint, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     
 	public void colorPeferenceChanged(String preference, Color col) {
 		
-		DefaultTreeModel model = (DefaultTreeModel)jTreeCheckConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treCheckConstraint.getModel();
 		model.reload();
 	}
 
 	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeCheckConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treCheckConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeCheckConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treCheckConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeCheckConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treCheckConstraint.getModel();
 		model.reload();
 		
 	}
 
 	public void shortCutChanged(String preference, String shortcut) {
-		DefaultTreeModel model = (DefaultTreeModel)jTreeCheckConstraints.getModel();
+		DefaultTreeModel model = (DefaultTreeModel)treCheckConstraint.getModel();
 		model.reload();
 		
 	}
@@ -278,31 +254,31 @@ public class CheckConstraintsPanel extends javax.swing.JPanel implements Mapping
     
     private void addRDBMSCheckConstraint(){
 		apic.getDatasourcesController(); 
-		CheckConstraintTreeModel model =(CheckConstraintTreeModel) jTreeCheckConstraints.getModel();
+		CheckConstraintTreeModel model =(CheckConstraintTreeModel) treCheckConstraint.getModel();
 		DefaultAssertionTreeNode<RDBMSCheckConstraint> node = new DefaultAssertionTreeNode<RDBMSCheckConstraint>(null);
 		MutableTreeNode root = (MutableTreeNode) model.getRoot();
 		int index = ((DefaultMutableTreeNode)model.getRoot()).getChildCount();
 		root.insert(node, index);
 		model.nodesWereInserted(root, new int[]{index});
 		model.nodeStructureChanged(root);
-		jTreeCheckConstraints.setVisibleRowCount(index+1);
+		treCheckConstraint.setVisibleRowCount(index+1);
 //		model.insertNodeInto(node, (MutableTreeNode) model.getRoot(), ((DefaultMutableTreeNode)model.getRoot()).getChildCount());
-		TreePath path = jTreeCheckConstraints.getPathForRow(index);
+		TreePath path = treCheckConstraint.getPathForRow(index);
 		if(path == null){
 			root.remove(index);
 			model.nodesWereRemoved(root, new int[] {index}, new Object[]{node});
 		}
-		jTreeCheckConstraints.setSelectionPath(path);
-		jTreeCheckConstraints.startEditingAtPath(path);
+		treCheckConstraint.setSelectionPath(path);
+		treCheckConstraint.startEditingAtPath(path);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonAdd;
-    private javax.swing.JButton jButtonDelete;
-    private javax.swing.JButton jButtonWizard;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTreeCheckConstraints;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDelete;
+    private javax.swing.JButton cmdWizard;
+    private javax.swing.JPanel pnlButtons;
+    private javax.swing.JScrollPane scrCheckConstraint;
+    private javax.swing.JTree treCheckConstraint;
     // End of variables declaration//GEN-END:variables
 
 }
