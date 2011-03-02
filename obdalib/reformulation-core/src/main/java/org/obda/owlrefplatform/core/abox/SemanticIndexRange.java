@@ -1,6 +1,8 @@
 package org.obda.owlrefplatform.core.abox;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 // FIXME: maybe should be renamed to Range
 
@@ -9,8 +11,11 @@ import java.util.LinkedList;
  */
 public class SemanticIndexRange {
 
-	private LinkedList<Interval> intervals = new LinkedList<Interval>();
-	
+	private List<Interval> intervals = new LinkedList<Interval>();
+
+	public SemanticIndexRange() {
+
+	}
 
 	public SemanticIndexRange(int from, int to) {
 		intervals.add(new Interval(from, to));
@@ -32,7 +37,41 @@ public class SemanticIndexRange {
 	 * Sort in accending order and merge overlapping intervals
 	 */
 	private void merge() {
+		List<Interval> new_intervals = new LinkedList<Interval>();
 
+		Collections.sort(intervals);
+		for (int i = 0; i < intervals.size() - 1; ++i) {
+			Interval it = intervals.get(i);
+			Interval it2 = intervals.get(i + 1);
+
+			if (it.to + 1 >= it2.from) {
+				if (it2.to >= it.to) {
+					new_intervals.add(new Interval(it.from, it2.to));
+				} else {
+					new_intervals.add(it);
+				}
+			}
+		}
+		intervals = new_intervals;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+
+		if (other == null)
+			return false;
+		if (other == this)
+			return true;
+		if (this.getClass() != other.getClass())
+			return false;
+		SemanticIndexRange otherRange = (SemanticIndexRange) other;
+
+		return this.intervals.equals(otherRange.intervals);
+	}
+
+	@Override
+	public String toString() {
+		return intervals.toString();
 	}
 
 	/**
@@ -76,6 +115,11 @@ public class SemanticIndexRange {
 		public int compareTo(Interval o) {
 			return this.from - o.from;
 		};
+
+		@Override
+		public String toString() {
+			return String.format("[%s:%s]", from, to);
+		}
 
 	}
 

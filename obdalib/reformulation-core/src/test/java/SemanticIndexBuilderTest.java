@@ -31,9 +31,10 @@ public class SemanticIndexBuilderTest extends TestCase {
 		return SemanticIndexBuilder.build(onto_set);
 
 	}
-	
-	private void compareIndexes(Map<OWLEntity, SemanticIndexRange> results, Map<String, SemanticIndexRange> expected) {
-		
+
+	private void compareIndexes(Map<OWLEntity, SemanticIndexRange> results,
+			Map<String, SemanticIndexRange> expected) {
+
 		assertEquals(expected.size(), results.size());
 		for (OWLEntity i : results.keySet()) {
 			String name = i.toString();
@@ -60,13 +61,22 @@ public class SemanticIndexBuilderTest extends TestCase {
 	public void test_1_0_1() throws OWLOntologyCreationException {
 		HashMap<String, SemanticIndexRange> expected = new HashMap<String, SemanticIndexRange>() {
 			{
-				put("A", new SemanticIndexRange(1, 4));
-				put("B", new SemanticIndexRange(2, 4));
-				put("C", new SemanticIndexRange(3, 4));
-				put("D", new SemanticIndexRange(4, 4));
+				put("A", new SemanticIndexRange(1, 13));
+				put("B", new SemanticIndexRange(6, 9));
+				put("C", new SemanticIndexRange(10, 13));
+				put("D", new SemanticIndexRange(2, 5));
+				put("E", new SemanticIndexRange(8, 8));
+				put("F", new SemanticIndexRange(9, 9));
+				put("G", new SemanticIndexRange(7, 7));
+				put("H", new SemanticIndexRange(13, 13));
+				put("I", new SemanticIndexRange(11, 11));
+				put("J", new SemanticIndexRange(12, 12));
+				put("K", new SemanticIndexRange(5, 5));
+				put("L", new SemanticIndexRange(4, 4));
+				put("M", new SemanticIndexRange(3, 3));
 			}
 		};
-		
+
 		Map<OWLEntity, SemanticIndexRange> results = build_index("test_1_0_1");
 		compareIndexes(results, expected);
 	}

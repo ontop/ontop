@@ -29,8 +29,11 @@ public class SemanticIndexBuilder {
 	 * 
 	 * @return dictionary of OWL entity and its index range
 	 */
-	public static Map<OWLEntity, SemanticIndexRange> build(HashSet<OWLOntology> ontologies) {
+	public static Map<OWLEntity, SemanticIndexRange> build(
+			HashSet<OWLOntology> ontologies) {
 		HashMap<OWLEntity, SemanticIndexRange> index_range = new HashMap<OWLEntity, SemanticIndexRange>();
+
+		DAG dag = new DAG();
 
 		Iterator<OWLOntology> ontologyIterator = ontologies.iterator();
 
@@ -49,14 +52,15 @@ public class SemanticIndexBuilder {
 							&& !edge.getSuperClass().isOWLThing()) {
 						OWLClass subClass = edge.getSubClass().asOWLClass();
 						OWLClass superClass = edge.getSuperClass().asOWLClass();
-						// TODO add edge between sub and super to the DAG
-						System.out.println(subClass+" "+ superClass);
+						dag.addEdge(subClass, superClass);
 					}
-
 				}
 			}
 		}
+		dag.index();
+		dag.buildRange();
+		log.debug(dag.toString());
 
-		return index_range;
+		return dag.getIndex();
 	}
 }

@@ -64,10 +64,18 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#E -->
+
+    <owl:Class rdf:about="#E">
+        <rdfs:subClassOf rdf:resource="#B"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#F -->
 
     <owl:Class rdf:about="#F">
-        <rdfs:subClassOf rdf:resource="#D"/>
+        <rdfs:subClassOf rdf:resource="#B"/>
     </owl:Class>
     
 
@@ -75,7 +83,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#G -->
 
     <owl:Class rdf:about="#G">
-        <rdfs:subClassOf rdf:resource="#C"/>
+        <rdfs:subClassOf rdf:resource="#B"/>
     </owl:Class>
     
 
@@ -83,7 +91,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#H -->
 
     <owl:Class rdf:about="#H">
-        <rdfs:subClassOf rdf:resource="#B"/>
+        <rdfs:subClassOf rdf:resource="#C"/>
     </owl:Class>
     
 
@@ -91,7 +99,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#I -->
 
     <owl:Class rdf:about="#I">
-        <rdfs:subClassOf rdf:resource="#D"/>
+        <rdfs:subClassOf rdf:resource="#C"/>
     </owl:Class>
     
 
@@ -99,7 +107,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#J -->
 
     <owl:Class rdf:about="#J">
-        <rdfs:subClassOf rdf:resource="#D"/>
+        <rdfs:subClassOf rdf:resource="#C"/>
     </owl:Class>
     
 
@@ -107,7 +115,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#K -->
 
     <owl:Class rdf:about="#K">
-        <rdfs:subClassOf rdf:resource="#C"/>
+        <rdfs:subClassOf rdf:resource="#D"/>
     </owl:Class>
     
 
@@ -115,7 +123,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#L -->
 
     <owl:Class rdf:about="#L">
-        <rdfs:subClassOf rdf:resource="#C"/>
+        <rdfs:subClassOf rdf:resource="#D"/>
     </owl:Class>
     
 
@@ -123,15 +131,7 @@
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#M -->
 
     <owl:Class rdf:about="#M">
-        <rdfs:subClassOf rdf:resource="#B"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#N -->
-
-    <owl:Class rdf:about="#N">
-        <rdfs:subClassOf rdf:resource="#B"/>
+        <rdfs:subClassOf rdf:resource="#D"/>
     </owl:Class>
 </rdf:RDF>
 
