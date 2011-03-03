@@ -17,41 +17,45 @@ public class SemanticIndexRange {
 
 	}
 
-	public SemanticIndexRange(int from, int to) {
-		intervals.add(new Interval(from, to));
+	public SemanticIndexRange(int start, int end) {
+		intervals.add(new Interval(start, end));
 	}
 
-	public void addInterval(int from, int to) {
-		intervals.add(new Interval(from, to));
+	public SemanticIndexRange addInterval(int start, int end) {
+		intervals.add(new Interval(start, end));
 		merge();
+
+		return this;
 	}
 
-	public void addRange(SemanticIndexRange other) {
+	public SemanticIndexRange addRange(SemanticIndexRange other) {
 		for (Interval it : other.intervals) {
 			intervals.add(it);
 		}
 		merge();
+		return this;
 	}
 
 	/**
-	 * Sort in accending order and merge overlapping intervals
+	 * Sort in accending order and collapse overlapping intervals
 	 */
 	private void merge() {
-		List<Interval> new_intervals = new LinkedList<Interval>();
 
 		Collections.sort(intervals);
-		for (int i = 0; i < intervals.size() - 1; ++i) {
-			Interval it = intervals.get(i);
-			Interval it2 = intervals.get(i + 1);
+		List<Interval> new_intervals = new LinkedList<Interval>();
 
-			if (it.to + 1 >= it2.from) {
-				if (it2.to >= it.to) {
-					new_intervals.add(new Interval(it.from, it2.to));
-				} else {
-					new_intervals.add(it);
-				}
+		int min = intervals.get(0).start;
+		int max = intervals.get(0).end;
+
+		for (int i = 1; i < intervals.size(); ++i) {
+			Interval item = intervals.get(i);
+			if (item.end > max + 1 && item.start > max + 1) {
+				new_intervals.add(new Interval(min, max));
+				min = item.start;
 			}
+			max = (max > item.end) ? max : item.end;
 		}
+		new_intervals.add(new Interval(min, max));
 		intervals = new_intervals;
 	}
 
@@ -82,11 +86,11 @@ public class SemanticIndexRange {
 	 */
 	class Interval implements Comparable<Interval> {
 
-		private int from, to;
+		private int start, end;
 
-		public Interval(int from, int to) {
-			this.from = from;
-			this.to = to;
+		public Interval(int start, int end) {
+			this.start = start;
+			this.end = end;
 		}
 
 		@Override
@@ -100,25 +104,25 @@ public class SemanticIndexRange {
 				return false;
 			Interval otherInterval = (Interval) other;
 
-			return (this.from == otherInterval.from && this.to == otherInterval.to);
+			return (this.start == otherInterval.start && this.end == otherInterval.end);
 		}
 
 		@Override
 		public int hashCode() {
 			int result = 17;
-			result += 37 * result + from;
-			result += 37 * result + to;
+			result += 37 * result + start;
+			result += 37 * result + end;
 			return result;
 		}
 
 		@Override
 		public int compareTo(Interval o) {
-			return this.from - o.from;
+			return this.start - o.start;
 		};
 
 		@Override
 		public String toString() {
-			return String.format("[%s:%s]", from, to);
+			return String.format("[%s:%s]", start, end);
 		}
 
 	}

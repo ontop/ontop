@@ -9,8 +9,10 @@ import java.util.Set;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLEntity;
+import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLSubClassAxiom;
+import org.semanticweb.owl.model.OWLSubPropertyAxiom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,11 +56,23 @@ public class SemanticIndexBuilder {
 						OWLClass superClass = edge.getSuperClass().asOWLClass();
 						dag.addEdge(subClass, superClass);
 					}
+				} else if (ax instanceof OWLSubPropertyAxiom) {
+					OWLSubPropertyAxiom<OWLObjectProperty> edge = (OWLSubPropertyAxiom<OWLObjectProperty>) ax;
+
+					if (!edge.getSubProperty().isAnonymous()
+							&& !edge.getSuperProperty().isAnonymous()) {
+
+						OWLObjectProperty subProperty = edge.getSubProperty();
+						OWLObjectProperty superProperty = edge
+								.getSuperProperty();
+						dag.addEdge(subProperty, superProperty);
+					}
 				}
 			}
 		}
 		dag.index();
 		dag.buildRange();
+
 		log.debug(dag.toString());
 
 		return dag.getIndex();

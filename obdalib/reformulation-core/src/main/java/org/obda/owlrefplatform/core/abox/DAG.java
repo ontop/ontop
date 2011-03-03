@@ -5,15 +5,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLEntity;
 
 class DAG {
 
-	private Map<OWLClass, Node> dagnodes = new HashMap<OWLClass, Node>();
+	private Map<OWLEntity, Node> dagnodes = new HashMap<OWLEntity, Node>();
 	private int index_counter = 1;
 
-	public void addEdge(OWLClass from, OWLClass to) {
+	private static final SemanticIndexRange NULL_RANGE = new SemanticIndexRange(
+			-1, -1);
+	private static final int NULL_INDEX = -1;
+
+	public void addEdge(OWLEntity from, OWLEntity to) {
 
 		Node f = dagnodes.get(from);
 		if (f == null) {
@@ -26,8 +29,8 @@ class DAG {
 			t = new Node(to);
 			dagnodes.put(to, t);
 		}
-		t.addChild(f);
-		f.addParent(t);
+		t.children.add(f);
+		f.parents.add(t);
 	}
 
 	public void index() {
@@ -39,14 +42,14 @@ class DAG {
 	}
 
 	private void indexNode(Node node) {
-		if (node.range != null) {
+
+		if (node.index == NULL_INDEX) {
+			node.index = index_counter;
+			index_counter++;
+		} else {
 			return;
 		}
-		node.range = new SemanticIndexRange(index_counter, index_counter);
-
-		index_counter++;
-
-		for (Node ch : node.getChildren()) {
+		for (Node ch : node.children) {
 			indexNode(ch);
 		}
 	}
@@ -60,6 +63,8 @@ class DAG {
 	}
 
 	private void buildRangeNode(Node node) {
+		node.range = new SemanticIndexRange(node.index, node.index);
+
 		if (node.children.isEmpty()) {
 			return;
 		}
@@ -90,25 +95,14 @@ class DAG {
 
 	class Node {
 
-		private OWLClass cls;
-		private SemanticIndexRange range;
+		private OWLEntity cls;
+		private SemanticIndexRange range = NULL_RANGE;
+		private int index = NULL_INDEX;
 		private Set<Node> parents = new HashSet<Node>();
 		private Set<Node> children = new HashSet<Node>();
 
-		public Node(OWLClass cls) {
+		public Node(OWLEntity cls) {
 			this.cls = cls;
-		}
-
-		public void addParent(Node par) {
-			parents.add(par);
-		}
-
-		public void addChild(Node chl) {
-			children.add(chl);
-		}
-
-		public Set<Node> getChildren() {
-			return children;
 		}
 
 		@Override
@@ -131,11 +125,7 @@ class DAG {
 
 		@Override
 		public String toString() {
-			if (range == null) {
-				System.out.println("Range is null for " + cls);
-				return cls.toString();
-			} else
-				return cls.toString() + range.toString();
+			return cls.toString() + range.toString();
 		}
 
 	}

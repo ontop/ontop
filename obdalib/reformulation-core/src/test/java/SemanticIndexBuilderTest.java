@@ -81,4 +81,31 @@ public class SemanticIndexBuilderTest extends TestCase {
 		compareIndexes(results, expected);
 	}
 
+	public void test_1_1_0() throws OWLOntologyCreationException {
+		HashMap<String, SemanticIndexRange> expected = new HashMap<String, SemanticIndexRange>() {
+			{
+				put("A", new SemanticIndexRange(1, 3));
+				put("B", new SemanticIndexRange(3, 3));
+				put("C", new SemanticIndexRange(2, 2));
+				put("D", new SemanticIndexRange(2, 2).addInterval(4, 4));
+			}
+		};
+
+		Map<OWLEntity, SemanticIndexRange> results = build_index("test_1_1_0");
+		compareIndexes(results, expected);
+	}
+
+	public void test_1_2_0() throws OWLOntologyCreationException {
+		HashMap<String, SemanticIndexRange> expected = new HashMap<String, SemanticIndexRange>() {
+			{
+				put("A", new SemanticIndexRange(1, 3));
+				put("B", new SemanticIndexRange(2, 3));
+				put("C", new SemanticIndexRange(3, 3));
+			}
+		};
+
+		Map<OWLEntity, SemanticIndexRange> results = build_index("test_1_2_0");
+		compareIndexes(results, expected);
+	}
+
 }
