@@ -94,21 +94,25 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner {
 	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	/**
-	 * The construction creates a new instance of the RDBMSSchemaInclusionDependencyMiner
+	 * The constructor.
 	 *
-	 * @param con the api controller
-	 * @param latch the count down signal to tell the parent thread when the mining is finished
+	 * @param apic 
+	 *           The API controller.
+	 * @param ds
+	 *           The selected data source.
+	 * @param signal 
+	 *           The count down signal to tell the parent thread when the 
+	 *           mining is finished.
 	 */
-	public RDBMSInclusionDependencyFromDBSchemaMiner (APIController con, CountDownLatch latch){
-		apic = con;
-		signal = latch;
+	public RDBMSInclusionDependencyFromDBSchemaMiner (APIController apic, 
+	    DataSource ds, CountDownLatch signal) {
+	  
+		this.apic = apic;
+		this.ds = ds;
+		this.signal = signal;
+		
 		foundInclusions = new HashSet<RDBMSInclusionDependency>();
-		try {
-			ds= apic.getDatasourcesController().getCurrentDataSource();
-			} catch (Exception e) {
-			e.printStackTrace();
-		}
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
+		mappings = apic.getMappingController().getMappings(ds.getSourceID());
 		createTableIndex();
 	}
 
@@ -204,9 +208,10 @@ public class RDBMSInclusionDependencyFromDBSchemaMiner implements IMiner {
 				try {
 					mine();
 					signal.countDown();
-				} catch (Exception e) {
+				} 
+				catch (Exception e) {
 					hasErrorOccurred = true;
-					exception = new MiningException("Excetpion thrown during mining process.\n" + e.getMessage());
+					exception = new MiningException("Exception thrown during mining process.\n" + e.getMessage());
 					signal.countDown();
 				}
 

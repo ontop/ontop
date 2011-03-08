@@ -89,25 +89,25 @@ public class RDBMSFunctionalDependencyFromDBSchemaMiner implements IMiner {
 	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	/**
-	 * The construction creates a new instance of the
-	 * {@link RDBMSSchemaInclusionDependencyMiner}
+	 * The constructor.
 	 *
-	 * @param con the api controller
-	 * @param latch the count down signal to tell the parent thread when
-	 * the mining is finished
-	 */
-	public RDBMSFunctionalDependencyFromDBSchemaMiner(APIController con,
-			CountDownLatch latch) {
-		apic = con;
-		signal = latch;
+	 * @param apic 
+   *           The API controller.
+   * @param ds
+   *           The selected data source.
+   * @param signal 
+   *           The count down signal to tell the parent thread when the 
+   *           mining is finished.
+   */
+	public RDBMSFunctionalDependencyFromDBSchemaMiner(APIController apic,
+			DataSource ds, CountDownLatch signal) {
+	  
+	  this.ds = ds;
+		this.apic = apic;
+		this.signal = signal;
+		
 		foundInclusions = new HashSet<RDBMSFunctionalDependency>();
-		try {
-			ds= apic.getDatasourcesController().getCurrentDataSource();
-			} catch (Exception e) {
-			e.printStackTrace();
-		}
-		mappings = apic.getMappingController().getMappings(
-				apic.getDatasourcesController().getCurrentDataSource().getSourceID());
+		mappings = apic.getMappingController().getMappings(ds.getSourceID());
 		createTableIndex();
 	}
 

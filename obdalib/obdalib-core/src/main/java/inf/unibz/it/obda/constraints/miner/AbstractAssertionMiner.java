@@ -48,13 +48,13 @@ public class AbstractAssertionMiner {
 	private List<OBDAMappingAxiom> queriesWithJoins = null;
 	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
-	public AbstractAssertionMiner(APIController con){
+	public AbstractAssertionMiner(APIController apic, DataSource ds){
 
-		apic = con;
-		ds= apic.getDatasourcesController().getCurrentDataSource();
+		this.apic = apic;
+		this.ds= ds;
 		ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-		mappings = apic.getMappingController().getMappings(apic.getDatasourcesController().getCurrentDataSource().getSourceID());
-//		schemaPattern = schema;
+		mappings = apic.getMappingController().getMappings(ds.getSourceID());
+
 		createTableIndex();
 		retrieveTableInfo();
 	}
