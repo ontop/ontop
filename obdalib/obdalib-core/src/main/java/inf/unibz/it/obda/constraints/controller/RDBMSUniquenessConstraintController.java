@@ -89,30 +89,55 @@ public class RDBMSUniquenessConstraintController extends
 		
 	}
 
+	public void changeDatasource(DataSource oldSource, DataSource newSource) {
+    
+    currentDataSource = newSource;
+    if (oldSource != newSource) {
+      if (oldSource != null) {
+        HashSet<RDBMSUniquenessConstraint> list = 
+            uniquenessconstraints.get(oldSource.getSourceID());
+        Iterator<RDBMSUniquenessConstraint> it = list.iterator();
+        while (it.hasNext()) {
+          fireAssertionRemoved(it.next());
+        }
+      }
+      if (newSource != null) {
+        HashSet<RDBMSUniquenessConstraint> list1 = 
+            uniquenessconstraints.get(newSource.getSourceID());
+        Iterator<RDBMSUniquenessConstraint> it1 = list1.iterator();
+        while (it1.hasNext()) {
+          fireAssertionAdded(it1.next());
+        }
+      }
+    }
+  }
+	
 	/**
 	 * Is executed when the listener gets a datasource removed event.
 	 * The method removes the assertion of the old data source from the
 	 * UI and shows the assertions associated to the new data soruce
 	 */
+	@Deprecated
 	public void currentDatasourceChange(DataSource previousdatasource,
 			DataSource currentsource) {
-		currentDataSource = currentsource;
-		if(previousdatasource != currentsource){
-			if(previousdatasource != null){
-				HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(previousdatasource.getSourceID());
-				Iterator<RDBMSUniquenessConstraint> it = list.iterator();
-				while(it.hasNext()){
-					fireAssertionRemoved(it.next());
-				}
-			}
-			if(currentsource != null){
-				HashSet<RDBMSUniquenessConstraint> list1 = uniquenessconstraints.get(currentsource.getSourceID());
-				Iterator<RDBMSUniquenessConstraint> it1 = list1.iterator();
-				while(it1.hasNext()){
-					fireAssertionAdded(it1.next());
-				}
-			}
-		}
+//  TODO Remove this abstract method from the DatasourcesControllerListener
+//		currentDataSource = currentsource;
+//		if(previousdatasource != currentsource){
+//			if(previousdatasource != null){
+//				HashSet<RDBMSUniquenessConstraint> list = uniquenessconstraints.get(previousdatasource.getSourceID());
+//				Iterator<RDBMSUniquenessConstraint> it = list.iterator();
+//				while(it.hasNext()){
+//					fireAssertionRemoved(it.next());
+//				}
+//			}
+//			if(currentsource != null){
+//				HashSet<RDBMSUniquenessConstraint> list1 = uniquenessconstraints.get(currentsource.getSourceID());
+//				Iterator<RDBMSUniquenessConstraint> it1 = list1.iterator();
+//				while(it1.hasNext()){
+//					fireAssertionAdded(it1.next());
+//				}
+//			}
+//		}
 	}
 
 	/**

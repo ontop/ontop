@@ -2,6 +2,7 @@ package inf.unibz.it.obda.dependencies.controller;
 
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
+import inf.unibz.it.obda.dependencies.domain.imp.RDBMSFunctionalDependency;
 import inf.unibz.it.obda.dependencies.domain.imp.RDBMSInclusionDependency;
 import inf.unibz.it.obda.domain.DataSource;
 
@@ -104,30 +105,55 @@ public class RDBMSInclusionDependencyController extends
 		
 	}
 
+  public void changeDatasource(DataSource oldSource, DataSource newSource) {
+    
+    currentDataSource = newSource;
+    if (oldSource != newSource) {
+      if (oldSource != null) {
+        HashSet<RDBMSInclusionDependency> list = 
+            inclusionDependencies.get(oldSource.getSourceID());
+        Iterator<RDBMSInclusionDependency> it = list.iterator();
+        while (it.hasNext()) {
+          fireAssertionRemoved(it.next());
+        }
+      }
+      if (newSource != null) {
+        HashSet<RDBMSInclusionDependency> list1 = 
+            inclusionDependencies.get(newSource.getSourceID());
+        Iterator<RDBMSInclusionDependency> it1 = list1.iterator();
+        while (it1.hasNext()) {
+          fireAssertionAdded(it1.next());
+        }
+      }
+    }
+  }
+	
 	/**
 	 * Is executed when the listener gets a datasource removed event.
 	 * The method removes the assertion of the old data source from the
 	 * UI and shows the assertions associated to the new data soruce
 	 */
+	@Deprecated
 	public void currentDatasourceChange(DataSource previousdatasource,
 			DataSource currentsource) {
-		currentDataSource = currentsource;
-		if(previousdatasource != currentsource){
-			if(previousdatasource != null){
-				HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(previousdatasource.getSourceID());
-				Iterator<RDBMSInclusionDependency> it = list.iterator();
-				while(it.hasNext()){
-					fireAssertionRemoved(it.next());
-				}
-			}
-			if(currentsource != null){
-				HashSet<RDBMSInclusionDependency> list1 = inclusionDependencies.get(currentsource.getSourceID());
-				Iterator<RDBMSInclusionDependency> it1 = list1.iterator();
-				while(it1.hasNext()){
-					fireAssertionAdded(it1.next());
-				}
-			}
-		}
+//  TODO Remove this abstract method from the DatasourcesControllerListener
+//		currentDataSource = currentsource;
+//		if(previousdatasource != currentsource){
+//			if(previousdatasource != null){
+//				HashSet<RDBMSInclusionDependency> list = inclusionDependencies.get(previousdatasource.getSourceID());
+//				Iterator<RDBMSInclusionDependency> it = list.iterator();
+//				while(it.hasNext()){
+//					fireAssertionRemoved(it.next());
+//				}
+//			}
+//			if(currentsource != null){
+//				HashSet<RDBMSInclusionDependency> list1 = inclusionDependencies.get(currentsource.getSourceID());
+//				Iterator<RDBMSInclusionDependency> it1 = list1.iterator();
+//				while(it1.hasNext()){
+//					fireAssertionAdded(it1.next());
+//				}
+//			}
+//		}
 	}
 
 	/**

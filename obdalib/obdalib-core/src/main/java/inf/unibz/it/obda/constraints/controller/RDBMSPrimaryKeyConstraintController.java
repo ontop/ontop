@@ -15,14 +15,13 @@ import java.util.Set;
 import java.util.Vector;
 
 public class RDBMSPrimaryKeyConstraintController extends
-AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
+    AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 
 	private DataSource currentDataSource = null;
 	private HashMap<URI, HashSet<RDBMSPrimaryKeyConstraint>> pkconstraints= null;
 	
-	public RDBMSPrimaryKeyConstraintController (){
+	public RDBMSPrimaryKeyConstraintController () {
 		pkconstraints = new HashMap<URI, HashSet<RDBMSPrimaryKeyConstraint>>();
-		
 	}
 	
 	@Override
@@ -88,30 +87,53 @@ AbstractConstraintAssertionController<RDBMSPrimaryKeyConstraint> {
 		
 	}
 
+	public void changeDatasource(DataSource oldSource, DataSource newSource) {
+	  
+	  currentDataSource = newSource;
+    if (oldSource != newSource) {
+      if (oldSource != null) {
+        HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(oldSource.getSourceID());
+        Iterator<RDBMSPrimaryKeyConstraint> it = list.iterator();
+        while (it.hasNext()) {
+          fireAssertionRemoved(it.next());
+        }
+      }
+      if (newSource != null) {
+        HashSet<RDBMSPrimaryKeyConstraint> list1 = pkconstraints.get(newSource.getSourceID());
+        Iterator<RDBMSPrimaryKeyConstraint> it1 = list1.iterator();
+        while (it1.hasNext()) {
+          fireAssertionAdded(it1.next());
+        }
+      }
+    }
+	}
+	
 	/**
 	 * Is executed when the listener gets a datasource removed event.
 	 * The method removes the assertion of the old data source from the
 	 * UI and shows the assertions associated to the new data soruce
 	 */
+	@Deprecated
 	public void currentDatasourceChange(DataSource previousdatasource,
 			DataSource currentsource) {
-		currentDataSource = currentsource;
-		if(previousdatasource != currentsource){
-			if(previousdatasource != null){
-				HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(previousdatasource.getSourceID());
-				Iterator<RDBMSPrimaryKeyConstraint> it = list.iterator();
-				while(it.hasNext()){
-					fireAssertionRemoved(it.next());
-				}
-			}
-			if(currentsource != null){
-				HashSet<RDBMSPrimaryKeyConstraint> list1 = pkconstraints.get(currentsource.getSourceID());
-				Iterator<RDBMSPrimaryKeyConstraint> it1 = list1.iterator();
-				while(it1.hasNext()){
-					fireAssertionAdded(it1.next());
-				}
-			}
-		}
+//  TODO Remove this abstract method from the DatasourcesControllerListener
+//		currentDataSource = currentsource;
+//		if(previousdatasource != currentsource){
+//			if(previousdatasource != null){
+//				HashSet<RDBMSPrimaryKeyConstraint> list = pkconstraints.get(previousdatasource.getSourceID());
+//				Iterator<RDBMSPrimaryKeyConstraint> it = list.iterator();
+//				while(it.hasNext()){
+//					fireAssertionRemoved(it.next());
+//				}
+//			}
+//			if(currentsource != null){
+//				HashSet<RDBMSPrimaryKeyConstraint> list1 = pkconstraints.get(currentsource.getSourceID());
+//				Iterator<RDBMSPrimaryKeyConstraint> it1 = list1.iterator();
+//				while(it1.hasNext()){
+//					fireAssertionAdded(it1.next());
+//				}
+//			}
+//		}
 	}
 
 	/**

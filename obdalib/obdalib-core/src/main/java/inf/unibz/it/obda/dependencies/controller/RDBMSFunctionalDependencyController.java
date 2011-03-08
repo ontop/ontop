@@ -110,30 +110,55 @@ public class RDBMSFunctionalDependencyController extends
 		
 	}
 
+	public void changeDatasource(DataSource oldSource, DataSource newSource) {
+    
+    currentDataSource = newSource;
+    if (oldSource != newSource) {
+      if (oldSource != null) {
+        HashSet<RDBMSFunctionalDependency> list = 
+            functionalDependencies.get(oldSource.getSourceID());
+        Iterator<RDBMSFunctionalDependency> it = list.iterator();
+        while (it.hasNext()) {
+          fireAssertionRemoved(it.next());
+        }
+      }
+      if (newSource != null) {
+        HashSet<RDBMSFunctionalDependency> list1 = 
+            functionalDependencies.get(newSource.getSourceID());
+        Iterator<RDBMSFunctionalDependency> it1 = list1.iterator();
+        while (it1.hasNext()) {
+          fireAssertionAdded(it1.next());
+        }
+      }
+    }
+  }
+	
 	/**
 	 * Is executed when the listener gets a datasource removed event.
 	 * The method removes the assertion of the old data source from the
 	 * UI and shows the assertions associated to the new data soruce
 	 */
+	@Deprecated
 	public void currentDatasourceChange(DataSource previousdatasource,
 			DataSource currentsource) {
-		currentDataSource = currentsource;
-		if(previousdatasource != currentsource){
-			if(previousdatasource != null){
-				HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(previousdatasource.getSourceID());
-				Iterator<RDBMSFunctionalDependency> it = list.iterator();
-				while(it.hasNext()){
-					fireAssertionRemoved(it.next());
-				}
-			}
-			if(currentsource != null){
-				HashSet<RDBMSFunctionalDependency> list1 = functionalDependencies.get(currentsource.getSourceID());
-				Iterator<RDBMSFunctionalDependency> it1 = list1.iterator();
-				while(it1.hasNext()){
-					fireAssertionAdded(it1.next());
-				}
-			}
-		}
+//  TODO Remove this abstract method from the DatasourcesControllerListener
+//		currentDataSource = currentsource;
+//		if(previousdatasource != currentsource){
+//			if(previousdatasource != null){
+//				HashSet<RDBMSFunctionalDependency> list = functionalDependencies.get(previousdatasource.getSourceID());
+//				Iterator<RDBMSFunctionalDependency> it = list.iterator();
+//				while(it.hasNext()){
+//					fireAssertionRemoved(it.next());
+//				}
+//			}
+//			if(currentsource != null){
+//				HashSet<RDBMSFunctionalDependency> list1 = functionalDependencies.get(currentsource.getSourceID());
+//				Iterator<RDBMSFunctionalDependency> it1 = list1.iterator();
+//				while(it1.hasNext()){
+//					fireAssertionAdded(it1.next());
+//				}
+//			}
+//		}
 	}
 
 	/**

@@ -68,10 +68,11 @@ public class DatasourcesController implements OntologyControllerListener {
 		}
 	}
 
+	// TODO Remove this method later.
 	public void fireCurrentDatasourceChanged(DataSource previousdatasource, DataSource source) {
-		for (DatasourcesControllerListener listener : listeners) {
-			listener.currentDatasourceChange(previousdatasource, source);
-		}
+//		for (DatasourcesControllerListener listener : listeners) {
+//			listener.currentDatasourceChange(previousdatasource, source);
+//		}
 	}
 
 	public void fireDatasourceAdded(DataSource source) {
@@ -179,16 +180,17 @@ public class DatasourcesController implements OntologyControllerListener {
 		listeners.remove(listener);
 	}
 
+	// TODO Remove this method later.
 	public synchronized void setCurrentDataSource(URI id) {
-		DataSource previous = currentdatasource;
-		if ((id != null) && (!id.equals(""))) {
-			DataSource ds = datasources.get(id);
-			currentdatasource = ds;
-			fireCurrentDatasourceChanged(previous, currentdatasource);
-		} else {
-			currentdatasource = null;
-			fireCurrentDatasourceChanged(previous, currentdatasource);
-		}
+//		DataSource previous = currentdatasource;
+//		if ((id != null) && (!id.equals(""))) {
+//			DataSource ds = datasources.get(id);
+//			currentdatasource = ds;
+//			fireCurrentDatasourceChanged(previous, currentdatasource);
+//		} else {
+//			currentdatasource = null;
+//			fireCurrentDatasourceChanged(previous, currentdatasource);
+//		}
 	}
 
 	public synchronized void updateDataSource(URI id, DataSource dsd) {

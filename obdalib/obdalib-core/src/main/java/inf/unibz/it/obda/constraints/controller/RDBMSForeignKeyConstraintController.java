@@ -3,6 +3,7 @@ package inf.unibz.it.obda.constraints.controller;
 import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
 import inf.unibz.it.obda.constraints.domain.imp.RDBMSForeignKeyConstraint;
+import inf.unibz.it.obda.constraints.domain.imp.RDBMSPrimaryKeyConstraint;
 import inf.unibz.it.obda.domain.DataSource;
 
 import java.net.URI;
@@ -88,31 +89,54 @@ AbstractConstraintAssertionController<RDBMSForeignKeyConstraint> {
 		fkconstraints = new HashMap<URI, HashSet<RDBMSForeignKeyConstraint>>();
 		
 	}
+	
+ public void changeDatasource(DataSource oldSource, DataSource newSource) {
+    
+    currentDataSource = newSource;
+    if (oldSource != newSource) {
+      if (oldSource != null) {
+        HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(oldSource.getSourceID());
+        Iterator<RDBMSForeignKeyConstraint> it = list.iterator();
+        while (it.hasNext()) {
+          fireAssertionRemoved(it.next());
+        }
+      }
+      if (newSource != null) {
+        HashSet<RDBMSForeignKeyConstraint> list1 = fkconstraints.get(newSource.getSourceID());
+        Iterator<RDBMSForeignKeyConstraint> it1 = list1.iterator();
+        while (it1.hasNext()) {
+          fireAssertionAdded(it1.next());
+        }
+      }
+    }
+  }
 
 	/**
 	 * Is executed when the listener gets a datasource removed event.
 	 * The method removes the assertion of the old data source from the
 	 * UI and shows the assertions associated to the new data soruce
 	 */
+  @Deprecated
 	public void currentDatasourceChange(DataSource previousdatasource,
 			DataSource currentsource) {
-		currentDataSource = currentsource;
-		if(previousdatasource != currentsource){
-			if(previousdatasource != null){
-				HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(previousdatasource.getSourceID());
-				Iterator<RDBMSForeignKeyConstraint> it = list.iterator();
-				while(it.hasNext()){
-					fireAssertionRemoved(it.next());
-				}
-			}
-			if(currentsource != null){
-				HashSet<RDBMSForeignKeyConstraint> list1 = fkconstraints.get(currentsource.getSourceID());
-				Iterator<RDBMSForeignKeyConstraint> it1 = list1.iterator();
-				while(it1.hasNext()){
-					fireAssertionAdded(it1.next());
-				}
-			}
-		}
+//  TODO Remove this abstract method from the DatasourcesControllerListener    
+//		currentDataSource = currentsource;
+//		if(previousdatasource != currentsource){
+//			if(previousdatasource != null){
+//				HashSet<RDBMSForeignKeyConstraint> list = fkconstraints.get(previousdatasource.getSourceID());
+//				Iterator<RDBMSForeignKeyConstraint> it = list.iterator();
+//				while(it.hasNext()){
+//					fireAssertionRemoved(it.next());
+//				}
+//			}
+//			if(currentsource != null){
+//				HashSet<RDBMSForeignKeyConstraint> list1 = fkconstraints.get(currentsource.getSourceID());
+//				Iterator<RDBMSForeignKeyConstraint> it1 = list1.iterator();
+//				while(it1.hasNext()){
+//					fireAssertionAdded(it1.next());
+//				}
+//			}
+//		}
 	}
 
 	/**
