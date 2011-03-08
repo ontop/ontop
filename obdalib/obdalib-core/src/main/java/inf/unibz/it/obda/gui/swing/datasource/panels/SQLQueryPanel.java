@@ -14,12 +14,10 @@
 
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
-import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 
 import java.awt.EventQueue;
 import java.sql.ResultSet;
@@ -27,19 +25,17 @@ import java.sql.ResultSet;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
-
 /**
  *
  * @author  mariano
  */
-public class SQLQueryPanel extends javax.swing.JPanel {
-    
-	
-	DatasourcesController dsc=null;
+public class SQLQueryPanel extends javax.swing.JPanel implements 
+    DatasourceSelectorListener {
+    	
+	DatasourcesController dsc;
 	String execute_Query;
 
-  private DatasourceComboBoxModel dsComboModel;
-	private DatasourceCellRenderer dsComboBoxRenderer;
+	private DataSource selectedSource;
 
     /** Creates new form SQLQueryPanel */
     public SQLQueryPanel(DatasourcesController dsc,String execute_Query) {
@@ -52,12 +48,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
     
     public SQLQueryPanel(DatasourcesController dsc) {
     	this.dsc = dsc;
-
-        DataSource[] datasources = dsc.getAllSources().values().toArray(new DataSource[0]);
-        dsComboModel = new DatasourceComboBoxModel(datasources);
-        dsComboBoxRenderer = new DatasourceCellRenderer();
-
-        initComponents();
+      initComponents();
     }
     
     
@@ -79,9 +70,8 @@ public class SQLQueryPanel extends javax.swing.JPanel {
         pnlQueryResult = new javax.swing.JPanel();
         scrQueryResult = new javax.swing.JScrollPane();
         tblQueryResult = new javax.swing.JTable();
-        cmbDatasource = new javax.swing.JComboBox();
 
-        setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        setFont(new java.awt.Font("Arial", 0, 18));
         setLayout(new java.awt.BorderLayout());
 
         splSqlQuery.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
@@ -128,7 +118,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 
         pnlQueryResult.setLayout(new java.awt.BorderLayout());
 
-        tblQueryResult.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        tblQueryResult.setFont(new java.awt.Font("Arial", 0, 18));
         tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -141,10 +131,6 @@ public class SQLQueryPanel extends javax.swing.JPanel {
         scrQueryResult.setViewportView(tblQueryResult);
 
         pnlQueryResult.add(scrQueryResult, java.awt.BorderLayout.CENTER);
-
-        cmbDatasource.setModel(dsComboModel);
-        cmbDatasource.setRenderer(dsComboBoxRenderer);
-        pnlQueryResult.add(cmbDatasource, java.awt.BorderLayout.PAGE_END);
 
         splSqlQuery.setRightComponent(pnlQueryResult);
 
@@ -172,23 +158,22 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 //
 //					queryTable.setModel(modelfactory.getResultSetTableModel(queryField.getText()));
 
-					DataSource current_ds = dsc.getCurrentDataSource();
-					if(current_ds == null){ 				
+					if(selectedSource == null){ 				
 						JOptionPane.showMessageDialog(null, "Pleas select a data source first");
 					}else{
 						JDBCConnectionManager man =JDBCConnectionManager.getJDBCConnectionManager();
 						try {
 							man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
 							man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-							if(!man.isConnectionAlive(current_ds.getSourceID())){
+							if(!man.isConnectionAlive(selectedSource.getSourceID())){
 								try {
-									man.createConnection(current_ds);
+									man.createConnection(selectedSource);
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
 							}
 						
-							java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), txtSqlQuery.getText(),current_ds);
+							java.sql.ResultSet set = man.executeQuery(selectedSource.getSourceID(), txtSqlQuery.getText(),selectedSource);
 							//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), execute_query,current_ds); //EK
 							IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
 							tblQueryResult.setModel(model);
@@ -231,8 +216,7 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 			rstm.close();
 		}
 		
-		DataSource current_ds = dsc.getCurrentDataSource();
-		if(current_ds == null){ 
+		if(selectedSource == null){ 
 		
 			JOptionPane.showMessageDialog(null, "Pleas select a data source first");
 		}else{
@@ -240,16 +224,16 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 			try {
 				man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
 				man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-				if(!man.isConnectionAlive(current_ds.getSourceID())){
+				if(!man.isConnectionAlive(selectedSource.getSourceID())){
 					try {
-						man.createConnection(current_ds);
+						man.createConnection(selectedSource);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			
 				//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), queryField.getText(),current_ds); original
-				java.sql.ResultSet set = man.executeQuery(current_ds.getSourceID(), execute_Query,current_ds); //EK
+				java.sql.ResultSet set = man.executeQuery(selectedSource.getSourceID(), execute_Query,selectedSource); //EK
 				IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
 				tblQueryResult.setModel(model);
 			} catch (Exception e) {
@@ -259,13 +243,15 @@ public class SQLQueryPanel extends javax.swing.JPanel {
 				
 			}
 		}
-}
+  }
     	
-    
-
+  @Override
+  public void datasourceChanged(DataSource oldSource, DataSource newSource)
+  {
+    this.selectedSource = newSource;
+  }  
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cmbDatasource;
     private javax.swing.JButton cmdExecute;
     private javax.swing.JLabel lblSqlQuery;
     private javax.swing.JPanel pnlQueryResult;
@@ -276,5 +262,4 @@ public class SQLQueryPanel extends javax.swing.JPanel {
     private javax.swing.JTable tblQueryResult;
     private javax.swing.JTextArea txtSqlQuery;
     // End of variables declaration//GEN-END:variables
-    
 }

@@ -95,7 +95,7 @@ public class ProgressMonitorDialog {
         window.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         window.getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setText("Mining Inclusion Dependencies...");
+        jLabel1.setText("Mining the dependencies...");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;

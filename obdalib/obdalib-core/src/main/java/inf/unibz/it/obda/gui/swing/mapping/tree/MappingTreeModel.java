@@ -19,8 +19,6 @@ import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.domain.SourceQuery;
-import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
@@ -195,27 +193,30 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		try {
 			if (newsrcuri != null) {
 				root.setUserObject("Mappings for: " + newsrcuri);
-			} else {
+
+	      ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
+	      ArrayList<OBDAMappingAxiom> newmappings = controller
+	          .getMappings(newsrcuri);
+
+	      if (newmappings != null) {
+	        for (OBDAMappingAxiom dataSourceMapping : newmappings) {
+	          RDBMSOBDAMappingAxiom mappingTest = (RDBMSOBDAMappingAxiom) dataSourceMapping;
+	          if (testFilters(mappingTest))
+	            newnodes
+	                .add(getMappingNodeFromMapping(mappingTest));
+	        }
+	      }
+	      root.removeAllChildren();
+	      for (MappingNode newnode : newnodes) {
+	        root.insert(newnode, root.getChildCount());
+	      }
+	      nodeStructureChanged(root);
+			} 
+			else {
 				root.setUserObject("No src uri");
 			}
-			ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
-			ArrayList<OBDAMappingAxiom> newmappings = controller
-					.getMappings(newsrcuri);
-
-			if (newmappings != null) {
-				for (OBDAMappingAxiom dataSourceMapping : newmappings) {
-					RDBMSOBDAMappingAxiom mappingTest = (RDBMSOBDAMappingAxiom) dataSourceMapping;
-					if (testFilters(mappingTest))
-						newnodes
-								.add(getMappingNodeFromMapping(mappingTest));
-				}
-			}
-			root.removeAllChildren();
-			for (MappingNode newnode : newnodes) {
-				root.insert(newnode, root.getChildCount());
-			}
-			nodeStructureChanged(root);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 	}

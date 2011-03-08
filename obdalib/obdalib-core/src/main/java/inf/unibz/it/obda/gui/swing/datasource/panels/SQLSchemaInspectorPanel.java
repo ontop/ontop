@@ -17,8 +17,7 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.swing.datasource.DatasourceCellRenderer;
-import inf.unibz.it.obda.gui.swing.datasource.DatasourceComboBoxModel;
+import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import java.awt.BorderLayout;
@@ -26,8 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -36,11 +33,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -59,7 +54,7 @@ import javax.swing.table.TableModel;
  *
  * @author  mariano
  */
-public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
+public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
     
 	/**
 	 * 
@@ -70,18 +65,13 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 
 	private static final int					TABLE_COLUMN_WITH	= 200;
 
+	private DataSource selectedSource;
 	
 	private DatasourcesController dscontroller = null;
-
-        private DatasourceComboBoxModel dsComboModel;
-	private DatasourceCellRenderer dsComboBoxRenderer;
 	
     /** Creates new form SQLSchemaInspectorPanel */
     public SQLSchemaInspectorPanel(DatasourcesController dsController) {
     	this.dscontroller = dsController;
-        DataSource[] datasources = dscontroller.getAllSources().values().toArray(new DataSource[0]);
-        dsComboModel = new DatasourceComboBoxModel(datasources);
-        dsComboBoxRenderer = new DatasourceCellRenderer();
 
         initComponents();
         addPopupMenu();
@@ -109,7 +99,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
         tblRelations = new JTable();
         scrAttributesTable = new JScrollPane();
         tblAttributes = new JTable();
-        cmbDatasource = new JComboBox();
 
         setLayout(new BorderLayout());
 
@@ -202,10 +191,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
         splRelationsColumns.setBottomComponent(scrAttributesTable);
 
         add(splRelationsColumns, BorderLayout.CENTER);
-
-        cmbDatasource.setModel(dsComboModel);
-        cmbDatasource.setRenderer(dsComboBoxRenderer);
-        add(cmbDatasource, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdDropViewsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDropViewsActionPerformed
@@ -217,24 +202,22 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 					if ((result == JOptionPane.CANCEL_OPTION) || (result == JOptionPane.NO_OPTION)) {
 						return;
 					}
-					DataSource ds = dscontroller.getCurrentDataSource();
 					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-					if(!man.isConnectionAlive(ds.getSourceID())){
-						man.createConnection(ds);
+					if(!man.isConnectionAlive(selectedSource.getSourceID())){
+						man.createConnection(selectedSource);
 					}
-					ResultSet set = man.getRelationsResultSet(ds);
-					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, ds);
+					ResultSet set = man.getRelationsResultSet(selectedSource);
+					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
 					int tablescounter = model.getRowCount();
 
-					DataSource current_datasource = dscontroller.getCurrentDataSource();
-					if (current_datasource == null) {
+					if (selectedSource == null) {
 						throw new NoDatasourceSelectedException("No source selected");
 					}
-					String driverstr = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-					String url = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-					String dbname = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-					String username = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-					String password = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
+					String driverstr = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
+					String url = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
+					String dbname = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
+					String username = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
+					String password = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 
 					Class driver = Class.forName(driverstr);
 					String sqlurl = "";
@@ -346,7 +329,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 							if(row != -1){
 								String s = tblRelations.getModel().getValueAt(row, 0).toString();
 								try {
-									String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, dscontroller.getCurrentDataSource());
+									String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, selectedSource);
 									tblRelations.getModel().setValueAt(count, row, 1);
 								} catch (NoDatasourceSelectedException e1) {
 									e1.printStackTrace();
@@ -402,9 +385,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 					// RelationsResultSetTableModelFactory(driver, url + dbname,
 					// username,
 					// password);
-					DataSource ds =dscontroller.getCurrentDataSource();
-					ResultSet set = JDBCConnectionManager.getJDBCConnectionManager().getRelationsResultSet(ds);
-					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, ds);
+					ResultSet set = JDBCConnectionManager.getJDBCConnectionManager().getRelationsResultSet(selectedSource);
+					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
 					tblRelations.setModel(model);
 					tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
 							* TABLE_ROW_HEIGHT));
@@ -431,6 +413,12 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 		});
     }//GEN-LAST:event_cmdRefreshActionPerformed
     
+
+    @Override
+    public void datasourceChanged(DataSource oldSource, DataSource newSource)
+    {
+      this.selectedSource = newSource;
+    }
     
     /***************************************************************************
 	 * Called when the relation table of the RDBMS inspector changed
@@ -462,7 +450,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 						// ResultSetTableModel model =
 						// factory.getResultSetTableModel("describe " + relation
 						// + ";");
-						ColumnInspectorTableModel model = factory.getTableDescriptionTableModel(dscontroller.getCurrentDataSource(), relation);
+						ColumnInspectorTableModel model = factory.getTableDescriptionTableModel(selectedSource, relation);
 						tblAttributes.setModel(model);
 						tblAttributes.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
 								* TABLE_ROW_HEIGHT));
@@ -484,7 +472,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 	}
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JComboBox cmbDatasource;
     private JButton cmdDropViews;
     private JButton cmdRefresh;
     private JPanel pnlButtons;
@@ -502,7 +489,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 			for(int i=0;i<rows; i++){
 				String s = tblRelations.getModel().getValueAt(i, 0).toString();
 				try {
-					String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, dscontroller.getCurrentDataSource());
+					String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, selectedSource);
 					tblRelations.getModel().setValueAt(count, i, 1);
 				} catch (NoDatasourceSelectedException e1) {
 					e1.printStackTrace();
@@ -514,5 +501,5 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel {
 			}
     	}
     }
-    
+
 }
