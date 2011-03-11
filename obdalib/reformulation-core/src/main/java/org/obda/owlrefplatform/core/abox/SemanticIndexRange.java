@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-// FIXME: maybe should be renamed to Range
-
 /**
  * Represents a set of continues intervals
  */
@@ -14,7 +12,6 @@ public class SemanticIndexRange {
 	private List<Interval> intervals = new LinkedList<Interval>();
 
 	public SemanticIndexRange() {
-
 	}
 
 	public SemanticIndexRange(int start, int end) {
@@ -37,7 +34,7 @@ public class SemanticIndexRange {
 	}
 
 	/**
-	 * Sort in accending order and collapse overlapping intervals
+	 * Sort in ascending order and collapse overlapping intervals
 	 */
 	private void merge() {
 
@@ -78,11 +75,13 @@ public class SemanticIndexRange {
 		return intervals.toString();
 	}
 
+	public List<Interval> getIntervals() {
+		return intervals;
+	}
+
 	/**
 	 * Continues interval between 2 points
-	 * 
 	 * @author Sergejs Pugacs
-	 * 
 	 */
 	class Interval implements Comparable<Interval> {
 
@@ -123,6 +122,13 @@ public class SemanticIndexRange {
 		@Override
 		public String toString() {
 			return String.format("[%s:%s]", start, end);
+		}
+
+		public int getStart() {
+			return start;
+		}
+		public int getEnd() {
+			return end;
 		}
 
 	}

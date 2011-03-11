@@ -26,7 +26,6 @@ public class SemanticIndexHelper {
             .getLogger(SemanticIndexHelper.class);
 
     public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    ;
     public OWLOntology ontology = null;
     public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     public Connection conn;
