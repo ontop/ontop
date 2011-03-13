@@ -14,7 +14,10 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Helper class to load ontologies and comapre computed values to expected results
@@ -22,12 +25,11 @@ import java.util.*;
  * @author Sergejs Pugac
  */
 public class SemanticIndexHelper {
-    private final static Logger log = LoggerFactory
+    public final static Logger log = LoggerFactory
             .getLogger(SemanticIndexHelper.class);
 
-    public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    public OWLOntology ontology = null;
-    public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+    public static final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     public Connection conn;
 
     public SemanticIndexHelper() {
@@ -89,9 +91,9 @@ public class SemanticIndexHelper {
         return rv;
     }
 
-    public Map<String, Integer> get_abox(String resname) {
+    public List<String[]> get_abox(String resname) {
         String resfile = owlloc + resname + ".abox";
-        Map<String, Integer> rv = new HashMap<String, Integer>();
+        List<String[]> rv = new LinkedList<String[]>();
         try {
 
             FileInputStream fstream = new FileInputStream(resfile);
@@ -100,9 +102,7 @@ public class SemanticIndexHelper {
             String strLine;
             while ((strLine = br.readLine()) != null) {
                 String[] tokens = strLine.split(" ");
-                String uri = tokens[0];
-                int index = Integer.parseInt(tokens[1]);
-                rv.put(uri, index);
+                rv.add(tokens);
             }
         } catch (Exception e) {
             e.printStackTrace();

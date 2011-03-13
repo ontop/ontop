@@ -21,8 +21,7 @@ public class DAGSerializerTest extends TestCase {
     public void test_create_schema() throws SQLException {
         DAGSerializer.recreate_tables(helper.conn);
         DatabaseMetaData md = helper.conn.getMetaData();
-        ResultSet rs = md
-                .getTables(null, null, DAGSerializer.index_table, null);
+        ResultSet rs = md.getTables(null, null, DAGSerializer.index_table, null);
         assertEquals(true, rs.next());
     }
 

@@ -19,9 +19,9 @@ public class DAG {
     private Map<String, DAGNode> dagnodes = new HashMap<String, DAGNode>();
 
     private int index_counter = 1;
-    private final static String owl_thing = "http://www.w3.org/2002/07/owl#Thing";
-    private final static String owl_exists = "::__exists__::";
-    private final static String owl_inverse_exists = "::__inverse__exists__::";
+    public final static String owl_thing = "http://www.w3.org/2002/07/owl#Thing";
+    public final static String owl_exists = "::__exists__::";
+    public final static String owl_inverse_exists = "::__inverse__exists__::";
 
 
     public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);

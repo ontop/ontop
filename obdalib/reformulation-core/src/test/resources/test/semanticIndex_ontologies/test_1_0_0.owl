@@ -66,32 +66,32 @@
     -->
 
 
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#a -->
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#ai -->
 
-    <owl:Thing rdf:about="#a">
-        <rdf:type rdf:resource="#A"/>
-    </owl:Thing>
+    <A rdf:about="#a">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </A>
 
 
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#b -->
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#bi -->
 
     <B rdf:about="#b">
         <rdf:type rdf:resource="&owl;Thing"/>
     </B>
 
 
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#c -->
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#ci -->
 
     <C rdf:about="#c">
         <rdf:type rdf:resource="&owl;Thing"/>
     </C>
 
 
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#d -->
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#di -->
 
-    <D rdf:about="#d">
-        <rdf:type rdf:resource="&owl;Thing"/>
-    </D>
+    <owl:Thing rdf:about="#d">
+        <rdf:type rdf:resource="#D"/>
+    </owl:Thing>
 </rdf:RDF>
 
 
