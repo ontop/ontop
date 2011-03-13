@@ -136,6 +136,7 @@ public class DAG {
         if (dagNode == null) {
             dagNode = new DAGNode(node);
             dagnodes.put(node, dagNode);
+            addEdge(node, owl_thing);
         }
     }
 
