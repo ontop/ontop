@@ -49,4 +49,11 @@ public class DAGTest extends TestCase {
         DAG exp = new DAG(helper.get_results(testname));
         assertEquals(exp, res);
     }
+
+    public void test_1_5_0() throws OWLOntologyCreationException {
+        String testname = "test_1_5_0";
+        DAG res = helper.load_dag(testname);
+        DAG exp = new DAG(helper.get_results(testname));
+        assertEquals(exp, res);
+    }
 }

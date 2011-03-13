@@ -68,11 +68,13 @@ public class SemanticIndexHelper {
             while ((strLine = br.readLine()) != null) {
                 String[] tokens = strLine.split(" ");
                 String uri = tokens[0];
-                String[] ranges = tokens[1].split(":");
+                int idx = Integer.parseInt(tokens[1]);
+                String[] ranges = tokens[2].split(",");
                 DAGNode node = new DAGNode(uri);
                 node.setRange(new SemanticIndexRange());
+                node.setIndex(idx);
                 for (int i = 0; i < ranges.length; ++i) {
-                    String[] range = ranges[i].split(",");
+                    String[] range = ranges[i].split(":");
 
                     int start = Integer.parseInt(range[0]);
                     int end = Integer.parseInt(range[1]);

@@ -1,16 +1,10 @@
 package org.obda.owlrefplatform.core.abox;
 
-import java.util.*;
-
-import org.semanticweb.owl.model.OWLAxiom;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyDomainAxiom;
-import org.semanticweb.owl.model.OWLObjectPropertyRangeAxiom;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLSubClassAxiom;
-import org.semanticweb.owl.model.OWLSubPropertyAxiom;
+import org.semanticweb.owl.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Stores the SemanticIndex of TBox and implements operations for serializing
@@ -25,10 +19,14 @@ public class DAG {
     private Map<String, DAGNode> dagnodes = new HashMap<String, DAGNode>();
 
     private int index_counter = 1;
+    private final static String owl_thing = "http://www.w3.org/2002/07/owl#Thing";
+    private final static String owl_exists = "::__exists__::";
+    private final static String owl_inverse_exists = "::__inverse__exists__::";
 
-    public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(
-            -1, -1);
+
+    public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
     public final static int NULL_INDEX = -1;
+
 
     /**
      * Build the DAG from the ontologies
@@ -38,43 +36,65 @@ public class DAG {
     public DAG(Set<OWLOntology> ontologies) {
 
         for (OWLOntology onto : ontologies) {
-            log.debug("Generating SemanticIndex for ontology: " + onto);
+            log.info("Generating SemanticIndex for ontology: " + onto);
 
-            for (OWLAxiom ax : onto.getAxioms()) {
-                if (ax instanceof OWLSubClassAxiom) {
-                    OWLSubClassAxiom edge = (OWLSubClassAxiom) ax;
-
-                    // FIXME: not handling existencial on the left side
-
-                    if (!edge.getSubClass().isOWLNothing() && !edge.getSuperClass().isOWLThing()) {
-                        String subClass = edge.getSubClass().asOWLClass().getURI().toString();
-                        String superClass = edge.getSuperClass().asOWLClass().getURI().toString();
-                        addEdge(subClass, superClass);
-                    }
-                } else if (ax instanceof OWLSubPropertyAxiom) {
-                    OWLSubPropertyAxiom<OWLObjectProperty> edge = (OWLSubPropertyAxiom<OWLObjectProperty>) ax;
-
-                    if (!edge.getSubProperty().isAnonymous()
-                            && !edge.getSuperProperty().isAnonymous()) {
-
-                        String subProperty = edge.getSubProperty().getURI().toString();
-                        String superProperty = edge.getSuperProperty().getURI().toString();
-                        addEdge(subProperty, superProperty);
-                    }
-                } else if (ax instanceof OWLObjectPropertyRangeAxiom) {
-
-                    // FIXME: Create an Exists(Inverse R)
-                    log.debug("ObjectPropRange: " + ax);
-
-                } else if (ax instanceof OWLObjectPropertyDomainAxiom) {
-
-                    // FIXME: Create an Exists(R)
-                    log.debug("ObjectPropDomain: " + ax);
-
+            for (OWLClass ax : onto.getReferencedClasses()) {
+                OWLClass cls = (OWLClass) ax;
+                Set<OWLDescription> sup_cls = cls.getSuperClasses(onto);
+                if (sup_cls.size() == 0 && !cls.isOWLThing()) {
+                    // top level class, manually add owl:Thing as superClass
+                    addEdge(cls.getURI().toString(), owl_thing);
                 } else {
-                    log.debug("Not supported axiom: " + ax);
+                    for (OWLDescription sc : sup_cls) {
+                        //FIXME: not handling existential quantification
+                        addEdge(cls.getURI().toString(), sc.asOWLClass().getURI().toString());
+                    }
                 }
             }
+            for (OWLObjectProperty ax : onto.getReferencedObjectProperties()) {
+                OWLObjectProperty obj = (OWLObjectProperty) ax;
+                Set<OWLObjectPropertyExpression> sup_prop = obj.getSuperProperties(onto);
+                String obj_str = obj.asOWLObjectProperty().getURI().toString();
+                if (sup_prop.size() == 0) {
+                    addEdge(obj_str, owl_thing);
+                } else {
+                    for (OWLObjectPropertyExpression spe : sup_prop) {
+                        addEdge(obj_str, spe.asOWLObjectProperty().getURI().toString());
+                    }
+                }
+
+                addNode(owl_exists + obj_str);
+                addNode(owl_inverse_exists + obj_str);
+            }
+
+            for (OWLDataProperty ax : onto.getReferencedDataProperties()) {
+                OWLDataProperty data = (OWLDataProperty) ax;
+                Set<OWLDataPropertyExpression> sup_pro = data.getSuperProperties(onto);
+                String data_str = data.asOWLDataProperty().getURI().toString();
+                if (sup_pro.size() == 0) {
+                    addEdge(data_str, owl_thing);
+                } else {
+                    for (OWLDataPropertyExpression spe : sup_pro) {
+                        addEdge(data_str, spe.asOWLDataProperty().getURI().toString());
+                    }
+                }
+
+                addNode(owl_exists + data_str);
+                addNode(owl_inverse_exists + data_str);
+
+            }
+            // Domain and Range
+            for (OWLPropertyAxiom ax : onto.getObjectPropertyAxioms()) {
+                if (ax instanceof OWLObjectPropertyDomainAxiom) {
+                    OWLObjectPropertyDomainAxiom domainAxiom = (OWLObjectPropertyDomainAxiom) ax;
+                    addEdge(owl_exists + domainAxiom.getProperty().toString(), domainAxiom.getDomain().toString());
+
+                } else if (ax instanceof OWLObjectPropertyRangeAxiom) {
+                    OWLObjectPropertyRangeAxiom rangeAxiom = (OWLObjectPropertyRangeAxiom) ax;
+                    addEdge(owl_inverse_exists + rangeAxiom.getProperty().toString(), rangeAxiom.getRange().toString());
+                }
+            }
+
         }
         index();
     }
@@ -111,6 +131,14 @@ public class DAG {
         f.getParents().add(t);
     }
 
+    private void addNode(String node) {
+        DAGNode dagNode = dagnodes.get(node);
+        if (dagNode == null) {
+            dagNode = new DAGNode(node);
+            dagnodes.put(node, dagNode);
+        }
+    }
+
     private void index() {
         LinkedList<DAGNode> roots = new LinkedList<DAGNode>();
         for (DAGNode n : dagnodes.values()) {
@@ -145,7 +173,7 @@ public class DAG {
     public String toString() {
         StringBuffer res = new StringBuffer();
         for (String uri : dagnodes.keySet()) {
-            res.append(uri + dagnodes.get(uri));
+            res.append(dagnodes.get(uri));
             res.append("\n");
         }
         return res.toString();
@@ -161,15 +189,13 @@ public class DAG {
             return false;
 
         DAG otherDAG = (DAG) other;
-        if (this.dagnodes.size() != otherDAG.dagnodes.size())
-            return false;
-
-        for (String i : otherDAG.dagnodes.keySet()) {
-            if (!this.dagnodes.containsKey(i)) {
-                return false;
-            }
-        }
-        return true;
+        return this.dagnodes.equals(otherDAG.dagnodes);
     }
+
+    @Override
+    public int hashCode() {
+        return this.dagnodes.hashCode();
+    }
+
 
 }

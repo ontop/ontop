@@ -1,4 +1,5 @@
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#A 1,4
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#B 2,4
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#C 3,4
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#D 4,4 
+http://www.w3.org/2002/07/owl#Thing 1 1:5
+http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#A 2 2:5
+http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#B 3 3:5
+http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#C 4 4:5
+http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#D 5 5:5

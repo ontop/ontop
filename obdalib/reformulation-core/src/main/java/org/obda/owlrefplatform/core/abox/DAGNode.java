@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.abox;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -13,8 +13,8 @@ public class DAGNode implements Comparable<DAGNode> {
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
-    private Set<DAGNode> parents = new HashSet<DAGNode>();
-    private Set<DAGNode> children = new HashSet<DAGNode>();
+    private Set<DAGNode> parents = new LinkedHashSet<DAGNode>();
+    private Set<DAGNode> children = new LinkedHashSet<DAGNode>();
 
     public DAGNode(String uri) {
         this.uri = uri;
@@ -30,17 +30,24 @@ public class DAGNode implements Comparable<DAGNode> {
             return false;
 
         DAGNode otherNode = (DAGNode) other;
-        return this.uri.equals(otherNode.uri);
+        return this.uri.equals(otherNode.uri)
+                && this.range.equals(otherNode.range)
+                && this.index == otherNode.index;
     }
 
     @Override
     public int hashCode() {
-        return this.uri.hashCode();
+        int result = 17;
+        result += 37 * result + this.uri.hashCode();
+        result += 37 * result + this.range.hashCode();
+        result += 37 * result + this.index;
+        return result;
+
     }
 
     @Override
     public String toString() {
-        return uri + range.toString();
+        return String.format("URI:%s, Range:%s, Idx: %d", uri, range, index);
     }
 
     @Override

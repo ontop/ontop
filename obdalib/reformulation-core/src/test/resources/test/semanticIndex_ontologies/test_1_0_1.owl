@@ -2,42 +2,38 @@
 
 
 <!DOCTYPE rdf:RDF [
-    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
-    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
-    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
-    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-    <!ENTITY Ontology1298746790294 "http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#" >
-]>
+        <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+        <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+        <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+        <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+        <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+        <!ENTITY Ontology1298746790294 "http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#" >
+        ]>
 
 
 <rdf:RDF xmlns="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#"
-     xml:base="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
-     xmlns:Ontology1298746790294="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+         xml:base="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+         xmlns:Ontology1298746790294="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <owl:Ontology rdf:about=""/>
-    
 
 
     <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Classes
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
+   ///////////////////////////////////////////////////////////////////////////////////////
+   //
+   // Classes
+   //
+   ///////////////////////////////////////////////////////////////////////////////////////
+    -->
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#A -->
 
     <owl:Class rdf:about="#A"/>
-    
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#B -->
@@ -45,7 +41,6 @@
     <owl:Class rdf:about="#B">
         <rdfs:subClassOf rdf:resource="#A"/>
     </owl:Class>
-    
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#C -->
@@ -53,7 +48,6 @@
     <owl:Class rdf:about="#C">
         <rdfs:subClassOf rdf:resource="#A"/>
     </owl:Class>
-    
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#D -->
@@ -61,7 +55,6 @@
     <owl:Class rdf:about="#D">
         <rdfs:subClassOf rdf:resource="#A"/>
     </owl:Class>
-    
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#E -->
@@ -69,73 +62,115 @@
     <owl:Class rdf:about="#E">
         <rdfs:subClassOf rdf:resource="#B"/>
     </owl:Class>
-    
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#F -->
 
     <owl:Class rdf:about="#F">
-        <rdfs:subClassOf rdf:resource="#B"/>
+        <rdfs:subClassOf rdf:resource="#C"/>
     </owl:Class>
-    
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#G -->
 
     <owl:Class rdf:about="#G">
-        <rdfs:subClassOf rdf:resource="#B"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#H -->
-
-    <owl:Class rdf:about="#H">
-        <rdfs:subClassOf rdf:resource="#C"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#I -->
-
-    <owl:Class rdf:about="#I">
-        <rdfs:subClassOf rdf:resource="#C"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#J -->
-
-    <owl:Class rdf:about="#J">
-        <rdfs:subClassOf rdf:resource="#C"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#K -->
-
-    <owl:Class rdf:about="#K">
         <rdfs:subClassOf rdf:resource="#D"/>
     </owl:Class>
-    
 
 
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#L -->
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
 
-    <owl:Class rdf:about="#L">
-        <rdfs:subClassOf rdf:resource="#D"/>
-    </owl:Class>
-    
+    <owl:Class rdf:about="&owl;Thing"/>
 
 
-    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#M -->
+    <!-- 
+   ///////////////////////////////////////////////////////////////////////////////////////
+   //
+   // Individuals
+   //
+   ///////////////////////////////////////////////////////////////////////////////////////
+    -->
 
-    <owl:Class rdf:about="#M">
-        <rdfs:subClassOf rdf:resource="#D"/>
-    </owl:Class>
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#a -->
+
+    <A rdf:about="#a">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </A>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#b -->
+
+    <B rdf:about="#b">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </B>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#c -->
+
+    <C rdf:about="#c">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </C>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#d -->
+
+    <owl:Thing rdf:about="#d">
+        <rdf:type rdf:resource="#D"/>
+    </owl:Thing>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#e -->
+
+    <E rdf:about="#e">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </E>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#f -->
+
+    <owl:Thing rdf:about="#f">
+        <rdf:type rdf:resource="#F"/>
+    </owl:Thing>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#g -->
+
+    <owl:Thing rdf:about="#g">
+        <rdf:type rdf:resource="#G"/>
+    </owl:Thing>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#h -->
+
+    <owl:Thing rdf:about="#h"/>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#i -->
+
+    <owl:Thing rdf:about="#i"/>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#j -->
+
+    <owl:Thing rdf:about="#j"/>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#k -->
+
+    <owl:Thing rdf:about="#k"/>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#l -->
+
+    <owl:Thing rdf:about="#l"/>
+
+
+    <!-- http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#m -->
+
+    <owl:Thing rdf:about="#m"/>
 </rdf:RDF>
 
 
-
-<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+        <!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
 
