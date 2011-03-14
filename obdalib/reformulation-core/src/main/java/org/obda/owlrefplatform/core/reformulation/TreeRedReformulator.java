@@ -270,10 +270,10 @@ public class TreeRedReformulator implements QueryRewriter {
 		log.debug("Removing trivially contained queries");
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
 
-		if (resultlist.size() < 300) {
+//		if (resultlist.size() < 300) {
 			log.debug("Removing CQC contained queries");
-			CQCUtilities.removeContainedQueriesSorted(resultlist, true);
-		}
+			CQCUtilities.removeContainedQueriesSorted(resultlist, false);
+//		}
 
 		DatalogProgram resultprogram = new DatalogProgramImpl();
 		resultprogram.appendRule(resultlist);
