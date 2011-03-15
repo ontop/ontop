@@ -53,7 +53,8 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	private MappingController controller = null;
 	private DefaultMutableTreeNode root = null;
-	private DatasourcesController dsc = null;
+//	private DatasourcesController dsc = null; TODO Remove this ds?
+	private URI currentDataSourceUri;
 	private final List<TreeModelFilter<OBDAMappingAxiom>> ListFilters = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 	protected APIController apic = null;
 
@@ -61,14 +62,22 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingTreeModel(APIController apic, DatasourcesController dsc,
-			MappingController controller) {
+	public MappingTreeModel(APIController apic,	MappingController controller) {
 		super(new DefaultMutableTreeNode("Mappings"));
 		this.apic = apic;
-		this.dsc = dsc;
 		root = (DefaultMutableTreeNode) getRoot();
 		this.controller = controller;
 	}
+	
+	// TODO Remove this ds?
+//	 public MappingTreeModel(APIController apic, DatasourcesController dsc,
+//	      MappingController controller) {
+//	    super(new DefaultMutableTreeNode("Mappings"));
+//	    this.apic = apic;
+//	    this.dsc = dsc;
+//	    root = (DefaultMutableTreeNode) getRoot();
+//	    this.controller = controller;
+//	  }
 
 	/***************************************************************************
 	 * Invoked when the model changes. It should be invoked only when it is
@@ -85,8 +94,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		Object oldmappingvalue = oldmappingnode.getUserObject();
 		super.valueForPathChanged(path, newValue);
 
-		URI sourceName = dsc.getCurrentDataSource().getSourceID();
-
+		// TODO Remove this ds?
+//		URI sourceName = dsc.getCurrentDataSource().getSourceID();
+		URI sourceName = currentDataSourceUri;
+		
 		if (oldmappingnode instanceof MappingNode) {
 			String query = (String) newValue;
 			controller.updateMapping(sourceName, (String) oldmappingvalue, query);
@@ -108,9 +119,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * is srcuri.
 	 */
 	public void mappingDeleted(URI srcuri, String mappingId) {
-		if (dsc.getCurrentDataSource()== null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
-			return;
-		}
+	  // TODO Remove this ds?
+//		if (dsc.getCurrentDataSource()== null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
+//			return;
+//		}
 		Enumeration<MappingNode> mappingNodes = root.children();
 		MappingNode affectedNode = null;
 		while (mappingNodes.hasMoreElements()) {
@@ -132,13 +144,14 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 */
 	public void mappingInserted(URI srcuri, String mapping_id) {
 		try {
-		DataSource currentsource = dsc.getCurrentDataSource();
-		if ((currentsource == null)|| !srcuri.equals(currentsource.getSourceID())) {
-			return;
-		}
-		URI src_uri = dsc.getCurrentDataSource().getSourceID();
-		RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller.getMapping(src_uri, mapping_id);
-		MappingNode mappingNode = MappingNode.getMappingNodeFromMapping(mapping);
+		  // TODO remove this ds?
+//  		DataSource currentsource = dsc.getCurrentDataSource();
+//  		if ((currentsource == null)|| !srcuri.equals(currentsource.getSourceID())) {
+//  			return;
+//  		}
+//  		URI src_uri = dsc.getCurrentDataSource().getSourceID();
+  		RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller.getMapping(srcuri, mapping_id);
+  		MappingNode mappingNode = MappingNode.getMappingNodeFromMapping(mapping);
 
 			insertNodeInto(mappingNode, root, root
 					.getChildCount());
@@ -155,9 +168,9 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	public void mappingUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
 		// SYNCWITH EVERYBODY EXCEPT WITH THE CONTROLLER SINCE IT WAS THE SOURCE
 		// OF THIS EVENT
-		if (dsc.getCurrentDataSource() == null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
-			return;
-		}
+//		if (dsc.getCurrentDataSource() == null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
+//			return;
+//		}
 		try {
 			MappingNode mappingnode = getMappingNode(mapping_id);
 			if (mappingnode == null) {
@@ -190,6 +203,8 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	public void currentSourceChanged(URI oldsrcuri, URI newsrcuri) {
 		// SYNCWITH EVERYBODY EXCEPT WITH THE CONTROLLER SINCE IT WAS THE SOURCE
 		// OF THIS EVENT
+	  this.currentDataSourceUri = newsrcuri;
+	  
 		try {
 			if (newsrcuri != null) {
 				root.setUserObject("Mappings for: " + newsrcuri);

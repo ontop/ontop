@@ -609,7 +609,7 @@ public class Dependency_SelectMappingPane extends javax.swing.JPanel implements
    */
   private void adjustTree() {
     
-    MappingTreeModel maptreemodel = new MappingTreeModel(apic, dsc, mapc);
+    MappingTreeModel maptreemodel = new MappingTreeModel(apic, mapc);
     MappingRenderer map_renderer = new MappingRenderer(apic, preference);
     treMapping.setModel(maptreemodel);
     treMapping.setSelectionModel(new MappingTreeSelectionModel());

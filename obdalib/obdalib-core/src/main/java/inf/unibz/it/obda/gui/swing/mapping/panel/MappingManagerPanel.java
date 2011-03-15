@@ -38,6 +38,7 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingPredicateTreeModelFil
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingSQLStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.RDBMSMappingValidator;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
@@ -134,7 +135,7 @@ public class MappingManagerPanel extends JPanel implements
     /***********************************************************************
      * Setting up the mappings tree
      */
-    MappingTreeModel maptreemodel = new MappingTreeModel(apic, dsc, mapc);
+    MappingTreeModel maptreemodel = new MappingTreeModel(apic, mapc);
     mapc.addMappingControllerListener(maptreemodel);
     treMappingsTree.setRootVisible(false);
     treMappingsTree.setModel(maptreemodel);
@@ -751,14 +752,16 @@ public class MappingManagerPanel extends JPanel implements
     MappingTreeModel model = (MappingTreeModel) treMappingsTree.getModel();
     treMappingsTree.requestFocus();
     try {
-      String mappingid = controller.insertMapping();
-      MappingNode newnode = model.getMappingNode(mappingid);
+      URI sourceId = selectedSource.getSourceID();
+      String mappingId = controller.getNextAvailableMappingID(sourceId);     
+      controller.insertMapping(selectedSource.getSourceID(), new RDBMSOBDAMappingAxiom(mappingId));
+      MappingNode newnode = model.getMappingNode(mappingId);
       treMappingsTree.scrollPathToVisible(new TreePath(newnode.getBodyNode().getPath()));
       treMappingsTree.setSelectionPath(new TreePath(newnode.getPath()));
       if (!newnode.isLeaf()) {
         treMappingsTree.expandPath(new TreePath(newnode.getPath()));
       }
-    } catch (NoDatasourceSelectedException e) {
+    } catch (NullPointerException e) {
       JOptionPane.showMessageDialog(null, "Select a data source first");
     } catch (DuplicateMappingException e) {
       e.printStackTrace(System.err);
