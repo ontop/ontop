@@ -16,9 +16,7 @@ import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class MappingController implements DatasourcesControllerListener {
+public class MappingController {
 
 	private ArrayList<MappingControllerListener>			listeners				= null;
 	private Hashtable<URI, ArrayList<OBDAMappingAxiom>>	mappings				= null;
@@ -50,7 +48,6 @@ public class MappingController implements DatasourcesControllerListener {
 		listeners = new ArrayList<MappingControllerListener>();
 		codec = new MappingXMLCodec(apic);
 		needsSyncwithReasoner = new Hashtable<URI, Boolean>();
-		dscontroller.addDatasourceControllerListener(this);
 	}
 
 	public void addMappingControllerListener(MappingControllerListener listener) {
@@ -119,8 +116,9 @@ public class MappingController implements DatasourcesControllerListener {
 			ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 			current_mappings.remove(index);
 		}
-		DataSource ds = dscontroller.getCurrentDataSource();
-		setNeedsSyncWithReasoner(ds.getSourceID(), true);
+		// TODO Remove this ds?
+//		DataSource ds = dscontroller.getCurrentDataSource();
+		setNeedsSyncWithReasoner(datasource_uri, true);
 		fireMappingDeleted(datasource_uri, mapping_id);
 	}
 
@@ -134,10 +132,11 @@ public class MappingController implements DatasourcesControllerListener {
 		while (!mappings.isEmpty()) {
 			mappings.remove(0);
 		}
-		DataSource ds = dscontroller.getCurrentDataSource();
-		if(ds !=null){
-			setNeedsSyncWithReasoner(ds.getSourceID(), true);
-		}
+		// TODO Remove this ds?
+//		DataSource ds = dscontroller.getCurrentDataSource();
+//		if(ds !=null){
+			setNeedsSyncWithReasoner(datasource_uri, true);
+//		}
 		fireAllMappingsRemoved();
 	}
 
@@ -310,28 +309,6 @@ public class MappingController implements DatasourcesControllerListener {
 		mappings.put(datasource_uri, new ArrayList<OBDAMappingAxiom>());
 	}
 
-	// TODO: Remove NoDatasourceSelectedException, always pass datasource as
-	// parameter
-	/***************************************************************************
-	 * Inserts a new mapping for the currently selected data source. If now
-	 * source is selected an exception is thrown.
-	 *
-	 * @deprecated Use the parameter instead
-	 *
-	 */
-	@Deprecated
-	public String insertMapping() throws NoDatasourceSelectedException, DuplicateMappingException {
-		DataSource currentsrc = dscontroller.getCurrentDataSource();
-		if ((currentsrc == null)) {
-			throw new NoDatasourceSelectedException("No datasource was selected");
-		}
-		String new_mapping_name = getNextAvailableMappingID(currentsrc.getSourceID());
-
-		insertMapping(currentsrc.getSourceID(), new RDBMSOBDAMappingAxiom(new_mapping_name));
-
-		return new_mapping_name;
-	}
-
 	/***************************************************************************
 	 * Inserts a mappings into the mappings for a datasource. If the ID of the
 	 * mapping already exits it throws an exception.
@@ -345,10 +322,11 @@ public class MappingController implements DatasourcesControllerListener {
 		if (index != -1)
 			throw new DuplicateMappingException("ID " + mapping.getId());
 		mappings.get(datasource_uri).add(mapping);
-		DataSource ds = dscontroller.getCurrentDataSource();
-		if(ds != null){
-			setNeedsSyncWithReasoner(ds.getSourceID(), true);
-		}
+		// TODO remove this ds?
+//		DataSource ds = dscontroller.getCurrentDataSource();
+//		if(ds != null){
+			setNeedsSyncWithReasoner(datasource_uri, true);
+//		}
 		fireMappingInserted(datasource_uri, mapping.getId());
 	}
 
@@ -437,9 +415,6 @@ public class MappingController implements DatasourcesControllerListener {
 		}
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
-
-	@Override
-	public void datasourcParametersUpdated() {}
 
 	public void activeOntologyChanged(){
 		for (MappingControllerListener listener : listeners) {
