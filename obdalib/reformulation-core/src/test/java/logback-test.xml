@@ -26,7 +26,7 @@
 	-->
 	
 
-	<root level="DEBUG">
+	<root level="WARN">
 		<appender-ref ref="STDOUT" />
 		
 	</root>

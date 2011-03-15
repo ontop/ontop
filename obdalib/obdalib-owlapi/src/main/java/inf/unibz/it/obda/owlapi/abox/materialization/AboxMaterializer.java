@@ -107,8 +107,9 @@ public class AboxMaterializer {
 			while (a_it.hasNext()) {
 				ResultSet res = jdbcMan.executeQuery(ds, sql);
 				Atom atom = a_it.next();
-				String name = atom.getPredicate().getName().getFragment();
-				String uri = ontoUri+"#"+name;
+//				String name = atom.getPredicate().getName().getFragment();
+//				String uri = ontoUri+"#"+name;
+				String uri = atom.getPredicate().getName().toString();
 				int arity = atom.getArity();
 				if (arity == 1) {  // Concept query atom
 					if (classesURIs.contains(uri)) {
@@ -133,8 +134,9 @@ public class AboxMaterializer {
 								}
 								sb.append(aux.toString());
 //								System.out.println(sb.toString());
-								OWLIndividual ind = factory.getOWLIndividual(sb.toString(), nm);
+								OWLIndividual ind = factory.getOWLIndividual(URI.create(sb.toString()));
 								OWLClass clazz = factory.getOWLClass(new URI(uri));
+								
 								OWLClassAssertionAxiom classAssertion = factory.getOWLClassAssertionAxiom(ind, clazz);
 //								manager.addAxiom(currentOntology, classAssertion);
 								individuals.add(classAssertion);
@@ -166,10 +168,10 @@ public class AboxMaterializer {
 							}
 							sb.append(aux.toString());
 //							System.out.println(sb.toString());
-							OWLIndividual ind = factory.getOWLIndividual(sb.toString(),nm);
+							OWLIndividual ind = factory.getOWLIndividual(URI.create(sb.toString()));
 							OWLDataProperty prop = factory.getOWLDataProperty(new URI(uri));
 							String value = res.getString(valueVar);
-							OWLDataPropertyAssertionAxiom axiom = factory.getOWLDataPropertyAssertionAxiom(ind, prop, value);
+							OWLDataPropertyAssertionAxiom axiom = factory.getOWLDataPropertyAssertionAxiom(ind, prop, factory.getOWLUntypedConstant(value));
 //							manager.addAxiom(currentOntology, axiom);
 							individuals.add(axiom);
 						}
@@ -210,8 +212,8 @@ public class AboxMaterializer {
 							}
 							sb2.append(aux2.toString());
 //							System.out.println(sb2.toString());
-							OWLIndividual ind1 = factory.getOWLIndividual(sb1.toString(),nm);
-							OWLIndividual ind2 = factory.getOWLIndividual(sb2.toString(),nm);
+							OWLIndividual ind1 = factory.getOWLIndividual(URI.create(sb1.toString()));
+							OWLIndividual ind2 = factory.getOWLIndividual(URI.create(sb2.toString()));
 							OWLObjectProperty prop = factory.getOWLObjectProperty(new URI(uri));
 							OWLObjectPropertyAssertionAxiom axiom = factory.getOWLObjectPropertyAssertionAxiom(ind1, prop, ind2);
 //							manager.addAxiom(currentOntology, axiom);

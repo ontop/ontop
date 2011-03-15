@@ -275,7 +275,7 @@ public class ABoxToDBDumper {
 						OWLIndividual i = caa.getIndividual();
 						String alias = classMapper.get(des.toString());
 						String tablename = ontoname + "_" + alias;
-						String in = onto.getURI().toString() + "#" + i.getURI().getFragment();
+						String in = i.getURI().toString();
 						add(tablename, in);
 					}
 
@@ -287,8 +287,8 @@ public class ABoxToDBDumper {
 					OWLDataPropertyExpression prop = paa.getProperty();
 					String alias = datapropertyMapper.get(prop.toString());
 					String tablename = ontoname + "_" + alias;
-					add(tablename, onto.getURI().toString() + "#" + sub.getURI().getFragment(), onto.getURI().toString() + "#"
-							+ obj.getLiteral());
+					add(tablename, sub.getURI().toString(), 
+							obj.getLiteral());
 
 				} else if (ax instanceof OWLObjectPropertyAssertionAxiom) {
 					OWLObjectPropertyAssertionAxiom ppa = (OWLObjectPropertyAssertionAxiom) ax;
@@ -297,8 +297,7 @@ public class ABoxToDBDumper {
 					OWLObjectPropertyExpression prop = ppa.getProperty();
 					String alias = objectporpertyMapper.get(prop.toString());
 					String tablename = ontoname + "_" + alias;
-					add(tablename, onto.getURI().toString() + "#" + sub.getURI().getFragment(), onto.getURI().toString() + "#"
-							+ obj.getURI().getFragment());
+					add(tablename, sub.getURI().toString(), obj.getURI().toString());
 				}
 			}
 		}

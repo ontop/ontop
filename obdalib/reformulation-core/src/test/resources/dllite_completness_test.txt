@@ -819,17 +819,17 @@ These are the first cases which tests the effects of unification and positive in
 = Combined tests with booleans and constants =
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
-|| 91 || a || A ISA ER, ER^^-^^ ISA ER || A(a1) A(a2) R(a2,r1) R(r1,r2) R(r2,r3) || q(x) :- A(x) R(x,y) R(y,z) R(z,m) || {a1 a2}|| ||
-|| 92 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) || {a} || ||
-|| 93 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) R(x,y3) A(y3) R(y3,z2) || {a} || ||
-|| 94 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
-|| 95 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
-|| 96 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
-|| 97 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
-|| 98 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
+|| 190 || a ||  A ISA ER, R RISA S, ER^^-^^ ISA B, B ISA EP, P RISA Q || A(a)  || q() :- P(x,y), Q(x,y) || {true}  || ||
+|| 191 || a || A ISA ER, ER^^-^^ ISA ER || A(a1) A(a2) R(a2,r1) R(r1,r2) R(r2,r3) || q(x) :- A(x) R(x,y) R(y,z) R(z,m) || {a1 a2}|| ||
+|| 192 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) || {a} || ||
+|| 193 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) R(x,y3) A(y3) R(y3,z2) || {a} || ||
+|| 194 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
+|| 195 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
+|| 196 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
+|| 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
+|| 198 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
 
 
 #END# Correct tests end here, ignore the ones bellow
 
 We need to complement with transtivity tests for all concept description and role description types.
-

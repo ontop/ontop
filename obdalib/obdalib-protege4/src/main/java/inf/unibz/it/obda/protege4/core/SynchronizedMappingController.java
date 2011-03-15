@@ -79,7 +79,13 @@ public class SynchronizedMappingController extends MappingController implements 
 	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
 			throws OWLException {
 
+		try {
 		((OWLAPICoupler)apic.getCoupler()).updateOntologies();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (changes.size() < 1)
+			return;
 		URI u = changes.get(0).getOntology().getURI();
 		String ontoprefix= null;
 		if(!u.toString().endsWith("#")){

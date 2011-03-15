@@ -20,7 +20,7 @@
 	<logger name="it.fub.inf.quonto" level="INFO" />
 	<logger name="it.fub.inf.quonto.dig11.http" level="INFO" />
 	<logger name="it.uniroma1.dis.quonto.mastromanager" level="INFO" />
-	<logger name="obda_tests" level="DEBUG" />
+	<logger name="obda_tests" level="INFO" />
 	<logger name="ch.qos.logback" level="WARN" />
 
 

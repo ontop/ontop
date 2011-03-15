@@ -80,7 +80,11 @@ public class SynchronizedMappingController extends MappingController implements 
 		if (changes.size() <= 0) {
 			return;
 		}
+		try {
 		((OWLAPICoupler)apic.getCoupler()).synchWithOntology(changes.get(0).getOntology());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		String ontoprefix = apic.getCoupler().getPrefixForUri(changes.get(0).getOntology().getURI());
 		List<RemoveAxiom> vec = getRemoveAxioms(changes);
 		if(vec != null){

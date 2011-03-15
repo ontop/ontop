@@ -289,7 +289,7 @@
 							dependencies are packed as .classes (uncompressed, no jars) and
 							the rest is packed as .jars
 						-->
-						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
+3						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,reformulation*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
 						<!-- necessary for protege 4 plugins -->
 						<Bundle-Category>protege</Bundle-Category>
@@ -323,7 +323,7 @@
 							This makes sure all OBDA classes are exported and available in
 							dependent projects
 						-->
-						<Export-Package>inf.unibz.it.*</Export-Package>
+						<Export-Package>inf.unibz.it.*,org.obda.*</Export-Package>
 
 
 						<!--
