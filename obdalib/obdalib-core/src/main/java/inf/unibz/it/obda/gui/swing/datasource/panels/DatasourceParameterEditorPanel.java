@@ -204,7 +204,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         panelDataSourceEditor.add(labelID, gridBagConstraints);
 
-        fieldURI.setEditable(false);
         fieldURI.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         fieldURI.setMinimumSize(new java.awt.Dimension(180, 19));
         fieldURI.setName("somename"); // NOI18N
