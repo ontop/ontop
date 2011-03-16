@@ -4,23 +4,16 @@ import inf.unibz.it.obda.owlapi.abox.materialization.AboxMaterializer;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;
-import java.net.URI;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import org.protege.editor.core.ProtegeManager;
-import org.protege.editor.core.editorkit.EditorKit;
-import org.protege.editor.core.editorkit.EditorKitFactory;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.event.EventType;
-import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.SimpleURIMapper;
 
 public class AboxMaterializationAction extends ProtegeAction {
 

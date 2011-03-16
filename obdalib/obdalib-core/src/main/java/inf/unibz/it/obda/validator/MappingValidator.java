@@ -14,10 +14,9 @@
 package inf.unibz.it.obda.validator;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.domain.Query;
 
 import java.util.Enumeration;
-
-import org.obda.query.domain.Query;
 
 public abstract class MappingValidator {
 

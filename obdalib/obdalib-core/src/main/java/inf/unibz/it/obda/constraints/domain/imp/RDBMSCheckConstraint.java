@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.constraints.domain.imp;
 
 import inf.unibz.it.obda.constraints.domain.CheckConstraint;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.ucq.typing.CheckOperationTerm;
 import inf.unibz.it.ucq.typing.XSDTypingController;
@@ -8,7 +9,6 @@ import inf.unibz.it.ucq.typing.XSDTypingController;
 import java.util.Iterator;
 import java.util.List;
 
-import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.ValueConstantImpl;
 

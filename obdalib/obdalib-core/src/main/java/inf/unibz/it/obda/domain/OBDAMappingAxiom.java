@@ -13,7 +13,6 @@
  */
 package inf.unibz.it.obda.domain;
 
-import org.obda.query.domain.Query;
 
 
 public interface OBDAMappingAxiom extends Cloneable {

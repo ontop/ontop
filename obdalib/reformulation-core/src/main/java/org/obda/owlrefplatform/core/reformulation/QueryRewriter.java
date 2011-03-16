@@ -1,9 +1,10 @@
 package org.obda.owlrefplatform.core.reformulation;
 
+import inf.unibz.it.obda.domain.Query;
+
 import java.util.List;
 
 import org.obda.owlrefplatform.core.ontology.Assertion;
-import org.obda.query.domain.Query;
 
 public interface QueryRewriter {
 

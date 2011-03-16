@@ -1,9 +1,8 @@
 package inf.unibz.it.utils.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-
-import org.obda.query.domain.Query;
 
 /**
  * This class should be used to create a target query from a String respectively

@@ -13,7 +13,8 @@
  */
 package inf.unibz.it.obda.validator;
 
-import org.obda.query.domain.Query;
+import inf.unibz.it.obda.domain.Query;
+
 
 public abstract class QueryValidator {
 

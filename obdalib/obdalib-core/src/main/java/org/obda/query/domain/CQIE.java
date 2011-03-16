@@ -1,8 +1,10 @@
 package org.obda.query.domain;
 
+import inf.unibz.it.obda.domain.Query;
+
 import java.util.List;
 
-public interface CQIE extends Query{
+public interface CQIE extends Query {
 
 	public Atom getHead();
 	public List<Atom> getBody();

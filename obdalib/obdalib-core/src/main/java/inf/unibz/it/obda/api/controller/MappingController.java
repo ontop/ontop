@@ -16,13 +16,13 @@ import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.obda.query.domain.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

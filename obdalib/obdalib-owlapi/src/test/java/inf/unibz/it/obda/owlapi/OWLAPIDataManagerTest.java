@@ -2,6 +2,7 @@ package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.domain.Query;
 
 import java.io.File;
 import java.net.URI;
@@ -11,7 +12,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.obda.query.domain.Query;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;

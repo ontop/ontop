@@ -1,10 +1,7 @@
 package inf.unibz.it.obda.protege4.gui.view.query;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
-import inf.unibz.it.obda.api.inference.reasoner.UCQReasoner;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
@@ -15,12 +12,7 @@ import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.protege4.gui.action.query.P4GetDefaultSPARQLPrefixAction;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
-import inf.unibz.it.ucq.domain.QueryResult;
-import inf.unibz.it.ucq.domain.UnionOfConjunctiveQueries;
-import inf.unibz.it.ucq.parser.sparql.UCQTranslator;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
-import inf.unibz.it.ucq.swing.IncrementalQueryResultTableModel;
-import inf.unibz.it.utils.swing.TextMessageDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -28,9 +20,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.ResultSet;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -50,10 +39,6 @@ import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntologyChange;
 import org.semanticweb.owl.model.OWLOntologyChangeListener;
-
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QueryParseException;
 
 public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implements SavedQueriesPanelListener{
 	/**
@@ -129,35 +114,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 //			@Override
 			public void run(String query, QueryInterfacePanel panel) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-					try {
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						Query sparqlQuery = QueryFactory.create(prefix + "\n" + query);
-						UCQTranslator translator = new UCQTranslator();
-						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-						String result = ((UCQReasoner) reasoner).getUnfolding(ucq);
-						String newsql = "SELECT count(*) FROM (" +result+") t1";
-						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-						DataSource ds = obdaController.getDatasourcesController().getCurrentDataSource();
-						if(ds == null){
-							JOptionPane.showMessageDialog(null, "Error: \n No data source selected");
-						}else{
-							ResultSet set = man.executeQuery(ds, newsql);
-							if(set.next()){
-								int o =Integer.parseInt(set.getObject(1).toString());
-								panel.updateStatus(o);
-							}
-							set.getStatement().close();
-							set.close();
-						}
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
-						e.printStackTrace();
-					}
-				} else if(reasoner instanceof DataQueryReasoner){
+				if(reasoner instanceof DataQueryReasoner){
 
 					try {
 						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
@@ -185,52 +142,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		});
 
-		panel_view_results.setCountAllTuplesActionForEQL(new OBDADataQueryAction(){
-
-//			@Override
-			public long getExecutionTime() {
-				return 0;
-			}
-
-//			@Override
-			public int getNumberOfRows() {
-				return 0;
-			}
-
-//			@Override
-			public void run(String query, QueryInterfacePanel panel) {
-
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-
-					try {
-						String sql = ((UCQReasoner) reasoner).unfoldEQL(query);
-						String newsql = "SELECT count(*) FROM (" +sql+") t1";
-						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-						DataSource ds = obdaController.getDatasourcesController().getCurrentDataSource();
-						if(ds == null){
-							JOptionPane.showMessageDialog(null, "Error: \n No data source selected");
-						}else{
-							ResultSet set = man.executeQuery(ds, newsql);
-							if(set.next()){
-								int o =Integer.parseInt(set.getObject(1).toString());
-								panel.updateStatus(o);
-							}
-							set.getStatement().close();
-							set.close();
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
-					}
-				} else {
-					JOptionPane
-					.showMessageDialog(null,
-							"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
-				}
-			}
-
-		});
+		
 
 		panel_query_interface.setExecuteUCQAction(new OBDADataQueryAction() {
 
@@ -239,36 +151,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 			public void run(String query, QueryInterfacePanel panel) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-					try {
-						long startTime = System.currentTimeMillis();
-						QueryhistoryController.getInstance().addQuery(query);
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						Query sparqlQuery = QueryFactory.create(prefix + "\n" + query);
-						UCQTranslator translator = new UCQTranslator();
-						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-						QueryResult result = ((UCQReasoner) reasoner).answerUCQ(ucq);
-						IncrementalQueryResultTableModel model = new IncrementalQueryResultTableModel(result);
-						model.addTableModelListener(panel);
-						rows = model.getRowCount();
-//						JOptionPane.showMessageDialog(null, "Number of tuples retrieved: " + rows);
-						panel_view_results.setTableModel(model);
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-					} catch (QueryParseException e) {
-						JOptionPane.showMessageDialog(null, "Syntax error in the SPARQL query. Parser's message:\n" + e.getMessage());
-						// e.printStackTrace(System.err);
-					} catch (Exception e) {
-						TextMessageDialog dialog = new TextMessageDialog(null, true);
-						StringWriter st = new StringWriter();
-						e.printStackTrace(new PrintWriter(st));
-						dialog.setText(st.toString());
-						dialog.setVisible(true);
-					}
-				}else if(reasoner instanceof DataQueryReasoner){
+				if(reasoner instanceof DataQueryReasoner){
 
 					try {
 						long startTime = System.currentTimeMillis();
@@ -310,120 +193,9 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		});
 
-		panel_query_interface.setRetrieveEQLUnfoldingAction(new OBDADataQueryAction() {
+		
 
-			private long time = 0;
-
-			public long getExecutionTime() {
-				return time;
-			}
-
-			public int getNumberOfRows() {
-				return 0;
-			}
-
-			public void run(String query, QueryInterfacePanel pane) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-
-					try {
-						long startTime = System.currentTimeMillis();
-						String sql = ((UCQReasoner) reasoner).unfoldEQL(query);
-
-//						JTextArea textArea = new JTextArea("\n\nQuery expansion:\n\n" + sql);
-//						textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
-//						JScrollPane scroll = new JScrollPane(textArea);
-//
-//						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-//						final JDialog dialog = new JDialog(protegeFrame);
-//						dialog.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-//						dialog.setTitle("Query Expansion");
-//						dialog.getContentPane().setLayout(new BorderLayout());
-//						dialog.getContentPane().add(scroll, BorderLayout.CENTER);
-//						JButton closeButton = new JButton("Close");
-//						closeButton.addActionListener(new ActionListener() {
-//							public void actionPerformed(ActionEvent e) {
-//								dialog.dispose();
-//							}
-//						});
-//
-//						JPanel south = new JPanel();
-//						south.add(closeButton);
-//						dialog.getContentPane().add(south, BorderLayout.SOUTH);
-//						dialog.setSize(800, 600);
-//
-//						dialog.setVisible(true);
-//						closeButton.requestFocus();
-
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						TextMessageFrame panel = new TextMessageFrame();
-						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-						panel.displaySQL(sql);
-						panel.setTitle("Query Unfolding");
-						double aux = time;
-						aux = aux/1000;
-						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
-						panel.updateStatus(msg);
-						panel.setVisible(true);
-
-					} catch (Exception e) {
-						e.printStackTrace();
-						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
-					}
-
-				} else {
-					JOptionPane
-					.showMessageDialog(null,
-							"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
-		}
-			}
-		});
-
-		panel_query_interface.setExecuteEQLAction(new OBDADataQueryAction() {
-
-			private long time =0;
-			private int rows =0;
-
-			public void run(String query, QueryInterfacePanel panel) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-					try {
-						long startTime = System.currentTimeMillis();
-						QueryResult result = ((UCQReasoner) reasoner).answerEQL(query);
-						IncrementalQueryResultTableModel model = new IncrementalQueryResultTableModel(result);
-						model.addTableModelListener(panel);
-//						JOptionPane.showMessageDialog(null, "Tuples retrieved: " + model.getRowCount());
-						panel_view_results.setTableModel(model);
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						rows = model.getRowCount();
-					} catch (QueryParseException e) {
-						JOptionPane.showMessageDialog(null, "Syntax error in the SPARSQL query. Parser's message:\n" + e.getMessage());
-						// e.printStackTrace(System.err);
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "Error while executing the query. Reasoner's message:\n" + e.getMessage());
-						e.printStackTrace(System.err);
-					}
-				} else {
-					JOptionPane
-							.showMessageDialog(null,
-									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
-				}
-			}
-
-			public long getExecutionTime() {
-				return time;
-			}
-
-			public int getNumberOfRows() {
-				return rows;
-			}
-
-		});
+		
 
 		panel_query_interface.setRetrieveUCQExpansionAction(new OBDADataQueryAction() {
 
@@ -432,67 +204,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 			public void run(String query,QueryInterfacePanel pane) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-//					try {
-//						long startTime = System.currentTimeMillis();
-//						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-//								.getModelManager());
-//						prefixAction.run();
-//						String prefix = (String) prefixAction.getResult();
-//						Query sparqlQuery = QueryFactory.create(prefix + "\n" + query);
-//						UCQTranslator translator = new UCQTranslator();
-//						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-//						UnionOfConjunctiveQueries result = ((UCQReasoner) reasoner).getRewritting(ucq);
-//						String s = "";
-//						if(result != null){
-//							UCQDatalogStringRenderer ren = new UCQDatalogStringRenderer(obdaController);
-//							s = ren.encode(result);
-//						}
-//						JTextArea textArea = new JTextArea("\n\nQuery expansion:\n\n" + result);
-//						textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
-//						JScrollPane scroll = new JScrollPane(textArea);
-//
-//						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-//						final JDialog dialog = new JDialog(protegeFrame);
-//						dialog.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-//						dialog.setTitle("Query Expansion");
-//						dialog.getContentPane().setLayout(new BorderLayout());
-//						dialog.getContentPane().add(scroll, BorderLayout.CENTER);
-//						JButton closeButton = new JButton("Close");
-//						closeButton.addActionListener(new ActionListener() {
-//							public void actionPerformed(ActionEvent e) {
-//								dialog.dispose();
-//							}
-//						});
-//
-//						JPanel south = new JPanel();
-//						south.add(closeButton);
-//						dialog.getContentPane().add(south, BorderLayout.SOUTH);
-//						dialog.setSize(800, 600);
-//
-//						dialog.setVisible(true);
-//						closeButton.requestFocus();
-
-//						long end = System.currentTimeMillis();
-//						time = end - startTime;
-//						TextMessageFrame panel = new TextMessageFrame();
-//						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-//						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-//						panel.displaySQL(s);
-//						panel.setTitle("Query Expansion");
-//						panel.updateBoderTitel("Query Expansion");
-//						double aux = time;
-//						aux = aux/1000;
-//						String msg = "Total expansion time: " + String.valueOf(aux) + " sec";
-//						panel.updateStatus(msg);
-//						panel.setVisible(true);
-//
-//					} catch (Exception e) {
-//						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
-//					}
-				} else if(reasoner instanceof DataQueryReasoner){
+				if(reasoner instanceof DataQueryReasoner){
 
 					try {
 						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
@@ -551,60 +263,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 			public void run(String query, QueryInterfacePanel pane) {
 				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if (reasoner instanceof UCQReasoner) {
-					try {
-						long startTime = System.currentTimeMillis();
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						Query sparqlQuery = QueryFactory.create(prefix + "\n" + query);
-						UCQTranslator translator = new UCQTranslator();
-						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-						String result = ((UCQReasoner) reasoner).getUnfolding(ucq);
-
-//						JTextArea textArea = new JTextArea("\n\nSQL Unfolding:\n\n" + result);
-//						textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
-//						JScrollPane scroll = new JScrollPane(textArea);
-//
-//						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-//						final JDialog dialog = new JDialog(protegeFrame);
-//						dialog.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-//						dialog.setTitle("Query Unfolding");
-//						dialog.getContentPane().setLayout(new BorderLayout());
-//						dialog.getContentPane().add(scroll, BorderLayout.CENTER);
-//						JButton closeButton = new JButton("Close");
-//						closeButton.addActionListener(new ActionListener() {
-//							public void actionPerformed(ActionEvent e) {
-//								dialog.dispose();
-//							}
-//						});
-//
-//						JPanel south = new JPanel();
-//						south.add(closeButton);
-//						dialog.getContentPane().add(south, BorderLayout.SOUTH);
-//						dialog.setSize(800, 600);
-//
-//						dialog.setVisible(true);
-//						closeButton.requestFocus();
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-						TextMessageFrame panel = new TextMessageFrame();
-						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-						panel.displaySQL(result);
-						panel.setTitle("Query Unfolding");
-						double aux = time;
-						aux = aux/1000;
-						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
-						panel.updateStatus(msg);
-						panel.setVisible(true);
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "Error: \n" + e.getMessage());
-					}
-				} else if(reasoner instanceof DataQueryReasoner){
+				if(reasoner instanceof DataQueryReasoner){
 					DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
 
 					try {

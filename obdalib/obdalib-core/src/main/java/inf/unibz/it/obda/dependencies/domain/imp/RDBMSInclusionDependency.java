@@ -1,13 +1,13 @@
 package inf.unibz.it.obda.dependencies.domain.imp;
 
 import inf.unibz.it.obda.dependencies.domain.InclusionDependencyAssertion;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
-import org.obda.query.domain.Query;
 import org.obda.query.domain.Variable;
 
 /**

@@ -1,12 +1,12 @@
 package inf.unibz.it.obda.constraints.domain.imp;
 
 import inf.unibz.it.obda.constraints.domain.PrimaryKeyConstraint;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.obda.query.domain.Query;
 import org.obda.query.domain.Variable;
 
 public class RDBMSPrimaryKeyConstraint extends PrimaryKeyConstraint{

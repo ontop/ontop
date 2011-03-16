@@ -1,5 +1,7 @@
 package org.obda.query.domain;
 
+import inf.unibz.it.obda.domain.Query;
+
 import java.util.List;
 
 public interface DatalogProgram extends Query {

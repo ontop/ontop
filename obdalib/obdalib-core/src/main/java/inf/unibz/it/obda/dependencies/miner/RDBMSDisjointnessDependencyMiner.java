@@ -5,6 +5,7 @@ import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.dependencies.miner.exception.MiningException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
@@ -28,7 +29,6 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
 import org.obda.query.domain.Atom;
-import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;

@@ -1,5 +1,7 @@
 package org.obda.owlrefplatform.core.reformulation;
 
+import inf.unibz.it.obda.domain.Query;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +27,6 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Query;
 import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

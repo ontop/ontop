@@ -13,19 +13,7 @@
  */
 package inf.unibz.it.obda.domain;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 
-@Deprecated
-public abstract class SourceQuery extends Query {
-
-	public SourceQuery(String inputquery, APIController apic) throws QueryParseException {
-		super(inputquery, apic);
-	}
-	
-	
-	public SourceQuery() throws QueryParseException {
-		super();
-	}
+public interface SourceQuery extends Query {
 
 }

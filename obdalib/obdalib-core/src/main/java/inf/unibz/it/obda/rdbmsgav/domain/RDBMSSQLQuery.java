@@ -13,11 +13,12 @@
  */
 package inf.unibz.it.obda.rdbmsgav.domain;
 
-import org.obda.query.domain.Query;
+import inf.unibz.it.obda.domain.Query;
 
 
 
 public class RDBMSSQLQuery implements Query {
+
 
 	private final String sqlQuery;
 

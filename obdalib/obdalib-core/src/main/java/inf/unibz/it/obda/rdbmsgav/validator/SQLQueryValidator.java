@@ -14,14 +14,13 @@ package inf.unibz.it.obda.rdbmsgav.validator;
 
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.validator.QueryValidator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.obda.query.domain.Query;
 
 public class SQLQueryValidator extends QueryValidator {
 

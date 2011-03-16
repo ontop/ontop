@@ -14,11 +14,13 @@
 package inf.unibz.it.obda.gui.swing.mapping.tree;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.domain.SourceQuery;
+import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
@@ -38,7 +40,6 @@ import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.RecognitionException;
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Query;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;

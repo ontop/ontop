@@ -31,7 +31,6 @@ import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
-import inf.unibz.it.ucq.parser.exception.QueryParseException;
 import inf.unibz.it.utils.io.FileUtils;
 import inf.unibz.it.utils.xml.XMLUtils;
 
@@ -58,6 +57,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.hp.hpl.jena.query.QueryParseException;
 
 /*******************************************************************************
  * Coordinates the saving/loading of the data for the plugin
@@ -375,12 +376,10 @@ public class DataManager {
 			if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element node = (Element) children.item(i);
 				if (node.getNodeName().equals("mappings")) { // Found mapping block
-					try {
+					
 				    URI source = URI.create(node.getAttribute("sourceuri"));
 						importMappingsFromXML(source, node);
-					} catch (QueryParseException e) {
-						log.warn(e.getMessage(), e);
-					}
+					
 				}
 				if ((major < 0) && (node.getNodeName().equals("datasource"))) {
 					// Found old data-source block
@@ -594,7 +593,7 @@ public class DataManager {
    * @see RDBMSOBDAMappingAxiom
    */
   protected void importMappingsFromXML(URI datasource, Element mappingRoot)
-      throws QueryParseException {
+      {
     NodeList childs = mappingRoot.getChildNodes();
     for (int i = 0; i < childs.getLength(); i++) {
       try {

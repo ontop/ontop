@@ -1,10 +1,10 @@
 package inf.unibz.it.obda.dependencies.domain;
 
 import inf.unibz.it.obda.dependencies.AbstractDependencyAssertion;
+import inf.unibz.it.obda.domain.Query;
 
 import java.util.List;
 
-import org.obda.query.domain.Query;
 import org.obda.query.domain.Variable;
 
 /**

@@ -1,6 +1,7 @@
 package inf.unibz.it.utils.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.domain.Query;
 
 import java.util.Iterator;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.List;
 import org.antlr.runtime.RecognitionException;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Query;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.tools.parser.DatalogProgramParser;
