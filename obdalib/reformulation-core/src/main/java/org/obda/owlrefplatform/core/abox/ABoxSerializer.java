@@ -78,7 +78,9 @@ public class ABoxSerializer {
         PreparedStatement role_stm = conn.prepareStatement(role_insert);
         PreparedStatement lit_stm = conn.prepareStatement(literal_insert);
 
-        Map<String, DAGNode> index = dag.getIndex();
+        Map<String, DAGNode> cls_index = dag.getClassIndex();
+        Map<String, DAGNode> obj_index = dag.getObjectPropertyIndex();
+        Map<String, DAGNode> data_index = dag.getDataPropertyIndex();
 
 
         for (OWLOntology onto : ontologies) {
@@ -91,7 +93,7 @@ public class ABoxSerializer {
                     String uri = triple.getSubject().asOWLIndividual().getURI().toString();
                     String lit = triple.getObject().getLiteral();
 
-                    int idx = index.get(prop).getIndex();
+                    int idx = data_index.get(prop).getIndex();
 
                     lit_stm.setString(1, uri);
                     lit_stm.setString(2, lit);
@@ -104,9 +106,7 @@ public class ABoxSerializer {
                     String uri1 = triple.getSubject().asOWLIndividual().getURI().toString();
                     String uri2 = triple.getObject().asOWLIndividual().getURI().toString();
 
-
-                    int idx = index.get(prop).getIndex();
-                    //log.debug(uri1+" "+uri2+" " + Integer.toString(idx));
+                    int idx = obj_index.get(prop).getIndex();
 
                     role_stm.setString(1, uri1);
                     role_stm.setString(2, uri2);
@@ -119,7 +119,7 @@ public class ABoxSerializer {
                     // XXX: strange behaviour - owlapi generates an extra assertion of the form ClassAssertion(Thing, i)
                     if (!cls.equals(DAG.owl_thing)) {
                         String uri = triple.getIndividual().getURI().toString();
-                        int idx = index.get(cls).getIndex();
+                        int idx = cls_index.get(cls).getIndex();
 
                         cls_stm.setString(1, uri);
                         cls_stm.setInt(2, idx);

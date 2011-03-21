@@ -1,5 +1,12 @@
-http://www.w3.org/2002/07/owl#Thing 1 1:5
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#A 2 2:5
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#B 3 3:5
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#C 4 4:5
-http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#D 5 5:5
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<dag>
+    <classes>
+        <class uri="http://www.w3.org/2002/07/owl#Thing" index="1" range="1:5"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#A" index="2" range="2:5"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#B" index="3" range="3:5"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#C" index="4" range="4:5"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#D" index="5" range="5:5"/>
+    </classes>
+    <objectproperties/>
+    <dataproperties/>
+</dag>

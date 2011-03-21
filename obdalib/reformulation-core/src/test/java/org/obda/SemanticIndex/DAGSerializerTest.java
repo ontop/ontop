@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DAGSerializerTest extends TestCase {
@@ -25,8 +26,7 @@ public class DAGSerializerTest extends TestCase {
         assertEquals(true, rs.next());
     }
 
-    private void load_and_test_dag(String ontoname)
-            throws OWLOntologyCreationException, SQLException {
+    private void load_and_test_dag(String ontoname) throws OWLOntologyCreationException, SQLException {
 
         DAG dag = helper.load_dag(ontoname);
 
@@ -35,21 +35,45 @@ public class DAGSerializerTest extends TestCase {
 
         ResultSet res_rows = helper.conn.createStatement().executeQuery(
                 "SELECT * FROM " + DAGSerializer.index_table);
-        Map<String, DAGNode> res_ranges = new HashMap<String, DAGNode>();
+
+        Map<String, DAGNode> res_classes = new HashMap<String, DAGNode>();
+        Map<String, DAGNode> res_obj_props = new HashMap<String, DAGNode>();
+        Map<String, DAGNode> res_data_props = new HashMap<String, DAGNode>();
+        Map<String, DAGNode> tmp;
+
         while (res_rows.next()) {
             String uri = res_rows.getString(1);
-            int start_idx = res_rows.getInt(2);
-            int end_idx = res_rows.getInt(3);
-            if (res_ranges.containsKey(uri)) {
-                res_ranges.get(uri).getRange().addInterval(start_idx, end_idx);
+            int idx = res_rows.getInt(2);
+            int start_idx = res_rows.getInt(3);
+            int end_idx = res_rows.getInt(4);
+            int type = res_rows.getInt(5);
+
+            if (type == DAGSerializer.CLASS_TYPE) {
+                tmp = res_classes;
+            } else if (type == DAGSerializer.OBJECTPROPERTY_TYPE) {
+                tmp = res_obj_props;
+            } else if (type == DAGSerializer.DATAPROPERTY_TYPE) {
+                tmp = res_data_props;
+            } else {
+                tmp = null;
+            }
+
+            if (tmp.containsKey(uri)) {
+                tmp.get(uri).getRange().addInterval(start_idx, end_idx);
             } else {
                 DAGNode node = new DAGNode(uri);
+                node.setIndex(idx);
                 node.setRange(new SemanticIndexRange(start_idx, end_idx));
-                res_ranges.put(uri, node);
+                tmp.put(uri, node);
             }
         }
-        DAG res_dag = new DAG(new ArrayList<DAGNode>(res_ranges.values()));
-        DAG expected_dag = new DAG(helper.get_results(ontoname));
+        DAG res_dag = new DAG(new ArrayList<DAGNode>(res_classes.values()),
+                new ArrayList<DAGNode>(res_obj_props.values()),
+                new ArrayList<DAGNode>(res_data_props.values()));
+
+        List<List<DAGNode>> exp_indexes = helper.get_results(ontoname);
+
+        DAG expected_dag = new DAG(exp_indexes.get(0), exp_indexes.get(1), exp_indexes.get(2));
         assertEquals(expected_dag, res_dag);
 
     }
