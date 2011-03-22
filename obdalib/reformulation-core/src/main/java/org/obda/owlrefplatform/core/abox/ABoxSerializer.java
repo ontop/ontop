@@ -20,22 +20,22 @@ public class ABoxSerializer {
             .getLogger(ABoxSerializer.class);
 
     public static final String class_table = "class";
-    public static final String role_table = "role";
-    public static final String literal_table = "literal";
+    public static final String objectprop_table = "role";
+    public static final String dataprop_table = "literal";
 
     public static final String class_table_create =
             "CREATE TABLE " + class_table + " ( "
                     + "URI VARCHAR(100),"
                     + "IDX INTEGER" + ");";
 
-    public static final String role_table_create =
-            "CREATE TABLE " + role_table + " ( "
+    public static final String objectprop_table_create =
+            "CREATE TABLE " + objectprop_table + " ( "
                     + "URI1 VARCHAR(100), "
                     + "URI2 VARCHAR(100), "
                     + "IDX INTEGER" + ");";
 
-    public static final String literal_table_create =
-            "CREATE TABLE " + literal_table + " ( "
+    public static final String dataprop_table_create =
+            "CREATE TABLE " + dataprop_table + " ( "
                     + "URI VARCHAR(100),"
                     + "LITERAL VARCHAR(100),"
                     + "IDX INTEGER" + ");";
@@ -43,19 +43,19 @@ public class ABoxSerializer {
     public static final String class_table_drop = "DROP TABLE " + class_table
             + " IF EXISTS;";
 
-    public static final String role_table_drop = "DROP TABLE " + role_table
+    public static final String role_table_drop = "DROP TABLE " + objectprop_table
             + " IF EXISTS;";
 
     public static final String literal_table_drop = "DROP TABLE "
-            + literal_table + " IF EXISTS;";
+            + dataprop_table + " IF EXISTS;";
 
     public static final String class_insert = "INSERT INTO " + class_table
             + "(URI, IDX) VALUES (?, ?)";
 
-    public static final String role_insert = "INSERT INTO " + role_table
+    public static final String role_insert = "INSERT INTO " + objectprop_table
             + "(URI1, URI2, IDX) VALUES (?, ?, ?)";
 
-    public static final String literal_insert = "INSERT INTO " + literal_table
+    public static final String literal_insert = "INSERT INTO " + dataprop_table
             + "(URI, LITERAL, IDX) VALUES (?, ?, ?)";
 
     public static void recreate_tables(Connection conn) {
@@ -66,8 +66,8 @@ public class ABoxSerializer {
             conn.createStatement().execute(literal_table_drop);
 
             conn.createStatement().execute(class_table_create);
-            conn.createStatement().execute(role_table_create);
-            conn.createStatement().execute(literal_table_create);
+            conn.createStatement().execute(objectprop_table_create);
+            conn.createStatement().execute(dataprop_table_create);
         } catch (SQLException e) {
             log.error(e.getMessage());
         }

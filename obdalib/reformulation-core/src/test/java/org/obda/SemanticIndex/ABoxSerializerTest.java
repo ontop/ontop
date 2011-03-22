@@ -41,7 +41,7 @@ public class ABoxSerializerTest extends TestCase {
             res_abox.add(new String[]{uri, idx});
         }
 
-        abox_rows = stmt.executeQuery(String.format(select_fmt, ABoxSerializer.role_table));
+        abox_rows = stmt.executeQuery(String.format(select_fmt, ABoxSerializer.objectprop_table));
         while (abox_rows.next()) {
             String uri1 = abox_rows.getString(1);
             String uri2 = abox_rows.getString(2);
@@ -49,7 +49,7 @@ public class ABoxSerializerTest extends TestCase {
             res_abox.add(new String[]{uri1, uri2, idx});
         }
 
-        abox_rows = stmt.executeQuery(String.format(select_fmt, ABoxSerializer.literal_table));
+        abox_rows = stmt.executeQuery(String.format(select_fmt, ABoxSerializer.dataprop_table));
 
         while (abox_rows.next()) {
             String uri = abox_rows.getString(1);

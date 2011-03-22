@@ -16,7 +16,6 @@ public class DAG {
 
     private final Logger log = LoggerFactory.getLogger(DAG.class);
 
-    //private Map<String, DAGNode> dagnodes = new HashMap<String, DAGNode>();
     private Map<String, DAGNode> cls_nodes = new HashMap<String, DAGNode>();
     private Map<String, DAGNode> objectprop_nodes = new HashMap<String, DAGNode>();
     private Map<String, DAGNode> dataprop_nodes = new HashMap<String, DAGNode>();
@@ -24,8 +23,13 @@ public class DAG {
 
     private int index_counter = 1;
     public final static String owl_thing = "http://www.w3.org/2002/07/owl#Thing";
-    public final static String owl_exists = "::__exists__::";
-    public final static String owl_inverse_exists = "::__inverse__exists__::";
+    public final static String owl_exists = "::__exists__";
+    public final static String owl_inverse_exists = "::__inverse__exists__";
+
+    public final static String owl_exists_obj = owl_exists + "object_property::";
+    public final static String owl_exists_data = owl_exists + "data_property::";
+    public final static String owl_inverse_exists_obj = owl_inverse_exists + "object_property::";
+    public final static String owl_inverse_exists_data = owl_inverse_exists + "data_property::";
 
 
     public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
@@ -68,12 +72,12 @@ public class DAG {
                     addEdge(obj_str, spe.asOWLObjectProperty().getURI().toString(), objectprop_nodes);
 
                 }
+                // FIXME: When inserting existential node, must specify if it is objectprop or dataprop
+                addNode(owl_exists_obj + obj_str, cls_nodes);
+                addEdge(owl_exists_obj + obj_str, owl_thing, cls_nodes);
 
-                addNode(owl_exists + obj_str, cls_nodes);
-                addEdge(owl_exists + obj_str, owl_thing, cls_nodes);
-
-                addNode(owl_inverse_exists + obj_str, cls_nodes);
-                addEdge(owl_inverse_exists + obj_str, owl_thing, cls_nodes);
+                addNode(owl_inverse_exists_obj + obj_str, cls_nodes);
+                addEdge(owl_inverse_exists_obj + obj_str, owl_thing, cls_nodes);
             }
 
             for (OWLDataProperty ax : onto.getDataPropertiesInSignature()) {
@@ -86,23 +90,23 @@ public class DAG {
                 }
 
 
-                addNode(owl_exists + data_str, cls_nodes);
-                addEdge(owl_exists + data_str, owl_thing, cls_nodes);
+                addNode(owl_exists_data + data_str, cls_nodes);
+                addEdge(owl_exists_data + data_str, owl_thing, cls_nodes);
 
-                addNode(owl_inverse_exists + data_str, cls_nodes);
-                addEdge(owl_inverse_exists + data_str, owl_thing, cls_nodes);
+                addNode(owl_inverse_exists_data + data_str, cls_nodes);
+                addEdge(owl_inverse_exists_data + data_str, owl_thing, cls_nodes);
 
             }
             // Domain and Range
             for (OWLPropertyAxiom ax : onto.getObjectPropertyAxioms()) {
                 if (ax instanceof OWLObjectPropertyDomainAxiom) {
                     OWLObjectPropertyDomainAxiom domainAxiom = (OWLObjectPropertyDomainAxiom) ax;
-                    addEdge(owl_exists + domainAxiom.getProperty().asOWLObjectProperty().getURI().toString(),
+                    addEdge(owl_exists_obj + domainAxiom.getProperty().asOWLObjectProperty().getURI().toString(),
                             domainAxiom.getDomain().asOWLClass().getURI().toString(), cls_nodes);
 
                 } else if (ax instanceof OWLObjectPropertyRangeAxiom) {
                     OWLObjectPropertyRangeAxiom rangeAxiom = (OWLObjectPropertyRangeAxiom) ax;
-                    addEdge(owl_inverse_exists + rangeAxiom.getProperty().asOWLObjectProperty().getURI().toString(),
+                    addEdge(owl_inverse_exists_obj + rangeAxiom.getProperty().asOWLObjectProperty().getURI().toString(),
                             rangeAxiom.getRange().asOWLClass().getURI().toString(), cls_nodes);
                 }
             }

@@ -1,5 +1,6 @@
 package org.obda.SemanticIndex;
 
+import inf.unibz.it.obda.owlapi.OWLAPIController;
 import org.h2.jdbcx.JdbcDataSource;
 import org.obda.owlrefplatform.core.abox.DAG;
 import org.obda.owlrefplatform.core.abox.DAGNode;
@@ -34,6 +35,7 @@ public class SemanticIndexHelper {
             .getLogger(SemanticIndexHelper.class);
 
     public static final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    public static OWLAPIController apic;
     public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     public Connection conn;
 
@@ -50,8 +52,8 @@ public class SemanticIndexHelper {
 
     public Set<OWLOntology> load_onto(String ontoname) throws OWLOntologyCreationException {
         String owlfile = owlloc + ontoname + ".owl";
-        OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(
-                owlfile)).toURI());
+        OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+        apic = new OWLAPIController(manager, ontology);
 
         Set<OWLOntology> onto_set = new HashSet<OWLOntology>(1);
         onto_set.add(ontology);
