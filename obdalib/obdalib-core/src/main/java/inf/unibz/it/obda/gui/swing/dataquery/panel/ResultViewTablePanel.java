@@ -15,6 +15,7 @@
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
 import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 import inf.unibz.it.utils.swing.DialogUtils;
 
@@ -22,13 +23,18 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableModel;
 
 //import edu.stanford.smi.protegex.owl.ui.ProtegeUI;
@@ -39,9 +45,14 @@ import javax.swing.table.TableModel;
  */
 public class ResultViewTablePanel extends javax.swing.JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8494558136315031084L;
 	private OBDADataQueryAction			countAllTuplesAction	= null;
 	private OBDADataQueryAction			countAllTuplesActionEQL	= null;
 	private QueryInterfacePanel 		querypanel = null;
+	private OBDASaveQueryResultToFileAction saveToFileAction =null; 
 	
 	/** Creates new form ResultViewTablePanel */
 	public ResultViewTablePanel(QueryInterfacePanel panel) {
@@ -61,7 +72,6 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
     private void initComponents() {
 
         panellViewSourceSquemaButtons = new javax.swing.JPanel();
-        buttonImport = new javax.swing.JButton();
         buttonSaveResults = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         resultsTable = new javax.swing.JTable();
@@ -73,17 +83,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         panellViewSourceSquemaButtons.setPreferredSize(new java.awt.Dimension(100, 45));
         panellViewSourceSquemaButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        buttonImport.setText("Import as ABox assertions");
-        buttonImport.setEnabled(false);
-        buttonImport.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonImportActionPerformed(evt);
-            }
-        });
-        panellViewSourceSquemaButtons.add(buttonImport);
-
         buttonSaveResults.setText("Save results");
-        buttonSaveResults.setEnabled(false);
         buttonSaveResults.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonSaveResultsActionPerformed(evt);
@@ -104,36 +104,25 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         jScrollPane1.setViewportView(resultsTable);
 
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
-        
-        this.resultsTable.setFont(new Font("Arial", Font.PLAIN, 18));
-        this.resultsTable.setRowHeight(21);
     }// </editor-fold>//GEN-END:initComponents
-
-	private void resultsTableMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_resultsTableMouseClicked
-	// TODO add your handling code here:
-	}// GEN-LAST:event_resultsTableMouseClicked
-
-	private void buttonImportActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonImportActionPerformed
-//		protege_main_window = (JFrame) getParent().getParent().getParent().getParent().getParent().getParent().getParent();
-//		String message = "<html>This will incorporate all knowledge presented in the results <br> as assertions about individuals in the current project. <br> <br> <bold>Are you sure you want to proceed?</bold></html>";
-//		JOptionPane.showConfirmDialog(protege_main_window, message);
-
-	}// GEN-LAST:event_buttonImportActionPerformed
 
 
 	private void buttonSaveResultsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveResultsActionPerformed
-		//Component tlcontainer = ProtegeUI.getTopLevelContainer(OBDAPluginController.getCurrentInstance().getCurrentProject());
-		//JFrame protege_main_window = (JFrame) getParent().getParent().getParent().getParent().getParent().getParent().getParent();
-		JDialog saveDialog = new JDialog();
-		SaveAsDialogPanel savePanel = new SaveAsDialogPanel(saveDialog);
-		saveDialog.getContentPane().add(savePanel, java.awt.BorderLayout.CENTER);
-		saveDialog.pack();
-		DialogUtils.centerDialogWRTParent(this, saveDialog);
-		saveDialog.setVisible(true);
+
+		GetOutputFileDialog dialog = new GetOutputFileDialog();
+		final File file = dialog.getOutPutFile();
+		if(file != null){
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+						saveToFileAction.run(querypanel.getQuery(), file);
+				}
+			});
+		}
+
+	
 	}// GEN-LAST:event_buttonSaveResultsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton buttonImport;
     private javax.swing.JButton buttonSaveResults;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel panellViewSourceSquemaButtons;
@@ -156,32 +145,9 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 						incm.close();
 					}
 				}
-				//QueryResultTableModel newmodel = (QueryResultTableModel) runner.getResult();
 				resultsTable.setModel(newmodel);
-//				newmodel.addTableModelListener(resultsTable);
-				// newmodel.fireTableStructureChanged();
 
-				
-				//				newmodel.fireTableDataChanged();
-
-				// resultsTable.setPreferredScrollableViewportSize(r);
-//				Dimension d = new Dimension(150 * newmodel.getColumnCount(), resultsTable.getRowHeight()
-//						* newmodel.getRowCount());
-//				resultsTable.setPreferredSize(d);
-//				resultsTable.setMinimumSize(d);
-//				resultsTable.setMaximumSize(d);
-//				resultsTable.setPreferredScrollableViewportSize(d);
-//				resultsTable.setR
 				addNotify();
-				
-				//resultsTable.setPreferredSize(d);
-				// resultsTable.getR
-				// JTable t = new JTable(newmodel);
-				// Container parent = resultsTable.getParent();
-				// JScrollPane pane = null;
-				// pane.set
-				// parent.invalidate();
-				// parent.repaint();
 
 				resultsTable.invalidate();
 				resultsTable.repaint();
@@ -201,14 +167,8 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 				
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
-						int tab =querypanel.getSelecetTab();
-						if(tab == 0){
-							String query = querypanel.getSPARQLQuery();
-							getCountAllTuplesActionForUCQ().run(query, querypanel);
-						}else{
-							String query = querypanel.getSPARQLQuery();
-							getCountAllTuplesActionForEQL().run(query, querypanel);
-						}
+						String query = querypanel.getQuery();
+						getCountAllTuplesActionForUCQ().run(query, querypanel);
 					}
 				});
 			}
@@ -234,6 +194,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		this.countAllTuplesActionEQL = countAllTuples;
 	}
 	
-	
-
+	public void setOBDASaveQueryToFileAction(OBDASaveQueryResultToFileAction action){
+		this.saveToFileAction = action;
+	}		
 }
