@@ -14,8 +14,8 @@
 
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 import inf.unibz.it.utils.swing.DialogUtils;
 

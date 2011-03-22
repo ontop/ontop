@@ -13,7 +13,6 @@
  */
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.gui.swing.action.GetDefaultSPARQLPrefixAction;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -57,17 +56,12 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 	SPARQLQueryStyledDocument				myself				= this;
 	public Style							default_style		= null;
 
-	private GetDefaultSPARQLPrefixAction	_getPrefixAction	= null;
+//	private GetDefaultSPARQLPrefixAction	_getPrefixAction	= null;
 
 	// SPARQLParser parser = null;
 
 	public SPARQLQueryStyledDocument(StyleContext context) {
-		this(context, null);
-	}
-
-	public SPARQLQueryStyledDocument(StyleContext context, GetDefaultSPARQLPrefixAction action) {
 		super(context);
-		this._getPrefixAction = action;
 
 		default_style = context.getStyle(StyleContext.DEFAULT_STYLE);
 		StyleConstants.setFontFamily(default_style, "Courier");
@@ -80,10 +74,6 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 			e.printStackTrace(System.err);
 		}
 		addDocumentListener(this);
-	}
-
-	public void setGetDefaultSPARQLPrefixAction(GetDefaultSPARQLPrefixAction action) {
-		_getPrefixAction = action;
 	}
 
 	public void changedUpdate(DocumentEvent e) {
@@ -114,10 +104,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 
 		try {
 			input = getText(0, getLength());
-			_getPrefixAction.run();
-
-			String prefix = (String) _getPrefixAction.getResult();
-			query = QueryFactory.create(prefix + input);
+			query = QueryFactory.create(input);
 
 		} catch (Exception e) {
 			invalid = true;

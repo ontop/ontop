@@ -15,8 +15,8 @@ package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.QueryController;
-import inf.unibz.it.obda.gui.swing.action.GetDefaultSPARQLPrefixAction;
-import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.utils.swing.DialogUtils;
 
 import java.awt.Color;
@@ -55,7 +55,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	private OBDADataQueryAction retrieveUCQExpansionAction = null;
 	private OBDADataQueryAction retrieveUCQUnfoldingAction = null;
 	private OBDADataQueryAction retrieveEQLUnfoldingAction = null;
-	private GetDefaultSPARQLPrefixAction prefixAction = null; 
+//	private GetDefaultSPARQLPrefixAction prefixAction = null; 
 	private QueryController qc = null;
 	private QueryInterfacePanel instance = null;
 	private double execTime = 0;
@@ -83,11 +83,11 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 		this.viewpanel = viewpanel;
 	}
 
-	public void setGetSPARQLDefaultPrefixAction(
-			GetDefaultSPARQLPrefixAction action) {
-		prefixAction = action;
-		_styled_doc.setGetDefaultSPARQLPrefixAction(action);
-	}
+//	public void setGetSPARQLDefaultPrefixAction(
+//			GetDefaultSPARQLPrefixAction action) {
+//		prefixAction = action;
+//		_styled_doc.setGetDefaultSPARQLPrefixAction(action);
+//	}
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
