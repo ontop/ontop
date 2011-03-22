@@ -20,6 +20,7 @@ import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.utils.swing.DialogUtils;
 
 import java.awt.Color;
+import java.net.URI;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -62,12 +63,14 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	private String currentGroup = null;
 	private String currentId = null;
 	private APIController apic = null;
+	private URI baseuri = null;
 
 	/** Creates new form QueryInterfacePanel */
-	public QueryInterfacePanel(APIController apic) {
+	public QueryInterfacePanel(APIController apic, URI baseuri) {
 		this.qc = apic.getQueryController();
 		instance = this;
 		this.apic = apic;
+		this.baseuri = baseuri;
 		initComponents();
 
 		StyleContext style = new StyleContext();
@@ -259,7 +262,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 //		String newcontent = prefix + "\n" + currentcontent;
 //		queryTextPane.setText(newcontent);
 		
-		SelectPrefixDialog dialog = new SelectPrefixDialog(apic.getIOManager().getPrefixManager().getPrefixMap(), queryTextPane);
+		SelectPrefixDialog dialog = new SelectPrefixDialog(apic.getIOManager().getPrefixManager().getPrefixMap(), queryTextPane,baseuri.toString());
 		dialog.show();
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 

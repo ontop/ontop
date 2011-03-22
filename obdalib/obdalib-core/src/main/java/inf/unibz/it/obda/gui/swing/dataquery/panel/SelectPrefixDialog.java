@@ -43,15 +43,17 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
 	private JDialog parent = null;
 	private JTextPane querypane = null;
 	private Vector<JCheckBox> checkboxes = null;
+	private String base = null;
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = -8277829841902027620L;
 	/** Creates new form SelectPrefixDialog */
-    public SelectPrefixDialog(Map<String, URI> prefixes, JTextPane pane) {
+    public SelectPrefixDialog(Map<String, URI> prefixes, JTextPane pane, String base) {
         super();
         this.prefixMap = prefixes;
         this.querypane = pane;
+        this.base = base;
         initComponents();
         drawCheckBoxes();
     }
@@ -177,6 +179,15 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
     
     private void accept(){
     	StringBuffer prefix = new StringBuffer();
+//    	prefix.append("BASE ");
+//    	prefix.append(": <");
+//		prefix.append(base);
+//		prefix.append(">\n");
+    	prefix.append("PREFIX ");
+    	prefix.append(": <");
+		prefix.append(base);
+		prefix.append("#");
+		prefix.append(">\n");
 		for (JCheckBox box : checkboxes) {
 			if(box.isSelected()){
 				prefix.append("PREFIX ");
