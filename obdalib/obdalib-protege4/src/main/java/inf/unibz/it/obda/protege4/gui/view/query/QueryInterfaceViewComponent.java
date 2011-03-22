@@ -2,15 +2,14 @@ package inf.unibz.it.obda.protege4.gui.view.query;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
-import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
 import inf.unibz.it.obda.gui.swing.queryhistory.QueryhistoryController;
 import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
-import inf.unibz.it.obda.protege4.gui.action.query.P4GetDefaultSPARQLPrefixAction;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 import inf.unibz.it.ucq.exception.QueryResultException;
@@ -89,7 +88,6 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		panel_query_interface = new QueryInterfacePanel(obdaController);
 
 		// getOWLWorkspace().getEditorKit()
-		panel_query_interface.setGetSPARQLDefaultPrefixAction(new P4GetDefaultSPARQLPrefixAction(getOWLModelManager()));
 		panel_view_results = new inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel(panel_query_interface);
 
 		ontochange_listener = new OWLOntologyChangeListener() {
@@ -125,11 +123,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					try {
 						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
 						dqr.startProgressMonitor("Counting tuples...");
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						Statement st =  dqr.getStatement(prefix + "\n" + query);
+						Statement st =  dqr.getStatement(query);
 						int result = st.getTupleCount();
 						panel.updateStatus(result);
 						dqr.finishProgressMonitor();
@@ -165,11 +159,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
 						rea.startProgressMonitor("Process Query...");
 						QueryhistoryController.getInstance().addQuery(query);
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(prefix + "\n" + query).getResultSet();
+						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(query).getResultSet();
 						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result);
 						model.addTableModelListener(panel);
 						rows = model.getRowCount();
@@ -217,14 +207,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
 						long startTime = System.currentTimeMillis();
 						dqr.startProgressMonitor("Process Query...");
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-//						Query sparqlQuery = QueryFactory.create();
-//						UCQTranslator translator = new UCQTranslator();
-//						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-						Statement st =  dqr.getStatement(prefix + "\n" + query);
+						Statement st =  dqr.getStatement(query);
 						String result = st.getRewriting();
 						dqr.finishProgressMonitor();
 						long end = System.currentTimeMillis();
@@ -276,14 +259,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					try {
 						long startTime = System.currentTimeMillis();
 						dqr.startProgressMonitor("Process Query...");
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-//						Query sparqlQuery = QueryFactory.create();
-//						UCQTranslator translator = new UCQTranslator();
-//						UnionOfConjunctiveQueries ucq = translator.getUCQ(obdaController, sparqlQuery);
-						Statement st =  dqr.getStatement(prefix + "\n" + query);
+						Statement st =  dqr.getStatement(query);
 						String result = st.getUnfolding();
 						dqr.finishProgressMonitor();
 						long end = System.currentTimeMillis();
@@ -330,11 +306,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
 						rea.startProgressMonitor("Process Query...");
 						QueryhistoryController.getInstance().addQuery(query);
-						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
-								.getModelManager());
-						prefixAction.run();
-						String prefix = (String) prefixAction.getResult();
-						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(prefix + "\n" + query).getResultSet();
+						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(query).getResultSet();
 						ResultSetToFileWriter.saveResultSet(result, file);
 						rea.finishProgressMonitor();
 					} catch (Exception e) {
