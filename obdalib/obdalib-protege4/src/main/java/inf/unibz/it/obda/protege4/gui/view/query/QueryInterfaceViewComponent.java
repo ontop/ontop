@@ -3,6 +3,7 @@ package inf.unibz.it.obda.protege4.gui.view.query;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
 import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
@@ -12,7 +13,9 @@ import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.protege4.gui.action.query.P4GetDefaultSPARQLPrefixAction;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
+import inf.unibz.it.ucq.exception.QueryResultException;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
+import inf.unibz.it.utils.io.ResultSetToFileWriter;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -20,6 +23,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -33,12 +37,14 @@ import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
+import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntologyChange;
 import org.semanticweb.owl.model.OWLOntologyChangeListener;
+import org.slf4j.LoggerFactory;
 
 public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implements SavedQueriesPanelListener{
 	/**
@@ -53,6 +59,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 	private OWLOntologyChangeListener	ontochange_listener		= null;
 	OBDAPluginController				obdaController			= null;
+	
 
 	@Override
 	protected void disposeOWLView() {
@@ -79,7 +86,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		JPanel panel_right_main = new JPanel();
 		JSplitPane split_right_horizontal = new javax.swing.JSplitPane();
-		panel_query_interface = new QueryInterfacePanel(obdaController.getQueryController());
+		panel_query_interface = new QueryInterfacePanel(obdaController);
 
 		// getOWLWorkspace().getEditorKit()
 		panel_query_interface.setGetSPARQLDefaultPrefixAction(new P4GetDefaultSPARQLPrefixAction(getOWLModelManager()));
@@ -97,8 +104,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		this.getOWLModelManager().addOntologyChangeListener(ontochange_listener);
 
 		// QueryController.getInstance().addListener(panel_query_interface);
-
-
+		
 		panel_view_results.setCountAllTuplesActionForUCQ(new OBDADataQueryAction(){
 
 //			@Override
@@ -128,6 +134,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						panel.updateStatus(result);
 						dqr.finishProgressMonitor();
 					} catch (Exception e) {
+						log.error(e.getMessage(), e);
 						JOptionPane
 						.showMessageDialog(null,
 								"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
@@ -172,7 +179,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						long end = System.currentTimeMillis();
 						time = end - startTime;
 					} catch (Exception e) {
-						e.printStackTrace();
+						log.error(e.getMessage(), e);
 						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
 
@@ -234,7 +241,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						panel.updateStatus(msg);
 						panel.setVisible(true);
 					} catch (Exception e) {
-						e.printStackTrace();
+						log.error(e.getMessage(), e);
 						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
 
@@ -293,7 +300,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						panel.updateStatus(msg);
 						panel.setVisible(true);
 					} catch (Exception e) {
-						e.printStackTrace();
+						log.error(e.getMessage(), e);
 						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
 				}else {
@@ -313,6 +320,31 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		});
 
+		panel_view_results.setOBDASaveQueryToFileAction(new OBDASaveQueryResultToFileAction() {
+			
+			@Override
+			public void run(String query, File file) {
+				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
+				if(reasoner instanceof DataQueryReasoner){
+					try {
+						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
+						rea.startProgressMonitor("Process Query...");
+						QueryhistoryController.getInstance().addQuery(query);
+						P4GetDefaultSPARQLPrefixAction prefixAction = new P4GetDefaultSPARQLPrefixAction(getOWLEditorKit()
+								.getModelManager());
+						prefixAction.run();
+						String prefix = (String) prefixAction.getResult();
+						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(prefix + "\n" + query).getResultSet();
+						ResultSetToFileWriter.saveResultSet(result, file);
+						rea.finishProgressMonitor();
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+						JOptionPane.showMessageDialog(null, "Error while saving the ResultSet. Exception message:\n" + e.getMessage());
+					}
+				}
+			}
+		});
+		
 		panel_right_main.setLayout(new java.awt.BorderLayout());
 
 		split_right_horizontal.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
