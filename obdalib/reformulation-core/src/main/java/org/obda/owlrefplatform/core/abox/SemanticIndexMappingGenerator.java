@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Generate the mappings for th
+ * Generate the mappings for DAG
  *
  * @author Sergejs Pugac
  */
@@ -34,9 +34,10 @@ public class SemanticIndexMappingGenerator {
     private final static PredicateFactory predicateFactory = BasicPredicateFactoryImpl.getInstance();
 
     /**
-     * Generate mappings for
+     * Generate mappings for DAG
      *
      * @param dag
+     * @param apic
      */
     public static void GenMapping(DAG dag, APIController apic) {
         int mapcounter = 1;
@@ -47,7 +48,6 @@ public class SemanticIndexMappingGenerator {
             String tablename;
             String projection;
             SemanticIndexRange range;
-            String where = "";
 
             if (node.getUri().startsWith(DAG.owl_exists_obj)) {
                 uri = node.getUri().substring(DAG.owl_exists_obj.length());
@@ -112,10 +112,81 @@ public class SemanticIndexMappingGenerator {
             //apic.getMappingController().insertMapping(dsUri, ax);
         }
         for (DAGNode node : dag.getObjectPropertyIndex().values()) {
+            String uri = node.getUri();
+
+            // Generate the WHERE clause
+            StringBuffer where_clause = new StringBuffer();
+            for (SemanticIndexRange.Interval it : node.getRange().getIntervals()) {
+                int st = it.getStart();
+                int end = it.getEnd();
+                where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
+            }
+            if (where_clause.length() != 0) {
+                // remove the last AND
+                where_clause.delete(where_clause.length() - 4, where_clause.length());
+            }
+
+            Term qtx = termFactory.createVariable("x");
+            Term qty = termFactory.createVariable("y");
+            List<Term> terms = new Vector<Term>();
+            terms.add(qty);
+            terms.add(qtx);
+            Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
+            Atom bodyAtom = new AtomImpl(predicate, terms);
+            List<Atom> body = new Vector<Atom>();
+            body.add(bodyAtom);
+            predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+
+            Atom head = new AtomImpl(predicate, terms);
+            Query cq = new CQIEImpl(head, body, false);
+
+            String sql = "SELECT URI1 as X, URI2 as Y FROM " + ABoxSerializer.objectprop_table;
+            if (where_clause.length() != 0) {
+                sql += " WHERE " + where_clause.toString();
+            }
+
+            OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
+            ax.setTargetQuery(cq);
+            ax.setSourceQuery(new RDBMSSQLQuery(sql));
+
 
         }
 
         for (DAGNode node : dag.getDataPropertyIndex().values()) {
+            String uri = node.getUri();
+            StringBuffer where_clause = new StringBuffer();
+            for (SemanticIndexRange.Interval it : node.getRange().getIntervals()) {
+                int st = it.getStart();
+                int end = it.getEnd();
+                where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
+            }
+            if (where_clause.length() != 0) {
+                // remove the last AND
+                where_clause.delete(where_clause.length() - 4, where_clause.length());
+            }
+
+            Term qtx = termFactory.createVariable("x");
+            Term qty = termFactory.createVariable("y");
+            List<Term> terms = new Vector<Term>();
+            terms.add(qty);
+            terms.add(qtx);
+            Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
+            Atom bodyAtom = new AtomImpl(predicate, terms);
+            List<Atom> body = new Vector<Atom>();
+            body.add(bodyAtom);
+            predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+
+            Atom head = new AtomImpl(predicate, terms);
+            Query cq = new CQIEImpl(head, body, false);
+
+            String sql = "SELECT URI as X, LITERAL as Y FROM " + ABoxSerializer.dataprop_table;
+            if (where_clause.length() != 0) {
+                sql += " WHERE " + where_clause.toString();
+            }
+
+            OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
+            ax.setTargetQuery(cq);
+            ax.setSourceQuery(new RDBMSSQLQuery(sql));
 
         }
     }
