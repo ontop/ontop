@@ -10,8 +10,6 @@ import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.QueryControllerListener;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
-import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
@@ -262,14 +260,6 @@ public class OBDAPluginController extends APIController implements Disposable {
 					controller.addControllerListener(defaultAssertionControllerListener);
 				}
 				addAssertionController(assertionClass, controller, xmlCodec);
-				if (controller instanceof AbstractDependencyAssertionController) {
-					AbstractDependencyAssertionController depController = (AbstractDependencyAssertionController) controller;
-					dscontroller.addDatasourceControllerListener(depController);
-				}
-				if (controller instanceof AbstractConstraintAssertionController) {
-					AbstractConstraintAssertionController depController = (AbstractConstraintAssertionController) controller;
-					dscontroller.addDatasourceControllerListener(depController);
-				}
 			} catch (Throwable e) {
 				ProtegeApplication.getErrorLog().logError(e);
 			}

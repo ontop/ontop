@@ -2,8 +2,8 @@ package inf.unibz.it.obda.protege4.gui.view.query;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
-import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
+import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
@@ -12,7 +12,6 @@ import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
-import inf.unibz.it.ucq.exception.QueryResultException;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
 import inf.unibz.it.utils.io.ResultSetToFileWriter;
 
@@ -36,14 +35,12 @@ import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
-import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLException;
 import org.semanticweb.owl.model.OWLOntologyChange;
 import org.semanticweb.owl.model.OWLOntologyChangeListener;
-import org.slf4j.LoggerFactory;
 
 public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implements SavedQueriesPanelListener{
 	/**

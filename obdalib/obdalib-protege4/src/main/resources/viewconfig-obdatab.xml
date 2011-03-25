@@ -14,10 +14,6 @@
 		    <Property id="pluginId"
 		      value="inf.unibz.it.obda.protege4.obdaplugin.RDBMSInspectorViewComponent"/>
 		  </Component>
-		  <Component label="Data Source Dependency Manager">
-		    <Property id="pluginId"
-		      value="inf.unibz.it.obda.protege4.obdaplugin.DependencyInterfaceViewComponent"/>
-		  </Component>
 		  <Component label="SQL query interface">
 		    <Property id="pluginId"
 		      value="inf.unibz.it.obda.protege4.obdaplugin.SQLQueryInterfaceViewComponent"/>

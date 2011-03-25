@@ -7,8 +7,6 @@ import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
-import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.utils.io.FileUtils;
@@ -211,43 +209,6 @@ public class OWLAPIDataManager extends DataManager {
 			Class<Assertion> assertionClass = assClassIt.next();
 			AssertionXMLCodec<Assertion> xmlCodec = assertionXMLCodecs.get(assertionClass);
 			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
-			if (controller instanceof AbstractDependencyAssertionController) {
-				AbstractDependencyAssertionController depcon = (AbstractDependencyAssertionController) controller;
-				Set<URI> ds = datasources.keySet();
-				Iterator<URI> it = ds.iterator();
-				while (it.hasNext()) {
-					URI dsName = it.next();
-					Collection<Assertion> assertions = depcon.getAssertionsForDataSource(dsName);
-					if (assertions != null && assertions.size() > 0) {
-						Element controllerElement = doc.createElement(depcon.getElementTag());
-						controllerElement.setAttribute("datasource_uri", dsName.toString());
-						for (Assertion assertion : assertions) {
-							Element assertionElement = xmlCodec.encode(assertion);
-							doc.adoptNode(assertionElement);
-							controllerElement.appendChild(assertionElement);
-						}
-						root.appendChild(controllerElement);
-					}
-				}
-			} else if (controller instanceof AbstractConstraintAssertionController) {
-				AbstractConstraintAssertionController constcon = (AbstractConstraintAssertionController) controller;
-				Set<URI> ds = datasources.keySet();
-				Iterator<URI> it = ds.iterator();
-				while (it.hasNext()) {
-					URI dsName = it.next();
-					Collection<Assertion> assertions = constcon.getAssertionsForDataSource(dsName);
-					if (assertions != null && assertions.size() > 0) {
-						Element controllerElement = doc.createElement(constcon.getElementTag());
-						controllerElement.setAttribute("datasource_uri", dsName.toString());
-						for (Assertion assertion : assertions) {
-							Element assertionElement = xmlCodec.encode(assertion);
-							doc.adoptNode(assertionElement);
-							controllerElement.appendChild(assertionElement);
-						}
-						root.appendChild(controllerElement);
-					}
-				}
-			} else {
 				Collection<Assertion> assertions = controller.getAssertions();
 				if (assertions.isEmpty())
 					continue;
@@ -258,7 +219,7 @@ public class OWLAPIDataManager extends DataManager {
 					controllerElement.appendChild(assertionElement);
 				}
 				root.appendChild(controllerElement);
-			}
+			
 		}
 		XMLUtils.saveDocumentToXMLFile(doc, prefixes, file);
 	}
