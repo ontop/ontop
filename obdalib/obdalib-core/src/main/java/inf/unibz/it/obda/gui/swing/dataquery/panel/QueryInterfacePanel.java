@@ -15,8 +15,7 @@ package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.QueryController;
-import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
 import inf.unibz.it.utils.swing.DialogUtils;
 
 import java.awt.Color;

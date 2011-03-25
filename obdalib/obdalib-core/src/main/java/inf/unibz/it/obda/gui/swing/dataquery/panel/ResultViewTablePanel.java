@@ -14,27 +14,20 @@
 
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
+import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
-import inf.unibz.it.utils.swing.DialogUtils;
 
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableModel;
 
 //import edu.stanford.smi.protegex.owl.ui.ProtegeUI;
