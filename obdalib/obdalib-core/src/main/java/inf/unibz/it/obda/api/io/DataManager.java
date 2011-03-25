@@ -22,8 +22,6 @@ import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
 import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
 import inf.unibz.it.obda.codec.xml.query.XMLReader;
 import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
-import inf.unibz.it.obda.constraints.AbstractConstraintAssertionController;
-import inf.unibz.it.obda.dependencies.AbstractDependencyAssertionController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
@@ -231,43 +229,7 @@ public class DataManager {
 			Class<Assertion> assertionClass = assClassIt.next();
 			AssertionXMLCodec<Assertion> xmlCodec = assertionXMLCodecs.get(assertionClass);
 			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
-			if (controller instanceof AbstractDependencyAssertionController) {
-				AbstractDependencyAssertionController depcon = (AbstractDependencyAssertionController) controller;
-				Set<URI> ds = datasources.keySet();
-				Iterator<URI> it = ds.iterator();
-				while (it.hasNext()) {
-					URI dsName = it.next();
-					Collection<Assertion> assertions = depcon.getAssertionsForDataSource(dsName);
-					if (assertions != null && assertions.size() > 0) {
-						Element controllerElement = doc.createElement(depcon.getElementTag());
-						controllerElement.setAttribute("datasource_uri", dsName.toString());
-						for (Assertion assertion : assertions) {
-							Element assertionElement = xmlCodec.encode(assertion);
-							doc.adoptNode(assertionElement);
-							controllerElement.appendChild(assertionElement);
-						}
-						root.appendChild(controllerElement);
-					}
-				}
-			} else if (controller instanceof AbstractConstraintAssertionController) {
-				AbstractConstraintAssertionController constcon = (AbstractConstraintAssertionController) controller;
-				Set<URI> ds = datasources.keySet();
-				Iterator<URI> it = ds.iterator();
-				while (it.hasNext()) {
-					URI dsName = it.next();
-					Collection<Assertion> assertions = constcon.getAssertionsForDataSource(dsName);
-					if (assertions != null && assertions.size() > 0) {
-						Element controllerElement = doc.createElement(constcon.getElementTag());
-						controllerElement.setAttribute("datasource_uri", dsName.toString());
-						for (Assertion assertion : assertions) {
-							Element assertionElement = xmlCodec.encode(assertion);
-							doc.adoptNode(assertionElement);
-							controllerElement.appendChild(assertionElement);
-						}
-						root.appendChild(controllerElement);
-					}
-				}
-			} else {
+//			
 				Collection<Assertion> assertions = controller.getAssertions();
 				if (assertions.isEmpty())
 					continue;
@@ -278,7 +240,7 @@ public class DataManager {
 					controllerElement.appendChild(assertionElement);
 				}
 				root.appendChild(controllerElement);
-			}
+			
 		}
 		XMLUtils.saveDocumentToXMLFile(doc, prefixes, file.toString());
 	}
@@ -417,43 +379,6 @@ public class DataManager {
 					Class<Assertion> assertionClass = assClassIt.next();
 					AssertionXMLCodec<Assertion> xmlCodec = assertionXMLCodecs.get(assertionClass);
 					AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
-					if (controller instanceof AbstractDependencyAssertionController) {
-						if (node.getNodeName().equals(controller.getElementTag())) {
-							String ds = node.getAttribute("datasource_uri");
-							apic.getDatasourcesController().setCurrentDataSource(URI.create(ds));
-							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
-							for (int j = 0; j < childrenAssertions.getLength(); j++) {
-								Element assertionElement = (Element) childrenAssertions.item(j);
-								try {
-									Assertion assertion = xmlCodec.decode(assertionElement);
-									if (assertion != null) {
-										controller.addAssertion(assertion);
-									}
-								} catch (Exception e) {
-									log.warn("Error loading assertion: {}", e.toString());
-									log.debug(e.getMessage(), e);
-								}
-							}
-						}
-					} else if (controller instanceof AbstractConstraintAssertionController) {
-						if (node.getNodeName().equals(controller.getElementTag())) {
-							String ds = node.getAttribute("datasource_uri");
-							apic.getDatasourcesController().setCurrentDataSource(URI.create(ds));
-							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
-							for (int j = 0; j < childrenAssertions.getLength(); j++) {
-								Element assertionElement = (Element) childrenAssertions.item(j);
-								try {
-									Assertion assertion = xmlCodec.decode(assertionElement);
-									if (assertion != null) {
-										controller.addAssertion(assertion);
-									}
-								} catch (Exception e) {
-									log.warn("Error loading assertion: {}", e.toString());
-									log.debug(e.getMessage(), e);
-								}
-							}
-						}
-					} else {
 						if (node.getNodeName().equals(controller.getElementTag())) {
 							NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
 							for (int j = 0; j < childrenAssertions.getLength(); j++) {
@@ -467,7 +392,6 @@ public class DataManager {
 								}
 							}
 						}
-					}
 				}
 			}
 		}
