@@ -5,23 +5,6 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
-
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.swing.JOptionPane;
-
-import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
@@ -46,385 +29,180 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.sql.*;
+import java.util.*;
+
 /**
- * The implementation of the factory for creating refomultions platform reasoner
- * 
+ * The implementation of the factory for creating reformulation's platform reasoner
+ *
  * @author Manfred Gerstgrasser
- * 
  */
 
 public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
 
-	protected APIController		apic			= null;
-	private ReformulationPlatformPreferences preference = null;
-	private String				id;
-	private String				name;
-	private OWLOntologyManager	owlOntologyManager;
-	private boolean				useInMemoryDB	= false;
-	private boolean				createMappings	= false;
-	private String				unfoldingMode	= null;
-	private String				reformulationTechnique = "";
+    private APIController apic;
+    private ReformulationPlatformPreferences preferences;
 
-	private Logger				log				= LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
+    private final Logger log = LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
 
-	/**
-	 * Sets up some prerequirements in order to create the reasoner
-	 * 
-	 * @param manager
-	 *            the owl ontology manager
-	 * @param id
-	 *            the reasoner id
-	 * @param name
-	 *            the reasoner name
-	 */
-	public void setup(OWLOntologyManager manager, String id, String name) {
-		this.id = id;
-		this.name = name;
-		this.owlOntologyManager = manager;
-	}
 
-	/**
-	 * Return the current OWLOntologyManager
-	 * 
-	 * @return the current OWLOntologyManager
-	 */
-	public OWLOntologyManager getOWLOntologyManager() {
-		return owlOntologyManager;
-	}
+    @Override
+    public void setOBDAController(APIController apic) {
+        this.apic = apic;
+        ABoxToDBDumper.getInstance().setAPIController(apic);
+    }
 
-	/**
-	 * Returns the current reasoner id
-	 * 
-	 * @return the current reasoner id
-	 */
-	public String getReasonerId() {
-		return id;
-	}
-	
-	@Override
-	public void setOBDAController(APIController apic) {
-		this.apic = apic;
-		ABoxToDBDumper.getInstance().setAPIController(apic);
-	}
+    @Override
+    public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
+        this.preferences = preference;
+    }
 
-	@Override
-	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
-		this.preference = preference;
-	}
+    /**
+     * Creates a new reformulation platform reasoner.
+     */
+    @Override
+    public OWLReasoner createReasoner(OWLOntologyManager manager) {
 
-	/**
-	 * Creates a new reformulation platform reasoner.
-	 */
-	public OWLReasoner createReasoner(OWLOntologyManager manager) {
-		log.debug("Creating a new instance of the BolzanoTechniqueWrapper");
-		
-		if (apic == null) {
-			throw new NullPointerException(
-					"The APIController for this OBDAOWLReformulationFactory " +
-					"has not been set. Call setAPIController(APIController " +
-					"apic) before instantiating a reasoner.");
-		}
-		
-		if (preference == null) {
-			throw new NullPointerException(
-					"The preferences for this OBDAOWLReformulationFactory " +
-					"has not been set. Call setPreferenceHolder(" +
-					"ReformulationPlatformPreferences preference) before " +
-					"instantiating a reasoner.");
-		}
-		
-		String useMem = (String) preference.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB);
-		unfoldingMode = (String) preference.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
-		String createMap = (String) preference.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
-		reformulationTechnique = (String) preference.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-		
-		log.debug("Parameters: ");
-		log.debug("{}={}", ReformulationPlatformPreferences.USE_INMEMORY_DB, (String) preference
-				.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB));
-		log.debug("{}={}", ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, (String) preference
-				.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM));
-		log.debug("{}={}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, (String) preference
-				.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS));
+        if (apic == null) {
+            throw new NullPointerException("APIController not set");
+        }
+        if (preferences == null) {
+            throw new NullPointerException("ReformulationPlatformPreferences not set");
+        }
 
-		createMappings = createMap.equals("true");
-		useInMemoryDB = useMem.equals("true");
+        String useMem = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB);
+        boolean useInMemoryDB = "true".equals(useMem);
 
-		// TODO OBDAOWLReformulationPlattformFactory add here code to validate
-		// all the known parameters
+        String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
+        String createMap = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
+        boolean createMappings = "true".equals(createMap);
 
-		OBDAOWLReformulationPlatform reasoner;
-		try {
-			TechniqueWrapper wra = null;
-			if (unfoldingMode.equals("direct")) {
-				wra = createTechniqueWrapperForSimpleUnfoldig();
-			} else if (unfoldingMode.equals("complex")) {
-				wra = createTechniqueWrapperForComplexMappingUnfoldig();
-			} else {
-				throw new IllegalArgumentException("The value for the parameter " + ReformulationPlatformPreferences.UNFOLDING_MECHANMISM
-						+ " is invalid. Use: direct or complex");
-			}
-			reasoner = new OBDAOWLReformulationPlatform(apic, owlOntologyManager, wra);
-			return reasoner;
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			RuntimeException e2 = new RuntimeException(e.getMessage());
-			e2.setStackTrace(e.getStackTrace());
-			throw e2;
-		}
+        String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
 
-	}
+        OBDAOWLReformulationPlatform reasoner = null;
+        QueryRewriter rewriter;
+        TechniqueWrapper techniqueWrapper;
+        UnfoldingMechanism unfMech = null;
+        SourceQueryGenerator gen = null;
+        DataSource ds;
+        EvaluationEngine eval_engine;
 
-	/**
-	 * used to create a reasoner which can handle mappings
-	 * 
-	 * @return a new reformulation plataform reasoner
-	 * @throws Exception
-	 */
-	private TechniqueWrapper createTechniqueWrapperForComplexMappingUnfoldig() throws Exception {
+        try {
+            Set<OWLOntology> ontologies = manager.getOntologies();
+            URI uri = null;
+            if (ontologies.size() > 0) {
+                uri = ontologies.iterator().next().getURI();
+            }
+            DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
 
-		// TODO OBDAOWLReformlationPlattformFActoryImpl. The
-		// createteTechniqueWrapperForComplexMappingUnfolding and for simple
-		// unfolding are almost mirrors to each other. Both methods should be
-		// combined into a single method to avoid repeating code.
+            log.debug("Translating ontologies");
+            OWLAPITranslator translator = new OWLAPITranslator();
+            Set<URI> uris = new HashSet<URI>();
+            for (OWLOntology onto : ontologies) {
+                uris.add(onto.getURI());
+                DLLiterOntology aux = translator.translate(onto);
+                ontology.addAssertions(aux.getAssertions());
+            }
 
-		log.debug("Creating an instance of the technique wrapper with complex mapping unfolder");
-		
-		log.debug("Translating ontologies");
-		Set<OWLOntology> ontologies = owlOntologyManager.getOntologies();
-		OWLAPITranslator translator = new OWLAPITranslator();
-		URI uri = null;
-		if (ontologies.size() > 0) {
-			uri = ontologies.iterator().next().getURI();
-		}
-		DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
+            if (useInMemoryDB) {
+                log.debug("Using in an memory database");
+                String driver = "org.h2.Driver";
+                String url = "jdbc:h2:mem:";
+                String dbname = "aboxdump";
+                String username = "sa";
+                String password = "";
+                Connection connection;
 
-		Iterator<OWLOntology> it = ontologies.iterator();
-		while (it.hasNext()) {
-			OWLOntology o = it.next();
-			DLLiterOntology aux = translator.translate(o);
-			ontology.addAssertions(aux.getAssertions());
-		}
-		
-		DataSource ds = null;
-		EvaluationEngine eng = null;
-		
-		if (!useInMemoryDB) {
-			log.debug("Using a persistent database");
-			
-			Collection<DataSource> sources = apic.getDatasourcesController().getAllSources().values();
-			if (sources == null || sources.size() == 0) {
-				throw new Exception("No datasource selected");
-			} else if (sources.size() > 1) {
-				throw new Exception("Currently the reasoner can only handle one datasource");
-			} else {
-				ds = sources.iterator().next();
-			}
-//			log.debug("Using datasource: {}", ds.getSourceID().toASCIIString());
-			
-			eng = new JDBCEngine(ds);
-		} else {
-			log.debug("Using in an memory database");
-			String driver = "org.h2.Driver";
-			String url = "jdbc:h2:mem:";
-			String dbname = "aboxdump";
-			String username = "sa";
-			String password = "";
-			Connection connection = null;
+                DataSource source = new DataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+                source.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
+                source.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, dbname);
+                source.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, password);
+                source.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
+                source.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
+                source.setParameter(RDBMSsourceParameterConstants.IS_IN_MEMORY, "true");
+                source.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-			DataSource source = new DataSource(URI.create("http://www.obda.org/ABOXDUMP"));
-			source.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-			source.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, dbname);
-			source.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, password);
-			source.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
-			source.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
-			source.setParameter(RDBMSsourceParameterConstants.IS_IN_MEMORY, "true");
-			source.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+                apic.getDatasourcesController().addDataSource(source);
+                apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
 
-			apic.getDatasourcesController().addDataSource(source);
-			apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
+                connection = DriverManager.getConnection(url + dbname, username, password);
+                String[] types = {"TABLE"};
 
-//			Class.forName(driver);
-			connection = DriverManager.getConnection(url + dbname, username, password);
-			String[] types = { "TABLE" };
-			ResultSet set = connection.getMetaData().getTables(null, null, "%", types);
-			Vector<String> drops = new Vector<String>();
-			while (set.next()) {
-				String table = set.getString(3);
-				drops.add("DROP TABLE " + table);
-			}
-			set.close();
-			Iterator<String> drit = drops.iterator();
-			Statement st = connection.createStatement();
-			while (drit.hasNext()) {
-				st.executeUpdate(drit.next());
-			}
-			if (connection != null) {
-				eng = new JDBCEngine(connection);
-				try {
-					ABoxToDBDumper.getInstance().materialize(ontologies, connection, source.getSourceID(), createMappings);
-				} catch (SQLException e) {
-					throw new OBDAOWLReformulaionPlatformFactoryException(e);
-				}
-			} else {
-				try {
-					throw new Exception("Could not establish connection do in memory DB");
-				} catch (Exception e) {
-					throw new OBDAOWLReformulaionPlatformFactoryException(e);
-				}
-			}
-			ds = source;
-		}
-		// ds = apic.getDatasourcesController().getCurrentDataSource();
-		
-		QueryRewriter rew = null;
-		if (reformulationTechnique.equals("dlr")) {
-			rew = new DLRPerfectReformulator(ontology.getAssertions());
-		}
-		else if (reformulationTechnique.equals("improved")) {
-			rew = new TreeRedReformulator(ontology.getAssertions());
-		}
-		
-		List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
-		
-		
-		MappingViewManager viewMan = new MappingViewManager(mappings);
-		
-		UnfoldingMechanism unfMech = new ComplexMappingUnfolder(mappings, viewMan);
-		
-		JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
-		
-		SourceQueryGenerator gen = new ComplexMappingSQLGenerator(ontology, viewMan, util);
-		
-		log.debug("Done setting up the technique wrapper");
+                ResultSet set = connection.getMetaData().getTables(null, null, "%", types);
+                Vector<String> drops = new Vector<String>();
+                while (set.next()) {
+                    String table = set.getString(3);
+                    drops.add("DROP TABLE " + table);
+                }
+                set.close();
 
-		return new BolzanoTechniqueWrapper(unfMech, rew, gen, eng, apic);
-	}
 
-	/**
-	 * Used to create a direct mapping reasoner
-	 * 
-	 * @return a new reformulation plataform reasoner
-	 * @throws Exception
-	 */
-	private TechniqueWrapper createTechniqueWrapperForSimpleUnfoldig() throws Exception {
-		log.debug("Instatiating a a technique wrapper with simple unfoldings.");
+                Statement st = connection.createStatement();
+                for (String drop_table : drops) {
+                    st.executeUpdate(drop_table);
+                }
 
-		UnfoldingMechanism unf = new DirectMappingUnfolder();
-		
-		Set<OWLOntology> ontologies = owlOntologyManager.getOntologies();
-		OWLAPITranslator translator = new OWLAPITranslator();
-		URI uri = null;
-		if (ontologies.size() > 0) {
-			uri = ontologies.iterator().next().getURI();
-		}
-		DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
+                eval_engine = new JDBCEngine(connection);
+                try {
+                    ABoxToDBDumper.getInstance().materialize(ontologies, connection, source.getSourceID(), createMappings);
+                } catch (SQLException e) {
+                    throw new OBDAOWLReformulaionPlatformFactoryException(e);
+                }
+                ds = source;
+            } else {
+                log.debug("Using a persistent database");
 
-		Iterator<OWLOntology> it = ontologies.iterator();
-		log.debug("Translating the ontology");
-		Set<URI> uris = new HashSet<URI>();
-		while (it.hasNext()) {
-			OWLOntology o = it.next();
-			uris.add(o.getURI());
-			DLLiterOntology aux = translator.translate(o);
-			ontology.addAssertions(aux.getAssertions());
-		}
+                Collection<DataSource> sources = apic.getDatasourcesController().getAllSources().values();
+                if (sources == null || sources.size() == 0) {
+                    throw new Exception("No datasource selected");
+                } else if (sources.size() > 1) {
+                    throw new Exception("Currently the reasoner can only handle one datasource");
+                } else {
+                    ds = sources.iterator().next();
+                }
+                eval_engine = new JDBCEngine(ds);
+            }
 
-		QueryRewriter rew = null;
-		if (reformulationTechnique.equals("dlr")) {
-			rew = new DLRPerfectReformulator(ontology.getAssertions());
-		}
-		else if (reformulationTechnique.equals("improved")) {
-			rew = new TreeRedReformulator(ontology.getAssertions());
-		}
-		
-		log.debug("Instantiating a SimpleDirectQueryGenrator");
-		SourceQueryGenerator gen = new SimpleDirectQueryGenrator(apic.getIOManager().getPrefixManager(), ontology, uris);
-		
-		EvaluationEngine eng = null;
-		if (!useInMemoryDB) {
-			log.debug("Using a persistent RDBMS");
-			Iterator<DataSource> dit = apic.getDatasourcesController().getAllSources().values().iterator();
-			DataSource ds = dit.next();  // Take the first data source on the list.
-			
-			if (ds == null) {
-				throw new Exception("No suitable data source found! Please do a manual abox dump or select the in memory mode");
-			}
-			eng = new JDBCEngine(ds);
-		} else {
 
-			
-			//TODO All the database management code should be put in a separate method or class
-			
-			log.debug("Setting up an in H2 in-memory database to store the ABox");
-			String driver = "org.h2.Driver";
-			String url = "jdbc:h2:mem:";
-			String dbname = "aboxdump";
-			String username = "sa";
-			String password = "";
-			Connection connection = null;
+            if ("dlr".equals(reformulationTechnique)) {
+                rewriter = new DLRPerfectReformulator(ontology.getAssertions());
+            } else if ("improved".equals(reformulationTechnique)) {
+                rewriter = new TreeRedReformulator(ontology.getAssertions());
+            } else {
+                throw new IllegalArgumentException("Invalid value for argument " + ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+            }
 
-//			Class.forName(driver);
-			connection = DriverManager.getConnection(url + dbname, username, password);
-			String[] types = { "TABLE" };
-			ResultSet set = connection.getMetaData().getTables(null, null, "%", types);
-			Vector<String> drops = new Vector<String>();
-			while (set.next()) {
-				String table = set.getString(3);
-				drops.add("DROP TABLE " + table);
-			}
-			set.close();
-			Iterator<String> drit = drops.iterator();
-			Statement st = connection.createStatement();
-			while (drit.hasNext()) {
-				st.executeUpdate(drit.next());
-			}
+            if ("complex".equals(unfoldingMode)) {
+                List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
 
-			//TODO this code will never do anything
-			if (connection == null)
-				throw new OBDAOWLReformulaionPlatformFactoryException(new Exception("Could not establish connection do in memory DB"));
+                MappingViewManager viewMan = new MappingViewManager(mappings);
 
-			eng = new JDBCEngine(connection);
+                unfMech = new ComplexMappingUnfolder(mappings, viewMan);
 
-			log.debug("Inserting ABox data from the ontology into the database");
-			try {
-				ABoxToDBDumper.getInstance().materialize(ontologies, connection, null, false);
-			} catch (SQLException e) {
-				throw new OBDAOWLReformulaionPlatformFactoryException(e);
-			}
+                JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
 
-		}
-		
-		log.debug("Done setting up the technique wrapper");
-		
-		return new BolzanoTechniqueWrapper(unf, rew, gen, eng, apic);
-	}
+                gen = new ComplexMappingSQLGenerator(ontology, viewMan, util);
+            } else if ("direct".equals(unfoldingMode)) {
+                gen = new SimpleDirectQueryGenrator(apic.getIOManager().getPrefixManager(), ontology, uris);
+                unfMech = new DirectMappingUnfolder();
+            } else {
+                log.error("Invalid parameter {}", ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
+            }
 
-	public String getReasonerName() {
-		return name;
-	}
+            log.debug("Done setting up the technique wrapper");
+            techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
+            reasoner = new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
 
-	public void initialise() throws Exception {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-	}
+        return reasoner;
+    }
 
-	public void dispose() throws Exception {
-
-	}
-
-	/**
-	 * Returns the current api controller
-	 * 
-	 * @return the current api controller
-	 */
-	public APIController getApiController() {
-
-		if (apic == null) {
-			JOptionPane.showMessageDialog(null, "Creation of reasoner failed. Look up the logfile for more information", "FAILURE",
-					JOptionPane.ERROR_MESSAGE);
-			throw new NullPointerException(
-					"The APIController for this factory has not been set. use setAPIController(APIController apic) to set it and try again.");
-		} else {
-			return apic;
-		}
-	}
+    public String getReasonerName() {
+        // assume for now that preferences define the reasoner name
+        return preferences.toString();
+    }
 }
