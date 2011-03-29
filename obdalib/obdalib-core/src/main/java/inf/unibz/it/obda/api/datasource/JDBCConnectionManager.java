@@ -61,14 +61,14 @@ public class JDBCConnectionManager {
 		Connection con = connectionPool.get(connID);
 		if(con == null){
 			
-			Class d = Class.forName(driver);
+//			Class d = Class.forName(driver);
 			con = DriverManager.getConnection(url+dbname, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
 			connectionPool.put(connID, con);
 		}else{
 			con.close();
-			Class d = Class.forName(driver);
+//			Class d = Class.forName(driver);
 			con = DriverManager.getConnection(url+dbname, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
@@ -83,6 +83,24 @@ public class JDBCConnectionManager {
 		}else{
 			return !con.isClosed();
 		}
+	}
+	
+	public Statement getStatement(URI connID, DataSource ds) throws Exception{
+		Connection con = connectionPool.get(connID);
+		if(con == null || con.isClosed()){
+			createConnection(ds);
+			con = connectionPool.get(connID);
+		}
+		if(currentStatement != null){
+				currentStatement.close();
+				currentStatement = null;
+		}
+		int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
+		int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
+		Statement st = con.createStatement(type, concur);
+		int fetchsize = (Integer)properties.get(JDBC_FETCHSIZE);
+		st.setFetchSize(fetchsize);
+		return st;
 	}
 	
 	public ResultSet executeQuery(URI connID, String query, DataSource ds) throws SQLException{
@@ -198,30 +216,7 @@ public class JDBCConnectionManager {
 		return "Count error";
 	}
 	
-	public String getRowCount(String name, DataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
-		
-		Connection con = connectionPool.get(ds.getSourceID());
-		if(con == null){
-			createConnection(ds);
-		}
-		con = connectionPool.get(ds.getSourceID());
-		Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		// Run the query, creating a ResultSet
-		ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + name.toUpperCase());
-		// Create and return a TableModel for the ResultSet
-		r.next();
-		// r.absolute(1);
-		if (r.first()) {
-			Object temp = r.getObject(1);
-			// count = ((Long) temp).toString();
-			String count = temp.toString();
-			return count;
-		}
-		return "Count error";
-		
-	}
-	
-	public ResultSet getRelationsResultSet(DataSource source) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
+	public Connection getConnection(DataSource source) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
 		if(source == null){
 			throw new SQLException("No data source selected.");
 		}
@@ -229,40 +224,8 @@ public class JDBCConnectionManager {
 		if(con == null){
 			createConnection(source);
 		}
-		con = connectionPool.get(source.getSourceID());
-		if(con != null){
-			if (source.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
+		return connectionPool.get(source.getSourceID());
 
-				Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-				String dbname = source.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-				// jdbc:db2://5.90.168.104:50000/MINIST:currentSchema=PROP;
-				String[] sp1 = dbname.split("/");
-				String catalog = sp1[sp1.length - 1].split(":")[0];
-				String t2 = dbname.split("=")[1];
-				String schema = t2.substring(0, t2.length() - 1);
-				ResultSet r = statement.executeQuery("SELECT TABLE_NAME FROM SYSIBM.TABLES WHERE TABLE_CATALOG = '" + catalog
-						+ "' AND TABLE_SCHEMA = '" + schema + "'");
-				return r;
-			} if (source.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
-				// select table_name from user_tables
-				Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-				ResultSet r = statement.executeQuery("select table_name from user_tables");
-				return r;
-			} else {
-				//postgres and mysql
-				DatabaseMetaData metdata = con.getMetaData();
-				String catalog = null;
-				String schemaPattern = "%";
-				String tableNamePattern = "%";
-				String types[] = { "TABLE" };
-				con.setAutoCommit(true);
-				ResultSet r = metdata.getTables(catalog, schemaPattern, tableNamePattern, types);
-				con.setAutoCommit(false);
-				return r;
-			}
-		}else{
-			throw new SQLException("No connection established for id: " + source.getSourceID());
-		}
 	}
 	
 	public void setPorperties(Properties p){

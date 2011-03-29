@@ -541,8 +541,8 @@ public class DataManager {
         }
       } catch (Exception e) {
         try {
-          log.warn("Error loading mapping with id: {}",
-              ((Element) childs.item(i)).getAttribute("id"));
+//          log.warn("Error loading mapping with id: {}",
+//              ((Element) childs.item(i)).getAttribute("id"));
           log.debug(e.getMessage(), e);
         } catch (Exception e2) {
           log.warn("Error loading mapping");

@@ -131,7 +131,7 @@ public class ResultSetTableModelFactory {
 		if (connection != null && !connection.isClosed())
 			return false;
 
-		Class driver = Class.forName(driverClassName);
+//		Class driver = Class.forName(driverClassName);
 		connection = DriverManager.getConnection(dbname, username, password);
 		connection.setAutoCommit(true);
 		return true;

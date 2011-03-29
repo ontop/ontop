@@ -14,8 +14,8 @@
 
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 
 import java.awt.EventQueue;
@@ -29,6 +29,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.table.TableModel;
+
 
 //import edu.stanford.smi.protegex.owl.ui.ProtegeUI;
 
@@ -158,12 +159,13 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 //			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				EventQueue.invokeLater(new Runnable() {
+				Thread thread = new Thread() {
 					public void run() {
 						String query = querypanel.getQuery();
 						getCountAllTuplesActionForUCQ().run(query, querypanel);
 					}
-				});
+				};
+				thread.start();
 			}
 			
 		});

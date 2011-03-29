@@ -70,7 +70,7 @@ public class RelationsResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	RelationsResultSetTableModel(ResultSet results, DataSource ds) throws SQLException {
+	public RelationsResultSetTableModel(ResultSet results, DataSource ds) throws SQLException {
 
 		source = ds;
 		listeners = new Vector<TableModelListener>();

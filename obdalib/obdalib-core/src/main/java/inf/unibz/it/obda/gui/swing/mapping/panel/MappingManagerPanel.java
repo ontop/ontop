@@ -789,7 +789,7 @@ public class MappingManagerPanel extends JPanel implements
     final JDialog resultquery = new JDialog();
     MappingNode mapping = (MappingNode) path.getLastPathComponent();
     MappingBodyNode body = mapping.getBodyNode();
-    SQLQueryPanel query_panel = new SQLQueryPanel(dsc, body.toString());
+    SQLQueryPanel query_panel = new SQLQueryPanel(selectedSource, body.toString());
 
     resultquery.setSize(pnlMappingManager.getWidth(), pnlMappingManager.getHeight());
     resultquery.setLocationRelativeTo(null);

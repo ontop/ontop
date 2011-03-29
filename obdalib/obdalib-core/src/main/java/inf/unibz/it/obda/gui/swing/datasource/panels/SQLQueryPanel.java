@@ -14,16 +14,22 @@
 
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
+import inf.unibz.it.utils.swing.OBDAProgessMonitor;
+import inf.unibz.it.utils.swing.OBDAProgressListener;
 
-import java.awt.EventQueue;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,22 +38,28 @@ import javax.swing.table.TableModel;
 public class SQLQueryPanel extends javax.swing.JPanel implements 
     DatasourceSelectorListener {
     	
-	DatasourcesController dsc;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7600557919206933923L;
 	String execute_Query;
+	
+	Logger								log				= LoggerFactory.getLogger(SQLQueryPanel.class);
 
 	private DataSource selectedSource;
 
     /** Creates new form SQLQueryPanel */
-    public SQLQueryPanel(DatasourcesController dsc,String execute_Query) {
+    public SQLQueryPanel(DataSource ds,String execute_Query) {
     	
-    	this(dsc);
+    	this();
     	this.execute_Query=execute_Query;
-    	show_Result_Query();    
+    	txtSqlQuery.setText(execute_Query);
+    	selectedSource = ds;
+    	cmdExecuteActionPerformed(null);    
     }
     
     
-    public SQLQueryPanel(DatasourcesController dsc) {
-    	this.dsc = dsc;
+    public SQLQueryPanel() {
       initComponents();
     }
     
@@ -138,119 +150,39 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {                                               
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-					// "com.mysql.jdbc.Driver",
-					// "jdbc:mysql://localhost/sattest", "mastro", "mastro");
-//					ResultSetTableModelFactory modelfactory = ResultSetTableModelFactory.getInstance(dsc.getCurrentDataSource());
-//
-//					/***********************************************************
-//					 * get Previous model, if any and close it before
-//					 * proceeding.
-//					 */
-					TableModel oldmodel = tblQueryResult.getModel();
-					if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
-
-						IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
-						rstm.close();
-					}
-//
-//					queryTable.setModel(modelfactory.getResultSetTableModel(queryField.getText()));
-
-					if(selectedSource == null){ 				
-						JOptionPane.showMessageDialog(null, "Pleas select a data source first");
-					}else{
-						JDBCConnectionManager man =JDBCConnectionManager.getJDBCConnectionManager();
-						try {
-							man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
-							man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-							if(!man.isConnectionAlive(selectedSource.getSourceID())){
-								try {
-									man.createConnection(selectedSource);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						
-							java.sql.ResultSet set = man.executeQuery(selectedSource.getSourceID(), txtSqlQuery.getText(),selectedSource);
-							//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), execute_query,current_ds); //EK
-							IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
-							tblQueryResult.setModel(model);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							throw new RuntimeException(e);
-							
-						}
-					}
-			}
-		});
-    }                                             
-//throw new RuntimeException(e);
-    
- 
-//    /***************************************************************************
-//	 * Verifies that there is a connected result set factory for the current
-//	 * data sources. If there is no factory it creates it, if there is, but the
-//	 * connection data for the current source and the data used to create the
-//	 * factory is different it closes the previous one and creates a new one.
-//	 * 
-//	 * If there exists a factory and its data is ok it checks if it is
-//	 * connected, if it is not it tries to connect it.
-//	 * 
-//	 * @throws NoDatasourceSelectedException
-//	 * @throws NoConnectionException
-//	 */
-//	private ResultSetTableModelFactory getResultSetModelFactory() throws NoDatasourceSelectedException, NoConnectionException,
-//			ClassNotFoundException, SQLException {
-//
-//	}
-    private void show_Result_Query(){
-    	txtSqlQuery.setText(execute_Query);
-    	TableModel oldmodel = tblQueryResult.getModel();
-    	
-		if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
-
-			IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
-			rstm.close();
-		}
-		
-		if(selectedSource == null){ 
-		
-			JOptionPane.showMessageDialog(null, "Pleas select a data source first");
-		}else{
-			JDBCConnectionManager man =JDBCConnectionManager.getJDBCConnectionManager();
-			try {
-				man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
-				man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-				if(!man.isConnectionAlive(selectedSource.getSourceID())){
-					try {
-						man.createConnection(selectedSource);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+    	try {
+    		if(selectedSource == null){
+    			JOptionPane.showMessageDialog(this, "Please select data source first", "Error", JOptionPane.ERROR_MESSAGE);
+    		}else{
+				OBDAProgessMonitor progMonitor = new OBDAProgessMonitor();
+				CountDownLatch latch = new CountDownLatch(1);
+				ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
+				progMonitor.addProgressListener(action);
+				progMonitor.addProgressListener(action);
+				progMonitor.start();
+				action.run();
+				latch.await();
+				progMonitor.stop();
+				ResultSet set = action.getResult();
+				if(set != null){
+					IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
+					tblQueryResult.setModel(model);
 				}
-			
-				//java.sql.ResultSet set = man.executeQuery(current_ds.getUri(), queryField.getText(),current_ds); original
-				java.sql.ResultSet set = man.executeQuery(selectedSource.getSourceID(), execute_Query,selectedSource); //EK
-				IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
-				tblQueryResult.setModel(model);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-				
-			}
+    		}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Error while executing query.\n Please refer to the log file for more information.");
+			log.error("Error while executing query.",e);
 		}
-  }
+
+    }                                             
+
     	
   @Override
   public void datasourceChanged(DataSource oldSource, DataSource newSource)
   {
     this.selectedSource = newSource;
   }  
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExecute;
     private javax.swing.JLabel lblSqlQuery;
@@ -262,4 +194,65 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
     private javax.swing.JTable tblQueryResult;
     private javax.swing.JTextArea txtSqlQuery;
     // End of variables declaration//GEN-END:variables
+    
+    private class ExecuteSQLQueryAction implements OBDAProgressListener{
+
+    	CountDownLatch latch = null;
+    	Thread thread = null;
+    	ResultSet result = null;
+    	Statement statement = null;
+    	
+    	private ExecuteSQLQueryAction (CountDownLatch latch){
+    		this.latch = latch;
+    	}
+    	
+		@Override
+		public void actionCanceled() {
+			try {
+				if(thread != null){
+					thread.interrupt();
+				}
+				if(statement != null && !statement.isClosed()){
+					statement.close();
+				}
+				result = null;
+				latch.countDown();
+			} catch (SQLException e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while canceling action.\n Please refer to the log file for more information.");
+				log.error("Error while counting tuples.",e);
+			}					
+		}
+		
+		public ResultSet getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread() {
+				public void run() {
+					try {
+				    	TableModel oldmodel = tblQueryResult.getModel();
+				  
+						if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
+							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
+							rstm.close();
+						}
+						JDBCConnectionManager man =JDBCConnectionManager.getJDBCConnectionManager();
+						man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
+						man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);							
+						statement = man.getStatement(selectedSource.getSourceID(), selectedSource); //EK
+						result = statement.executeQuery(txtSqlQuery.getText());
+						latch.countDown();
+					} catch (Exception e) {
+						latch.countDown();
+						JOptionPane.showMessageDialog(null, "Error while executing query.\n Please refer to the log file for more information.");
+						log.error("Error while executing query.",e);
+					}
+				}
+			};
+			thread.start();
+		}
+    	
+    }
 }

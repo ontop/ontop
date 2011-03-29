@@ -20,6 +20,10 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.sql.parser.SimpleSQLParser.statement_return;
+import inf.unibz.it.utils.swing.OBDAProgessMonitor;
+import inf.unibz.it.utils.swing.OBDAProgressListener;
+
 import java.awt.BorderLayout;
 
 import java.awt.Dimension;
@@ -28,10 +32,12 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.CountDownLatch;
+
 import javax.swing.BorderFactory;
 
 import javax.swing.DefaultListSelectionModel;
@@ -49,6 +55,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -68,6 +77,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 	private DataSource selectedSource;
 	
 	private DatasourcesController dscontroller = null;
+	
+	Logger								log				= LoggerFactory.getLogger(SQLSchemaInspectorPanel.class);
 	
     /** Creates new form SQLSchemaInspectorPanel */
     public SQLSchemaInspectorPanel(DatasourcesController dsController) {
@@ -93,7 +104,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
         pnlButtons = new JPanel();
         cmdRefresh = new JButton();
-        cmdDropViews = new JButton();
         splRelationsColumns = new JSplitPane();
         scrRelationsTable = new JScrollPane();
         tblRelations = new JTable();
@@ -114,14 +124,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
             }
         });
         pnlButtons.add(cmdRefresh);
-
-        cmdDropViews.setText("Drop views");
-        cmdDropViews.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                cmdDropViewsActionPerformed(evt);
-            }
-        });
-        pnlButtons.add(cmdDropViews);
 
         add(pnlButtons, BorderLayout.NORTH);
 
@@ -192,79 +194,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
         add(splRelationsColumns, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void cmdDropViewsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDropViewsActionPerformed
-    	EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					int result = JOptionPane.showConfirmDialog(null,
-							"This will delete ALL views named view_XXXX\n are you sure you want to proceed?");
-					if ((result == JOptionPane.CANCEL_OPTION) || (result == JOptionPane.NO_OPTION)) {
-						return;
-					}
-					JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-					if(!man.isConnectionAlive(selectedSource.getSourceID())){
-						man.createConnection(selectedSource);
-					}
-					ResultSet set = man.getRelationsResultSet(selectedSource);
-					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
-					int tablescounter = model.getRowCount();
-
-					if (selectedSource == null) {
-						throw new NoDatasourceSelectedException("No source selected");
-					}
-					String driverstr = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-					String url = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-					String dbname = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-					String username = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-					String password = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-
-					Class driver = Class.forName(driverstr);
-					String sqlurl = "";
-					if (url.charAt(url.length() - 1) == '/') {
-						sqlurl = url + dbname;
-					} else {
-						sqlurl = url + "/" + dbname;
-					}
-					//System.out.println(sqlurl);
-					java.sql.Connection connection = DriverManager.getConnection(sqlurl, username, password);
-					connection.setAutoCommit(false);
-
-					for (int i = 0; i < tablescounter; i++) {
-						String tablename = (String) model.getValueAt(i, 0);
-						if (tablename.length() < 5)
-							continue;
-						if (tablename.substring(0, 5).equals("view_")) {
-							dropview(tablename, connection);
-						}
-					}
-					connection.close();
-				} catch (SQLException ex) {
-
-					ex.printStackTrace(System.err);
-					JOptionPane.showMessageDialog(null, new String[] { ex.getClass().getName() + ": ", ex.getMessage() });
-
-				} catch (ClassNotFoundException ex) {
-					ex.printStackTrace(System.err);
-					JOptionPane.showMessageDialog(null, new String[] { // Display
-							// a
-									// 2-line
-									// message
-									"JDBC Driver Missing. Make sure the JDBC jar", "is accesible in the classpath." });
-
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			}
-		});
-    }//GEN-LAST:event_cmdDropViewsActionPerformed
-
-    
-	private void dropview(String viewname, Connection connection) throws NoDatasourceSelectedException, SQLException {
-		Statement st = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-		st.executeUpdate("drop view " + viewname);
-		st.close();
-	}
 	
 	private void addPopupMenu(){
 		JPopupMenu menu = new JPopupMenu();
@@ -277,44 +206,35 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				Counter c = new Counter();
-				c.start();
+				try {
+					int row = tblRelations.getSelectedRow();
+					if(row != -1){
+						String s = tblRelations.getModel().getValueAt(row, 0).toString();
+						CountDownLatch latch = new CountDownLatch(1);
+						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+						CountAllTuplesAction action = new CountAllTuplesAction(latch);
+						monitor.addProgressListener(action);
+						monitor.start();
+						action.run();
+						latch.await();
+						monitor.stop();
+						String[] result = action.getResult();
+						if(result !=null){
+							for(int i=0;i<result.length;i++){
+								tblRelations.getModel().setValueAt(result[i], i, 1);
+							}
+						}
+						
+					}
+					
+				} catch (InterruptedException e1) {
+					JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+					log.error("Error while counting.",e);
+				}
 			}
 			
 		});
-		menu.add(countAll);
-		
-//		JMenuItem countapprox = new JMenuItem(); 
-//		countapprox.setText("count approximatly");
-//		countapprox.setToolTipText("Counts approximatly the number of rows in the selected table");
-//		countapprox.addActionListener(new ActionListener(){
-//
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//				int row = relationsTable.getSelectedRow();
-//				if(row != -1){
-//					String s = relationsTable.getModel().getValueAt(row, 0).toString();
-//					try {
-//						String count = JDBCConnectionManager.getJDBCConnectionManager().getApprimateRowCount(s, dscontroller.getCurrentDataSource());
-//						int i = count.indexOf(".");
-//						if(i != -1){
-//							count = count.substring(0, i);
-//						}
-//						relationsTable.getModel().setValueAt(count, row, 1);
-//					} catch (NoDatasourceSelectedException e1) {
-//						e1.printStackTrace();
-//					} catch (ClassNotFoundException e1) {
-//						e1.printStackTrace();
-//					} catch (SQLException e1) {
-//						e1.printStackTrace();
-//					}
-//				}
-//				
-//			}
-//			
-//		});
-//		menu.add(countapprox);
-		
+		menu.add(countAll);		
 		JMenuItem countrow = new JMenuItem(); 
 		countrow.setText("count");
 		countrow.setToolTipText("Counts the number of rows in the selected table");
@@ -322,95 +242,56 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 //			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-							int row = tblRelations.getSelectedRow();
-							if(row != -1){
-								String s = tblRelations.getModel().getValueAt(row, 0).toString();
-								try {
-									String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, selectedSource);
-									tblRelations.getModel().setValueAt(count, row, 1);
-								} catch (NoDatasourceSelectedException e1) {
-									e1.printStackTrace();
-								} catch (ClassNotFoundException e1) {
-									e1.printStackTrace();
-								} catch (SQLException e1) {
-									e1.printStackTrace();
-								}
-							}
+				try {
+					int row = tblRelations.getSelectedRow();
+					if(row != -1){
+						String s = tblRelations.getModel().getValueAt(row, 0).toString();
+						CountDownLatch latch = new CountDownLatch(1);
+						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+						CountTuplesAction action = new CountTuplesAction(latch,s);
+						monitor.addProgressListener(action);
+						monitor.start();
+						action.run();
+						latch.await();
+						monitor.stop();
+						String count = action.getResult();
+						if(!count.equals("-1")){
+							tblRelations.getModel().setValueAt(count, row, 1);
 						}
-					});
-			}
+						
+					}
+					
+				} catch (InterruptedException e1) {
+					JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+					log.error("Error while counting.",e);
+				}
+			}	
 		});
 		menu.add(countrow);
 		tblRelations.setComponentPopupMenu(menu);
 	}
 	
     private void cmdRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
-    	EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					// DataSource current_datasource =
-					// DatasourcesController.getInstance().getCurrentDataSource();
-					// if (current_datasource == null) {
-					// JOptionPane.showMessageDialog(null, "Select a data source
-					// first");
-					// return;
-					// }
-					// String driver =
-					// current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-					// String url =
-					// current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-					// String dbname =
-					// current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-					// String username =
-					// current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-					// String password =
-					// current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-					
-					TableModel oldmodel = tblRelations.getModel();
-					if ((oldmodel != null) && (oldmodel instanceof RelationsResultSetTableModel)) {
-						RelationsResultSetTableModel model = (RelationsResultSetTableModel)oldmodel;
-						if (model != null) {
-							try {
-								model.close();
-							} catch (Exception e) {
-							}
-							
-						}
-						((RelationsResultSetTableModel) oldmodel).close();
-					}
-					// RelationsResultSetTableModelFactory factory = new
-					// RelationsResultSetTableModelFactory(driver, url + dbname,
-					// username,
-					// password);
-					ResultSet set = JDBCConnectionManager.getJDBCConnectionManager().getRelationsResultSet(selectedSource);
-					RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
-					tblRelations.setModel(model);
-					tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
-							* TABLE_ROW_HEIGHT));
-				} catch (SQLException ex) {
-					// If something goes wrong, clear the message line
-
-					// Then display the error in a dialog box
-					ex.printStackTrace(System.err);
-					JOptionPane.showMessageDialog(null, new String[] { ex.getClass().getName() + ": ", ex.getMessage() });
-
-				} catch (ClassNotFoundException ex) {
-					JOptionPane.showMessageDialog(null, new String[] { // Display
-							// a
-									// 2-line
-									// message
-									"JDBC Driver Missing. Make sure the JDBC jar", "is accesible in the classpath." });
-
-				} catch(NoDatasourceSelectedException e ) {
-					JOptionPane.showMessageDialog(null, "Error: No data source has been selected. \nPlease select a data source in the data source selector and try again.");
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
+    	try {
+			OBDAProgessMonitor progMonitor = new OBDAProgessMonitor();
+			CountDownLatch latch = new CountDownLatch(1);
+			UpdateRelationTableAction action = new UpdateRelationTableAction(latch);
+			progMonitor.addProgressListener(action);
+			progMonitor.start();
+			action.run();
+			latch.await();
+			progMonitor.stop();
+			ResultSet set = action.getResult();
+			if(set != null){
+				RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
+				tblRelations.setModel(model);
+				tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
+						* TABLE_ROW_HEIGHT));
 			}
-		});
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Error while updating table.\n Please refer to the log file for more information.");
+			log.error("Error while updating table model.",e);
+		}
     }//GEN-LAST:event_cmdRefreshActionPerformed
     
 
@@ -470,9 +351,47 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			});
 		}
 	}
+	
+	
+	private ResultSet getResultSetForRelations() throws Exception{
+		
+		Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
+		if(con != null){
+			if (selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
+
+				Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				String dbname = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
+				// jdbc:db2://5.90.168.104:50000/MINIST:currentSchema=PROP;
+				String[] sp1 = dbname.split("/");
+				String catalog = sp1[sp1.length - 1].split(":")[0];
+				String t2 = dbname.split("=")[1];
+				String schema = t2.substring(0, t2.length() - 1);
+				ResultSet r = statement.executeQuery("SELECT TABLE_NAME FROM SYSIBM.TABLES WHERE TABLE_CATALOG = '" + catalog
+							+ "' AND TABLE_SCHEMA = '" + schema + "'");
+				return r;
+			} if (selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
+					// select table_name from user_tables
+				Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				ResultSet r = statement.executeQuery("select table_name from user_tables");
+				return  r;
+			} else {
+					//postgres and mysql
+				DatabaseMetaData metdata = con.getMetaData();
+				String catalog = null;
+				String schemaPattern = "%";
+				String tableNamePattern = "%";
+				String types[] = { "TABLE" };
+				con.setAutoCommit(true);
+				ResultSet r = metdata.getTables(catalog, schemaPattern, tableNamePattern, types);
+				con.setAutoCommit(false);
+				return r;
+			}
+		}else{
+			throw new SQLException("No connection established for id: " + selectedSource.getSourceID());
+		}
+	}
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton cmdDropViews;
     private JButton cmdRefresh;
     private JPanel pnlButtons;
     private JScrollPane scrAttributesTable;
@@ -481,25 +400,172 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
     private JTable tblAttributes;
     private JTable tblRelations;
     // End of variables declaration//GEN-END:variables
-    
-    private class Counter extends Thread{
-    	
-    	public void run (){
-    		int rows = tblRelations.getRowCount();
-			for(int i=0;i<rows; i++){
-				String s = tblRelations.getModel().getValueAt(i, 0).toString();
-				try {
-					String count = JDBCConnectionManager.getJDBCConnectionManager().getRowCount(s, selectedSource);
-					tblRelations.getModel().setValueAt(count, i, 1);
-				} catch (NoDatasourceSelectedException e1) {
-					e1.printStackTrace();
-				} catch (ClassNotFoundException e1) {
-					e1.printStackTrace();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}
-    	}
-    }
 
+    private class CountTuplesAction implements OBDAProgressListener{
+
+    	CountDownLatch latch = null;
+    	Thread thread = null;
+    	String result = "-1";
+    	String table = null;
+    	Statement statement = null;
+    	
+    	
+    	private CountTuplesAction(CountDownLatch latch, String table){
+    		this.latch = latch;
+    		this.table = table;
+    	}
+    	
+    	public String getResult(){
+    		return result;
+    	}
+    	
+    	public void run(){
+    		thread = new Thread(){
+    			public void run(){
+    				try {
+    					Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
+    					statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    					ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + table.toUpperCase());
+    					r.next();
+    					if (r.first()) {
+    						Object temp = r.getObject(1);
+    						String count = temp.toString();
+    						result = count;
+    					}
+    					latch.countDown();
+    				} catch (Exception e) {
+    					latch.countDown();
+						JOptionPane.showMessageDialog(null, "Error while counting tuples in " +table+ ".\n Please refer to the log file for more information.");
+						log.error("Error while counting tuples in " +table,e);
+    				} 
+    			}
+    		};
+    		thread.start();
+    	}
+    	
+		@Override
+		public void actionCanceled() {
+			try {
+				if(thread != null){
+					thread.interrupt();
+				}
+				if(statement != null && !statement.isClosed()){
+					statement.cancel();
+					statement.close();
+				}
+				latch.countDown();
+			} catch (SQLException e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while canceling action.\n Please refer to the log file for more information.");
+				log.error("Error while counting tuples.",e);
+			}			
+		}
+    	
+    }
+    
+    private class CountAllTuplesAction implements OBDAProgressListener{
+
+    	CountDownLatch latch = null;
+    	Thread thread = null;
+    	String[] result = null;
+    	Statement statement = null;    	
+    	private CountAllTuplesAction(CountDownLatch latch){
+    		this.latch = latch;
+    	}
+    	
+    	public String[] getResult(){
+    		return result;
+    	}
+    	
+    	public void run(){
+    		thread = new Thread(){
+    			public void run(){
+		    		try {
+						int rows = tblRelations.getRowCount();
+						result = new String[rows];
+						for(int i=0;i<rows; i++){
+							String s = tblRelations.getModel().getValueAt(i, 0).toString();
+							Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
+							statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+							ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + s.toUpperCase());
+							r.next();
+							if (r.first()) {
+								Object temp = r.getObject(1);
+								String count = temp.toString();
+								result[i] = count;
+							}else{
+								result[i] = "count error";
+							}
+							statement.close();
+						}
+						latch.countDown();
+					} catch (Exception e) {
+						latch.countDown();
+						JOptionPane.showMessageDialog(null, "Error while counting tuples.\n Please refer to the log file for more information.");
+						log.error("Error while counting tuples.",e);
+					}
+    			}
+    		};
+    		thread.start();
+    	}
+    	
+		@Override
+		public void actionCanceled() {
+			try {
+				if(thread != null){
+					thread.interrupt();
+				}
+				if(statement != null && !statement.isClosed()){
+					statement.cancel();
+					statement.close();
+				}
+				latch.countDown();
+			} catch (SQLException e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while canceling action.\n Please refer to the log file for more information.");
+				log.error("Error while counting tuples.",e);
+			}					
+		}
+    	
+    }
+    
+    private class UpdateRelationTableAction implements OBDAProgressListener{
+
+    	CountDownLatch latch = null;
+    	Thread thread = null;
+    	ResultSet result = null;
+    	
+    	private UpdateRelationTableAction(CountDownLatch latch){
+    		this.latch = latch;
+    	}
+    	
+		@Override
+		public void actionCanceled() {
+			if(thread != null){
+    			thread.interrupt();
+    		}
+    		latch.countDown();			
+		}
+    	
+		public ResultSet getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread() {
+				public void run() {
+					try {
+						result = getResultSetForRelations();
+						latch.countDown();
+					} catch (Exception e) {
+						latch.countDown();
+						JOptionPane.showMessageDialog(null, "Error while updating table.\n Please refer to the log file for more information.");
+						log.error("Error while retriving relational information from data source.",e);
+					}
+				}
+			};
+			thread.start();
+		}
+    }
+    
 }

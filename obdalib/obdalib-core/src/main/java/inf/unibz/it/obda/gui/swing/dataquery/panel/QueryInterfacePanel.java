@@ -15,7 +15,7 @@ package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.QueryController;
-import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.utils.swing.DialogUtils;
 
 import java.awt.Color;
@@ -50,7 +50,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	private static final long serialVersionUID = -5902798157183352944L;
 	private ResultViewTablePanel viewpanel;
 	private SPARQLQueryStyledDocument _styled_doc = null;
-	private OBDADataQueryAction executeUCQAction = null;
+	private inf.unibz.it.obda.gui.swing.OBDADataQueryAction executeUCQAction = null;
 	private OBDADataQueryAction executeEQLAction = null;
 	private OBDADataQueryAction retrieveUCQExpansionAction = null;
 	private OBDADataQueryAction retrieveUCQUnfoldingAction = null;
