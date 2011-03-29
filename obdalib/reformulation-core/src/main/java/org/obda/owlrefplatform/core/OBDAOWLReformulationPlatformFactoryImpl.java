@@ -243,7 +243,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 			apic.getDatasourcesController().addDataSource(source);
 			apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
 
-			Class.forName(driver);
+//			Class.forName(driver);
 			connection = DriverManager.getConnection(url + dbname, username, password);
 			String[] types = { "TABLE" };
 			ResultSet set = connection.getMetaData().getTables(null, null, "%", types);
@@ -363,7 +363,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 			String password = "";
 			Connection connection = null;
 
-			Class.forName(driver);
+//			Class.forName(driver);
 			connection = DriverManager.getConnection(url + dbname, username, password);
 			String[] types = { "TABLE" };
 			ResultSet set = connection.getMetaData().getTables(null, null, "%", types);

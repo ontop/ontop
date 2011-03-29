@@ -16,8 +16,6 @@ import javax.swing.JOptionPane;
 
 import org.obda.owlrefplatform.core.abox.ABoxDumpListener;
 import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
-import org.obda.owlrefplatform.core.abox.ABoxDumpListener;
-import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import org.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
@@ -84,11 +82,6 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	}
 
 	public Statement getStatement(String query) throws Exception {
-
-		progressMonitor.setIndeterminate(true);
-		progressMonitor.setMessage("Processing Query....");
-		progressMonitor.setStarted();
-
 		return techwrapper.getStatement(query);
 	}
 
@@ -474,7 +467,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 	public void setProgressMonitor(ProgressMonitor progressMonitor) {
 
-		this.progressMonitor = progressMonitor;
+//		this.progressMonitor = progressMonitor;
 	}
 
 	private ProgressMonitor getProgressMonitor() {
@@ -500,9 +493,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 
 	public void startProgressMonitor(String msg) {
-		getProgressMonitor().setMessage(msg);
-		getProgressMonitor().setIndeterminate(true);
-		getProgressMonitor().setStarted();
+//		getProgressMonitor().setMessage(msg);
+//		getProgressMonitor().setIndeterminate(true);
+//		getProgressMonitor().setStarted();
 
 	}
 }

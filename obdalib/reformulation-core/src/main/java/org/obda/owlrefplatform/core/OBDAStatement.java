@@ -35,6 +35,7 @@ public class OBDAStatement implements Statement {
 	private EvaluationEngine engine = null;
 	private DatalogProgram query = null;
 	private APIController apic = null;
+	private boolean canceled = false;
 
 	private DatalogProgram rewriting = null;
 	private DatalogProgram unfolding = null;
@@ -113,11 +114,15 @@ public class OBDAStatement implements Statement {
 
 		String unf = getUnfolding();
 		String newsql = "SELECT count(*) FROM (" +unf+") t1";
-		ResultSet set= engine.execute(newsql);
-		if(set.next()){
-			return set.getInt(1);
+		if(!canceled){
+			ResultSet set= engine.execute(newsql);
+			if(set.next()){
+				return set.getInt(1);
+			}else{
+				throw new Exception("Tuple count faild due to empty result set.");
+			}
 		}else{
-			throw new Exception("Tuple count faild due to empty result set.");
+			throw new Exception("Action canceled.");
 		}
 	}
 
@@ -139,6 +144,11 @@ public class OBDAStatement implements Statement {
 			}
 		}
 		return bool;
+	}
+
+	@Override
+	public void close() throws Exception{
+		engine.closeStatement();		
 	}
 
 }

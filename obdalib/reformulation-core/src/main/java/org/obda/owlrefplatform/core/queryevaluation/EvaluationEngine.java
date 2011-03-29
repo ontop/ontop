@@ -31,4 +31,8 @@ public interface EvaluationEngine {
 	 * @param ds the new data source
 	 */
 	public void update(DataSource ds);
+	
+	public void closeStatement() throws Exception;
+	
+	public void isCanceled (boolean bool);
 }

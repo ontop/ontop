@@ -504,7 +504,7 @@ public class ABoxToDBDumper {
 		// TODO ABox Dump: This method will not catch exceptions properly. Why
 		// is the default database schema called postgres?
 
-		Class.forName(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
+//		Class.forName(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
 		String usr = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String pwd = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		String url = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);

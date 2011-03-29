@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class JDBCEngine implements EvaluationEngine {
 
 	private DataSource	datasource	= null;
 	private Connection	connection	= null;
+	private Statement 	statement 	= null;
+	private boolean actionCanceled = false;
 
 	Logger				log			= LoggerFactory.getLogger(EvaluationEngine.class);
 
@@ -52,7 +55,7 @@ public class JDBCEngine implements EvaluationEngine {
 		String dbname = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String username = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-		Class d = Class.forName(driver);
+//		Class d = Class.forName(driver);
 		connection = DriverManager.getConnection(url + dbname, username, password);
 
 	}
@@ -70,7 +73,12 @@ public class JDBCEngine implements EvaluationEngine {
 
 	public ResultSet execute(String sql) throws Exception {
 		log.debug("Executing SQL query: \n{}", sql);
-		return connection.createStatement().executeQuery(sql);
+		if(! actionCanceled){
+			statement = connection.createStatement();
+			return statement.executeQuery(sql);
+		}else{
+			throw new Exception("Action canceled");
+		}
 	}
 
 	@Override
@@ -91,5 +99,18 @@ public class JDBCEngine implements EvaluationEngine {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public void closeStatement() throws Exception{
+		if(statement != null && !statement.isClosed()){
+			statement.cancel();
+			statement.close();
+		}
+	}
+
+	@Override
+	public void isCanceled(boolean bool) {
+		actionCanceled = bool;		
 	}
 }
