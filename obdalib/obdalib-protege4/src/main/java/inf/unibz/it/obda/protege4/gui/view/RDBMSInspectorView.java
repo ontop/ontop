@@ -42,7 +42,7 @@ public class RDBMSInspectorView  extends AbstractOWLViewComponent {
   	
     setLayout(new BorderLayout());
     add(inspectorPanel, BorderLayout.CENTER);
-    add(datasourceSelector, BorderLayout.SOUTH);
+    add(datasourceSelector, BorderLayout.NORTH);
     
     log.info("RDBMS schema inspector initialized");
   }

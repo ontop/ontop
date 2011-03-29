@@ -2,8 +2,8 @@ package inf.unibz.it.obda.protege4.gui.view.query;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
-import inf.unibz.it.obda.gui.swing.action.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.action.OBDASaveQueryResultToFileAction;
+import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
@@ -14,6 +14,8 @@ import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
 import inf.unibz.it.utils.io.ResultSetToFileWriter;
+import inf.unibz.it.utils.swing.OBDAProgessMonitor;
+import inf.unibz.it.utils.swing.OBDAProgressListener;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -23,6 +25,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -114,27 +117,23 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 //			@Override
 			public void run(String query, QueryInterfacePanel panel) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if(reasoner instanceof DataQueryReasoner){
-
-					try {
-						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-						dqr.startProgressMonitor("Counting tuples...");
-						Statement st =  dqr.getStatement(query);
-						int result = st.getTupleCount();
+				
+				try {
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					CountDownLatch latch = new CountDownLatch(1);
+					CountAllTuplesAction action = new CountAllTuplesAction(latch, query);
+					monitor.addProgressListener(action);
+					monitor.start();
+					action.run();
+					latch.await();
+					monitor.stop();
+					int result = action.getResult();
+					if(result != -1){
 						panel.updateStatus(result);
-						dqr.finishProgressMonitor();
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						JOptionPane
-						.showMessageDialog(null,
-								"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
 					}
-
-				}else {
-					JOptionPane
-							.showMessageDialog(null,
-									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Error while counting tuples.\n Please refer to the log file for more information.");
+					log.error("Error while counting tuples.",e);
 				}
 			}
 
@@ -148,33 +147,31 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			private int rows =0;
 
 			public void run(String query, QueryInterfacePanel panel) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if(reasoner instanceof DataQueryReasoner){
-
-					try {
-						long startTime = System.currentTimeMillis();
-						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
-						rea.startProgressMonitor("Process Query...");
-						QueryhistoryController.getInstance().addQuery(query);
-						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(query).getResultSet();
+				
+				try {
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					CountDownLatch latch = new CountDownLatch(1);
+					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
+					monitor.addProgressListener(action);
+					monitor.start();
+					long startTime = System.currentTimeMillis();
+					action.run();
+					latch.await();
+					monitor.stop();
+					QueryResultSet result = action.getResult();
+					if(result !=null){
 						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result);
 						model.addTableModelListener(panel);
 						rows = model.getRowCount();
-//					JOptionPane.showMessageDialog(null, "Number of tuples retrieved: " + rows);
 						panel_view_results.setTableModel(model);
-						rea.finishProgressMonitor();
-						long end = System.currentTimeMillis();
-						time = end - startTime;
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
-
-				}else {
-					JOptionPane
-							.showMessageDialog(null,
-									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+					long end = System.currentTimeMillis();
+					time = end - startTime;
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Error while executing query.\n Please refer to the log file for more information.");
+					log.error("Error while executing query.",e);
 				}
+
 			}
 
 			public long getExecutionTime() {
@@ -197,22 +194,25 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			private final int rows =0;
 
 			public void run(String query,QueryInterfacePanel pane) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if(reasoner instanceof DataQueryReasoner){
-
-					try {
-						DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-						long startTime = System.currentTimeMillis();
-						dqr.startProgressMonitor("Process Query...");
-						Statement st =  dqr.getStatement(query);
-						String result = st.getRewriting();
-						dqr.finishProgressMonitor();
-						long end = System.currentTimeMillis();
-						time = end - startTime;
+				
+				try {
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					CountDownLatch latch = new CountDownLatch(1);
+					ExpandQueryAction action = new ExpandQueryAction(latch, query);
+					monitor.addProgressListener(action);
+					monitor.start();
+					long startTime = System.currentTimeMillis();
+					action.run();
+					latch.await();
+					monitor.stop();
+					String result = action.getResult();
+					long end = System.currentTimeMillis();
+					time = end - startTime;
+					if(result != null){
 						TextMessageFrame panel = new TextMessageFrame();
 						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+										.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
 						panel.displaySQL(result);
 						panel.setTitle("Query Unfolding");
 						double aux = time;
@@ -220,15 +220,10 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
 						panel.updateStatus(msg);
 						panel.setVisible(true);
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
-
-				} else {
-					JOptionPane
-							.showMessageDialog(null,
-									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+				} catch (InterruptedException e) {
+					JOptionPane.showMessageDialog(null, "Error while expanding query.\n Please refer to the log file for more information.");
+					log.error("Error while expanding query.",e);
 				}
 			}
 
@@ -249,22 +244,25 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			private final int rows =0;
 
 			public void run(String query, QueryInterfacePanel pane) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if(reasoner instanceof DataQueryReasoner){
-					DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-
-					try {
-						long startTime = System.currentTimeMillis();
-						dqr.startProgressMonitor("Process Query...");
-						Statement st =  dqr.getStatement(query);
-						String result = st.getUnfolding();
-						dqr.finishProgressMonitor();
-						long end = System.currentTimeMillis();
-						time = end - startTime;
+				
+				try {
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					CountDownLatch latch = new CountDownLatch(1);
+					UnfoldQueryAction action = new UnfoldQueryAction(latch, query);
+					monitor.addProgressListener(action);
+					monitor.start();
+					long startTime = System.currentTimeMillis();
+					action.run();
+					latch.await();
+					monitor.stop();
+					String result = action.getResult();
+					long end = System.currentTimeMillis();
+					time = end - startTime;
+					if(result != null){
 						TextMessageFrame panel = new TextMessageFrame();
 						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+										.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
 						panel.displaySQL(result);
 						panel.setTitle("Query Unfolding");
 						double aux = time;
@@ -272,15 +270,12 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						String msg = "Total unfolding time: " + String.valueOf(aux) + " sec";
 						panel.updateStatus(msg);
 						panel.setVisible(true);
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "Error while unfolding the query. Reasoner's message:\n" + e.getMessage());
 					}
-				}else {
-					JOptionPane
-							.showMessageDialog(null,
-									"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+				} catch (InterruptedException e) {
+					JOptionPane.showMessageDialog(null, "Error while expanding query.\n Please refer to the log file for more information.");
+					log.error("Error while unfolding query.",e);
 				}
+
 			}
 
 			public long getExecutionTime() {
@@ -297,19 +292,23 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			
 			@Override
 			public void run(String query, File file) {
-				OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-				if(reasoner instanceof DataQueryReasoner){
-					try {
-						DataQueryReasoner rea = (DataQueryReasoner) reasoner;
-						rea.startProgressMonitor("Process Query...");
-						QueryhistoryController.getInstance().addQuery(query);
-						QueryResultSet result = ((DataQueryReasoner) reasoner).getStatement(query).getResultSet();
-						ResultSetToFileWriter.saveResultSet(result, file);
-						rea.finishProgressMonitor();
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "Error while saving the ResultSet. Exception message:\n" + e.getMessage());
+				
+				try {
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					CountDownLatch latch = new CountDownLatch(1);
+					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
+					monitor.addProgressListener(action);
+					monitor.start();
+					action.run();
+					latch.await();
+					monitor.stop();
+					QueryResultSet result = action.getResult();
+					if(result !=null){
+						ResultSetToFileWriter.saveResultSet(result, file);	
 					}
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Error while saving query results.\n Please refer to the log file for more information.");
+					log.error("Error while saving query results.",e);
 				}
 			}
 		});
@@ -356,53 +355,252 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 			}
 		}
 	}
-
-	public class TextDialog extends JDialog {
-
-		JTextArea textArea = new JTextArea("");
-
-		public TextDialog() {
-
-			textArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
-			JScrollPane scroll = new JScrollPane(textArea);
-
-			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-
-			setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-					.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
-			getContentPane().setLayout(new GridBagLayout());
-			GridBagConstraints c1 = new GridBagConstraints();
-			c1.anchor = GridBagConstraints.CENTER;
-			c1.weightx = 1;
-			c1.weighty = 1;
-			c1.fill = GridBagConstraints.BOTH;
-
-			getContentPane().add(scroll, c1);
-
-			c1.anchor = GridBagConstraints.CENTER;
-			c1.weightx = 1;
-			c1.weighty = 1;
-			c1.fill = GridBagConstraints.HORIZONTAL;
-
-
-			JButton closeButton = new JButton("Close");
-			closeButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					dispose();
-				}
-			});
-
-			JPanel south = new JPanel();
-			south.add(closeButton);
-
-
-			getContentPane().add(south, c1);
-			setSize(800, 600);
-
+	
+	private class UnfoldQueryAction implements OBDAProgressListener{
+		private Statement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private String result = null;
+		private String query = null;
+		
+		private UnfoldQueryAction(CountDownLatch latch,String query){
+			this.latch = latch;
+			this.query = query;
 		}
 
-		public void setContent(String content) {
-			textArea.setText(content);
+		public String getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread(){
+				public void run(){
+					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
+					if(reasoner instanceof DataQueryReasoner){
+		
+						try {
+							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
+							Statement st =  dqr.getStatement(query);
+							result = st.getUnfolding();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error(e.getMessage(), e);
+							JOptionPane
+							.showMessageDialog(null,
+									"Error while unfolding query.\n Please refer to the log for more information.");
+						}
+		
+					}else {
+						latch.countDown();
+						JOptionPane
+								.showMessageDialog(null,
+										"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+					}
+				}
+			};
+			thread.start();
+		}
+		
+		@Override
+		public void actionCanceled() {
+			try {
+				if(statement != null){
+					statement.close();
+				}
+				latch.countDown();
+			} catch (Exception e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while canceling unfolding action.\n Please refer to the log file for more information.");
+				log.error("Error while canceling unfolding action.",e);
+			}
+		}
+	}
+	
+	private class ExpandQueryAction implements OBDAProgressListener{
+	
+		private Statement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private String result = null;
+		private String query = null;
+		
+		private ExpandQueryAction(CountDownLatch latch,String query){
+			this.latch = latch;
+			this.query = query;
+		}
+
+		public String getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread(){
+				public void run(){
+					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
+					if(reasoner instanceof DataQueryReasoner){
+		
+						try {
+							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
+							Statement st =  dqr.getStatement(query);
+							result = st.getRewriting();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error(e.getMessage(), e);
+							JOptionPane
+							.showMessageDialog(null,
+									"Error while expanding query.\n Please refer to the log for more information.");
+						}
+		
+					}else {
+						latch.countDown();
+						JOptionPane
+								.showMessageDialog(null,
+										"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+					}
+				}
+			};
+			thread.start();
+		}
+		
+		@Override
+		public void actionCanceled() {
+			try {
+				if(statement != null){
+					statement.close();
+				}
+				latch.countDown();
+			} catch (Exception e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+				log.error("Error while counting.",e);
+			}
+		}
+	}
+	
+	private class ExecuteQueryAction implements OBDAProgressListener{
+
+		private Statement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private QueryResultSet result = null;
+		private String query = null;
+		
+		private ExecuteQueryAction(CountDownLatch latch,String query){
+			this.latch = latch;
+			this.query = query;
+		}
+
+		public QueryResultSet getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread(){
+				public void run(){
+					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
+					if(reasoner instanceof DataQueryReasoner){
+		
+						try {
+							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
+							Statement st =  dqr.getStatement(query);
+							result = st.getResultSet();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error(e.getMessage(), e);
+							JOptionPane
+							.showMessageDialog(null,
+									"Error while executing query.\n Please refer to the log for more information.");
+						}
+		
+					}else {
+						latch.countDown();
+						JOptionPane
+								.showMessageDialog(null,
+										"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+					}
+				}
+			};
+			thread.start();
+		}
+		
+		@Override
+		public void actionCanceled() {
+			try {
+				if(statement != null){
+					statement.close();
+				}
+				latch.countDown();
+			} catch (Exception e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+				log.error("Error while counting.",e);
+			}
+		}
+		
+	}
+	
+	private class CountAllTuplesAction implements OBDAProgressListener{
+		
+		private Statement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private int result = -1;
+		private String query = null;
+		
+		private CountAllTuplesAction(CountDownLatch latch,String query){
+			this.latch = latch;
+			this.query = query;
+		}
+
+		public int getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread(){
+				public void run(){
+					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
+					if(reasoner instanceof DataQueryReasoner){
+		
+						try {
+							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
+							Statement st =  dqr.getStatement(query);
+							result = st.getTupleCount();
+							latch.countDown();
+						} catch (Exception e) {
+							latch.countDown();
+							log.error(e.getMessage(), e);
+							JOptionPane
+							.showMessageDialog(null,
+									"Error while counting tuples.\n Please refer to the log for more information.");
+						}
+		
+					}else {
+						latch.countDown();
+						JOptionPane
+								.showMessageDialog(null,
+										"This feature can only be used in conjunction with an UCQ\nenabled reasoner. Please, select a UCQ enabled reasoner and try again.");
+					}
+				}
+			};
+			thread.start();
+		}
+		
+		@Override
+		public void actionCanceled() {
+			try {
+				if(statement != null){
+					statement.close();
+				}
+				latch.countDown();
+			} catch (Exception e) {
+				latch.countDown();
+				JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+				log.error("Error while counting.",e);
+			}
 		}
 	}
 }

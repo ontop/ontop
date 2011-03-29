@@ -45,7 +45,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent {
     	
     setLayout(new BorderLayout());
     add(mappingPanel, BorderLayout.CENTER);
-    add(datasourceSelector, BorderLayout.SOUTH);
+    add(datasourceSelector, BorderLayout.NORTH);
       
     log.info("Mappings manager initialized");
   }

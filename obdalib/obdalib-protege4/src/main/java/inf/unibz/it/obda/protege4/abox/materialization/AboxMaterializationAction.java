@@ -1,10 +1,13 @@
 package inf.unibz.it.obda.protege4.abox.materialization;
 
 import inf.unibz.it.obda.owlapi.abox.materialization.AboxMaterializer;
+import inf.unibz.it.utils.swing.OBDAProgessMonitor;
+import inf.unibz.it.utils.swing.OBDAProgressListener;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
 
@@ -53,63 +56,80 @@ public class AboxMaterializationAction extends ProtegeAction {
 		OWLEditorKit kit = (OWLEditorKit) this.getEditorKit();
 		OWLModelManager mm = kit.getOWLModelManager();
 		Container cont = this.getWorkspace().getRootPane().getParent();
-		// String path = JOptionPane.showInputDialog(cont,
-		// "Insert the path of the owl file, where the new ontology should be saved");
-
-		// if(path== null || path.equals("")){
-		// return;
-		// }
-		// if(!path.toLowerCase().endsWith("owl")){
-		// JOptionPane.showMessageDialog(cont, "You must specify an owl file!");
-		// }
 		try {
 			OWLOntologyManager owlOntManager = mm.getOWLOntologyManager();
 			OWLOntology owl_ont = mm.getActiveOntology();
 			String file = owlOntManager.getPhysicalURIForOntology(owl_ont).getPath();
 			AboxMaterializer mat = new AboxMaterializer();
-//			EditorKitFactory kitFactory = kit.getEditorKitFactory();
-//			EditorKit dlKit = kitFactory.createEditorKit();
-//			OWLModelManager dlModelManager = (OWLModelManager) dlKit.getModelManager();
-//			OWLOntologyManager dlOntManager = dlModelManager.getOWLOntologyManager();
 			
 			OWLModelManager dlModelManager = (OWLModelManager) getEditorKit().getModelManager();
 			OWLOntologyManager dlOntManager = dlModelManager.getOWLOntologyManager();
 
-//			String suffix = "with_materialized_Abox";
-//			String uriStr = owl_ont.getURI().toString();
-//			if (uriStr.endsWith(".owl")) {
-//				uriStr = uriStr.substring(0, uriStr.length() - 4) + "_" + suffix + ".owl";
-//			} else {
-//				uriStr = uriStr + "_" + suffix + ".owl";
-//			}
-//			URI uri = URI.create(uriStr);
-
-//			String physUriStr = owlOntManager.getPhysicalURIForOntology(owl_ont).toString();
-//			if (physUriStr.endsWith(".owl")) {
-//				physUriStr = physUriStr.substring(0, physUriStr.length() - 4) + "_" + suffix + ".owl";
-//			} else {
-//				physUriStr = physUriStr + "_" + suffix + ".owl";
-//			}
-//			URI physUri = URI.create(physUriStr);
-//			dlOntManager.addURIMapper(new SimpleURIMapper(uri, physUri));
-
-//			Set<OWLAxiom> set = owl_ont.getAxioms();
-//			OWLOntology new_onto = dlOntManager.createOntology(uri);
-//			dlOntManager.addAxioms(new_onto, set);
-			Set<OWLIndividualAxiom> individuals = mat.materializeAbox(file, owl_ont, owlOntManager);
+			OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+			CountDownLatch latch = new CountDownLatch(1);
+			MaterializeAction action = new MaterializeAction(mat, file, owl_ont, owlOntManager, latch);
+			monitor.addProgressListener(action);
+			monitor.start();
+			action.run();
+			latch.await();
+			monitor.stop();
+			Set<OWLIndividualAxiom> individuals = action.getResult();
 			
-			//dlOntManager.addAxioms(new_onto, individuals);
-			dlOntManager.addAxioms(owl_ont, individuals);
-			
-//			dlModelManager.setActiveOntology(new_onto);
-//			dlModelManager.setDirty(new_onto);
-//			dlModelManager.fireEvent(EventType.ONTOLOGY_CREATED);
-//			ProtegeManager.getInstance().getEditorKitManager().addEditorKit(dlKit);
+			if(individuals != null){
+				dlOntManager.addAxioms(owl_ont, individuals);
+			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(cont, "ERROR: could not materialize abox.");
 			e.printStackTrace();
 		}
 
+	}
+	
+	private class MaterializeAction implements OBDAProgressListener{
+
+		private Thread thread = null;
+		private Set<OWLIndividualAxiom> result = null;
+		private CountDownLatch latch = null;
+		private String file = null;
+		private AboxMaterializer mat = null;
+		private OWLOntology owl_ont = null;
+		private OWLOntologyManager man = null;
+		
+		public MaterializeAction(AboxMaterializer mat,String file,OWLOntology owl_ont,OWLOntologyManager man,CountDownLatch latch){
+			this.file = file;
+			this.mat = mat;
+			this.owl_ont = owl_ont;
+			this.man = man;
+			this.latch = latch;
+		}
+		
+		public Set<OWLIndividualAxiom> getResult(){
+			return result;
+		}
+		
+		public void run(){
+			thread = new Thread(){
+				public void run(){
+					try {
+						result = mat.materializeAbox(file, owl_ont, man);
+						latch.countDown();
+					} catch (Exception e) {
+						latch.countDown();
+						JOptionPane.showMessageDialog(null,"ERROR: could not materialize abox.");
+					}
+				}
+			};
+			thread.start();
+		}
+		
+		@Override
+		public void actionCanceled() {
+			if(thread != null){
+				latch.countDown();
+				thread.interrupt();
+			}			
+		}
+		
 	}
 
 }

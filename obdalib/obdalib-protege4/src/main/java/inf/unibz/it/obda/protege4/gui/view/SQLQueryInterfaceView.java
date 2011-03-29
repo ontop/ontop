@@ -32,14 +32,14 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent {
   	Vector<DataSource> vecDatasource = 
         new Vector<DataSource>(dsController.getAllSources().values());
 
-  	SQLQueryPanel queryPanel = new SQLQueryPanel(dsController);
+  	SQLQueryPanel queryPanel = new SQLQueryPanel();
   	DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);
     datasourceSelector.addDatasourceListListener(queryPanel);
     dsController.addDatasourceControllerListener(datasourceSelector);
 
   	setLayout(new BorderLayout());
     add(queryPanel, BorderLayout.CENTER);
-    add(datasourceSelector, BorderLayout.SOUTH);
+    add(datasourceSelector, BorderLayout.NORTH);
     
     log.info("SQL Query view initialized");
   }
