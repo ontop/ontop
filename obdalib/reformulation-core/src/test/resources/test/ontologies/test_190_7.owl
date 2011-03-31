@@ -8,6 +8,7 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
+    <!ENTITY test_190_7 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_190_7.owl#" >
 ]>
 
 
@@ -18,7 +19,8 @@
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:test_190_7="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_190_7.owl#">
     <owl:Ontology rdf:about=""/>
     
 
@@ -116,11 +118,11 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#a -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_190_7.owl#a -->
 
-    <test:A rdf:about="&test;a">
-        <rdf:type rdf:resource="&owl;Thing"/>
-    </test:A>
+    <owl:Thing rdf:about="#a">
+        <rdf:type rdf:resource="&test;A"/>
+    </owl:Thing>
     
 
 

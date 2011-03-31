@@ -69,7 +69,7 @@ public class TestFileGenerator {
 		log.info("Location for OBDA files: {}", obdalocation);
 		log.info("Location for XML files: {}", xmllocation);
 		log.info("Mode: {}", mode);
-		
+
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -85,8 +85,6 @@ public class TestFileGenerator {
 		String tl = args[2];
 		String inputfile = args[3];
 		String mode = args[4];
-		
-	
 
 		TestFileGenerator gen = new TestFileGenerator(obdaloc, xmlloc, tl, mode);
 		gen.parseInputFile(inputfile);
@@ -388,38 +386,41 @@ public class TestFileGenerator {
 			OWLOntology o = manager.createOntology(u);
 			vec.add(o);
 		}
-		String[] individuals = abox.trim().split(" ");
-		for (int i = 0; i < individuals.length; i++) {
-			String aux = individuals[i].trim();
-			if (aux.length() > 0) {
-				int i1 = aux.indexOf("(");
-				int i2 = aux.indexOf(")");
-				String entity = aux.substring(0, i1);
-				String parameters = aux.substring(i1 + 1, i2);
-				String[] names = parameters.split(",");
-				OWLAxiom axiom = null;
-				if (names.length == 2) {
-					String objprop = uri.toString() + "#" + entity;
-					OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(objprop));
-					String ind1uri = uri.toString() + "#" + names[0];
-					String ind2uri = uri.toString() + "#" + names[1];
-					OWLIndividual ind1 = dataFactory.getOWLIndividual(URI.create(ind1uri));
-					OWLIndividual ind2 = dataFactory.getOWLIndividual(URI.create(ind2uri));
-					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(ind1, op, ind2);
-				} else {
-					String clazz = uri.toString() + "#" + entity;
-					OWLClass cl = dataFactory.getOWLClass(URI.create(clazz));
-					String induri = uri.toString() + "#" + parameters;
-					OWLIndividual ind = dataFactory.getOWLIndividual(URI.create(induri));
-					axiom = dataFactory.getOWLClassAssertionAxiom(ind, cl);
+		Iterator<OWLOntology> it = vec.iterator();
+		while (it.hasNext()) {
+			OWLOntology onto = it.next();
+			String[] individuals = abox.trim().split(" ");
+			OWLAxiom axiom = null;
+			for (int i = 0; i < individuals.length; i++) {
+				String aux = individuals[i].trim();
+				if (aux.length() > 0) {
+					int i1 = aux.indexOf("(");
+					int i2 = aux.indexOf(")");
+					String entity = aux.substring(0, i1);
+					String parameters = aux.substring(i1 + 1, i2);
+					String[] names = parameters.split(",");
+					axiom = null;
+					if (names.length == 2) {
+						String objprop = uri.toString() + "#" + entity;
+						OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(objprop));
+						String ind1uri = onto.getURI() + "#" + names[0];
+						String ind2uri = onto.getURI() + "#" + names[1];
+						OWLIndividual ind1 = dataFactory.getOWLIndividual(URI.create(ind1uri));
+						OWLIndividual ind2 = dataFactory.getOWLIndividual(URI.create(ind2uri));
+						axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(ind1, op, ind2);
+					} else {
+						String clazz = uri.toString() + "#" + entity;
+						OWLClass cl = dataFactory.getOWLClass(URI.create(clazz));
+						String induri = onto.getURI() + "#" + parameters;
+						OWLIndividual ind = dataFactory.getOWLIndividual(URI.create(induri));
+						axiom = dataFactory.getOWLClassAssertionAxiom(ind, cl);
+					}
 				}
-				Iterator<OWLOntology> it = vec.iterator();
-				while (it.hasNext() && axiom != null) {
-					manager.addAxiom(it.next(), axiom);
-				}
+				if (axiom != null)
+					manager.addAxiom(onto, axiom);
 			}
-		}
 
+		}
 		return vec;
 	}
 
@@ -574,18 +575,18 @@ public class TestFileGenerator {
 					throw new Exception("Wrong query format at line nr " + linenr);
 				}
 				sb1.append(getSPARQLTerm(p[0]));
-//				if (!(p[0].startsWith("'") && p[0].endsWith("'"))) {
-//					sb1.append("$");
-//				}
-//				sb1.append(p[0]);
+				// if (!(p[0].startsWith("'") && p[0].endsWith("'"))) {
+				// sb1.append("$");
+				// }
+				// sb1.append(p[0]);
 				sb1.append(" dllite:");
 				sb1.append(name);
-				
+
 				sb1.append(getSPARQLTerm(p[1]));
-//				if (!(p[1].startsWith("") && p[1].endsWith("'"))) {
-//					sb1.append("$");
-//				}
-//				sb1.append(p[1]);
+				// if (!(p[1].startsWith("") && p[1].endsWith("'"))) {
+				// sb1.append("$");
+				// }
+				// sb1.append(p[1]);
 			} else {
 				sb1.append(getSPARQLTerm(parameters));
 				sb1.append(" rdf:type dllite:");
@@ -749,21 +750,21 @@ public class TestFileGenerator {
 				out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);");
 				out.newLine();
 				out.append("\t\t\tSet<String> res = tester.executeQuery(id);");
-				
+
 				out.append("\t\t\tassertTrue(exp.size() == res.size());\n");
 				out.append("\t\t\tfor (String realResult : res) {\n");
 				out.append("\t\t\t\tassertTrue(exp.contains(realResult));\n");
 				out.append("\t\t\t}\n");
-				
+
 				out.append("\t\t}\n");
-				
+
 				out.newLine();
 				out.append("\t\tlog.debug(\"Testing in-memory db/complex-mappings\");\n");
 				out.append("\t\ttester.load(ontoname, true, true);");
 				out.newLine();
-				
+
 				/* Generating secon part of the test, inmemory, complex mappings */
-				
+
 				out.append("\t\tqueryids = tester.getQueryIds();");
 				out.newLine();
 				out.append("\t\tqit = queryids.iterator();");
@@ -783,7 +784,7 @@ public class TestFileGenerator {
 				out.append("\t\t\t}\n");
 
 				out.append("\t\t}\n");
-				
+
 				out.append("\t}");
 				out.newLine();
 				out.newLine();

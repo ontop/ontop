@@ -8,6 +8,7 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
+    <!ENTITY test_191_11 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#" >
 ]>
 
 
@@ -15,6 +16,7 @@
      xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:test_191_11="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
@@ -88,42 +90,42 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#a1 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#a1 -->
 
-    <test:A rdf:about="&test;a1">
+    <owl:Thing rdf:about="#a1">
+        <rdf:type rdf:resource="&test;A"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#a2 -->
+
+    <test:A rdf:about="#a2">
         <rdf:type rdf:resource="&owl;Thing"/>
+        <test:R rdf:resource="#r1"/>
     </test:A>
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#a2 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#r1 -->
 
-    <owl:Thing rdf:about="&test;a2">
-        <rdf:type rdf:resource="&test;A"/>
-        <test:R rdf:resource="&test;r1"/>
+    <owl:Thing rdf:about="#r1">
+        <test:R rdf:resource="#r2"/>
     </owl:Thing>
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#r1 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#r2 -->
 
-    <owl:Thing rdf:about="&test;r1">
-        <test:R rdf:resource="&test;r2"/>
+    <owl:Thing rdf:about="#r2">
+        <test:R rdf:resource="#r3"/>
     </owl:Thing>
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#r2 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_191_11.owl#r3 -->
 
-    <owl:Thing rdf:about="&test;r2">
-        <test:R rdf:resource="&test;r3"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#r3 -->
-
-    <owl:Thing rdf:about="&test;r3"/>
+    <owl:Thing rdf:about="#r3"/>
 </rdf:RDF>
 
 

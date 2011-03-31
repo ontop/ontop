@@ -8,12 +8,14 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
+    <!ENTITY test_192_7 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_192_7.owl#" >
 ]>
 
 
 <rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_192_7.owl#"
      xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_192_7.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:test_192_7="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_192_7.owl#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
@@ -81,11 +83,11 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#a -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_192_7.owl#a -->
 
-    <test:A rdf:about="&test;a">
-        <rdf:type rdf:resource="&owl;Thing"/>
-    </test:A>
+    <owl:Thing rdf:about="#a">
+        <rdf:type rdf:resource="&test;A"/>
+    </owl:Thing>
     
 
 
@@ -98,7 +100,12 @@
      -->
 
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;A"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;R"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <owl:onProperty>
             <owl:ObjectProperty>
                 <owl:inverseOf rdf:resource="&test;R"/>
@@ -107,12 +114,7 @@
         <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
-                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="&test;A"/>
         <owl:onProperty>
             <owl:ObjectProperty>
                 <owl:inverseOf rdf:resource="&test;R"/>

@@ -8,11 +8,13 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
+    <!ENTITY test_194_9 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#" >
 ]>
 
 
 <rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#"
      xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl"
+     xmlns:test_194_9="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
@@ -70,13 +72,13 @@
     <owl:Class rdf:about="&test;A">
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
+                <owl:onProperty rdf:resource="&test;P"/>
                 <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;P"/>
+                <owl:onProperty rdf:resource="&test;R"/>
                 <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -101,42 +103,42 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#a -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#a -->
 
-    <test:A rdf:about="&test;a">
-        <rdf:type rdf:resource="&owl;Thing"/>
-    </test:A>
-    
-
-
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#n1 -->
-
-    <owl:Thing rdf:about="&test;n1">
-        <test:R rdf:resource="&test;n2"/>
-        <test:R rdf:resource="&test;n3"/>
+    <owl:Thing rdf:about="#a">
+        <rdf:type rdf:resource="&test;A"/>
     </owl:Thing>
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#n2 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#n1 -->
 
-    <owl:Thing rdf:about="&test;n2">
-        <test:S rdf:resource="&test;n4"/>
+    <owl:Thing rdf:about="#n1">
+        <test:R rdf:resource="#n2"/>
+        <test:R rdf:resource="#n3"/>
     </owl:Thing>
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#n3 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#n2 -->
 
-    <owl:Thing rdf:about="&test;n3">
-        <test:S rdf:resource="&test;n4"/>
+    <owl:Thing rdf:about="#n2">
+        <test:S rdf:resource="#n4"/>
     </owl:Thing>
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#n4 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#n3 -->
 
-    <owl:Thing rdf:about="&test;n4"/>
+    <owl:Thing rdf:about="#n3">
+        <test:S rdf:resource="#n4"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_194_9.owl#n4 -->
+
+    <owl:Thing rdf:about="#n4"/>
     
 
 
