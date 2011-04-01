@@ -44,10 +44,10 @@ public class OntologyLoader {
 
 
             ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, true);
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, true);
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
 
             OBDAOWLReformulationPlatformFactoryImpl factory = new OBDAOWLReformulationPlatformFactoryImpl();
             factory.setOBDAController(controller);

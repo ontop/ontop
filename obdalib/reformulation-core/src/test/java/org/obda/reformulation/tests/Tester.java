@@ -82,7 +82,7 @@ public class Tester {
 
     }
 
-    public void load(String onto, boolean createMappings, boolean complexUnfolding) throws Exception {
+    public void load(String onto, String unfold_type) throws Exception {
 
         String owlfile = owlloc + onto + ".owl";
         String resultfile = xmlLoc + onto + ".xml";
@@ -90,17 +90,14 @@ public class Tester {
         loadResults(resultfile);
 
         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-        if (createMappings)
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+        if (unfold_type.equals("complex") || unfold_type.equals("semantic"))
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, true);
         else
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, false);
 
-        pref.setDefaultValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, true);
 
-        if (complexUnfolding)
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "complex");
-        else
-            pref.setDefaultValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, "direct");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, unfold_type);
 
         OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
         fac.setOBDAController(apic);
