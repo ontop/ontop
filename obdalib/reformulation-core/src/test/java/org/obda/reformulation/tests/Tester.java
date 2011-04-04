@@ -91,11 +91,11 @@ public class Tester {
 
         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
         if (unfold_type.equals("complex") || unfold_type.equals("semantic"))
-            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, true);
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
         else
-            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, false);
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
 
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, true);
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
 
         pref.setCurrentValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, unfold_type);
 
