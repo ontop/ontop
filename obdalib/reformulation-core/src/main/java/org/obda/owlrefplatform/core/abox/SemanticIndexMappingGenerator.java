@@ -2,6 +2,7 @@ package org.obda.owlrefplatform.core.abox;
 
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
@@ -28,167 +29,165 @@ import java.util.Vector;
  */
 public class SemanticIndexMappingGenerator {
 
-    private final static Logger log = LoggerFactory.getLogger(SemanticIndexMappingGenerator.class);
+    private final Logger log = LoggerFactory.getLogger(SemanticIndexMappingGenerator.class);
 
     private final static TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
     private final static PredicateFactory predicateFactory = BasicPredicateFactoryImpl.getInstance();
 
+    private int mapcounter;
+    private final APIController apic;
+    private final DAG dag;
+
+    public SemanticIndexMappingGenerator(APIController apic, DAG dag) {
+        this.apic = apic;
+        this.dag = dag;
+        mapcounter = 1;
+    }
+
     /**
      * Generate mappings for DAG
      *
-     * @param dag
-     * @param apic
+     * @throws DuplicateMappingException error creating mappings
      */
-    public static void GenMapping(DAG dag, APIController apic) {
-        int mapcounter = 1;
-
+    public void build() throws DuplicateMappingException {
+        log.debug("Generating mappings for DAG {}", dag);
         for (DAGNode node : dag.getClassIndex().values()) {
-
-            String uri;
-            String tablename;
-            String projection;
-            SemanticIndexRange range;
-
-            if (node.getUri().startsWith(DAG.owl_exists_obj)) {
-                uri = node.getUri().substring(DAG.owl_exists_obj.length());
-                tablename = ABoxSerializer.objectprop_table;
-                projection = "URI1 as X";
-                range = dag.getObjectPropertyIndex().get(uri).getRange();
-            } else if (node.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
-                uri = node.getUri().substring(DAG.owl_inverse_exists_obj.length());
-                tablename = ABoxSerializer.objectprop_table;
-                projection = "URI2 as X";
-                range = dag.getObjectPropertyIndex().get(uri).getRange();
-            } else if (node.getUri().startsWith(DAG.owl_exists_data)) {
-                uri = node.getUri().substring(DAG.owl_exists_data.length());
-                tablename = ABoxSerializer.dataprop_table;
-                projection = "URI as X";
-                range = dag.getDataPropertyIndex().get(uri).getRange();
-            } else if (node.getUri().startsWith(DAG.owl_inverse_exists_data)) {
-                uri = node.getUri().substring(DAG.owl_inverse_exists_data.length());
-                tablename = ABoxSerializer.dataprop_table;
-                projection = "LITERAL as X";
-                range = dag.getDataPropertyIndex().get(uri).getRange();
-            } else {
-                uri = node.getUri();
-                tablename = ABoxSerializer.class_table;
-                projection = "URI as X";
-                range = node.getRange();
-            }
-            // Generate the WHERE clause
-            StringBuffer where_clause = new StringBuffer();
-            for (SemanticIndexRange.Interval it : range.getIntervals()) {
-                int st = it.getStart();
-                int end = it.getEnd();
-                where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
-            }
-            if (where_clause.length() != 0) {
-                // remove the last AND
-                where_clause.delete(where_clause.length() - 4, where_clause.length());
+            if (node.getUri().startsWith(DAG.owl_exists) || node.getUri().startsWith(DAG.owl_inverse_exists)) {
+                continue;
             }
 
-            Term qt = termFactory.createVariable("x");
-            List<Term> terms = new Vector<Term>();
-            terms.add(qt);
-            Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
-            Atom bodyAtom = new AtomImpl(predicate, terms);
-            List<Atom> body = new Vector<Atom>();
-            body.add(bodyAtom);
-            predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+            String uri = node.getUri();
+            String tablename = ABoxSerializer.class_table;
+            String projection = "URI as X";
+            SemanticIndexRange range = node.getRange();
+            insert_unary_mapping(uri, projection, tablename, range);
 
-            Atom head = new AtomImpl(predicate, terms);
-            Query cq = new CQIEImpl(head, body, false);
+            // check if has child exists(R)
+            for (DAGNode child : node.getChildren()) {
 
-            String sql = "SELECT " + projection + "FROM" + tablename;
-            if (where_clause.length() != 0) {
-                sql += " WHERE " + where_clause.toString();
+                if (child.getUri().startsWith(DAG.owl_exists_obj)) {
+                    uri = child.getUri().substring(DAG.owl_exists_obj.length());
+                    tablename = ABoxSerializer.objectprop_table;
+                    projection = "URI1 as X";
+                    range = dag.getObjectPropertyIndex().get(uri).getRange();
+                } else if (child.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
+                    uri = child.getUri().substring(DAG.owl_inverse_exists_obj.length());
+                    tablename = ABoxSerializer.objectprop_table;
+                    projection = "URI2 as X";
+                    range = dag.getObjectPropertyIndex().get(uri).getRange();
+                } else if (child.getUri().startsWith(DAG.owl_exists_data)) {
+                    uri = child.getUri().substring(DAG.owl_exists_data.length());
+                    tablename = ABoxSerializer.dataprop_table;
+                    projection = "URI as X";
+                    range = dag.getDataPropertyIndex().get(uri).getRange();
+                } else if (child.getUri().startsWith(DAG.owl_inverse_exists_data)) {
+                    uri = child.getUri().substring(DAG.owl_inverse_exists_data.length());
+                    tablename = ABoxSerializer.dataprop_table;
+                    projection = "LITERAL as X";
+                    range = dag.getDataPropertyIndex().get(uri).getRange();
+                }
+                insert_unary_mapping(uri, projection, tablename, range);
             }
-
-            OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-            ax.setTargetQuery(cq);
-            ax.setSourceQuery(new RDBMSSQLQuery(sql));
-
-            // FIXME: how to obtaint dsUri
-            //apic.getMappingController().insertMapping(dsUri, ax);
         }
         for (DAGNode node : dag.getObjectPropertyIndex().values()) {
             String uri = node.getUri();
+            String projection = " URI1 as X, URI2 as Y ";
+            String table = ABoxSerializer.objectprop_table;
+            SemanticIndexRange range = node.getRange();
 
-            // Generate the WHERE clause
-            StringBuffer where_clause = new StringBuffer();
-            for (SemanticIndexRange.Interval it : node.getRange().getIntervals()) {
-                int st = it.getStart();
-                int end = it.getEnd();
-                where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
-            }
-            if (where_clause.length() != 0) {
-                // remove the last AND
-                where_clause.delete(where_clause.length() - 4, where_clause.length());
-            }
-
-            Term qtx = termFactory.createVariable("x");
-            Term qty = termFactory.createVariable("y");
-            List<Term> terms = new Vector<Term>();
-            terms.add(qty);
-            terms.add(qtx);
-            Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
-            Atom bodyAtom = new AtomImpl(predicate, terms);
-            List<Atom> body = new Vector<Atom>();
-            body.add(bodyAtom);
-            predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-
-            Atom head = new AtomImpl(predicate, terms);
-            Query cq = new CQIEImpl(head, body, false);
-
-            String sql = "SELECT URI1 as X, URI2 as Y FROM " + ABoxSerializer.objectprop_table;
-            if (where_clause.length() != 0) {
-                sql += " WHERE " + where_clause.toString();
-            }
-
-            OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-            ax.setTargetQuery(cq);
-            ax.setSourceQuery(new RDBMSSQLQuery(sql));
-
-
+            insert_binary_mapping(uri, projection, table, range);
         }
 
         for (DAGNode node : dag.getDataPropertyIndex().values()) {
+
             String uri = node.getUri();
-            StringBuffer where_clause = new StringBuffer();
-            for (SemanticIndexRange.Interval it : node.getRange().getIntervals()) {
-                int st = it.getStart();
-                int end = it.getEnd();
-                where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
-            }
-            if (where_clause.length() != 0) {
-                // remove the last AND
-                where_clause.delete(where_clause.length() - 4, where_clause.length());
-            }
+            String projection = " URI as X, LITERAL as Y ";
+            String table = ABoxSerializer.dataprop_table;
+            SemanticIndexRange range = node.getRange();
 
-            Term qtx = termFactory.createVariable("x");
-            Term qty = termFactory.createVariable("y");
-            List<Term> terms = new Vector<Term>();
-            terms.add(qty);
-            terms.add(qtx);
-            Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
-            Atom bodyAtom = new AtomImpl(predicate, terms);
-            List<Atom> body = new Vector<Atom>();
-            body.add(bodyAtom);
-            predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-
-            Atom head = new AtomImpl(predicate, terms);
-            Query cq = new CQIEImpl(head, body, false);
-
-            String sql = "SELECT URI as X, LITERAL as Y FROM " + ABoxSerializer.dataprop_table;
-            if (where_clause.length() != 0) {
-                sql += " WHERE " + where_clause.toString();
-            }
-
-            OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-            ax.setTargetQuery(cq);
-            ax.setSourceQuery(new RDBMSSQLQuery(sql));
-
+            insert_binary_mapping(uri, projection, table, range);
         }
     }
+
+    private void insert_unary_mapping(String uri, String projection, String table, SemanticIndexRange range) throws DuplicateMappingException {
+        // Generate the WHERE clause
+        StringBuffer where_clause = new StringBuffer();
+        for (SemanticIndexRange.Interval it : range.getIntervals()) {
+            int st = it.getStart();
+            int end = it.getEnd();
+            where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
+        }
+        if (where_clause.length() != 0) {
+            // remove the last AND
+            where_clause.delete(where_clause.length() - 4, where_clause.length());
+        }
+
+        Term qt = termFactory.createVariable("x");
+        List<Term> terms = new Vector<Term>();
+        terms.add(qt);
+        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
+        Atom bodyAtom = new AtomImpl(predicate, terms);
+        List<Atom> body = new Vector<Atom>();
+        body.add(bodyAtom);
+        predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+
+        Atom head = new AtomImpl(predicate, terms);
+        Query cq = new CQIEImpl(head, body, false);
+
+        String sql = "SELECT " + projection + " FROM " + table;
+        if (where_clause.length() != 0) {
+            sql += " WHERE " + where_clause.toString();
+        }
+
+        OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
+        ax.setTargetQuery(cq);
+        ax.setSourceQuery(new RDBMSSQLQuery(sql));
+
+        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
+        apic.getMappingController().insertMapping(dsUri, ax);
+    }
+
+    private void insert_binary_mapping(String uri, String projection, String table, SemanticIndexRange range) throws DuplicateMappingException {
+
+        // Generate the WHERE clause
+        StringBuffer where_clause = new StringBuffer();
+        for (SemanticIndexRange.Interval it : range.getIntervals()) {
+            int st = it.getStart();
+            int end = it.getEnd();
+            where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
+        }
+        if (where_clause.length() != 0) {
+            // remove the last AND
+            where_clause.delete(where_clause.length() - 4, where_clause.length());
+        }
+
+        Term qtx = termFactory.createVariable("x");
+        Term qty = termFactory.createVariable("y");
+        List<Term> terms = new Vector<Term>();
+        terms.add(qty);
+        terms.add(qtx);
+        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
+        Atom bodyAtom = new AtomImpl(predicate, terms);
+        List<Atom> body = new Vector<Atom>();
+        body.add(bodyAtom);
+        predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+
+        Atom head = new AtomImpl(predicate, terms);
+        Query cq = new CQIEImpl(head, body, false);
+
+        String sql = "SELECT " + projection + " FROM " + table;
+        if (where_clause.length() != 0) {
+            sql += " WHERE " + where_clause.toString();
+        }
+
+        OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
+        ax.setTargetQuery(cq);
+        ax.setSourceQuery(new RDBMSSQLQuery(sql));
+
+        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
+        apic.getMappingController().insertMapping(dsUri, ax);
+
+    }
+
 
 }

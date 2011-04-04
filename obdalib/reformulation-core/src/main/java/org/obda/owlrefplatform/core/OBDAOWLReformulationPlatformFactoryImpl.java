@@ -46,57 +46,54 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 
     private APIController apic;
     private ReformulationPlatformPreferences preferences = null;
-	private String				id;
-	private String				name;
-	private OWLOntologyManager	owlOntologyManager;
+    private String id;
+    private String name;
+    private OWLOntologyManager owlOntologyManager;
 
 
     private final Logger log = LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
-    
+
     /**
-	 * Sets up some prerequirements in order to create the reasoner
-	 * 
-	 * @param manager
-	 *            the owl ontology manager
-	 * @param id
-	 *            the reasoner id
-	 * @param name
-	 *            the reasoner name
-	 */
-	public void setup(OWLOntologyManager manager, String id, String name) {
-		this.id = id;
-		this.name = name;
-		this.owlOntologyManager = manager;
-	}
+     * Sets up some prerequirements in order to create the reasoner
+     *
+     * @param manager the owl ontology manager
+     * @param id      the reasoner id
+     * @param name    the reasoner name
+     */
+    public void setup(OWLOntologyManager manager, String id, String name) {
+        this.id = id;
+        this.name = name;
+        this.owlOntologyManager = manager;
+    }
 
-	/**
-	 * Return the current OWLOntologyManager
-	 * 
-	 * @return the current OWLOntologyManager
-	 */
-	public OWLOntologyManager getOWLOntologyManager() {
-		return owlOntologyManager;
-	}
+    /**
+     * Return the current OWLOntologyManager
+     *
+     * @return the current OWLOntologyManager
+     */
+    public OWLOntologyManager getOWLOntologyManager() {
+        return owlOntologyManager;
+    }
 
-	/**
-	 * Returns the current reasoner id
-	 * 
-	 * @return the current reasoner id
-	 */
-	public String getReasonerId() {
-		return id;
-	}
-	
-	@Override
-	public void setOBDAController(APIController apic) {
-		this.apic = apic;
-		ABoxToDBDumper.getInstance().setAPIController(apic);
-	}
+    /**
+     * Returns the current reasoner id
+     *
+     * @return the current reasoner id
+     */
+    public String getReasonerId() {
+        return id;
+    }
 
-	@Override
-	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
-		this.preferences = preference;
-	}
+    @Override
+    public void setOBDAController(APIController apic) {
+        this.apic = apic;
+        ABoxToDBDumper.getInstance().setAPIController(apic);
+    }
+
+    @Override
+    public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
+        this.preferences = preference;
+    }
 
 
     /**
@@ -113,9 +110,9 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         }
 
         //String useMem = (String)
-        boolean useInMemoryDB = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB);
+        boolean useInMemoryDB = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB).equals("true");
         String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
-        boolean createMappings = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
+        boolean createMappings = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
         String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
 
         OBDAOWLReformulationPlatform reasoner = null;
@@ -231,7 +228,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             } else if ("semantic".equals(unfoldingMode)) {
                 // create t-dag, sigma-dag, create mappings, compute t'
 
-                SemanticIndexMappingGenerator.GenMapping(dag, apic);
+                SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(apic, dag);
+                map_gen.build();
 
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
                 MappingViewManager viewMan = new MappingViewManager(mappings);
@@ -254,28 +252,25 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         return reasoner;
     }
 
-    
+
     public String getReasonerName() {
-		return name;
-	}
+        return name;
+    }
 
-	public void initialise() throws Exception {
+    public void initialise() throws Exception {
 
-	}
+    }
 
-	public void dispose() throws Exception {
+    public void dispose() throws Exception {
 
-	}
+    }
 
-	/**
-	 * Returns the current api controller
-	 * 
-	 * @return the current api controller
-	 */
-	public APIController getApiController() {
-
-		
-			return apic;
-		
-	}
+    /**
+     * Returns the current api controller
+     *
+     * @return the current api controller
+     */
+    public APIController getApiController() {
+        return apic;
+    }
 }
