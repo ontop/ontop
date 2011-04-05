@@ -7,7 +7,6 @@ import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
 import java.net.URI;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -17,6 +16,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JDBCConnectionManager {
 
@@ -34,6 +36,8 @@ public class JDBCConnectionManager {
 	private Statement currentStatement = null;
 	
 	private String currentDriver = null;
+	
+	Logger				log			= LoggerFactory.getLogger(JDBCConnectionManager.class);
 	
 	private JDBCConnectionManager(){
 		properties = new HashMap<String, Object>();
@@ -61,15 +65,22 @@ public class JDBCConnectionManager {
 		Connection con = connectionPool.get(connID);
 		if(con == null){
 			
-//			Class d = Class.forName(driver);
+			try {
+				Class d = Class.forName(driver);
+			} catch (Exception e) {
+				log.warn("Driver class not found!");
+			}
 			con = DriverManager.getConnection(url+dbname, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
 			connectionPool.put(connID, con);
 		}else{
 			con.close();
-//			Class d = Class.forName(driver);
-			con = DriverManager.getConnection(url+dbname, username, password);
+			try {
+				Class d = Class.forName(driver);
+			} catch (Exception e) {
+				log.warn("Driver class not found!");
+			}			con = DriverManager.getConnection(url+dbname, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
 			connectionPool.put(connID, con);

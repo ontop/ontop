@@ -43,7 +43,12 @@ import javax.swing.JComboBox;
 public class DatasourceSelector extends javax.swing.JPanel implements
     DatasourcesControllerListener {
 
-  private DataSource previousSource;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7644402239114670390L;
+
+private DataSource previousSource;
 
   private DefaultComboBoxModel cboModelDatasource;
   private DatasourceCellRenderer cboRendererDatasource;
@@ -60,6 +65,11 @@ public class DatasourceSelector extends javax.swing.JPanel implements
     initComponents();
   }
 
+  public DataSource getSelectedDataSource(){
+	  return (DataSource) cboDatasource.getSelectedItem();
+	  
+  }
+  
   public void addDatasourceListListener(DatasourceSelectorListener l) {
     listeners.add(l);
   }
