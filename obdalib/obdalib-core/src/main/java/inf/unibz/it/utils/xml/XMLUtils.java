@@ -72,6 +72,29 @@ public class XMLUtils {
 
 		tmpFile.delete();
 	}
+	
+	public static void saveDocumentToXMLFile(Document doc, File file)
+	throws FileNotFoundException, IOException {
+
+		File tmpFile = prepare(doc);		
+		// Input
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(new FileInputStream(tmpFile)));
+		
+		// Output
+		PrintWriter out = new PrintWriter(new FileOutputStream(file));
+		
+		String cursor = "";
+		while ((cursor = in.readLine()) != null) {		
+		    out.println(cursor);
+		}
+		
+		out.flush();
+		out.close();
+		in.close();
+		
+		tmpFile.delete();
+	}
 
 	private static File prepare(Document doc) throws IOException {
 
