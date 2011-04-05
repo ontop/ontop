@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.abox;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
@@ -504,11 +505,16 @@ public class ABoxToDBDumper {
 		// TODO ABox Dump: This method will not catch exceptions properly. Why
 		// is the default database schema called postgres?
 
-//		Class.forName(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
+		try {
+			Class d = Class.forName(RDBMSsourceParameterConstants.DATABASE_DRIVER);
+		} catch (Exception e) {
+			log.warn("Driver class not found!");
+		}
 		String usr = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String pwd = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		String url = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		conn = DriverManager.getConnection(url + "postgres", usr, pwd);
+//		conn = DriverManager.getConnection(url + "postgres", usr, pwd);
+		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 		log.debug("Creating a connection to the database {}", url + "postgres");
 		try {
 			conn.createStatement().executeUpdate("DROP DATABASE " + ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));

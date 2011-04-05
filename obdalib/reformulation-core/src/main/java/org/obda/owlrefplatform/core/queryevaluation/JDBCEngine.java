@@ -55,7 +55,11 @@ public class JDBCEngine implements EvaluationEngine {
 		String dbname = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String username = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-//		Class d = Class.forName(driver);
+		try {
+			Class d = Class.forName(driver);
+		} catch (Exception e) {
+			log.warn("Driver class not found!");
+		}
 		connection = DriverManager.getConnection(url + dbname, username, password);
 
 	}
