@@ -43,17 +43,17 @@ public class ReformulationTest extends TestCase {
             }
         }
         // Uncomment for testing SemanticIndex
-//		log.debug("Testing in-memory db/SemanticIndex");
-//		tester.load(ontoname, "semantic");
-//		for(String id : tester.getQueryIds()) {
-//			log.debug("Testing query: {}", id);
-//			Set<String> exp = tester.getExpectedResult(id);
-//			Set<String> res = tester.executeQuery(id);
-//			assertTrue(exp.size() == res.size());
-//			for (String realResult : res) {
-//				assertTrue(exp.contains(realResult));
-//			}
-//		}
+        log.debug("Testing in-memory db/SemanticIndex");
+        tester.load(ontoname, "semantic");
+        for (String id : tester.getQueryIds()) {
+            log.debug("Testing query: {}", id);
+            Set<String> exp = tester.getExpectedResult(id);
+            Set<String> res = tester.executeQuery(id);
+            assertTrue(exp.size() == res.size());
+            for (String realResult : res) {
+                assertTrue(exp.contains(realResult));
+            }
+        }
 
     }
 

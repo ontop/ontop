@@ -125,11 +125,11 @@ public class SemanticIndexMappingGenerator {
         for (SemanticIndexRange.Interval it : range.getIntervals()) {
             int st = it.getStart();
             int end = it.getEnd();
-            where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) AND ", st, end));
+            where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) OR ", st, end));
         }
         if (where_clause.length() != 0) {
-            // remove the last AND
-            where_clause.delete(where_clause.length() - 4, where_clause.length());
+            // remove the last OR
+            where_clause.delete(where_clause.length() - 3, where_clause.length());
         }
 
         Term qt = termFactory.createVariable("x");
