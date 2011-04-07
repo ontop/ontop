@@ -92,6 +92,11 @@ public class SemanticIndexMappingGenerator {
         for (DAGNode node : dag.getObjectPropertyIndex().values()) {
             String uri = node.getUri();
             String projection = " URI1 as X, URI2 as Y ";
+
+            if (uri.startsWith(DAG.owl_inverse)) {
+                uri = uri.substring(DAG.owl_inverse.length());
+                projection = "URI2 as X, URI1 as Y";
+            }
             String table = ABoxSerializer.objectprop_table;
             SemanticIndexRange range = node.getRange();
 
@@ -102,6 +107,11 @@ public class SemanticIndexMappingGenerator {
 
             String uri = node.getUri();
             String projection = " URI as X, LITERAL as Y ";
+
+            if (uri.startsWith(DAG.owl_inverse)) {
+                uri = uri.substring(DAG.owl_inverse.length());
+                projection = "URI2 as X, URI1 as Y";
+            }
             String table = ABoxSerializer.dataprop_table;
             SemanticIndexRange range = node.getRange();
 
@@ -161,11 +171,11 @@ public class SemanticIndexMappingGenerator {
             where_clause.delete(where_clause.length() - 4, where_clause.length());
         }
 
-        Term qtx = termFactory.createVariable("x");
-        Term qty = termFactory.createVariable("y");
+        Term qtx = termFactory.createVariable("X");
+        Term qty = termFactory.createVariable("Y");
         List<Term> terms = new Vector<Term>();
-        terms.add(qty);
         terms.add(qtx);
+        terms.add(qty);
         Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
         Atom bodyAtom = new AtomImpl(predicate, terms);
         List<Atom> body = new Vector<Atom>();
