@@ -40,37 +40,31 @@ public class ABoxSerializer {
                     + "LITERAL VARCHAR(100),"
                     + "IDX INTEGER" + ");";
 
-    public static final String class_table_drop = "DROP TABLE " + class_table
-            + " IF EXISTS;";
+    public static final String class_table_drop = "DROP TABLE IF EXISTS " + class_table;
 
-    public static final String role_table_drop = "DROP TABLE " + objectprop_table
-            + " IF EXISTS;";
+    public static final String objectprop_table_drop = "DROP TABLE IF EXISTS " + objectprop_table;
 
-    public static final String literal_table_drop = "DROP TABLE "
-            + dataprop_table + " IF EXISTS;";
+    public static final String dataprop_table_drop = "DROP TABLE IF EXISTS " + dataprop_table;
 
     public static final String class_insert = "INSERT INTO " + class_table
-            + "(URI, IDX) VALUES (?, ?)";
+            + " (URI, IDX) VALUES (?, ?)";
 
     public static final String role_insert = "INSERT INTO " + objectprop_table
-            + "(URI1, URI2, IDX) VALUES (?, ?, ?)";
+            + " (URI1, URI2, IDX) VALUES (?, ?, ?)";
 
     public static final String literal_insert = "INSERT INTO " + dataprop_table
-            + "(URI, LITERAL, IDX) VALUES (?, ?, ?)";
+            + " (URI, LITERAL, IDX) VALUES (?, ?, ?)";
 
-    public static void recreate_tables(Connection conn) {
-        try {
-            log.debug("Recreating ABox tables");
-            conn.createStatement().execute(class_table_drop);
-            conn.createStatement().execute(role_table_drop);
-            conn.createStatement().execute(literal_table_drop);
+    public static void recreate_tables(Connection conn) throws SQLException {
+        log.debug("Recreating ABox tables");
+        conn.createStatement().execute(class_table_drop);
+        conn.createStatement().execute(objectprop_table_drop);
+        conn.createStatement().execute(dataprop_table_drop);
 
-            conn.createStatement().execute(class_table_create);
-            conn.createStatement().execute(objectprop_table_create);
-            conn.createStatement().execute(dataprop_table_create);
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-        }
+        conn.createStatement().execute(class_table_create);
+        conn.createStatement().execute(objectprop_table_create);
+        conn.createStatement().execute(dataprop_table_create);
+
     }
 
     public static void ABOX2DB(Set<OWLOntology> ontologies, DAG dag, Connection conn) throws SQLException {
