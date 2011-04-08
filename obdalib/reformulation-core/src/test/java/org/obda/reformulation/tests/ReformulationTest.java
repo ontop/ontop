@@ -4,6 +4,9 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 
@@ -23,38 +26,37 @@ public class ReformulationTest extends TestCase {
         tester.load(ontoname, "direct");
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
-            Set<String> exp = tester.getExpectedResult(id);
-            Set<String> res = tester.executeQuery(id);
-            assertTrue(exp.size() == res.size());
-            for (String realResult : res) {
-                assertTrue(exp.contains(realResult));
-            }
+            List<String> exp = set2List(tester.getExpectedResult(id));
+            List<String> res = set2List(tester.executeQuery(id));
+            assertEquals(exp, res);
         }
 
         log.debug("Testing in-memory db/complex-mappings");
         tester.load(ontoname, "complex");
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
-            Set<String> exp = tester.getExpectedResult(id);
-            Set<String> res = tester.executeQuery(id);
-            assertTrue(exp.size() == res.size());
-            for (String realResult : res) {
-                assertTrue(exp.contains(realResult));
-            }
+            List<String> exp = set2List(tester.getExpectedResult(id));
+            List<String> res = set2List(tester.executeQuery(id));
+            assertEquals(exp, res);
         }
-        // Uncomment for testing SemanticIndex
+
         log.debug("Testing in-memory db/SemanticIndex");
         tester.load(ontoname, "semantic");
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
-            Set<String> exp = tester.getExpectedResult(id);
-            Set<String> res = tester.executeQuery(id);
-            assertTrue(exp.size() == res.size());
-            for (String realResult : res) {
-                assertTrue(exp.contains(realResult));
-            }
+            List<String> exp = set2List(tester.getExpectedResult(id));
+            List<String> res = set2List(tester.executeQuery(id));
+            assertEquals(exp, res);
         }
+    }
 
+    private List<String> set2List(Set<String> s) {
+        List<String> rv = new ArrayList<String>(s.size());
+        for (String obj : s) {
+            rv.add(obj);
+        }
+        Collections.sort(rv);
+        return rv;
     }
 
     public void test_1_0_0() throws Exception {
@@ -2121,4 +2123,5 @@ public class ReformulationTest extends TestCase {
         String ontoname = "test_198_0";
         test_function(ontoname);
     }
+
 }

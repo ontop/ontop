@@ -685,75 +685,73 @@ public class TestFileGenerator {
             out.append("import java.util.Set;\n");
             out.append("import java.util.Iterator;\n");
             out.append("import java.util.List;\n");
+            out.append("import java.util.Collections;\n");
+            out.append("import java.util.ArrayList;\n");
             out.append("import org.slf4j.Logger;\n");
             out.append("import org.slf4j.LoggerFactory;\n");
 
             out.newLine();
             out.newLine();
             out.append("public class ReformulationTest extends TestCase {\n\n");
-            out.append("\tprivate Tester tester = null;\n");
-            out.append("\tLogger	log	= LoggerFactory.getLogger(this.getClass());\n");
-            out.append("\tprivate String propfile = \"src/test/resources/test.properties\";\n");
-            out.append("\tpublic ReformulationTest(){\n");
-            out.append("\t\ttester = new Tester(propfile);\n");
-            out.append("\t}\n");
+            out.append("    private Tester tester = null;\n");
+            out.append("    Logger	log	= LoggerFactory.getLogger(this.getClass());\n");
+            out.append("    private String propfile = \"src/test/resources/test.properties\";\n");
+            out.append("    public ReformulationTest(){\n");
+            out.append("        tester = new Tester(propfile);\n");
+            out.append("    }\n");
 
 
             // generate the tester function
-            out.append("\tprivate void test_function(String ontoname) throws Exception {\n");
-            out.append("\t\tlog.debug(\"Test case: {}\", ontoname);\n");
-            out.append("\t\tlog.debug(\"Testing in-memory db/direct-mappings\");\n");
-            out.append("\t\ttester.load(ontoname, \"direct\");\n");
-            out.append("\t\tfor(String id : tester.getQueryIds()) {\n");
-            out.append("\t\t\tlog.debug(\"Testing query: {}\", id);\n");
-            out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);\n");
-            out.append("\t\t\tSet<String> res = tester.executeQuery(id);\n");
-            out.append("\t\t\tassertTrue(exp.size() == res.size());\n");
-            out.append("\t\t\tfor (String realResult : res) {\n");
-            out.append("\t\t\t\tassertTrue(exp.contains(realResult));\n");
-            out.append("\t\t\t}\n");
-
-            out.append("\t\t}\n");
+            out.append("    private void test_function(String ontoname) throws Exception {\n");
+            out.append("        log.debug(\"Test case: {}\", ontoname);\n");
+            out.append("        log.debug(\"Testing in-memory db/direct-mappings\");\n");
+            out.append("        tester.load(ontoname, \"direct\");\n");
+            out.append("        for(String id : tester.getQueryIds()) {\n");
+            out.append("            log.debug(\"Testing query: {}\", id);\n");
+            out.append("            List<String> exp = set2List(tester.getExpectedResult(id));\n");
+            out.append("            List<String> res = set2List(tester.executeQuery(id));\n");
+            out.append("            assertEquals(exp, res);\n");
+            out.append("        }\n");
             out.newLine();
 
             /* Generating secon part of the test, inmemory, complex mappings */
-            out.append("\t\tlog.debug(\"Testing in-memory db/complex-mappings\");\n");
-            out.append("\t\ttester.load(ontoname, \"complex\");\n");
-            out.append("\t\tfor(String id : tester.getQueryIds()) {\n");
-            out.append("\t\t\tlog.debug(\"Testing query: {}\", id);\n");
-            out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);\n");
-            out.append("\t\t\tSet<String> res = tester.executeQuery(id);\n");
-            out.append("\t\t\tassertTrue(exp.size() == res.size());\n");
-            out.append("\t\t\tfor (String realResult : res) {\n");
-            out.append("\t\t\t\tassertTrue(exp.contains(realResult));\n");
-            out.append("\t\t\t}\n");
-
-            out.append("\t\t}\n");
+            out.append("        log.debug(\"Testing in-memory db/complex-mappings\");\n");
+            out.append("        tester.load(ontoname, \"complex\");\n");
+            out.append("        for(String id : tester.getQueryIds()) {\n");
+            out.append("            log.debug(\"Testing query: {}\", id);\n");
+            out.append("            List<String> exp = set2List(tester.getExpectedResult(id));\n");
+            out.append("            List<String> res = set2List(tester.executeQuery(id));\n");
+            out.append("            assertEquals(exp, res);\n");
+            out.append("        }\n");
             out.newLine();
 
             /* Generating third part of the test, inmemory, SemanticIndex */
-            out.append("\t\tlog.debug(\"Testing in-memory db/SemanticIndex\");\n");
-            out.append("\t\ttester.load(ontoname, \"semantic\");\n");
-            out.append("\t\tfor(String id : tester.getQueryIds()) {\n");
-            out.append("\t\t\tlog.debug(\"Testing query: {}\", id);\n");
-            out.append("\t\t\tSet<String> exp = tester.getExpectedResult(id);\n");
-            out.append("\t\t\tSet<String> res = tester.executeQuery(id);\n");
-            out.append("\t\t\tassertTrue(exp.size() == res.size());\n");
-            out.append("\t\t\tfor (String realResult : res) {\n");
-            out.append("\t\t\t\tassertTrue(exp.contains(realResult));\n");
-            out.append("\t\t\t}\n");
+            out.append("        log.debug(\"Testing in-memory db/SemanticIndex\");\n");
+            out.append("        tester.load(ontoname, \"semantic\");\n");
+            out.append("        for(String id : tester.getQueryIds()) {\n");
+            out.append("            log.debug(\"Testing query: {}\", id);\n");
+            out.append("            List<String> exp = set2List(tester.getExpectedResult(id));\n");
+            out.append("            List<String> res = set2List(tester.executeQuery(id));\n");
+            out.append("            assertEquals(exp, res);\n");
+            out.append("        }\n");
+            out.append("    }\n");
 
-            out.append("\t\t}\n");
-            out.newLine();
+            out.append("    private List<String> set2List(Set<String> s) {\n");
+            out.append("        List<String> rv = new ArrayList<String>(s.size());\n");
+            out.append("        for (String obj : s) {\n");
+            out.append("            rv.add(obj);\n");
+            out.append("        }\n");
+            out.append("        Collections.sort(rv);\n");
+            out.append("        return rv;\n");
+            out.append("    }\n");
 
-            out.append("\t}\n");
 
             for (int i = 0; i < tests.size(); i++) {
-                out.append("\tpublic void " + tests.get(i) + "() throws Exception {");
+                out.append("    public void " + tests.get(i) + "() throws Exception {");
                 out.newLine();
-                out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-                out.append("\t\ttest_function(ontoname);\n");
-                out.append("\t}");
+                out.append("        String ontoname = \"" + tests.get(i) + "\";\n");
+                out.append("        test_function(ontoname);\n");
+                out.append("    }\n");
                 out.newLine();
             }
             out.append("}");
