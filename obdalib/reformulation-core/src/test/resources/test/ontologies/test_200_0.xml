@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<results>
+    <result queryid="b">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>a</constant>
+            </tuple>
+            <tuple>
+                <constant>b</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="d">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>a</constant>
+            </tuple>
+            <tuple>
+                <constant>b</constant>
+            </tuple>
+            <tuple>
+                <constant>c</constant>
+            </tuple>
+            <tuple>
+                <constant>d</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="c">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>a</constant>
+            </tuple>
+            <tuple>
+                <constant>b</constant>
+            </tuple>
+            <tuple>
+                <constant>c</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="a">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>a</constant>
+            </tuple>
+        </tuples>
+    </result>
+</results>

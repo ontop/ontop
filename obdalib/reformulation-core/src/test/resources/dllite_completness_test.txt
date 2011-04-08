@@ -390,11 +390,11 @@ These are the first cases which tests the effects of unification and positive in
 ||   || g ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||
 ||46 || a || R RISA S, A ISA ER^^-^^ || A(a) R(r1,r2) S(s1,s2) || q(x)   :- S(x,y) || {s1 r1} || ||
 ||   || b ||            ||              || q(y)   :- S(x,y) || {s2 r2 a} || ||
-||   || c ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||   
+||   || c ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||
 
 
 === With object constants in the queries ===
- 
+
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 ||47 || a || A ISA B || A(a) || q() :- A(<a>) || {true} || ||
 || ||  b ||         ||      || q() :- B(<a>) || {true} || ||
@@ -445,7 +445,7 @@ These are the first cases which tests the effects of unification and positive in
 || ||c ||          ||        || q() :- A(<r2>) || {false}    || ||
 || ||d ||          ||        || q(x) :- R(x,<r2>) || {r1}    || ||
 || ||e ||          ||        || q(y) :- R(<r1>,y) || {r2}  || ||
-|| ||f ||          ||        || q() :- R(<r1>,<r2>) || {true}  || ||     
+|| ||f ||          ||        || q() :- R(<r1>,<r2>) || {true}  || ||
 
 With exists R on the left
 
@@ -555,7 +555,7 @@ With exists R on the left
 ||   || ap    ||           ||                || q() :- S(<s2>,<s2>) || {false} || ||
 
 
-With exists R inverse on the left 
+With exists R inverse on the left
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 || 65||a || ER^^-^^ ISA B || R(r1,r2)        || q(x) :- R(x,<r2>) || {r1} || ||
@@ -627,7 +627,7 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
 ||76 || a || R RISA S   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {r2} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {} || ||
@@ -663,7 +663,7 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
 ||79 || a || R^^-^^ RISA S^^-^^   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {r2} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {} || ||
@@ -699,7 +699,7 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
 ||82 || a || R RISA S^^-^^   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {r1} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {r2} || ||
@@ -735,11 +735,11 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
 ||85 || a || R^^-^^ RISA S   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {r1} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {r2} || ||
-||   || d ||            ||           || q(x)   :- S(x,<r2>)    || {} || ||                                
+||   || d ||            ||           || q(x)   :- S(x,<r2>)    || {} || ||
 ||   || e ||            ||           || q()    :- S(<r1>,<r2>) || {false} || ||
 ||   || f ||            ||           || q()    :- S(<r2>,<r1>) || {true} || ||
 ||   || aa ||            ||           || q(x)   :- S(<s1>,x)    || {s2} || ||
@@ -828,6 +828,18 @@ These are the first cases which tests the effects of unification and positive in
 || 196 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
 || 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
 || 198 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
+
+= Inheritance tests =
+
+||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
+||200 || a || A ISA B, B ISA C, C ISA D || A(a), B(b), C(c), D(d) || q(x) :- A(x) || {a} || ||
+|| ||  b ||         ||      || q(x) :- B(x) || {a b} || ||
+|| ||  c ||         ||      || q(x) :- C(x) || {a b c} || ||
+|| ||  d ||         ||      || q(x) :- D(x) || {a b c d} || ||
+||201 || a || R RISA S, S RISA T, T RISA V || R(r1,r2), S(s1,s2), T(t1,t2), V(v1,v2) || q(x,y) :- R(x,y) || {(r1,r2)} || ||
+|| ||  b ||         ||      || q(x,y) :- S(x,y) || {(r1,r2) (s1,s2)} || ||
+|| ||  c ||         ||      || q(x,y) :- T(x,y) || {(r1,r2) (s1,s2) (t1,t2)} || ||
+|| ||  d ||         ||      || q(x,y) :- V(x,y) || {(r1,r2) (s1,s2) (t1,t2) (v1,v2)} || ||
 
 
 #END# Correct tests end here, ignore the ones bellow

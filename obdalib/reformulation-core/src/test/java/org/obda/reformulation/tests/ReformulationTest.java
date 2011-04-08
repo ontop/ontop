@@ -2124,4 +2124,14 @@ public class ReformulationTest extends TestCase {
         test_function(ontoname);
     }
 
+    public void test_200_0() throws Exception {
+        String ontoname = "test_200_0";
+        test_function(ontoname);
+    }
+
+    public void test_201_0() throws Exception {
+        String ontoname = "test_201_0";
+        test_function(ontoname);
+    }
+
 }
