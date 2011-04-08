@@ -31,7 +31,7 @@ public class AtomicRoleDescriptionImpl implements BasicRoleDescription {
 		AtomicRoleDescriptionImpl concept2 = (AtomicRoleDescriptionImpl)obj;
 		if (inverse != concept2.inverse)
 			return false;
-		return (predicate.equals(concept2));
+		return (predicate.equals(concept2.predicate));
 	}
 
 	public String toString() {
