@@ -55,6 +55,7 @@ public class DatalogQueryHelper {
 					": <" + prefixMapping.get(prefix).toString() + ">\n";
 		}
 		prefixString = baseString + prefixString; // the base prefix should always on top.
+		prefixString = prefixString+ "PREFIX "+ OBDA_PREFIX_MAPPING_PREDICATE + ": <" + OBDA_URI_MAPPING_PREDICATE +">\n";
 		return prefixString;
 	}
 }
