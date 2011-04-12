@@ -20,6 +20,9 @@ public class DAG {
     private Map<String, DAGNode> objectprop_nodes = new HashMap<String, DAGNode>();
     private Map<String, DAGNode> dataprop_nodes = new HashMap<String, DAGNode>();
 
+    private Set<OWLDataProperty> dataprops = new HashSet<OWLDataProperty>();
+    private Set<OWLObjectProperty> objprops = new HashSet<OWLObjectProperty>();
+
 
     private int index_counter = 1;
     public final static String owl_thing = "http://www.w3.org/2002/07/owl#Thing";
@@ -47,76 +50,77 @@ public class DAG {
         for (OWLOntology onto : ontologies) {
             log.info("Generating SemanticIndex for ontology: " + onto);
 
-            for (OWLObjectProperty ax : onto.getObjectPropertiesInSignature()) {
-                OWLObjectProperty obj = (OWLObjectProperty) ax;
-                Set<OWLObjectPropertyExpression> sup_prop = obj.getSuperProperties(onto);
-                String obj_str = obj.asOWLObjectProperty().getURI().toString();
+            dataprops = onto.getDataPropertiesInSignature();
+            for (OWLDataProperty prop : dataprops) {
+                addNode(prop.getURI().toString(), dataprop_nodes);
+                addNode(owl_inverse + prop.getURI().toString(), dataprop_nodes);
 
-                if (sup_prop.size() == 0) {
-                    addNode(obj_str, objectprop_nodes);
-                }
+                addNode(owl_exists_data + prop.getURI().toString(), cls_nodes);
+                addNode(owl_inverse_exists_data + prop.getURI().toString(), cls_nodes);
 
-                for (OWLObjectPropertyExpression spe : sup_prop) {
-                    addEdge(obj_str, getOWlProperty(spe), objectprop_nodes);
+                addEdge(owl_exists_data + prop.getURI().toString(), owl_thing, cls_nodes);
+                addEdge(owl_inverse_exists_data + prop.getURI().toString(), owl_thing, cls_nodes);
+            }
+            objprops = onto.getObjectPropertiesInSignature();
+            for (OWLObjectProperty prop : objprops) {
+                addNode(prop.getURI().toString(), objectprop_nodes);
+                addNode(owl_inverse + prop.getURI().toString(), objectprop_nodes);
 
-                }
+                addNode(owl_exists_obj + prop.getURI().toString(), cls_nodes);
+                addNode(owl_inverse_exists_obj + prop.getURI().toString(), cls_nodes);
 
-                addNode(owl_exists_obj + obj_str, cls_nodes);
-                addEdge(owl_exists_obj + obj_str, owl_thing, cls_nodes);
-
-                addNode(owl_inverse_exists_obj + obj_str, cls_nodes);
-                addEdge(owl_inverse_exists_obj + obj_str, owl_thing, cls_nodes);
+                addEdge(owl_exists_obj + prop.getURI().toString(), owl_thing, cls_nodes);
+                addEdge(owl_inverse_exists_obj + prop.getURI().toString(), owl_thing, cls_nodes);
             }
 
-            for (OWLDataProperty ax : onto.getDataPropertiesInSignature()) {
-                OWLDataProperty data = (OWLDataProperty) ax;
-                Set<OWLDataPropertyExpression> sup_pro = data.getSuperProperties(onto);
-                String data_str = data.asOWLDataProperty().getURI().toString();
+            for (OWLAxiom ax : onto.getAxioms()) {
+                if (ax instanceof OWLSubClassAxiom) {
+                    OWLSubClassAxiom axiom = (OWLSubClassAxiom) ax;
+                    String sup_cls = getOwlClass(axiom.getSuperClass());
+                    String sub_cls = getOwlClass(axiom.getSubClass());
+                    addEdge(sup_cls, owl_thing, cls_nodes);
+                    addEdge(sub_cls, sup_cls, cls_nodes);
 
-                for (OWLDataPropertyExpression spe : sup_pro) {
-                    addEdge(data_str, getOWlProperty(spe), dataprop_nodes);
-                }
+                    log.debug("Class: {} {}", sub_cls, sup_cls);
+                } else if (ax instanceof OWLSubPropertyAxiom) {
+                    OWLSubPropertyAxiom axiom = (OWLSubPropertyAxiom) ax;
+                    String sup_prop = getOWlProperty(axiom.getSuperProperty());
+                    String sub_prop = getOWlProperty(axiom.getSubProperty());
 
+                    addEdge(sub_prop, sup_prop, objectprop_nodes);
 
-                addNode(owl_exists_data + data_str, cls_nodes);
-                addEdge(owl_exists_data + data_str, owl_thing, cls_nodes);
-
-                addNode(owl_inverse_exists_data + data_str, cls_nodes);
-                addEdge(owl_inverse_exists_data + data_str, owl_thing, cls_nodes);
-
-            }
-
-            for (OWLClass ax : onto.getClassesInSignature()) {
-                OWLClass cls = (OWLClass) ax;
-                Set<OWLDescription> sup_cls = cls.getSuperClasses(onto);
-                if (sup_cls.size() == 0 && !cls.isOWLThing()) {
-                    // top level class, manually add owl:Thing as superClass
-                    addEdge(cls.getURI().toString(), owl_thing, cls_nodes);
-                } else {
-                    for (OWLDescription sc : sup_cls) {
-                        addEdge(cls.getURI().toString(), getOwlClass(sc), cls_nodes);
+                    String implicit_sub;
+                    if (sub_prop.startsWith(owl_inverse)) {
+                        implicit_sub = sub_prop.substring(owl_inverse.length());
+                    } else {
+                        implicit_sub = owl_inverse + sub_prop;
                     }
-                }
-            }
+                    String implicit_sup;
+                    if (sup_prop.startsWith(owl_inverse)) {
+                        implicit_sup = sup_prop.substring(owl_inverse.length());
+                    } else {
+                        implicit_sup = owl_inverse + sup_prop;
+                    }
+                    addEdge(implicit_sub, implicit_sup, objectprop_nodes);
 
-            // Domain and Range
-            for (OWLPropertyAxiom ax : onto.getObjectPropertyAxioms()) {
-                if (ax instanceof OWLObjectPropertyDomainAxiom) {
+
+                    log.debug("SubProperty: {} {}", sub_prop, sup_prop);
+                } else if (ax instanceof OWLObjectPropertyDomainAxiom) {
                     OWLObjectPropertyDomainAxiom domainAxiom = (OWLObjectPropertyDomainAxiom) ax;
                     OWLObjectProperty prop = domainAxiom.getProperty().asOWLObjectProperty();
                     String domain = getOwlClass(domainAxiom.getDomain());
 
                     addEdge(owl_exists_obj + prop.getURI().toString(), domain, cls_nodes);
-
                 } else if (ax instanceof OWLObjectPropertyRangeAxiom) {
                     OWLObjectPropertyRangeAxiom rangeAxiom = (OWLObjectPropertyRangeAxiom) ax;
                     String range = getOwlClass(rangeAxiom.getRange());
 
                     addEdge(owl_inverse_exists_obj + rangeAxiom.getProperty().asOWLObjectProperty().getURI().toString(),
                             range, cls_nodes);
+                } else {
+                    log.debug("Unsupported axiom: {}", ax);
                 }
             }
-
         }
         index();
     }
@@ -129,35 +133,50 @@ public class DAG {
             OWLObjectProperty rv;
             if (restriction.getProperty() instanceof OWLObjectPropertyInverse) {
                 rv = ((OWLObjectPropertyInverse) restriction.getProperty()).getInverse().asOWLObjectProperty();
-
+                if (dataprops.contains(rv)) {
+                    return owl_inverse_exists_data + rv.getURI().toString();
+                } else if (objprops.contains(rv)) {
+                    return owl_inverse_exists_obj + rv.getURI().toString();
+                }
             } else {
                 rv = restriction.getProperty().asOWLObjectProperty();
+
+                if (dataprops.contains(rv)) {
+                    return owl_exists_data + rv.getURI().toString();
+                } else if (objprops.contains(rv)) {
+                    return owl_exists_obj + rv.getURI().toString();
+                }
             }
-            if (dataprop_nodes.containsKey(rv.getURI().toString())) {
-                return owl_exists_data + rv.getURI().toString();
-            } else if (objectprop_nodes.containsKey(rv.getURI().toString())) {
-                return owl_exists_obj + rv.getURI().toString();
-            }
+
 
         } else if (obj instanceof OWLObjectSomeRestriction) {
             OWLObjectSomeRestriction restriction = (OWLObjectSomeRestriction) obj;
             OWLObjectProperty rv;
             if (restriction.getProperty() instanceof OWLObjectPropertyInverse) {
                 rv = ((OWLObjectPropertyInverse) restriction.getProperty()).getInverse().asOWLObjectProperty();
-
+                if (dataprops.contains(rv)) {
+                    return owl_inverse_exists_data + rv.getURI().toString();
+                } else if (objprops.contains(rv)) {
+                    return owl_inverse_exists_obj + rv.getURI().toString();
+                }
             } else {
                 rv = restriction.getProperty().asOWLObjectProperty();
+                if (dataprops.contains(rv)) {
+                    return owl_exists_data + rv.getURI().toString();
+                } else if (objprops.contains(rv)) {
+                    return owl_exists_obj + rv.getURI().toString();
+                }
             }
-            if (dataprop_nodes.containsKey(rv.getURI().toString())) {
-                return owl_exists_data + rv.getURI().toString();
-            } else if (objectprop_nodes.containsKey(rv.getURI().toString())) {
-                return owl_exists_obj + rv.getURI().toString();
-            }
+
         } else if (obj instanceof OWLObjectProperty) {
             return ((OWLObjectProperty) obj).asOWLObjectProperty().getURI().toString();
         }
+        OWLClass cls = (OWLClass) obj;
+        if (cls.isOWLThing()) {
+            return owl_thing;
+        }
 
-        return ((OWLClass) obj).asOWLClass().getURI().toString();
+        return cls.asOWLClass().getURI().toString();
     }
 
     private String getOWlProperty(OWLObject obj) {
@@ -166,6 +185,7 @@ public class DAG {
         } else if (obj instanceof OWLObjectPropertyInverse) {
             OWLObjectPropertyInverse inverse = (OWLObjectPropertyInverse) obj;
             return owl_inverse + inverse.getInverse().asOWLObjectProperty().getURI().toString();
+
         }
         return null;
     }
@@ -173,9 +193,7 @@ public class DAG {
     /**
      * Create DAG from previously saved index
      *
-     * @param cls_index        list of TBox class assertions with computed ranges and indexes
-     * @param objectprop_index list of TBox role assertions with computed ranges and indexes
-     * @param dataprop_index   list of TBox literal assertions with computed ranges and indexes
+     * @param cls_index list of TBox class assertions with computed ranges and indexes
      */
     public DAG(List<DAGNode> cls_index, List<DAGNode> objectprop_index, List<DAGNode> dataprop_index) {
         for (DAGNode node : cls_index) {
@@ -183,9 +201,6 @@ public class DAG {
         }
         for (DAGNode node : objectprop_index) {
             objectprop_nodes.put(node.getUri(), node);
-        }
-        for (DAGNode node : dataprop_index) {
-            dataprop_nodes.put(node.getUri(), node);
         }
     }
 
@@ -234,11 +249,6 @@ public class DAG {
             }
         }
         for (DAGNode n : objectprop_nodes.values()) {
-            if (n.getParents().isEmpty()) {
-                roots.add(n);
-            }
-        }
-        for (DAGNode n : dataprop_nodes.values()) {
             if (n.getParents().isEmpty()) {
                 roots.add(n);
             }

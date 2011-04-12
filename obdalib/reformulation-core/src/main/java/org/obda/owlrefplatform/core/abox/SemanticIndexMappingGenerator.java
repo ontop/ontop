@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -51,7 +53,9 @@ public class SemanticIndexMappingGenerator {
      */
     public void build() throws DuplicateMappingException {
         log.debug("Generating mappings for DAG {}", dag);
+        Map<String, Set<DAGNode>> class_descdendants = DAGOperations.buildDescendants(dag.getClassIndex());
         for (DAGNode node : dag.getClassIndex().values()) {
+
             if (node.getUri().startsWith(DAG.owl_exists) || node.getUri().startsWith(DAG.owl_inverse_exists)) {
                 continue;
             }
@@ -63,30 +67,55 @@ public class SemanticIndexMappingGenerator {
             insert_unary_mapping(uri, projection, tablename, range);
 
             // check if has child exists(R)
-            for (DAGNode child : node.getChildren()) {
+            for (DAGNode descendant : class_descdendants.get(node.getUri().toString())) {
+                String child_uri;
+                String projection_inverse;
+                SemanticIndexRange range_inverse;
 
-                if (child.getUri().startsWith(DAG.owl_exists_obj)) {
-                    uri = child.getUri().substring(DAG.owl_exists_obj.length());
+                if (descendant.getUri().startsWith(DAG.owl_exists_obj)) {
+                    child_uri = descendant.getUri().substring(DAG.owl_exists_obj.length());
                     tablename = ABoxSerializer.objectprop_table;
+
                     projection = "URI1 as X";
-                    range = dag.getObjectPropertyIndex().get(uri).getRange();
-                } else if (child.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
-                    uri = child.getUri().substring(DAG.owl_inverse_exists_obj.length());
+                    projection_inverse = "URI2 as X";
+
+                    range = dag.getObjectPropertyIndex().get(child_uri).getRange();
+                    range_inverse = dag.getObjectPropertyIndex().get(DAG.owl_inverse + child_uri).getRange();
+                } else if (descendant.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
+                    child_uri = descendant.getUri().substring(DAG.owl_inverse_exists_obj.length());
                     tablename = ABoxSerializer.objectprop_table;
+
                     projection = "URI2 as X";
-                    range = dag.getObjectPropertyIndex().get(uri).getRange();
-                } else if (child.getUri().startsWith(DAG.owl_exists_data)) {
-                    uri = child.getUri().substring(DAG.owl_exists_data.length());
+                    projection_inverse = "URI1 as X";
+
+                    range = dag.getObjectPropertyIndex().get(child_uri).getRange();
+                    range_inverse = dag.getObjectPropertyIndex().get(DAG.owl_inverse + child_uri).getRange();
+                } else if (descendant.getUri().startsWith(DAG.owl_exists_data)) {
+                    child_uri = descendant.getUri().substring(DAG.owl_exists_data.length());
                     tablename = ABoxSerializer.dataprop_table;
+
                     projection = "URI as X";
-                    range = dag.getDataPropertyIndex().get(uri).getRange();
-                } else if (child.getUri().startsWith(DAG.owl_inverse_exists_data)) {
-                    uri = child.getUri().substring(DAG.owl_inverse_exists_data.length());
+                    projection_inverse = "LITERAL as X";
+
+                    range = dag.getDataPropertyIndex().get(child_uri).getRange();
+                    range_inverse = dag.getDataPropertyIndex().get(DAG.owl_inverse + child_uri).getRange();
+                } else if (descendant.getUri().startsWith(DAG.owl_inverse_exists_data)) {
+                    child_uri = descendant.getUri().substring(DAG.owl_inverse_exists_data.length());
                     tablename = ABoxSerializer.dataprop_table;
+
                     projection = "LITERAL as X";
-                    range = dag.getDataPropertyIndex().get(uri).getRange();
+                    projection_inverse = "LITERAL as X";
+
+                    range = dag.getDataPropertyIndex().get(child_uri).getRange();
+                    range_inverse = dag.getDataPropertyIndex().get(DAG.owl_inverse + child_uri).getRange();
+                } else {
+                    // Ignore concept descendants
+                    continue;
                 }
+
                 insert_unary_mapping(uri, projection, tablename, range);
+                insert_unary_mapping(uri, projection_inverse, tablename, range_inverse);
+
             }
         }
         for (DAGNode node : dag.getObjectPropertyIndex().values()) {
