@@ -4,27 +4,21 @@
  */
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.net.URI;
-import java.security.KeyStore;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JTextArea;
+import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-
-import org.obda.query.domain.CQIE;
 
 
 /*
@@ -43,6 +37,7 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
 	private JDialog parent = null;
 	private JTextPane querypane = null;
 	private Vector<JCheckBox> checkboxes = null;
+	private Vector<JLabel> labels = null;
 	private String base = null;
     /**
 	 * 
@@ -62,14 +57,16 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
     	parent = new JDialog();
     	parent.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     	parent.setContentPane(this);
-    	parent.setSize(350, 580);
     	parent.setLocationRelativeTo(querypane);   	
+    	parent.pack();
+    	jButtonAccept.requestFocus();
     	parent.setVisible(true);
     }
     
     private void drawCheckBoxes(){
     
     	checkboxes = new Vector<JCheckBox>();
+    	labels = new Vector<JLabel>();
     	int i = 0;
     	Iterator<String> it =  prefixMap.keySet().iterator();
     	while(it.hasNext()){
@@ -77,13 +74,34 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
     		if(!key.equals("version")){
 	    		 jCheckBox1 = new JCheckBox();
 		    	 jCheckBox1.setText(key);
+		    	 jCheckBox1.setPreferredSize(new Dimension(444, 18));
+		    	 jCheckBox1.setFont(new java.awt.Font("Tahoma", 1, 11));
+		    	 jCheckBox1.setPreferredSize(new Dimension(75,15));
 		         java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
 		         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 		         gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
 		         gridBagConstraints.gridy = i;
+		         gridBagConstraints.gridx = 0;
+		         gridBagConstraints.weightx = 0.0;
 		         jPanel2.add(jCheckBox1, gridBagConstraints);
 		         checkboxes.add(jCheckBox1);
+		      		     
+		         jPanel2.add(jCheckBox1, gridBagConstraints);
+
+		         jLabel1 = new JLabel();
+		         jLabel1.setText( ": <" + prefixMap.get(key)+">");
+		         jLabel1.setPreferredSize(new Dimension(350,15));
+		         gridBagConstraints = new java.awt.GridBagConstraints();
+		         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+		         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		         gridBagConstraints.weightx = 1.0;
+		         gridBagConstraints.gridx = 1;
+		         gridBagConstraints.gridy = i;
+		         gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+		         jPanel2.add(jLabel1, gridBagConstraints);
+		         labels.add(jLabel1);
+		         
 		         i++;
 		         if(key.equals("owl") || key.equals("rdf") || key.equals("rdfs")){
 		        	 jCheckBox1.setSelected(true);
@@ -140,30 +158,25 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
         KeyStroke ks_ecape = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0);
         this.registerKeyboardAction(actionListenerCancel, ks_ecape, JComponent.WHEN_IN_FOCUSED_WINDOW);
         
+        jButtonAccept.requestFocusInWindow();
+        
         ActionListener actionListenerAccept = new ActionListener() {
       	  public void actionPerformed(ActionEvent actionEvent) {
       	     accept();
       	  }
       	};
-      KeyStroke ks_enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0);
-      this.registerKeyboardAction(actionListenerAccept, ks_enter, JComponent.WHEN_IN_FOCUSED_WINDOW);
-      
-      ActionListener actionListenerSelectAll = new ActionListener() {
-      	  public void actionPerformed(ActionEvent actionEvent) {
-      	     selectAll();
-      	  }
-      	};
-      KeyStroke ks_ctrl_A = KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.CTRL_DOWN_MASK );
-      this.registerKeyboardAction(actionListenerSelectAll, ks_ctrl_A, JComponent.WHEN_IN_FOCUSED_WINDOW);
-      
-      ActionListener actionListenerSelectNone = new ActionListener() {
-      	  public void actionPerformed(ActionEvent actionEvent) {
-      	     selectNone();
-      	  }
-      	};
-      KeyStroke ks_ctrl_N = KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.CTRL_DOWN_MASK);
-      this.registerKeyboardAction(actionListenerSelectNone, ks_ctrl_N, JComponent.WHEN_IN_FOCUSED_WINDOW);
-    }
+      	KeyStroke ks_enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0);
+      	this.registerKeyboardAction(actionListenerAccept, ks_enter, JComponent.WHEN_IN_FOCUSED_WINDOW);
+      	
+      	jButtonCancel.setMnemonic('c');
+      	jButtonSelectAll.setMnemonic('a');
+      	jButtonSelectNone.setMnemonic('n');
+      	jButtonAccept.setPreferredSize(new Dimension(80,22));
+      	jButtonCancel.setPreferredSize(new Dimension(80,22));
+      	jButtonSelectAll.setPreferredSize(new Dimension(80,22));
+      	jButtonSelectNone.setPreferredSize(new Dimension(80,22));
+      	jPanel3.setPreferredSize(new Dimension(1,1));
+ }
 
     private void selectAll(){
     	for (JCheckBox box : checkboxes) {
@@ -179,23 +192,20 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
     
     private void accept(){
     	StringBuffer prefix = new StringBuffer();
-//    	prefix.append("BASE ");
-//    	prefix.append(": <");
-//		prefix.append(base);
-//		prefix.append(">\n");
     	prefix.append("PREFIX ");
     	prefix.append(": <");
 		prefix.append(base);
 		prefix.append("#");
 		prefix.append(">\n");
+		int i = 0;
 		for (JCheckBox box : checkboxes) {
 			if(box.isSelected()){
 				prefix.append("PREFIX ");
 				prefix.append(box.getText());
-				prefix.append(": <");
-				prefix.append(prefixMap.get(box.getText()));
-				prefix.append(">\n");
+				prefix.append(labels.get(i).getText());
+				prefix.append("\n");
 			}
+			i++;
 		}
 		String currentcontent = querypane.getText();
 		String newContent = prefix+currentcontent;
@@ -228,11 +238,12 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
         jPanel2 = new javax.swing.JPanel();
         jCheckBox1 = new javax.swing.JCheckBox();
         jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
 
         setMinimumSize(new java.awt.Dimension(100, 100));
         setLayout(new java.awt.GridBagLayout());
 
-        jLabelHeader.setText("Select the relevant prefixes for your query:");
+        jLabelHeader.setText("Select the prefixes relevant for your query:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -280,17 +291,15 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
         add(jPanel1, gridBagConstraints);
 
         jPanel2.setLayout(new java.awt.GridBagLayout());
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 393, Short.MAX_VALUE)
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
-        );
+        
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        jPanel2.add(jPanel3, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -300,7 +309,6 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jPanel2, gridBagConstraints);
-
     }// </editor-fold>//GEN-END:initComponents
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
@@ -314,6 +322,7 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
     private javax.swing.JButton jButtonSelectAll;
     private javax.swing.JButton jButtonSelectNone;
     private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabelHeader;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

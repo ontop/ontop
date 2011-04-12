@@ -9,7 +9,9 @@ import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.IconLoader;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
@@ -50,24 +52,25 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel{
     	GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2,5, 0, 0);
         add(selector, gridBagConstraints);
         dscontroller.addDatasourceControllerListener(selector);
     	
-    	jButtonAdd.setIcon(IconLoader.getImageIcon("images/plus.png"));
+    	jButtonAdd.setText("Insert");
+    	jButtonAdd.setMnemonic('i');
     	jButtonAdd.setToolTipText("Add a new datasource");
         jButtonAdd.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jButtonAdd.setContentAreaFilled(false);
         jButtonAdd.setIconTextGap(0);
-        jButtonAdd.setMaximumSize(new java.awt.Dimension(25, 25));
-        jButtonAdd.setMinimumSize(new java.awt.Dimension(25, 25));
-        jButtonAdd.setPreferredSize(new java.awt.Dimension(25, 25));
+        jButtonAdd.setMinimumSize(new java.awt.Dimension(50, 15));
+        jButtonAdd.setPreferredSize(new java.awt.Dimension(50, 20));
     	jButtonAdd.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				String name = (String) JOptionPane.showInputDialog("Indicate the ID of the new data source", null);
+				String name = (String) JOptionPane.showInputDialog("Insert the URI of the new data source.\nThe URI should be a unique idenfier for the data souce\nnot the connection url or the actual data source name.", null);
 				if ((name != null) && (!name.trim().equals(""))) {
 					dscontroller.addDataSource(name.trim());
 				}
@@ -75,14 +78,15 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel{
 			}
 		});
     	
-    	jButtonRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
+    	jButtonRemove.setText("Delete");
+    	jButtonRemove.setMnemonic('d');
     	jButtonRemove.setToolTipText("Remove the selected datasource");
         jButtonRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jButtonRemove.setContentAreaFilled(false);
         jButtonRemove.setIconTextGap(0);
-        jButtonRemove.setMaximumSize(new java.awt.Dimension(25, 25));
-        jButtonRemove.setMinimumSize(new java.awt.Dimension(25, 25));
-        jButtonRemove.setPreferredSize(new java.awt.Dimension(25, 25));
+        jButtonRemove.setMaximumSize(new java.awt.Dimension(60, 30));
+        jButtonRemove.setMinimumSize(new java.awt.Dimension(50, 18));
+        jButtonRemove.setPreferredSize(new java.awt.Dimension(50, 20));
     	jButtonRemove.addActionListener(new ActionListener() {
 			
 			@Override
@@ -97,6 +101,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel{
     	jLabeltitle.setBackground(new java.awt.Color(153, 153, 153));
     	jLabeltitle.setFont(new java.awt.Font("Arial", 1, 11));
     	jLabeltitle.setForeground(new java.awt.Color(153, 153, 153));
+    	jLabeltitle.setPreferredSize(new Dimension(119,14));
     }
 
     /** This method is called from within the constructor to
@@ -118,22 +123,24 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel{
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(jButtonAdd, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(jButtonRemove, gridBagConstraints);
 
-        jLabeltitle.setText("Select Datasource:");
+        jLabeltitle.setText("Select datasource:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        gridBagConstraints.insets = new Insets(5, 5, 5, 5);
         add(jLabeltitle, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
     }// </editor-fold>//GEN-END:initComponents

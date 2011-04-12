@@ -75,7 +75,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
         splSqlQuery = new javax.swing.JSplitPane();
         pnlSqlQuery = new javax.swing.JPanel();
-        lblSqlQuery = new javax.swing.JLabel();
+//        lblSqlQuery = new javax.swing.JLabel();
         scrSqlQuery = new javax.swing.JScrollPane();
         txtSqlQuery = new javax.swing.JTextArea();
         cmdExecute = new javax.swing.JButton();
@@ -92,14 +92,14 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
         pnlSqlQuery.setPreferredSize(new java.awt.Dimension(156, 100));
         pnlSqlQuery.setLayout(new java.awt.GridBagLayout());
 
-        lblSqlQuery.setText("SQL Query:");
-        lblSqlQuery.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        lblSqlQuery.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        lblSqlQuery.setRequestFocusEnabled(false);
-        lblSqlQuery.setVerifyInputWhenFocusTarget(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlSqlQuery.add(lblSqlQuery, gridBagConstraints);
+//        lblSqlQuery.setText("SQL Query:");
+//        lblSqlQuery.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+//        lblSqlQuery.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+//        lblSqlQuery.setRequestFocusEnabled(false);
+//        lblSqlQuery.setVerifyInputWhenFocusTarget(false);
+//        gridBagConstraints = new java.awt.GridBagConstraints();
+//        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+//        pnlSqlQuery.add(lblSqlQuery, gridBagConstraints);
 
         txtSqlQuery.setColumns(20);
         txtSqlQuery.setRows(2);
@@ -114,7 +114,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
         gridBagConstraints.weighty = 2.0;
         pnlSqlQuery.add(scrSqlQuery, gridBagConstraints);
 
-        cmdExecute.setText("Excecute");
+        cmdExecute.setText("Execute");
         cmdExecute.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdExecuteActionPerformed(evt);
@@ -185,7 +185,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExecute;
-    private javax.swing.JLabel lblSqlQuery;
+//    private javax.swing.JLabel lblSqlQuery;
     private javax.swing.JPanel pnlQueryResult;
     private javax.swing.JPanel pnlSqlQuery;
     private javax.swing.JScrollPane scrQueryResult;

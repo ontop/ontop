@@ -152,7 +152,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 //  		}
 //  		URI src_uri = dsc.getCurrentDataSource().getSourceID();
   		RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller.getMapping(srcuri, mapping_id);
-  		MappingNode mappingNode = MappingNode.getMappingNodeFromMapping(mapping);
+  		MappingNode mappingNode = getMappingNodeFromMapping(mapping);
 
 			insertNodeInto(mappingNode, root, root
 					.getChildCount());

@@ -187,7 +187,7 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 	}// GEN-LAST:event_removeButtonActionPerformed
 
 	private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addButtonActionPerformed
-		String name = (String) JOptionPane.showInputDialog("Indicate the ID of the new data source", null);
+		String name = (String) JOptionPane.showInputDialog("Indicate the URI of the new data source", null);
 		if ((name != null) && (!name.equals(""))) {
 			dscontroller.addDataSource(name);
 		}

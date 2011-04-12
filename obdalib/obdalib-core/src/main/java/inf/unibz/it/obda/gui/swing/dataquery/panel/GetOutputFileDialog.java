@@ -44,18 +44,18 @@ public class GetOutputFileDialog {
 		JFileChooser fc = new JFileChooser(new File(filename));
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.setMultiSelectionEnabled(false);
-		fc.setSelectedFile(new File(File.separator+"tmp"+File.separator+"result.csf"));
+		fc.setSelectedFile(new File(File.separator+"tmp"+File.separator+"result.csv"));
 		fc.setFileFilter(new FileFilter() {
 			
 			@Override
 			public String getDescription() {
-				return ".csf files";
+				return ".csv files";
 			}
 			
 			@Override
 			public boolean accept(File f) {
 				
-				return f.isDirectory()|| f.getName().toLowerCase().endsWith(".csf");
+				return f.isDirectory()|| f.getName().toLowerCase().endsWith(".csv");
 			}
 		});
 		fc.addActionListener(new ActionListener() {

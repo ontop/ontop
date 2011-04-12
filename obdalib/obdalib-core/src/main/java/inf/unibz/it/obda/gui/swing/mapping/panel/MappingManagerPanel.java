@@ -56,6 +56,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -86,7 +87,7 @@ public class MappingManagerPanel extends JPanel implements
   private final String TEXT = "text";
 
   private DefaultMutableTreeNode editedNode;
-  private MappingManagerPreferences pref;
+  private OBDAPreferences pref;
   private KeyStroke addMapping;
   private KeyStroke editBody;
   private KeyStroke editHead;
@@ -124,7 +125,7 @@ public class MappingManagerPanel extends JPanel implements
     this.apic = apic;
     this.mapc = mapc;
     this.dsc = dsc;
-    pref = preference.getMappingsPreference();
+    pref = preference;
     datalogParser = new DatalogProgramParser();
 
     initComponents();
@@ -136,38 +137,59 @@ public class MappingManagerPanel extends JPanel implements
      */
     MappingTreeModel maptreemodel = new MappingTreeModel(apic, mapc);
     mapc.addMappingControllerListener(maptreemodel);
-    treMappingsTree.setRootVisible(false);
-    treMappingsTree.setModel(maptreemodel);
+    mappingsTree.setRootVisible(false);
+    mappingsTree.setModel(maptreemodel);
     MappingRenderer map_renderer = new MappingRenderer(apic, preference);
-    treMappingsTree.setCellRenderer(map_renderer);
-    treMappingsTree.setEditable(true);
-    treMappingsTree.setCellEditor(new MappingTreeNodeCellEditor(treMappingsTree, this, apic));
-    treMappingsTree.setSelectionModel(new MappingTreeSelectionModel());
-    treMappingsTree.setRowHeight(0);
-    treMappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
-    treMappingsTree.setToggleClickCount(1);
-    treMappingsTree.setInvokesStopCellEditing(true);
-    cmdAddMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
+    mappingsTree.setCellRenderer(map_renderer);
+    mappingsTree.setEditable(true);
+    mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(mappingsTree, this, apic));
+    mappingsTree.setSelectionModel(new MappingTreeSelectionModel());
+    mappingsTree.setRowHeight(0);
+    mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
+    mappingsTree.setToggleClickCount(1);
+    mappingsTree.setInvokesStopCellEditing(true);
+//    cmdAddMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
     cmdAddMapping.setToolTipText("Add a new mapping");
-    cmdRemoveMapping.setIcon(IconLoader.getImageIcon("images/minus.png"));
+//    cmdRemoveMapping.setIcon(IconLoader.getImageIcon("images/minus.png"));
     cmdRemoveMapping.setToolTipText("Remove selected mappings");
-    cmdDuplicateMapping.setIcon(IconLoader.getImageIcon("images/duplicate.png"));
+//    cmdDuplicateMapping.setIcon(IconLoader.getImageIcon("images/duplicate.png"));
     cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
-    pref.registerPreferenceChangedListener(this);
+    pref.getMappingsPreference().registerPreferenceChangedListener(this);
   }
 
   private void registerAction() {
     
-    InputMap inputmap = treMappingsTree.getInputMap();
-    ActionMap actionmap = treMappingsTree.getActionMap();
+    InputMap inputmap = mappingsTree.getInputMap();
+    ActionMap actionmap = mappingsTree.getActionMap();
 
-    String add = pref.getShortCut(MappingManagerPreferences.ADD_MAPPING);
+    jLabelFilter.setBackground(new java.awt.Color(153, 153, 153));
+    jLabelFilter.setFont(new java.awt.Font("Arial", 1, 11));
+    jLabelFilter.setForeground(new java.awt.Color(153, 153, 153));
+    jLabelFilter.setPreferredSize(new Dimension(75,14));
+    jLabelFilter.setText("Insert Filter: ");
+    
+    cmdAddMapping.setText("Insert");
+    cmdAddMapping.setMnemonic('i');
+    cmdAddMapping.setIcon(null);
+    cmdAddMapping.setPreferredSize(new Dimension(50,21));
+    
+    cmdRemoveMapping.setText("Remove");
+    cmdRemoveMapping.setMnemonic('r');
+    cmdRemoveMapping.setIcon(null);
+    cmdRemoveMapping.setPreferredSize(new Dimension(50,21));
+    
+    cmdDuplicateMapping.setText("Duplicate");
+    cmdDuplicateMapping.setMnemonic('d');
+    cmdDuplicateMapping.setIcon(null);
+    cmdDuplicateMapping.setPreferredSize(new Dimension(50,21));
+    
+    String add = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.ADD_MAPPING);
     addMapping = KeyStroke.getKeyStroke(add);
-    String body = pref.getShortCut(MappingManagerPreferences.EDIT_BODY);
+    String body = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_BODY);
     editBody = KeyStroke.getKeyStroke(body);
-    String head = pref.getShortCut(MappingManagerPreferences.EDIT_HEAD);
+    String head = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_HEAD);
     editHead = KeyStroke.getKeyStroke(head);
-    String id = pref.getShortCut(MappingManagerPreferences.EDIT_ID);
+    String id = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_ID);
     editID = KeyStroke.getKeyStroke(id);
 
     AbstractAction addAction = new AbstractAction() {
@@ -182,7 +204,7 @@ public class MappingManagerPanel extends JPanel implements
     AbstractAction editBodyAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent actionEvent) {
-        TreePath path = treMappingsTree.getSelectionPath();
+        TreePath path = mappingsTree.getSelectionPath();
         if (path == null) {
           return;
         }
@@ -195,7 +217,7 @@ public class MappingManagerPanel extends JPanel implements
     AbstractAction editHeadAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent actionEvent) {
-        TreePath path = treMappingsTree.getSelectionPath();
+        TreePath path = mappingsTree.getSelectionPath();
         if (path == null) {
           return;
         }
@@ -208,13 +230,13 @@ public class MappingManagerPanel extends JPanel implements
     AbstractAction editIDAction = new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent actionEvent) {
-        TreePath path = treMappingsTree.getSelectionPath();
+        TreePath path = mappingsTree.getSelectionPath();
         if (path == null) {
           return;
         }
-        treMappingsTree.setEditable(true);
+        mappingsTree.setEditable(true);
         editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-        treMappingsTree.startEditingAtPath(path);
+        mappingsTree.startEditingAtPath(path);
       }
     };
     inputmap.put(editID, MappingManagerPreferences.EDIT_ID);
@@ -250,13 +272,13 @@ public class MappingManagerPanel extends JPanel implements
     editID.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        TreePath path = treMappingsTree.getSelectionPath();
+        TreePath path = mappingsTree.getSelectionPath();
         if (path == null) {
           return;
         }
-        treMappingsTree.setEditable(true);
+        mappingsTree.setEditable(true);
         editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-        treMappingsTree.startEditingAtPath(path);
+        mappingsTree.startEditingAtPath(path);
       }
     });
     editID.setMnemonic(this.editID.getKeyCode());
@@ -268,7 +290,7 @@ public class MappingManagerPanel extends JPanel implements
     editHead.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        TreePath path = treMappingsTree.getSelectionPath();
+        TreePath path = mappingsTree.getSelectionPath();
         if (path == null) {
           return;
         }
@@ -284,7 +306,7 @@ public class MappingManagerPanel extends JPanel implements
     editBody.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        TreePath path = treMappingsTree.getSelectionPath();
+        TreePath path = mappingsTree.getSelectionPath();
         if (path == null) {
           return;
         }
@@ -332,177 +354,194 @@ public class MappingManagerPanel extends JPanel implements
    * WARNING: Do NOT modify this code. The content of this method is always
    * regenerated by the Form Editor.
    */
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-    menuMappings = new javax.swing.JPopupMenu();
-    menuValidateAll = new javax.swing.JMenuItem();
-    menuValidateBody = new javax.swing.JMenuItem();
-    menuValidateHead = new javax.swing.JMenuItem();
-    menuExecuteQuery = new javax.swing.JMenuItem();
-    scrMappingsManager = new javax.swing.JScrollPane();
-    pnlMappingManager = new javax.swing.JPanel();
-    pnlMappingButtons = new javax.swing.JPanel();
-    txtFilter = new javax.swing.JTextField();
-    chkFilter = new javax.swing.JCheckBox();
-    cmdAddMapping = new javax.swing.JButton();
-    cmdRemoveMapping = new javax.swing.JButton();
-    cmdDuplicateMapping = new javax.swing.JButton();
-    scrMappingsTree = new javax.swing.JScrollPane();
-    treMappingsTree = new javax.swing.JTree();
+        menuMappings = new javax.swing.JPopupMenu();
+        menuValidateAll = new javax.swing.JMenuItem();
+        menuValidateBody = new javax.swing.JMenuItem();
+        menuValidateHead = new javax.swing.JMenuItem();
+        menuExecuteQuery = new javax.swing.JMenuItem();
+        pnlMappingManager = new javax.swing.JPanel();
+        pnlMappingButtons = new javax.swing.JPanel();
+        txtFilter = new javax.swing.JTextField();
+        chkFilter = new javax.swing.JCheckBox();
+        cmdAddMapping = new javax.swing.JButton();
+        cmdRemoveMapping = new javax.swing.JButton();
+        cmdDuplicateMapping = new javax.swing.JButton();
+        jLabelFilter = new javax.swing.JLabel();
+        scrMappingsTree = new javax.swing.JScrollPane();
+        mappingsTree = new javax.swing.JTree();
 
-    menuValidateAll.setText("Validate");
-    menuValidateAll.setEnabled(false);
-    menuValidateAll.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        menuValidateAllActionPerformed(evt);
-      }
-    });
-    menuMappings.add(menuValidateAll);
+        menuValidateAll.setText("Validate");
+        menuValidateAll.setEnabled(false);
+        menuValidateAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuValidateAllActionPerformed(evt);
+            }
+        });
+        menuMappings.add(menuValidateAll);
 
-    menuValidateBody.setText("Validate body");
-    menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        menuValidateBodyActionPerformed(evt);
-      }
-    });
-    menuMappings.add(menuValidateBody);
+        menuValidateBody.setText("Validate body");
+        menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuValidateBodyActionPerformed(evt);
+            }
+        });
+        menuMappings.add(menuValidateBody);
 
-    menuValidateHead.setText("Validate head");
-    menuValidateHead.setEnabled(false);
-    menuValidateHead.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        menuValidateHeadActionPerformed(evt);
-      }
-    });
-    menuMappings.add(menuValidateHead);
+        menuValidateHead.setText("Validate head");
+        menuValidateHead.setEnabled(false);
+        menuValidateHead.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuValidateHeadActionPerformed(evt);
+            }
+        });
+        menuMappings.add(menuValidateHead);
 
-    menuExecuteQuery.setText("Execute Query");
-    menuExecuteQuery.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        menuExecuteQueryActionPerformed(evt);
-      }
-    });
-    menuMappings.add(menuExecuteQuery);
+        menuExecuteQuery.setText("Execute Query");
+        menuExecuteQuery.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuExecuteQueryActionPerformed(evt);
+            }
+        });
+        menuMappings.add(menuExecuteQuery);
 
-    setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.GridBagLayout());
 
-    scrMappingsManager.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        pnlMappingManager.setAutoscrolls(true);
+        pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
+        pnlMappingManager.setLayout(new java.awt.GridBagLayout());
 
-    pnlMappingManager.setAutoscrolls(true);
-    pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
-    pnlMappingManager.setLayout(new java.awt.GridBagLayout());
+        pnlMappingButtons.setEnabled(false);
+        pnlMappingButtons.setLayout(new java.awt.GridBagLayout());
 
-    pnlMappingButtons.setEnabled(false);
-    pnlMappingButtons.setLayout(new java.awt.GridBagLayout());
+        txtFilter.setPreferredSize(new java.awt.Dimension(250, 20));
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                try {
+					sendFilters(evt);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.9;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(txtFilter, gridBagConstraints);
 
-    txtFilter.setPreferredSize(new java.awt.Dimension(250, 20));
-    txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-      @Override
-      public void keyPressed(java.awt.event.KeyEvent evt) {
-        try {
-          sendFilters(evt);
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.9;
-    pnlMappingButtons.add(txtFilter, gridBagConstraints);
+        chkFilter.setText("Apply Filters");
+        chkFilter.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                try {
+					chkFilterItemStateChanged(evt);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(chkFilter, gridBagConstraints);
 
-    chkFilter.setText("Apply Filters");
-    chkFilter.addItemListener(new java.awt.event.ItemListener() {
-      @Override
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        try {
-          chkFilterItemStateChanged(evt);
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
-    pnlMappingButtons.add(chkFilter, new java.awt.GridBagConstraints());
+//        cmdAddMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
+        cmdAddMapping.setToolTipText("Add new mapping");
+        cmdAddMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdAddMapping.setContentAreaFilled(false);
+        cmdAddMapping.setIconTextGap(0);
+        cmdAddMapping.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdAddMapping.setMinimumSize(new java.awt.Dimension(25, 25));
+        cmdAddMapping.setPreferredSize(new java.awt.Dimension(25, 25));
+        cmdAddMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdAddMappingActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdAddMapping, gridBagConstraints);
 
-    cmdAddMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
-    cmdAddMapping.setToolTipText("Add new mapping");
-    cmdAddMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    cmdAddMapping.setContentAreaFilled(false);
-    cmdAddMapping.setIconTextGap(0);
-    cmdAddMapping.setMaximumSize(new java.awt.Dimension(25, 25));
-    cmdAddMapping.setMinimumSize(new java.awt.Dimension(25, 25));
-    cmdAddMapping.setPreferredSize(new java.awt.Dimension(25, 25));
-    cmdAddMapping.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdAddMappingActionPerformed(evt);
-      }
-    });
-    pnlMappingButtons.add(cmdAddMapping, new java.awt.GridBagConstraints());
+//        cmdRemoveMapping.setIcon(IconLoader.getImageIcon("images/minus.png"));
+        cmdRemoveMapping.setToolTipText("Remove mappings");
+        cmdRemoveMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdRemoveMapping.setContentAreaFilled(false);
+        cmdRemoveMapping.setIconTextGap(0);
+        cmdRemoveMapping.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdRemoveMapping.setMinimumSize(new java.awt.Dimension(25, 25));
+        cmdRemoveMapping.setPreferredSize(new java.awt.Dimension(25, 25));
+        cmdRemoveMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRemoveMappingActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdRemoveMapping, gridBagConstraints);
 
-    cmdRemoveMapping.setIcon(IconLoader.getImageIcon("images/minus.png"));
-    cmdRemoveMapping.setToolTipText("Remove mappings");
-    cmdRemoveMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    cmdRemoveMapping.setContentAreaFilled(false);
-    cmdRemoveMapping.setIconTextGap(0);
-    cmdRemoveMapping.setMaximumSize(new java.awt.Dimension(25, 25));
-    cmdRemoveMapping.setMinimumSize(new java.awt.Dimension(25, 25));
-    cmdRemoveMapping.setPreferredSize(new java.awt.Dimension(25, 25));
-    cmdRemoveMapping.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdRemoveMappingActionPerformed(evt);
-      }
-    });
-    pnlMappingButtons.add(cmdRemoveMapping, new java.awt.GridBagConstraints());
+//        cmdDuplicateMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
+        cmdDuplicateMapping.setToolTipText("Duplicate mappings");
+        cmdDuplicateMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdDuplicateMapping.setContentAreaFilled(false);
+        cmdDuplicateMapping.setIconTextGap(0);
+        cmdDuplicateMapping.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdDuplicateMapping.setMinimumSize(new java.awt.Dimension(25, 25));
+        cmdDuplicateMapping.setPreferredSize(new java.awt.Dimension(25, 25));
+        cmdDuplicateMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDuplicateMappingActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdDuplicateMapping, gridBagConstraints);
 
-    cmdDuplicateMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
-    cmdDuplicateMapping.setToolTipText("Duplicate mappings");
-    cmdDuplicateMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    cmdDuplicateMapping.setContentAreaFilled(false);
-    cmdDuplicateMapping.setIconTextGap(0);
-    cmdDuplicateMapping.setMaximumSize(new java.awt.Dimension(25, 25));
-    cmdDuplicateMapping.setMinimumSize(new java.awt.Dimension(25, 25));
-    cmdDuplicateMapping.setPreferredSize(new java.awt.Dimension(25, 25));
-    cmdDuplicateMapping.addActionListener(new java.awt.event.ActionListener() {
-      @Override
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdDuplicateMappingActionPerformed(evt);
-      }
-    });
-    pnlMappingButtons.add(cmdDuplicateMapping, new java.awt.GridBagConstraints());
+        jLabelFilter.setText("Insert Filter");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(jLabelFilter, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    pnlMappingManager.add(pnlMappingButtons, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        pnlMappingManager.add(pnlMappingButtons, gridBagConstraints);
 
-    treMappingsTree.setComponentPopupMenu(menuMappings);
-    treMappingsTree.setEditable(true);
-    scrMappingsTree.setViewportView(treMappingsTree);
+        mappingsTree.setComponentPopupMenu(menuMappings);
+        mappingsTree.setEditable(true);
+        scrMappingsTree.setViewportView(mappingsTree);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-    pnlMappingManager.add(scrMappingsTree, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        pnlMappingManager.add(scrMappingsTree, gridBagConstraints);
 
-    scrMappingsManager.setViewportView(pnlMappingManager);
-
-    add(scrMappingsManager, java.awt.BorderLayout.CENTER);
-  }// </editor-fold>//GEN-END:initComponents
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(pnlMappingManager, gridBagConstraints);
+        
+        
+    }// </editor-fold>//GEN-END:initComponents
 
   /***
    * The action for the search field and the search checkbox. If the checkbox
@@ -558,7 +597,7 @@ public class MappingManagerPanel extends JPanel implements
 
   private void menuExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteQueryActionPerformed
     // TODO add your handling code here:
-    TreePath path = treMappingsTree.getSelectionPath();
+    TreePath path = mappingsTree.getSelectionPath();
     if (path == null) {
       return;
     }
@@ -566,8 +605,8 @@ public class MappingManagerPanel extends JPanel implements
   }// GEN-LAST:event_menuExecuteQueryActionPerformed
 
   private void menuValidateAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateAllActionPerformed
-    MappingValidationDialog outputField = new MappingValidationDialog(treMappingsTree);
-    TreePath path[] = treMappingsTree.getSelectionPaths();
+    MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
+    TreePath path[] = mappingsTree.getSelectionPaths();
     if (path == null) {
       return;
     }
@@ -605,13 +644,13 @@ public class MappingManagerPanel extends JPanel implements
   }// GEN-LAST:event_menuValidateAllActionPerformed
 
   private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
-    final MappingValidationDialog outputField = new MappingValidationDialog(treMappingsTree);
+    final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
 
     Runnable action = new Runnable() {
       @Override
       public void run() {
         canceled = false;
-        final TreePath path[] = treMappingsTree.getSelectionPaths();
+        final TreePath path[] = mappingsTree.getSelectionPaths();
         outputField.setVisible(true);
         if (path == null) {
           return;
@@ -689,12 +728,12 @@ public class MappingManagerPanel extends JPanel implements
   }// GEN-LAST:event_menuValidateHeadActionPerformed
 
   private void cmdDuplicateMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_duplicateMappingButtonActionPerformed
-    TreePath[] currentSelection = treMappingsTree.getSelectionPaths();
+    TreePath[] currentSelection = mappingsTree.getSelectionPaths();
     if (currentSelection == null) {
       JOptionPane.showMessageDialog(this, "Please Select a Mapping first", "ERROR", JOptionPane.ERROR_MESSAGE);
     } else {
       if (JOptionPane.showConfirmDialog(this, "This will create copies of the selected mappings. \nNumber of mappings selected = "
-          + treMappingsTree.getSelectionPaths().length + "\n Continue? ", "Copy confirmation", JOptionPane.YES_NO_OPTION,
+          + mappingsTree.getSelectionPaths().length + "\n Continue? ", "Copy confirmation", JOptionPane.YES_NO_OPTION,
           JOptionPane.QUESTION_MESSAGE) == JOptionPane.NO_OPTION) {
         return;
       }
@@ -723,12 +762,12 @@ public class MappingManagerPanel extends JPanel implements
 
   private void removeMapping() {
     if (JOptionPane.showConfirmDialog(this, "This will delete ALL the selected mappings. \nNumber of mappings selected = "
-        + treMappingsTree.getSelectionPaths().length + "\n Continue? ", "Delete confirmation", JOptionPane.WARNING_MESSAGE,
+        + mappingsTree.getSelectionPaths().length + "\n Continue? ", "Delete confirmation", JOptionPane.WARNING_MESSAGE,
         JOptionPane.YES_NO_OPTION) == JOptionPane.CANCEL_OPTION) {
       return;
     }
     // The manager panel can handle multiple deletions.
-    TreePath[] currentSelection = treMappingsTree.getSelectionPaths();
+    TreePath[] currentSelection = mappingsTree.getSelectionPaths();
     MappingController controller = mapc;
     URI srcuri = selectedSource.getSourceID();
 
@@ -747,42 +786,27 @@ public class MappingManagerPanel extends JPanel implements
 
   private void addMapping() {
     
-    MappingController controller = mapc;
-    MappingTreeModel model = (MappingTreeModel) treMappingsTree.getModel();
-    treMappingsTree.requestFocus();
-    try {
-      URI sourceId = selectedSource.getSourceID();
-      String mappingId = controller.getNextAvailableMappingID(sourceId);     
-      controller.insertMapping(selectedSource.getSourceID(), new RDBMSOBDAMappingAxiom(mappingId));
-      MappingNode newnode = model.getMappingNode(mappingId);
-      treMappingsTree.scrollPathToVisible(new TreePath(newnode.getBodyNode().getPath()));
-      treMappingsTree.setSelectionPath(new TreePath(newnode.getPath()));
-      if (!newnode.isLeaf()) {
-        treMappingsTree.expandPath(new TreePath(newnode.getPath()));
-      }
-    } catch (NullPointerException e) {
-      JOptionPane.showMessageDialog(null, "Select a data source first");
-    } catch (DuplicateMappingException e) {
-      e.printStackTrace(System.err);
-      JOptionPane.showMessageDialog(this, "ERROR: duplicate mapping: " + e.getMessage());
-      return;
-    }
+	  JDialog dialog = new JDialog();
+	  dialog.setContentPane(new NewMappingDialogPanel(apic,pref, dialog));
+	  dialog.setSize(500, 300);
+	  dialog.setLocationRelativeTo(null);
+	  dialog.setVisible(true);
   }
 
   private void startEditHeadOfMapping(TreePath path) {
-    treMappingsTree.setEditable(true);
+    mappingsTree.setEditable(true);
     MappingNode mapping = (MappingNode) path.getLastPathComponent();
     MappingHeadNode head = mapping.getHeadNode();
     editedNode = head;
-    treMappingsTree.startEditingAtPath(new TreePath(head.getPath()));
+    mappingsTree.startEditingAtPath(new TreePath(head.getPath()));
   }
 
   private void startEditBodyOfMapping(TreePath path) {
-    treMappingsTree.setEditable(true);
+    mappingsTree.setEditable(true);
     MappingNode mapping = (MappingNode) path.getLastPathComponent();
     MappingBodyNode body = mapping.getBodyNode();
     editedNode = body;
-    treMappingsTree.startEditingAtPath(new TreePath(body.getPath()));
+    mappingsTree.startEditingAtPath(new TreePath(body.getPath()));
   }
 
   private void startExecuteQueryOfMapping(TreePath path) {
@@ -798,44 +822,44 @@ public class MappingManagerPanel extends JPanel implements
     resultquery.setTitle("Query Results");
   }
 
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JCheckBox chkFilter;
-  private javax.swing.JButton cmdAddMapping;
-  private javax.swing.JButton cmdDuplicateMapping;
-  private javax.swing.JButton cmdRemoveMapping;
-  private javax.swing.JMenuItem menuExecuteQuery;
-  private javax.swing.JPopupMenu menuMappings;
-  private javax.swing.JMenuItem menuValidateAll;
-  private javax.swing.JMenuItem menuValidateBody;
-  private javax.swing.JMenuItem menuValidateHead;
-  private javax.swing.JPanel pnlMappingButtons;
-  private javax.swing.JPanel pnlMappingManager;
-  private javax.swing.JScrollPane scrMappingsManager;
-  private javax.swing.JScrollPane scrMappingsTree;
-  private javax.swing.JTree treMappingsTree;
-  private javax.swing.JTextField txtFilter;
-  // End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkFilter;
+    private javax.swing.JButton cmdAddMapping;
+    private javax.swing.JButton cmdDuplicateMapping;
+    private javax.swing.JButton cmdRemoveMapping;
+    private javax.swing.JLabel jLabelFilter;
+    private javax.swing.JTree mappingsTree;
+    private javax.swing.JMenuItem menuExecuteQuery;
+    private javax.swing.JPopupMenu menuMappings;
+    private javax.swing.JMenuItem menuValidateAll;
+    private javax.swing.JMenuItem menuValidateBody;
+    private javax.swing.JMenuItem menuValidateHead;
+    private javax.swing.JPanel pnlMappingButtons;
+    private javax.swing.JPanel pnlMappingManager;
+    private javax.swing.JScrollPane scrMappingsTree;
+    private javax.swing.JTextField txtFilter;
+    // End of variables declaration//GEN-END:variables
 
   @Override
   public void colorPeferenceChanged(String preference, Color col) {
-    DefaultTreeModel model = (DefaultTreeModel) treMappingsTree.getModel();
+    DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
     model.reload();
   }
 
   @Override
   public void fontFamilyPreferenceChanged(String preference, String font) {
-    DefaultTreeModel model = (DefaultTreeModel) treMappingsTree.getModel();
+    DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
     model.reload();
   }
 
   @Override
   public void fontSizePreferenceChanged(String preference, int size) {
-    DefaultTreeModel model = (DefaultTreeModel) treMappingsTree.getModel();
+    DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
     model.reload();
   }
 
   public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-    DefaultTreeModel model = (DefaultTreeModel) treMappingsTree.getModel();
+    DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
     model.reload();
   }
 
@@ -863,10 +887,10 @@ public class MappingManagerPanel extends JPanel implements
   }
 
   public void stopTreeEditing() {
-    if (treMappingsTree.isEditing()) {
-      MappingTreeNodeCellEditor editor = (MappingTreeNodeCellEditor) treMappingsTree.getCellEditor();
+    if (mappingsTree.isEditing()) {
+      MappingTreeNodeCellEditor editor = (MappingTreeNodeCellEditor) mappingsTree.getCellEditor();
       if (editor.isInputValid()) {
-        if (treMappingsTree.stopEditing()) {
+        if (mappingsTree.stopEditing()) {
           String txt = editor.getCellEditorValue().toString();
           updateNode(txt);
         }
@@ -948,7 +972,7 @@ public class MappingManagerPanel extends JPanel implements
    * @param ListOfMappings
    */
   private void applyFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
-    MappingTreeModel model = (MappingTreeModel) treMappingsTree.getModel();
+    MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
     model.removeAllFilters();
     model.addFilters(filters);
     model.currentSourceChanged(selectedSource.getSourceID(), selectedSource.getSourceID());
@@ -990,7 +1014,7 @@ public class MappingManagerPanel extends JPanel implements
     this.selectedSource = newSource;
 
     // Update the mapping tree.
-    MappingTreeModel model = (MappingTreeModel) treMappingsTree.getModel();
+    MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
     URI oldSourceUri = null;
     if (oldSource != null) {
       oldSourceUri = oldSource.getSourceID();

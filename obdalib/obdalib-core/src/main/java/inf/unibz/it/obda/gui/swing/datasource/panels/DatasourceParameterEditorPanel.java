@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
  */
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener  {
     
+	DataSource currentDS = null;
 	
     /**
 	 * 
@@ -78,18 +79,20 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         jLabelPadding = new javax.swing.JLabel();
         jLabelPlaceholder3 = new javax.swing.JLabel();
 
+        setMinimumSize(new java.awt.Dimension(210, 200));
+        setPreferredSize(new java.awt.Dimension(210, 235));
         setLayout(new java.awt.GridBagLayout());
 
         panelDatasourceParametersBean.setBorder(javax.swing.BorderFactory.createTitledBorder("Datasource Settings"));
         panelDatasourceParametersBean.setAutoscrolls(true);
-        panelDatasourceParametersBean.setMinimumSize(new java.awt.Dimension(200, 350));
-        panelDatasourceParametersBean.setPreferredSize(new java.awt.Dimension(200, 350));
+        panelDatasourceParametersBean.setMinimumSize(new java.awt.Dimension(200, 230));
+        panelDatasourceParametersBean.setPreferredSize(new java.awt.Dimension(200, 240));
         panelDatasourceParametersBean.setLayout(new java.awt.GridBagLayout());
 
         panelDatasourceInfo.setAutoscrolls(true);
         panelDatasourceInfo.setMaximumSize(new java.awt.Dimension(32767, 23));
-        panelDatasourceInfo.setMinimumSize(new java.awt.Dimension(100, 100));
-        panelDatasourceInfo.setPreferredSize(new java.awt.Dimension(140, 100));
+        panelDatasourceInfo.setMinimumSize(new java.awt.Dimension(100, 75));
+        panelDatasourceInfo.setPreferredSize(new java.awt.Dimension(140, 75));
         panelDatasourceInfo.setLayout(new java.awt.GridBagLayout());
 
         labelHeaderDatasourceURI.setBackground(new java.awt.Color(153, 153, 153));
@@ -103,6 +106,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         panelDatasourceInfo.add(labelHeaderDatasourceURI, gridBagConstraints);
 
         labelDatasource.setFont(new java.awt.Font("Arial", 0, 11));
@@ -118,7 +122,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         panelDatasourceInfo.add(labelDatasource, gridBagConstraints);
 
         labelHeaderDatasourceType.setBackground(new java.awt.Color(153, 153, 153));
-        labelHeaderDatasourceType.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        labelHeaderDatasourceType.setFont(new java.awt.Font("Arial", 1, 11));
         labelHeaderDatasourceType.setForeground(new java.awt.Color(153, 153, 153));
         labelHeaderDatasourceType.setText("Type:");
         labelHeaderDatasourceType.setFocusable(false);
@@ -131,6 +135,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         panelDatasourceInfo.add(labelHeaderDatasourceType, gridBagConstraints);
 
         labelDSType.setFont(new java.awt.Font("Arial", 0, 11));
@@ -147,7 +152,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         panelDatasourceInfo.add(labelDSType, gridBagConstraints);
 
         labelHeaderMappingsType.setBackground(new java.awt.Color(153, 153, 153));
-        labelHeaderMappingsType.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        labelHeaderMappingsType.setFont(new java.awt.Font("Arial", 1, 11));
         labelHeaderMappingsType.setForeground(new java.awt.Color(153, 153, 153));
         labelHeaderMappingsType.setText("Mapping Type:");
         labelHeaderMappingsType.setFocusable(false);
@@ -158,6 +163,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         panelDatasourceInfo.add(labelHeaderMappingsType, gridBagConstraints);
 
         labelMapType.setFont(new java.awt.Font("Arial", 0, 11));
@@ -172,6 +178,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         panelDatasourceInfo.add(labelMapType, gridBagConstraints);
+
+        jLabelPlaceholder2.setPreferredSize(new java.awt.Dimension(1, 1));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -191,12 +199,13 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         panelDataSourceEditor.setAlignmentX(5.0F);
         panelDataSourceEditor.setAlignmentY(5.0F);
         panelDataSourceEditor.setAutoscrolls(true);
+        panelDataSourceEditor.setFocusTraversalPolicyProvider(true);
         panelDataSourceEditor.setMaximumSize(new java.awt.Dimension(6404444, 34452345));
         panelDataSourceEditor.setMinimumSize(new java.awt.Dimension(220, 120));
-        panelDataSourceEditor.setPreferredSize(new java.awt.Dimension(220, 222));
+        panelDataSourceEditor.setPreferredSize(new java.awt.Dimension(220, 130));
         panelDataSourceEditor.setLayout(new java.awt.GridBagLayout());
 
-        labelURL.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        labelURL.setFont(new java.awt.Font("Arial", 1, 11));
         labelURL.setForeground(new java.awt.Color(153, 153, 153));
         labelURL.setText("  JDBC URL:");
         labelURL.setFocusable(false);
@@ -280,7 +289,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
         panelDataSourceEditor.add(fieldDBUser, gridBagConstraints);
 
-        labelPassword.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        labelPassword.setFont(new java.awt.Font("Arial", 1, 11));
         labelPassword.setForeground(new java.awt.Color(153, 153, 153));
         labelPassword.setText("  Database Password:");
         labelPassword.setFocusable(false);
@@ -308,7 +317,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
         panelDataSourceEditor.add(fieldDBPassword, gridBagConstraints);
 
-        labelDriver.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        labelDriver.setFont(new java.awt.Font("Arial", 1, 11));
         labelDriver.setForeground(new java.awt.Color(153, 153, 153));
         labelDriver.setText("  JDBC Driver:");
         labelDriver.setFocusable(false);
@@ -351,8 +360,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 0);
         panelDatasourceParametersBean.add(panelDataSourceEditor, gridBagConstraints);
+
+        jLabelPadding.setPreferredSize(new java.awt.Dimension(1, 10));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -364,7 +374,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
         add(panelDatasourceParametersBean, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -377,18 +387,17 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
     private void fieldChangeHandler(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_fieldChangeHandler
 
-		DataSource currentsrc = dscontroller.getCurrentDataSource();
-		if (currentsrc == null) {
+		if (currentDS == null) {
 			JOptionPane.showMessageDialog(this, "Select a data source first");
 			return;
 		}
 //		currentsrc.setUri(fieldURI.getText());
-		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, fieldDBName.getText());
-		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, fieldDBUser.getText());
-		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
-		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
-		currentsrc.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, fieldURL.getText());
-		currentsrc.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
+		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, fieldDBName.getText());
+		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, fieldDBUser.getText());
+		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
+		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
+		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, fieldURL.getText());
+		currentDS.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
 		dscontroller.fireParametersUpdated();
 		
 		return;
@@ -446,6 +455,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			fieldDBUser.setEnabled(false);
 			fieldDBPassword.setEnabled(false);
 			fieldURL.setEnabled(false);
+			currentDS = null;
 		} else {
 
 			/*******************************************************************
@@ -468,7 +478,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			fieldDBUser.setEnabled(true);
 			fieldDBPassword.setEnabled(true);
 			fieldURL.setEnabled(true);
-
+			currentDS = currentsource;
 		}
 	}
 
