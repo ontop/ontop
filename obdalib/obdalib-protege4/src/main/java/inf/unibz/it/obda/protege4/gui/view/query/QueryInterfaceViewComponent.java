@@ -132,7 +132,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						panel.updateStatus(result);
 					}
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error while counting tuples.\n Please refer to the log file for more information.");
+					JOptionPane.showMessageDialog(null, "Error while counting tuples.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 					log.error("Error while counting tuples.",e);
 				}
 			}
@@ -168,7 +168,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					long end = System.currentTimeMillis();
 					time = end - startTime;
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error while executing query.\n Please refer to the log file for more information.");
+					JOptionPane.showMessageDialog(null, "Error while executing query.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 					log.error("Error while executing query.",e);
 				}
 
@@ -222,7 +222,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						panel.setVisible(true);
 					}
 				} catch (InterruptedException e) {
-					JOptionPane.showMessageDialog(null, "Error while expanding query.\n Please refer to the log file for more information.");
+					JOptionPane.showMessageDialog(null, "Error while expanding query.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 					log.error("Error while expanding query.",e);
 				}
 			}
@@ -272,7 +272,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						panel.setVisible(true);
 					}
 				} catch (InterruptedException e) {
-					JOptionPane.showMessageDialog(null, "Error while expanding query.\n Please refer to the log file for more information.");
+					JOptionPane.showMessageDialog(null, "Error while expanding query.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 					log.error("Error while unfolding query.",e);
 				}
 
@@ -307,7 +307,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 						ResultSetToFileWriter.saveResultSet(result, file);	
 					}
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error while saving query results.\n Please refer to the log file for more information.");
+					JOptionPane.showMessageDialog(null, "Error while saving query results.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 					log.error("Error while saving query results.",e);
 				}
 			}
@@ -388,7 +388,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 							log.error(e.getMessage(), e);
 							JOptionPane
 							.showMessageDialog(null,
-									"Error while unfolding query.\n Please refer to the log for more information.");
+									"Error while unfolding query.\n "+e.getMessage()+ "\nPlease refer to the log for more information.");
 						}
 		
 					}else {
@@ -411,7 +411,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while canceling unfolding action.\n Please refer to the log file for more information.");
+				JOptionPane.showMessageDialog(null, "Error while canceling unfolding action.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 				log.error("Error while canceling unfolding action.",e);
 			}
 		}
@@ -450,7 +450,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 							log.error(e.getMessage(), e);
 							JOptionPane
 							.showMessageDialog(null,
-									"Error while expanding query.\n Please refer to the log for more information.");
+									"Error while expanding query.\n "+e.getMessage()+ "\nPlease refer to the log for more information.");
 						}
 		
 					}else {
@@ -473,7 +473,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+				JOptionPane.showMessageDialog(null, "Error while counting.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 				log.error("Error while counting.",e);
 			}
 		}
@@ -512,7 +512,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 							log.error(e.getMessage(), e);
 							JOptionPane
 							.showMessageDialog(null,
-									"Error while executing query.\n Please refer to the log for more information.");
+									"Error while executing query.\n "+e.getMessage()+ "\nPlease refer to the log for more information.");
 						}
 		
 					}else {
@@ -535,7 +535,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+				JOptionPane.showMessageDialog(null, "Error while counting.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 				log.error("Error while counting.",e);
 			}
 		}
@@ -575,7 +575,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 							log.error(e.getMessage(), e);
 							JOptionPane
 							.showMessageDialog(null,
-									"Error while counting tuples.\n Please refer to the log for more information.");
+									"Error while counting tuples.\n "+e.getMessage()+ "\nPlease refer to the log for more information.");
 						}
 		
 					}else {
@@ -598,7 +598,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
+				JOptionPane.showMessageDialog(null, "Error while counting.\n "+e.getMessage()+ "\nPlease refer to the log file for more information.");
 				log.error("Error while counting.",e);
 			}
 		}

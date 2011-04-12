@@ -30,37 +30,16 @@ public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent {
     protected void initialiseOWLView() throws Exception {
     	OBDAPluginController apic = getOWLEditorKit().get(APIController.class.getName());
     	
-        setLayout(new GridBagLayout());
-        GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 0.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        setLayout(new BorderLayout());
+        
         DataSourceSelectionPanel selectionpanel = new DataSourceSelectionPanel(apic);
-        add(selectionpanel, gridBagConstraints);
+        add(selectionpanel, BorderLayout.NORTH);
         
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.0;
-        gridBagConstraints.weightx = 1.0;
         DatasourceParameterEditorPanel editor = new DatasourceParameterEditorPanel(apic);
-        add(editor,gridBagConstraints);
+        add(editor,BorderLayout.CENTER);
         selectionpanel.getDataSourceSelector().addDatasourceListListener(editor);
+        apic.getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
         
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.weightx = 1.0;
-        JPanel newPanel = new JPanel();
-        newPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("User Settings"));
-        newPanel.setMaximumSize(new Dimension(80, 50));
-        add(newPanel,gridBagConstraints);
         
         log.info("Datasource browser initialized");
     }
