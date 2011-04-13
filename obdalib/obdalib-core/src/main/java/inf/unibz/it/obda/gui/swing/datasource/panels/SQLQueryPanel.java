@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
@@ -61,6 +62,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
     
     public SQLQueryPanel() {
       initComponents();
+      cmdExecute.setMnemonic('x');
     }
     
     
@@ -75,7 +77,6 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
         splSqlQuery = new javax.swing.JSplitPane();
         pnlSqlQuery = new javax.swing.JPanel();
-//        lblSqlQuery = new javax.swing.JLabel();
         scrSqlQuery = new javax.swing.JScrollPane();
         txtSqlQuery = new javax.swing.JTextArea();
         cmdExecute = new javax.swing.JButton();
@@ -91,15 +92,6 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
         pnlSqlQuery.setMinimumSize(new java.awt.Dimension(156, 100));
         pnlSqlQuery.setPreferredSize(new java.awt.Dimension(156, 100));
         pnlSqlQuery.setLayout(new java.awt.GridBagLayout());
-
-//        lblSqlQuery.setText("SQL Query:");
-//        lblSqlQuery.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-//        lblSqlQuery.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-//        lblSqlQuery.setRequestFocusEnabled(false);
-//        lblSqlQuery.setVerifyInputWhenFocusTarget(false);
-//        gridBagConstraints = new java.awt.GridBagConstraints();
-//        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-//        pnlSqlQuery.add(lblSqlQuery, gridBagConstraints);
 
         txtSqlQuery.setColumns(20);
         txtSqlQuery.setRows(2);
@@ -130,7 +122,6 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
         pnlQueryResult.setLayout(new java.awt.BorderLayout());
 
-        tblQueryResult.setFont(new java.awt.Font("Arial", 0, 18));
         tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -139,6 +130,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
                 "Results"
             }
         ));
+        tblQueryResult.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblQueryResult.setRowHeight(21);
         scrQueryResult.setViewportView(tblQueryResult);
 
@@ -185,7 +177,6 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExecute;
-//    private javax.swing.JLabel lblSqlQuery;
     private javax.swing.JPanel pnlQueryResult;
     private javax.swing.JPanel pnlSqlQuery;
     private javax.swing.JScrollPane scrQueryResult;

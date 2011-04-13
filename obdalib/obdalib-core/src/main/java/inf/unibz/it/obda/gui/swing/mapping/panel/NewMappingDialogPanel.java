@@ -30,6 +30,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.text.StyleContext;
 
@@ -281,9 +282,21 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
     private void jButtonTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTestActionPerformed
     	 final JDialog resultquery = new JDialog();
     	 SQLQueryPanel query_panel = new SQLQueryPanel(selectedSource, jTextPaneBody.getText());
-    	 resultquery.setLocationRelativeTo(null);
-    	 resultquery.add(query_panel);
+    	 
+    	 JPanel panel = new JPanel();
+    	 panel.setLayout(new GridBagLayout());
+    	 GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
+         gridBagConstraints.gridx = 0;
+         gridBagConstraints.gridy = 0;
+         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+         gridBagConstraints.weightx = 1.0;
+         gridBagConstraints.weighty = 1.0;
+    	 gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+    	 panel.add(query_panel, gridBagConstraints);
+         
+    	 resultquery.setContentPane(panel);
     	 resultquery.pack();
+    	 resultquery.setLocationRelativeTo(null);
     	 resultquery.setVisible(true);
     	 resultquery.setTitle("Query Results");
     }//GEN-LAST:event_jButtonTestActionPerformed

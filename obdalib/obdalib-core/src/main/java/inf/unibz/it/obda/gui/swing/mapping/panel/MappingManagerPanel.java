@@ -148,11 +148,8 @@ public class MappingManagerPanel extends JPanel implements
     mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
     mappingsTree.setToggleClickCount(1);
     mappingsTree.setInvokesStopCellEditing(true);
-//    cmdAddMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
     cmdAddMapping.setToolTipText("Add a new mapping");
-//    cmdRemoveMapping.setIcon(IconLoader.getImageIcon("images/minus.png"));
     cmdRemoveMapping.setToolTipText("Remove selected mappings");
-//    cmdDuplicateMapping.setIcon(IconLoader.getImageIcon("images/duplicate.png"));
     cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
     pref.getMappingsPreference().registerPreferenceChangedListener(this);
   }
@@ -171,17 +168,20 @@ public class MappingManagerPanel extends JPanel implements
     cmdAddMapping.setText("Insert");
     cmdAddMapping.setMnemonic('i');
     cmdAddMapping.setIcon(null);
-    cmdAddMapping.setPreferredSize(new Dimension(50,21));
+    cmdAddMapping.setPreferredSize(new Dimension(40,21));
+    cmdAddMapping.setMinimumSize(new Dimension(40,21));
     
     cmdRemoveMapping.setText("Remove");
     cmdRemoveMapping.setMnemonic('r');
     cmdRemoveMapping.setIcon(null);
     cmdRemoveMapping.setPreferredSize(new Dimension(50,21));
+    cmdRemoveMapping.setMinimumSize(new Dimension(50,21));
     
     cmdDuplicateMapping.setText("Duplicate");
     cmdDuplicateMapping.setMnemonic('d');
     cmdDuplicateMapping.setIcon(null);
-    cmdDuplicateMapping.setPreferredSize(new Dimension(50,21));
+    cmdDuplicateMapping.setPreferredSize(new Dimension(60,21));
+    cmdDuplicateMapping.setMinimumSize(new Dimension(60,21));
     
     String add = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.ADD_MAPPING);
     addMapping = KeyStroke.getKeyStroke(add);
@@ -451,7 +451,6 @@ public class MappingManagerPanel extends JPanel implements
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         pnlMappingButtons.add(chkFilter, gridBagConstraints);
 
-//        cmdAddMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
         cmdAddMapping.setToolTipText("Add new mapping");
         cmdAddMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdAddMapping.setContentAreaFilled(false);
@@ -470,7 +469,6 @@ public class MappingManagerPanel extends JPanel implements
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         pnlMappingButtons.add(cmdAddMapping, gridBagConstraints);
 
-//        cmdRemoveMapping.setIcon(IconLoader.getImageIcon("images/minus.png"));
         cmdRemoveMapping.setToolTipText("Remove mappings");
         cmdRemoveMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdRemoveMapping.setContentAreaFilled(false);
@@ -489,7 +487,6 @@ public class MappingManagerPanel extends JPanel implements
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         pnlMappingButtons.add(cmdRemoveMapping, gridBagConstraints);
 
-//        cmdDuplicateMapping.setIcon(IconLoader.getImageIcon("images/plus.png"));
         cmdDuplicateMapping.setToolTipText("Duplicate mappings");
         cmdDuplicateMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdDuplicateMapping.setContentAreaFilled(false);
@@ -539,8 +536,6 @@ public class MappingManagerPanel extends JPanel implements
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(pnlMappingManager, gridBagConstraints);
-        
-        
     }// </editor-fold>//GEN-END:initComponents
 
   /***

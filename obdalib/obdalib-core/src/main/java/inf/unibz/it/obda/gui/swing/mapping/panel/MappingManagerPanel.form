@@ -94,7 +94,6 @@
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtFilterActionPerformed"/>
                 <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="sendFilters"/>
               </Events>
               <Constraints>
@@ -118,9 +117,6 @@
             </Component>
             <Component class="javax.swing.JButton" name="cmdAddMapping">
               <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="IconLoader.getImageIcon(&quot;images/plus.png&quot;)" type="code"/>
-                </Property>
                 <Property name="toolTipText" type="java.lang.String" value="Add new mapping"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
@@ -150,9 +146,6 @@
             </Component>
             <Component class="javax.swing.JButton" name="cmdRemoveMapping">
               <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="IconLoader.getImageIcon(&quot;images/minus.png&quot;)" type="code"/>
-                </Property>
                 <Property name="toolTipText" type="java.lang.String" value="Remove mappings"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
@@ -182,9 +175,6 @@
             </Component>
             <Component class="javax.swing.JButton" name="cmdDuplicateMapping">
               <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="IconLoader.getImageIcon(&quot;images/plus.png&quot;)" type="code"/>
-                </Property>
                 <Property name="toolTipText" type="java.lang.String" value="Duplicate mappings"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
