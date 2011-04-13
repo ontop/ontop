@@ -508,7 +508,7 @@ public class ABoxToDBDumper {
 		try {
 			Class d = Class.forName(RDBMSsourceParameterConstants.DATABASE_DRIVER);
 		} catch (Exception e) {
-			log.warn("Driver class not found!");
+			log.warn("Driver class not found our it has already been loaded");
 		}
 		String usr = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String pwd = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);

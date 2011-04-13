@@ -193,7 +193,7 @@ public class OWLAPITranslator {
 						}else if(subclass instanceof OWLObjectComplementOf){
 							System.out.println(axiom.getClass() + "is ignored during translation.");
 						}else if(superclass instanceof OWLObjectIntersectionOf){
-							OWLObjectIntersectionOf inter = (OWLObjectIntersectionOf) axiom;
+							OWLObjectIntersectionOf inter = (OWLObjectIntersectionOf) superclass;
 							Set<OWLDescription> operants = inter.getOperands();
 							Iterator<OWLDescription> op_it = operants.iterator();
 							while(op_it.hasNext()){
