@@ -68,7 +68,7 @@ public class JDBCConnectionManager {
 			try {
 				Class d = Class.forName(driver);
 			} catch (Exception e) {
-				log.warn("Driver class not found!");
+				log.warn("Driver class not found our it has already been loaded");
 			}
 			con = DriverManager.getConnection(url+dbname, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
@@ -79,7 +79,7 @@ public class JDBCConnectionManager {
 			try {
 				Class d = Class.forName(driver);
 			} catch (Exception e) {
-				log.warn("Driver class not found!");
+				log.warn("Driver class not found our it has already been loaded");
 			}			con = DriverManager.getConnection(url+dbname, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
