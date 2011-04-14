@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core.abox;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Sergejs Pugacs
@@ -13,8 +13,10 @@ public class DAGNode implements Comparable<DAGNode> {
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
-    private Set<DAGNode> parents = new LinkedHashSet<DAGNode>();
-    private Set<DAGNode> children = new LinkedHashSet<DAGNode>();
+    private LinkedList<DAGNode> parents = new LinkedList<DAGNode>();
+    private LinkedList<DAGNode> children = new LinkedList<DAGNode>();
+    public LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
+
 
     public DAGNode(String uri) {
         this.uri = uri;
@@ -63,7 +65,7 @@ public class DAGNode implements Comparable<DAGNode> {
         this.index = index;
     }
 
-    public Set<DAGNode> getParents() {
+    public LinkedList<DAGNode> getParents() {
         return parents;
     }
 
@@ -75,12 +77,16 @@ public class DAGNode implements Comparable<DAGNode> {
         return this.range;
     }
 
-    public Set<DAGNode> getChildren() {
+    public List<DAGNode> getChildren() {
         return children;
     }
 
     public String getUri() {
         return uri;
+    }
+
+    public LinkedList<DAGNode> getEquivalents() {
+        return equivalents;
     }
 
 }

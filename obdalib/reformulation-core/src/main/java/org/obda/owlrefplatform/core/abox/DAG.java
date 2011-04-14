@@ -122,6 +122,15 @@ public class DAG {
                 }
             }
         }
+        DAGOperations.removeCycles(cls_nodes);
+        DAGOperations.computeTransitiveReduct(cls_nodes);
+
+        DAGOperations.removeCycles(objectprop_nodes);
+        DAGOperations.computeTransitiveReduct(objectprop_nodes);
+
+        DAGOperations.removeCycles(dataprop_nodes);
+        DAGOperations.computeTransitiveReduct(dataprop_nodes);
+
         index();
     }
 
@@ -229,8 +238,12 @@ public class DAG {
             t = new DAGNode(to);
             dagnodes.put(to, t);
         }
-        t.getChildren().add(f);
-        f.getParents().add(t);
+        if (!t.getChildren().contains(f)) {
+            t.getChildren().add(f);
+        }
+        if (!f.getParents().contains(t)) {
+            f.getParents().add(t);
+        }
     }
 
     private void addNode(String node, Map<String, DAGNode> dagnodes) {
