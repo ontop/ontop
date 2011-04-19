@@ -87,7 +87,14 @@ public class ABoxSerializer {
                     String uri = triple.getSubject().asOWLIndividual().getURI().toString();
                     String lit = triple.getObject().getLiteral();
 
-                    int idx = data_index.get(prop).getIndex();
+                    DAGNode node = data_index.get(prop);
+                    int idx;
+                    if (node == null) {
+                        // search equivalent mappings
+                        idx = data_index.get(dag.equi_mappings.get(prop)).getIndex();
+                    } else {
+                        idx = node.getIndex();
+                    }
 
                     lit_stm.setString(1, uri);
                     lit_stm.setString(2, lit);
@@ -100,7 +107,16 @@ public class ABoxSerializer {
                     String uri1 = triple.getSubject().asOWLIndividual().getURI().toString();
                     String uri2 = triple.getObject().asOWLIndividual().getURI().toString();
 
-                    int idx = obj_index.get(prop).getIndex();
+
+                    DAGNode node = obj_index.get(prop);
+                    int idx;
+                    if (node == null) {
+                        // search equivalent mappings
+                        idx = obj_index.get(dag.equi_mappings.get(prop)).getIndex();
+                    } else {
+                        idx = node.getIndex();
+                    }
+
 
                     role_stm.setString(1, uri1);
                     role_stm.setString(2, uri2);
@@ -113,7 +129,15 @@ public class ABoxSerializer {
                     // XXX: strange behaviour - owlapi generates an extra assertion of the form ClassAssertion(Thing, i)
                     if (!cls.equals(DAG.owl_thing)) {
                         String uri = triple.getIndividual().getURI().toString();
-                        int idx = cls_index.get(cls).getIndex();
+
+                        DAGNode node = cls_index.get(cls);
+                        int idx;
+                        if (node == null) {
+                            // search equivalent mappings
+                            idx = cls_index.get(dag.equi_mappings.get(cls)).getIndex();
+                        } else {
+                            idx = node.getIndex();
+                        }
 
                         cls_stm.setString(1, uri);
                         cls_stm.setInt(2, idx);

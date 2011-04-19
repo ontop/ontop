@@ -39,6 +39,8 @@ public class DAG {
     public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
     public final static int NULL_INDEX = -1;
 
+    public Map<String, String> equi_mappings = new HashMap<String, String>();
+
 
     /**
      * Build the DAG from the ontologies
@@ -122,13 +124,13 @@ public class DAG {
                 }
             }
         }
-        DAGOperations.removeCycles(cls_nodes);
+        DAGOperations.removeCycles(cls_nodes, equi_mappings);
         DAGOperations.computeTransitiveReduct(cls_nodes);
 
-        DAGOperations.removeCycles(objectprop_nodes);
+        DAGOperations.removeCycles(objectprop_nodes, equi_mappings);
         DAGOperations.computeTransitiveReduct(objectprop_nodes);
 
-        DAGOperations.removeCycles(dataprop_nodes);
+        DAGOperations.removeCycles(dataprop_nodes, equi_mappings);
         DAGOperations.computeTransitiveReduct(dataprop_nodes);
 
         index();

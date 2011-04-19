@@ -66,6 +66,11 @@ public class SemanticIndexMappingGenerator {
             SemanticIndexRange range = node.getRange();
             insert_unary_mapping(uri, projection, tablename, range);
 
+            // Handle equivalent nodes
+            for (DAGNode equi : node.getEquivalents()) {
+                insert_unary_mapping(equi.getUri(), projection, tablename, range);
+            }
+
             // check if has child exists(R)
             for (DAGNode descendant : class_descdendants.get(node.getUri().toString())) {
                 String child_uri;
@@ -130,6 +135,11 @@ public class SemanticIndexMappingGenerator {
             SemanticIndexRange range = node.getRange();
 
             insert_binary_mapping(uri, projection, table, range);
+
+            // Handle equivalent nodes
+            for (DAGNode equi : node.getEquivalents()) {
+                insert_binary_mapping(equi.getUri(), projection, table, range);
+            }
         }
 
         for (DAGNode node : dag.getDataPropertyIndex().values()) {
@@ -145,6 +155,11 @@ public class SemanticIndexMappingGenerator {
             SemanticIndexRange range = node.getRange();
 
             insert_binary_mapping(uri, projection, table, range);
+
+            // Handle equivalent nodes
+            for (DAGNode equi : node.getEquivalents()) {
+                insert_binary_mapping(equi.getUri(), projection, table, range);
+            }
         }
     }
 

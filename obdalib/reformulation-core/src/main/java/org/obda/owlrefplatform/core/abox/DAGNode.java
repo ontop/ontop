@@ -1,7 +1,9 @@
 package org.obda.owlrefplatform.core.abox;
 
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Sergejs Pugacs
@@ -15,6 +17,10 @@ public class DAGNode implements Comparable<DAGNode> {
 
     private LinkedList<DAGNode> parents = new LinkedList<DAGNode>();
     private LinkedList<DAGNode> children = new LinkedList<DAGNode>();
+
+    public Set<DAGNode> ancestors = new LinkedHashSet<DAGNode>();
+    public Set<DAGNode> descendans = new LinkedHashSet<DAGNode>();
+
     public LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 
 
