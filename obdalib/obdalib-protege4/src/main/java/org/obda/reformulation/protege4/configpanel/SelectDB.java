@@ -75,10 +75,11 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
         java.awt.GridBagConstraints gridBagConstraints;
 
         jPanel1 = new javax.swing.JPanel();
-        jButton3 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        jButton3ÓK = new javax.swing.JButton();
+        jButtonNew = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
+        jCheckBoxOverride = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
 
@@ -88,27 +89,27 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        jButton3.setText("OK");
-        jButton3.setMaximumSize(new java.awt.Dimension(50, 25));
-        jButton3.setMinimumSize(new java.awt.Dimension(50, 25));
-        jButton3.setPreferredSize(new java.awt.Dimension(50, 25));
+        jButton3ÓK.setText("OK");
+        jButton3ÓK.setMaximumSize(new java.awt.Dimension(50, 25));
+        jButton3ÓK.setMinimumSize(new java.awt.Dimension(50, 25));
+        jButton3ÓK.setPreferredSize(new java.awt.Dimension(50, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        jPanel1.add(jButton3, gridBagConstraints);
+        jPanel1.add(jButton3ÓK, gridBagConstraints);
 
-        jButton1.setText("New...");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonNew.setText("New...");
+        jButtonNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButtonNewActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        jPanel1.add(jButton1, gridBagConstraints);
+        jPanel1.add(jButtonNew, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -129,6 +130,21 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
         gridBagConstraints.insets = new java.awt.Insets(8, 1, 15, 1);
         jPanel1.add(jLabel1, gridBagConstraints);
 
+        jCheckBoxOverride.setText("Override existing ABox drop");
+        jCheckBoxOverride.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxOverrideActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 15, 0);
+        jPanel1.add(jCheckBoxOverride, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
@@ -147,7 +163,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     }// </editor-fold>//GEN-END:initComponents
 
     private void addListener(){
-    	jButton3.addActionListener(new java.awt.event.ActionListener() {
+    	jButton3ÓK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	jButton3ActionPerformed(evt);
             }
@@ -172,23 +188,29 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     	this.setVisible(false);
     	String name = jComboBox1.getSelectedItem().toString();  
     	try {
-			dumper.materialize(ontologies, URI.create(name));
+			dumper.materialize(ontologies, URI.create(name),jCheckBoxOverride.isSelected());
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Error during the dumping. Please check the logfile for more information", "FAILURE", JOptionPane.ERROR);
+			JOptionPane.showMessageDialog(null, "Error during the dumping. Please check the logfile for more information", "FAILURE", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
     }
     
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButtonNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewActionPerformed
        
     	 dialog = new SetParametersDialog(new JFrame(), false,apic);
          dialog.setLocationRelativeTo(this);
          dialog.setVisible(true);
     	
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jButtonNewActionPerformed
+
+    private void jCheckBoxOverrideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxOverrideActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jCheckBoxOverrideActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton3ÓK;
+    private javax.swing.JButton jButtonNew;
+    private javax.swing.JCheckBox jCheckBoxOverride;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
