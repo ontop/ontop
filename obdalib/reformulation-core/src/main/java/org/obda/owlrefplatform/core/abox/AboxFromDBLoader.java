@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 public class AboxFromDBLoader {
 
-	public HashMap<URIIdentyfier, String> getMapper(DataSource source) throws Exception{
+	public HashMap<URIIdentyfier, String> getMapper(DataSource source) throws AboxLoaderException{
 		
 		Statement statement= null;
 		ResultSet res = null;
@@ -31,7 +31,7 @@ public class AboxFromDBLoader {
 			}
 			return mapper;
 		} catch (Exception e) {
-			throw new Exception("Error while loading the index for the Direct SQL Generator from the given data source.", e);
+			throw new AboxLoaderException("Error while loading the index for the Direct SQL Generator from the given data source.", e);
 		}
 		finally{
 			try {

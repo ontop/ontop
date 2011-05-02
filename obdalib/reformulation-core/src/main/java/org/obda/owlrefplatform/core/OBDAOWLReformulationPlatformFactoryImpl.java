@@ -8,6 +8,7 @@ import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import org.obda.owlrefplatform.core.abox.ABoxSerializer;
 import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.abox.AboxDumpException;
 import org.obda.owlrefplatform.core.abox.AboxFromDBLoader;
 import org.obda.owlrefplatform.core.abox.DAG;
 import org.obda.owlrefplatform.core.abox.DirectMappingGenerator;
@@ -38,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.sql.*;
 import java.util.*;
+
+import javax.swing.JOptionPane;
 
 /**
  * The implementation of the factory for creating reformulation's platform reasoner
@@ -189,21 +192,23 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                     for (String drop_table : drops) {
                         st.executeUpdate(drop_table);
                     }
-                    try {
-                    	ABoxToDBDumper dumper = ABoxToDBDumper.getInstance();
-                        dumper.materialize(ontologies, connection, source.getSourceID());
-                        if(createMappings){
-                        	DirectMappingGenerator mapGen = new DirectMappingGenerator();
-                        	Set<OBDAMappingAxiom> mappings = mapGen.getMappings(ontologies, dumper.getMapper());
-                        	Iterator<OBDAMappingAxiom> it = mappings.iterator();
-                        	MappingController mapCon = apic.getMappingController();
-                        	while(it.hasNext()){
-                        		mapCon.insertMapping(ds.getSourceID(), it.next());
-                        	}
-                        }
-                    } catch (SQLException e) {
-                        throw new OBDAOWLReformulaionPlatformFactoryException(e);
-                    }
+                    ABoxToDBDumper dumper;
+					try {
+						dumper = ABoxToDBDumper.getInstance();
+						dumper.materialize(ontologies, connection, source.getSourceID());
+					} catch (AboxDumpException e) {
+						
+						throw new Exception(e);
+					}
+					if(createMappings){
+						DirectMappingGenerator mapGen = new DirectMappingGenerator();
+						Set<OBDAMappingAxiom> mappings = mapGen.getMappings(ontologies, dumper.getMapper());
+						Iterator<OBDAMappingAxiom> it = mappings.iterator();
+						MappingController mapCon = apic.getMappingController();
+						while(it.hasNext()){
+							mapCon.insertMapping(ds.getSourceID(), it.next());
+						}
+					}
                 }else{
                 	throw new Exception(dbType + " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
                 }
@@ -253,12 +258,11 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 
             techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
             log.debug("Done setting up the technique wrapper");
-            reasoner = new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
+            return new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
 
         } catch (Exception e) {
-            e.printStackTrace();
+           throw new RuntimeException(e.getMessage());
         }
-        return reasoner;
     }
 
 

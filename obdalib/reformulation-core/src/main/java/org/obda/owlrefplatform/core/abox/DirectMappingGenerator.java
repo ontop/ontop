@@ -42,8 +42,8 @@ public class DirectMappingGenerator {
 	
 	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
 	
-	public Set<OBDAMappingAxiom> getMappings(DataSource datasource){
-		return null;
+	public Set<OBDAMappingAxiom> getMappings(DataSource datasource) throws Exception{
+		throw new Exception("Not yet implemented");
 	}
 	
 	public Set<OBDAMappingAxiom> getMappings(Set<OWLOntology> ontologies, Map<URIIdentyfier,String> tableMap){

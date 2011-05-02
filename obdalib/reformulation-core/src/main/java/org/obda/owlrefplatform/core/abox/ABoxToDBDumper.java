@@ -106,7 +106,7 @@ public class ABoxToDBDumper {
 	 *            true if automatic mappings should be made
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, Connection c, URI dsUri) throws Exception {
+	public void materialize(Set<OWLOntology> ontologies, Connection c, URI dsUri) throws AboxDumpException {
 
 		log.debug("Materializing ABoxes into DB");
 
@@ -170,7 +170,7 @@ public class ABoxToDBDumper {
 						URIIdentyfier id = new URIIdentyfier(clazz.getURI(),URIType.CONCEPT);
 						String tablename = mapper.get(id);
 						if(tablename == null){
-							throw new Exception("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+							throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
 						}
 						String in = i.getURI().toString();
 						add(tablename, in);
@@ -185,7 +185,7 @@ public class ABoxToDBDumper {
 					URIIdentyfier id = new URIIdentyfier(dp.getURI(),URIType.DATAPROPERTY);
 					String tablename = mapper.get(id);
 					if(tablename == null){
-						throw new Exception("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+						throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
 					}
 					add(tablename, sub.getURI().toString(),	obj.getLiteral());
 	
@@ -198,7 +198,7 @@ public class ABoxToDBDumper {
 					URIIdentyfier id = new URIIdentyfier(op.getURI(),URIType.OBJECTPROPERTY);
 					String tablename = mapper.get(id);
 					if(tablename == null){
-						throw new Exception("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+						throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
 					}
 					add(tablename, sub.getURI().toString(), obj.getURI().toString());
 				}
@@ -206,9 +206,15 @@ public class ABoxToDBDumper {
 			log.debug("Tuples to be inserted: {}", tupleCounter);
 		}
 
-		materializeMapper();
-		insertData();
-		createIndexes();
+		try {
+			materializeMapper();
+			insertData();
+			createIndexes();
+		} catch (SQLException e) {
+			throw new AboxDumpException("Error while dumping Abox to data base", e);
+		} catch (Exception e) {
+			throw new AboxDumpException("Error while dumping Abox to data base", e);
+		}
 	}
 
 	/**
@@ -222,7 +228,7 @@ public class ABoxToDBDumper {
 	 *            true if automatic mappings should be created
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, URI dsname) throws Exception {
+	public void materialize(Set<OWLOntology> ontologies, URI dsname) throws AboxDumpException {
 
 		if (apic == null) {
 			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
