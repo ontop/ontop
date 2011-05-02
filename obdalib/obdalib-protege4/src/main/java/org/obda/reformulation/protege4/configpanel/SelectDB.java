@@ -162,7 +162,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     	this.setVisible(false);
     	String name = jComboBox1.getSelectedItem().toString();  
     	try {
-			dumper.materialize(ontologies, URI.create(name), false);
+			dumper.materialize(ontologies, URI.create(name));
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Error during the dumping. Please check the logfile for more information", "FAILURE", JOptionPane.ERROR);
 			e.printStackTrace();
