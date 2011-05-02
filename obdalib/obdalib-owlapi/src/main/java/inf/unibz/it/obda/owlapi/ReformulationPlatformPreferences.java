@@ -17,10 +17,14 @@ public class ReformulationPlatformPreferences {
 
 	private static final String				DEFAULT_PROPERTIESFILE						= "default.properties";
 
-	public static final String				UNFOLDING_MECHANMISM						= "org.obda.owlreformulationplatform.unflodingMechanism";
-	public static final String				USE_INMEMORY_DB								= "org.obda.owlreformulationplatform.useInMemoryDB";
+//	public static final String				UNFOLDING_MECHANMISM						= "org.obda.owlreformulationplatform.unflodingMechanism";
+//	public static final String				USE_INMEMORY_DB								= "org.obda.owlreformulationplatform.useInMemoryDB";
 	public static final String				CREATE_TEST_MAPPINGS						= "org.obda.owlreformulationplatform.createTestMappings";
 	public static final String				REFORMULATION_TECHNIQUE						= "org.obda.owlreformulationplatform.reformulationTechnique";
+	
+	public static final String				ABOX_MODE									= "org.obda.owlreformulationplatform.aboxmode";
+	public static final String				DBTYPE										= "org.obda.owlreformulationplatform.dbtype";
+	public static final String				DATA_LOCATION								= "org.obda.owlreformulationplatform.datalocation";
 	
 	private static final String				DIG_HTTP_PORT								= "dig.http.port";
 	private static final String				QUONTO_TBOXXMLDUMP							= "quonto.tboxxmldump";
@@ -230,14 +234,19 @@ public class ReformulationPlatformPreferences {
 					.booleanValue());
 			// log.debug(QUONTO_ABOX_JODS_PE_PUTDISTICNT + " = " + aux);
 		}
-		prop = properties.getProperty(UNFOLDING_MECHANMISM);
+		prop = properties.getProperty(ABOX_MODE);
 		if (prop != null) {
-			setDefaultValueOf(UNFOLDING_MECHANMISM, prop.trim());
+			setDefaultValueOf(ABOX_MODE, prop.trim());
 			// log.debug(QUONTO_ABOX_JODS_PE_PUTDISTICNT + " = " + aux);
 		}
-		prop = properties.getProperty(USE_INMEMORY_DB);
+		prop = properties.getProperty(DBTYPE);
 		if (prop != null) {
-			setDefaultValueOf(USE_INMEMORY_DB, prop.trim());
+			setDefaultValueOf(DBTYPE, prop.trim());
+			// log.debug(QUONTO_ABOX_JODS_PE_PUTDISTICNT + " = " + aux);
+		}
+		prop = properties.getProperty(DATA_LOCATION);
+		if (prop != null) {
+			setDefaultValueOf(DATA_LOCATION, prop.trim());
 			// log.debug(QUONTO_ABOX_JODS_PE_PUTDISTICNT + " = " + aux);
 		}
 		prop = properties.getProperty(CREATE_TEST_MAPPINGS);
