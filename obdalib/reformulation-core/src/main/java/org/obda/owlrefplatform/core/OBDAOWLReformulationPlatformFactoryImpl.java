@@ -2,6 +2,7 @@ package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.MappingController;
+import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
@@ -170,7 +171,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 apic.getDatasourcesController().addDataSource(source);
                 apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
                 ds = source;
-                connection = DriverManager.getConnection(url + dbname, username, password);
+                connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
                 if (dbType.equals("semantic")) {
                     //perform semantic import
                     dag = new DAG(ontologies);

@@ -5,6 +5,7 @@ import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
@@ -72,9 +73,7 @@ public class ABoxToDBDumper {
 	private Set<String>							createIndexSQL			= null;
 	private int									indexcounter			= 1;
 	
-	private int 								conceptCounter = 1;
-	private int 								datapropCounter = 1;
-	private int 								objectpropCounter = 1;
+	
 
 	private static ABoxToDBDumper				instance				= null;
 	
@@ -115,6 +114,10 @@ public class ABoxToDBDumper {
 		createIndexSQL = new HashSet<String>();
 		mapper = new HashMap<URIIdentyfier,String>();
 
+		
+		int conceptCounter = 1;
+		int datapropCounter = 1;
+		int objectpropCounter = 1;
 
 		conn = c;
 
@@ -228,7 +231,7 @@ public class ABoxToDBDumper {
 	 *            true if automatic mappings should be created
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, URI dsname) throws AboxDumpException {
+	public void materialize(Set<OWLOntology> ontologies, URI dsname, boolean override) throws AboxDumpException {
 
 		if (apic == null) {
 			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
@@ -236,12 +239,23 @@ public class ABoxToDBDumper {
 
 		ds = apic.getDatasourcesController().getDataSource(dsname);
 
-		try {
-			createConnection();
-		} catch (Exception e1) {
-			log.error(e1.getMessage(), e1);
+		if(override){
+			AboxFromDBLoader loader = new AboxFromDBLoader();
+			try {
+				loader.destroyDump(ds);
+			} catch (AboxLoaderException e) {
+				throw new AboxDumpException("Error while dropping old dump", e);
+			}
 		}
-
+		try {
+			conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
+		} catch (NoDatasourceSelectedException e) {
+			throw new AboxDumpException("Error while connecting to data base", e);
+		} catch (ClassNotFoundException e) {
+			throw new AboxDumpException("Error while connecting to data base", e);
+		} catch (SQLException e) {
+			throw new AboxDumpException("Error while connecting to data base", e);
+		}
 		materialize(ontologies, conn, dsname);
 	}
 
@@ -273,6 +287,7 @@ public class ABoxToDBDumper {
 		
 		String insertStatement = "INSERT INTO mapper VALUES "+ values.toString();
 		
+		conn.commit();
 		Statement st = conn.createStatement();
 		st.execute(createTable);
 		st.execute(insertStatement);
@@ -287,7 +302,8 @@ public class ABoxToDBDumper {
 	 */
 	private void insertData() throws SQLException {
 		log.debug("Inserting data into DB. ");
-
+		
+		conn.commit();
 		Statement st = conn.createStatement();
 		Set<String> keys = inserts.keySet();// keys are table names
 		Iterator<String> it = keys.iterator();
@@ -414,6 +430,7 @@ public class ABoxToDBDumper {
 
 		if (createTableSQLs.add(sql.toString())) {
 			try {
+				conn.commit();
 				Statement st = conn.createStatement();
 				log.debug("Executing SQL: {}", sql.toString());
 				st.execute(sql.toString());
@@ -424,38 +441,6 @@ public class ABoxToDBDumper {
 		}
 	}
 
-	/**
-	 * creates a sql connection with the default data source
-	 *
-	 * @throws Exception
-	 */
-	private void createConnection() throws Exception {
-
-		// TODO ABox Dump: This method will not catch exceptions properly. Why
-		// is the default database schema called postgres?
-
-		try {
-			Class d = Class.forName(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-		} catch (Exception e) {
-			log.warn("Driver class not found our it has already been loaded");
-		}
-		String usr = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-		String pwd = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-		String url = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-//		conn = DriverManager.getConnection(url + "postgres", usr, pwd);
-		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
-		log.debug("Creating a connection to the database {}", url + "postgres");
-		try {
-			conn.createStatement().executeUpdate("DROP DATABASE " + ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));
-
-		} catch (SQLException e) {
-			log.debug(e.getMessage(), e);
-		}
-		conn.createStatement().executeUpdate("CREATE DATABASE " + ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));
-		conn.close();
-
-		conn = DriverManager.getConnection(url + ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME), usr, pwd);
-	}
 
 	/**
 	 * creates SQL statements to create indexes over the created tables
@@ -465,6 +450,7 @@ public class ABoxToDBDumper {
 	private void createIndexes() throws Exception {
 		log.debug("Creating indexes");
 		Iterator<String> it = createIndexSQL.iterator();
+		conn.commit();
 		Statement st = conn.createStatement();
 		while (it.hasNext()) {
 			String sql = it.next();
