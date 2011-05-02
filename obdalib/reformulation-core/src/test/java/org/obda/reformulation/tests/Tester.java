@@ -8,6 +8,8 @@ import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
+import inf.unibz.it.obda.queryanswering.Statement;
+
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
@@ -90,14 +92,20 @@ public class Tester {
         loadResults(resultfile);
 
         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-        if (unfold_type.equals("complex") || unfold_type.equals("semantic"))
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
+        if (unfold_type.equals("virtual"))
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        else
+        else if(unfold_type.equals("material")){
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
-
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.USE_INMEMORY_DB, "true");
-
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM, unfold_type);
+        } else{
+        	throw new  Exception("The unfolding mechanism can only be either material or virtual");
+        	// Note: Due to resent changes the semantic mode has been removed. It is now a 
+        	// submode of the material Abox mode and the tester has still to be adapted to that
+        	// changes
+        }
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "direct");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
 
         OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
         fac.setOBDAController(apic);
@@ -143,7 +151,8 @@ public class Tester {
 
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
-        QueryResultSet result = reasoner.getStatement(fullquery).getResultSet();
+        Statement statement = reasoner.getStatement(fullquery);
+        QueryResultSet result = statement.getResultSet();
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {
