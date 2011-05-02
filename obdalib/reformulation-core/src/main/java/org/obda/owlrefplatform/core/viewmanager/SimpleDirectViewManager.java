@@ -32,13 +32,17 @@ public class SimpleDirectViewManager implements ViewManager {
 	private String baseuri = null;
 	private Atom orgHead = null;
 	
+	public SimpleDirectViewManager(){
+		
+	}
+	
 	public SimpleDirectViewManager(PrefixManager man,DLLiterOntology onto, Set<URI> uris){
 		ontology = onto;
 		loadedURIs = uris;
-		ontoMapper = ABoxToDBDumper.getInstance().getOntolgyMapper();
-		classMapper = ABoxToDBDumper.getInstance().getClassMapper();
-		datapropertyMapper = ABoxToDBDumper.getInstance().getDataPropertyMapper();
-		objectporpertyMapper = ABoxToDBDumper.getInstance().getObjectPropertyMapper();
+//		ontoMapper = ABoxToDBDumper.getInstance().getOntolgyMapper();
+//		classMapper = ABoxToDBDumper.getInstance().getClassMapper();
+//		datapropertyMapper = ABoxToDBDumper.getInstance().getDataPropertyMapper();
+//		objectporpertyMapper = ABoxToDBDumper.getInstance().getObjectPropertyMapper();
 		if(uris.size()==0){
 			throw new NullPointerException();
 		}

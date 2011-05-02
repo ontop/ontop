@@ -69,23 +69,17 @@ public class ABoxToDBDumper {
 	private APIController						apic					= null;
 	private List<ABoxDumpListener>				listener				= null;
 	private DataSource							ds						= null;
-	private Map<String, String>					ontologyMapper			= null;
-	private Map<String, String>					classMapper				= null;
-	private Map<String, String>					datapropertyMapper		= null;
-	private Map<String, String>					objectporpertyMapper	= null;
-	private int									ontocounter				= 1;
-	private int									classcounter			= 1;
-	private int									dpcounter				= 1;
-	private int									opcounter				= 1;
 	private Set<String>							createIndexSQL			= null;
 	private int									indexcounter			= 1;
-	private int									mapcounter				= 1;
-
-	private final PredicateFactory				predicateFactory		= BasicPredicateFactoryImpl.getInstance();
-	private final TermFactoryImpl				termFactory				= TermFactoryImpl.getInstance();
+	
+	private int 								conceptCounter = 1;
+	private int 								datapropCounter = 1;
+	private int 								objectpropCounter = 1;
 
 	private static ABoxToDBDumper				instance				= null;
-
+	
+	private Map<URIIdentyfier,String> 	mapper 		= null;
+	
 	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
 
 	public ABoxToDBDumper() {
@@ -112,197 +106,107 @@ public class ABoxToDBDumper {
 	 *            true if automatic mappings should be made
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, Connection c, URI dsUri, boolean createMappings) throws Exception {
+	public void materialize(Set<OWLOntology> ontologies, Connection c, URI dsUri) throws Exception {
 
 		log.debug("Materializing ABoxes into DB");
 
 		createTableSQLs = new HashSet<String>();
 		inserts = new HashMap<String, List<List<String>>>();
-		ontologyMapper = new HashMap<String, String>();
-		classMapper = new HashMap<String, String>();
-		datapropertyMapper = new HashMap<String, String>();
-		objectporpertyMapper = new HashMap<String, String>();
 		createIndexSQL = new HashSet<String>();
-		ontocounter = 1;
-		classcounter = 1;
-		dpcounter = 1;
-		opcounter = 1;
+		mapper = new HashMap<URIIdentyfier,String>();
+
 
 		conn = c;
 
-		Iterator<OWLOntology> ontologyIterator = ontologies.iterator();
-
-		while (ontologyIterator.hasNext()) {
-
-			/*
-			 * For each ontology
-			 */
-			OWLOntology onto = ontologyIterator.next();
-			log.debug("Materializing ABox for ontology: {}", onto.getURI().toString());
-			log.debug("Creating mapping: {}", createMappings);
-
-			String ontoname = getOntologyAlias();
-			ontologyMapper.put(getOnotlogyName(onto), ontoname);
-			Set<OWLEntity> entities = onto.getSignature();
+		Iterator<OWLOntology> it = ontologies.iterator();
+		while(it.hasNext()){	
+			OWLOntology ontology = it.next();
+			log.debug("Materializing ABox for ontology: {}", ontology.getURI().toString());
+			Set<OWLEntity> entities = ontology.getSignature();
 			Iterator<OWLEntity> entityIterator = entities.iterator();
-
+				
 			while (entityIterator.hasNext()) {
-				/* For each entity */
+					/* For each entity */
 				OWLEntity entity = entityIterator.next();
-
+	
 				if (entity instanceof OWLClass) {
 					OWLClass clazz = (OWLClass) entity;
 					if (!clazz.isOWLThing()) {
-						String alias = getClassAlias();
-						String tablename = ontoname + "_" + alias;
-						classMapper.put(entity.toString(), alias);
-
+						URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.CONCEPT);
+						String tablename = "table_concept_" + conceptCounter++;
+						mapper.put(id,tablename);
 						/* Creating the table */
 						createTable(tablename, 1);
-
-						if (createMappings && !clazz.isOWLThing()) {
-
-							/* Creating the mapping */
-							URI name = clazz.getURI();
-							Term qt = termFactory.createVariable("x");
-							List<Term> terms = new Vector<Term>();
-							terms.add(qt);
-							Predicate predicate = predicateFactory.createPredicate(name, terms.size());
-							Atom bodyAtom = new AtomImpl(predicate, terms);
-							List<Atom> body = new Vector<Atom>();
-							body.add(bodyAtom); // the body
-							predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-							Atom head = new AtomImpl(predicate, terms); // the
-							// head
-							Query cq = new CQIEImpl(head, body, false);
-							String sql = "SELECT term0 as x FROM " + tablename;
-							OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-							ax.setTargetQuery(cq);
-							ax.setSourceQuery(new RDBMSSQLQuery(sql));
-							apic.getMappingController().insertMapping(dsUri, ax);
-
-							log.debug("Mapping created: {}", ax.toString());
-						}
 					}
 				} else if (entity instanceof OWLObjectProperty) {
-					String alias = getOPAlias();
-					String tablename = ontoname + "_" + alias;
-					objectporpertyMapper.put(entity.toString(), alias);
-
+					URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.OBJECTPROPERTY);
+					String tablename = "table_objectProperty_" + objectpropCounter++;
+					mapper.put(id,tablename);
+					/* Creating the table */
 					createTable(tablename, 2);
-
-					if (createMappings) {
-						OWLObjectProperty oop = (OWLObjectProperty) entity;
-						Term qt1 = termFactory.createVariable("x");
-						Term qt2 = termFactory.createVariable("y");
-						List<Term> terms = new Vector<Term>();
-						terms.add(qt1);
-						terms.add(qt2);
-						Predicate predicate = predicateFactory.createPredicate(oop.getURI(), terms.size());
-						Atom bodyAtom = new AtomImpl(predicate, terms);
-						List<Atom> body = new Vector<Atom>();
-						body.add(bodyAtom); // the body
-						predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-						Atom head = new AtomImpl(predicate, terms); // the head
-						Query cq = new CQIEImpl(head, body, false);
-						String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-						OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-						ax.setTargetQuery(cq);
-						ax.setSourceQuery(new RDBMSSQLQuery(sql));
-
-						log.debug("Mapping created: {}", ax.toString());
-
-						apic.getMappingController().insertMapping(dsUri, ax);
-
-					}
-
 				} else if (entity instanceof OWLDataProperty) {
-					String alias = getDPAlias();
-					String tablename = ontoname + "_" + alias;
-					datapropertyMapper.put(entity.toString(), alias);
-
+					URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.DATAPROPERTY);
+					String tablename = "table_dataProperty_" + datapropCounter++;
+					mapper.put(id,tablename);
+					/* Creating the table */
 					createTable(tablename, 2);
-
-					if (createMappings) {
-						OWLDataProperty oop = (OWLDataProperty) entity;
-						Term qt1 = termFactory.createVariable("x");
-						Term qt2 = termFactory.createVariable("y");
-						List<Term> terms = new Vector<Term>();
-						terms.add(qt1);
-						terms.add(qt2);
-						Predicate predicate = predicateFactory.createPredicate(oop.getURI(), terms.size());
-						Atom bodyAtom = new AtomImpl(predicate, terms);
-						List<Atom> body = new Vector<Atom>();
-						body.add(bodyAtom); // the body
-						predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-						Atom head = new AtomImpl(predicate, terms); // the head
-						Query cq = new CQIEImpl(head, body, false);
-						String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-						OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-						ax.setTargetQuery(cq);
-						ax.setSourceQuery(new RDBMSSQLQuery(sql));
-
-						log.debug("Mapping created: {}", ax.toString());
-
-						apic.getMappingController().insertMapping(dsUri, ax);
-					}
 				}
 			}
-		}
-
-		/* Inserting the data */
-
-		log.debug("Preparing the data to insert");
-		int tupleCounter = 0;
-
-		Iterator<OWLOntology> it = ontologies.iterator();
-		while (it.hasNext()) {
-			OWLOntology onto = it.next();
-			String ontoname = ontologyMapper.get(getOnotlogyName(onto));
-			Set<OWLIndividualAxiom> ind = onto.getIndividualAxioms();
+	
+			/* Inserting individuals */
+			log.debug("Preparing indivituals to insert");
+			int tupleCounter = 0;
+			Set<OWLIndividualAxiom> ind = ontology.getIndividualAxioms();
 			Iterator<OWLIndividualAxiom> ind_it = ind.iterator();
 			while (ind_it.hasNext()) {
-
 				tupleCounter += 1;
-
 				OWLIndividualAxiom ax = ind_it.next();
 				if (ax instanceof OWLClassAssertionAxiom) {
-
 					OWLClassAssertionAxiom caa = (OWLClassAssertionAxiom) ax;
 					OWLDescription des = caa.getDescription();
 					if (!des.isOWLThing()) {
 						OWLIndividual i = caa.getIndividual();
-						String alias = classMapper.get(des.toString());
-						String tablename = ontoname + "_" + alias;
+						OWLClass clazz = (OWLClass) des;
+						URIIdentyfier id = new URIIdentyfier(clazz.getURI(),URIType.CONCEPT);
+						String tablename = mapper.get(id);
+						if(tablename == null){
+							throw new Exception("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+						}
 						String in = i.getURI().toString();
 						add(tablename, in);
 					}
-
 				} else if (ax instanceof OWLDataPropertyAssertionAxiom) {
-
+	
 					OWLDataPropertyAssertionAxiom paa = (OWLDataPropertyAssertionAxiom) ax;
 					OWLConstant obj = paa.getObject();
 					OWLIndividual sub = paa.getSubject();
 					OWLDataPropertyExpression prop = paa.getProperty();
-					String alias = datapropertyMapper.get(prop.toString());
-					String tablename = ontoname + "_" + alias;
-					add(tablename, sub.getURI().toString(), 
-							obj.getLiteral());
-
+					OWLDataProperty dp = (OWLDataProperty) prop;
+					URIIdentyfier id = new URIIdentyfier(dp.getURI(),URIType.DATAPROPERTY);
+					String tablename = mapper.get(id);
+					if(tablename == null){
+						throw new Exception("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+					}
+					add(tablename, sub.getURI().toString(),	obj.getLiteral());
+	
 				} else if (ax instanceof OWLObjectPropertyAssertionAxiom) {
 					OWLObjectPropertyAssertionAxiom ppa = (OWLObjectPropertyAssertionAxiom) ax;
 					OWLIndividual sub = ppa.getSubject();
 					OWLIndividual obj = ppa.getObject();
 					OWLObjectPropertyExpression prop = ppa.getProperty();
-					String alias = objectporpertyMapper.get(prop.toString());
-					String tablename = ontoname + "_" + alias;
+					OWLObjectProperty op = (OWLObjectProperty) prop;
+					URIIdentyfier id = new URIIdentyfier(op.getURI(),URIType.OBJECTPROPERTY);
+					String tablename = mapper.get(id);
+					if(tablename == null){
+						throw new Exception("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+					}
 					add(tablename, sub.getURI().toString(), obj.getURI().toString());
 				}
 			}
+			log.debug("Tuples to be inserted: {}", tupleCounter);
 		}
-		log.debug("Tuples to be inserted: {}", tupleCounter);
 
-
+		materializeMapper();
 		insertData();
 		createIndexes();
 	}
@@ -318,7 +222,7 @@ public class ABoxToDBDumper {
 	 *            true if automatic mappings should be created
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, URI dsname, boolean createMappings) throws Exception {
+	public void materialize(Set<OWLOntology> ontologies, URI dsname) throws Exception {
 
 		if (apic == null) {
 			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
@@ -332,9 +236,43 @@ public class ABoxToDBDumper {
 			log.error(e1.getMessage(), e1);
 		}
 
-		materialize(ontologies, conn, dsname, createMappings);
+		materialize(ontologies, conn, dsname);
 	}
 
+	private void materializeMapper() throws Exception{
+		
+		String createTable = "CREATE TABLE mapper (uri VARCHAR NOT NULL, type VARCHAR NOT NULL, tablename VARCHAR NOT NULL)";
+		
+		StringBuffer values = new StringBuffer();
+		Iterator<URIIdentyfier> it = mapper.keySet().iterator();
+		while(it.hasNext()){
+			URIIdentyfier id = it.next();
+			if(values.length() >0){
+				values.append(",");
+			}
+			values.append("(");
+			values.append("'");
+			values.append(id.getUri());
+			values.append("'");
+			values.append(",");
+			values.append("'");
+			values.append(id.getType());
+			values.append("'");
+			values.append(",");
+			values.append("'");
+			values.append(mapper.get(id));
+			values.append("'");
+			values.append(")");
+		}
+		
+		String insertStatement = "INSERT INTO mapper VALUES "+ values.toString();
+		
+		Statement st = conn.createStatement();
+		st.execute(createTable);
+		st.execute(insertStatement);
+		st.close();
+	}
+	
 	/**
 	 * Inserts the data into the abox. Note: its creates one SQL statement per
 	 * table
@@ -349,40 +287,40 @@ public class ABoxToDBDumper {
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
 			String key = it.next();
-			List<List<String>> values = inserts.get(key);
-			StringBuffer v = new StringBuffer();
-			Iterator<List<String>> vit = values.iterator();
+			List<List<String>> listOfValues = inserts.get(key);
+			StringBuffer sqlbody = new StringBuffer();
+			Iterator<List<String>> vit = listOfValues.iterator();
 			while (vit.hasNext()) {
-				List<String> list = vit.next();
+				List<String> values = vit.next();
 				StringBuffer sb = new StringBuffer();
-				Iterator<String> it2 = list.iterator();
+				Iterator<String> it2 = values.iterator();
 				while (it2.hasNext()) {
-					String s = it2.next();
-					s = s.replace("'", "");
-					s = "'" + s + "'";
+					String value = it2.next();
+					value = value.replace("'", "");
+					value = "'" + value + "'";
 					if (sb.length() > 0) {
 						sb.append(",");
 					}
-					sb.append(s);
+					sb.append(value);
 				}
-				String value = sb.toString();
-				if (v.length() > 0) {
-					v.append(",");
+				String valuesAsString = sb.toString();
+				if (sqlbody.length() > 0) {
+					sqlbody.append(",");
 				}
-				v.append("(");
-				v.append(value);
-				v.append(")");
+				sqlbody.append("(");
+				sqlbody.append(valuesAsString);
+				sqlbody.append(")");
 			}
 
-			StringBuffer sb = new StringBuffer();
-			sb.append("INSERT INTO ");
-			sb.append(key);
-			sb.append(" VALUES ");
-			sb.append(v);
+			StringBuffer sqlquery = new StringBuffer();
+			sqlquery.append("INSERT INTO ");
+			sqlquery.append(key);
+			sqlquery.append(" VALUES ");
+			sqlquery.append(sqlbody);
 
-			log.debug("{}", sb.toString());
+			log.debug("{}", sqlquery.toString());
 			// System.out.println(sb.toString());
-			st.execute(sb.toString());
+			st.execute(sqlquery.toString());
 
 		}
 		log.debug("Done inserting data");
@@ -404,9 +342,9 @@ public class ABoxToDBDumper {
 			list = new Vector<List<String>>();
 			// createTable(tablename, 1);
 		}
-		Vector<String> v = new Vector<String>();
-		v.add(value);
-		list.add(v);
+		Vector<String> values = new Vector<String>();
+		values.add(value);
+		list.add(values);
 		inserts.put(tablename, list);
 	}
 
@@ -426,7 +364,6 @@ public class ABoxToDBDumper {
 		List<List<String>> list = inserts.get(tablename);
 		if (list == null) {
 			list = new Vector<List<String>>();
-			// createTable(tablename, 1);
 		}
 		Vector<String> v = new Vector<String>();
 		v.add(sub);
@@ -479,20 +416,6 @@ public class ABoxToDBDumper {
 				log.error(e.getMessage(), e);
 			}
 		}
-	}
-
-	/**
-	 * This method takes the ontology name out from its uri. Its not actually
-	 * necessary to do but keeps the names shorter
-	 *
-	 * @param onto
-	 *            the ontology uri
-	 * @return the onotlogy name
-	 */
-	private String getOnotlogyName(OWLOntology onto) {
-		String ontouri = onto.getURI().toString();
-		int i = ontouri.lastIndexOf("/");
-		return ontouri.substring(i + 1, ontouri.length() - 4);
 	}
 
 	/**
@@ -591,81 +514,9 @@ public class ABoxToDBDumper {
 			instance = new ABoxToDBDumper();
 		}
 		return instance;
+	}	
+	
+	public Map<URIIdentyfier, String> getMapper(){
+		return mapper;
 	}
-
-	// Note the following methods where needed to resolve the same name problem
-	// e.g. between classes and properties
-
-	/**
-	 * creates an alias for each ontology
-	 *
-	 * @return the alias
-	 */
-	private String getOntologyAlias() {
-		return "ontology" + ontocounter++;
-	}
-
-	/**
-	 * creates an alias for each class
-	 *
-	 * @return the alias
-	 */
-	private String getClassAlias() {
-		return "class" + classcounter++;
-	}
-
-	/**
-	 * creates an alias for each object property
-	 *
-	 * @return the alias
-	 */
-	private String getOPAlias() {
-		return "objectproperty" + opcounter++;
-	}
-
-	/**
-	 * creates an alias for each data property
-	 *
-	 * @return the alias
-	 */
-	private String getDPAlias() {
-		return "dataproperty" + dpcounter++;
-	}
-
-	/**
-	 * Returns a map between original ontology names and alias
-	 *
-	 * @return a map
-	 */
-	public Map<String, String> getOntolgyMapper() {
-		return ontologyMapper;
-	}
-
-	/**
-	 * Returns a map between original class names and alias
-	 *
-	 * @return a map
-	 */
-	public Map<String, String> getClassMapper() {
-		return classMapper;
-	}
-
-	/**
-	 * Returns a map between original object property names and alias
-	 *
-	 * @return a map
-	 */
-	public Map<String, String> getObjectPropertyMapper() {
-		return objectporpertyMapper;
-	}
-
-	/**
-	 * Returns a map between original data property names and alias
-	 *
-	 * @return a map
-	 */
-	public Map<String, String> getDataPropertyMapper() {
-		return datapropertyMapper;
-	}
-
 }

@@ -1,13 +1,16 @@
 package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import org.obda.owlrefplatform.core.abox.ABoxSerializer;
 import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.abox.AboxFromDBLoader;
 import org.obda.owlrefplatform.core.abox.DAG;
+import org.obda.owlrefplatform.core.abox.DirectMappingGenerator;
 import org.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
@@ -110,10 +113,12 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         }
 
         //String useMem = (String)
-        boolean useInMemoryDB = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.USE_INMEMORY_DB).equals("true");
-        String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
-        boolean createMappings = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
         String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+        boolean useInMemoryDB = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals("inmemory");
+        String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
+        String dbType = (String)preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
+        boolean createMappings = (Boolean) preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
+       
 
         OBDAOWLReformulationPlatform reasoner = null;
         QueryRewriter rewriter;
@@ -158,17 +163,17 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 source.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
                 source.setParameter(RDBMSsourceParameterConstants.IS_IN_MEMORY, "true");
                 source.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-
+                
                 apic.getDatasourcesController().addDataSource(source);
                 apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
-
+                ds = source;
                 connection = DriverManager.getConnection(url + dbname, username, password);
-                if (unfoldingMode.equals("semantic")) {
+                if (dbType.equals("semantic")) {
                     //perform semantic import
                     dag = new DAG(ontologies);
                     ABoxSerializer.recreate_tables(connection);
                     ABoxSerializer.ABOX2DB(ontologies, dag, connection);
-                } else {
+                } else if(dbType.equals("direct")){
                     //perform direct import
                     String[] types = {"TABLE"};
 
@@ -185,12 +190,23 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                         st.executeUpdate(drop_table);
                     }
                     try {
-                        ABoxToDBDumper.getInstance().materialize(ontologies, connection, source.getSourceID(), createMappings);
+                    	ABoxToDBDumper dumper = ABoxToDBDumper.getInstance();
+                        dumper.materialize(ontologies, connection, source.getSourceID());
+                        if(createMappings){
+                        	DirectMappingGenerator mapGen = new DirectMappingGenerator();
+                        	Set<OBDAMappingAxiom> mappings = mapGen.getMappings(ontologies, dumper.getMapper());
+                        	Iterator<OBDAMappingAxiom> it = mappings.iterator();
+                        	MappingController mapCon = apic.getMappingController();
+                        	while(it.hasNext()){
+                        		mapCon.insertMapping(ds.getSourceID(), it.next());
+                        	}
+                        }
                     } catch (SQLException e) {
                         throw new OBDAOWLReformulaionPlatformFactoryException(e);
                     }
+                }else{
+                	throw new Exception(dbType + " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
                 }
-                ds = source;
                 eval_engine = new JDBCEngine(connection);
 
             } else {
@@ -216,29 +232,23 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 throw new IllegalArgumentException("Invalid value for argument: " + ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
             }
 
-            if ("complex".equals(unfoldingMode)) {
+            if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
+            	if(dbType.equals("semantic")){
+            		 // create t-dag, sigma-dag, create mappings, compute t'
+            		SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(apic, dag);
+                    map_gen.build();
+            	}
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
                 MappingViewManager viewMan = new MappingViewManager(mappings);
                 unfMech = new ComplexMappingUnfolder(mappings, viewMan);
                 JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
                 gen = new ComplexMappingSQLGenerator(ontology, viewMan, util);
-            } else if ("direct".equals(unfoldingMode)) {
+            } else if ("material".equals(unfoldingMode)) {
                 unfMech = new DirectMappingUnfolder();
-                gen = new SimpleDirectQueryGenrator(apic.getIOManager().getPrefixManager(), ontology, uris);
-            } else if ("semantic".equals(unfoldingMode)) {
-                // create t-dag, sigma-dag, create mappings, compute t'
-
-                SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(apic, dag);
-                map_gen.build();
-
-                List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
-                MappingViewManager viewMan = new MappingViewManager(mappings);
-                unfMech = new ComplexMappingUnfolder(mappings, viewMan);
-                JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
-                gen = new ComplexMappingSQLGenerator(ontology, viewMan, util);
-
+                AboxFromDBLoader loader = new AboxFromDBLoader();
+                gen = new SimpleDirectQueryGenrator(loader.getMapper(ds));
             } else {
-                log.error("Invalid parameter {}", ReformulationPlatformPreferences.UNFOLDING_MECHANMISM);
+                log.error("Invalid parameter for {}", ReformulationPlatformPreferences.ABOX_MODE);
             }
 
             techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
@@ -248,7 +258,6 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return reasoner;
     }
 

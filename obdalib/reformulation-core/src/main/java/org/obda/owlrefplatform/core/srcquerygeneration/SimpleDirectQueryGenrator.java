@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.obda.owlrefplatform.core.abox.URIIdentyfier;
+import org.obda.owlrefplatform.core.abox.URIType;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.viewmanager.SimpleDirectViewManager;
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
@@ -26,6 +28,8 @@ import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.reasoner.rulesys.builtins.UriConcat;
+
 /**
  * The implementation of the sql generator for the direct mapping approach
  * 
@@ -35,22 +39,20 @@ import org.slf4j.LoggerFactory;
 
 public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 
-	private SimpleDirectViewManager			viewmanager	= null;
-	private DLLiterOntology					ontology	= null;
+	private Map<URIIdentyfier, String> 	mapper 		= null;
 	private HashMap<String, List<Object[]>>	termMap		= null;
 	private HashMap<String, List<Object[]>>	constMap	= null;
 	private Map<Atom, String>				aliasMapper	= null;
-	private PrefixManager					manager		= null;
 	private int								counter		= 1;
+	private SimpleDirectViewManager 		viewManager = null;
 
 	Logger									log			= LoggerFactory.getLogger(SimpleDirectQueryGenrator.class);
 
-	public SimpleDirectQueryGenrator(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
-
-		ontology = onto;
-		manager = man;
-		viewmanager = new SimpleDirectViewManager(manager, ontology, uris);
+	public SimpleDirectQueryGenrator(Map<URIIdentyfier, String> mapper) {
+		
+		this.mapper = mapper;
 		aliasMapper = new HashMap<Atom, String>();
+		viewManager = new SimpleDirectViewManager();
 	}
 
 	/**
@@ -183,7 +185,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			if (sb.length() > 0) {
 				sb.append(", ");
 			}
-			String table = viewmanager.getTranslatedName(a);
+			String table = getTablename(a);
 			String tablealias = getAlias();
 			aliasMapper.put(a, tablealias);
 			sb.append(table + " as " + tablealias);
@@ -307,8 +309,8 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 
 	@Override
 	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
-		this.ontology = onto;
-		viewmanager = new SimpleDirectViewManager(man, onto, uris);
+//		this.ontology = onto;
+//		viewmanager = new SimpleDirectViewManager(man, onto, uris);
 
 	}
 
@@ -318,7 +320,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 
 	@Override
 	public ViewManager getViewManager() {
-		return viewmanager;
+		return viewManager;
 	}
 
 	private boolean isDPBoolean(DatalogProgram dp) {
@@ -334,5 +336,22 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			}
 		}
 		return bool;
+	}
+	
+	private String getTablename(Atom atom){
+		
+		String tablename = null;
+		if(atom.getArity() == 1){
+			URIIdentyfier id = new URIIdentyfier(atom.getPredicate().getName(), URIType.CONCEPT);
+			tablename = mapper.get(id);
+		}else{
+			URIIdentyfier id = new URIIdentyfier(atom.getPredicate().getName(), URIType.OBJECTPROPERTY);
+			tablename = mapper.get(id);
+			if(tablename == null){
+				id = new URIIdentyfier(atom.getPredicate().getName(), URIType.DATAPROPERTY);
+				tablename = mapper.get(id);
+			}
+		}
+		return tablename;
 	}
 }

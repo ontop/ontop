@@ -22,7 +22,7 @@ public interface SourceQueryGenerator {
 
 	/**
 	 * Translates the given datalog program into a source query, which
-	 * will late be evaluated by a evaluation engine.
+	 * can later be evaluated by a evaluation engine.
 	 * 
 	 * @param query the datalog program
 	 * @return the souce query
