@@ -11,6 +11,7 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -52,6 +53,15 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
         addListener();
         addItemsToCombo();
         apic.getDatasourcesController().addDatasourceControllerListener(this);
+        addExistingDataSourcesToCombo();
+    }
+    
+    private void addExistingDataSourcesToCombo(){
+    	HashMap<URI, DataSource> sources = apic.getDatasourcesController().getAllSources();
+    	Iterator<DataSource> it = sources.values().iterator();
+    	while(it.hasNext()){
+    		jComboBox1.addItem(it.next().getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));
+    	}
     }
 
     /** This method is called from within the constructor to
