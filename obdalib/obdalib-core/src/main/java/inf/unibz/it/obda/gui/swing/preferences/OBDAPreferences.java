@@ -58,6 +58,7 @@ public class OBDAPreferences {
 		public void fontFamilyPreferenceChanged(String preference, String font);
 		public void isBoldPreferenceChanged(String preference, Boolean isBold);
 		public void shortCutChanged(String preference, String shortcut);
+		public void useDefaultPreferencesChanged(String preference, String useDefault);
 	} 
 	
 	public class MappingManagerPreferences{
@@ -65,66 +66,31 @@ public class OBDAPreferences {
 		private List<MappingManagerPreferenceChangeListener> listener = null;
 		
 		public static final String CLASS_COLOR = "class_Color";
-		public static final String CLASS_FONTFAMILY = "class_Fontfamily";
-		public static final String CLASS_FONTSIZE = "class_Fontsize";
-		public static final String CLASS_ISBOLD = "class_isBold";
-		
 		public static final String DATAPROPERTY_COLOR = "dataProperty_Color";
-		public static final String DATAPROPERTY_FONTFAMILY = "dataProperty_Fontfamily";
-		public static final String DATAPROPERTY_FONTSIZE = "dataProperty_Fontsize";
-		public static final String DATAPROPERTY_ISBOLD = "dataProperty_isBold";
-		
 		public static final String VARIABLE_COLOR = "variable_Color";
-		public static final String VARIABLE_FONTFAMILY = "variable_Fontfamily";
-		public static final String VARIABLE_FONTSIZE = "variable_Fontsize";
-		public static final String VARIABLE_ISBOLD = "variable_isBold";
-		
 		public static final String PARAMETER_COLOR = "parameter_Color";
-		public static final String PARAMETER_FONTFAMILY = "parameter_Fontfamily";
-		public static final String PARAMETER_FONTSIZE = "parameter_Fontsize";
-		public static final String PARAMETER_ISBOLD = "parameter_isBold";
-		
 		public static final String FUCNTOR_COLOR = "functor_Color";
-		public static final String FUCNTOR_FONTFAMILY = "functor_Fontfamily";
-		public static final String FUCNTOR_FONTSIZE = "functor_Fontsize";
-		public static final String FUCNTOR_ISBOLD = "functor_isBold";
-		
 		public static final String MAPPING_BODY_COLOR = "mapping_body_Color";
-		public static final String MAPPING_BODY_FONTFAMILY = "mapping_body_Fontfamily";
-		public static final String MAPPING_BODY_FONTSIZE = "mapping_body_Fontsize";
-		public static final String MAPPING_BODY_ISBOLD = "mapping_body_isBold";
-		
 		public static final String MAPPING_ID_COLOR = "mapping_id_Color";
-		public static final String MAPPING_ID_FONTFAMILY = "mapping_id_Fontfamily";
-		public static final String MAPPING_ID_FONTSIZE = "mapping_id_Fontsize";
-		public static final String MAPPING_ID_ISBOLD = "mapping_id_isBold";
-		
 		public static final String OBJECTPROPTERTY_COLOR = "objectproperty_Color";
-		public static final String OBJECTPROPTERTY_FONTFAMILY = "objectproperty_Fontfamily";
-		public static final String OBJECTPROPTERTY_FONTSIZE = "objectproperty_Fontsize";
-		public static final String OBJECTPROPTERTY_ISBOLD = "objectproperty_isBold";
 		
-		public static final String INVALIDQUERY_COLOR = "invalidquery_Color";
-		public static final String INVALIDQUERY_FONTFAMILY = "invalidquery_Fontfamily";
-		public static final String INVALIDQUERY_FONTSIZE = "invalidquery_Fontsize";
-		public static final String INVALIDQUERY_ISBOLD = "invalidquery_isBold";
-		
-		public static final String DEPENDENCIES_COLOR = "dependencies_Color";
-		public static final String DEPENDENCIES_FONTFAMILY = "dependencies_Fontfamily";
-		public static final String DEPENDENCIES_FONTSIZE = "dependencies_Fontsize";
-		public static final String DEPENDENCIES_ISBOLD = "dependencies_isBold";
+		public static final String OBDAPREFS_FONTFAMILY = "dependencies_Fontfamily";
+		public static final String OBDAPREFS_FONTSIZE = "dependencies_Fontsize";
+		public static final String OBDAPREFS_ISBOLD = "dependencies_isBold";
 		
 		public static final String ADD_MAPPING = "add.Mapping";
 		public static final String DELETE_MAPPING = "delete.Mapping";
 		public static final String EDIT_HEAD = "edit.Mapping.Head";
 		public static final String EDIT_BODY = "edit.Mapping.Body";
 		public static final String EDIT_ID = "edit.Mapping.id";
+		public static final String USE_DEAFAULT = "use.default";
 		
 		private HashMap<String, Color> colorMap = null;
 		private HashMap<String, String> fontMap = null;
 		private HashMap<String, Integer> sizeMap = null;
 		private HashMap<String, Boolean> isBoldMap = null;
 		private HashMap<String, String> shortCuts = null;
+		private boolean useDefault = true;
 		
 		private MappingManagerPreferences(){
 			colorMap = new HashMap<String,Color>();
@@ -143,43 +109,12 @@ public class OBDAPreferences {
 			colorMap.put(VARIABLE_COLOR, Color.GRAY);
 			colorMap.put(PARAMETER_COLOR, Color.BLACK);
 			colorMap.put(FUCNTOR_COLOR, Color.BLACK);
-			colorMap.put(INVALIDQUERY_COLOR, Color.RED);
 			colorMap.put(MAPPING_BODY_COLOR, Color.BLACK);
 			colorMap.put(MAPPING_ID_COLOR, Color.BLACK);
-			colorMap.put(DEPENDENCIES_COLOR, Color.BLACK);
-			
-			fontMap.put(CLASS_FONTFAMILY, "SansSerif");
-			fontMap.put(DATAPROPERTY_FONTFAMILY, "SansSerif");
-			fontMap.put(OBJECTPROPTERTY_FONTFAMILY, "SansSerif");
-			fontMap.put(VARIABLE_FONTFAMILY, "Monospaced");
-			fontMap.put(PARAMETER_FONTFAMILY, "Monospaced");
-			fontMap.put(FUCNTOR_FONTFAMILY, "SansSerif");
-			fontMap.put(MAPPING_BODY_FONTFAMILY,"Monospaced");
-			fontMap.put(MAPPING_ID_FONTFAMILY,"SansSerif");
-			fontMap.put(INVALIDQUERY_FONTFAMILY,"SansSerif");
-			fontMap.put(DEPENDENCIES_FONTFAMILY, "SansSerif");
-			
-			sizeMap.put(CLASS_FONTSIZE, new Integer(18));
-			sizeMap.put(DATAPROPERTY_FONTSIZE, new Integer(18));
-			sizeMap.put(OBJECTPROPTERTY_FONTSIZE, new Integer(18));
-			sizeMap.put(VARIABLE_FONTSIZE, new Integer(18));
-			sizeMap.put(PARAMETER_FONTSIZE, new Integer(18));
-			sizeMap.put(FUCNTOR_FONTSIZE, new Integer(18));
-			sizeMap.put(MAPPING_BODY_FONTSIZE,new Integer(18));
-			sizeMap.put(MAPPING_ID_FONTSIZE,new Integer(18));
-			sizeMap.put(INVALIDQUERY_FONTSIZE,new Integer(18));
-			sizeMap.put(DEPENDENCIES_FONTSIZE,new Integer(14));
-			
-			isBoldMap.put(CLASS_ISBOLD, new Boolean("true"));
-			isBoldMap.put(DATAPROPERTY_ISBOLD, new Boolean("true"));
-			isBoldMap.put(OBJECTPROPTERTY_ISBOLD, new Boolean("true"));
-			isBoldMap.put(VARIABLE_ISBOLD, new Boolean("false"));
-			isBoldMap.put(PARAMETER_ISBOLD, new Boolean("false"));
-			isBoldMap.put(FUCNTOR_ISBOLD, new Boolean("true"));
-			isBoldMap.put(MAPPING_BODY_ISBOLD,new Boolean("false"));
-			isBoldMap.put(MAPPING_ID_ISBOLD,new Boolean("false"));
-			isBoldMap.put(INVALIDQUERY_ISBOLD,new Boolean("false"));
-			isBoldMap.put(DEPENDENCIES_ISBOLD,new Boolean("false"));
+
+			fontMap.put(OBDAPREFS_FONTFAMILY, "SansSerif");
+			sizeMap.put(OBDAPREFS_FONTSIZE, new Integer(15));
+			isBoldMap.put(OBDAPREFS_ISBOLD,new Boolean("false"));
 			
 			shortCuts.put(ADD_MAPPING, "ctrl pressed A");
 			shortCuts.put(DELETE_MAPPING, "ctrl pressed D");
@@ -332,6 +267,14 @@ public class OBDAPreferences {
 			}
 		}
 		
+		private void fireDefaultPreferencesChanged(String pref, String shortCut){
+			Iterator<MappingManagerPreferenceChangeListener> it = listener.iterator();
+			while(it.hasNext()){
+				MappingManagerPreferenceChangeListener l = it.next();
+				l.useDefaultPreferencesChanged(pref, shortCut);
+			}
+		}
+		
 		public void registerPreferenceChangedListener(MappingManagerPreferenceChangeListener li){
 			listener.add(li);
 		}
@@ -360,6 +303,20 @@ public class OBDAPreferences {
 				fireShortCutChangedEvent(key, value);
 			}
 		}
+		
+		public boolean getUseDefault(){
+			return useDefault;
+		}
+		
+		public void setUseDefault(boolean b){
+			useDefault=b;
+			if(useDefault){
+				fireDefaultPreferencesChanged(USE_DEAFAULT, "true");
+			}else{
+				fireDefaultPreferencesChanged(USE_DEAFAULT, "false");
+			}
+		}
 	}
 
+	
 }

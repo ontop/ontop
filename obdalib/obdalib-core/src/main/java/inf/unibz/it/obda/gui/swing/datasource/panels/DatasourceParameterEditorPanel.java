@@ -67,8 +67,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         panelDataSourceEditor = new javax.swing.JPanel();
         labelURL = new javax.swing.JLabel();
         fieldURL = new javax.swing.JTextField();
-        labelName = new javax.swing.JLabel();
-        fieldDBName = new javax.swing.JTextField();
         labelUsername = new javax.swing.JLabel();
         fieldDBUser = new javax.swing.JTextField();
         labelPassword = new javax.swing.JLabel();
@@ -233,35 +231,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
         panelDataSourceEditor.add(fieldURL, gridBagConstraints);
 
-        labelName.setFont(new java.awt.Font("Arial", 1, 11));
-        labelName.setForeground(new java.awt.Color(153, 153, 153));
-        labelName.setText("  Database Name:");
-        labelName.setFocusable(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        panelDataSourceEditor.add(labelName, gridBagConstraints);
-
-        fieldDBName.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-        fieldDBName.setMinimumSize(new java.awt.Dimension(180, 19));
-        fieldDBName.setName("somename"); // NOI18N
-        fieldDBName.setPreferredSize(new java.awt.Dimension(180, 19));
-        fieldDBName.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                fieldChangeHandler(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
-        panelDataSourceEditor.add(fieldDBName, gridBagConstraints);
-
-        labelUsername.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        labelUsername.setFont(new java.awt.Font("Arial", 1, 11));
         labelUsername.setForeground(new java.awt.Color(153, 153, 153));
         labelUsername.setText("  Database Username:");
         labelUsername.setFocusable(false);
@@ -282,7 +252,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
@@ -310,7 +280,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
@@ -341,7 +311,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
@@ -349,7 +319,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         panelDataSourceEditor.add(fieldDBDriver, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
@@ -374,7 +344,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(panelDatasourceParametersBean, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -392,7 +362,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			return;
 		}
 //		currentsrc.setUri(fieldURI.getText());
-		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, fieldDBName.getText());
 		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, fieldDBUser.getText());
 		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
 		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
@@ -407,7 +376,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField fieldDBDriver;
-    private javax.swing.JTextField fieldDBName;
     private javax.swing.JTextField fieldDBPassword;
     private javax.swing.JTextField fieldDBUser;
     private javax.swing.JTextField fieldURL;
@@ -422,7 +390,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JLabel labelHeaderDatasourceURI;
     private javax.swing.JLabel labelHeaderMappingsType;
     private javax.swing.JLabel labelMapType;
-    private javax.swing.JLabel labelName;
     private javax.swing.JLabel labelPassword;
     private javax.swing.JLabel labelURL;
     private javax.swing.JLabel labelUsername;
@@ -443,7 +410,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			labelMapType.setText("");
 			labelDatasource.setText("");
 			fieldDBDriver.setText("");
-			fieldDBName.setText("");
 			fieldDBUser.setText("");
 			fieldDBPassword.setText("");
 			fieldURL.setText("");
@@ -451,7 +417,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			labelMapType.setEnabled(false);
 			labelDatasource.setEnabled(false);
 			fieldDBDriver.setEnabled(false);
-			fieldDBName.setEnabled(false);
 			fieldDBUser.setEnabled(false);
 			fieldDBPassword.setEnabled(false);
 			fieldURL.setEnabled(false);
@@ -466,7 +431,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			labelMapType.setText("OBDAMappings");
 			labelDatasource.setText(currentsource.getSourceID().toString());
 			fieldDBDriver.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
-			fieldDBName.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));
 			fieldDBUser.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME));
 			fieldDBPassword.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD));
 			fieldURL.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL));
@@ -474,7 +438,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			labelMapType.setEnabled(true);
 			labelDatasource.setEnabled(true);
 			fieldDBDriver.setEnabled(true);
-			fieldDBName.setEnabled(true);
 			fieldDBUser.setEnabled(true);
 			fieldDBPassword.setEnabled(true);
 			fieldURL.setEnabled(true);

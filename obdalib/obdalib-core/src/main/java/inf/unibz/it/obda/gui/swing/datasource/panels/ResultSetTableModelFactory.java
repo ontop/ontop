@@ -73,7 +73,6 @@ public class ResultSetTableModelFactory {
 		}
 		String driver = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
 		String url = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		String dbname = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String username = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 
@@ -83,7 +82,7 @@ public class ResultSetTableModelFactory {
 			 * No facotry has been created yet. Creating on
 			 * 
 			 */
-			rstmfactory = new ResultSetTableModelFactory(driver, url + dbname, username, password);
+			rstmfactory = new ResultSetTableModelFactory(driver, url, username, password);
 			resultsetfactories.put(current_datasource.getSourceID(), rstmfactory);
 		} else {
 			// If the datasource information changed since last connectino was
@@ -91,11 +90,11 @@ public class ResultSetTableModelFactory {
 			boolean driverissame = driver.equals(rstmfactory.driverClassName);
 			boolean userissame = username.equals(rstmfactory.username);
 			boolean passwordissame = password.equals(rstmfactory.password);
-			boolean dbissame = rstmfactory.dbname.equals(url + dbname);
+			boolean dbissame = rstmfactory.dbname.equals(url);
 
 			if (!((driverissame) && (userissame) && (passwordissame) && (dbissame))) {
 				rstmfactory.close();
-				rstmfactory = new ResultSetTableModelFactory(driver, url + dbname, username, password);
+				rstmfactory = new ResultSetTableModelFactory(driver, url, username, password);
 				resultsetfactories.put(current_datasource.getSourceID(), rstmfactory);
 			}
 		}

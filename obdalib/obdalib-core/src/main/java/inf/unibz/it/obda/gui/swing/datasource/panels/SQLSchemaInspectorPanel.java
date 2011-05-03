@@ -360,11 +360,11 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			if (selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
 
 				Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-				String dbname = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
+				String url = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
 				// jdbc:db2://5.90.168.104:50000/MINIST:currentSchema=PROP;
-				String[] sp1 = dbname.split("/");
+				String[] sp1 = url.split("/");
 				String catalog = sp1[sp1.length - 1].split(":")[0];
-				String t2 = dbname.split("=")[1];
+				String t2 = url.split("=")[1];
 				String schema = t2.substring(0, t2.length() - 1);
 				ResultSet r = statement.executeQuery("SELECT TABLE_NAME FROM SYSIBM.TABLES WHERE TABLE_CATALOG = '" + catalog
 							+ "' AND TABLE_SCHEMA = '" + schema + "'");

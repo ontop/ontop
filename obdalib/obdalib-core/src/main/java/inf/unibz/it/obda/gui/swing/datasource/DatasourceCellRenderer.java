@@ -22,9 +22,7 @@ public class DatasourceCellRenderer extends JLabel implements
 		else {
 			DataSource datasource = (DataSource)value;
 			String datasourceUri = datasource.getSourceID().toString();
-			String databaseName = 
-				datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
-			setText(datasourceUri + " (" + databaseName + ")");
+			setText(datasourceUri);
 		}
 		
 		return this;

@@ -132,14 +132,6 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     		
     	});
     	
-    	cmdInvalidQueryColor.addActionListener(new ActionListener(){
-
-			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdInvalidQueryColor, MappingManagerPreferences.INVALIDQUERY_COLOR);
-				cc.setVisible(true);
-			}
-    		
-    	});
     	String aux = pref.getShortCut(add);
     	KeyStroke ks = KeyStroke.getKeyStroke(aux);
     	lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(ks.getModifiers()) + " + "+ KeyEvent.getKeyText(ks.getKeyCode()));
@@ -399,61 +391,18 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 //    	Color id = pref.getColor(MappingManagerPreferences.MAPPING_ID_COLOR);
 //    	jButtonIDColour2.setBackground(id);
 //    	jButtonIDColour2.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-    	Color iq = pref.getColor(MappingManagerPreferences.INVALIDQUERY_COLOR);
-    	cmdInvalidQueryColor.setBackground(iq);
-    	cmdInvalidQueryColor.setOpaque(true);
-    	cmdInvalidQueryColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	String fontClassFam = pref.getFontFamily(MappingManagerPreferences.CLASS_FONTFAMILY);
-    	int classSize = pref.getFontSize(MappingManagerPreferences.CLASS_FONTSIZE);
-    	cmdClassFont.setText(fontClassFam + ", " + classSize);
-    	cmdClassFont.setToolTipText(fontClassFam + ", " + classSize);
+    	String fontBody = pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY);
+    	int bodySize = pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE);
+    	cmdFontFamily.setText(fontBody + ", " + bodySize);
+    	cmdFontFamily.setToolTipText(fontBody + ", " + bodySize);
     	
-    	String fontDP = pref.getFontFamily(MappingManagerPreferences.DATAPROPERTY_FONTFAMILY);
-    	int sizeDP = pref.getFontSize(MappingManagerPreferences.DATAPROPERTY_FONTSIZE);
-    	cmdDataPropertyFont.setText(fontDP + ", " + sizeDP);
-    	cmdDataPropertyFont.setToolTipText(fontDP + ", " + sizeDP);
-    	
-    	String fontOP = pref.getFontFamily(MappingManagerPreferences.OBJECTPROPTERTY_FONTFAMILY);
-    	int sizeOP = pref.getFontSize(MappingManagerPreferences.OBJECTPROPTERTY_FONTSIZE);
-    	cmdObjectPropertyFont.setText(fontOP + ", " + sizeOP);
-    	cmdObjectPropertyFont.setToolTipText(fontOP + ", " + sizeOP);
-    	
-    	String fontVar = pref.getFontFamily(MappingManagerPreferences.VARIABLE_FONTFAMILY);
-    	int varSize = pref.getFontSize(MappingManagerPreferences.VARIABLE_FONTSIZE);
-    	cmdVariableFonr.setText(fontVar + ", " + varSize);
-    	cmdVariableFonr.setToolTipText(fontVar + ", " + varSize);
-    	
-    	String fontPara = pref.getFontFamily(MappingManagerPreferences.PARAMETER_FONTFAMILY);
-    	int paraSize = pref.getFontSize(MappingManagerPreferences.PARAMETER_FONTSIZE);
-    	cmdParameterFont.setText(fontPara + ", "+ paraSize);
-    	cmdParameterFont.setToolTipText(fontPara + ", "+ paraSize);
-    	
-    	String fontFunc = pref.getFontFamily(MappingManagerPreferences.FUCNTOR_FONTFAMILY);
-    	int funcSize = pref.getFontSize(MappingManagerPreferences.FUCNTOR_FONTSIZE);
-    	cmdFunctorFont.setText(fontFunc + ", " +funcSize);
-    	cmdFunctorFont.setToolTipText(fontFunc + ", " +funcSize);
-    	
-    	String fontBody = pref.getFontFamily(MappingManagerPreferences.MAPPING_BODY_FONTFAMILY);
-    	int bodySize = pref.getFontSize(MappingManagerPreferences.MAPPING_BODY_FONTSIZE);
-    	cmdMappingBodyFont.setText(fontBody + ", " + bodySize);
-    	cmdMappingBodyFont.setToolTipText(fontBody + ", " + bodySize);
-    	
-    	String fontID = pref.getFontFamily(MappingManagerPreferences.MAPPING_ID_FONTFAMILY);
-    	int idSize = pref.getFontSize(MappingManagerPreferences.MAPPING_ID_FONTSIZE);
-    	cmdMappingIdFont.setText(fontID + ", "+ idSize);
-    	cmdMappingIdFont.setToolTipText(fontID + ", "+ idSize);
-    	
-    	String fontIQ= pref.getFontFamily(MappingManagerPreferences.INVALIDQUERY_FONTFAMILY);
-    	int iqSize = pref.getFontSize(MappingManagerPreferences.INVALIDQUERY_FONTSIZE);
-    	cmdInvalidQueryFont.setText(fontIQ + ", "+ iqSize);
-    	cmdInvalidQueryFont.setToolTipText(fontIQ + ", "+ iqSize);
-    	
-    	String fontDep = pref.getFontFamily(MappingManagerPreferences.DEPENDENCIES_FONTFAMILY);
-    	int depSize = pref.getFontSize(MappingManagerPreferences.DEPENDENCIES_FONTSIZE);
-    	cmdDependencyFont.setText(fontDep + ", " + depSize);
-    	cmdDependencyFont.setToolTipText(fontDep + ", " + depSize);
-    	
+    	jCheckBoxUseDefault.setSelected(pref.getUseDefault());
+    	if(jCheckBoxUseDefault.isSelected()){
+    		cmdFontFamily.setEnabled(false);
+    	}else{
+    		cmdFontFamily.setEnabled(true);
+    	}
     }
     
     /** This method is called from within the constructor to
@@ -471,38 +420,22 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         pnlClassPreferences = new javax.swing.JPanel();
         lblClass = new javax.swing.JLabel();
         cmdClassColor = new javax.swing.JButton();
-        cmdClassFont = new javax.swing.JButton();
         lblDataProperty = new javax.swing.JLabel();
-        cmdDataPropertyFont = new javax.swing.JButton();
         cmdDataPropertyColor = new javax.swing.JButton();
         lblObjectProperty = new javax.swing.JLabel();
-        cmdObjectPropertyFont = new javax.swing.JButton();
         cmdObjectPropertyColor = new javax.swing.JButton();
         pnlVariablePreferences = new javax.swing.JPanel();
         lblParameter = new javax.swing.JLabel();
         cmdParameterColor = new javax.swing.JButton();
-        cmdParameterFont = new javax.swing.JButton();
         lblVariable = new javax.swing.JLabel();
         cmdVariableColor = new javax.swing.JButton();
-        cmdVariableFonr = new javax.swing.JButton();
         lblFunctors = new javax.swing.JLabel();
         cmdFunctorColor = new javax.swing.JButton();
-        cmdFunctorFont = new javax.swing.JButton();
         pnlMappingPreferences = new javax.swing.JPanel();
         lblMappingBody = new javax.swing.JLabel();
-        cmdMappingBodyColor = new javax.swing.JButton();
-        cmdMappingBodyFont = new javax.swing.JButton();
-        lblMappingId = new javax.swing.JLabel();
-        cmdMappingIdColor = new javax.swing.JButton();
-        cmdMappingIdFont = new javax.swing.JButton();
-        pnlDataSourceDependencies = new javax.swing.JPanel();
-        cmdDependencyFont = new javax.swing.JButton();
-        cmdDependencyColor = new javax.swing.JButton();
-        lblDependency = new javax.swing.JLabel();
-        pnlInvalidQueries = new javax.swing.JPanel();
-        cmdInvalidQueryFont = new javax.swing.JButton();
-        cmdInvalidQueryColor = new javax.swing.JButton();
-        lblInvalidQuery = new javax.swing.JLabel();
+        cmdFontFamily = new javax.swing.JButton();
+        jCheckBoxUseDefault = new javax.swing.JCheckBox();
+        jLabelplaceholder2 = new javax.swing.JLabel();
         pnlEditingShortcutTab = new javax.swing.JPanel();
         pnlShortcutSettings = new javax.swing.JPanel();
         lblAddMapping = new javax.swing.JLabel();
@@ -516,6 +449,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         lblEditMappingId = new javax.swing.JLabel();
         lblMappingIdKey = new javax.swing.JLabel();
         lblInfo = new javax.swing.JLabel();
+        jLabelPlaceholder = new javax.swing.JLabel();
 
         setMinimumSize(new java.awt.Dimension(520, 600));
         setPreferredSize(new java.awt.Dimension(520, 600));
@@ -544,34 +478,21 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlClassPreferences.add(lblClass, gridBagConstraints);
 
-        cmdClassColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdClassColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdClassColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdClassColor.setMaximumSize(new java.awt.Dimension(200, 17));
         cmdClassColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdClassColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdClassColor.setPreferredSize(new java.awt.Dimension(120, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
         pnlClassPreferences.add(cmdClassColor, gridBagConstraints);
-
-        cmdClassFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdClassFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdClassFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdClassFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdClassFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdClassFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlClassPreferences.add(cmdClassFont, gridBagConstraints);
 
         lblDataProperty.setText("Data Property:");
         lblDataProperty.setMaximumSize(new java.awt.Dimension(100, 20));
@@ -583,33 +504,20 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlClassPreferences.add(lblDataProperty, gridBagConstraints);
 
-        cmdDataPropertyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdDataPropertyFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdDataPropertyFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdDataPropertyFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdDataPropertyFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdDataPropertyFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlClassPreferences.add(cmdDataPropertyFont, gridBagConstraints);
-
         cmdDataPropertyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdDataPropertyColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdDataPropertyColor.setMaximumSize(new java.awt.Dimension(200, 17));
         cmdDataPropertyColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdDataPropertyColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdDataPropertyColor.setPreferredSize(new java.awt.Dimension(120, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
         pnlClassPreferences.add(cmdDataPropertyColor, gridBagConstraints);
 
         lblObjectProperty.setText("Object Property:");
@@ -622,36 +530,26 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlClassPreferences.add(lblObjectProperty, gridBagConstraints);
 
-        cmdObjectPropertyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdObjectPropertyFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdObjectPropertyFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdObjectPropertyFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdObjectPropertyFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdObjectPropertyFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlClassPreferences.add(cmdObjectPropertyFont, gridBagConstraints);
-
         cmdObjectPropertyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdObjectPropertyColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdObjectPropertyColor.setMaximumSize(new java.awt.Dimension(200, 17));
         cmdObjectPropertyColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdObjectPropertyColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdObjectPropertyColor.setPreferredSize(new java.awt.Dimension(120, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
         pnlClassPreferences.add(cmdObjectPropertyColor, gridBagConstraints);
 
-        pnlDisplayPreferencesTab.add(pnlClassPreferences, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        pnlDisplayPreferencesTab.add(pnlClassPreferences, gridBagConstraints);
 
         pnlVariablePreferences.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Variable preferences"));
         pnlVariablePreferences.setMinimumSize(new java.awt.Dimension(475, 110));
@@ -668,36 +566,22 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlVariablePreferences.add(lblParameter, gridBagConstraints);
 
-        cmdParameterColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdParameterColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdParameterColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdParameterColor.setMaximumSize(new java.awt.Dimension(200, 17));
         cmdParameterColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdParameterColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdParameterColor.setPreferredSize(new java.awt.Dimension(120, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
         pnlVariablePreferences.add(cmdParameterColor, gridBagConstraints);
-
-        cmdParameterFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdParameterFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdParameterFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdParameterFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdParameterFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdParameterFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlVariablePreferences.add(cmdParameterFont, gridBagConstraints);
 
         lblVariable.setText("Variable:");
         lblVariable.setMaximumSize(new java.awt.Dimension(100, 20));
@@ -709,36 +593,22 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlVariablePreferences.add(lblVariable, gridBagConstraints);
 
-        cmdVariableColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdVariableColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdVariableColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdVariableColor.setMaximumSize(new java.awt.Dimension(200, 17));
         cmdVariableColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdVariableColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdVariableColor.setPreferredSize(new java.awt.Dimension(120, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
         pnlVariablePreferences.add(cmdVariableColor, gridBagConstraints);
-
-        cmdVariableFonr.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdVariableFonr.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdVariableFonr.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdVariableFonr.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdVariableFonr.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdVariableFonrActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlVariablePreferences.add(cmdVariableFonr, gridBagConstraints);
 
         lblFunctors.setText("Functor:");
         lblFunctors.setMaximumSize(new java.awt.Dimension(100, 20));
@@ -750,36 +620,22 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlVariablePreferences.add(lblFunctors, gridBagConstraints);
 
         cmdFunctorColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdFunctorColor.setMaximumSize(new java.awt.Dimension(90, 17));
+        cmdFunctorColor.setMaximumSize(new java.awt.Dimension(200, 17));
         cmdFunctorColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdFunctorColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdFunctorColor.setPreferredSize(new java.awt.Dimension(120, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
         pnlVariablePreferences.add(cmdFunctorColor, gridBagConstraints);
-
-        cmdFunctorFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdFunctorFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdFunctorFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdFunctorFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdFunctorFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdFunctorFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlVariablePreferences.add(cmdFunctorFont, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -789,211 +645,68 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
         pnlDisplayPreferencesTab.add(pnlVariablePreferences, gridBagConstraints);
 
-        pnlMappingPreferences.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Mapping preferences"));
+        pnlMappingPreferences.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Font Preferences"));
         pnlMappingPreferences.setMinimumSize(new java.awt.Dimension(475, 90));
         pnlMappingPreferences.setPreferredSize(new java.awt.Dimension(475, 90));
         pnlMappingPreferences.setLayout(new java.awt.GridBagLayout());
 
-        lblMappingBody.setText("Mappings Body:");
+        lblMappingBody.setText("Font Family:");
         lblMappingBody.setMaximumSize(new java.awt.Dimension(100, 20));
         lblMappingBody.setMinimumSize(new java.awt.Dimension(100, 20));
         lblMappingBody.setPreferredSize(new java.awt.Dimension(100, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
         gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlMappingPreferences.add(lblMappingBody, gridBagConstraints);
 
-        cmdMappingBodyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdMappingBodyColor.setEnabled(false);
-        cmdMappingBodyColor.setMaximumSize(new java.awt.Dimension(90, 17));
-        cmdMappingBodyColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdMappingBodyColor.setPreferredSize(new java.awt.Dimension(60, 17));
+        cmdFontFamily.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
+        cmdFontFamily.setMaximumSize(new java.awt.Dimension(200, 17));
+        cmdFontFamily.setMinimumSize(new java.awt.Dimension(90, 17));
+        cmdFontFamily.setPreferredSize(new java.awt.Dimension(120, 17));
+        cmdFontFamily.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdFontFamilyActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlMappingPreferences.add(cmdMappingBodyColor, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
+        pnlMappingPreferences.add(cmdFontFamily, gridBagConstraints);
 
-        cmdMappingBodyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdMappingBodyFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdMappingBodyFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdMappingBodyFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdMappingBodyFont.addActionListener(new java.awt.event.ActionListener() {
+        jCheckBoxUseDefault.setText("Use default fonts        ");
+        jCheckBoxUseDefault.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdMappingBodyFontActionPerformed(evt);
+                jCheckBoxUseDefaultActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 20);
+        pnlMappingPreferences.add(jCheckBoxUseDefault, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlMappingPreferences.add(cmdMappingBodyFont, gridBagConstraints);
-
-        lblMappingId.setText("Mappings ID:");
-        lblMappingId.setMaximumSize(new java.awt.Dimension(100, 20));
-        lblMappingId.setMinimumSize(new java.awt.Dimension(100, 20));
-        lblMappingId.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlMappingPreferences.add(lblMappingId, gridBagConstraints);
-
-        cmdMappingIdColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdMappingIdColor.setEnabled(false);
-        cmdMappingIdColor.setMaximumSize(new java.awt.Dimension(90, 17));
-        cmdMappingIdColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdMappingIdColor.setPreferredSize(new java.awt.Dimension(60, 17));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlMappingPreferences.add(cmdMappingIdColor, gridBagConstraints);
-
-        cmdMappingIdFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdMappingIdFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdMappingIdFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdMappingIdFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdMappingIdFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdMappingIdFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlMappingPreferences.add(cmdMappingIdFont, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
         pnlDisplayPreferencesTab.add(pnlMappingPreferences, gridBagConstraints);
-
-        pnlDataSourceDependencies.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Datasource dependencies"));
-        pnlDataSourceDependencies.setMinimumSize(new java.awt.Dimension(475, 70));
-        pnlDataSourceDependencies.setPreferredSize(new java.awt.Dimension(475, 70));
-        pnlDataSourceDependencies.setLayout(new java.awt.GridBagLayout());
-
-        cmdDependencyFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdDependencyFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdDependencyFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdDependencyFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdDependencyFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdDependencyFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlDataSourceDependencies.add(cmdDependencyFont, gridBagConstraints);
-
-        cmdDependencyColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10)); // NOI18N
-        cmdDependencyColor.setEnabled(false);
-        cmdDependencyColor.setMaximumSize(new java.awt.Dimension(90, 17));
-        cmdDependencyColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdDependencyColor.setPreferredSize(new java.awt.Dimension(60, 17));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlDataSourceDependencies.add(cmdDependencyColor, gridBagConstraints);
-
-        lblDependency.setText("Dependency:");
-        lblDependency.setMaximumSize(new java.awt.Dimension(100, 20));
-        lblDependency.setMinimumSize(new java.awt.Dimension(100, 20));
-        lblDependency.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlDataSourceDependencies.add(lblDependency, gridBagConstraints);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
-        pnlDisplayPreferencesTab.add(pnlDataSourceDependencies, gridBagConstraints);
-
-        pnlInvalidQueries.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Invalid queries"));
-        pnlInvalidQueries.setMinimumSize(new java.awt.Dimension(475, 70));
-        pnlInvalidQueries.setPreferredSize(new java.awt.Dimension(475, 70));
-        pnlInvalidQueries.setLayout(new java.awt.GridBagLayout());
-
-        cmdInvalidQueryFont.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdInvalidQueryFont.setMaximumSize(new java.awt.Dimension(200, 17));
-        cmdInvalidQueryFont.setMinimumSize(new java.awt.Dimension(90, 17));
-        cmdInvalidQueryFont.setPreferredSize(new java.awt.Dimension(120, 17));
-        cmdInvalidQueryFont.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdInvalidQueryFontActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 15, 0, 15);
-        pnlInvalidQueries.add(cmdInvalidQueryFont, gridBagConstraints);
-
-        cmdInvalidQueryColor.setFont(new java.awt.Font("DejaVu Sans", 0, 10));
-        cmdInvalidQueryColor.setMaximumSize(new java.awt.Dimension(90, 17));
-        cmdInvalidQueryColor.setMinimumSize(new java.awt.Dimension(60, 17));
-        cmdInvalidQueryColor.setPreferredSize(new java.awt.Dimension(60, 17));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlInvalidQueries.add(cmdInvalidQueryColor, gridBagConstraints);
-
-        lblInvalidQuery.setText("Query:");
-        lblInvalidQuery.setMaximumSize(new java.awt.Dimension(100, 20));
-        lblInvalidQuery.setMinimumSize(new java.awt.Dimension(100, 20));
-        lblInvalidQuery.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.ipadx = 80;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        pnlInvalidQueries.add(lblInvalidQuery, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 5, 5);
-        pnlDisplayPreferencesTab.add(pnlInvalidQueries, gridBagConstraints);
+        gridBagConstraints.weighty = 1.0;
+        pnlDisplayPreferencesTab.add(jLabelplaceholder2, gridBagConstraints);
 
         tabMainPanel.addTab("Display Preference", pnlDisplayPreferencesTab);
 
@@ -1129,88 +842,52 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlEditingShortcutTab.add(lblInfo, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.weighty = 1.0;
+        pnlEditingShortcutTab.add(jLabelPlaceholder, gridBagConstraints);
 
         tabMainPanel.addTab("Mapping Editing Shortcut", pnlEditingShortcutTab);
 
         add(tabMainPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void cmdClassFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdClassFontActionPerformed
-
-    	FontChooser2 fe =new FontChooser2(cmdClassFont, MappingManagerPreferences.CLASS_FONTFAMILY, MappingManagerPreferences.CLASS_FONTSIZE, MappingManagerPreferences.CLASS_ISBOLD);
-    }//GEN-LAST:event_cmdClassFontActionPerformed
-
-    private void cmdDataPropertyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDataPropertyFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdDataPropertyFont, MappingManagerPreferences.DATAPROPERTY_FONTFAMILY, MappingManagerPreferences.DATAPROPERTY_FONTSIZE, MappingManagerPreferences.DATAPROPERTY_ISBOLD);
-    }//GEN-LAST:event_cmdDataPropertyFontActionPerformed
-
-    private void cmdObjectPropertyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdObjectPropertyFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdObjectPropertyFont, MappingManagerPreferences.OBJECTPROPTERTY_FONTFAMILY, MappingManagerPreferences.OBJECTPROPTERTY_FONTSIZE, MappingManagerPreferences.OBJECTPROPTERTY_ISBOLD);
+    private void cmdFontFamilyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFontFamilyActionPerformed
+    	FontChooser2 fe = new FontChooser2(cmdFontFamily, MappingManagerPreferences.OBDAPREFS_FONTFAMILY, MappingManagerPreferences.OBDAPREFS_FONTSIZE, MappingManagerPreferences.OBDAPREFS_ISBOLD);
     	
-    }//GEN-LAST:event_cmdObjectPropertyFontActionPerformed
+    }//GEN-LAST:event_cmdFontFamilyActionPerformed
 
-    private void cmdVariableFonrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdVariableFonrActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdVariableFonr, MappingManagerPreferences.VARIABLE_FONTFAMILY, MappingManagerPreferences.VARIABLE_FONTSIZE, MappingManagerPreferences.VARIABLE_ISBOLD);
+    private void jCheckBoxUseDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxUseDefaultActionPerformed
+        
+    	if(jCheckBoxUseDefault.isSelected()){
+    		pref.setUseDefault(true);
+    		cmdFontFamily.setEnabled(false);
+    	}else{
+    		pref.setUseDefault(false);
+    		cmdFontFamily.setEnabled(true);
+    	}
     	
-    }//GEN-LAST:event_cmdVariableFonrActionPerformed
-
-    private void cmdParameterFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdParameterFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdParameterFont, MappingManagerPreferences.PARAMETER_FONTFAMILY, MappingManagerPreferences.PARAMETER_FONTSIZE, MappingManagerPreferences.PARAMETER_ISBOLD);
-    	;
-    }//GEN-LAST:event_cmdParameterFontActionPerformed
-
-    private void cmdFunctorFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFunctorFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdFunctorFont, MappingManagerPreferences.FUCNTOR_FONTFAMILY, MappingManagerPreferences.FUCNTOR_FONTSIZE, MappingManagerPreferences.FUCNTOR_ISBOLD);
-    	
-    }//GEN-LAST:event_cmdFunctorFontActionPerformed
-
-    private void cmdMappingBodyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMappingBodyFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdMappingBodyFont, MappingManagerPreferences.MAPPING_BODY_FONTFAMILY, MappingManagerPreferences.MAPPING_BODY_FONTSIZE, MappingManagerPreferences.MAPPING_BODY_ISBOLD);
-    	
-    }//GEN-LAST:event_cmdMappingBodyFontActionPerformed
-
-    private void cmdMappingIdFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMappingIdFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdMappingIdFont, MappingManagerPreferences.MAPPING_ID_FONTFAMILY, MappingManagerPreferences.MAPPING_ID_FONTSIZE, MappingManagerPreferences.MAPPING_ID_ISBOLD);
-    	
-    }//GEN-LAST:event_cmdMappingIdFontActionPerformed
-
-    private void cmdInvalidQueryFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdInvalidQueryFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdInvalidQueryFont, MappingManagerPreferences.INVALIDQUERY_FONTFAMILY, MappingManagerPreferences.INVALIDQUERY_FONTSIZE, MappingManagerPreferences.INVALIDQUERY_ISBOLD);
-    }//GEN-LAST:event_cmdInvalidQueryFontActionPerformed
-
-    private void cmdDependencyFontActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDependencyFontActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdDependencyFont, MappingManagerPreferences.DEPENDENCIES_FONTFAMILY, MappingManagerPreferences.DEPENDENCIES_FONTSIZE, MappingManagerPreferences.DEPENDENCIES_ISBOLD);
-    }//GEN-LAST:event_cmdDependencyFontActionPerformed
+    }//GEN-LAST:event_jCheckBoxUseDefaultActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdClassColor;
-    private javax.swing.JButton cmdClassFont;
     private javax.swing.JButton cmdDataPropertyColor;
-    private javax.swing.JButton cmdDataPropertyFont;
-    private javax.swing.JButton cmdDependencyColor;
-    private javax.swing.JButton cmdDependencyFont;
+    private javax.swing.JButton cmdFontFamily;
     private javax.swing.JButton cmdFunctorColor;
-    private javax.swing.JButton cmdFunctorFont;
-    private javax.swing.JButton cmdInvalidQueryColor;
-    private javax.swing.JButton cmdInvalidQueryFont;
-    private javax.swing.JButton cmdMappingBodyColor;
-    private javax.swing.JButton cmdMappingBodyFont;
-    private javax.swing.JButton cmdMappingIdColor;
-    private javax.swing.JButton cmdMappingIdFont;
     private javax.swing.JButton cmdObjectPropertyColor;
-    private javax.swing.JButton cmdObjectPropertyFont;
     private javax.swing.JButton cmdParameterColor;
-    private javax.swing.JButton cmdParameterFont;
     private javax.swing.JButton cmdVariableColor;
-    private javax.swing.JButton cmdVariableFonr;
+    private javax.swing.JCheckBox jCheckBoxUseDefault;
+    private javax.swing.JLabel jLabelPlaceholder;
+    private javax.swing.JLabel jLabelplaceholder2;
     private javax.swing.JLabel lblAddMapping;
     private javax.swing.JLabel lblAddMappingKey;
     private javax.swing.JLabel lblClass;
     private javax.swing.JLabel lblDataProperty;
     private javax.swing.JLabel lblDeleteMapping;
     private javax.swing.JLabel lblDeleteMappingKey;
-    private javax.swing.JLabel lblDependency;
     private javax.swing.JLabel lblEditMappingBody;
     private javax.swing.JLabel lblEditMappingBodyKey;
     private javax.swing.JLabel lblEditMappingHead;
@@ -1218,18 +895,14 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     private javax.swing.JLabel lblEditMappingId;
     private javax.swing.JLabel lblFunctors;
     private javax.swing.JLabel lblInfo;
-    private javax.swing.JLabel lblInvalidQuery;
     private javax.swing.JLabel lblMappingBody;
-    private javax.swing.JLabel lblMappingId;
     private javax.swing.JLabel lblMappingIdKey;
     private javax.swing.JLabel lblObjectProperty;
     private javax.swing.JLabel lblParameter;
     private javax.swing.JLabel lblVariable;
     private javax.swing.JPanel pnlClassPreferences;
-    private javax.swing.JPanel pnlDataSourceDependencies;
     private javax.swing.JPanel pnlDisplayPreferencesTab;
     private javax.swing.JPanel pnlEditingShortcutTab;
-    private javax.swing.JPanel pnlInvalidQueries;
     private javax.swing.JPanel pnlMappingPreferences;
     private javax.swing.JPanel pnlShortcutSettings;
     private javax.swing.JPanel pnlVariablePreferences;
@@ -1270,7 +943,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 
             jColorChooser1 = new javax.swing.JColorChooser();
 //            jButton1 = new javax.swing.JButton();
-            jLabel1 = new javax.swing.JLabel();
+            jLabelplaceholder2 = new javax.swing.JLabel();
             jLabel2 = new javax.swing.JLabel();
 
             setLayout(new java.awt.GridBagLayout());
@@ -1286,7 +959,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
             gridBagConstraints.gridx = 0;
             gridBagConstraints.gridy = 2;
             gridBagConstraints.weighty = 1.0;
-            add(jLabel1, gridBagConstraints);
+            add(jLabelplaceholder2, gridBagConstraints);
             gridBagConstraints = new java.awt.GridBagConstraints();
             gridBagConstraints.gridx = 1;
             gridBagConstraints.gridy = 0;
@@ -1390,6 +1063,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	    init();
     	    JOptionPane pane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
     		JDialog d = pane.createDialog("Font Chooser");
+    		d.setSize(400, 300);
     		d.setResizable(true);
     		d.setVisible(true);
     		Object o = pane.getValue();
