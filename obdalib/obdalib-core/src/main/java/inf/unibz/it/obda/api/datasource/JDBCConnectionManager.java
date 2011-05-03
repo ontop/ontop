@@ -57,7 +57,6 @@ public class JDBCConnectionManager {
 		String driver = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
 		currentDriver = driver;
 		String url = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		String dbname = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String username = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		URI connID = ds.getSourceID();
@@ -70,7 +69,7 @@ public class JDBCConnectionManager {
 			} catch (Exception e) {
 				log.warn("Driver class not found our it has already been loaded");
 			}
-			con = DriverManager.getConnection(url+dbname, username, password);
+			con = DriverManager.getConnection(url, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
 			connectionPool.put(connID, con);
@@ -80,7 +79,7 @@ public class JDBCConnectionManager {
 				Class d = Class.forName(driver);
 			} catch (Exception e) {
 				log.warn("Driver class not found our it has already been loaded");
-			}			con = DriverManager.getConnection(url+dbname, username, password);
+			}			con = DriverManager.getConnection(url, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
 			connectionPool.put(connID, con);
