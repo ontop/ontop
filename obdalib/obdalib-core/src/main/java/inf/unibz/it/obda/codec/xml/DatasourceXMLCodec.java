@@ -33,7 +33,6 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		URI uri = URI.create(id);
 		new_src = new DataSource(uri);
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, dbname);
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, dburl);
 		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
@@ -64,7 +63,6 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		String id = input.getSourceID().toString();
 		String driver = input.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
 		String  uristring= input.getParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI);
-		String dbname = input.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String pwd = input.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		String dburl = input.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
 		String username = input.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
@@ -73,7 +71,6 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		element.setAttribute("URI", id);
 		element.setAttribute("ontouri",uristring);
 		element.setAttribute("databaseDriver",driver);
-		element.setAttribute("databaseName", dbname);
 		element.setAttribute("databasePassword", pwd);
 		element.setAttribute("databaseURL", dburl);
 		element.setAttribute("databaseUsername", username);

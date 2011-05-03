@@ -37,6 +37,7 @@ public class OBDAProgessMonitor{
 	}
 	
 	public void triggerActionCanceled(){
+		parent.setVisible(false);
 		for(OBDAProgressListener pl : listeners){
 			pl.actionCanceled();
 		}

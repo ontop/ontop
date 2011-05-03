@@ -112,9 +112,10 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 		Style style = context.getStyle(StyleContext.DEFAULT_STYLE);
 
 		if (node instanceof MappingNode) {
-
-			StyleConstants.setFontFamily(style, pref.getFontFamily(MappingManagerPreferences.MAPPING_ID_FONTFAMILY));
-			StyleConstants.setFontSize(style, pref.getFontSize(MappingManagerPreferences.MAPPING_ID_FONTSIZE));
+			if(!pref.getUseDefault()){
+				StyleConstants.setFontFamily(style, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+				StyleConstants.setFontSize(style, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+			}
 			label.setIcon(mappingIcon);
 			String txt = ((String) node.getUserObject());
 			DefaultStyledDocument doc = new DefaultStyledDocument();
@@ -127,9 +128,10 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 			area.setDocument(doc);
 
 		} else if (node instanceof MappingBodyNode) {
-
-			StyleConstants.setFontFamily(style, pref.getFontFamily(MappingManagerPreferences.MAPPING_BODY_FONTFAMILY));
-			StyleConstants.setFontSize(style, pref.getFontSize(MappingManagerPreferences.MAPPING_BODY_FONTSIZE));
+			if(!pref.getUseDefault()){
+				StyleConstants.setFontFamily(style, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+				StyleConstants.setFontSize(style, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+			}
 			label.setIcon(mappingbodyIcon);
 			String txt = ((String) node.getUserObject());
 			DefaultStyledDocument doc = new DefaultStyledDocument();

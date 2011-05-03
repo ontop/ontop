@@ -15,7 +15,6 @@ package inf.unibz.it.obda.rdbmsgav.domain;
 
 public class RDBMSsourceParameterConstants {
 
-	public static final String DATABASE_NAME = "databaseName";
 	public static final String DATABASE_USERNAME = "databaseUsername";
 	public static final String DATABASE_PASSWORD = "databasePassword";
 	public static final String DATABASE_DRIVER = "databaseDriver";

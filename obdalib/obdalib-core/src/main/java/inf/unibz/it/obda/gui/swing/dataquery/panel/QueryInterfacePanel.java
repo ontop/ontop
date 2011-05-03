@@ -16,6 +16,8 @@ package inf.unibz.it.obda.gui.swing.dataquery.panel;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
+import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
+import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferenceChangeListener;
 import inf.unibz.it.utils.swing.DialogUtils;
 
 import java.awt.Color;
@@ -41,7 +43,7 @@ import javax.swing.text.StyleContext;
  * @author mariano
  */
 public class QueryInterfacePanel extends javax.swing.JPanel implements
-		SavedQueriesPanelListener, TableModelListener {
+		SavedQueriesPanelListener, TableModelListener, MappingManagerPreferenceChangeListener {
 
 	/**
 	 * Variable currentGroup is the group's id to which belongs the selected query
@@ -65,15 +67,16 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	private URI baseuri = null;
 
 	/** Creates new form QueryInterfacePanel */
-	public QueryInterfacePanel(APIController apic, URI baseuri) {
+	public QueryInterfacePanel(APIController apic, URI baseuri, OBDAPreferences prefs) {
 		this.qc = apic.getQueryController();
 		instance = this;
 		this.apic = apic;
 		this.baseuri = baseuri;
+		prefs.getMappingsPreference().registerPreferenceChangedListener(this);
 		initComponents();
 
 		StyleContext style = new StyleContext();
-		_styled_doc = new SPARQLQueryStyledDocument(style);
+		_styled_doc = new SPARQLQueryStyledDocument(style, prefs.getMappingsPreference());
 
 		// UIUtils.setAntializaing(this, true);
 		queryTextPane.setDocument(_styled_doc);
@@ -406,5 +409,41 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 
 	public String getQuery(){	
 		return queryTextPane.getText();
+	}
+
+	@Override
+	public void colorPeferenceChanged(String preference, Color col) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void fontFamilyPreferenceChanged(String preference, String font) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void fontSizePreferenceChanged(String preference, int size) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void shortCutChanged(String preference, String shortcut) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void useDefaultPreferencesChanged(String key, String value) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);		
 	}
 }

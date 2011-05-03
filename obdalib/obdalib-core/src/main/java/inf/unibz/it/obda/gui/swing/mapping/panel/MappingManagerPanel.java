@@ -1020,4 +1020,11 @@ public class MappingManagerPanel extends JPanel implements
     }
     model.currentSourceChanged(oldSourceUri, newSourceUri);
   }
+
+	@Override
+	public void useDefaultPreferencesChanged(String key, String value) {
+		 DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
+		    model.reload();
+		
+	}
 }

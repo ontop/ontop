@@ -74,58 +74,69 @@ public class QueryPainter {
 		boolean invalid = false;
 		CQIE query = null;
 
+		boolean useDefault = pref.getUseDefault();
+		
 		SimpleAttributeSet black = new SimpleAttributeSet();
 		black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
-		black.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
+		if(!useDefault){
+			black.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
+		}
 
 		SimpleAttributeSet brackets = new SimpleAttributeSet();
-		brackets.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
 		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
-		brackets.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
-
+		if(!useDefault){
+			brackets.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
+			brackets.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
+		}
+			
 		SimpleAttributeSet functor = new SimpleAttributeSet();
-		functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.FUCNTOR_ISBOLD));
 		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.FUCNTOR_COLOR));
-		functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.FUCNTOR_FONTFAMILY) );
-		functor.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.FUCNTOR_FONTSIZE));
+		if(!useDefault){
+			functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY) );
+			functor.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+		}
 
 		SimpleAttributeSet parameters = new SimpleAttributeSet();
-		parameters.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.PARAMETER_FONTFAMILY));
 		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.PARAMETER_COLOR));
-		parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.PARAMETER_ISBOLD));
-		parameters.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.PARAMETER_FONTSIZE));
+		if(!useDefault){
+			parameters.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			parameters.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+		}
 
 		SimpleAttributeSet dataProp = new SimpleAttributeSet();
-		dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.DATAPROPERTY_ISBOLD));
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.DATAPROPERTY_COLOR));
-		dataProp.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.DATAPROPERTY_FONTFAMILY) );
-		dataProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.DATAPROPERTY_FONTSIZE) );
+		if(!useDefault){
+			dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			dataProp.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY) );
+			dataProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+		}
 
 		SimpleAttributeSet objectProp = new SimpleAttributeSet();
-		objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBJECTPROPTERTY_ISBOLD));
 		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR));
-		objectProp.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBJECTPROPTERTY_FONTFAMILY));
-		objectProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.DATAPROPERTY_FONTSIZE) );
+		if(!useDefault){
+			objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			objectProp.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			objectProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+		}
 
 		SimpleAttributeSet clazz = new SimpleAttributeSet();
-		clazz.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.CLASS_ISBOLD));
 		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.CLASS_COLOR));
-		clazz.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.CLASS_FONTFAMILY));
-		clazz.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.CLASS_FONTSIZE) );
+		if(!useDefault){
+			clazz.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			clazz.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			clazz.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+		}
 
 
 		SimpleAttributeSet variable = new SimpleAttributeSet();
-		variable.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.VARIABLE_ISBOLD));
 		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.VARIABLE_COLOR));
-		variable.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.VARIABLE_FONTFAMILY));
-		variable.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.VARIABLE_FONTSIZE) );
-
-
-		SimpleAttributeSet invalidQuery = new SimpleAttributeSet();
-		invalidQuery.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.INVALIDQUERY_COLOR));
-		invalidQuery.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.INVALIDQUERY_FONTFAMILY) );
-		invalidQuery.addAttribute(StyleConstants.FontSize, pref.getFontSize(MappingManagerPreferences.INVALIDQUERY_FONTSIZE));
-		invalidQuery.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.INVALIDQUERY_ISBOLD));
+		if(!useDefault){
+			variable.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			variable.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			variable.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+		}
 
 
 		try {
@@ -147,7 +158,7 @@ public class QueryPainter {
 
 					try {
 						doc.removeDocumentListener(doc);
-						doc.setCharacterAttributes(0, doc.getLength(), invalidQuery, true);
+						doc.setCharacterAttributes(0, doc.getLength(), black, true);
 						doc.addDocumentListener(doc);
 					} catch (Exception e) {
 						System.err.print("Unexcpected error: " + e.getMessage());
@@ -348,38 +359,6 @@ public class QueryPainter {
 		}
 
 		return result;
-	}
-
-	private void checkValidityOfConjunctiveQuery(CQIE cq) throws Exception{
-		List<Atom> atoms = cq.getBody();
-		Iterator<Atom> it = atoms.iterator();
-		APICoupler coup= apic.getCoupler();
-		URI onto_uri = apic.getCurrentOntologyURI();
-		while(it.hasNext()){
-			Atom atom = it.next();
-			int arity = atom.getArity();
-			if (arity == 1) {  // concept query atom
-				String name =apic.getEntityNameRenderer().getPredicateName(atom);
-				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(name));
-				if(!isConcept){
-					throw new Exception("Concept "+name+" not present in ontology.");
-				}
-
-			} else if (arity == 2) {  // binary query atom
-				String name = apic.getEntityNameRenderer().getPredicateName(atom);
-				List<Term> terms = atom.getTerms();
-				Term t2 = terms.get(1);
-				boolean found = false;
-				if(t2 instanceof FunctionalTermImpl){
-					found =coup.isObjectProperty(onto_uri,new URI(name));
-				}else{
-					found =coup.isDatatypeProperty(onto_uri,new URI(name));
-				}
-				if(!found){
-					throw new Exception("Property "+name+" not present in ontology.");
-				}
-			}
-		}
 	}
 
 
