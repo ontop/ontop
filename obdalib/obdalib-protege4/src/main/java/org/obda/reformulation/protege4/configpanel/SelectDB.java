@@ -9,6 +9,7 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.utils.swing.OBDAProgessMonitor;
 
 import java.net.URI;
 import java.util.Collection;
@@ -185,14 +186,26 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     }
     
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
-    	this.setVisible(false);
-    	String name = jComboBox1.getSelectedItem().toString();  
-    	try {
-			dumper.materialize(ontologies, URI.create(name),jCheckBoxOverride.isSelected());
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Error during the dumping. Please check the logfile for more information", "FAILURE", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-		}
+    	this.setVisible(false); 
+    	
+    		Thread th = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String name = jComboBox1.getSelectedItem().toString(); 
+				OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+		    	monitor.start();
+		    	try {
+					dumper.materialize(ontologies, URI.create(name),jCheckBoxOverride.isSelected());
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Error during the dumping. Please check the logfile for more information", "FAILURE", JOptionPane.ERROR_MESSAGE);
+					e.printStackTrace();
+				}
+				monitor.stop();
+				JOptionPane.showMessageDialog(null,"Dump successful!","",JOptionPane.PLAIN_MESSAGE);	
+			}
+		});
+    	th.start();
+		
     }
     
     private void jButtonNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewActionPerformed
