@@ -12,7 +12,6 @@ import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.utils.swing.OBDAProgessMonitor;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -76,7 +75,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
         java.awt.GridBagConstraints gridBagConstraints;
 
         jPanel1 = new javax.swing.JPanel();
-        jButton3ÓK = new javax.swing.JButton();
+        jButtonOK = new javax.swing.JButton();
         jButtonNew = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
@@ -90,15 +89,15 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        jButton3ÓK.setText("OK");
-        jButton3ÓK.setMaximumSize(new java.awt.Dimension(50, 25));
-        jButton3ÓK.setMinimumSize(new java.awt.Dimension(50, 25));
-        jButton3ÓK.setPreferredSize(new java.awt.Dimension(50, 25));
+        jButtonOK.setText("OK");
+        jButtonOK.setMaximumSize(new java.awt.Dimension(50, 25));
+        jButtonOK.setMinimumSize(new java.awt.Dimension(50, 25));
+        jButtonOK.setPreferredSize(new java.awt.Dimension(50, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        jPanel1.add(jButton3ÓK, gridBagConstraints);
+        jPanel1.add(jButtonOK, gridBagConstraints);
 
         jButtonNew.setText("New...");
         jButtonNew.addActionListener(new java.awt.event.ActionListener() {
@@ -164,7 +163,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     }// </editor-fold>//GEN-END:initComponents
 
     private void addListener(){
-    	jButton3ÓK.addActionListener(new java.awt.event.ActionListener() {
+    	jButtonOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	jButton3ActionPerformed(evt);
             }
@@ -221,8 +220,8 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     }//GEN-LAST:event_jCheckBoxOverrideActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton3ÓK;
     private javax.swing.JButton jButtonNew;
+    private javax.swing.JButton jButtonOK;
     private javax.swing.JCheckBox jCheckBoxOverride;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
