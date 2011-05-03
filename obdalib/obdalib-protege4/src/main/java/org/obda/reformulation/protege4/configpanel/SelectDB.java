@@ -8,7 +8,6 @@ package org.obda.reformulation.protege4.configpanel;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 import inf.unibz.it.utils.swing.OBDAProgessMonitor;
 
 import java.net.URI;
@@ -51,7 +50,6 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
         this.ontologies = ontologies;
         initComponents();
         addListener();
-        addItemsToCombo();
         apic.getDatasourcesController().addDatasourceControllerListener(this);
         addExistingDataSourcesToCombo();
     }
@@ -60,7 +58,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
     	HashMap<URI, DataSource> sources = apic.getDatasourcesController().getAllSources();
     	Iterator<DataSource> it = sources.values().iterator();
     	while(it.hasNext()){
-    		jComboBox1.addItem(it.next().getParameter(RDBMSsourceParameterConstants.DATABASE_NAME));
+    		jComboBox1.addItem(it.next().getSourceID());
     	}
     }
 
@@ -170,20 +168,6 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
         });
     }
     
-    private void addItemsToCombo(){
-    	
-    	HashMap<URI, DataSource> map = apic.getDatasourcesController().getAllSources();
-    	Iterator<DataSource> it= map.values().iterator();
-    	while(it.hasNext()){
-    		DataSource ds = it.next();
-    		String usage = ds.getParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
-    		if(usage != null && usage.equals("true")){
-    			jComboBox1.addItem(ds.getSourceID().toString());
-    		}
-    	}
-    	
-    }
-    
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
     	this.setVisible(false); 
     	
@@ -194,13 +178,17 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 				OBDAProgessMonitor monitor = new OBDAProgessMonitor();
 		    	monitor.start();
 		    	try {
+		    		monitor.addProgressListener(dumper);
 					dumper.materialize(ontologies, URI.create(name),jCheckBoxOverride.isSelected());
+					monitor.stop();
+					if(!dumper.wasMaterializationCanceled()){
+						JOptionPane.showMessageDialog(null,"Dump successful!","",JOptionPane.PLAIN_MESSAGE);
+					}
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error during the dumping. Please check the logfile for more information", "FAILURE", JOptionPane.ERROR_MESSAGE);
+					monitor.stop();
+					JOptionPane.showMessageDialog(null, "Error during the dumping. "+ e.getMessage(), "FAILURE", JOptionPane.ERROR_MESSAGE);
 					e.printStackTrace();
 				}
-				monitor.stop();
-				JOptionPane.showMessageDialog(null,"Dump successful!","",JOptionPane.PLAIN_MESSAGE);	
 			}
 		});
     	th.start();
@@ -233,7 +221,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 	@Override
 	public void alldatasourcesDeleted() {
 		if(isVisible()){
-			addItemsToCombo();
+			addExistingDataSourcesToCombo();
 		}
 		
 	}
@@ -242,7 +230,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 	public void currentDatasourceChange(DataSource previousdatasource,
 			DataSource currentsource) {
 		if(isVisible()){
-			addItemsToCombo();
+			addExistingDataSourcesToCombo();
 		}
 		
 	}
@@ -250,7 +238,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 	@Override
 	public void datasourcParametersUpdated() {
 		if(isVisible()){
-			addItemsToCombo();
+			addExistingDataSourcesToCombo();
 		}
 		
 	}
@@ -258,7 +246,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 	@Override
 	public void datasourceAdded(DataSource source) {
 		if(isVisible()){
-			addItemsToCombo();
+			addExistingDataSourcesToCombo();
 		}
 		
 	}
@@ -266,7 +254,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 	@Override
 	public void datasourceDeleted(DataSource source) {
 		if(isVisible()){
-			addItemsToCombo();
+			addExistingDataSourcesToCombo();
 		}
 		
 	}
@@ -274,7 +262,7 @@ public class SelectDB extends javax.swing.JDialog implements DatasourcesControll
 	@Override
 	public void datasourceUpdated(String oldname, DataSource currendata) {
 		if(isVisible()){
-			addItemsToCombo();
+			addExistingDataSourcesToCombo();
 		}
 		
 	}

@@ -81,4 +81,9 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel
 	public void preferenceChanged(String key, String value) {
 		preference.putString(key, value);
 	}
+
+	@Override
+	public void useDefaultPreferencesChanged(String key, String value) {
+		preference.putString(key, value);
+	}
 }

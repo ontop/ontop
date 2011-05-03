@@ -7,6 +7,7 @@ import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
+import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.queryhistory.QueryhistoryController;
 import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
@@ -85,7 +86,9 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		JPanel panel_right_main = new JPanel();
 		JSplitPane split_right_horizontal = new javax.swing.JSplitPane();
-		panel_query_interface = new QueryInterfacePanel(obdaController, this.getOWLModelManager().getActiveOntology().getURI());
+		 OBDAPreferences preference = (OBDAPreferences)
+         getOWLEditorKit().get(OBDAPreferences.class.getName());
+		panel_query_interface = new QueryInterfacePanel(obdaController, this.getOWLModelManager().getActiveOntology().getURI(),preference);
 
 		// getOWLWorkspace().getEditorKit()
 		panel_view_results = new inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel(panel_query_interface);

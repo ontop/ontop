@@ -202,7 +202,6 @@ public class SetParametersDialog extends javax.swing.JDialog {
     		DataSource aux = getOldAboxDump();
     		if(aux != null){
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-    			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, dbname);
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, usr);
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
@@ -213,7 +212,6 @@ public class SetParametersDialog extends javax.swing.JDialog {
 	    		
 		    	DataSource ds = new DataSource(URI.create("ABOXDUMP"));
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, dbname);
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, usr);
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
