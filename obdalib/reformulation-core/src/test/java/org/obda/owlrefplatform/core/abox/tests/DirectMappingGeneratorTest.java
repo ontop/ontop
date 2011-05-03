@@ -39,14 +39,12 @@ private String file = "C:/Users/obda/ontologies/ABoxDumpTest/ABoxDumpTest.owl";
 		     ontology = manager.loadOntologyFromPhysicalURI((new File(file)).toURI());
 
 		     String driver = "org.h2.Driver";
-	         String url = "jdbc:h2:mem:";
-	         String dbname = "aboxdump";
+	         String url = "jdbc:h2:mem:aboxdump";
 	         String username = "sa";
 	         String password = "";
 
 	         DataSource source = new DataSource(URI.create("http://www.obda.org/ABOXDUMP"));
 	         source.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-	         source.setParameter(RDBMSsourceParameterConstants.DATABASE_NAME, dbname);
 	         source.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, password);
 	         source.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
 	         source.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
