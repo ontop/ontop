@@ -52,7 +52,6 @@ public class JDBCEngine implements EvaluationEngine {
 		
 		log.debug("Connecting to JDBC source: {}", url);
 		
-		String dbname = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_NAME);
 		String username = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		try {
@@ -60,7 +59,7 @@ public class JDBCEngine implements EvaluationEngine {
 		} catch (Exception e) {
 			log.warn("Driver class not found our it has already been loaded");
 		}
-		connection = DriverManager.getConnection(url + dbname, username, password);
+		connection = DriverManager.getConnection(url, username, password);
 
 	}
 

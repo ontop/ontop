@@ -3,18 +3,14 @@ package org.obda.owlrefplatform.core.abox;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.utils.swing.OBDAProgressListener;
 
 import java.net.URI;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,14 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
@@ -62,18 +50,16 @@ import org.slf4j.LoggerFactory;
 // TODO ABoxDumper document in the schema when and how the data is inserted into
 // the schema
 
-public class ABoxToDBDumper {
+public class ABoxToDBDumper implements OBDAProgressListener{
 
 	private Connection							conn					= null;
-	private Set<String>							createTableSQLs			= null;
-	private HashMap<String, List<List<String>>>	inserts					= null;
 	private APIController						apic					= null;
 	private List<ABoxDumpListener>				listener				= null;
 	private DataSource							ds						= null;
-	private Set<String>							createIndexSQL			= null;
 	private int									indexcounter			= 1;
 	
-	
+	private boolean								isCanceled = false;					
+	private Statement 							statement = null;
 
 	private static ABoxToDBDumper				instance				= null;
 	
@@ -106,117 +92,124 @@ public class ABoxToDBDumper {
 	 * @throws Exception
 	 */
 	public void materialize(Set<OWLOntology> ontologies, Connection c, URI dsUri) throws AboxDumpException {
-
-		log.debug("Materializing ABoxes into DB");
-
-		createTableSQLs = new HashSet<String>();
-		inserts = new HashMap<String, List<List<String>>>();
-		createIndexSQL = new HashSet<String>();
-		mapper = new HashMap<URIIdentyfier,String>();
-
-		
-		int conceptCounter = 1;
-		int datapropCounter = 1;
-		int objectpropCounter = 1;
-
-		conn = c;
-
-		Iterator<OWLOntology> it = ontologies.iterator();
-		while(it.hasNext()){	
-			OWLOntology ontology = it.next();
-			log.debug("Materializing ABox for ontology: {}", ontology.getURI().toString());
-			Set<OWLEntity> entities = ontology.getSignature();
-			Iterator<OWLEntity> entityIterator = entities.iterator();
-				
-			while (entityIterator.hasNext()) {
-					/* For each entity */
-				OWLEntity entity = entityIterator.next();
+		try {
+			log.debug("Materializing ABoxes into DB");
+			isCanceled = false;
+			
+			Set<String>	createTableSQLs			=  new HashSet<String>();;
+			HashMap<String, List<List<String>>>	inserts	= new HashMap<String, List<List<String>>>();
+			Set<String>	createIndexSQL			= new HashSet<String>();
+			
+			mapper = new HashMap<URIIdentyfier,String>();
+			
+			int conceptCounter = 1;
+			int datapropCounter = 1;
+			int objectpropCounter = 1;
 	
-				if (entity instanceof OWLClass) {
-					OWLClass clazz = (OWLClass) entity;
-					if (!clazz.isOWLThing()) {
-						URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.CONCEPT);
-						String tablename = "table_concept_" + conceptCounter++;
+			conn = c;
+	
+			Iterator<OWLOntology> it = ontologies.iterator();
+			while(it.hasNext()){	
+				OWLOntology ontology = it.next();
+				log.debug("Materializing ABox for ontology: {}", ontology.getURI().toString());
+				Set<OWLEntity> entities = ontology.getSignature();
+				Iterator<OWLEntity> entityIterator = entities.iterator();
+					
+				while (entityIterator.hasNext()) {
+						/* For each entity */
+					OWLEntity entity = entityIterator.next();
+		
+					if (entity instanceof OWLClass) {
+						OWLClass clazz = (OWLClass) entity;
+						if (!clazz.isOWLThing()) {
+							URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.CONCEPT);
+							String tablename = "table_concept_" + conceptCounter++;
+							mapper.put(id,tablename);
+							/* Creating the table */
+							createTable(tablename, 1, createIndexSQL,createTableSQLs);
+						}
+					} else if (entity instanceof OWLObjectProperty) {
+						URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.OBJECTPROPERTY);
+						String tablename = "table_objectProperty_" + objectpropCounter++;
 						mapper.put(id,tablename);
 						/* Creating the table */
-						createTable(tablename, 1);
+						createTable(tablename, 2,createIndexSQL, createTableSQLs);
+					} else if (entity instanceof OWLDataProperty) {
+						URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.DATAPROPERTY);
+						String tablename = "table_dataProperty_" + datapropCounter++;
+						mapper.put(id,tablename);
+						/* Creating the table */
+						createTable(tablename, 2,createIndexSQL,createTableSQLs);
 					}
-				} else if (entity instanceof OWLObjectProperty) {
-					URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.OBJECTPROPERTY);
-					String tablename = "table_objectProperty_" + objectpropCounter++;
-					mapper.put(id,tablename);
-					/* Creating the table */
-					createTable(tablename, 2);
-				} else if (entity instanceof OWLDataProperty) {
-					URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.DATAPROPERTY);
-					String tablename = "table_dataProperty_" + datapropCounter++;
-					mapper.put(id,tablename);
-					/* Creating the table */
-					createTable(tablename, 2);
 				}
-			}
-	
-			/* Inserting individuals */
-			log.debug("Preparing indivituals to insert");
-			int tupleCounter = 0;
-			Set<OWLIndividualAxiom> ind = ontology.getIndividualAxioms();
-			Iterator<OWLIndividualAxiom> ind_it = ind.iterator();
-			while (ind_it.hasNext()) {
-				tupleCounter += 1;
-				OWLIndividualAxiom ax = ind_it.next();
-				if (ax instanceof OWLClassAssertionAxiom) {
-					OWLClassAssertionAxiom caa = (OWLClassAssertionAxiom) ax;
-					OWLDescription des = caa.getDescription();
-					if (!des.isOWLThing()) {
-						OWLIndividual i = caa.getIndividual();
-						OWLClass clazz = (OWLClass) des;
-						URIIdentyfier id = new URIIdentyfier(clazz.getURI(),URIType.CONCEPT);
+		
+				/* Inserting individuals */
+				log.debug("Preparing indivituals to insert");
+				int tupleCounter = 0;
+				Set<OWLIndividualAxiom> ind = ontology.getIndividualAxioms();
+				Iterator<OWLIndividualAxiom> ind_it = ind.iterator();
+				while (ind_it.hasNext()) {
+					tupleCounter += 1;
+					OWLIndividualAxiom ax = ind_it.next();
+					if (ax instanceof OWLClassAssertionAxiom) {
+						OWLClassAssertionAxiom caa = (OWLClassAssertionAxiom) ax;
+						OWLDescription des = caa.getDescription();
+						if (!des.isOWLThing()) {
+							OWLIndividual i = caa.getIndividual();
+							OWLClass clazz = (OWLClass) des;
+							URIIdentyfier id = new URIIdentyfier(clazz.getURI(),URIType.CONCEPT);
+							String tablename = mapper.get(id);
+							if(tablename == null){
+								throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+							}
+							String in = i.getURI().toString();
+							add(tablename, in, inserts);
+						}
+					} else if (ax instanceof OWLDataPropertyAssertionAxiom) {
+		
+						OWLDataPropertyAssertionAxiom paa = (OWLDataPropertyAssertionAxiom) ax;
+						OWLConstant obj = paa.getObject();
+						OWLIndividual sub = paa.getSubject();
+						OWLDataPropertyExpression prop = paa.getProperty();
+						OWLDataProperty dp = (OWLDataProperty) prop;
+						URIIdentyfier id = new URIIdentyfier(dp.getURI(),URIType.DATAPROPERTY);
 						String tablename = mapper.get(id);
 						if(tablename == null){
 							throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
 						}
-						String in = i.getURI().toString();
-						add(tablename, in);
+						add(tablename, sub.getURI().toString(),	obj.getLiteral(),inserts);
+		
+					} else if (ax instanceof OWLObjectPropertyAssertionAxiom) {
+						OWLObjectPropertyAssertionAxiom ppa = (OWLObjectPropertyAssertionAxiom) ax;
+						OWLIndividual sub = ppa.getSubject();
+						OWLIndividual obj = ppa.getObject();
+						OWLObjectPropertyExpression prop = ppa.getProperty();
+						OWLObjectProperty op = (OWLObjectProperty) prop;
+						URIIdentyfier id = new URIIdentyfier(op.getURI(),URIType.OBJECTPROPERTY);
+						String tablename = mapper.get(id);
+						if(tablename == null){
+							throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+						}
+						add(tablename, sub.getURI().toString(), obj.getURI().toString(),inserts);
 					}
-				} else if (ax instanceof OWLDataPropertyAssertionAxiom) {
-	
-					OWLDataPropertyAssertionAxiom paa = (OWLDataPropertyAssertionAxiom) ax;
-					OWLConstant obj = paa.getObject();
-					OWLIndividual sub = paa.getSubject();
-					OWLDataPropertyExpression prop = paa.getProperty();
-					OWLDataProperty dp = (OWLDataProperty) prop;
-					URIIdentyfier id = new URIIdentyfier(dp.getURI(),URIType.DATAPROPERTY);
-					String tablename = mapper.get(id);
-					if(tablename == null){
-						throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
-					}
-					add(tablename, sub.getURI().toString(),	obj.getLiteral());
-	
-				} else if (ax instanceof OWLObjectPropertyAssertionAxiom) {
-					OWLObjectPropertyAssertionAxiom ppa = (OWLObjectPropertyAssertionAxiom) ax;
-					OWLIndividual sub = ppa.getSubject();
-					OWLIndividual obj = ppa.getObject();
-					OWLObjectPropertyExpression prop = ppa.getProperty();
-					OWLObjectProperty op = (OWLObjectProperty) prop;
-					URIIdentyfier id = new URIIdentyfier(op.getURI(),URIType.OBJECTPROPERTY);
-					String tablename = mapper.get(id);
-					if(tablename == null){
-						throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
-					}
-					add(tablename, sub.getURI().toString(), obj.getURI().toString());
 				}
+				log.debug("Tuples to be inserted: {}", tupleCounter);
 			}
-			log.debug("Tuples to be inserted: {}", tupleCounter);
-		}
-
-		try {
 			materializeMapper();
-			insertData();
-			createIndexes();
+			insertData(inserts);
+			createIndexes(createIndexSQL);
 		} catch (SQLException e) {
-			throw new AboxDumpException("Error while dumping Abox to data base", e);
+			if(isCanceled){
+				log.debug(e.getMessage());
+			}else{
+				throw new AboxDumpException("Error while dumping Abox to data base. " + e.getMessage(), e);
+			}
 		} catch (Exception e) {
-			throw new AboxDumpException("Error while dumping Abox to data base", e);
+			if(isCanceled){
+				log.debug(e.getMessage());
+			}else{
+				throw new AboxDumpException("Error while dumping Abox to data base. " + e.getMessage(), e);
+			}
 		}
 	}
 
@@ -232,7 +225,7 @@ public class ABoxToDBDumper {
 	 * @throws Exception
 	 */
 	public void materialize(Set<OWLOntology> ontologies, URI dsname, boolean override) throws AboxDumpException {
-
+		isCanceled = false;
 		if (apic == null) {
 			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
 		}
@@ -250,11 +243,11 @@ public class ABoxToDBDumper {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 		} catch (NoDatasourceSelectedException e) {
-			throw new AboxDumpException("Error while connecting to data base", e);
+			throw new AboxDumpException("Error while connecting to data base. " + e.getMessage(), e);
 		} catch (ClassNotFoundException e) {
-			throw new AboxDumpException("Error while connecting to data base", e);
+			throw new AboxDumpException("Error while connecting to data base. " + e.getMessage(), e);
 		} catch (SQLException e) {
-			throw new AboxDumpException("Error while connecting to data base", e);
+			throw new AboxDumpException("Error while connecting to data base. " + e.getMessage(), e);
 		}
 		materialize(ontologies, conn, dsname);
 	}
@@ -288,10 +281,10 @@ public class ABoxToDBDumper {
 		String insertStatement = "INSERT INTO mapper VALUES "+ values.toString();
 		
 		conn.commit();
-		Statement st = conn.createStatement();
-		st.execute(createTable);
-		st.execute(insertStatement);
-		st.close();
+		statement = conn.createStatement();
+		statement.execute(createTable);
+		statement.execute(insertStatement);
+		statement.close();
 	}
 	
 	/**
@@ -300,11 +293,11 @@ public class ABoxToDBDumper {
 	 *
 	 * @throws SQLException
 	 */
-	private void insertData() throws SQLException {
+	private void insertData(HashMap<String, List<List<String>>>	inserts) throws SQLException {
 		log.debug("Inserting data into DB. ");
 		
 		conn.commit();
-		Statement st = conn.createStatement();
+		statement = conn.createStatement();
 		Set<String> keys = inserts.keySet();// keys are table names
 		Iterator<String> it = keys.iterator();
 		while (it.hasNext()) {
@@ -342,11 +335,11 @@ public class ABoxToDBDumper {
 
 			log.debug("{}", sqlquery.toString());
 			// System.out.println(sb.toString());
-			st.execute(sqlquery.toString());
+			statement.execute(sqlquery.toString());
 
 		}
 		log.debug("Done inserting data");
-		st.close();
+		statement.close();
 	}
 
 	/**
@@ -357,7 +350,7 @@ public class ABoxToDBDumper {
 	 * @param value
 	 *            the value as String
 	 */
-	private void add(String tablename, String value) {
+	private void add(String tablename, String value, HashMap<String, List<List<String>>>	inserts) {
 
 		List<List<String>> list = inserts.get(tablename);
 		if (list == null) {
@@ -381,7 +374,7 @@ public class ABoxToDBDumper {
 	 * @param obj
 	 *            the object as string
 	 */
-	private void add(String tablename, String sub, String obj) {
+	private void add(String tablename, String sub, String obj,HashMap<String, List<List<String>>>	inserts) {
 
 		List<List<String>> list = inserts.get(tablename);
 		if (list == null) {
@@ -401,8 +394,9 @@ public class ABoxToDBDumper {
 	 *            the table name
 	 * @param columns
 	 *            number of columns
+	 * @throws AboxDumpException 
 	 */
-	private void createTable(String tablename, int columns) {
+	private void createTable(String tablename, int columns, Set<String>	createIndexSQL, Set<String>	createTableSQLs	) throws AboxDumpException {
 
 		// TODO Move create table to an independent method that creates the DDL
 		// for the full database. Creation of the schema should be done in one
@@ -431,12 +425,12 @@ public class ABoxToDBDumper {
 		if (createTableSQLs.add(sql.toString())) {
 			try {
 				conn.commit();
-				Statement st = conn.createStatement();
+				statement = conn.createStatement();
 				log.debug("Executing SQL: {}", sql.toString());
-				st.execute(sql.toString());
-				st.close();
+				statement.execute(sql.toString());
+				statement.close();
 			} catch (SQLException e) {
-				log.error(e.getMessage(), e);
+				throw new AboxDumpException(e.getMessage());
 			}
 		}
 	}
@@ -447,17 +441,17 @@ public class ABoxToDBDumper {
 	 *
 	 * @throws Exception
 	 */
-	private void createIndexes() throws Exception {
+	private void createIndexes(Set<String>	createIndexSQL) throws Exception {
 		log.debug("Creating indexes");
 		Iterator<String> it = createIndexSQL.iterator();
 		conn.commit();
-		Statement st = conn.createStatement();
+		statement = conn.createStatement();
 		while (it.hasNext()) {
 			String sql = it.next();
 			log.debug("Executing update: {}", sql);
-			st.executeUpdate(sql);
+			statement.executeUpdate(sql);
 		}
-		st.close();
+		statement.close();
 		log.debug("Indexes created successfully");
 	}
 
@@ -510,5 +504,40 @@ public class ABoxToDBDumper {
 	
 	public Map<URIIdentyfier, String> getMapper(){
 		return mapper;
+	}
+
+	@Override
+	public void actionCanceled() {
+		
+		try {
+			isCanceled = true;
+			statement.cancel();
+			statement.close();
+			removeTables();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void removeTables() throws SQLException{
+		Collection<String> col = mapper.values();
+		Iterator<String> it = col.iterator();
+		statement = conn.createStatement();
+		while(it.hasNext()){
+			try {
+				statement.executeUpdate("DROP TABLE " + it.next() );
+			} catch (SQLException e) {
+				log.debug(e.getMessage());
+			}
+		}
+		try {
+			statement.execute("DROP TABLE mapper");
+		} catch (SQLException e) {
+			log.debug(e.getMessage());
+		}
+	}
+	
+	public boolean wasMaterializationCanceled(){
+		return isCanceled;
 	}
 }
