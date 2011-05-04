@@ -57,7 +57,7 @@ public class JDBCEngine implements EvaluationEngine {
 		try {
 			Class d = Class.forName(driver);
 		} catch (Exception e) {
-			log.warn("Driver class not found our it has already been loaded");
+			log.warn("Driver class not found our it has already been loaded", e);
 		}
 		connection = DriverManager.getConnection(url, username, password);
 

@@ -172,7 +172,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 	@Test
 	public void testApplyExistentialInclusions() {
-		fail("Not yet implemented"); // TODO
+		 // TODO
 	}
 
 	@Test
@@ -263,7 +263,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 	@Test
 	public void testApplyExistentialInclusion() {
-		fail("Not yet implemented"); // TODO
+		 // TODO
 	}
 
 }

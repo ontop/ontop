@@ -57,6 +57,11 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	 */
 	public Statement getStatement(String query) throws Exception {
 
+		if (query.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
+			// This is an epistemic query 
+			return new OBDAEpistemicStatement(unfoldingMechanism, queryRewriter, querygenerator, evaluationEngine, query);
+		}
+		
 		SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
 
 		queryProgram = null;
@@ -77,6 +82,9 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 				queryProgram = null;
 			}
 		}
+		
+		
+		
 
 		if (queryProgram == null)  // if it is still null
 			throw new Exception("Unsupported syntax");
