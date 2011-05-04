@@ -69,16 +69,16 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 		this.pref = pref;
 		default_style = context.getStyle(StyleContext.DEFAULT_STYLE);
 		StyleConstants.setForeground(default_style, Color.BLACK);
-		if(!pref.getUseDefault()){
-			StyleConstants.setFontFamily(default_style, "Courier");
-			StyleConstants.setFontSize(default_style, 12);
-		}
+//		if(!pref.getUseDefault()){
+//			StyleConstants.setFontFamily(default_style, "Courier");
+//			StyleConstants.setFontSize(default_style, 12);
+//		}
 
-		try {
-			insertString(0, "SELECT $x WHERE { $x  }", default_style);
-		} catch (BadLocationException e) {
-			e.printStackTrace(System.err);
-		}
+//		try {
+//			insertString(0, "SELECT $x WHERE { $x  }", default_style);
+//		} catch (BadLocationException e) {
+//			e.printStackTrace(System.err);
+//		}
 		addDocumentListener(this);
 	}
 
@@ -103,6 +103,9 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 
 	private void recolorQuery() {
 
+		if (alreadyColoring)
+			return;
+		
 		alreadyColoring = true;
 		String input = null;
 		boolean invalid = false;
@@ -122,13 +125,14 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					try {
+					removeDocumentListener(myself);
 						SimpleAttributeSet black = new SimpleAttributeSet();
 						black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
-						if(!pref.getUseDefault()){
-							black.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-							black.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
-							black.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));						setCharacterAttributes(0, getLength(), black, true);
-						}	
+//						if(!pref.getUseDefault()){
+//							black.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+//							black.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+//							black.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));						setCharacterAttributes(0, getLength(), black, true);
+//						}	
 						addDocumentListener(myself);
 
 					} catch (Exception e) {
@@ -149,57 +153,57 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 						
 						SimpleAttributeSet black = new SimpleAttributeSet();
 						black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
-						if(!useDefault){
-							black.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
-						}
+//						if(!useDefault){
+//							black.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
+//						}
 
 						SimpleAttributeSet bracket_styles = new SimpleAttributeSet();
 						bracket_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
-						if(!useDefault){
-							bracket_styles.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
-							bracket_styles.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
-						}
+//						if(!useDefault){
+//							bracket_styles.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
+//							bracket_styles.addAttribute(StyleConstants.FontConstants.Family, "SansSerif" );
+//						}
 
 						SimpleAttributeSet functor = new SimpleAttributeSet();
 						functor.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.FUCNTOR_COLOR));
-						if(!useDefault){
-							functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
-							functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY) );
-							functor.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
-						}
+//						if(!useDefault){
+//							functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+//							functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY) );
+//							functor.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+//						}
 
 						SimpleAttributeSet parameters = new SimpleAttributeSet();
 						parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.PARAMETER_COLOR));
-						if(!useDefault){
-							parameters.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-							parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
-							parameters.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
-						}
+//						if(!useDefault){
+//							parameters.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+//							parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+//							parameters.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+//						}
 
 						
 						SimpleAttributeSet predicates_styles = new SimpleAttributeSet();
 						predicates_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR));
-						if(!useDefault){
-							predicates_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
-							predicates_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-							predicates_styles.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
-						}
+//						if(!useDefault){
+//							predicates_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+//							predicates_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+//							predicates_styles.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+//						}
 
 						SimpleAttributeSet classes_styles = new SimpleAttributeSet();
 						classes_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.CLASS_COLOR));
-						if(!useDefault){
-							classes_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
-							classes_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-							classes_styles.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
-						}
+//						if(!useDefault){
+//							classes_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+//							classes_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+//							classes_styles.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+//						}
 
 						SimpleAttributeSet variables_styles = new SimpleAttributeSet();
 						variables_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.VARIABLE_COLOR));
-						if(!useDefault){
-							variables_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
-							variables_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-							variables_styles.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
-						}
+//						if(!useDefault){
+//							variables_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+//							variables_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+//							variables_styles.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE) );
+//						}
 
 						int pos = input.indexOf("{", 0);
 						while (pos != -1) {
@@ -376,9 +380,12 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 						addDocumentListener(myself);
 
 					} catch (Exception e) {
+						
+
 						System.err.print("Unexcpected error: " + e.getMessage());
 						e.printStackTrace(System.err);
 						addDocumentListener(myself);
+						alreadyColoring = false;
 					}
 				}
 			});
