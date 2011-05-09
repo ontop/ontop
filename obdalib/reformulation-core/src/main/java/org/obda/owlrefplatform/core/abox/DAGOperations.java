@@ -15,40 +15,6 @@ import java.util.*;
 public class DAGOperations {
     private static final Logger log = LoggerFactory.getLogger(DAGOperations.class);
 
-    /**
-     * Calculate the ancestors for all nodes in the given DAG
-     *
-     * @param dagnodes a DAG
-     * @return Map from uri to the Set of their ancestors
-     */
-    public static Map<String, Set<DAGNode>> buildAncestor(Map<String, DAGNode> dagnodes) {
-        Map<String, Set<DAGNode>> ancestors = new HashMap<String, Set<DAGNode>>();
-        LinkedList<DAGNode> stack = new LinkedList<DAGNode>();
-
-        // Start with top nodes, that don't have parents
-        for (DAGNode n : dagnodes.values()) {
-            if (n.getParents().isEmpty()) {
-                stack.add(n);
-            }
-            // Initialize all ancestors to an empty set
-            ancestors.put(n.getUri(), new LinkedHashSet<DAGNode>());
-        }
-        while (!stack.isEmpty()) {
-            DAGNode cur_el = stack.pop();
-            for (DAGNode child_node : cur_el.getChildren()) {
-
-                // add parent to ancestor list
-                ancestors.get(child_node.getUri()).add(cur_el);
-
-                // add parent parents to ancestor list
-                for (DAGNode cur_node_ancestor : ancestors.get(cur_el.getUri())) {
-                    ancestors.get(child_node.getUri()).add(cur_node_ancestor);
-                }
-                stack.add(child_node);
-            }
-        }
-        return ancestors;
-    }
 
     /**
      * Calculate the descendants for all nodes in the given DAG
@@ -56,33 +22,31 @@ public class DAGOperations {
      * @param dagnodes a DAG
      * @return Map from uri to the Set of their descendants
      */
-    public static Map<String, Set<DAGNode>> buildDescendants(Map<String, DAGNode> dagnodes) {
-        Map<String, Set<DAGNode>> descendants = new HashMap<String, Set<DAGNode>>();
-        LinkedList<DAGNode> stack = new LinkedList<DAGNode>();
+    public static void buildDescendants(Map<String, DAGNode> dagnodes) {
+        Queue<DAGNode> stack = new LinkedList<DAGNode>();
 
         // Start with bottom nodes, that don't have children
         for (DAGNode n : dagnodes.values()) {
             if (n.getChildren().isEmpty()) {
                 stack.add(n);
             }
-            // Initialize all descendants to an empty set
-            descendants.put(n.getUri(), new LinkedHashSet<DAGNode>());
         }
+        log.debug("Got all roots for descendants");
         while (!stack.isEmpty()) {
-            DAGNode cur_el = stack.pop();
+            DAGNode cur_el = stack.remove();
             for (DAGNode par_node : cur_el.getParents()) {
 
                 // add child to descendants list
-                descendants.get(par_node.getUri()).add(cur_el);
+                par_node.descendans.add(cur_el);
 
                 // add child children to descendants list
-                for (DAGNode cur_el_descendant : descendants.get(cur_el.getUri())) {
-                    descendants.get(par_node.getUri()).add(cur_el_descendant);
+                for (DAGNode cur_el_descendant : cur_el.descendans) {
+                    par_node.descendans.add(cur_el_descendant);
                 }
                 stack.add(par_node);
             }
         }
-        return descendants;
+        log.debug("Got all descendants");
     }
 
     /**
@@ -94,7 +58,7 @@ public class DAGOperations {
      * @param childnode
      * @param parentnode
      */
-    public static void addParentEdge(DAGNode childnode, DAGNode parentnode) {
+    private static void addParentEdge(DAGNode childnode, DAGNode parentnode) {
 
         if (childnode.equals(parentnode)) {
             return;
@@ -115,7 +79,7 @@ public class DAGOperations {
      * @param childnode
      * @param parentnode
      */
-    public static void removeParentEdge(DAGNode childnode, DAGNode parentnode) {
+    private static void removeParentEdge(DAGNode childnode, DAGNode parentnode) {
         childnode.getParents().remove(parentnode);
         parentnode.getChildren().remove(childnode);
     }
@@ -142,19 +106,12 @@ public class DAGOperations {
 
 
     public static void computeTransitiveReduct(Map<String, DAGNode> dagnodes) {
-        Map<String, Set<DAGNode>> ancestors = buildAncestor(dagnodes);
-        for (String uri : ancestors.keySet()) {
-            dagnodes.get(uri).ancestors = ancestors.get(uri);
-        }
-        Map<String, Set<DAGNode>> descendants = buildDescendants(dagnodes);
-        for (String uri : descendants.keySet()) {
-            dagnodes.get(uri).descendans = descendants.get(uri);
-        }
+        buildDescendants(dagnodes);
 
         LinkedList<Edge> redundantEdges = new LinkedList<Edge>();
         for (DAGNode node : dagnodes.values()) {
             for (DAGNode child : node.getChildren()) {
-                for (DAGNode child_desc : descendants.get(child.getUri())) {
+                for (DAGNode child_desc : child.descendans) {
                     redundantEdges.add(new Edge(node, child_desc));
                 }
             }
@@ -200,7 +157,7 @@ public class DAGOperations {
     private static Map<DAGNode, Integer> t_idx;
     private static Map<DAGNode, Integer> t_low_idx;
 
-    public static ArrayList<ArrayList<DAGNode>> scc(Map<String, DAGNode> list) {
+    private static ArrayList<ArrayList<DAGNode>> scc(Map<String, DAGNode> list) {
         stack = new ArrayList<DAGNode>();
         SCC = new ArrayList<ArrayList<DAGNode>>();
         t_idx = new HashMap<DAGNode, Integer>();
@@ -213,7 +170,7 @@ public class DAGOperations {
         return SCC;
     }
 
-    public static void strongconnect(DAGNode v) {
+    private static void strongconnect(DAGNode v) {
         t_idx.put(v, index);
         t_low_idx.put(v, index);
 

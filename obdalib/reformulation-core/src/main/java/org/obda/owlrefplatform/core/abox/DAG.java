@@ -120,19 +120,24 @@ public class DAG {
                     addEdge(owl_inverse_exists_obj + rangeAxiom.getProperty().asOWLObjectProperty().getURI().toString(),
                             range, cls_nodes);
                 } else {
-                    log.debug("Unsupported axiom: {}", ax);
+//                    log.debug("Unsupported axiom: {}", ax);
                 }
             }
         }
+        log.debug("Starting to remove cycles from classes");
         DAGOperations.removeCycles(cls_nodes, equi_mappings);
+        log.debug("Starting transitive reduction for classes");
         DAGOperations.computeTransitiveReduct(cls_nodes);
 
+        log.debug("Starting to remove cycles from objectprops");
         DAGOperations.removeCycles(objectprop_nodes, equi_mappings);
+        log.debug("Starting transitive reduction for objectprops");
         DAGOperations.computeTransitiveReduct(objectprop_nodes);
 
         DAGOperations.removeCycles(dataprop_nodes, equi_mappings);
         DAGOperations.computeTransitiveReduct(dataprop_nodes);
 
+        log.debug("Starting to index");
         index();
     }
 
@@ -240,12 +245,10 @@ public class DAG {
             t = new DAGNode(to);
             dagnodes.put(to, t);
         }
-        if (!t.getChildren().contains(f)) {
-            t.getChildren().add(f);
-        }
-        if (!f.getParents().contains(t)) {
-            f.getParents().add(t);
-        }
+
+        t.getChildren().add(f);
+        f.getParents().add(t);
+
     }
 
     private void addNode(String node, Map<String, DAGNode> dagnodes) {
@@ -268,11 +271,31 @@ public class DAG {
                 roots.add(n);
             }
         }
+        for (DAGNode n : dataprop_nodes.values()) {
+            if (n.getParents().isEmpty()) {
+                roots.add(n);
+            }
+        }
         // The unit tests depend on this to guarantee certain numberings
         Collections.sort(roots);
 
         for (DAGNode node : roots) {
             indexNode(node);
+        }
+        for (DAGNode node : roots) {
+            mergeRangeNode(node);
+        }
+    }
+
+    private void mergeRangeNode(DAGNode node) {
+
+
+        for (DAGNode ch : node.getChildren()) {
+            if (ch != node) {
+                mergeRangeNode(ch);
+                node.getRange().addRange(ch.getRange());
+            }
+
         }
     }
 
@@ -286,8 +309,9 @@ public class DAG {
             return;
         }
         for (DAGNode ch : node.getChildren()) {
-            indexNode(ch);
-            node.getRange().addRange(ch.getRange());
+            if (ch != node) {
+                indexNode(ch);
+            }
         }
     }
 

@@ -1,8 +1,7 @@
 package org.obda.owlrefplatform.core.abox;
 
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,11 +14,11 @@ public class DAGNode implements Comparable<DAGNode> {
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
-    private LinkedList<DAGNode> parents = new LinkedList<DAGNode>();
-    private LinkedList<DAGNode> children = new LinkedList<DAGNode>();
+    private Set<DAGNode> parents = new HashSet<DAGNode>();
+    private Set<DAGNode> children = new HashSet<DAGNode>();
 
-    public Set<DAGNode> ancestors = new LinkedHashSet<DAGNode>();
-    public Set<DAGNode> descendans = new LinkedHashSet<DAGNode>();
+    public Set<DAGNode> ancestors = new HashSet<DAGNode>();
+    public Set<DAGNode> descendans = new HashSet<DAGNode>();
 
     public LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 
@@ -38,17 +37,17 @@ public class DAGNode implements Comparable<DAGNode> {
             return false;
 
         DAGNode otherNode = (DAGNode) other;
-        return this.uri.equals(otherNode.uri)
-                && this.range.equals(otherNode.range)
-                && this.index == otherNode.index;
+        return this.uri.equals(otherNode.uri);
+//                && this.range.equals(otherNode.range)
+//                && this.index == otherNode.index;
     }
 
     @Override
     public int hashCode() {
         int result = 17;
         result += 37 * result + this.uri.hashCode();
-        result += 37 * result + this.range.hashCode();
-        result += 37 * result + this.index;
+//        result += 37 * result + this.range.hashCode();
+//        result += 37 * result + this.index;
         return result;
 
     }
@@ -71,7 +70,7 @@ public class DAGNode implements Comparable<DAGNode> {
         this.index = index;
     }
 
-    public LinkedList<DAGNode> getParents() {
+    public Set<DAGNode> getParents() {
         return parents;
     }
 
@@ -83,7 +82,7 @@ public class DAGNode implements Comparable<DAGNode> {
         return this.range;
     }
 
-    public List<DAGNode> getChildren() {
+    public Set<DAGNode> getChildren() {
         return children;
     }
 

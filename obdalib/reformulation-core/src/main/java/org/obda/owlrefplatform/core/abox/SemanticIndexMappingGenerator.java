@@ -20,8 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -53,7 +51,7 @@ public class SemanticIndexMappingGenerator {
      */
     public void build() throws DuplicateMappingException {
         log.debug("Generating mappings for DAG {}", dag);
-        Map<String, Set<DAGNode>> class_descdendants = DAGOperations.buildDescendants(dag.getClassIndex());
+        //Map<String, Set<DAGNode>> class_descdendants = DAGOperations.buildDescendants(dag.getClassIndex());
         for (DAGNode node : dag.getClassIndex().values()) {
 
             if (node.getUri().startsWith(DAG.owl_exists) || node.getUri().startsWith(DAG.owl_inverse_exists)) {
@@ -72,7 +70,7 @@ public class SemanticIndexMappingGenerator {
             }
 
             // check if has child exists(R)
-            for (DAGNode descendant : class_descdendants.get(node.getUri().toString())) {
+            for (DAGNode descendant : node.descendans) {
                 String child_uri;
                 String projection_inverse;
                 SemanticIndexRange range_inverse;
