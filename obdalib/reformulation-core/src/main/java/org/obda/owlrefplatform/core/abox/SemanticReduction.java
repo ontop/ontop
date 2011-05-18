@@ -98,8 +98,28 @@ public class SemanticReduction {
     }
 
     private boolean check_redundant(DAGNode parent, DAGNode child) {
-
+        if (check_directly_redundant(parent, child))
+            return true;
+        else {
+            for (DAGNode child_prime : parent.getChildren()) {
+                if (!child_prime.equals(child) &&
+                        check_directly_redundant(child_prime, child) &&
+                        !check_redundant(child_prime, parent)) {
+                    return true;
+                }
+            }
+        }
         return false;
+    }
+
+    private boolean check_directly_redundant(DAGNode parent, DAGNode child) {
+        DAGNode sp = sdag.getTDAG().get(parent.getUri());
+        DAGNode sc = sdag.getTDAG().get(child.getUri());
+        DAGNode tp = tdag.getTDAG().get(parent.getUri());
+        DAGNode tc = tdag.getTDAG().get(child.getUri());
+
+        return (sp.descendans.contains(sc) && sc.descendans.containsAll(tc.descendans));
+
     }
 
 }
