@@ -6,7 +6,6 @@ import java.util.Map;
 
 /**
  * Reachability DAG
- * Replaces all -ER with ER (treats ER and -ER as equivalent nodes)
  */
 public class TDAG {
     private final Map<String, DAGNode> dag_nodes = new HashMap<String, DAGNode>();
@@ -15,36 +14,88 @@ public class TDAG {
 
         for (DAGNode node : dag.getClassIndex().values()) {
             String uri;
+            DAGNode tnode;
             if (node.getUri().startsWith(DAG.owl_inverse_exists_data)) {
-                uri = DAG.owl_exists_data +
-                        node.getUri().substring(DAG.owl_inverse_exists_data.length());
+                String er_uri = DAG.owl_exists_data + node.getUri().substring(DAG.owl_inverse_exists_data.length());
+
+                DAGNode er = dag_nodes.get(er_uri);
+                if (er == null) {
+                    // Create an additional ER node
+                    er = new DAGNode(er_uri);
+                    dag_nodes.put(er_uri, er);
+                    // Make ER a parent of  current node ER-
+                    er.getChildren().add(node);
+                    node.getParents().add(er);
+                }
+                if (dag_nodes.get(node.getUri()) == null) {
+                    dag_nodes.put(node.getUri(), node);
+                }
+                // Children will we added to ER-
+                tnode = node;
+
             } else if (node.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
-                uri = DAG.owl_exists_obj +
-                        node.getUri().substring(DAG.owl_inverse_exists_obj.length());
+                String er_uri = DAG.owl_exists_obj + node.getUri().substring(DAG.owl_inverse_exists_obj.length());
+                DAGNode er = dag_nodes.get(er_uri);
+                if (er == null) {
+                    // Create an additional ER node
+                    er = new DAGNode(er_uri);
+                    dag_nodes.put(er_uri, er);
+                    // Make ER a parent of  current node ER-
+                    er.getChildren().add(node);
+                    node.getParents().add(er);
+                }
+                if (dag_nodes.get(node.getUri()) == null) {
+                    dag_nodes.put(node.getUri(), node);
+                }
+                // Children will we added to ER-
+                tnode = node;
+            } else if (node.getUri().startsWith(DAG.owl_exists_obj)) {
+                String erm_uri = DAG.owl_inverse_exists_obj + node.getUri().substring(DAG.owl_exists_obj.length());
+                DAGNode erm = dag_nodes.get(erm_uri);
+                if (erm == null) {
+                    // Create and additional ER- node
+                    erm = new DAGNode(erm_uri);
+                    dag_nodes.put(erm_uri, erm);
+
+                    node.getParents().add(erm);
+                    erm.getChildren().add(node);
+                }
+                if (dag_nodes.get(node.getUri()) == null) {
+                    dag_nodes.put(node.getUri(), node);
+                }
+                // Children will ber added to ER-
+                tnode = erm;
+            } else if (node.getUri().startsWith(DAG.owl_exists_data)) {
+                String erm_uri = DAG.owl_inverse_exists_data + node.getUri().substring(DAG.owl_exists_data.length());
+                DAGNode erm = dag_nodes.get(erm_uri);
+                if (erm == null) {
+                    // Create and additional ER- node
+                    erm = new DAGNode(erm_uri);
+                    dag_nodes.put(erm_uri, erm);
+
+                    node.getParents().add(erm);
+                    erm.getChildren().add(node);
+                }
+                if (dag_nodes.get(node.getUri()) == null) {
+                    dag_nodes.put(node.getUri(), node);
+                }
+                // Children will ber added to ER-
+                tnode = erm;
+
             } else {
-                uri = node.getUri();
+                DAGNode n = dag_nodes.get(node.getUri());
+                if (n == null) {
+                    n = new DAGNode(node.getUri());
+                    dag_nodes.put(node.getUri(), n);
+                }
+                tnode = n;
             }
 
-            DAGNode tnode = dag_nodes.get(uri);
-            if (tnode == null) {
-                // Use modified URI when constructing DAGNode, this is important
-                tnode = new DAGNode(uri);
-                dag_nodes.put(uri, tnode);
-            }
             for (DAGNode child_node : node.getChildren()) {
-                String child_uri;
-                if (child_node.getUri().startsWith(DAG.owl_inverse_exists_data)) {
-                    child_uri = DAG.owl_exists_data +
-                            child_node.getUri().substring(DAG.owl_inverse_exists_data.length());
-                } else if (child_node.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
-                    child_uri = DAG.owl_exists_obj +
-                            child_node.getUri().substring(DAG.owl_inverse_exists_obj.length());
-                } else {
-                    child_uri = child_node.getUri();
-                }
+                String child_uri = child_node.getUri();
+
                 DAGNode tchild_node = dag_nodes.get(child_uri);
                 if (tchild_node == null) {
-                    // Use modified URI when constructing DAGNode, this is important
                     tchild_node = new DAGNode(child_uri);
                     dag_nodes.put(child_uri, tchild_node);
                 }

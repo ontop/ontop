@@ -25,12 +25,12 @@ public class SemanticReduction {
     private static final Logger log = LoggerFactory.getLogger(SemanticReduction.class);
     private final DAG dag;
     private final TDAG tdag;
-    private final TDAG sdag;
+    private final SDAG sdag;
 
     private BasicPredicateFactoryImpl predicateFactory;
     private DescriptionFactory descFactory;
 
-    public SemanticReduction(DAG dag, TDAG tdag, TDAG sdag) {
+    public SemanticReduction(DAG dag, TDAG tdag, SDAG sdag) {
         this.dag = dag;
         this.tdag = tdag;
         this.sdag = sdag;
