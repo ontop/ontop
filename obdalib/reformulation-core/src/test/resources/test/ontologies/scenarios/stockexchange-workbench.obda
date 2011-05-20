@@ -76,7 +76,7 @@
       <SQLQuery string="SELECT id FROM transaction WHERE type=true"/>
     </mapping>
   </mappings>
-  <dataSource URI="RandBStockExchange" databaseDriver="org.postgresql.Driver" databaseName="stockclient1" databasePassword="stock-09" databaseURL="jdbc:postgresql://localhost/stockclient1" databaseUsername="stock" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl"/>
+  <dataSource URI="RandBStockExchange" databaseDriver="org.postgresql.Driver" databaseName="stockclient1" databasePassword="stock-09" databaseURL="jdbc:postgresql://obdalin.inf.unibz.it/stockclient1" databaseUsername="stock" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl"/>
   <SavedQueries>
     <QueryGroup id="Simple queries">
       <Query id="Addresses" text="SELECT * WHERE {      $x rdf:type :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet $street. &#xa;&#x9;&#x9;$x :inCity $city. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa;} "/>
