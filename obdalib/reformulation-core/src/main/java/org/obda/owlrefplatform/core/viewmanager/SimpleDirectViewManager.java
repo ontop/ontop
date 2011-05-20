@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.query.domain.Atom;
 
@@ -43,7 +42,7 @@ public class SimpleDirectViewManager implements ViewManager {
 //		classMapper = ABoxToDBDumper.getInstance().getClassMapper();
 //		datapropertyMapper = ABoxToDBDumper.getInstance().getDataPropertyMapper();
 //		objectporpertyMapper = ABoxToDBDumper.getInstance().getObjectPropertyMapper();
-		if(uris.size()==0){
+		if(uris.size() == 0){
 			throw new NullPointerException();
 		}
 		prefixMap = new HashMap<String, String>();
@@ -54,7 +53,7 @@ public class SimpleDirectViewManager implements ViewManager {
 			String ontoname = u.substring(i+1,u.length()-4);
 			prefixMap.put(u, ontoname);
 		}
-		baseuri = man.getURIForPrefix("xml:base").toString();
+		baseuri = man.getURIForPrefix("xml:base");
 	}
 	
 	/**
@@ -62,7 +61,7 @@ public class SimpleDirectViewManager implements ViewManager {
 	 * the abox. 
 	 */
 	public String getTranslatedName(Atom atom) throws Exception {
-		String aux =atom.getPredicate().getName().toString();
+		String aux = atom.getPredicate().getName().toString();
 		String frag = atom.getPredicate().getName().getFragment();
 		int i = aux.lastIndexOf("#");
 		String uri = aux.substring(0,i);

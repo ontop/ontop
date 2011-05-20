@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -72,16 +71,16 @@ public class OWLAPIDataManager extends DataManager {
 	public void loadOBDADataFromURI(URI obdaFileURI) {
 
 		File obdaFile = new File(obdaFileURI);
-		if (obdaFile == null) {
-			log.error("The OBDA file is not found!");
-			return;
-		}
+
 		if (!obdaFile.exists()) {
+      log.error("The OBDA file is not found!");
 			return;
 		}
 		if (!obdaFile.canRead()) {
 			log.error("Cannot read the OBDA file:" + obdaFile.toString());
+			return;
 		}
+
 		Document doc = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -105,17 +104,17 @@ public class OWLAPIDataManager extends DataManager {
 			String name = n.getNodeName();
 			String value = n.getNodeValue();
 			if(name.equals("xml:base")){
-				prefixManager.addUri(URI.create(value), name);
-			}else if (name.equals("version")){
-				prefixManager.addUri(URI.create(value), name);
+				prefixManager.addUri(value, name);
+			}else if (name.equals("version")){ // TODO Remove "version" from prefix manager.
+				prefixManager.addUri(value, name);
 			}else if (name.equals("xmlns")){
-				prefixManager.addUri(URI.create(value), name);
+				prefixManager.addUri(value, name);
 			}else if (value.endsWith(".owl#")){
 				String[] aux = name.split(":");
-				prefixManager.addUri(URI.create(value), aux[1]);
+				prefixManager.addUri(value, aux[1]);
 			}else if(name.startsWith("xmlns:")){
 				String[] aux = name.split(":");
-				prefixManager.addUri(URI.create(value), aux[1]);
+				prefixManager.addUri(value, aux[1]);
 			}
 		}
 
@@ -179,12 +178,12 @@ public class OWLAPIDataManager extends DataManager {
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.newDocument();
 		root = doc.createElement("OBDA");
-		HashMap<String, URI> prefixes = prefixManager.getPrefixMap();
+		HashMap<String, String> prefixes = prefixManager.getPrefixMap();
 		Set<String> set = prefixes.keySet();
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
 			String key = sit.next();
-			root.setAttribute(key, prefixManager.getPrefixMap().get(key).toString());
+			root.setAttribute(key, prefixManager.getPrefixMap().get(key));
 		}
 		doc.appendChild(root);
 
@@ -228,7 +227,7 @@ public class OWLAPIDataManager extends DataManager {
 	 * Returns the Map containing for each prefix the corresponding onotlogy URI
 	 * @return the prefix map
 	 */
-	public Map<String, URI> getPrefixMap(){
+	public HashMap<String, String> getPrefixMap(){
 		return prefixManager.getPrefixMap();
 	}
 }

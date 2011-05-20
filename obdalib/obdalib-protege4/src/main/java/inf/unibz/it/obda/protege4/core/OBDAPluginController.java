@@ -9,7 +9,6 @@ import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.QueryControllerListener;
-import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
@@ -48,7 +47,6 @@ import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.model.RemoveAxiom;
-import org.slf4j.LoggerFactory;
 
 public class OBDAPluginController extends APIController implements Disposable {
 
@@ -60,35 +58,51 @@ public class OBDAPluginController extends APIController implements Disposable {
 	WorkspaceManager wsmanager = null;
 	OWLEditorKit owlEditorKit = null;
 	PrefixMapperManager prefixmanager = null;
-	
-	org.slf4j.Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public OBDAPluginController(EditorKit editorKit) {
 		super();
-		// loading JDBC Drivers
-
-		// OBDAPluginController.class.getClassLoader().
 
 		if (!(editorKit instanceof OWLEditorKit)) {
-			throw new IllegalArgumentException(
-					"Received non OWLEditorKit editor kit");
-		}
-		
+			throw new IllegalArgumentException("Received non OWLEditorKit editor kit");
+		}		
 		this.owlEditorKit = (OWLEditorKit) editorKit;
 		
+		initMapController();
+		initIOManager();
+		initAPICoupler();
+		
+		setupReasonerFactory();
+		
+	  // Adding standard listeners
+	  addOntologyChangeListener();
+	  addDatasourceControllerListener();
+	  addMappingControllerListener();
+	  addQueryControllerListener();
+	  		
+    // Looking for instances of AssertionControllerFactory Plugins
+    loadAssertionControllerFactoryPlugins();
+	}
+	
+	private void initMapController() {
 		mapcontroller = new SynchronizedMappingController(dscontroller, this);
-		ioManager = new OBDAPluginDataManager(this, new PrefixManager());
-		owlEditorKit.getOWLModelManager().addOntologyChangeListener((SynchronizedMappingController)mapcontroller);
-		// registerAsListener(owlEditorKit);
-		OWLOntologyManager mmgr = ((OWLModelManagerImpl)editorKit.getModelManager()).getOWLOntologyManager();
-		OWLOntology root = owlEditorKit.getOWLModelManager().getActiveOntology();
+	}
+	
+	private void initIOManager() {
+		ioManager = new OBDAPluginDataManager(this, new ProtegePrefixManager());
+	}
+	
+	private void initAPICoupler() {
+		final OWLOntologyManager mmgr = ((OWLModelManagerImpl) owlEditorKit.getModelManager()).getOWLOntologyManager();
+		final OWLOntology root = owlEditorKit.getOWLModelManager().getActiveOntology();
 		apicoupler = new OWLAPICoupler(this, mmgr, root);
 		setCoupler(apicoupler);
-		
-		/**
-		 * Setting up the current reasoner factories to have a reference to this
-		 * OBDA Plugin controller
-		 */
+	}
+	
+	 /**
+   * Setting up the current reasoner factories to have a reference to this
+   * OBDA plugin controller.
+   */
+	private void setupReasonerFactory() {
 		Set<ProtegeOWLReasonerFactory> factories = owlEditorKit
 				.getOWLWorkspace().getOWLModelManager().getOWLReasonerManager()
 				.getInstalledReasonerFactories();
@@ -105,145 +119,96 @@ public class OBDAPluginController extends APIController implements Disposable {
 						reasonerPreference);
 			}
 		}
-
-		/***
-		 * Adding standard listeners
-		 */
-
-		this.getDatasourcesController().addDatasourceControllerListener(new DatasourcesControllerListener() {
-			
-			@Override
-			public void datasourceUpdated(String oldname, DataSource currendata) {
+	}
+	
+  private void addOntologyChangeListener() {
+    final SynchronizedMappingController controller = (SynchronizedMappingController) mapcontroller;
+    owlEditorKit.getOWLModelManager().addOntologyChangeListener(controller);
+  }
+	 
+	private void addDatasourceControllerListener() {
+		dscontroller.addDatasourceControllerListener(new DatasourcesControllerListener() {			
+		  public void datasourceUpdated(String oldname, DataSource currendata) {
 				triggerOntologyChanged();				
-			}
-			
-			@Override
+			}			
 			public void datasourceDeleted(DataSource source) {
 				triggerOntologyChanged();
-			}
-			
-			@Override
+			}			
 			public void datasourceAdded(DataSource source) {
 				triggerOntologyChanged();				
 			}
-			@Override
-			public void currentDatasourceChange(DataSource previousdatasource,
-					DataSource currentsource) {
-
+			public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
+			  // Do nothing!
 			}
-			@Override
 			public void alldatasourcesDeleted() {
 				triggerOntologyChanged();
-				
 			}
-
-			@Override
 			public void datasourcParametersUpdated() {
 				triggerOntologyChanged();
 			}
 		});
+	}
+	
+  private void addMappingControllerListener() {
+    mapcontroller.addMappingControllerListener(new MappingControllerListener() {
+      public void allMappingsRemoved() {
+        triggerOntologyChanged();
+      }
+      public void currentSourceChanged(URI oldsrcuri, URI newsrcuri) {
+        // Do nothing!
+      }
+      public void mappingDeleted(URI srcuri, String mapping_id) {
+        triggerOntologyChanged();
+      }
+      public void mappingInserted(URI srcuri, String mapping_id) {
+        triggerOntologyChanged();
+      }
+      public void mappingUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
+        triggerOntologyChanged();
+      }
+      public void ontologyChanged() {
+        triggerOntologyChanged();
+      }
+    });
+  }
 
-		this.getMappingController().addMappingControllerListener(
-				new MappingControllerListener() {
-
-					public void allMappingsRemoved() {
-						triggerOntologyChanged();
-					}
-
-					public void currentSourceChanged(URI oldsrcuri,
-							URI newsrcuri) {
-
-					}
-
-					public void mappingDeleted(URI srcuri, String mapping_id) {
-						triggerOntologyChanged();
-					}
-
-					public void mappingInserted(URI srcuri, String mapping_id) {
-						triggerOntologyChanged();
-					}
-
-					public void mappingUpdated(URI srcuri,
-							String mapping_id, OBDAMappingAxiom mapping) {
-						triggerOntologyChanged();
-					}
-
-					@Override
-					public void ontologyChanged() {
-						triggerOntologyChanged();
-						
-					}
-
-				});
-
+	private void addQueryControllerListener() {
 		queryController.addListener(new QueryControllerListener() {
-
 			public void elementAdded(QueryControllerEntity element) {
 				triggerOntologyChanged();
-
 			}
-
-			public void elementAdded(QueryControllerQuery query,
-					QueryControllerGroup group) {
+			public void elementAdded(QueryControllerQuery query, QueryControllerGroup group) {
 				triggerOntologyChanged();
-
 			}
-
 			public void elementRemoved(QueryControllerEntity element) {
 				triggerOntologyChanged();
-
 			}
-
-			public void elementRemoved(QueryControllerQuery query,
-					QueryControllerGroup group) {
+			public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group) {
 				triggerOntologyChanged();
-
 			}
-
 			public void elementChanged(QueryControllerQuery query) {
 				triggerOntologyChanged();
-
 			}
-
-			public void elementChanged(QueryControllerQuery query,
-					QueryControllerGroup group) {
+			public void elementChanged(QueryControllerQuery query, QueryControllerGroup group) {
 				triggerOntologyChanged();
-
 			}
-
 		});
-
-		/***
-		 * Looking for instances of AssertionControllerFactory Plugins
-		 */
-		loadAssertionControllerFactoryPlugins();
 	}
 
 	private void loadAssertionControllerFactoryPlugins() {
-
 		AssertionControllerListener<Assertion> defaultAssertionControllerListener = new AssertionControllerListener<Assertion>() {
-
 			public void assertionAdded(Assertion assertion) {
 				triggerOntologyChanged();
-
 			}
-
-			public void assertionChanged(Assertion oldAssertion,
-					Assertion newAssertion) {
+			public void assertionChanged(Assertion oldAssertion, Assertion newAssertion) {
 				triggerOntologyChanged();
-
 			}
-
 			public void assertionRemoved(Assertion assertion) {
 				triggerOntologyChanged();
-
 			}
-
 			public void assertionsCleared() {
 				triggerOntologyChanged();
-
 			}
-
 		};
 
 		AssertionControllerFactoryPluginLoader loader = new AssertionControllerFactoryPluginLoader();
@@ -282,51 +247,49 @@ public class OBDAPluginController extends APIController implements Disposable {
 	private final OWLModelManagerListener modelManagerListener = new OWLModelManagerListener() {
 
 		public void handleChange(OWLModelManagerChangeEvent event) {
-			// System.out.println("HANDLEEEEEEEEEEEEEEEEEEEEEEEE");
 			EventType type = event.getType();
 			OWLModelManager source = event.getSource();
-			OWLOntology ontology = owlEditorKit.getOWLModelManager()
-					.getActiveOntology();
+			OWLOntology ontology = owlEditorKit.getOWLModelManager().getActiveOntology();
 
-			switch (type) {
-			case ABOUT_TO_CLASSIFY:
-				break;
-			case ENTITY_RENDERER_CHANGED:
-				break;
-			case ONTOLOGY_CLASSIFIED:
-				break;
-			case ACTIVE_ONTOLOGY_CHANGED:
-				if(currentOntology != ontology){
-					OBDAPluginController.this.currentOntology = ontology;
-					OBDAPluginController.this.currentOntologyURI = ontology
-							.getURI();
-					String uri = ontology.getURI().toString();
-					if(loadedOntologies.add(uri)){
-						apicoupler.addNewOntologyInfo(ontology);
-						loadData(source.getOntologyPhysicalURI(ontology));
-					} 
-					try {
-						mapcontroller.activeOntologyChanged();
-						
-					} catch (Exception e) {
-						log.warn("Error changing the active ontology.");
-					}
-				}
-				apicoupler.updateOntologies();
-				break;
-			case ENTITY_RENDERING_CHANGED:
-				break;
-			case ONTOLOGY_CREATED:
-				break;
-			case ONTOLOGY_LOADED:
-				break;
-			case ONTOLOGY_SAVED:
-				break;
-			case ONTOLOGY_VISIBILITY_CHANGED:
-				break;
-			case REASONER_CHANGED:
-				break;
-			}
+      switch (type) {
+        case ABOUT_TO_CLASSIFY :
+          break;
+        case ENTITY_RENDERER_CHANGED :
+          break;
+        case ONTOLOGY_CLASSIFIED :
+          break;
+        case ACTIVE_ONTOLOGY_CHANGED :
+          if (currentOntology != ontology) {
+            OBDAPluginController.this.currentOntology = ontology;
+            OBDAPluginController.this.currentOntologyURI = ontology.getURI();
+            String uri = ontology.getURI().toString();
+            if (loadedOntologies.add(uri)) {
+              apicoupler.addNewOntologyInfo(ontology);
+              loadData(source.getOntologyPhysicalURI(ontology));
+            }
+            try {
+              mapcontroller.activeOntologyChanged();
+
+            }
+            catch (Exception e) {
+              log.warn("Error changing the active ontology.");
+            }
+          }
+          apicoupler.updateOntologies();
+          break;
+        case ENTITY_RENDERING_CHANGED :
+          break;
+        case ONTOLOGY_CREATED :
+          break;
+        case ONTOLOGY_LOADED :
+          break;
+        case ONTOLOGY_SAVED :
+          break;
+        case ONTOLOGY_VISIBILITY_CHANGED :
+          break;
+        case REASONER_CHANGED :
+          break;
+      }
 		}
 	};
 

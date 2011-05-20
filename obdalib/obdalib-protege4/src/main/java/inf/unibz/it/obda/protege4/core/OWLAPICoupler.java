@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.protege.editor.owl.ui.prefix.PrefixMapperManager;
@@ -58,13 +57,6 @@ public class OWLAPICoupler implements APICoupler {
 		this.mmgr = mmgr;
 		this.prefixManager = PrefixMapperManager.getInstance();
 		this.infoMap = new HashMap<URI, OntologyEntitiyInformation>();
-		Map<String, String> prefixes = prefixManager.getPrefixes();
-
-		Set<String> keys = prefixes.keySet();
-		for (String key : keys) {
-			System.out.println(key + ": " + prefixes.get(key));
-		}
-//		synchWithOntology(root);
 	}
 
 	public void addNewOntologyInfo(OWLOntology root){

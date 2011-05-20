@@ -132,7 +132,7 @@ public class OWLAPICoupler implements APICoupler {
 	@Override
 	public String getPrefixForUri(URI uri) {
 
-		Map<String, URI> map = datamanager.getPrefixMap();
+		Map<String, String> map = datamanager.getPrefixMap();
 		String uristring = uri.toString();
 		String base = "";
 		if(uristring.contains("#")){
@@ -145,7 +145,7 @@ public class OWLAPICoupler implements APICoupler {
 		Iterator<String> sit = set.iterator();
 		while(sit.hasNext()){
 			String key = sit.next();
-			String value = map.get(key).toString();
+			String value = map.get(key);
 			if(value.equals(base)){
 				return key;
 			}
@@ -158,7 +158,7 @@ public class OWLAPICoupler implements APICoupler {
 		if(prefix.equals("")){
 			return apic.getCurrentOntologyURI().toString();
 		}else{
-			return datamanager.getPrefixMap().get(prefix).toString();
+			return datamanager.getPrefixMap().get(prefix);
 		}
 
 	}

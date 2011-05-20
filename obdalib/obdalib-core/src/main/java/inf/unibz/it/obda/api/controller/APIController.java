@@ -16,7 +16,7 @@ import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.api.io.EntityNameRenderer;
-import inf.unibz.it.obda.api.io.PrefixManager;
+import inf.unibz.it.obda.api.io.SimplePrefixManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
@@ -70,7 +70,7 @@ public abstract class APIController {
 	// a set of all currently loaded ontotlogies
 	protected HashSet<String> loadedOntologies = null;
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public APIController() {
 
@@ -80,7 +80,7 @@ public abstract class APIController {
 		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 		loadedOntologies = new HashSet<String>();
-		ioManager = new DataManager(this, new PrefixManager());
+		ioManager = new DataManager(this, new SimplePrefixManager());
 
 //		dependencyRenderer = new DependencyAssertionRenderer(this);
 //		constraintsRenderer = new ConstraintsRenderer(this);

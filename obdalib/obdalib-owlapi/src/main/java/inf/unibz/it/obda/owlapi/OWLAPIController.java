@@ -2,7 +2,7 @@ package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.api.io.PrefixManager;
+import inf.unibz.it.obda.api.io.SimplePrefixManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,7 +36,7 @@ public class OWLAPIController extends APIController {
 	URI					currentOntologyPhysicalURI	= null;
 	OWLOntologyManager	mmger						= null;
 	private final OWLOntology	root;
-	private PrefixManager prefixmanager = null;
+	private SimplePrefixManager prefixmanager = null;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -44,13 +44,13 @@ public class OWLAPIController extends APIController {
 		super();
 //		mapcontroller = new SynchronizedMappingController(dscontroller, this);
 		mapcontroller = new MappingController(dscontroller, this);
-		prefixmanager = new PrefixManager();
+		prefixmanager = new SimplePrefixManager();
 		ioManager = new OWLAPIDataManager(this, prefixmanager);
 		mmger = owlman;
 		currentOntologyPhysicalURI = mmger.getPhysicalURIForOntology(root);
 		this.root = root;
 		mapcontroller = new SynchronizedMappingController(dscontroller, this);
-		ioManager = new OWLAPIDataManager(this, new PrefixManager());
+		ioManager = new OWLAPIDataManager(this, prefixmanager);
 		apicoupler = new OWLAPICoupler(this, owlman, root,(OWLAPIDataManager) ioManager);
 		setCurrentOntologyURI(root.getURI());
 		setCoupler(apicoupler);
@@ -131,16 +131,16 @@ public class OWLAPIController extends APIController {
 		loadingData = true;
 
 		File obdaFile = new File(getIOManager().getOBDAFile(owlFile));
-		if (obdaFile == null) {
-			log.error("OBDA file not found.");
-			return false;
-		}
+
 		if (!obdaFile.exists()) {
+      log.error("OBDA file not found.");
 			return false;
 		}
 		if (!obdaFile.canRead()) {
 			log.error("Cannot read the OBDA file:" + obdaFile.toString());
+			return false;
 		}
+		
 		Document doc = null;
 		try {
 
@@ -166,26 +166,26 @@ public class OWLAPIController extends APIController {
 				String name = n.getNodeName();
 				String value = n.getNodeValue();
 				if(name.equals("xml:base")){
-					prefixmanager.addUri(URI.create(value), name);
+					prefixmanager.addUri(value, name);
 				}else if (name.equals("version")){
-					prefixmanager.addUri(URI.create(value), name);
+					prefixmanager.addUri(value, name);
 				}else if (name.equals("xmlns")){
-					prefixmanager.addUri(URI.create(value), name);
+					prefixmanager.addUri(value, name);
 				}else if (value.endsWith(".owl#")){
 					String[] aux = name.split(":");
-					prefixmanager.addUri(URI.create(value), aux[1]);
+					prefixmanager.addUri(value, aux[1]);
 				}else if(name.equals("xmlns:owl2xml")){
 					String[] aux = name.split(":");
-					prefixmanager.addUri(URI.create(value), aux[1]);
+					prefixmanager.addUri(value, aux[1]);
 				}
 			}
 		}else{
 			String ontoUrl = getCurrentOntologyURI().toString();
 			int i = ontoUrl.lastIndexOf("/");
 			String ontoName = ontoUrl.substring(i+1,ontoUrl.length()-4); //-4 because we want to remove the .owl suffix
-			prefixmanager.addUri(URI.create(ontoUrl),"xml:base");
-			prefixmanager.addUri(URI.create(ontoUrl),"xmlns");
-			prefixmanager.addUri(URI.create(ontoUrl+"#"),ontoName);
+			prefixmanager.addUri(ontoUrl, "xml:base");
+			prefixmanager.addUri(ontoUrl, "xmlns");
+			prefixmanager.addUri(ontoUrl.concat("#"), ontoName);
 		}
 		try {
 			URI obdafile = getIOManager().getOBDAFile(owlFile);

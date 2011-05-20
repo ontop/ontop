@@ -186,22 +186,22 @@ public class DataManager {
 
 		// Create the document root
 		root = doc.createElement("OBDA");
-		HashMap<String, URI> prefixes = prefixManager.getPrefixMap();
+		HashMap<String, String> prefixes = prefixManager.getPrefixMap();
 		Set<String> keys = prefixes.keySet();
 		Iterator<String> sit = keys.iterator();
 		while (sit.hasNext()) {
 			String key = sit.next();
-			if (key.equals("version")) {
-				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
+			if (key.equals("version")) { // TODO Remove "version" from prefix manager.
+				root.setAttribute(key, prefixManager.getURIForPrefix(key));
 			}
 			else if (key.equals("xml:base")) {
-				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
+				root.setAttribute(key, prefixManager.getURIForPrefix(key));
 			}
 			else if (key.equals("xmlns")) {
-				root.setAttribute(key, prefixManager.getURIForPrefix(key).toString());
+				root.setAttribute(key, prefixManager.getURIForPrefix(key));
 			}
 			else {
-				root.setAttribute("xmlns:"+key, prefixManager.getURIForPrefix(key).toString());
+				root.setAttribute("xmlns:"+key, prefixManager.getURIForPrefix(key));
 			}
 		}
 		doc.appendChild(root);
@@ -295,18 +295,16 @@ public class DataManager {
 	 */
 	public void loadOBDADataFromURI(URI obdaFileURI) {
 		File obdaFile = new File(obdaFileURI);
-		if (obdaFile == null) {
-			log.error("OBDA file not found.");
-			return;
-		}
 
 		if (!obdaFile.exists()) {
+      log.error("OBDA file not found.");
 			return;
 		}
 		if (!obdaFile.canRead()) {
-			System.err.print("WARNING: can't read the OBDA file:" +
-			    obdaFile.toString());
+			System.err.print("WARNING: can't read the OBDA file:" + obdaFile.toString());
+			return;
 		}
+
 		Document doc = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

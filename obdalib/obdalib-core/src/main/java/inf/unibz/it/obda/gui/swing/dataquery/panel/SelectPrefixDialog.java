@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
@@ -33,7 +32,7 @@ import javax.swing.KeyStroke;
  */
 public class SelectPrefixDialog extends javax.swing.JPanel{
 
-	private Map<String, URI> prefixMap = null;
+  private Map<String, String> prefixMap = null;
 	private JDialog parent = null;
 	private JTextPane querypane = null;
 	private Vector<JCheckBox> checkboxes = null;
@@ -44,7 +43,7 @@ public class SelectPrefixDialog extends javax.swing.JPanel{
 	 */
 	private static final long serialVersionUID = -8277829841902027620L;
 	/** Creates new form SelectPrefixDialog */
-    public SelectPrefixDialog(Map<String, URI> prefixes, JTextPane pane, String base) {
+    public SelectPrefixDialog(Map<String, String> prefixes, JTextPane pane, String base) {
         super();
         this.prefixMap = prefixes;
         this.querypane = pane;

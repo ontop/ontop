@@ -8,7 +8,6 @@ package org.obda.query.tools.parser;
 
 import inf.unibz.it.obda.api.io.PrefixManager;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -38,21 +37,20 @@ public class DatalogQueryHelper {
 		String prefixString = "";
 		String baseString = "";
 
-		HashMap<String, URI> prefixMapping = prefixManager.getPrefixMap();
+		HashMap<String, String> prefixMapping = prefixManager.getPrefixMap();
 		Set<String> prefixes = prefixMapping.keySet();
 		for (String prefix : prefixes) {
 			if (prefix.equals("version"))  continue;
 
 			if (prefix.equals("xml:base"))
 				baseString =
-					"BASE <" + prefixMapping.get(prefix).toString() + ">\n";
+					"BASE <" + prefixMapping.get(prefix) + ">\n";
 			else if (prefix.equals("xmlns"))
 				prefixString +=
-					"PREFIX : <" + prefixMapping.get(prefix).toString() + ">\n";
+					"PREFIX : <" + prefixMapping.get(prefix) + ">\n";
 			else
 				prefixString +=
-					"PREFIX " + prefix +
-					": <" + prefixMapping.get(prefix).toString() + ">\n";
+					"PREFIX " + prefix + ": <" + prefixMapping.get(prefix) + ">\n";
 		}
 		prefixString = baseString + prefixString; // the base prefix should always on top.
 		prefixString = prefixString+ "PREFIX "+ OBDA_PREFIX_MAPPING_PREDICATE + ": <" + OBDA_URI_MAPPING_PREDICATE +">\n";

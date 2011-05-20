@@ -21,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -35,13 +34,13 @@ public class XMLUtils {
 
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, HashMap<String, URI> prefixes, String filename)
+	public static void saveDocumentToXMLFile(Document doc, HashMap<String, String> prefixes, String filename)
 			throws FileNotFoundException, IOException {
 		File file = new File(filename);
 		saveDocumentToXMLFile(doc, prefixes, file);
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, HashMap<String, URI> prefixes, File file)
+	public static void saveDocumentToXMLFile(Document doc, HashMap<String, String> prefixes, File file)
 			throws FileNotFoundException, IOException {
 
 		File tmpFile = prepare(doc);
@@ -76,7 +75,7 @@ public class XMLUtils {
 	public static void saveDocumentToXMLFile(Document doc, File file)
 	throws FileNotFoundException, IOException {
 
-		saveDocumentToXMLFile(doc, new HashMap<String, URI>(), file);
+		saveDocumentToXMLFile(doc, new HashMap<String, String>(), file);
 	}
 
 	private static File prepare(Document doc) throws IOException {
@@ -98,7 +97,7 @@ public class XMLUtils {
 		return fOut;
 	}
 
-	private static String prepare(HashMap<String, URI> prefixes) {
+	private static String prepare(HashMap<String, String> prefixes) {
 
 		String doctype = "<!DOCTYPE OBDA [\n";
 		Set<String> prefixIds = prefixes.keySet();
@@ -110,7 +109,7 @@ public class XMLUtils {
 				  id.equals("rdfs") ||
 				  id.equals("owl") ||
 				  id.equals("xsd"))) {
-				String uri = prefixes.get(id).toString();
+				String uri = prefixes.get(id);
 				doctype += "   <!ENTITY " + id + " '" +  uri + "'>\n";
 			}
 		}
