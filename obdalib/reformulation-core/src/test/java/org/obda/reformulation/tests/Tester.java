@@ -10,6 +10,20 @@ import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
@@ -19,13 +33,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URI;
-import java.util.*;
 
 public class Tester {
 
@@ -191,17 +198,16 @@ public class Tester {
         queryresults = new HashMap<String, Set<String>>();
 
         File results = new File(resultfile);
-        if (results == null) {
-            System.err.println("result file not found.");
-            return;
-        }
 
         if (!results.exists()) {
-            return;
+          System.err.println("result file not found.");
+          return;
         }
         if (!results.canRead()) {
             System.err.print("WARNING: can't read the result file:" + results.toString());
+            return;
         }
+        
         Document doc = null;
         try {
 
@@ -298,11 +304,11 @@ public class Tester {
 
     private void fillPrefixManager() {
         PrefixManager man = apic.getIOManager().getPrefixManager();
-        man.addUri(URI.create("http://www.w3.org/2000/01/rdf-schema#"), "rdfs");
-        man.addUri(URI.create("http://www.w3.org/1999/02/22-rdf-syntax-ns#"), "rdf");
-        man.addUri(URI.create("http://www.w3.org/2001/XMLSchema#"), "xsd");
-        man.addUri(URI.create("http://www.w3.org/2002/07/owl#"), "owl");
-        man.addUri(ontology.getURI(), "xml:base");
-        man.addUri(URI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"), "dllite");
+        man.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs");
+        man.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf");
+        man.addUri("http://www.w3.org/2001/XMLSchema#", "xsd");
+        man.addUri("http://www.w3.org/2002/07/owl#", "owl");
+        man.addUri(ontology.getURI().toString(), "xml:base");
+        man.addUri("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#", "dllite");
     }
 }
