@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.api.io;
 
-import java.net.URI;
 import java.util.HashMap;
 
 /**
@@ -11,7 +10,7 @@ import java.util.HashMap;
  *
  */
 
-public class SimplePrefixManager {
+public class SimplePrefixManager implements PrefixManager {
 
 	/**
 	 * A simple map containing for each ontolgoy URI the correpsonding prefix
@@ -57,7 +56,7 @@ public class SimplePrefixManager {
 	 * @param prefix the prefix
 	 * @return the corresponding prefix or null if the ontology URI is not registered
 	 */
-	public String getPrefixForURI(URI uri){
+	public String getPrefixForURI(String uri){
 		return uriToPrefixMap.get(uri);
 	}
 
