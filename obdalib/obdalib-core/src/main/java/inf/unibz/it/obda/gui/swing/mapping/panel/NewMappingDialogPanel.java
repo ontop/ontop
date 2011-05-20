@@ -67,10 +67,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
     /** Creates new form NewMappingDialogPanel */
-    public NewMappingDialogPanel(APIController apic, OBDAPreferences pref, JDialog parent) {
+    public NewMappingDialogPanel(APIController apic, OBDAPreferences pref, JDialog parent, DataSource dataSource) {
         controller = apic;
         preferences = pref.getMappingsPreference();
         this.parent = parent;
+        selectedSource = dataSource;
     	initComponents();
     	init();
     }
@@ -82,40 +83,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
     	
     	jButtonInsert.addActionListener(new ActionListener() {
 			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				insertMapping();
-				
-			}
-		});
-    	
-    	jPanel1.setLayout(new GridBagLayout());
-    	
-    	 JLabel label = new JLabel("Select datasource: ");
-    	 label.setBackground(new java.awt.Color(153, 153, 153));
-    	 label.setFont(new java.awt.Font("Arial", 1, 11));
-    	 label.setForeground(new java.awt.Color(153, 153, 153));
-    	 label.setPreferredSize(new Dimension(119,14));
-    	    
-    	 GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-    	 gridBagConstraints.gridx = 0;
-    	 gridBagConstraints.gridy = 0;
-    	 gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    	 gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-    	 jPanel1.add(label, gridBagConstraints);
-    	 
-    	 Vector<DataSource> vecDatasource = 
-    	        new Vector<DataSource>(controller.getDatasourcesController().getAllSources().values());
-    	 DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);
-    	 datasourceSelector.addDatasourceListListener(this);
-    	 
-    	 gridBagConstraints = new java.awt.GridBagConstraints();
-    	 gridBagConstraints.gridx = 1;
-    	 gridBagConstraints.gridy = 0;
-    	 gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    	 gridBagConstraints.weightx = 1.0;
-    	 gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-    	 jPanel1.add(datasourceSelector, gridBagConstraints);
+  			@Override
+  			public void actionPerformed(ActionEvent e) {
+  				insertMapping();
+  			}
+  		});
     	 
     	 ActionListener actionListenerCancel = new ActionListener() {
        	  public void actionPerformed(ActionEvent actionEvent) {
@@ -144,10 +116,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
     	
     	String headstring = jTextPaneHead.getText();
     	String bodystring = jTextPaneBody.getText();
-    	if(selectedSource == null){
-    		JOptionPane.showMessageDialog(null, "Please select a data source first.");
-    		return;
-    	}
     	CQIE head = parse(headstring);
     	if(head != null){
 			parent.setVisible(false);
@@ -342,11 +310,13 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2); 
 		if (atoms.length == 1)  // if no head
-			input = queryHelper.getDefaultHead()+ " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
-			 	input;
+			input = queryHelper.getDefaultHead()+ " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + input;
 
 		// Append the prefixes
-		query = queryHelper.getPrefixes() + input;
+		final String ontologyUri = controller.getCurrentOntologyURI().toString();
+		query += "BASE <" + ontologyUri + "#>\n";
+		query += "PREFIX : <" + ontologyUri + "#>\n";
+		query += queryHelper.getPrefixes() + input;
 		
 		return query;
 	}

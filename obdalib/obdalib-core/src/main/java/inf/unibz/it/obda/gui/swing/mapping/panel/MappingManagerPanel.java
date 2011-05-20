@@ -782,7 +782,7 @@ public class MappingManagerPanel extends JPanel implements
   private void addMapping() {
     
 	  JDialog dialog = new JDialog();
-	  dialog.setContentPane(new NewMappingDialogPanel(apic,pref, dialog));
+	  dialog.setContentPane(new NewMappingDialogPanel(apic,pref, dialog, selectedSource));
 	  dialog.setSize(500, 300);
 	  dialog.setLocationRelativeTo(null);
 	  dialog.setVisible(true);
