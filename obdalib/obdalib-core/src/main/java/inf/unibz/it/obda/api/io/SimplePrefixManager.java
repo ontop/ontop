@@ -11,23 +11,23 @@ import java.util.HashMap;
  *
  */
 
-public class PrefixManager {
+public class SimplePrefixManager {
 
 	/**
 	 * A simple map containing for each ontolgoy URI the correpsonding prefix
 	 */
-	private HashMap<URI, String> uriToPrefixMap = null;
+	private HashMap<String, String> uriToPrefixMap = null;
 	/**
 	 * A simple map containing for each prefix the correpsonding onotlogy URI
 	 */
-	private HashMap<String,URI> prefixToURIMap = null;
+	private HashMap<String, String> prefixToURIMap = null;
 
 	/**
 	 * The constructor. It creates a new instance of the prefix manager
 	 */
-	public PrefixManager (){
-		uriToPrefixMap = new HashMap<URI, String>();
-		prefixToURIMap = new HashMap<String, URI>();
+	public SimplePrefixManager (){
+		uriToPrefixMap = new HashMap<String, String>();
+		prefixToURIMap = new HashMap<String, String>();
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class PrefixManager {
 	 * @param uri the ontolgy URI
 	 * @param prefix the prefix
 	 */
-	public void addUri(URI uri, String prefix){
+	public void addUri(String uri, String prefix){
 		uriToPrefixMap.put(uri, prefix);
 		prefixToURIMap.put(prefix, uri);
 	}
@@ -47,7 +47,7 @@ public class PrefixManager {
 	 * @param prefix the prefix
 	 * @return the corresponding ontology URI or null if the prefix is not registered
 	 */
-	public URI getURIForPrefix(String prefix){
+	public String getURIForPrefix(String prefix){
 		return prefixToURIMap.get(prefix);
 	}
 
@@ -65,7 +65,7 @@ public class PrefixManager {
 	 * Returns a map with all registered prefixes and the corresponding ontology URI's
 	 * @return a hash map
 	 */
-	public HashMap<String,URI> getPrefixMap(){
+	public HashMap<String, String> getPrefixMap(){
 		return prefixToURIMap;
 	}
 }
