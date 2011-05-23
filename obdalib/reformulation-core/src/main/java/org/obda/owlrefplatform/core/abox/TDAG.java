@@ -104,6 +104,43 @@ public class TDAG {
                 tchild_node.getParents().add(tnode);
             }
         }
+
+        for (DAGNode node : dag.getObjectPropertyIndex().values()) {
+            DAGNode tnode = dag_nodes.get(node.getUri());
+            if (tnode == null) {
+                tnode = new DAGNode(node.getUri());
+                dag_nodes.put(node.getUri(), tnode);
+            }
+            for (DAGNode child_node : node.getChildren()) {
+                String child_uri = child_node.getUri();
+                DAGNode tchild_node = dag_nodes.get(child_uri);
+                if (tchild_node == null) {
+                    tchild_node = new DAGNode(child_uri);
+                    dag_nodes.put(child_uri, child_node);
+                }
+                tnode.getChildren().add(tchild_node);
+                tchild_node.getParents().add(tnode);
+            }
+        }
+
+        for (DAGNode node : dag.getDataPropertyIndex().values()) {
+            DAGNode tnode = dag_nodes.get(node.getUri());
+            if (tnode == null) {
+                tnode = new DAGNode(node.getUri());
+                dag_nodes.put(node.getUri(), tnode);
+            }
+            for (DAGNode child_node : node.getChildren()) {
+                String child_uri = child_node.getUri();
+                DAGNode tchild_node = dag_nodes.get(child_uri);
+                if (tchild_node == null) {
+                    tchild_node = new DAGNode(child_uri);
+                    dag_nodes.put(child_uri, child_node);
+                }
+                tnode.getChildren().add(tchild_node);
+                tchild_node.getParents().add(tnode);
+            }
+        }
+
         DAGOperations.buildDescendants(dag_nodes);
     }
 
