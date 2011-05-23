@@ -156,6 +156,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 			insertNodeInto(mappingNode, root, root
 					.getChildCount());
+			nodeStructureChanged(root);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
