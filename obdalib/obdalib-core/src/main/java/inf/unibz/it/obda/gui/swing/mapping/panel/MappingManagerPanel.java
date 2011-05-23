@@ -776,7 +776,13 @@ public class MappingManagerPanel extends JPanel implements
   }
 
   private void cmdAddMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addMappingButtonActionPerformed
-    addMapping();
+    if (selectedSource != null) {
+      addMapping();
+    }
+    else {
+      JOptionPane.showMessageDialog(this, "Select the data source first!", "Warning", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
   }// GEN-LAST:event_addMappingButtonActionPerformed
 
   private void addMapping() {
