@@ -27,8 +27,8 @@ public class SemanticReduction {
     private final TDAG tdag;
     private final SDAG sdag;
 
-    private BasicPredicateFactoryImpl predicateFactory;
-    private DescriptionFactory descFactory;
+    private final BasicPredicateFactoryImpl predicateFactory;
+    private final DescriptionFactory descFactory;
 
     public SemanticReduction(DAG dag, TDAG tdag, SDAG sdag) {
         this.dag = dag;
@@ -41,6 +41,7 @@ public class SemanticReduction {
     }
 
     public List<Assertion> reduce() {
+        log.debug("Starting semantic-reduction");
         List<Assertion> rv = new LinkedList<Assertion>();
 
 
@@ -49,15 +50,61 @@ public class SemanticReduction {
             for (DAGNode child : node.descendans) {
 
                 if (!check_redundant(node, child)) {
-                    URI node_uri = URI.create(node.getUri());
-                    Predicate node_p = predicateFactory.createPredicate(node_uri, 1);
-                    ConceptDescription node_cd = descFactory.getConceptDescription(node_p);
 
-                    URI child_uri = URI.create(child.getUri());
-                    Predicate child_p = predicateFactory.createPredicate(child_uri, 1);
-                    ConceptDescription child_cd = descFactory.getConceptDescription(child_p);
+                    String uri = node.getUri();
+                    int arity;
+                    boolean inverted;
+                    if (uri.startsWith(DAG.owl_exists_data)) {
+                        uri = uri.substring(DAG.owl_exists_data.length());
+                        arity = 2;
+                        inverted = false;
+                    } else if (uri.startsWith(DAG.owl_exists_obj)) {
+                        uri = uri.substring(DAG.owl_exists_obj.length());
+                        arity = 2;
+                        inverted = false;
+                    } else if (uri.startsWith(DAG.owl_inverse_exists_data)) {
+                        uri = uri.substring(DAG.owl_inverse_exists_data.length());
+                        arity = 2;
+                        inverted = true;
+                    } else if (uri.startsWith(DAG.owl_inverse_exists_obj)) {
+                        uri = uri.substring(DAG.owl_inverse_exists_obj.length());
+                        arity = 2;
+                        inverted = true;
+                    } else {
+                        arity = 1;
+                        inverted = false;
+                    }
+                    URI node_uri = URI.create(uri);
+                    Predicate node_p = predicateFactory.createPredicate(node_uri, arity);
+                    ConceptDescription node_cd = descFactory.getConceptDescription(node_p, false, inverted);
 
-                    rv.add(new DLLiterConceptInclusionImpl(node_cd, child_cd));
+                    // Do same dispatch in child
+                    uri = child.getUri();
+                    if (uri.startsWith(DAG.owl_exists_data)) {
+                        uri = uri.substring(DAG.owl_exists_data.length());
+                        arity = 2;
+                        inverted = false;
+                    } else if (uri.startsWith(DAG.owl_exists_obj)) {
+                        uri = uri.substring(DAG.owl_exists_obj.length());
+                        arity = 2;
+                        inverted = false;
+                    } else if (uri.startsWith(DAG.owl_inverse_exists_data)) {
+                        uri = uri.substring(DAG.owl_inverse_exists_data.length());
+                        arity = 2;
+                        inverted = true;
+                    } else if (uri.startsWith(DAG.owl_inverse_exists_obj)) {
+                        uri = uri.substring(DAG.owl_inverse_exists_obj.length());
+                        arity = 2;
+                        inverted = true;
+                    } else {
+                        arity = 1;
+                        inverted = false;
+                    }
+                    URI child_uri = URI.create(uri);
+                    Predicate child_p = predicateFactory.createPredicate(child_uri, arity);
+                    ConceptDescription child_cd = descFactory.getConceptDescription(child_p, false, inverted);
+
+                    rv.add(new DLLiterConceptInclusionImpl(child_cd, node_cd));
                 }
             }
         }
@@ -65,15 +112,28 @@ public class SemanticReduction {
 
             for (DAGNode child : node.descendans) {
                 if (!check_redundant(node, child)) {
-                    URI node_uri = URI.create(node.getUri());
+                    String uri = node.getUri();
+                    boolean inverted = false;
+                    if (uri.startsWith(DAG.owl_inverse)) {
+                        uri = uri.substring(DAG.owl_inverse.length());
+                        inverted = true;
+                    }
+
+                    URI node_uri = URI.create(uri);
                     Predicate node_p = predicateFactory.createPredicate(node_uri, 2);
-                    RoleDescription node_rd = descFactory.getRoleDescription(node_p);
+                    RoleDescription node_rd = descFactory.getRoleDescription(node_p, inverted);
 
-                    URI child_uri = URI.create(child.getUri());
+                    uri = child.getUri();
+                    inverted = false;
+                    if (uri.startsWith(DAG.owl_inverse)) {
+                        uri = uri.substring(DAG.owl_inverse.length());
+                        inverted = true;
+                    }
+                    URI child_uri = URI.create(uri);
                     Predicate child_p = predicateFactory.createPredicate(child_uri, 2);
-                    RoleDescription child_rd = descFactory.getRoleDescription(child_p);
+                    RoleDescription child_rd = descFactory.getRoleDescription(child_p, inverted);
 
-                    rv.add(new DLLiterRoleInclusionImpl(node_rd, child_rd));
+                    rv.add(new DLLiterRoleInclusionImpl(child_rd, node_rd));
                 }
             }
         }
@@ -81,19 +141,32 @@ public class SemanticReduction {
 
             for (DAGNode child : node.descendans) {
                 if (!check_redundant(node, child)) {
-                    URI node_uri = URI.create(node.getUri());
+                    String uri = node.getUri();
+                    boolean inverted = false;
+                    if (uri.startsWith(DAG.owl_inverse)) {
+                        uri = uri.substring(DAG.owl_inverse.length());
+                        inverted = true;
+                    }
+
+                    URI node_uri = URI.create(uri);
                     Predicate node_p = predicateFactory.createPredicate(node_uri, 2);
-                    RoleDescription node_rd = descFactory.getRoleDescription(node_p);
+                    RoleDescription node_rd = descFactory.getRoleDescription(node_p, inverted);
 
-                    URI child_uri = URI.create(child.getUri());
+                    uri = child.getUri();
+                    inverted = false;
+                    if (uri.startsWith(DAG.owl_inverse)) {
+                        uri = uri.substring(DAG.owl_inverse.length());
+                        inverted = true;
+                    }
+                    URI child_uri = URI.create(uri);
                     Predicate child_p = predicateFactory.createPredicate(child_uri, 2);
-                    RoleDescription child_rd = descFactory.getRoleDescription(child_p);
+                    RoleDescription child_rd = descFactory.getRoleDescription(child_p, inverted);
 
-                    rv.add(new DLLiterRoleInclusionImpl(node_rd, child_rd));
+                    rv.add(new DLLiterRoleInclusionImpl(child_rd, node_rd));
                 }
             }
         }
-
+        log.debug("Finished semantic-reduction");
         return rv;
     }
 
@@ -115,7 +188,6 @@ public class SemanticReduction {
     private boolean check_directly_redundant(DAGNode parent, DAGNode child) {
         DAGNode sp = sdag.getTDAG().get(parent.getUri());
         DAGNode sc = sdag.getTDAG().get(child.getUri());
-        DAGNode tp = tdag.getTDAG().get(parent.getUri());
         DAGNode tc = tdag.getTDAG().get(child.getUri());
 
         return (sp.descendans.contains(sc) && sc.descendans.containsAll(tc.descendans));
