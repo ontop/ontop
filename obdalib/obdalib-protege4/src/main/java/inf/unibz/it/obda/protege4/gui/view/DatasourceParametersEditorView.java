@@ -42,7 +42,7 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent {
 		
         setLayout(new BorderLayout());
 //        try {
-        add(new DatasourceParameterEditorPanel(apic), BorderLayout.CENTER);
+        add(new DatasourceParameterEditorPanel(apic.getOBDAManager()), BorderLayout.CENTER);
 //        } catch (Exception e) {
 //        	e.printStackTrace(System.out);
 //        	throw e;

@@ -220,7 +220,7 @@ public class MappingRenderer extends DefaultTreeCellRenderer {
 	private String prepareQuery(String input) {
 		String query = "";
 		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+			new DatalogQueryHelper(apic.getPrefixManager());
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1)  // if no head

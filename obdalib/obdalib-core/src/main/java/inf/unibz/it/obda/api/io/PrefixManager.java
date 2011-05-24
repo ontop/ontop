@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.api.io;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstracts the prefix mapping mechanism.
@@ -15,5 +15,13 @@ public interface PrefixManager
   
   public String getPrefixForURI(String uri);
   
-  public HashMap<String, String> getPrefixMap();
+  public Map<String, String> getPrefixMap();
+  
+  public String getDefaultNamespace();
+  
+  public void setDefaultNamespace(String uri);
+  
+  public String getShortForm(String uri, boolean useDefaultPrefix);
+  
+  public String getShortForm(String uri);
 }

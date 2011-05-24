@@ -205,7 +205,7 @@ public class SetParametersDialog extends javax.swing.JDialog {
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, usr);
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
     			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
-    			aux.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
+//    			aux.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
     			aux.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
     			apic.getDatasourcesController().updateDataSource(aux.getSourceID(), aux);
     		}else{
@@ -215,7 +215,7 @@ public class SetParametersDialog extends javax.swing.JDialog {
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, usr);
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
 		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
-		    	ds.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
+//		    	ds.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
 		    	ds.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		    	apic.getDatasourcesController().addDataSource(ds);
     		}
@@ -228,7 +228,7 @@ public class SetParametersDialog extends javax.swing.JDialog {
     	
     	DataSource dump = null;
     	
-    	Iterator<DataSource> it = apic.getDatasourcesController().getAllSources().values().iterator();
+    	Iterator<DataSource> it = apic.getDatasourcesController().getAllSources().iterator();
     	while(it.hasNext()){
     		DataSource aux = it.next();
     		String s = aux.getParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);

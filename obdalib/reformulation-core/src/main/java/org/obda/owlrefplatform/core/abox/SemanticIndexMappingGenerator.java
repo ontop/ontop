@@ -3,6 +3,7 @@ package org.obda.owlrefplatform.core.abox;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
+import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
@@ -37,8 +38,10 @@ public class SemanticIndexMappingGenerator {
     private int mapcounter;
     private final APIController apic;
     private final DAG dag;
+    private final DataSource ds;
 
-    public SemanticIndexMappingGenerator(APIController apic, DAG dag) {
+    public SemanticIndexMappingGenerator(DataSource ds, APIController apic, DAG dag) {
+    	this.ds = ds;
         this.apic = apic;
         this.dag = dag;
         mapcounter = 1;
@@ -195,8 +198,8 @@ public class SemanticIndexMappingGenerator {
         ax.setTargetQuery(cq);
         ax.setSourceQuery(new RDBMSSQLQuery(sql));
 
-        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
-        apic.getMappingController().insertMapping(dsUri, ax);
+//        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
+        apic.getMappingController().insertMapping(ds.getSourceID(), ax);
     }
 
     private void insert_binary_mapping(String uri, String projection, String table, SemanticIndexRange range) throws DuplicateMappingException {
@@ -236,8 +239,8 @@ public class SemanticIndexMappingGenerator {
         ax.setTargetQuery(cq);
         ax.setSourceQuery(new RDBMSSQLQuery(sql));
 
-        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
-        apic.getMappingController().insertMapping(dsUri, ax);
+//        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
+        apic.getMappingController().insertMapping(ds.getSourceID(), ax);
 
     }
 

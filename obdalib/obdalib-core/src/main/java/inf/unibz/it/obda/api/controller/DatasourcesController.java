@@ -17,17 +17,15 @@ import inf.unibz.it.obda.domain.DataSource;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
-public class DatasourcesController implements OntologyControllerListener {
+public class DatasourcesController {
 
 	private final DatasourceXMLCodec							codec				= new DatasourceXMLCodec();
 
@@ -35,7 +33,7 @@ public class DatasourcesController implements OntologyControllerListener {
 
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
 
-	private DataSource									currentdatasource	= null;
+//	private DataSource									currentdatasource	= null;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -68,12 +66,6 @@ public class DatasourcesController implements OntologyControllerListener {
 		}
 	}
 
-	// TODO Remove this method later.
-	public void fireCurrentDatasourceChanged(DataSource previousdatasource, DataSource source) {
-		for (DatasourcesControllerListener listener : listeners) {
-			listener.currentDatasourceChange(previousdatasource, source);
-		}
-	}
 
 	public void fireDatasourceAdded(DataSource source) {
 		for (DatasourcesControllerListener listener : listeners) {
@@ -99,75 +91,77 @@ public class DatasourcesController implements OntologyControllerListener {
 		}
 	}
 
-	public HashMap<URI, DataSource> getAllSources() {
-		return datasources;
+	public List<DataSource> getAllSources() {
+		List<DataSource> sources = new LinkedList<DataSource>(datasources.values());
+		return Collections.unmodifiableList(sources);
 	}
 
-	/***
-	 * Gets all sources for Ontology
-	 *
-	 * @param ontologyURI
-	 * @return
-	 */
-	public Set<DataSource> getDatasources(URI ontologyURI) {
-		HashSet<DataSource> ontoSources = new HashSet<DataSource>();
-		Collection<DataSource> allSources = datasources.values();
-		for (Iterator<DataSource> iterator = allSources.iterator(); iterator.hasNext();) {
-			DataSource dataSource = iterator.next();
-			if (dataSource.getSourceID().equals(ontologyURI.toString())) {
-				ontoSources.add(dataSource);
-			}
-		}
-		return ontoSources;
-	}
+//	/***
+//	 * Gets all sources for Ontology
+//	 *
+//	 * @param ontologyURI
+//	 * @return
+//	 */
+//	public Set<DataSource> getDatasources(URI ontologyURI) {
+//		HashSet<DataSource> ontoSources = new HashSet<DataSource>();
+//		Set<DataSource> allSources = new HashSet(datasources.values());
+//		Collections.unmodifiableSet(allSources);
+////		for (Iterator<DataSource> iterator = allSources.iterator(); iterator.hasNext();) {
+////			DataSource dataSource = iterator.next();
+////			if (dataSource.getSourceID().equals(ontologyURI.toString())) {
+////				ontoSources.add(dataSource);
+////			}
+////		}
+////		return ontoSources;
+//	}
 
-	// TODO remove this method, no such thing as current datasource, use an
-	// outside coordinator if needed for GUI code
-	public synchronized DataSource getCurrentDataSource() {
-		return currentdatasource;
-	}
+//	// TODO remove this method, no such thing as current datasource, use an
+//	// outside coordinator if needed for GUI code
+//	public synchronized DataSource getCurrentDataSource() {
+//		return currentdatasource;
+//	}
 
 	public synchronized DataSource getDataSource(URI name) {
 
 		return datasources.get(name);
 	}
 
-	/***
-	 * Use a DatasourceXML codec instead
-	 *
-	 * @param sourceelement
-	 */
-	@Deprecated
-	public void loadDatasourceFromXML(Element sourceelement) {
-		DatasourceXMLCodec codec = new DatasourceXMLCodec();
-		DataSource source = codec.decode(sourceelement);
-		addDataSource(source);
-	}
+//	/***
+//	 * Use a DatasourceXML codec instead
+//	 *
+//	 * @param sourceelement
+//	 */
+//	@Deprecated
+//	public void loadDatasourceFromXML(Element sourceelement) {
+//		DatasourceXMLCodec codec = new DatasourceXMLCodec();
+//		DataSource source = codec.decode(sourceelement);
+//		addDataSource(source);
+//	}
 
-	/***
-	 * Use a DatasourceXMLCodec instead
-	 *
-	 * @param strsources
-	 * @throws Exception
-	 */
-	@Deprecated
-	public synchronized void loadSourcesFromString(String strsources) throws Exception {
-		try {
-			datasources = DataSource.decodeDataSources(strsources);
-		} catch (Exception e) {
-			log.error("Error while parsing the data source");
-			throw e;
-		}
-	}
+//	/***
+//	 * Use a DatasourceXMLCodec instead
+//	 *
+//	 * @param strsources
+//	 * @throws Exception
+//	 */
+//	@Deprecated
+//	public synchronized void loadSourcesFromString(String strsources) throws Exception {
+//		try {
+//			datasources = DataSource.decodeDataSources(strsources);
+//		} catch (Exception e) {
+//			log.error("Error while parsing the data source");
+//			throw e;
+//		}
+//	}
 
-	public void removeAllSources() {
-		while (!datasources.values().isEmpty()) {
-			DataSource source = datasources.values().iterator().next();
-			datasources.remove(source.getSourceID());
-		}
-
-		fireAllDatasourcesDeleted();
-	}
+//	public void removeAllSources() {
+//		while (!datasources.values().isEmpty()) {
+//			DataSource source = datasources.values().iterator().next();
+//			datasources.remove(source.getSourceID());
+//		}
+//
+//		fireAllDatasourcesDeleted();
+//	}
 
 	public synchronized void removeDataSource(URI id) {
 
@@ -180,18 +174,18 @@ public class DatasourcesController implements OntologyControllerListener {
 		listeners.remove(listener);
 	}
 
-	// TODO Remove this method later!
-	public synchronized void setCurrentDataSource(URI id) {
-		DataSource previous = currentdatasource;
-		if ((id != null) && (!id.equals(""))) {
-			DataSource ds = datasources.get(id);
-			currentdatasource = ds;
-			fireCurrentDatasourceChanged(previous, currentdatasource);
-		} else {
-			currentdatasource = null;
-			fireCurrentDatasourceChanged(previous, currentdatasource);
-		}
-	}
+//	// TODO Remove this method later!
+//	public synchronized void setCurrentDataSource(URI id) {
+//		DataSource previous = currentdatasource;
+//		if ((id != null) && (!id.equals(""))) {
+//			DataSource ds = datasources.get(id);
+//			currentdatasource = ds;
+//			fireCurrentDatasourceChanged(previous, currentdatasource);
+//		} else {
+//			currentdatasource = null;
+//			fireCurrentDatasourceChanged(previous, currentdatasource);
+//		}
+//	}
 
 	public synchronized void updateDataSource(URI id, DataSource dsd) {
 	  datasources.remove(id);
@@ -199,8 +193,5 @@ public class DatasourcesController implements OntologyControllerListener {
 		fireDataSourceNameUpdated(id, dsd);
 	}
 
-	public void currentOntologyChanged(URI uri, URI oldURI) {
-	  // TODO Try to do a different implementation.
-	}
-
+	
 }

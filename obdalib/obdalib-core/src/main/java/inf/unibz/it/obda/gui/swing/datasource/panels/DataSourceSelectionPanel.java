@@ -7,13 +7,13 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.IconLoader;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -45,8 +45,8 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel{
     
     private void init(){
     	
-    	Vector<DataSource> sources = new Vector<DataSource>();
-    	sources.addAll(dscontroller.getAllSources().values());
+    	List<DataSource> sources = new Vector<DataSource>();
+    	sources.addAll(dscontroller.getAllSources());
     	selector = new DatasourceSelector(sources);
     	
     	GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();

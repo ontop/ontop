@@ -99,7 +99,6 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
     @Override
     public void setOBDAController(APIController apic) {
         this.apic = apic;
-        ABoxToDBDumper.getInstance().setAPIController(apic);
     }
 
     @Override
@@ -172,7 +171,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 source.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
                 
                 apic.getDatasourcesController().addDataSource(source);
-                apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
+//                apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
                 ds = source;
                 connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
                 if (dbType.equals("semantic")) {
@@ -198,10 +197,9 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                     }
                     ABoxToDBDumper dumper;
 					try {
-						dumper = ABoxToDBDumper.getInstance();
-						dumper.materialize(ontologies, connection, source.getSourceID());
+						dumper = new ABoxToDBDumper(source);
+						dumper.materialize(ontologies, false);
 					} catch (AboxDumpException e) {
-						
 						throw new Exception(e);
 					}
 					if(createMappings){
@@ -221,9 +219,9 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             } else {
                 log.debug("Using a persistent database");
 
-                Collection<DataSource> sources = apic.getDatasourcesController().getAllSources().values();
+                Collection<DataSource> sources = apic.getDatasourcesController().getAllSources();
                 if (sources == null || sources.size() == 0) {
-                    throw new Exception("No datasource selected");
+                    throw new Exception("No datasource has been defined");
                 } else if (sources.size() > 1) {
                     throw new Exception("Currently the reasoner can only handle one datasource");
                 } else {
@@ -244,7 +242,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
             	if(dbType.equals("semantic")){
             		 // create t-dag, sigma-dag, create mappings, compute t'
-            		SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(apic, dag);
+            		SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(ds, apic, dag);
                     map_gen.build();
             	}
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());

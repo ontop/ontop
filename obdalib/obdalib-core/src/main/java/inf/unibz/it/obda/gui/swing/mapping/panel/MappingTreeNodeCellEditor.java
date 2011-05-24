@@ -16,6 +16,7 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
+import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 
@@ -158,7 +159,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	private String prepareQuery(String input) {
 		String query = "";
 		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(controller.getIOManager().getPrefixManager());
+			new DatalogQueryHelper(controller.getPrefixManager());
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1)  // if no head
@@ -172,39 +173,41 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		return query;
 	}
 
-	private void checkValidityOfConjunctiveQuery(CQIE cq) throws Exception{
-		List<Atom> atoms = cq.getBody();
-		Iterator<Atom> it = atoms.iterator();
-		APICoupler coup= controller.getCoupler();
-		URI onto_uri =controller.getCurrentOntologyURI();
-		while(it.hasNext()){
-			Atom atom = it.next();
-			int arity = atom.getArity();
-			if (arity == 1){  // concept query atom
-				String name = controller.getEntityNameRenderer().getPredicateName(atom);
-				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(name));
-				if(!isConcept){
-					throw new Exception("Concept "+name+" not present in ontology.");
-				}
-
-			} else if (arity == 2) {  // binary query atom
-				String name = controller.getEntityNameRenderer().getPredicateName(atom);
-				List<Term> terms = atom.getTerms();
-				Term t2 = terms.get(1);
-				boolean found = false;
-				if(t2 instanceof FunctionalTermImpl){
-					found =coup.isObjectProperty(onto_uri,new URI(name));
-				}else{
-					found =coup.isDatatypeProperty(onto_uri,new URI(name));
-				}
-				if(!found){
-					throw new Exception("Property "+name+" not present in ontology.");
-				}
-			} else {
-				// TODO Throw an exception
-			}
-		}
-	}
+//	private void checkValidityOfConjunctiveQuery(CQIE cq) throws Exception{
+//		List<Atom> atoms = cq.getBody();
+//		Iterator<Atom> it = atoms.iterator();
+//		APICoupler coup= controller.getCoupler();
+//		PrefixManager prefixman = controller.getPrefixManager();
+////		URI onto_uri = URI.create(prefixman.getDefaultNamespace());
+//		while(it.hasNext()){
+//			Atom atom = it.next();
+//			int arity = atom.getArity();
+//			if (arity == 1){  // concept query atom
+//				String name = controller.getEntityNameRenderer().getPredicateName(atom);
+//				boolean isConcept =coup.isNamedConcept(new URI(name));
+//				if(!isConcept){
+//					throw new Exception("Concept "+name+" not present in ontology.");
+//				}
+//
+//			} else if (arity == 2) {  // binary query atom
+//				String name = controller.getEntityNameRenderer().getPredicateName(atom);
+//				List<Term> terms = atom.getTerms();
+//				Term t2 = terms.get(1);
+//				boolean found = false;
+//				if(t2 instanceof FunctionalTermImpl){
+//					found =coup.isObjectProperty(new URI(name));
+//				}else{
+//					found =coup.isDatatypeProperty(new URI(name));
+//				}
+//				if(!found){
+//					throw new Exception("Property "+name+" not present in ontology.");
+//				}
+//			} else {
+//				log.error("Recieved an n-ary predicate.");
+//				throw new RuntimeException("Error, recieved an n-ary atom, only unary and binary atoms are accepted here");
+//			}
+//		}
+//	}
 
 		public void addCellEditorListener(CellEditorListener arg0) {
 			listener.add(arg0);

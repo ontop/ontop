@@ -9,6 +9,11 @@ import javax.swing.ListCellRenderer;
 public class ReformulationMethodsCellRenderer extends JLabel implements
 		ListCellRenderer {
 	
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= -543240735952113261L;
+
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 			int index, boolean isSelected, boolean cellHasFocus) {

@@ -24,6 +24,10 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class RDBMSInspectorView  extends AbstractOWLViewComponent {
     
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= -1168890804596237449L;
 	private static final Logger log = Logger.getLogger(RDBMSInspectorView.class);   
     
   @Override
@@ -37,9 +41,9 @@ public class RDBMSInspectorView  extends AbstractOWLViewComponent {
   	OBDAPluginController apic = 
   	    getOWLEditorKit().get(APIController.class.getName());
   	
-  	DatasourcesController dsController = apic.getDatasourcesController();
+  	DatasourcesController dsController = apic.getOBDAManager().getDatasourcesController();
   	Vector<DataSource> vecDatasource = 
-        new Vector<DataSource>(dsController.getAllSources().values());
+        new Vector<DataSource>(dsController.getAllSources());
   	
   	SQLSchemaInspectorPanel inspectorPanel = new SQLSchemaInspectorPanel(dsController);
   	DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);

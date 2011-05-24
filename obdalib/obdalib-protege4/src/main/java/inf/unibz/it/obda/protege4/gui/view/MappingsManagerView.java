@@ -25,6 +25,10 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class MappingsManagerView extends AbstractOWLViewComponent {
 
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
 	private static final Logger log = Logger.getLogger(MappingsManagerView.class);
        
   @Override
@@ -39,13 +43,13 @@ public class MappingsManagerView extends AbstractOWLViewComponent {
     OBDAPreferences preference = (OBDAPreferences)
          getOWLEditorKit().get(OBDAPreferences.class.getName());
     	
-    MappingController mapController = apiController.getMappingController();
-    DatasourcesController dsController = apiController.getDatasourcesController();
+    MappingController mapController = apiController.getOBDAManager().getMappingController();
+    DatasourcesController dsController = apiController.getOBDAManager().getDatasourcesController();
     	
     Vector<DataSource> vecDatasource = 
-        new Vector<DataSource>(dsController.getAllSources().values());
+        new Vector<DataSource>(dsController.getAllSources());
  
-    MappingManagerPanel mappingPanel = new MappingManagerPanel(apiController, 
+    MappingManagerPanel mappingPanel = new MappingManagerPanel(apiController.getOBDAManager(), 
         mapController, dsController, preference); 
     DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);
     datasourceSelector.addDatasourceListListener(mappingPanel);

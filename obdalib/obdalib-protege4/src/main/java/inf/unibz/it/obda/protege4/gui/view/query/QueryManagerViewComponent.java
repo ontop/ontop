@@ -31,7 +31,7 @@ public class QueryManagerViewComponent extends AbstractOWLViewComponent {
     protected void initialiseOWLView() throws Exception {
     	obdaController = (OBDAPluginController)getOWLEditorKit().get(APIController.class.getName());
     	setLayout(new BorderLayout());
-    	panel = new SavedQueriesPanel(obdaController.getQueryController());
+    	panel = new SavedQueriesPanel(obdaController.getOBDAManager().getQueryController());
 //    	panel.add
 //    	panel.add
         add(panel, BorderLayout.CENTER);

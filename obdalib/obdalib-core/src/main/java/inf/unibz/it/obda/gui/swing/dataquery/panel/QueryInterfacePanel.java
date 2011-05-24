@@ -264,7 +264,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 //		String newcontent = prefix + "\n" + currentcontent;
 //		queryTextPane.setText(newcontent);
 		
-		SelectPrefixDialog dialog = new SelectPrefixDialog(apic.getIOManager().getPrefixManager().getPrefixMap(), queryTextPane,baseuri.toString());
+		SelectPrefixDialog dialog = new SelectPrefixDialog(apic.getPrefixManager().getPrefixMap(), queryTextPane,baseuri.toString());
 		dialog.show();
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 

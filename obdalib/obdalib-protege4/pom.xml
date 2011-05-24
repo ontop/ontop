@@ -109,7 +109,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.1</version>
+			<version>1.5.11</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -317,7 +317,7 @@
 							lead to class not found exceptions. It's very important to assure
 							only the needed depdencies are imported.
 						-->
-						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*,org.protege.osgi.*</Import-Package>
+						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*,org.protege.osgi.jdbc</Import-Package>
 
 						<!--
 							This makes sure all OBDA classes are exported and available in

@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.owlapi;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.APICoupler;
+import inf.unibz.it.obda.api.io.PrefixManager;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -36,13 +36,12 @@ public class OWLAPICoupler implements APICoupler {
 
 	// OWLModelManager owlman = null;
 //	EntityFinder			finder	= null;
-	private APIController	apic;
+//	private APIController	apic;
 
 	// private OWLModelManager mmgr;
 
 	private OWLOntologyManager mmgr = null;
 
-	private final OWLOntology merged = null;
 
 	private OWLOntology	mergedOntology;
 
@@ -52,29 +51,27 @@ public class OWLAPICoupler implements APICoupler {
 
 	private HashSet<String>	objectProperties;
 
-	private OWLAPIDataManager datamanager =null;
+	private PrefixManager prefixman;
+	
+//	private OWLOntology root;
+//	
 
-	public OWLAPICoupler(APIController apic, OWLOntologyManager mmgr, OWLOntology root, OWLAPIDataManager iomanager) {
+	public OWLAPICoupler(OWLOntologyManager mmgr, PrefixManager prefixman) {
 		// this.mmgr = manager;
-		this.apic = apic;
+		this.prefixman = prefixman;
 		this.mmgr = mmgr;
-		this.datamanager = iomanager;
+		
+//		this.root = root;
+//		this.datamanager = iomanager;
 
-		OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologyImportsClosureSetProvider(mmgr, root));
-		try {
-			mergedOntology = merger.createMergedOntology(mmgr, root.getURI());
-		} catch (OWLOntologyCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OWLOntologyChangeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
+		
 		classesURIs = new HashSet<String>();
 		dataProperties = new HashSet<String>();
 		objectProperties = new HashSet<String>();
+
+
+		
+
 
 		Set<OWLClass> set = mergedOntology.getReferencedClasses();
 		Iterator<OWLClass> it = set.iterator();
@@ -93,15 +90,15 @@ public class OWLAPICoupler implements APICoupler {
 
 	}
 
-	public boolean isDatatypeProperty(URI ontouri,URI propertyURI) {
+	public boolean isDatatypeProperty(URI propertyURI) {
 		return dataProperties.contains(propertyURI.toString());
 	}
 
-	public boolean isNamedConcept(URI ontouri,URI propertyURI) {
+	public boolean isNamedConcept(URI propertyURI) {
 		return classesURIs.contains(propertyURI.toString());
 	}
 
-	public boolean isObjectProperty(URI ontouri,URI propertyURI) {
+	public boolean isObjectProperty(URI propertyURI) {
 		return objectProperties.contains(propertyURI.toString());
 	}
 
@@ -110,62 +107,77 @@ public class OWLAPICoupler implements APICoupler {
 	}
 
 	public void synchWithOntology(OWLOntology root){
-		mergedOntology = root;
+//		mergedOntology = root;
+		
 
-		classesURIs = new HashSet<String>();
-		dataProperties = new HashSet<String>();
-		objectProperties = new HashSet<String>();
-
-		Set<OWLClass> set = mergedOntology.getReferencedClasses();
-		Iterator<OWLClass> it = set.iterator();
-		while(it.hasNext()){
-			classesURIs.add(it.next().getURI().toString());
+		OWLOntologyMerger merger = new OWLOntologyMerger(new OWLOntologyImportsClosureSetProvider(mmgr, root));
+		try {
+			mergedOntology = merger.createMergedOntology(mmgr, root.getURI());
+		} catch (OWLOntologyCreationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (OWLOntologyChangeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		for (OWLDataProperty c: mergedOntology.getReferencedDataProperties()) {
-			dataProperties.add(c.getURI().toString());
-		}
-		for (OWLObjectProperty c: mergedOntology.getReferencedObjectProperties()) {
-			objectProperties.add(c.getURI().toString());
-		}
+		
+//		
+//		
+//
+//		classesURIs = new HashSet<String>();
+//		dataProperties = new HashSet<String>();
+//		objectProperties = new HashSet<String>();
+//
+//		Set<OWLClass> set = mergedOntology.getReferencedClasses();
+//		Iterator<OWLClass> it = set.iterator();
+//		while(it.hasNext()){
+//			classesURIs.add(it.next().getURI().toString());
+//		}
+//		for (OWLDataProperty c: mergedOntology.getReferencedDataProperties()) {
+//			dataProperties.add(c.getURI().toString());
+//		}
+//		for (OWLObjectProperty c: mergedOntology.getReferencedObjectProperties()) {
+//			objectProperties.add(c.getURI().toString());
+//		}
 	}
 
-	@Override
-	public String getPrefixForUri(URI uri) {
+//	@Override
+//	public String getPrefixForUri(URI uri) {
+//
+//		Map<String, String> map = prefixman.getPrefixMap();
+//		String uristring = uri.toString();
+//		String base = "";
+//		if(uristring.contains("#")){
+//			String[] aux = uristring.split("#");
+//			base = aux[0];
+//		}else{
+//			base = uristring;
+//		}
+//		Set<String> set = map.keySet();
+//		Iterator<String> sit = set.iterator();
+//		while(sit.hasNext()){
+//			String key = sit.next();
+//			String value = map.get(key);
+//			if(value.equals(base)){
+//				return key;
+//			}
+//		}
+//		return "";
+//	}
 
-		Map<String, String> map = datamanager.getPrefixMap();
-		String uristring = uri.toString();
-		String base = "";
-		if(uristring.contains("#")){
-			String[] aux = uristring.split("#");
-			base = aux[0];
-		}else{
-			base = uristring;
-		}
-		Set<String> set = map.keySet();
-		Iterator<String> sit = set.iterator();
-		while(sit.hasNext()){
-			String key = sit.next();
-			String value = map.get(key);
-			if(value.equals(base)){
-				return key;
-			}
-		}
-		return "";
-	}
+//	@Override
+//	public String getUriForPrefix(String prefix) {
+////		if(prefix.equals("")){
+////			return root.toString();
+////		}else{
+//			return prefixman.getURIForPrefix(prefix);
+////		}
+//
+//	}
 
-	@Override
-	public String getUriForPrefix(String prefix) {
-		if(prefix.equals("")){
-			return apic.getCurrentOntologyURI().toString();
-		}else{
-			return datamanager.getPrefixMap().get(prefix);
-		}
-
-	}
-
-	@Override
-	public void removeOntology(URI ontouri) {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void removeOntology(URI ontouri) {
+//		// TODO Auto-generated method stub
+//
+//	}
 }

@@ -1,34 +1,29 @@
 /***
- * Copyright (c) 2008, Mariano Rodriguez-Muro.
- * All rights reserved.
- *
- * The OBDA-API is licensed under the terms of the Lesser General Public
- * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
- * work include:
+ * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
  * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
- *   file named OBDAAPI_3DPARTY-LICENSES.txt.
+ * The OBDA-API is licensed under the terms of the Lesser General Public License
+ * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
+ * include:
+ * 
+ * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
+ * third-party components licensed under terms that may be different from those
+ * of the LGPL. Information about such licenses can be found in the file named
+ * OBDAAPI_3DPARTY-LICENSES.txt.
  */
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceTreeModel;
 
 import java.net.URI;
 
 import javax.swing.JOptionPane;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellEditor;
-import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -38,17 +33,16 @@ import javax.swing.tree.TreeSelectionModel;
  */
 public class DatasourceManagerPanel extends javax.swing.JPanel {
 
-	private static final long	serialVersionUID	= 1L;
-	
-	private DatasourcesController dscontroller = null;
-		
+	private static final long		serialVersionUID	= 1L;
+
+	private DatasourcesController	dscontroller		= null;
+
 	/** Creates new form DatasourceManagerPanel */
 	public DatasourceManagerPanel(APIController apiController) {
-		
+
 		this.dscontroller = apiController.getDatasourcesController();
 		initComponents();
-		
-		
+
 		/***********************************************************************
 		 * Setting up the data sources tree
 		 */
@@ -57,23 +51,24 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 		DefaultTreeCellEditor edit = new DefaultTreeCellEditor(treeDatasourceMgr, ren);
 		treeDatasourceMgr.setCellEditor(edit);
 		treeDatasourceMgr.setCellRenderer(ren);
-		treeDatasourceMgr.setEditable(true);
-		edit.addCellEditorListener(new CellEditorListener() {
-			
-			@Override
-			public void editingStopped(ChangeEvent e) {
-				DataSource ds = dscontroller.getCurrentDataSource();
-				URI old = ds.getSourceID();
-				TreeCellEditor ed = (TreeCellEditor) e.getSource();
-				String neu = ed.getCellEditorValue().toString();
-				ds.setNewID(URI.create(neu));
-				dscontroller.updateDataSource(old, ds);
-				
-			}
-			
-			@Override
-			public void editingCanceled(ChangeEvent e) {}
-		});
+		// treeDatasourceMgr.setEditable(true);
+		// edit.addCellEditorListener(new CellEditorListener() {
+		//			
+		// @Override
+		// public void editingStopped(ChangeEvent e) {
+		// DataSource ds = dscontroller.getCurrentDataSource();
+		//				
+		// URI old = ds.getSourceID();
+		// TreeCellEditor ed = (TreeCellEditor) e.getSource();
+		// String neu = ed.getCellEditorValue().toString();
+		// ds.setNewID(URI.create(neu));
+		// dscontroller.updateDataSource(old, ds);
+		//				
+		// }
+		//			
+		// @Override
+		// public void editingCanceled(ChangeEvent e) {}
+		// });
 		DatasourcesController srcontroller = dscontroller;
 		DatasourceTreeModel srctreemodel = new DatasourceTreeModel();
 		srcontroller.addDatasourceControllerListener(srctreemodel);
@@ -87,15 +82,17 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 			public void valueChanged(TreeSelectionEvent e) {
 				TreePath currentSelection = e.getPath();
 				DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) (currentSelection.getLastPathComponent());
-				if ((currentNode != null) && (currentNode.getUserObject() != null) && currentNode.getUserObject().toString().equals("")) {
-					dscontroller.setCurrentDataSource(null);
-				} else {
-					if(currentNode.getUserObject() != null){
-						dscontroller.setCurrentDataSource(URI.create(currentNode.toString()));
-					}else{//means the user selected the root ie he collapsed the tree
-						dscontroller.setCurrentDataSource(null); 
-					}
-				}
+				// if ((currentNode != null) && (currentNode.getUserObject() !=
+				// null) && currentNode.getUserObject().toString().equals("")) {
+				// dscontroller.setCurrentDataSource(null);
+				// } else {
+				// if(currentNode.getUserObject() != null){
+				// dscontroller.setCurrentDataSource(URI.create(currentNode.toString()));
+				// }else{//means the user selected the root ie he collapsed the
+				// tree
+				// dscontroller.setCurrentDataSource(null);
+				// }
+				// }
 			}
 		});
 	}
@@ -106,83 +103,86 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 	 * regenerated by the Form Editor.
 	 */
 	// <editor-fold defaultstate="collapsed" desc=" Generated Code
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+	// <editor-fold defaultstate="collapsed"
+	// desc=" Generated Code ">//GEN-BEGIN:initComponents
+	private void initComponents() {
+		java.awt.GridBagConstraints gridBagConstraints;
 
-        panelDatasourceHeader = new javax.swing.JPanel();
-        labelDatasources = new javax.swing.JLabel();
-        addButton = new javax.swing.JButton();
-        removeButton = new javax.swing.JButton();
-        scrollDatasourceTree = new javax.swing.JScrollPane();
-        treeDatasourceMgr = new javax.swing.JTree();
+		panelDatasourceHeader = new javax.swing.JPanel();
+		labelDatasources = new javax.swing.JLabel();
+		addButton = new javax.swing.JButton();
+		removeButton = new javax.swing.JButton();
+		scrollDatasourceTree = new javax.swing.JScrollPane();
+		treeDatasourceMgr = new javax.swing.JTree();
 
-        setLayout(new java.awt.BorderLayout());
+		setLayout(new java.awt.BorderLayout());
 
-        panelDatasourceHeader.setLayout(new java.awt.GridBagLayout());
+		panelDatasourceHeader.setLayout(new java.awt.GridBagLayout());
 
-        panelDatasourceHeader.setMaximumSize(new java.awt.Dimension(35000, 35000));
-        panelDatasourceHeader.setMinimumSize(new java.awt.Dimension(75, 54));
-        labelDatasources.setFont(new java.awt.Font("Arial", 1, 11));
-        labelDatasources.setForeground(new java.awt.Color(153, 153, 153));
-        labelDatasources.setText("   Datasources");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 2.0;
-        panelDatasourceHeader.add(labelDatasources, gridBagConstraints);
+		panelDatasourceHeader.setMaximumSize(new java.awt.Dimension(35000, 35000));
+		panelDatasourceHeader.setMinimumSize(new java.awt.Dimension(75, 54));
+		labelDatasources.setFont(new java.awt.Font("Arial", 1, 11));
+		labelDatasources.setForeground(new java.awt.Color(153, 153, 153));
+		labelDatasources.setText("   Datasources");
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.weightx = 2.0;
+		panelDatasourceHeader.add(labelDatasources, gridBagConstraints);
 
-        addButton.setIcon(IconLoader.getImageIcon("images/plus.png"));
-        addButton.setToolTipText("Add a new datasource");
-        addButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        addButton.setContentAreaFilled(false);
-        addButton.setIconTextGap(0);
-        addButton.setMaximumSize(new java.awt.Dimension(25, 25));
-        addButton.setMinimumSize(new java.awt.Dimension(25, 25));
-        addButton.setPreferredSize(new java.awt.Dimension(25, 25));
-        addButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addButtonActionPerformed(evt);
-            }
-        });
+		addButton.setIcon(IconLoader.getImageIcon("images/plus.png"));
+		addButton.setToolTipText("Add a new datasource");
+		addButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+		addButton.setContentAreaFilled(false);
+		addButton.setIconTextGap(0);
+		addButton.setMaximumSize(new java.awt.Dimension(25, 25));
+		addButton.setMinimumSize(new java.awt.Dimension(25, 25));
+		addButton.setPreferredSize(new java.awt.Dimension(25, 25));
+		addButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addButtonActionPerformed(evt);
+			}
+		});
 
-        panelDatasourceHeader.add(addButton, new java.awt.GridBagConstraints());
+		panelDatasourceHeader.add(addButton, new java.awt.GridBagConstraints());
 
-        removeButton.setIcon(IconLoader.getImageIcon("images/minus.png"));
-        removeButton.setToolTipText("Remove the selected datasource");
-        removeButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        removeButton.setContentAreaFilled(false);
-        removeButton.setIconTextGap(0);
-        removeButton.setMaximumSize(new java.awt.Dimension(25, 25));
-        removeButton.setMinimumSize(new java.awt.Dimension(25, 25));
-        removeButton.setPreferredSize(new java.awt.Dimension(25, 25));
-        removeButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeButtonActionPerformed(evt);
-            }
-        });
+		removeButton.setIcon(IconLoader.getImageIcon("images/minus.png"));
+		removeButton.setToolTipText("Remove the selected datasource");
+		removeButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+		removeButton.setContentAreaFilled(false);
+		removeButton.setIconTextGap(0);
+		removeButton.setMaximumSize(new java.awt.Dimension(25, 25));
+		removeButton.setMinimumSize(new java.awt.Dimension(25, 25));
+		removeButton.setPreferredSize(new java.awt.Dimension(25, 25));
+		removeButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				removeButtonActionPerformed(evt);
+			}
+		});
 
-        panelDatasourceHeader.add(removeButton, new java.awt.GridBagConstraints());
+		panelDatasourceHeader.add(removeButton, new java.awt.GridBagConstraints());
 
-        add(panelDatasourceHeader, java.awt.BorderLayout.NORTH);
+		add(panelDatasourceHeader, java.awt.BorderLayout.NORTH);
 
-        scrollDatasourceTree.setMinimumSize(new java.awt.Dimension(0, 0));
-        scrollDatasourceTree.setOpaque(false);
-        scrollDatasourceTree.setPreferredSize(new java.awt.Dimension(300, 322));
-        treeDatasourceMgr.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        treeDatasourceMgr.setForeground(new java.awt.Color(51, 51, 51));
-        treeDatasourceMgr.setMaximumSize(new java.awt.Dimension(987987, 800987));
-        treeDatasourceMgr.setShowsRootHandles(true);
-        scrollDatasourceTree.setViewportView(treeDatasourceMgr);
+		scrollDatasourceTree.setMinimumSize(new java.awt.Dimension(0, 0));
+		scrollDatasourceTree.setOpaque(false);
+		scrollDatasourceTree.setPreferredSize(new java.awt.Dimension(300, 322));
+		treeDatasourceMgr.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+		treeDatasourceMgr.setForeground(new java.awt.Color(51, 51, 51));
+		treeDatasourceMgr.setMaximumSize(new java.awt.Dimension(987987, 800987));
+		treeDatasourceMgr.setShowsRootHandles(true);
+		scrollDatasourceTree.setViewportView(treeDatasourceMgr);
 
-        add(scrollDatasourceTree, java.awt.BorderLayout.CENTER);
+		add(scrollDatasourceTree, java.awt.BorderLayout.CENTER);
 
-    }// </editor-fold>//GEN-END:initComponents
+	}// </editor-fold>//GEN-END:initComponents
 
 	private void removeButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeButtonActionPerformed
 		TreePath currentSelection = treeDatasourceMgr.getSelectionPath();
 		if (currentSelection != null) {
-			DatasourcesController srcctrl = dscontroller;
-			srcctrl.removeDataSource(srcctrl.getCurrentDataSource().getSourceID());
+			
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)currentSelection.getLastPathComponent();
+			dscontroller.removeDataSource(URI.create((node.getUserObject().toString())));
+			
 		}
 	}// GEN-LAST:event_removeButtonActionPerformed
 
@@ -193,12 +193,12 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 		}
 	}// GEN-LAST:event_addButtonActionPerformed
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addButton;
-    private javax.swing.JLabel labelDatasources;
-    private javax.swing.JPanel panelDatasourceHeader;
-    private javax.swing.JButton removeButton;
-    private javax.swing.JScrollPane scrollDatasourceTree;
-    private javax.swing.JTree treeDatasourceMgr;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JButton		addButton;
+	private javax.swing.JLabel		labelDatasources;
+	private javax.swing.JPanel		panelDatasourceHeader;
+	private javax.swing.JButton		removeButton;
+	private javax.swing.JScrollPane	scrollDatasourceTree;
+	private javax.swing.JTree		treeDatasourceMgr;
+	// End of variables declaration//GEN-END:variables
 }

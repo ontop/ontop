@@ -47,7 +47,7 @@ import org.semanticweb.owl.util.ProgressMonitor;
  *
  */
 
-public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReasoner, MonitorableOWLReasoner, ABoxDumpListener{
+public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReasoner, MonitorableOWLReasoner {
 
 	private static final String		NOT_IMPLEMENTED_STR		= "Service not available.";
 
@@ -68,7 +68,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		this.ontoManager = manager;
 		this.techwrapper = wrapper;
 		dscon = apic.getDatasourcesController();
-		ABoxToDBDumper.getInstance().addListener(this);
+//		ABoxToDBDumper.getInstance().addListener(this);
 		loadOntologies(ontoManager.getOntologies());
 	}
 
@@ -189,8 +189,6 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				e.printStackTrace();
 			}
 		}
-		techwrapper.updateOntology(ontology, uris);
-
 	}
 
 
@@ -477,13 +475,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		return progressMonitor;
 	}
 
-	@Override
-	public void dump_successful(DataSource ds) {
 
-//		ds.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
-		dscon.addDataSource(ds);
-		techwrapper.updateDataSource(ds);
-	}
 
 
 	public void finishProgressMonitor() {

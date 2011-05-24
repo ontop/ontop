@@ -8,7 +8,7 @@ package org.obda.query.tools.parser;
 
 import inf.unibz.it.obda.api.io.PrefixManager;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -16,6 +16,8 @@ import java.util.Set;
  *
  * @author Josef Hardi <josef.hardi@gmail.com>
  */
+
+@Deprecated
 public class DatalogQueryHelper {
 
 	public static final String OBDA_PREFIX_MAPPING_PREDICATE = "obdap";
@@ -37,18 +39,22 @@ public class DatalogQueryHelper {
 		String prefixString = "";
 		String baseString = "";
 
-		HashMap<String, String> prefixMapping = prefixManager.getPrefixMap();
+		if (prefixManager.getDefaultNamespace() != null) {
+			prefixString += "BASE <"+ prefixManager.getDefaultNamespace() +">\n";
+			prefixString += "PREFIX : <"+ prefixManager.getDefaultNamespace() +">\n";
+		}
+		Map<String, String> prefixMapping = prefixManager.getPrefixMap();
 		Set<String> prefixes = prefixMapping.keySet();
 		for (String prefix : prefixes) {
-			if (prefix.equals("version"))  continue;
+//			if (prefix.equals("version"))  continue;
 
-			if (prefix.equals("xml:base"))
-				baseString =
-					"BASE <" + prefixMapping.get(prefix) + ">\n";
-			else if (prefix.equals("xmlns"))
-				prefixString +=
-					"PREFIX : <" + prefixMapping.get(prefix) + ">\n";
-			else
+//			if (prefix.equals("xml:base"))
+//				baseString =
+//					"BASE <" + prefixMapping.get(prefix) + ">\n";
+//			else if (prefix.equals("xmlns"))
+//				prefixString +=
+//					"PREFIX : <" + prefixMapping.get(prefix) + ">\n";
+//			else
 				prefixString +=
 					"PREFIX " + prefix + ": <" + prefixMapping.get(prefix) + ">\n";
 		}

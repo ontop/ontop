@@ -153,7 +153,7 @@ public class TestFileGenerator {
             Iterator<OWLOntology> oit = o.iterator();
             while (oit.hasNext()) {
                 OWLOntology onto = oit.next();
-                apic = new OWLAPIController(manager, onto);
+                apic = new OWLAPIController();
                 String ontoname = onto.getURI().toString();
                 int z = ontoname.lastIndexOf("/");
                 ontoname = ontoname.substring(z + 1, ontoname.length() - 4);
@@ -183,7 +183,7 @@ public class TestFileGenerator {
                     writer.addResult(ids.get(query), queryhead, results);
                 }
                 String loc = obdalocation + ontoname + ".obda";
-                apic.getIOManager().saveOBDAData(URI.create(loc));
+                apic.getIOManager().saveOBDAData(URI.create(loc), apic.getPrefixManager());
 
                 String owluri = obdalocation + ontoname + ".owl";
                 manager.saveOntology(onto, new File(owluri).toURI());

@@ -7,6 +7,10 @@ import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 
 public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel {
 
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 2017399622537704497L;
 	private ReformulationPlatformPreferences preference = null;
 	private ConfigPanel configPanel = null;
 	

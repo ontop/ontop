@@ -23,6 +23,10 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class SQLQueryInterfaceView extends AbstractOWLViewComponent {
     
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 993255482453828915L;
 	private static final Logger log = Logger.getLogger(SQLQueryInterfaceView.class);
     
   @Override
@@ -36,9 +40,9 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent {
   	OBDAPluginController apic = 
   	    getOWLEditorKit().get(APIController.class.getName());
   	
-  	DatasourcesController dsController = apic.getDatasourcesController();
+  	DatasourcesController dsController = apic.getOBDAManager().getDatasourcesController();
   	Vector<DataSource> vecDatasource = 
-        new Vector<DataSource>(dsController.getAllSources().values());
+        new Vector<DataSource>(dsController.getAllSources());
 
   	SQLQueryPanel queryPanel = new SQLQueryPanel();
   	DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);

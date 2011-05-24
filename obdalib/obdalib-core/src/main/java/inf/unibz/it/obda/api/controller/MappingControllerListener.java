@@ -53,8 +53,5 @@ public interface MappingControllerListener {
 	 */
 	public void allMappingsRemoved();
 	
-	/**
-	 * Called when the active ontology is changed. 
-	 */
-	public void ontologyChanged();
+	
 }

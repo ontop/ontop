@@ -13,7 +13,6 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.APICoupler;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.domain.Query;
@@ -33,8 +32,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
@@ -46,10 +43,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
@@ -68,7 +62,7 @@ public class TreeCellEditorDialog extends JDialog {
 	private JTree						tree				= null;
 	private boolean						update				= true;
 
-	private static TreeCellEditorDialog	instance			= null;
+//	private static TreeCellEditorDialog	instance			= null;
 
 	private DatasourcesController		dsc					= null;
 
@@ -84,7 +78,7 @@ public class TreeCellEditorDialog extends JDialog {
 		this.dsc = dsc;
 		this.mapc = mapc;
 		myself = this;
-		instance = this;
+//		instance = this;
 		createDialog();
 	}
 
@@ -230,7 +224,9 @@ public class TreeCellEditorDialog extends JDialog {
 	private void update(String str) throws Exception {
 
 		MappingController con = mapc;
-		URI sourceName = dsc.getCurrentDataSource().getSourceID();
+		
+		URI sourceName = null;
+		
 		String nodeContent = (String) editedNode.getUserObject();
 		if (editedNode instanceof MappingNode) {
 
@@ -250,44 +246,11 @@ public class TreeCellEditorDialog extends JDialog {
 			MappingNode parent = (MappingNode) node.getParent();
 
 			Query h = parse(str);
-			checkValidityOfConjunctiveQuery((CQIE) h);
+//			checkValidityOfConjunctiveQuery((CQIE) h);
 			con.updateTargetQueryMapping(sourceName, parent.getMappingID(), h);
 		}
 	}
 
-	private void checkValidityOfConjunctiveQuery(CQIE cq ) throws Exception{
-		List<Atom> atoms = cq.getBody();
-		Iterator<Atom> it = atoms.iterator();
-		APICoupler coup= apic.getCoupler();
-		URI onto_uri =apic.getCurrentOntologyURI();
-		while(it.hasNext()){
-			Atom atom = it.next();
-			int arity = atom.getArity();
-			if (arity == 1) {  // concept query atom
-				String name = apic.getEntityNameRenderer().getPredicateName(atom);
-				String classUri = onto_uri.toString()+"#"+name;
-				boolean isConcept =coup.isNamedConcept(onto_uri,new URI(classUri));
-				if(!isConcept){
-					throw new Exception("Concept "+name+" not present in ontology.");
-				}
-
-			} else if (arity == 2) {  // binary concept atom
-				String name =apic.getEntityNameRenderer().getPredicateName(atom);
-				String propUri = onto_uri.toString()+"#"+name;
-				List<Term> terms = atom.getTerms();
-				Term t2 = terms.get(1);
-				boolean found = false;
-				if(t2 instanceof FunctionalTermImpl){
-					found =coup.isObjectProperty(onto_uri,new URI(propUri));
-				}else{
-					found =coup.isDatatypeProperty(onto_uri,new URI(propUri));
-				}
-				if(!found){
-					throw new Exception("Property "+name+" not present in ontology.");
-				}
-			}
-		}
-	}
 
 	private CQIE parse(String query) {
 		CQIE cq = null;
@@ -303,9 +266,11 @@ public class TreeCellEditorDialog extends JDialog {
 	}
 
 	private String prepareQuery(String input) {
+		//TODO Revisar este methodo urgentemente. Prefix related
+		
 		String query = "";
 		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+			new DatalogQueryHelper(apic.getPrefixManager());
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1)  // if no head

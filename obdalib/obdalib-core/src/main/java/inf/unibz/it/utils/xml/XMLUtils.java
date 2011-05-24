@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.xml.serialize.OutputFormat;
@@ -34,13 +35,13 @@ public class XMLUtils {
 
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, HashMap<String, String> prefixes, String filename)
+	public static void saveDocumentToXMLFile(Document doc, Map<String, String> prefixes, String filename)
 			throws FileNotFoundException, IOException {
 		File file = new File(filename);
 		saveDocumentToXMLFile(doc, prefixes, file);
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, HashMap<String, String> prefixes, File file)
+	public static void saveDocumentToXMLFile(Document doc, Map<String, String> prefixes, File file)
 			throws FileNotFoundException, IOException {
 
 		File tmpFile = prepare(doc);
@@ -97,7 +98,7 @@ public class XMLUtils {
 		return fOut;
 	}
 
-	private static String prepare(HashMap<String, String> prefixes) {
+	private static String prepare(Map<String, String> prefixes) {
 
 		String doctype = "<!DOCTYPE OBDA [\n";
 		Set<String> prefixIds = prefixes.keySet();

@@ -116,10 +116,7 @@ public class MappingController {
 			ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 			current_mappings.remove(index);
 		}
-		// TODO Remove this ds?
-//		DataSource ds = dscontroller.getCurrentDataSource();
-		setNeedsSyncWithReasoner(datasource_uri, true);
-		fireMappingDeleted(datasource_uri, mapping_id);
+fireMappingDeleted(datasource_uri, mapping_id);
 	}
 
 	/***************************************************************************
@@ -132,11 +129,6 @@ public class MappingController {
 		while (!mappings.isEmpty()) {
 			mappings.remove(0);
 		}
-		// TODO Remove this ds?
-//		DataSource ds = dscontroller.getCurrentDataSource();
-//		if(ds !=null){
-			setNeedsSyncWithReasoner(datasource_uri, true);
-//		}
 		fireAllMappingsRemoved();
 	}
 
@@ -322,11 +314,6 @@ public class MappingController {
 		if (index != -1)
 			throw new DuplicateMappingException("ID " + mapping.getId());
 		mappings.get(datasource_uri).add(mapping);
-		// TODO remove this ds?
-//		DataSource ds = dscontroller.getCurrentDataSource();
-//		if(ds != null){
-			setNeedsSyncWithReasoner(datasource_uri, true);
-//		}
 		fireMappingInserted(datasource_uri, mapping.getId());
 	}
 
@@ -352,13 +339,6 @@ public class MappingController {
 		listeners.remove(listener);
 	}
 
-	private void setNeedsSyncwithReasoner(URI src, Boolean value) {
-		this.needsSyncwithReasoner.put(src, value);
-	}
-
-	private void setNeedsSyncWithReasoner(URI src_uri, boolean changed) {
-		setNeedsSyncwithReasoner(src_uri, Boolean.valueOf(changed));
-	}
 
 	/***************************************************************************
 	 * Updates the indicated mapping and fires the appropiate event.
@@ -370,10 +350,6 @@ public class MappingController {
 	public void updateSourceQueryMapping(URI datasource_uri, String mapping_id, Query sourceQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		mapping.setSourceQuery(sourceQuery);
-		DataSource ds = dscontroller.getCurrentDataSource();
-		if(ds != null){
-			setNeedsSyncWithReasoner(ds.getSourceID(), true);
-		}
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
 
@@ -387,11 +363,6 @@ public class MappingController {
 	public void updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		mapping.setId(new_mappingid);
-
-		DataSource ds = dscontroller.getCurrentDataSource();
-		if(ds !=null){
-			setNeedsSyncWithReasoner(ds.getSourceID(), true);
-		}
 		fireMappigUpdated(datasource_uri, mapping_id, mapping);
 	}
 
@@ -408,21 +379,16 @@ public class MappingController {
 			return;
 		}
 		mapping.setTargetQuery(targetQuery);
-
-		DataSource ds = dscontroller.getCurrentDataSource();
-		if(ds != null){
-			setNeedsSyncWithReasoner(ds.getSourceID(), true);
-		}
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
 	}
 
-	public void activeOntologyChanged(){
-		for (MappingControllerListener listener : listeners) {
-			try {
-				listener.ontologyChanged();
-			} catch (Exception e) {
-				log.warn("Error while notifying listeners about an active ontology change.");
-			}
-		}
-	}
+//	public void activeOntologyChanged(){
+//		for (MappingControllerListener listener : listeners) {
+//			try {
+//				listener.ontologyChanged();
+//			} catch (Exception e) {
+//				log.warn("Error while notifying listeners about an active ontology change.");
+//			}
+//		}
+//	}
 }

@@ -1,14 +1,9 @@
 package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.queryanswering.Statement;
 
-import java.net.URI;
-import java.util.Set;
-
 import org.antlr.runtime.RecognitionException;
-import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import org.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import org.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
@@ -91,22 +86,22 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 
 		return new OBDAStatement(unfoldingMechanism, queryRewriter, querygenerator, evaluationEngine, queryProgram, apic);
 	}
-
-	/**
-	 * Updates the data source of wrapper if it changed
-	 */
-	@Override
-	public void updateDataSource(DataSource ds) {
-		evaluationEngine.update(ds);
-	}
-
-	/**
-	 * Updates the ontologies previously given to the wrapper if they changed
-	 */
-	@Override
-	public void updateOntology(DLLiterOntology onto, Set<URI> uris) {
-		queryRewriter.updateAssertions(onto.getAssertions());
-		querygenerator.update(apic.getIOManager().getPrefixManager(),onto, uris);
-	}
+//
+//	/**
+//	 * Updates the data source of wrapper if it changed
+//	 */
+//	@Override
+//	public void updateDataSource(DataSource ds) {
+//		evaluationEngine.update(ds);
+//	}
+//
+//	/**
+//	 * Updates the ontologies previously given to the wrapper if they changed
+//	 */
+//	@Override
+//	public void updateOntology(DLLiterOntology onto, Set<URI> uris) {
+//		queryRewriter.updateAssertions(onto.getAssertions());
+//		querygenerator.update(apic.getIOManager().getPrefixManager(),onto, uris);
+//	}
 
 }

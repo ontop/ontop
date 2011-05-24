@@ -9,6 +9,8 @@ public class OBDAProgessMonitor{
 	private Vector<OBDAProgressListener> listeners = null;
 	private JDialog parent = null;
 	
+	private boolean canceled = false;
+	
 	public OBDAProgessMonitor(){
 		listeners = new Vector<OBDAProgressListener>();
 	}
@@ -37,9 +39,14 @@ public class OBDAProgessMonitor{
 	}
 	
 	public void triggerActionCanceled(){
+		canceled = true;
 		parent.setVisible(false);
 		for(OBDAProgressListener pl : listeners){
 			pl.actionCanceled();
 		}
+	}
+	
+	public boolean isCanceled() {
+		return canceled;
 	}
 }

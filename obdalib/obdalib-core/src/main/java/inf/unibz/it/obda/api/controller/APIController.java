@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- *
+ * 
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- *
+ * 
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -15,37 +15,28 @@ package inf.unibz.it.obda.api.controller;
 import inf.unibz.it.dl.assertion.Assertion;
 import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.io.DataManager;
-import inf.unibz.it.obda.api.io.EntityNameRenderer;
+import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.api.io.SimplePrefixManager;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public abstract class APIController {
 
-//	private static APIController										controllerInstance		= null;
+	// private static APIController controllerInstance = null;
 
-	private static APICoupler											couplerInstance			= null;
+//	private static APICoupler											couplerInstance			= null;
 
-	private HashSet<OntologyControllerListener>							ontologyListeners		= null;
+//	private HashSet<OntologyControllerListener>							ontologyListeners		= null;
 
-	protected URI															currentOntologyURI		= null;
+	protected URI														currentOntologyURI		= null;
 
 	private HashMap<Class<Assertion>, AssertionController<Assertion>>	assertionControllers	= null;
 
@@ -53,24 +44,26 @@ public abstract class APIController {
 
 	protected DataManager												ioManager				= null;
 
-	protected DatasourcesController dscontroller = null;
+	protected DatasourcesController										dscontroller			= null;
 
-	protected MappingController mapcontroller = null;
+	private MappingController											mapcontroller			= null;
 
-	protected QueryController queryController = null;
+	protected QueryController											queryController			= null;
 
-	//renders the Dependency assertions from the obda file
-//	private DependencyAssertionRenderer dependencyRenderer = null;
-//	private ConstraintsRenderer constraintsRenderer = null;
+	private PrefixManager											prefman					= null;
 
+	// renders the Dependency assertions from the obda file
+	// private DependencyAssertionRenderer dependencyRenderer = null;
+	// private ConstraintsRenderer constraintsRenderer = null;
 
-	// the entity name renderer provides the name any entity which belongs to a loaded ontology.
-	protected EntityNameRenderer nameRenderer = null;
+	// the entity name renderer provides the name any entity which belongs to a
+	// loaded ontology.
+//	protected EntityNameRenderer										nameRenderer			= null;
 
 	// a set of all currently loaded ontotlogies
-	protected HashSet<String> loadedOntologies = null;
+//	private HashSet<String>												loadedOntologies		= null;
 
-	protected final Logger log = LoggerFactory.getLogger(this.getClass());
+	protected final Logger												log						= LoggerFactory.getLogger(this.getClass());
 
 	public APIController() {
 
@@ -79,11 +72,12 @@ public abstract class APIController {
 		queryController = new QueryController();
 		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
 		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
-		loadedOntologies = new HashSet<String>();
-		ioManager = new DataManager(this, new SimplePrefixManager());
+		
+		setPrefixManager(new SimplePrefixManager());
+		ioManager = new DataManager(this);
+		
+		log.debug("OBDA Lib initialized");
 
-//		dependencyRenderer = new DependencyAssertionRenderer(this);
-//		constraintsRenderer = new ConstraintsRenderer(this);
 	}
 
 	public QueryController getQueryController() {
@@ -95,38 +89,37 @@ public abstract class APIController {
 	}
 
 	public MappingController getMappingController() {
-		return mapcontroller;
+		return this.mapcontroller;
 	}
 
 	public AssertionController<?> getController(Class<?> assertionClass) {
 		return assertionControllers.get(assertionClass);
 	}
 
-	/***************************************************************************
-	 * Sets the current APICoupler. An object which is able to interact with the
-	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
-	 * operations over it. For example, checking wether a named object is a
-	 * Property or Concepts, etc.
-	 *
-	 * @param coupler
-	 */
-	public void setCoupler(APICoupler coupler) {
-		APIController.couplerInstance = coupler;
-		nameRenderer = new EntityNameRenderer(this);
-		nameRenderer.setCoupler(coupler);
-	}
+//	/***************************************************************************
+//	 * Sets the current APICoupler. An object which is able to interact with the
+//	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
+//	 * operations over it. For example, checking wether a named object is a
+//	 * Property or Concepts, etc.
+//	 * 
+//	 * @param coupler
+//	 */
+//	public void setCoupler(APICoupler coupler) {
+//		APIController.couplerInstance = coupler;
+//		nameRenderer = new EntityNameRenderer(getPrefixManager());
+//	}
 
-	/***************************************************************************
-	 * Gets the current APICoupler. An object which is able to interact with the
-	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
-	 * operations over it. For example, checking if a named object is a Property
-	 * or Concepts, etc.
-	 *
-	 * @param coupler
-	 */
-	public APICoupler getCoupler() {
-		return couplerInstance;
-	}
+//	/***************************************************************************
+//	 * Gets the current APICoupler. An object which is able to interact with the
+//	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
+//	 * operations over it. For example, checking if a named object is a Property
+//	 * or Concepts, etc.
+//	 * 
+//	 * @param coupler
+//	 */
+//	public APICoupler getCoupler() {
+//		return couplerInstance;
+//	}
 
 	public DataManager getIOManager() {
 		return this.ioManager;
@@ -135,7 +128,7 @@ public abstract class APIController {
 	/***************************************************************************
 	 * Registers a new assertion controller. These are used during
 	 * saving/loading
-	 *
+	 * 
 	 * @param controller
 	 */
 	public <T extends Assertion> void addAssertionController(Class<T> assertionClass, AssertionController<T> controller,
@@ -146,11 +139,12 @@ public abstract class APIController {
 
 	}
 
-	//TODO Fix remove assertion controller, API is wrong, should give the controller intance to remove
+	// TODO Fix remove assertion controller, API is wrong, should give the
+	// controller intance to remove
 	/***************************************************************************
 	 * Removes the assertion controller which is currently linked to the given
 	 * assertionClass
-	 *
+	 * 
 	 * @param assertionClass
 	 */
 	public void removeAssertionController(Class assertionClass) {
@@ -159,48 +153,33 @@ public abstract class APIController {
 		ioManager.removeAssertionController(assertionClass);
 	}
 
-
-
-	public void addOntologyControllerListener(OntologyControllerListener listener) {
-		getOntologyControllerListeners().add(listener);
-	}
-
-	public Collection<OntologyControllerListener> getOntologyControllerListeners() {
-		if (ontologyListeners == null) {
-			ontologyListeners = new HashSet<OntologyControllerListener>();
-		}
-		return ontologyListeners;
-	}
-
-	/***
-	 * Sets the current ontology URI and loads all .obda data for the current
-	 * obda file.
-	 *
-	 * @param uri
-	 */
-	public void setCurrentOntologyURI(URI uri) {
-		URI oldURI = currentOntologyURI;
-		currentOntologyURI = uri;
-//		dscontroller.currentOntologyChanged(uri, oldURI);
+//	public void addOntologyControllerListener(OntologyControllerListener listener) {
+//		getOntologyControllerListeners().add(listener);
+//	}
 //
-//		mapcontroller.removeAllMappings();
-//		dscontroller.removeAllSources();
-//		queryController.removeAllQueriesAndGroups();
-//
-//		Set<Class<Assertion>> registredAssertions = assertionControllers.keySet();
-//		for (Class<Assertion> assertionClass : registredAssertions) {
-//			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
-//			controller.clear();
+//	public Collection<OntologyControllerListener> getOntologyControllerListeners() {
+//		if (ontologyListeners == null) {
+//			ontologyListeners = new HashSet<OntologyControllerListener>();
 //		}
+//		return ontologyListeners;
+//	}
 
-//		ioManager.loadOBDADataFromFile(ioManager.getOBDAFile(getCurrentOntologyFile()));
-		mapcontroller.activeOntologyChanged();
+//	/***
+//	 * Sets the current ontology URI and loads all .obda data for the current
+//	 * obda file.
+//	 * 
+//	 * @param uri
+//	 */
+//	public void setCurrentOntologyURI(URI uri) {
+//		URI oldURI = currentOntologyURI;
+//		currentOntologyURI = uri;
+//		getMapcontroller().activeOntologyChanged();
+//
+//	}
 
-	}
-
-	public URI getCurrentOntologyURI() {
-		return currentOntologyURI;
-	}
+//	public URI getCurrentOntologyURI() {
+//		return currentOntologyURI;
+//	}
 
 	// private void fireCurrentOntologyChanged(URI uri, URI oldURI) {
 	// DatasourcesController.getInstance().removeAllSources();
@@ -212,9 +191,9 @@ public abstract class APIController {
 	// }
 	// }
 
-	public abstract URI getPhysicalURIOfOntology(URI onto);
+	// public abstract URI getPhysicalURIOfOntology(URI onto);
 
-	public abstract File getCurrentOntologyFile();
+	// public abstract File getCurrentOntologyFile();
 
 	public String getVersion() {
 		try {
@@ -253,61 +232,86 @@ public abstract class APIController {
 	}
 
 	/***
-	 * Gets the set of URI's for the currently loaded ontologies, i.e., ontologies
-	 * for which mappings have been loaded.
-	 *
+	 * Gets the set of URI's for the currently loaded ontologies, i.e.,
+	 * ontologies for which mappings have been loaded.
+	 * 
 	 * @return
 	 */
-	public abstract Set<URI> getOntologyURIs();
+	// public abstract Set<URI> getOntologyURIs();
 
-	/**
-	 * Returns the current entity name renderer
-	 * @return the current entity name renderer
-	 */
-	public EntityNameRenderer getEntityNameRenderer(){
-		return nameRenderer;
+//	/**
+//	 * Returns the current entity name renderer
+//	 * 
+//	 * @return the current entity name renderer
+//	 */
+//	public EntityNameRenderer getEntityNameRenderer() {
+//		return nameRenderer;
+//	}
+
+//	/**
+//	 * Adds the given ontology uri to the set of already loaded ontologies
+//	 * uri's.
+//	 * 
+//	 * @param ontoUri
+//	 */
+//
+//	public void markAsLoaded(URI ontoUri) {
+//		getLoadedOntologies().add(ontoUri.toString());
+//	}
+
+//	/**
+//	 * Removes the ontolgy identified by the given URI from the set of all
+//	 * currently loaded ontologies and all other objects (data sources,
+//	 * mappings, etc)
+//	 * 
+//	 * @param ontoUri
+//	 *            the URI of the ontology to remove
+//	 */
+//	public void unloaded(URI ontoUri) {
+//		getLoadedOntologies().remove(ontoUri.toString());
+//		HashMap<URI, DataSource> map = dscontroller.getAllSources();
+//		Set<URI> set = map.keySet();
+//		Iterator<URI> it = set.iterator();
+//		boolean controlle = false;
+//		Vector<URI> dstoDelete = new Vector<URI>();
+//		while (it.hasNext()) {
+//			DataSource ds = map.get(it.next());
+//			String dsuri = ds.getParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI);
+//			if (dsuri.equals(ontoUri.toString())) {
+//				dstoDelete.add(ds.getSourceID());
+//				controlle = true;
+//			}
+//		}
+//		if (!controlle) {
+//			log.error("ERROR: NO data source deleted after an ontology was deleted");
+//		}
+//		Iterator<URI> it2 = dstoDelete.iterator();
+//		while (it2.hasNext()) {
+//			dscontroller.removeDataSource(it2.next());
+//		}
+//	}
+
+//	public void setMapcontroller(MappingController mapcontroller) {
+//		this.mapcontroller = mapcontroller;
+//	}
+//
+//	public MappingController getMapcontroller() {
+//		return mapcontroller;
+//	}
+
+//	public void setLoadedOntologies(HashSet<String> loadedOntologies) {
+//		this.loadedOntologies = loadedOntologies;
+//	}
+
+//	public HashSet<String> getLoadedOntologies() {
+//		return loadedOntologies;
+//	}
+
+	public void setPrefixManager(PrefixManager prefman) {
+		this.prefman = prefman;
 	}
 
-	/**
-	 * Adds the given ontology uri to the set of already
-	 * loaded ontologies uri's.
-	 *
-	 * @param ontoUri
-	 */
-
-	public void markAsLoaded(URI ontoUri){
-		loadedOntologies.add(ontoUri.toString());
-	}
-
-
-	/**
-	 * Removes the ontolgy identified by the given URI from the set of all
-	 * currently loaded ontologies and all other objects (data sources, mappings, etc)
-	 *
-	 * @param ontoUri the URI of the ontology to remove
-	 */
-	public void unloaded(URI ontoUri){
-		loadedOntologies.remove(ontoUri.toString());
-		HashMap<URI, DataSource> map =dscontroller.getAllSources();
-		Set<URI> set = map.keySet();
-		Iterator<URI> it = set.iterator();
-		boolean controlle = false;
-		Vector<URI> dstoDelete = new Vector<URI>();
-		while(it.hasNext()){
-			DataSource ds = map.get(it.next());
-			String dsuri = ds.getParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI);
-			if(dsuri.equals(ontoUri.toString())){
-				dstoDelete.add(ds.getSourceID());
-				controlle = true;
-			}
-		}
-		if(!controlle){
-			log.error("ERROR: NO data source deleted after an ontology was deleted");
-		}
-		Iterator<URI> it2 = dstoDelete.iterator();
-		while(it2.hasNext()){
-			dscontroller.removeDataSource(it2.next());
-		}
-		couplerInstance.removeOntology(ontoUri);
+	public PrefixManager getPrefixManager() {
+		return prefman;
 	}
 }

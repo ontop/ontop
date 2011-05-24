@@ -57,7 +57,8 @@ public class JDBCEngine implements EvaluationEngine {
 		try {
 			Class d = Class.forName(driver);
 		} catch (Exception e) {
-			log.warn("Driver class not found our it has already been loaded", e);
+			log.warn("Driver class not found our it has already been loaded");
+			log.debug(e.getMessage(), e);
 		}
 		connection = DriverManager.getConnection(url, username, password);
 
@@ -77,6 +78,8 @@ public class JDBCEngine implements EvaluationEngine {
 	public ResultSet execute(String sql) throws Exception {
 		log.debug("Executing SQL query: \n{}", sql);
 		if(! actionCanceled){
+			if (connection == null)
+				throw new SQLException("No connection has been stablished yet");
 			statement = connection.createStatement();
 			return statement.executeQuery(sql);
 		}else{

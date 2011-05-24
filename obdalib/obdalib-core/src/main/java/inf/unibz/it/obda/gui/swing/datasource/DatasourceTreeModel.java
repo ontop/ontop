@@ -1,15 +1,14 @@
 /***
- * Copyright (c) 2008, Mariano Rodriguez-Muro.
- * All rights reserved.
- *
- * The OBDA-API is licensed under the terms of the Lesser General Public
- * License v.3 (see OBDAAPI_LICENSE.txt for details). The components of this
- * work include:
+ * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
  * 
- * a) The OBDA-API developed by the author and licensed under the LGPL; and, 
- * b) third-party components licensed under terms that may be different from 
- *   those of the LGPL.  Information about such licenses can be found in the 
- *   file named OBDAAPI_3DPARTY-LICENSES.txt.
+ * The OBDA-API is licensed under the terms of the Lesser General Public License
+ * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
+ * include:
+ * 
+ * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
+ * third-party components licensed under terms that may be different from those
+ * of the LGPL. Information about such licenses can be found in the file named
+ * OBDAAPI_3DPARTY-LICENSES.txt.
  */
 package inf.unibz.it.obda.gui.swing.datasource;
 
@@ -18,16 +17,16 @@ import inf.unibz.it.obda.domain.DataSource;
 
 import java.net.URI;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 public class DatasourceTreeModel extends DefaultTreeModel implements DatasourcesControllerListener {
 
-	private static final long	serialVersionUID = 6283495101253307672L;
+	private static final long	serialVersionUID	= 6283495101253307672L;
 
-	private URI	currentOntologyURI = null;
+	private URI					currentOntologyURI	= null;
 
 	public DatasourceTreeModel() {
 		super(new DefaultMutableTreeNode());
@@ -63,7 +62,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 				break;
 			}
 		}
-		if(affectedchild != null){
+		if (affectedchild != null) {
 			affectedchild.setUserObject(currendata.getSourceID());
 			nodeChanged(affectedchild);
 		}
@@ -78,31 +77,22 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
 
 	}
-	
+
 	/**
-	 * Synchronize a hash map of <code>DataSource</code> objects to the tree model.
+	 * Synchronize an array of <code>DataSource</code> objects to the tree
+	 * model.
 	 * 
-	 * @param datasources the hash map of data sources.
+	 * @param datasources
+	 *            the array of data sources.
 	 */
-	public void synchronize(HashMap<URI, DataSource> datasources) {
-	  DataSource[] datasourcesArray = 
-	      datasources.values().toArray(new DataSource[datasources.size()]);
-	  synchronize(datasourcesArray);
+	public void synchronize(List<DataSource> datasources) {
+		alldatasourcesDeleted();
+		int size = datasources.size();
+		for (int i = 0; i < size; i++) {
+			datasourceAdded(datasources.get(i));
+		}
 	}
-	
-	/**
-   * Synchronize an array of <code>DataSource</code> objects to the tree model.
-   * 
-   * @param datasources the array of data sources.
-   */
-	public void synchronize(DataSource[] datasources) {
-	  alldatasourcesDeleted();
-	  int size = datasources.length;
-	  for (int i = 0; i < size; i++) {
-	    datasourceAdded(datasources[i]);
-	  }
-	}
-	
+
 	/***
 	 * 
 	 * @param uri
@@ -114,5 +104,6 @@ public class DatasourceTreeModel extends DefaultTreeModel implements Datasources
 	}
 
 	@Override
-	public void datasourcParametersUpdated() {}
+	public void datasourcParametersUpdated() {
+	}
 }

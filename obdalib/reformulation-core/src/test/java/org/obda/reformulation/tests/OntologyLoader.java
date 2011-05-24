@@ -35,12 +35,13 @@ public class OntologyLoader {
             OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
             // Loading the OBDA data (note, the obda file must be in the same folder as the owl file
-            OWLAPIController controller = new OWLAPIController(manager, ontology);
-            controller.loadData(new File(owlfile).toURI());
+            OWLAPIController controller = new OWLAPIController();
+            String obdafile = owlfile.substring(0, owlfile.length()-3) + ".obda";
+            controller.getIOManager().loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), controller.getPrefixManager());;
 
-            DataManager ioManager = controller.getIOManager();
-            URI obdaUri = ioManager.getOBDAFile(new File(owlfile).toURI());
-            ioManager.loadOBDADataFromURI(obdaUri);
+//            DataManager ioManager = controller.getIOManager();
+//            URI obdaUri = ioManager.getOBDAFile(new File(owlfile).toURI());
+//            ioManager.loadOBDADataFromURI(obdaUri);
 
 
             ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();

@@ -168,8 +168,12 @@ public class OWLAPIDataManagerTest extends TestCase {
         OWLOntology ontology =
         	manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
+        String obdafilestr = owlfile.substring(0, owlfile.length() -3) + "obda";
+        URI obdafileuri = new File(obdafilestr).toURI();
         // Load the OBDA data.
-        controller = new OWLAPIController(manager, ontology);
-        controller.loadData(new File(owlfile).toURI());
+        
+        
+        controller = new OWLAPIController();
+        controller.getIOManager().loadOBDADataFromURI(obdafileuri,ontology.getURI(),controller.getPrefixManager());
 	}
 }

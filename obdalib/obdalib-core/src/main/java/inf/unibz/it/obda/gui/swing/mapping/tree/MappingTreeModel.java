@@ -318,28 +318,28 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		}
 	}
 
-	@Override
-	public void ontologyChanged() {
-		try {
-			DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
-			if(ds!=null){
-				ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
-				ArrayList<OBDAMappingAxiom> newmappings = controller.getMappings(ds.getSourceID());
-				if (newmappings != null) {
-					for (OBDAMappingAxiom dataSourceMapping : newmappings) {
-						newnodes.add(getMappingNodeFromMapping(dataSourceMapping));
-					}
-				}
-				root.removeAllChildren();
-				for (MappingNode newnode : newnodes) {
-					root.insert(newnode, root.getChildCount());
-				}
-				nodeStructureChanged(root);
-			}
-		} catch (Exception e) {
-			e.printStackTrace(System.err);
-		}
-	}
+//	@Override
+//	public void ontologyChanged() {
+//		try {
+//			DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
+//			if(ds!=null){
+//				ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
+//				ArrayList<OBDAMappingAxiom> newmappings = controller.getMappings(ds.getSourceID());
+//				if (newmappings != null) {
+//					for (OBDAMappingAxiom dataSourceMapping : newmappings) {
+//						newnodes.add(getMappingNodeFromMapping(dataSourceMapping));
+//					}
+//				}
+//				root.removeAllChildren();
+//				for (MappingNode newnode : newnodes) {
+//					root.insert(newnode, root.getChildCount());
+//				}
+//				nodeStructureChanged(root);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace(System.err);
+//		}
+//	}
 
 	/*
 	 * @see
@@ -438,7 +438,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	private String prepareQuery(String input) {
 		String query = "";
 		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+			new DatalogQueryHelper(apic.getPrefixManager());
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1)  // if no head

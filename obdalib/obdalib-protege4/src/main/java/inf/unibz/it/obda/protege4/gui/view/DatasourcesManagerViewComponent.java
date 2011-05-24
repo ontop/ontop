@@ -6,11 +6,6 @@ import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceParameterEditorPa
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-
-import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -32,13 +27,13 @@ public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent {
     	
         setLayout(new BorderLayout());
         
-        DataSourceSelectionPanel selectionpanel = new DataSourceSelectionPanel(apic);
+        DataSourceSelectionPanel selectionpanel = new DataSourceSelectionPanel(apic.getOBDAManager());
         add(selectionpanel, BorderLayout.NORTH);
         
-        DatasourceParameterEditorPanel editor = new DatasourceParameterEditorPanel(apic);
+        DatasourceParameterEditorPanel editor = new DatasourceParameterEditorPanel(apic.getOBDAManager());
         add(editor,BorderLayout.CENTER);
         selectionpanel.getDataSourceSelector().addDatasourceListListener(editor);
-        apic.getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
+        apic.getOBDAManager().getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
         
         
         log.info("Datasource browser initialized");

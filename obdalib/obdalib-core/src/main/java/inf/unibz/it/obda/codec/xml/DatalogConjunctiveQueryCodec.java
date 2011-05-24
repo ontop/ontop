@@ -18,9 +18,9 @@ import org.w3c.dom.Element;
 /**
  * The DatalogConjunctiveQueryCodec can be used to encode a conjunctive query
  * into XML or to decode a conjunctive query from XML
- *
+ * 
  * @author Manfred Gerstgrasser
- *
+ * 
  */
 
 public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
@@ -28,18 +28,18 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 	/**
 	 * The tag used to represent a conjunctive query in XML
 	 */
-	private static final String	TAG	= "CQ";
+	private static final String	TAG				= "CQ";
 
 	/**
 	 * the current api controller
 	 */
-	APIController apic = null;
+	APIController				apic			= null;
 
-	DatalogProgramParser datalogParser = new DatalogProgramParser();
+	DatalogProgramParser		datalogParser	= new DatalogProgramParser();
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger		log				= LoggerFactory.getLogger(this.getClass());
 
-	public DatalogConjunctiveQueryCodec(APIController apic){
+	public DatalogConjunctiveQueryCodec(APIController apic) {
 		this.apic = apic;
 	}
 
@@ -99,8 +99,7 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 		try {
 			datalogParser.parse(query);
 			cq = datalogParser.getRule(0);
-		}
-		catch (RecognitionException e) {
+		} catch (RecognitionException e) {
 			log.warn(e.getMessage());
 		}
 		return cq;
@@ -108,14 +107,11 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 
 	private String prepareQuery(String input) {
 		String query = input;
-		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(apic.getIOManager().getPrefixManager());
+		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1)  // if no head
-			query = queryHelper.getDefaultHead() + " " +
-			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
-			 	query;
+		if (atoms.length == 1) // if no head
+			query = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + query;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;

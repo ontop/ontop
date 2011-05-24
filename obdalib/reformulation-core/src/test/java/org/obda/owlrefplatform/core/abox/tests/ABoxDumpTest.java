@@ -62,10 +62,10 @@ public class ABoxDumpTest extends TestCase {
  		 Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
 
          
-	     ABoxToDBDumper dumper = new ABoxToDBDumper();
+	     ABoxToDBDumper dumper = new ABoxToDBDumper(source);
 	     Set<OWLOntology> vex = new HashSet<OWLOntology>();
 	     vex.add(ontology);
-	     dumper.materialize(vex,conn, source.getSourceID());
+	     dumper.materialize(vex,true);
 	     Map<URIIdentyfier, String> org_mapper = dumper.getMapper();
 	     Collection<String> tables = dumper.getMapper().values();
 	     

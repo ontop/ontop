@@ -559,8 +559,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						latch.countDown();
 					} catch (Exception e) {
 						latch.countDown();
+						log.error("Error while retriving information from the data source.",e);
 						JOptionPane.showMessageDialog(null, "Error while updating table.\n Please refer to the log file for more information.");
-						log.error("Error while retriving relational information from data source.",e);
 					}
 				}
 			};

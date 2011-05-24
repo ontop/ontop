@@ -54,10 +54,10 @@ private String file = "C:/Users/obda/ontologies/ABoxDumpTest/ABoxDumpTest.owl";
 	 		 Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
 
 	         
-		     ABoxToDBDumper dumper = new ABoxToDBDumper();
+		     ABoxToDBDumper dumper = new ABoxToDBDumper(source);
 		     Set<OWLOntology> vex = new HashSet<OWLOntology>();
 		     vex.add(ontology);
-		     dumper.materialize(vex,conn, source.getSourceID());
+		     dumper.materialize(vex,true);
 		     Map<URIIdentyfier, String> mapper = dumper.getMapper();
 		     
 		     DirectMappingGenerator mapGen = new DirectMappingGenerator();

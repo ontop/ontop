@@ -53,7 +53,7 @@ public class SemanticIndexHelper {
     public Set<OWLOntology> load_onto(String ontoname) throws OWLOntologyCreationException {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-        apic = new OWLAPIController(manager, ontology);
+        apic = new OWLAPIController();
 
         Set<OWLOntology> onto_set = new HashSet<OWLOntology>(1);
         onto_set.add(ontology);

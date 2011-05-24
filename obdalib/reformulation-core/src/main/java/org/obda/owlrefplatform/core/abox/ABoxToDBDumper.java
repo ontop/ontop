@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 public class ABoxToDBDumper implements OBDAProgressListener{
 
 	private Connection							conn					= null;
-	private APIController						apic					= null;
+//	private APIController						apic					= null;
 	private List<ABoxDumpListener>				listener				= null;
 	private DataSource							ds						= null;
 	private int									indexcounter			= 1;
@@ -61,20 +61,21 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 	private boolean								isCanceled = false;					
 	private Statement 							statement = null;
 
-	private static ABoxToDBDumper				instance				= null;
+//	private static ABoxToDBDumper				instance				= null;
 	
 	private Map<URIIdentyfier,String> 	mapper 		= null;
 	
 	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
 
-	public ABoxToDBDumper() {
+	public ABoxToDBDumper(DataSource ds) {
+		this.ds = ds;
 		listener = new Vector<ABoxDumpListener>();
-		instance = this;
+//		instance = this;
 	}
 
-	public void setAPIController(APIController apic) {
-		this.apic = apic;
-	}
+//	public void setAPIController(APIController apic) {
+//		this.apic = apic;
+//	}
 
 	/**
 	 * Materializes the Abox of the given ontologies using the given sql
@@ -91,7 +92,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 	 *            true if automatic mappings should be made
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, Connection c, URI dsUri) throws AboxDumpException {
+	private void materialize(Set<OWLOntology> ontologies, Connection c) throws AboxDumpException {
 		try {
 			log.debug("Materializing ABoxes into DB");
 			isCanceled = false;
@@ -224,13 +225,13 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 	 *            true if automatic mappings should be created
 	 * @throws Exception
 	 */
-	public void materialize(Set<OWLOntology> ontologies, URI dsname, boolean override) throws AboxDumpException {
+	public void materialize(Set<OWLOntology> ontologies, boolean override) throws AboxDumpException {
 		isCanceled = false;
-		if (apic == null) {
-			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
-		}
-
-		ds = apic.getDatasourcesController().getDataSource(dsname);
+//		if (apic == null) {
+//			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
+//		}
+//
+//		ds = apic.getDatasourcesController().getDataSource(dsname);
 
 		if(override){
 			AboxFromDBLoader loader = new AboxFromDBLoader();
@@ -249,7 +250,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		} catch (SQLException e) {
 			throw new AboxDumpException("Error while connecting to data base. " + e.getMessage(), e);
 		}
-		materialize(ontologies, conn, dsname);
+		materialize(ontologies, conn);
 	}
 
 	private void materializeMapper() throws Exception{
@@ -475,32 +476,32 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		listener.remove(l);
 	}
 
-	/**
-	 * Returns the given api controller
-	 *
-	 * @return the api controller
-	 */
-	public APIController getController() {
-		// TODO this shouldn't return a null pointer, the calling method should
-		// be prepared to recreive a null object
-		if (apic == null) {
-			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
-		}
-		return apic;
-	}
+//	/**
+//	 * Returns the given api controller
+//	 *
+//	 * @return the api controller
+//	 */
+//	public APIController getController() {
+//		// TODO this shouldn't return a null pointer, the calling method should
+//		// be prepared to recreive a null object
+//		if (apic == null) {
+//			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
+//		}
+//		return apic;
+//	}
 
-	/**
-	 * Returns the current instance of the class
-	 *
-	 * @return
-	 */
-
-	public static ABoxToDBDumper getInstance() {
-		if (instance == null) {
-			instance = new ABoxToDBDumper();
-		}
-		return instance;
-	}	
+//	/**
+//	 * Returns the current instance of the class
+//	 *
+//	 * @return
+//	 */
+//
+//	public static ABoxToDBDumper getInstance() {
+//		if (instance == null) {
+//			instance = new ABoxToDBDumper();
+//		}
+//		return instance;
+//	}	
 	
 	public Map<URIIdentyfier, String> getMapper(){
 		return mapper;
@@ -515,7 +516,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			statement.close();
 			removeTables();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			log.warn(e.getMessage());
 		}
 	}
 	
@@ -535,9 +536,5 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		} catch (SQLException e) {
 			log.debug(e.getMessage());
 		}
-	}
-	
-	public boolean wasMaterializationCanceled(){
-		return isCanceled;
-	}
+	}	
 }

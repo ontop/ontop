@@ -49,8 +49,8 @@ public class OBDAIOListenerPlugin extends IOListenerPluginInstance {
 
 	@Override
 	public void afterSave(IOListenerEvent ioevent) {
-		URI uri = ioevent.getPhysicalURI();
-		((OBDAPluginController)getOWLEditorKit().get(APIController.class.getName())).saveData(uri);
+//		URI uri = ioevent.getPhysicalURI();
+//		((OBDAPluginController)getOWLEditorKit().get(APIController.class.getName())).saveData(uri);
 	}
 
 	@Override

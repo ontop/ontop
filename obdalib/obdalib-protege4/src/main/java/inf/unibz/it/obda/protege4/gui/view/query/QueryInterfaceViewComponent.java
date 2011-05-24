@@ -88,7 +88,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		JSplitPane split_right_horizontal = new javax.swing.JSplitPane();
 		 OBDAPreferences preference = (OBDAPreferences)
          getOWLEditorKit().get(OBDAPreferences.class.getName());
-		panel_query_interface = new QueryInterfacePanel(obdaController, this.getOWLModelManager().getActiveOntology().getURI(),preference);
+		panel_query_interface = new QueryInterfacePanel(obdaController.getOBDAManager(), this.getOWLModelManager().getActiveOntology().getURI(),preference);
 
 		// getOWLWorkspace().getEditorKit()
 		panel_view_results = new inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel(panel_query_interface);

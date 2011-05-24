@@ -12,6 +12,7 @@ import inf.unibz.it.obda.queryanswering.Statement;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -180,15 +181,16 @@ public class Tester {
         return tuples;
     }
 
-    private void loadOntology(String owlfile) throws OWLOntologyCreationException {
+    private void loadOntology(String owlfile) throws OWLOntologyCreationException,IOException {
 
         manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
-        apic = new OWLAPIController(manager, ontology);
+        apic = new OWLAPIController();
+        String obdafile = owlfile.substring(0, owlfile.length()-3) + "obda";
         // apic.loadData(new File(owlfile).toURI());
-        URI obdafile = apic.getIOManager().getOBDAFile(manager.getPhysicalURIForOntology(ontology));
-        apic.getIOManager().loadOBDADataFromURI(obdafile);
+        
+        apic.getIOManager().loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),apic.getPrefixManager());
         fillPrefixManager();
     }
 
@@ -303,12 +305,13 @@ public class Tester {
     }
 
     private void fillPrefixManager() {
-        PrefixManager man = apic.getIOManager().getPrefixManager();
+        PrefixManager man = apic.getPrefixManager();
+        man.setDefaultNamespace(ontology.getURI().toString());
         man.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs");
         man.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf");
         man.addUri("http://www.w3.org/2001/XMLSchema#", "xsd");
         man.addUri("http://www.w3.org/2002/07/owl#", "owl");
-        man.addUri(ontology.getURI().toString(), "xml:base");
+//        man.addUri(ontology.getURI().toString(), "xml:base");
         man.addUri("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#", "dllite");
     }
 }
