@@ -9,22 +9,6 @@ import inf.unibz.it.obda.owlapi.OWLAPIController;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
@@ -34,6 +18,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
 public class Tester {
 
@@ -92,7 +84,7 @@ public class Tester {
 
     }
 
-    public void load(String onto, String unfold_type) throws Exception {
+    public void load(String onto, String unfold_type, String dbType) throws Exception {
 
         String owlfile = owlloc + onto + ".owl";
         String resultfile = xmlLoc + onto + ".xml";
@@ -103,15 +95,15 @@ public class Tester {
         pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
         if (unfold_type.equals("virtual"))
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        else if(unfold_type.equals("material")){
+        else if (unfold_type.equals("material")) {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
-        } else{
-        	throw new  Exception("The unfolding mechanism can only be either material or virtual");
-        	// Note: Due to resent changes the semantic mode has been removed. It is now a 
-        	// submode of the material Abox mode and the tester has still to be adapted to that
-        	// changes
+        } else {
+            throw new Exception("The unfolding mechanism can only be either material or virtual");
+            // Note: Due to resent changes the semantic mode has been removed. It is now a
+            // submode of the material Abox mode and the tester has still to be adapted to that
+            // changes
         }
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "direct");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, dbType);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
 
@@ -140,6 +132,11 @@ public class Tester {
                 }
             }
         }
+    }
+
+    // TODO workaround for old syntax for calling tester.load
+    public void load(String onto, String unfold_type) throws Exception {
+        load(onto, unfold_type, "direct");
     }
 
     public Set<String> getQueryIds() {
@@ -181,16 +178,16 @@ public class Tester {
         return tuples;
     }
 
-    private void loadOntology(String owlfile) throws OWLOntologyCreationException,IOException {
+    private void loadOntology(String owlfile) throws OWLOntologyCreationException, IOException {
 
         manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
         apic = new OWLAPIController();
-        String obdafile = owlfile.substring(0, owlfile.length()-3) + "obda";
+        String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
         // apic.loadData(new File(owlfile).toURI());
-        
-        apic.getIOManager().loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),apic.getPrefixManager());
+
+        apic.getIOManager().loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), apic.getPrefixManager());
         fillPrefixManager();
     }
 
@@ -202,14 +199,14 @@ public class Tester {
         File results = new File(resultfile);
 
         if (!results.exists()) {
-          System.err.println("result file not found.");
-          return;
+            System.err.println("result file not found.");
+            return;
         }
         if (!results.canRead()) {
             System.err.print("WARNING: can't read the result file:" + results.toString());
             return;
         }
-        
+
         Document doc = null;
         try {
 

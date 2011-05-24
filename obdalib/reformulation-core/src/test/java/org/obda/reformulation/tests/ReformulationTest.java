@@ -1,11 +1,12 @@
 package org.obda.reformulation.tests;
 
-import java.util.Set;
-
 import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 
 public class ReformulationTest extends TestCase {
@@ -43,18 +44,16 @@ public class ReformulationTest extends TestCase {
                 assertTrue(exp.contains(realResult));
             }
         }
-        // Uncomment for testing SemanticIndex
-//		log.debug("Testing in-memory db/SemanticIndex");
-//		tester.load(ontoname, "semantic");
-//		for(String id : tester.getQueryIds()) {
-//			log.debug("Testing query: {}", id);
-//			Set<String> exp = tester.getExpectedResult(id);
-//			Set<String> res = tester.executeQuery(id);
-//			assertTrue(exp.size() == res.size());
-//			for (String realResult : res) {
-//				assertTrue(exp.contains(realResult));
-//			}
-//		}
+        log.debug("Testing in-memory db/SemanticIndex");
+        tester.load(ontoname, "virtual", "semantic");
+        for (String id : tester.getQueryIds()) {
+            log.debug("Testing query: {}", id);
+            Set<String> exp = tester.getExpectedResult(id);
+            Set<String> res = tester.executeQuery(id);
+            List<String> exp_list = new LinkedList<String>(exp);
+            List<String> res_list = new LinkedList<String>(res);
+            assertEquals(exp_list, res_list);
+        }
 
     }
 
