@@ -21,5 +21,7 @@ public interface TechniqueWrapper {
 	public Statement getStatement() throws Exception;
 //	public void updateOntology(DLLiterOntology onto, Set<URI> uris);
 //	public void updateDataSource(DataSource ds);
+	
+	public void dispose();
 
 }

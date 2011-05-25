@@ -14,6 +14,7 @@
 package inf.unibz.it.obda.rdbmsgav.domain;
 
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.domain.QueryModifiers;
 
 
 
@@ -48,4 +49,11 @@ public class RDBMSSQLQuery implements Query {
 	public int hashCode(){
 		return this.toString().hashCode();
 	}
+
+	@Override
+	public QueryModifiers getQueryModifiers() {
+		return new QueryModifiers();
+	}
+	
+	 
 }

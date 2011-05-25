@@ -64,6 +64,13 @@ public class DatasourceSelector extends javax.swing.JPanel implements Datasource
 
 		initComponents();
 	}
+	
+	public void initSources(List<DataSource> datsources) {
+		cboModelDatasource.removeAllElements();
+		for (DataSource ds: datsources) {
+			cboModelDatasource.addElement(ds);
+		}
+	}
 
 	public DataSource getSelectedDataSource() {
 		return (DataSource) cboDatasource.getSelectedItem();

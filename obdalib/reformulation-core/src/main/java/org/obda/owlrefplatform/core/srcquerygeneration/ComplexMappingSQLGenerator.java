@@ -6,7 +6,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +23,6 @@ import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
@@ -46,13 +44,12 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	private List<String>				sqlqueries				= null;
 	private JDBCUtility					util					= null;
 	private Map<Integer, String>		localAliasMap			= null;
-	private DLLiterOntology				onto					= null;
 
 	org.slf4j.Logger					log						= LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
 
-	public ComplexMappingSQLGenerator(DLLiterOntology onto, MappingViewManager man, JDBCUtility util) {
+	public ComplexMappingSQLGenerator(MappingViewManager man, JDBCUtility util) {
 		viewManager = man;
-		this.onto = onto;
+		
 		this.util = util;
 	}
 
@@ -153,6 +150,10 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		
 		sqlqueries = new Vector<String>();
 		
+		Object tempdist = query.getQueryModifiers().get("distinct");
+		boolean distinct = false;
+		if (tempdist != null)
+			distinct = (Boolean)tempdist;		
 		
 		StringBuilder finalquery = new StringBuilder();
 		while (it.hasNext()) {
@@ -163,6 +164,9 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			String where = getWhereClause(q);
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
+			if (distinct && query.getRules().size() == 1) {
+				sb.append("DISTINCT ");
+			}
 			sb.append(select);
 			sb.append(" FROM ");
 			sb.append(from);
@@ -175,7 +179,11 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			}
 			sqlqueries.add(sb.toString());
 			if (finalquery.length() > 0) {
-				finalquery.append("\nUNION\n");
+				if (distinct) {
+					finalquery.append("\nUNION\n");
+				} else {
+					finalquery.append("\nUNION ALL\n");
+				}
 			}
 			finalquery.append("(");
 			finalquery.append(sb.toString());
@@ -186,11 +194,11 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		return result;
 	}
 
-	@Override
-	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	/**
 	 * produces the from clause of the sql query for the given CQIE
@@ -282,8 +290,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 									FunctionalTermImpl ov2 = (FunctionalTermImpl) term_N;
 									if (ov1.getTerms().size() == ov2.getTerms().size()) {
 										for (int j = 0; j < ov1.getTerms().size(); j++) {
-											Term t0 = ov1.getTerms().get(j);
-											Term tn = ov2.getTerms().get(j);
+//											Term t0 = ov1.getTerms().get(j);
+//											Term tn = ov2.getTerms().get(j);
 											String sqlVar_0 = map.getSQLVariableAt(pos_0);
 											String sqlVar_N = map_N.getSQLVariableAt(pos_N);
 											StringBuilder equ = new StringBuilder();
@@ -374,8 +382,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 										FunctionalTermImpl ov2 = (FunctionalTermImpl) term_N;
 										if (ov1.getTerms().size() == ov2.getTerms().size()) {
 											for (int j = 0; j < ov1.getTerms().size(); j++) {
-												Term t0 = ov1.getTerms().get(j);
-												Term tn = ov2.getTerms().get(j);
+//												Term t0 = ov1.getTerms().get(j);
+//												Term tn = ov2.getTerms().get(j);
 												String sqlVar_0 = map.getSQLVariableAt(pos_0);
 												String sqlVar_N = map_N.getSQLVariableAt(pos_N);
 												StringBuilder equ = new StringBuilder();
@@ -451,7 +459,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					Object[] o = list.get(0);
 					Atom a = (Atom) o[0];
 					Integer pos = (Integer) o[1];
-					String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
+//					String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
 					String alias = localAliasMap.get(a.hashCode());
 					AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
 					String sqlvar = map.getSQLVariableAt(pos);
@@ -478,7 +486,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							Object[] o = list.get(0);
 							Atom a = (Atom) o[0];
 							Integer pos = (Integer) o[1];
-							String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
+//							String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
 							String alias = localAliasMap.get(a.hashCode());
 							AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
 							String sqlvar = map.getSQLVariableAt(pos);

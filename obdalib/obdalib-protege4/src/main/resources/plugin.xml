@@ -6,7 +6,7 @@
 	
 	<extension id="DatasourcesManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Datasource selector"></label>
+		<label value="Datasource editor"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.view.DatasourcesManagerViewComponent">
 		</class>
@@ -16,7 +16,7 @@
 	
 	<extension id="MappingsManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Mappings manager"></label>
+		<label value="Mappings editor"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.view.MappingsManagerView">
 		</class>
@@ -26,7 +26,7 @@
 	
 	<extension id="RDBMSInspectorViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="RDBMS source inspector"></label>
+		<label value="RDBMS inspector"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.view.RDBMSInspectorView">
 		</class>
@@ -36,7 +36,7 @@
 	
 	<extension id="SQLQueryInterfaceViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="RDBMS queries"></label>
+		<label value="SQL query interface"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.view.SQLQueryInterfaceView">
 		</class>
@@ -50,22 +50,22 @@
 	
 	<extension id="QueryManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Query Manager"></label>
+		<label value="Query manager"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.view.query.QueryManagerViewComponent">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="ABox Query"></category>
+		<category value="OBDA"></category>
 	</extension>
 	
 	<extension id="QueryInterfaceViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Individuals queries"></label>
+		<label value="OBDA query interface"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.view.query.QueryInterfaceViewComponent">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="ABox Query"></category>
+		<category value="Data query"></category>
 	</extension>
 	
 	
@@ -84,7 +84,7 @@
 	
 	<extension id="DatasourcesManagerTab"
 		point="org.protege.editor.core.application.WorkspaceTab">
-		<label value="OBDA"></label>
+		<label value="OBDA model"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.tab.OBDAWorkspaceTab">
 		</class>
@@ -96,7 +96,7 @@
 	
 	<extension id="IndividualsQueryTab"
 		point="org.protege.editor.core.application.WorkspaceTab">
-		<label value="ABox Query"></label>
+		<label value="OBDA query"></label>
 		<class
 			value="inf.unibz.it.obda.protege4.gui.tab.IndividualsQueriesWorkspaceTab">
 		</class>
@@ -109,34 +109,25 @@
 
 	<!-- Editor Kit setup extensions -->	
 
-  <extension id="OBDAIOListener" point="org.protege.editor.owl.io.listener">
-    <class value="inf.unibz.it.obda.protege4.core.OBDAIOListenerPlugin"/>
-  </extension>
-    
   <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
   	<class value="inf.unibz.it.obda.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
   </extension>
   
-
-    
-
-	<!-- A type of plugin which defines a new assertion controller type which should 
+ 	<!-- A type of plugin which defines a new assertion controller type which should 
 	be taken into account by the main APIController when it is setup during the 
 	creation of an OWLEditorKit -->
     
-  <extension-point id="obda.controller" name="Assertion Controller"/>
+  <!-- <extension-point id="obda.controller" name="Assertion Controller"/> -->
     
     
   <!-- OBDA preferences -->
     
   <extension id="preferences.obdaplugin"
              point="org.protege.editor.core.application.preferencespanel">
-    <label value="OBDA Plugin"/>
+    <label value="OBDA"/>
     <class value="inf.unibz.it.obda.protege4.gui.preferences.OBDAPluginPreferencesPanel"/>
   </extension>
   
-  
-
   <extension id="reformulation-configuration"
              point="org.protege.editor.core.application.preferencespanel">
     <label value="Quest"/>

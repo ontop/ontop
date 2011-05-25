@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.reformulation;
 
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.utils.QueryUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,8 +48,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	 * @throws Exception
 	 */
 	private DatalogProgram reformulate(DatalogProgram q) throws Exception {
-
+		
 		DatalogProgramImpl prog = new DatalogProgramImpl();
+		
+		QueryUtils.copyQueryModifiers(q, prog);
+		
 		List<CQIE> queries = q.getRules();
 		prog.appendRule(queries);
 		HashSet<Integer> newRules = new HashSet<Integer>();

@@ -115,9 +115,16 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
         String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
         boolean createMappings = preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
+        log.debug("Initializing Quest query answering engine...");
+        log.debug("Active preferences:");
+        log.debug("{} = {}", ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, reformulationTechnique);
+        log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION, useInMemoryDB);
+        log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE, unfoldingMode);
+        log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE, dbType);
+        log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
 
 
-        OBDAOWLReformulationPlatform reasoner = null;
+        
         QueryRewriter rewriter;
         TechniqueWrapper techniqueWrapper;
         UnfoldingMechanism unfMech = null;
@@ -248,7 +255,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 MappingViewManager viewMan = new MappingViewManager(mappings);
                 unfMech = new ComplexMappingUnfolder(mappings, viewMan);
                 JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
-                gen = new ComplexMappingSQLGenerator(ontology, viewMan, util);
+                gen = new ComplexMappingSQLGenerator(viewMan, util);
             } else if ("material".equals(unfoldingMode)) {
                 unfMech = new DirectMappingUnfolder();
                 AboxFromDBLoader loader = new AboxFromDBLoader();
@@ -257,12 +264,17 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 log.error("Invalid parameter for {}", ReformulationPlatformPreferences.ABOX_MODE);
             }
 
+            /***
+             * Done, sending a new reasoner with the modules we just configured
+             */
+            
             techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
-            log.debug("Done setting up the technique wrapper");
+            log.debug("... Quest has been setup and is ready for querying");           
+            
             return new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
 
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

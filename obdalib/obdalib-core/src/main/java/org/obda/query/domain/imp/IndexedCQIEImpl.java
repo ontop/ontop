@@ -1,5 +1,7 @@
 package org.obda.query.domain.imp;
 
+import inf.unibz.it.obda.domain.QueryModifiers;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -69,5 +71,10 @@ public class IndexedCQIEImpl implements CQIE {
 		boolean copyIsBoolean = isBoolean;
 
 		return new CQIEImpl(copyHead, copyBody, copyIsBoolean);
+	}
+	
+	@Override
+	public QueryModifiers getQueryModifiers() {
+		return new QueryModifiers();
 	}
 }

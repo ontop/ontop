@@ -1,8 +1,5 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
-import inf.unibz.it.obda.api.io.PrefixManager;
-
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,7 +10,6 @@ import java.util.Vector;
 
 import org.obda.owlrefplatform.core.abox.URIIdentyfier;
 import org.obda.owlrefplatform.core.abox.URIType;
-import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.viewmanager.SimpleDirectViewManager;
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
 import org.obda.query.domain.Atom;
@@ -28,8 +24,6 @@ import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.reasoner.rulesys.builtins.UriConcat;
-
 /**
  * The implementation of the sql generator for the direct mapping approach
  * 
@@ -37,19 +31,21 @@ import com.hp.hpl.jena.reasoner.rulesys.builtins.UriConcat;
  * 
  */
 
+// TODO This class needs restructuring
+
 public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 
-	private Map<URIIdentyfier, String> 	mapper 		= null;
+	private Map<URIIdentyfier, String>		mapper		= null;
 	private HashMap<String, List<Object[]>>	termMap		= null;
 	private HashMap<String, List<Object[]>>	constMap	= null;
 	private Map<Atom, String>				aliasMapper	= null;
 	private int								counter		= 1;
-	private SimpleDirectViewManager 		viewManager = null;
+	private SimpleDirectViewManager			viewManager	= null;
 
 	Logger									log			= LoggerFactory.getLogger(SimpleDirectQueryGenrator.class);
 
 	public SimpleDirectQueryGenrator(Map<URIIdentyfier, String> mapper) {
-		
+
 		this.mapper = mapper;
 		aliasMapper = new HashMap<Atom, String>();
 		viewManager = new SimpleDirectViewManager();
@@ -64,18 +60,28 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		StringBuffer sb = new StringBuffer();
 		List<CQIE> rules = query.getRules();
 		Iterator<CQIE> it = rules.iterator();
+
+		Object tempdist = query.getQueryModifiers().get("distinct");
+		boolean distinct = false;
+		if (tempdist != null)
+			distinct = (Boolean)tempdist;
+
 		while (it.hasNext()) {
 			if (sb.length() > 0) {
 				sb.append("\n");
-				sb.append("UNION");
+				if (distinct) {
+					sb.append("UNION");
+				} else {
+					sb.append("UNION ALL");
+				}
 				sb.append("\n");
 			}
 			if (isDPBoolean(query)) {
 				sb.append("(");
-				sb.append(generateSourceQuery(it.next()));
+				sb.append(generateSourceQuery(it.next(),distinct && rules.size() == 1));
 				sb.append(")");
 			} else {
-				sb.append(generateSourceQuery(it.next()));
+				sb.append(generateSourceQuery(it.next(),distinct && rules.size() == 1));
 			}
 		}
 		String output = sb.toString();
@@ -91,12 +97,15 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	 * @return the sql query for it
 	 * @throws Exception
 	 */
-	private String generateSourceQuery(CQIE query) throws Exception {
+	private String generateSourceQuery(CQIE query, boolean distinct) throws Exception {
 
 		createAuxIndex(query);
 		StringBuffer sb = new StringBuffer();
 		String fromclause = generateFromClause(query);
 		sb.append("SELECT ");
+		if (distinct) {
+			sb.append("DISTINCT ");
+		}
 		sb.append(generateSelectClause(query));
 		sb.append(" FROM ");
 		sb.append(fromclause);
@@ -149,15 +158,17 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 						sb.append(aux.toString());
 					}
 				} else if (t instanceof URIConstant) {
-					URIConstant uriterm = (URIConstant)t;
+					URIConstant uriterm = (URIConstant) t;
 					sb.append("'");
 					sb.append(uriterm.getName().trim());
 					sb.append("' as auxvar");
 					sb.append(variableCounter);
 					variableCounter += 1;
-					/* note that we use the counter to be able to give a name to the
-					 * column that the URIConstant will occupy. Since we don't have the
-					 * orginal name of the head of the query, we need to invent one. 
+					/*
+					 * note that we use the counter to be able to give a name to
+					 * the column that the URIConstant will occupy. Since we
+					 * don't have the orginal name of the head of the query, we
+					 * need to invent one.
 					 */
 				} else {
 					throw new RuntimeException("SimpleDirectQueryGenrator: Unexpected term in the head of a query: " + t);
@@ -308,12 +319,13 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		}
 	}
 
-	@Override
-	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
-//		this.ontology = onto;
-//		viewmanager = new SimpleDirectViewManager(man, onto, uris);
-
-	}
+	// @Override
+	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
+	// uris) {
+	// // this.ontology = onto;
+	// // viewmanager = new SimpleDirectViewManager(man, onto, uris);
+	//
+	// }
 
 	private String getAlias() {
 		return "t_" + counter++;
@@ -338,17 +350,17 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		}
 		return bool;
 	}
-	
-	private String getTablename(Atom atom){
-		
+
+	private String getTablename(Atom atom) {
+
 		String tablename = null;
-		if(atom.getArity() == 1){
+		if (atom.getArity() == 1) {
 			URIIdentyfier id = new URIIdentyfier(atom.getPredicate().getName(), URIType.CONCEPT);
 			tablename = mapper.get(id);
-		}else{
+		} else {
 			URIIdentyfier id = new URIIdentyfier(atom.getPredicate().getName(), URIType.OBJECTPROPERTY);
 			tablename = mapper.get(id);
-			if(tablename == null){
+			if (tablename == null) {
 				id = new URIIdentyfier(atom.getPredicate().getName(), URIType.DATAPROPERTY);
 				tablename = mapper.get(id);
 			}

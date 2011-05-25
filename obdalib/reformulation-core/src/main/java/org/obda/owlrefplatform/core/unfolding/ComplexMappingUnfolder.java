@@ -2,11 +2,14 @@ package org.obda.owlrefplatform.core.unfolding;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.utils.QueryUtils;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.obda.owlrefplatform.core.basicoperations.CQCUtilities;
@@ -16,9 +19,11 @@ import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
+import org.obda.query.domain.Function;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
+import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.imp.AtomImpl;
 import org.obda.query.domain.imp.CQIEImpl;
 import org.obda.query.domain.imp.DatalogProgramImpl;
@@ -31,31 +36,44 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implements the partial evaluation algorithm with obda mappings
- *
+ * 
  * @author Manfred Gerstgrasser
- *
+ * 
  */
 
 public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
-	List<OBDAMappingAxiom>		mappings			= null;
-	Set<OBDAMappingAxiom>		splitMappings		= null;
+	List<OBDAMappingAxiom>			mappings			= null;
+	Set<OBDAMappingAxiom>			splitMappings		= null;
 
 	// private Map<String, LinkedList<OBDAMappingAxiom>> mappingsIndex = null;
 
-	private MappingViewManager	viewManager			= null;
-	private TermFactoryImpl		termFactory			= null;
-	private ResolutionEngine	resolutionEngine	= null;
+	private MappingViewManager		viewManager			= null;
+	private TermFactoryImpl			termFactory			= null;
+	private ResolutionEngine		resolutionEngine	= null;
 
 	/*
 	 * A program that has rules of the form C(p(x)) :- Aux(x) to be used for the
 	 * computation of partial evaluations
 	 */
-	DatalogProgram				compilationOfM		= null;
+	DatalogProgram					compilationOfM		= null;
 
-	Logger						log					= LoggerFactory.getLogger(ComplexMappingUnfolder.class);
+	Logger							log					= LoggerFactory.getLogger(ComplexMappingUnfolder.class);
 
-	public ComplexMappingUnfolder(List<OBDAMappingAxiom> mappings, MappingViewManager man) {
+	private Map<String, Function>	functTermMap		= null;
+
+	URIToFunctionMatcher			uriFunctorMatcher;
+
+	/***
+	 * 
+	 * Exception if it recieves a list of mappigs in which two function terms
+	 * are defined such that they have the same predicate name, but different
+	 * arities.
+	 * 
+	 * @param mappings
+	 * @param man
+	 */
+	public ComplexMappingUnfolder(List<OBDAMappingAxiom> mappings, MappingViewManager man) throws Exception {
 
 		log.debug("Setting up ComplexMappingUnfolder");
 		log.debug("Mappings recreived: {}", mappings.size());
@@ -64,6 +82,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		this.termFactory = TermFactoryImpl.getInstance();
 		this.viewManager = man;
 		resolutionEngine = new ResolutionEngine();
+		functTermMap = new HashMap<String, Function>();
 
 		splitMappings = new HashSet<OBDAMappingAxiom>();
 		// mappingsIndex = new HashMap<String, LinkedList<OBDAMappingAxiom>>();
@@ -100,7 +119,33 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			CQIE mappingrule = getRule(mapping);
 			compilationOfM.appendRule(mappingrule);
 			log.debug("Rule generated: {}", mappingrule);
+
+			/* Collecting functional terms */
+			List<Term> headTerms = mappingrule.getHead().getTerms();
+			for (Term term : headTerms) {
+				if (term instanceof FunctionalTermImpl) {
+					FunctionalTermImpl function = (FunctionalTermImpl) term;
+					String predicateName = function.getFunctionSymbol().getName().toString();
+					if (functTermMap.containsKey(predicateName)) {
+						/*
+						 * We found an existing fucntional term that has the
+						 * same predicate, these must have the same airity,
+						 * otherwise we cannt match URI constants with
+						 * functional terms.
+						 */
+						Function existing = functTermMap.get(predicateName);
+						if (function.getTerms().size() != existing.getTerms().size())
+							throw new Exception("The model contains to function terms that have the same base but different arity");
+					}
+					functTermMap.put(predicateName, function);
+				}
+			}
 		}
+
+		uriFunctorMatcher = new URIToFunctionMatcher(functTermMap);
+
+		/* Collecting all the function symbols in the auxiliary program */
+
 		this.compilationOfM = compilationOfM;
 
 	}
@@ -108,16 +153,16 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	/***
 	 * Creates a rule for a mapping at can be used to create the program to be
 	 * used for the computatino of partial evaluations.
-	 *
+	 * 
 	 * Given a Mapping sql1 -> C(p(x))
-	 *
+	 * 
 	 * This method will return a rule
-	 *
+	 * 
 	 * C(p(aux_1) :- Aux(aux_1, aux_2)
-	 *
+	 * 
 	 * Where Aux is the auxiliary predicate assocaited to the view for the SQL
 	 * query sql1.
-	 *
+	 * 
 	 * @param mapping
 	 * @return
 	 */
@@ -179,13 +224,21 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	public DatalogProgram unfold(DatalogProgram inputquery) throws Exception {
 		log.info("Computing unfolding for query of size: {}", inputquery.getRules().size());
 		long startime = System.currentTimeMillis();
+
 		log.debug("Computing partial evaluation for: \n{}", inputquery);
 		deAnonymize(inputquery);
+
+		log.debug("Replacing any URI constants for function symbols if there are matching ones.");
+		inputquery = replaceURIsForFunctions(inputquery);
+		
 		LinkedList<CQIE> evaluation = new LinkedList<CQIE>();
 		Iterator<CQIE> qit = inputquery.getRules().iterator();
 		int maxlenght = 0;
 
-		/* Finding the longest query */
+		/*
+		 * Finding the longest query, we will try to unfold from the atom that
+		 * is farther away
+		 */
 
 		while (qit.hasNext()) {
 			CQIE query = qit.next();
@@ -206,7 +259,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			for (CQIE currentQuery : partialEvaluation) {
 				if (pos < currentQuery.getBody().size()) {
 					List<CQIE> currentPartialEvaluation = unfoldAtom(pos, currentQuery);
-//					newPartialEvaluation.addAll(CQCUtilities.removeDuplicateAtoms(currentPartialEvaluation));
+					// newPartialEvaluation.addAll(CQCUtilities.removeDuplicateAtoms(currentPartialEvaluation));
 					newPartialEvaluation.addAll(currentPartialEvaluation);
 				} else {
 					newPartialEvaluation.add(currentQuery);
@@ -215,24 +268,24 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			pos++;
 			partialEvaluation.clear();
 			partialEvaluation.addAll(newPartialEvaluation);
-			//CQCUtilities.removeContainedQueriesSyntacticSorter(partialEvaluation, false);
-			
+			// CQCUtilities.removeContainedQueriesSyntacticSorter(partialEvaluation,
+			// false);
+
 		}
 		HashSet<CQIE> cleanset = CQCUtilities.removeDuplicateAtoms(partialEvaluation);
 		partialEvaluation.clear();
 		partialEvaluation.addAll(cleanset);
 		CQCUtilities.removeContainedQueriesSyntacticSorter(partialEvaluation, true);
-		
-		
-		
-		
-		
+
 		DatalogProgram dp = new DatalogProgramImpl();
+
+		QueryUtils.copyQueryModifiers(inputquery, dp);
+
 		dp.appendRule(partialEvaluation);
-		
+
 		log.debug("Computed partial evaluation: \n{}", dp);
 		long endtime = System.currentTimeMillis();
-		long timeelapsedseconds = (endtime - startime)/1000;
+		long timeelapsedseconds = (endtime - startime) / 1000;
 		log.info("Final size of unfolding: {}   Time elapsed: {}s", dp.getRules().size(), timeelapsedseconds);
 		return dp;
 	}
@@ -267,18 +320,18 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	/***
 	 * Replaces each variable 'v' in the query for a new variable constructed
 	 * using the name of the original variable plus the counter. For example
-	 *
+	 * 
 	 * q(x) :- C(x)
-	 *
+	 * 
 	 * results in
-	 *
+	 * 
 	 * q(x_1) :- C(x_1)
-	 *
+	 * 
 	 * if counter = 1.
-	 *
+	 * 
 	 * This method can be used to generate "fresh" rules from a datalog program
 	 * that is going to be used during a resolution procedure.
-	 *
+	 * 
 	 * @param rule
 	 * @param count
 	 * @return
@@ -307,7 +360,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 					}
 				}
 				Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createFunctionalTerm(newFunctionSymbol, newInnerTerms);
+				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createFunctionalTerm(newFunctionSymbol,
+						newInnerTerms);
 				newTerm = newFunctionalTerm;
 			}
 			if (newTerm != null)
@@ -349,13 +403,55 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 	}
 
+	/***
+	 * Produces a new program in which all URI constnats have been replaced by
+	 * grounded functions that match the URI. Any URI constant that was not
+	 * matched will remain in the output.
+	 * 
+	 * @param dp
+	 */
+	private DatalogProgram replaceURIsForFunctions(DatalogProgram dp) {
+		List<CQIE> rules = dp.getRules();
+		List<CQIE> newrules = new LinkedList<CQIE>();
+
+		for (CQIE rule : rules) {
+			List<Atom> body = rule.getBody();
+			List<Atom> newbody = new LinkedList<Atom>();
+			for (int i = 0; i < body.size(); i++) {
+				Atom atom = body.get(i);
+				List<Term> terms = atom.getTerms();
+				List<Term> newTerms = new LinkedList<Term>();
+				for (Term t : terms) {
+					if (t instanceof URIConstant) {
+						URIConstant uri = (URIConstant) t;
+						Function matchedFunction = this.uriFunctorMatcher.getPossibleFunctionalTermMatch(uri);
+						if (matchedFunction != null)
+							newTerms.add(matchedFunction);
+						else
+							newTerms.add(t);
+					} else {
+						newTerms.add(t);
+					}
+				}
+				Atom newatom = new AtomImpl(atom.getPredicate(), newTerms);
+				newbody.add(newatom);
+			}
+			CQIE newrule = new CQIEImpl(rule.getHead(), newbody, rule.isBoolean());
+			newrules.add(newrule);
+		}
+		DatalogProgram newprogram = new DatalogProgramImpl();
+		newprogram.appendRule(newrules);
+		QueryUtils.copyQueryModifiers(dp, newprogram);
+		return newprogram;
+	}
+
 	/**
 	 * method that enumerates all undistinguished variables in the given data
 	 * log program. This will also remove any instances of
 	 * UndisinguishedVariable and replace them by instance of Variable
 	 * (enumerated as mentioned before). This step is needed to ensure that the
 	 * algorithm treats each undistinguished variable as a unique variable.
-	 *
+	 * 
 	 * @param dp
 	 */
 	private void deAnonymize(DatalogProgram dp) {

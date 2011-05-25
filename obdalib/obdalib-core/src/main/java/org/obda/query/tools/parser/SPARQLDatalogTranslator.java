@@ -72,6 +72,8 @@ public class SPARQLDatalogTranslator {
 		Query queryObject = QueryFactory.create(query);
 
 		DatalogProgramImpl datalog = new DatalogProgramImpl();
+		if (queryObject.isDistinct())
+			datalog.getQueryModifiers().put("distinct", true);
 
 		// Get the head atom.
 		Atom head = getHeadAtom(queryObject);

@@ -1,5 +1,7 @@
 package org.obda.query.domain.imp;
 
+import inf.unibz.it.obda.domain.QueryModifiers;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,8 +18,11 @@ public class DatalogProgramImpl implements DatalogProgram {
 	private List<CQIE>					rules			= null;
 
 	private Map<Predicate, List<CQIE>>	predicateIndex	= null;
+	
+	private QueryModifiers modifiers;
 
 	public DatalogProgramImpl() {
+		modifiers = new QueryModifiers();
 		rules = new Vector<CQIE>();
 		predicateIndex = new HashMap<Predicate, List<CQIE>>();
 	}
@@ -102,6 +107,11 @@ public class DatalogProgramImpl implements DatalogProgram {
 			predicateIndex.put(headPredicate, rules);
 		}
 		return rules;
+	}
+	
+	@Override
+	public QueryModifiers getQueryModifiers() {
+		return modifiers;
 	}
 
 }

@@ -70,6 +70,27 @@ public class StockExchangeTest extends TestCase {
 		r.close();
 		st.close();
 		
+		// The embedded query query
+		sparqlstr = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> select distinct * where { ?x :hasAddress :getAddressObj-991 }";
+		
+		// Getting a prefix for the query
+		
+		st = reasoner.getStatement();
+		r = st.executeQuery(sparqlstr);
+		ic = r.getColumCount();
+		int count = 0;
+		while (r.nextRow()) {
+			count +=1;
+			for (int i = 0; i < ic; i++) {
+				System.out.print(r.getAsString(i+1) + ", ");
+			}
+			System.out.println("");
+		}
+		r.close();
+		st.close();
+		assertTrue(count == 1);
+		
+		
 		
 	}
 

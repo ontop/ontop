@@ -23,42 +23,37 @@ import org.slf4j.LoggerFactory;
 
 public class JDBCEngine implements EvaluationEngine {
 
-	private DataSource	datasource	= null;
-	private Connection	connection	= null;
-	private Statement 	statement 	= null;
-	private boolean actionCanceled = false;
+	private DataSource	datasource		= null;
+	private Connection	connection		= null;
+	private Statement	statement		= null;
+	private boolean		actionCanceled	= false;
 
-	Logger				log			= LoggerFactory.getLogger(EvaluationEngine.class);
+	Logger				log				= LoggerFactory.getLogger(EvaluationEngine.class);
 
-	public JDBCEngine(DataSource ds) {
+	public JDBCEngine(DataSource ds) throws SQLException {
 		datasource = ds;
-		try {
-			connect();
-		} catch (ClassNotFoundException e) {
-			log.error(e.getMessage(), e);
-		} catch (SQLException e) {
-			log.error(e.getMessage(), e);
-		}
+		connect();
+
 	}
 
 	public JDBCEngine(Connection con) {
 		connection = con;
 	}
 
-	private void connect() throws ClassNotFoundException, SQLException {
+	private void connect() throws SQLException {
 
 		String driver = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
 		String url = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		
+
 		log.debug("Connecting to JDBC source: {}", url);
-		
+
 		String username = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
 		String password = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
 		try {
 			Class d = Class.forName(driver);
 		} catch (Exception e) {
-			log.warn("Driver class not found our it has already been loaded");
-			log.debug(e.getMessage(), e);
+			log.warn("WARNING: JDBC Driver not found exception or may have been already loaded by the system.");
+			// log.debug(e.getMessage(), e);
 		}
 		connection = DriverManager.getConnection(url, username, password);
 
@@ -77,12 +72,12 @@ public class JDBCEngine implements EvaluationEngine {
 
 	public ResultSet execute(String sql) throws Exception {
 		log.debug("Executing SQL query: \n{}", sql);
-		if(! actionCanceled){
+		if (!actionCanceled) {
 			if (connection == null)
 				throw new SQLException("No connection has been stablished yet");
 			statement = connection.createStatement();
 			return statement.executeQuery(sql);
-		}else{
+		} else {
 			throw new Exception("Action canceled");
 		}
 	}
@@ -108,8 +103,8 @@ public class JDBCEngine implements EvaluationEngine {
 	}
 
 	@Override
-	public void closeStatement() throws Exception{
-		if(statement != null && !statement.isClosed()){
+	public void closeStatement() throws Exception {
+		if (statement != null && !statement.isClosed()) {
 			statement.cancel();
 			statement.close();
 		}
@@ -117,6 +112,14 @@ public class JDBCEngine implements EvaluationEngine {
 
 	@Override
 	public void isCanceled(boolean bool) {
-		actionCanceled = bool;		
+		actionCanceled = bool;
+	}
+
+	@Override
+	public void dispose() {
+		try {
+			disconnect();
+		} catch (SQLException e) {
+		}
 	}
 }

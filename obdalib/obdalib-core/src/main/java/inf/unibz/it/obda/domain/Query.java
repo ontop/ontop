@@ -15,5 +15,7 @@ package inf.unibz.it.obda.domain;
 
 
 public interface Query {
+	
+	public QueryModifiers getQueryModifiers();
 
 }

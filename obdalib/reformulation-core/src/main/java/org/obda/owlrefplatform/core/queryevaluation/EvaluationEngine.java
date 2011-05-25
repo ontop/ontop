@@ -35,4 +35,6 @@ public interface EvaluationEngine {
 	public void closeStatement() throws Exception;
 	
 	public void isCanceled (boolean bool);
+	
+	public void dispose();
 }

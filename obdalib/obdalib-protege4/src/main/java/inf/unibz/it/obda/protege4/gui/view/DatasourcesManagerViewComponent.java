@@ -10,33 +10,43 @@ import java.awt.BorderLayout;
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
-public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent {
-    private static final long serialVersionUID = -4515710047558710080L;
-    
-    private static final Logger log = Logger.getLogger(DatasourcesManagerViewComponent.class);
-    
-    
-    @Override
-    protected void disposeOWLView() {
-        
-    }
+public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent  {
+	private static final long		serialVersionUID	= -4515710047558710080L;
 
-    @Override
-    protected void initialiseOWLView() throws Exception {
-    	OBDAPluginController apic = getOWLEditorKit().get(APIController.class.getName());
-    	
-        setLayout(new BorderLayout());
-        
-        DataSourceSelectionPanel selectionpanel = new DataSourceSelectionPanel(apic.getOBDAManager());
-        add(selectionpanel, BorderLayout.NORTH);
-        
-        DatasourceParameterEditorPanel editor = new DatasourceParameterEditorPanel(apic.getOBDAManager().getDatasourcesController());
-        add(editor,BorderLayout.CENTER);
-        selectionpanel.getDataSourceSelector().addDatasourceListListener(editor);
-        apic.getOBDAManager().getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
-        
-        
-        log.debug("Datasource browser initialized");
-    }
+	private static final Logger		log					= Logger.getLogger(DatasourcesManagerViewComponent.class);
 
+	DataSourceSelectionPanel		selectionpanel;
+	DatasourceParameterEditorPanel	editor;
+
+	@Override
+	protected void disposeOWLView() {
+
+	}
+
+	@Override
+	protected void initialiseOWLView() throws Exception {
+		OBDAPluginController apic = getOWLEditorKit().get(APIController.class.getName());
+
+		setLayout(new BorderLayout());
+
+		selectionpanel = new DataSourceSelectionPanel(apic.getOBDAManager().getDatasourcesController());
+		add(selectionpanel, BorderLayout.NORTH);
+
+		editor = new DatasourceParameterEditorPanel(apic.getOBDAManager().getDatasourcesController());
+		add(editor, BorderLayout.CENTER);
+		selectionpanel.getDataSourceSelector().addDatasourceListListener(editor);
+		apic.getOBDAManager().getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
+
+//		apic.addListener(this);
+		
+		log.debug("Datasource browser initialized");
+		
+		
+	}
+
+//	@Override
+//	public void obdaModelChanged(APIController oldmodel, APIController newmodel) {
+//		selectionpanel.setDatasourcesController(newmodel.getDatasourcesController());
+//		editor.setDatasourcesController(newmodel.getDatasourcesController());
+//	}
 }

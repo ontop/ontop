@@ -64,7 +64,7 @@ public class AboxFromDBLoader {
 				res.close();
 				statement.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				
 			}
 		}
 	} 

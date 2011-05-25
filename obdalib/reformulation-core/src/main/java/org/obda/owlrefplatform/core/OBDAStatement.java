@@ -319,6 +319,8 @@ public class OBDAStatement implements Statement {
 			} catch (RecognitionException e) {
 				log.warn(e.getMessage());
 				queryProgram = null;
+			} catch (IllegalArgumentException e2) {
+				log.warn(e2.getMessage());
 			}
 		}
 

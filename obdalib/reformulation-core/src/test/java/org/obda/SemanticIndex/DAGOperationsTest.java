@@ -6,7 +6,7 @@ import junit.framework.TestCase;
 /**
  * @author Sergejs Pugac
  */
-public class DAGOperationsTest extends TestCase {
+public class DAGOperationsTest  {
 
 //    SemanticIndexHelper helper = new SemanticIndexHelper();
 //

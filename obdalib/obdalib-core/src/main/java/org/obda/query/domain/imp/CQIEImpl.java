@@ -1,5 +1,7 @@
 package org.obda.query.domain.imp;
 
+import inf.unibz.it.obda.domain.QueryModifiers;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -136,5 +138,10 @@ public class CQIEImpl implements CQIE, ListListener {
 		rehash = true;
 		string = null;
 
+	}
+	
+	@Override
+	public QueryModifiers getQueryModifiers() {
+		return new QueryModifiers();
 	}
 }

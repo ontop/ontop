@@ -31,7 +31,6 @@ import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.OWLModelManagerImpl;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
@@ -57,7 +56,7 @@ public class OBDAPluginController implements Disposable {
 
 	OWLAPIController								obdacontroller			= null;
 
-	List<OBDAPluginControllerListener>				controllerListeners;
+//	List<OBDAPluginControllerListener>				controllerListeners;
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -83,14 +82,11 @@ public class OBDAPluginController implements Disposable {
 			throw new IllegalArgumentException("The OBDA PLugin only works with OWLEditorKit instances.");
 		}
 		this.owlEditorKit = (OWLEditorKit) editorKit;
-		mmgr = ((OWLModelManagerImpl) owlEditorKit.getModelManager()).getOWLOntologyManager();
+		mmgr = ((OWLModelManager) owlEditorKit.getModelManager()).getOWLOntologyManager();
 
-		controllerListeners = new LinkedList<OBDAPluginControllerListener>();
-		OWLModelManager owlmm = owlEditorKit.getModelManager();
-		owlmm.addListener(modelManagerListener);
-
-		// loadAssertionControllerFactoryPlugins();
-
+//		controllerListeners = new LinkedList<OBDAPluginControllerListener>();
+//		OWLModelManager owlmm = owlEditorKit.getModelManager();
+//		owlmm.addListener(getModelManagerListener());
 	}
 
 	public OWLAPIController getOBDAManager() {
@@ -114,6 +110,10 @@ public class OBDAPluginController implements Disposable {
 		APIController oldcontroller = obdacontroller;
 		
 		if (obdacontroller != null) {
+
+			log.warn("WARNING: At the moment, the obda plugin doesn't support editing two ontologies in the same window");
+			log.warn("Open ontologies ONLY IN A NEW WINDOWS, otherwise, the OBDA information and the behaivor of the plugin will be inconsistent");
+			
 			obdacontroller.getDatasourcesController().removeDatasourceControllerListener(dlistener);
 			obdacontroller.getMappingController().removeMappingControllerListener(mlistener);
 			obdacontroller.getQueryController().removeListener(qlistener);
@@ -145,7 +145,7 @@ public class OBDAPluginController implements Disposable {
 			}
 		}
 		
-		triggerOBDAModelChangeEvent(oldcontroller, obdacontroller);
+//		triggerOBDAModelChangeEvent(oldcontroller, obdacontroller);
 	}
 
 	@Deprecated
@@ -269,24 +269,24 @@ public class OBDAPluginController implements Disposable {
 
 	}
 
-	public void addListener(OBDAPluginControllerListener listener) {
-		controllerListeners.add(listener);
-	}
+//	public void addListener(OBDAPluginControllerListener listener) {
+//		controllerListeners.add(listener);
+//	}
+//
+//	public void removeListener(OBDAPluginControllerListener listener) {
+//		controllerListeners.remove(listener);
+//	}
 
-	public void removeListener(OBDAPluginControllerListener listener) {
-		controllerListeners.remove(listener);
-	}
-
-	private void triggerOBDAModelChangeEvent(APIController oldmodel, APIController newmodel) {
-		for (OBDAPluginControllerListener listener : controllerListeners) {
-			try {
-				listener.obdaModelChanged(oldmodel, newmodel);
-			} catch (Exception e) {
-				log.warn("Eror notifying listeners of obda model change: {}", e.getMessage());
-				log.debug(e.getMessage(), e);
-			}
-		}
-	}
+//	private void triggerOBDAModelChangeEvent(APIController oldmodel, APIController newmodel) {
+//		for (OBDAPluginControllerListener listener : controllerListeners) {
+//			try {
+//				listener.obdaModelChanged(oldmodel, newmodel);
+//			} catch (Exception e) {
+//				log.warn("Eror notifying listeners of obda model change: {}", e.getMessage());
+//				log.debug(e.getMessage(), e);
+//			}
+//		}
+//	}
 
 	/***
 	 * Protege wont trigger a save action unless it detects that the OWLOntology
@@ -326,12 +326,17 @@ public class OBDAPluginController implements Disposable {
 	 * APIController.class.getName() property with the put method.
 	 */
 	public void dispose() throws Exception {
-		try {
-			owlEditorKit.getModelManager().removeListener(modelManagerListener);
-		} catch (Exception e) {
-			log.warn(e.getMessage());
-		}
+//		try {
+//			
+//			owlEditorKit.getModelManager().removeListener(getModelManagerListener());
+//		} catch (Exception e) {
+//			log.warn(e.getMessage());
+//		}
 
+	}
+
+	protected OWLModelManagerListener getModelManagerListener() {
+		return modelManagerListener;
 	}
 
 	/***

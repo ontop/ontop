@@ -25,4 +25,6 @@ public interface DatalogProgram extends Query {
 	 * @return
 	 */
 	public List<CQIE> getRules(Predicate headPredicate);
+	
+	
 }

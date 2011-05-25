@@ -45,5 +45,10 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	public Statement getStatement() throws Exception {
 		return new OBDAStatement(unfoldingMechanism, queryRewriter, querygenerator, evaluationEngine, apic);
 	}
+	
+	@Override
+	public void dispose() {
+		evaluationEngine.dispose();
+	}
 
 }

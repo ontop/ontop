@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.reformulation;
 
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.utils.QueryUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,7 +50,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	private Map<Predicate, Set<PositiveInclusion>>	rightExistentialIndex		= null;
 
-	Logger											log							= LoggerFactory.getLogger(DLRPerfectReformulator.class);
+	Logger											log							= LoggerFactory.getLogger(TreeRedReformulator.class);
 
 	public TreeRedReformulator(List<Assertion> assertions) {
 		this.originalassertions = assertions;
@@ -109,6 +110,8 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
+		
+		
 		log.debug("Starting query rewrting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
@@ -281,10 +284,14 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		long endtime = System.currentTimeMillis();
 
+		QueryUtils.copyQueryModifiers(input, resultprogram);
+		
 		log.debug("Computed reformulation: \n{}", resultprogram);
 		log.debug("Final size of the reformulation: {}", resultlist.size());
 		double seconds = (endtime - starttime) / 1000;
 		log.info("Time elapsed for reformulation: {}s", seconds);
+		
+		
 		return resultprogram;
 	}
 

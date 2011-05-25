@@ -36,6 +36,7 @@ public interface SourceQueryGenerator {
 	 * @param onto the new dlliter ontology
 	 * @param uris the set of URIs of the ontologies integrated into the dlliter ontology
 	 */
-	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris);
+//	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris);
+	
 	public ViewManager getViewManager();
 }

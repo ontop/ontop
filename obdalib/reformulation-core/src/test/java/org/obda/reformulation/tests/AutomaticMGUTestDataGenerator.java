@@ -27,7 +27,7 @@ import org.obda.query.domain.imp.TermFactoryImpl;
  * @author Mariano Rodriguez Muro
  *
  */
-public class AutomaticMGUTestDataGenerator extends TestCase {
+public class AutomaticMGUTestDataGenerator {
 
 	BasicPredicateFactoryImpl	predFac	= BasicPredicateFactoryImpl.getInstance();
 	TermFactory					termFac	= TermFactoryImpl.getInstance();
