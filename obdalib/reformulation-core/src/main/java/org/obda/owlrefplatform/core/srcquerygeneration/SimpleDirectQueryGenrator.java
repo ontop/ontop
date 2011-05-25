@@ -58,7 +58,8 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	/**
 	 * Generates the final sql query for the given datalog program
 	 */
-	public String generateSourceQuery(DatalogProgram query) throws Exception {
+	@Override
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception {
 		log.debug("Simple SQL generator. Generating SQL query for input query: \n\n{}\n\n", query);
 		StringBuffer sb = new StringBuffer();
 		List<CQIE> rules = query.getRules();

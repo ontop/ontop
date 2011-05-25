@@ -7,9 +7,8 @@ import java.util.Map;
 import org.protege.editor.owl.ui.prefix.PrefixMapper;
 
 /**
- * The prefix manager is administrating the prefixes for ontolgyie. It allows to
- * register and unregister prefixes for ontolgies and to query them.
- * 
+ * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any
+ * prefix defined in Protege are transparently passed to all OBDA lib classes.
  * 
  */
 
@@ -24,7 +23,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	@Override
 	public void addUri(String uri, String prefix) {
 		owlmapper.addPrefixMapping(prefix, uri);
-		
+
 	}
 
 	@Override
@@ -41,5 +40,5 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	public String getURIForPrefix(String prefix) {
 		return owlmapper.getValue(prefix);
 	}
-	
+
 }

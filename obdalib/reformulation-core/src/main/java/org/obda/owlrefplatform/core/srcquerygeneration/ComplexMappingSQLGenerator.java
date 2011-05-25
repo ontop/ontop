@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
+import org.obda.query.domain.Variable;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.UndistinguishedVariable;
 import org.obda.query.domain.imp.VariableImpl;
@@ -34,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Manfred Gerstgrasser
  * 
  */
-//TODO This class needs to be restructured
+// TODO This class needs to be restructured
 
 public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
@@ -46,7 +48,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	private Map<Integer, String>		localAliasMap			= null;
 	private DLLiterOntology				onto					= null;
 
-	org.slf4j.Logger								log						= LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
+	org.slf4j.Logger					log						= LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
 
 	public ComplexMappingSQLGenerator(DLLiterOntology onto, MappingViewManager man, JDBCUtility util) {
 		viewManager = man;
@@ -141,17 +143,23 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	}
 
 	@Override
-	public String generateSourceQuery(DatalogProgram query) throws Exception {
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception {
 		log.info("Generating source query");
 		List<CQIE> queries = query.getRules();
+		
+		if (queries.size() < 1) 
+			return "";
 		Iterator<CQIE> it = queries.iterator();
+		
 		sqlqueries = new Vector<String>();
+		
+		
 		StringBuilder finalquery = new StringBuilder();
 		while (it.hasNext()) {
 			CQIE q = it.next();
 			prepareIndex(q);
 			String from = getFromClause(q);
-			String select = getSelectClause(q);
+			String select = getSelectClause(q,signature);
 			String where = getWhereClause(q);
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -422,7 +430,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	 *            the query
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(CQIE q) throws Exception {
+	private String getSelectClause(CQIE q,List<String> signature) throws Exception {
 		Atom head = q.getHead();
 		List<Term> headterms = head.getTerms();
 		StringBuilder sb = new StringBuilder();
@@ -451,7 +459,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					sb.append(".");
 					sb.append(sqlvar);
 					sb.append(" as ");
-					sb.append(viewManager.getOrgHeadVariableName(hpos));
+					sb.append(viewManager.getOrgHeadVariableName(hpos, signature));
 				} else if (ht instanceof FunctionalTermImpl) {
 					// TODO ComplexMappingSQLGenerator: This code is probably
 					// wrong, we need unit test to check it
@@ -491,14 +499,14 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					String concat = util.getConcatination(name, vex);
 					sb.append(concat);
 					sb.append(" as ");
-					sb.append(viewManager.getOrgHeadVariableName(hpos));
+					sb.append(viewManager.getOrgHeadVariableName(hpos,signature));
 
 				} else {
 					sb.append("'");
 					sb.append(ht.getName());
 					sb.append("'");
 					sb.append(" as ");
-					sb.append(viewManager.getOrgHeadVariableName(hpos));
+					sb.append(viewManager.getOrgHeadVariableName(hpos,signature));
 				}
 
 				if (hit.hasNext()) {

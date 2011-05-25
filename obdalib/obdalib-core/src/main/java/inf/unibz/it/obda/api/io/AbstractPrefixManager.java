@@ -46,12 +46,12 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				return result.toString();
 			}
 		}
-		Iterator<String> longnamespaces = this.getPrefixMap().keySet().iterator();
+		Iterator<String> longnamespaces = this.getPrefixMap().values().iterator();
 		while (longnamespaces.hasNext()) {
 			String longnamespace = longnamespaces.next();
 			if (uri.length() > longnamespace.length())
 			if (uri.substring(0, longnamespace.length()).equals(longnamespace)) {
-				result.replace(0, longnamespace.length(), this.getPrefixMap().get(longnamespace) + ":");
+				result.replace(0, longnamespace.length(), this.getPrefixForURI(longnamespace) + ":");
 				break;
 			}
 		}

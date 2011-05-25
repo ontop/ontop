@@ -98,8 +98,8 @@ public class OntologyLoader {
                 System.out.println("ID: " + id);
 
                 String sparqlstr = prefix + query;
-                Statement statement = reasoner.getStatement(sparqlstr);
-                QueryResultSet result = statement.getResultSet();
+                Statement statement = reasoner.getStatement();
+                QueryResultSet result = statement.executeQuery(sparqlstr);
 
                 // Printing the results
                 System.out.println("Results:");

@@ -9,14 +9,12 @@ import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
-import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceSelector;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -24,14 +22,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.net.URI;
-import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.StyleContext;
 
 import org.antlr.runtime.RecognitionException;
@@ -78,9 +77,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	private void init() {
 
-		MappingStyledDocument mapdoc = new MappingStyledDocument(new StyleContext(), controller, preferences);
+		final MappingStyledDocument mapdoc = new MappingStyledDocument(new StyleContext(), controller, preferences);
 		jTextPaneHead.setDocument(mapdoc);
 
+		jButtonInsert.setEnabled(false);
 		jButtonInsert.addActionListener(new ActionListener() {
 
 			@Override
@@ -105,6 +105,39 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		};
 		KeyStroke ks_enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK);
 		this.registerKeyboardAction(actionListenerAccept, ks_enter, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+		mapdoc.addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+				Runnable action = new Runnable() {
+					
+					@Override
+					public void run() {
+						try {
+							Thread.currentThread().sleep(10);
+						} catch (InterruptedException e) {
+						}
+						
+						jButtonInsert.setEnabled(mapdoc.isValidQuery());
+					}
+				};
+				SwingUtilities.invokeLater(action);
+				
+			}
+		});
 
 		jButtonCancel.setMnemonic('c');
 		jButtonTest.setMnemonic('t');
@@ -143,107 +176,101 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 */
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed"
-	// desc="Generated Code">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		jPanel1 = new javax.swing.JPanel();
-		jLabelMappingHead = new javax.swing.JLabel();
-		jLabelMappingBody = new javax.swing.JLabel();
-		jButtonTest = new javax.swing.JButton();
-		jButtonCancel = new javax.swing.JButton();
-		jButtonInsert = new javax.swing.JButton();
-		jScrollPane1 = new javax.swing.JScrollPane();
-		jTextPaneHead = new javax.swing.JTextPane();
-		jScrollPane2 = new javax.swing.JScrollPane();
-		jTextPaneBody = new javax.swing.JTextPane();
+        jPanel1 = new javax.swing.JPanel();
+        jButtonInsert = new javax.swing.JButton();
+        jButtonCancel = new javax.swing.JButton();
+        jLabelMappingHead = new javax.swing.JLabel();
+        jLabelMappingBody = new javax.swing.JLabel();
+        jButtonTest = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextPaneHead = new javax.swing.JTextPane();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextPaneBody = new javax.swing.JTextPane();
 
-		setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.GridBagLayout());
 
-		javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-		jPanel1.setLayout(jPanel1Layout);
-		jPanel1Layout.setHorizontalGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 392,
-				Short.MAX_VALUE));
-		jPanel1Layout.setVerticalGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 15,
-				Short.MAX_VALUE));
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Create Mapping"));
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridwidth = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(jPanel1, gridBagConstraints);
+        jButtonInsert.setText("Insert");
+        jPanel1.add(jButtonInsert);
 
-		jLabelMappingHead.setText("Mapping Head");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.gridwidth = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(jLabelMappingHead, gridBagConstraints);
+        jButtonCancel.setText("Cancel");
+        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCancelActionPerformed(evt);
+            }
+        });
 
-		jLabelMappingBody.setText("Mapping Body");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 3;
-		gridBagConstraints.gridwidth = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new java.awt.Insets(7, 4, 4, 4);
-		add(jLabelMappingBody, gridBagConstraints);
+        jPanel1.add(jButtonCancel);
 
-		jButtonTest.setText("Test");
-		jButtonTest.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButtonTestActionPerformed(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 4;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(jButtonTest, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        add(jPanel1, gridBagConstraints);
 
-		jButtonCancel.setText("Cancel");
-		jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButtonCancelActionPerformed(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(jButtonCancel, gridBagConstraints);
+        jLabelMappingHead.setText("Mapping Head:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        add(jLabelMappingHead, gridBagConstraints);
 
-		jButtonInsert.setText("Insert");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(jButtonInsert, gridBagConstraints);
+        jLabelMappingBody.setText("Mapping Body");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(7, 4, 4, 4);
+        add(jLabelMappingBody, gridBagConstraints);
 
-		jScrollPane1.setViewportView(jTextPaneHead);
+        jButtonTest.setText("Test");
+        jButtonTest.setActionCommand("Test SQL query");
+        jButtonTest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonTestActionPerformed(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.gridwidth = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		add(jScrollPane1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        add(jButtonTest, gridBagConstraints);
 
-		jScrollPane2.setViewportView(jTextPaneBody);
+        jTextPaneHead.setToolTipText("Write the query that will be the head of the mapping. \\nThis is a conjunctive query, possibly with function simbols to create object uris from the data of the databse. \\n For example: obdap:q($id) :- Person(individual-uri($id))");
+        jScrollPane1.setViewportView(jTextPaneHead);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 4;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		add(jScrollPane2, gridBagConstraints);
-	}// </editor-fold>//GEN-END:initComponents
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(jScrollPane1, gridBagConstraints);
+
+        jScrollPane2.setViewportView(jTextPaneBody);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(jScrollPane2, gridBagConstraints);
+
+    }// </editor-fold>//GEN-END:initComponents
 
 	private void jButtonTestActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
 		final JDialog resultquery = new JDialog();
@@ -272,19 +299,18 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		parent.dispose();
 	}// GEN-LAST:event_jButtonCancelActionPerformed
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton		jButtonCancel;
-	private javax.swing.JButton		jButtonInsert;
-	private javax.swing.JButton		jButtonTest;
-	private javax.swing.JLabel		jLabelMappingBody;
-	private javax.swing.JLabel		jLabelMappingHead;
-	private javax.swing.JPanel		jPanel1;
-	private javax.swing.JScrollPane	jScrollPane1;
-	private javax.swing.JScrollPane	jScrollPane2;
-	private javax.swing.JTextPane	jTextPaneBody;
-	private javax.swing.JTextPane	jTextPaneHead;
-
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonCancel;
+    private javax.swing.JButton jButtonInsert;
+    private javax.swing.JButton jButtonTest;
+    private javax.swing.JLabel jLabelMappingBody;
+    private javax.swing.JLabel jLabelMappingHead;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextPane jTextPaneBody;
+    private javax.swing.JTextPane jTextPaneHead;
+    // End of variables declaration//GEN-END:variables
 
 	private CQIE parse(String query) {
 		CQIE cq = null;

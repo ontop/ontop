@@ -206,11 +206,12 @@ public class MappingViewManager implements ViewManager {
 	 * @return the original variable name at the given position
 	 * @throws Exception
 	 */
-	public String getOrgHeadVariableName(int pos) throws Exception {
-		if (pos < 0 || pos > head.getArity()) {
+	public String getOrgHeadVariableName(int pos, List<String> signature) throws Exception {
+		if (pos < 0 || pos > signature.size()) {
 			throw new Exception("Invalid position for HeadVariable");
 		} else {
-			return head.getTerms().get(pos).getName();
+			return signature.get(pos);
+//			return head.getTerms().get(pos).getName();
 		}
 	}
 }

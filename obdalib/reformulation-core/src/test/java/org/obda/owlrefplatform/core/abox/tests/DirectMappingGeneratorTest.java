@@ -28,7 +28,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class DirectMappingGeneratorTest extends TestCase{
 
-private String file = "C:/Users/obda/ontologies/ABoxDumpTest/ABoxDumpTest.owl";
+private String file = "src/test/resources/test/ontologies/aboxgeneration/ABoxDumpTest.owl";
 	
 	private OWLOntologyManager manager = null;
     private OWLOntology ontology = null;

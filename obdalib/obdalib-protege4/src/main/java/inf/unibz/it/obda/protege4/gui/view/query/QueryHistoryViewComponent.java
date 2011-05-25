@@ -11,6 +11,11 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class QueryHistoryViewComponent extends AbstractOWLViewComponent {
 
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 8641739937602849648L;
+
 	@Override
 	protected void disposeOWLView() {
 		

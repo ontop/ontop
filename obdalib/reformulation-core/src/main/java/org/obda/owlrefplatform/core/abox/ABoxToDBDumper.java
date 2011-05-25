@@ -1,12 +1,10 @@
 package org.obda.owlrefplatform.core.abox;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.utils.swing.OBDAProgressListener;
 
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -238,7 +236,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			try {
 				loader.destroyDump(ds);
 			} catch (AboxLoaderException e) {
-				throw new AboxDumpException("Error while dropping old dump", e);
+				log.warn("Error while dropping old dump: it might not exists");
 			}
 		}
 		try {

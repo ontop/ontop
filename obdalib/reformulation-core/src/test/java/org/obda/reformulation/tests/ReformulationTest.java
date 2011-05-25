@@ -44,16 +44,16 @@ public class ReformulationTest extends TestCase {
                 assertTrue(exp.contains(realResult));
             }
         }
-        log.debug("Testing in-memory db/SemanticIndex");
-        tester.load(ontoname, "virtual", "semantic");
-        for (String id : tester.getQueryIds()) {
-            log.debug("Testing query: {}", id);
-            Set<String> exp = tester.getExpectedResult(id);
-            Set<String> res = tester.executeQuery(id);
-            List<String> exp_list = new LinkedList<String>(exp);
-            List<String> res_list = new LinkedList<String>(res);
-            assertEquals(exp_list, res_list);
-        }
+//        log.debug("Testing in-memory db/SemanticIndex");
+//        tester.load(ontoname, "virtual", "semantic");
+//        for (String id : tester.getQueryIds()) {
+//            log.debug("Testing query: {}", id);
+//            Set<String> exp = tester.getExpectedResult(id);
+//            Set<String> res = tester.executeQuery(id);
+//            List<String> exp_list = new LinkedList<String>(exp);
+//            List<String> res_list = new LinkedList<String>(res);
+//            assertEquals(exp_list, res_list);
+//        }
 
     }
 

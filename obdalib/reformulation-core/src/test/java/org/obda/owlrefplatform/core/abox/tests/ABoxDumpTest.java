@@ -1,4 +1,8 @@
 package org.obda.owlrefplatform.core.abox.tests;
+import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
+import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
@@ -10,33 +14,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
-import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
-import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.owlapi.OWLAPIController;
-import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import junit.framework.TestCase;
 
-import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.abox.AboxFromDBLoader;
 import org.obda.owlrefplatform.core.abox.URIIdentyfier;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
-
-
-import junit.framework.TestCase;
 
 
 public class ABoxDumpTest extends TestCase {
 
 	
-	private String file = "C:/Users/obda/ontologies/ABoxDumpTest/ABoxDumpTest.owl";
-	
+	private String file = "src/test/resources/test/ontologies/aboxgeneration/ABoxDumpTest.owl";	
 	private OWLOntologyManager manager = null;
     private OWLOntology ontology = null;
 	

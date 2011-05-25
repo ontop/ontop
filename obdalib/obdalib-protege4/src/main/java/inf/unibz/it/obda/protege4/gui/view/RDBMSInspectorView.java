@@ -6,7 +6,6 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceSelector;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLSchemaInspectorPanel;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
-import inf.unibz.it.obda.protege4.gui.constants.GUIConstants;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -50,7 +49,7 @@ public class RDBMSInspectorView  extends AbstractOWLViewComponent {
   	datasourceSelector.addDatasourceListListener(inspectorPanel);
     dsController.addDatasourceControllerListener(datasourceSelector);
 
-  	setBackground(GUIConstants.COLOR_DATASOURCE);
+  	setBackground(new java.awt.Color(153, 0, 0));
   	
   	JPanel selectorPanel = new JPanel();
     selectorPanel.setLayout(new GridBagLayout());
@@ -83,6 +82,6 @@ public class RDBMSInspectorView  extends AbstractOWLViewComponent {
     add(inspectorPanel, BorderLayout.CENTER);
     add(selectorPanel, BorderLayout.NORTH);
     
-    log.info("RDBMS schema inspector initialized");
+    log.debug("RDBMS schema inspector initialized");
   }
 }

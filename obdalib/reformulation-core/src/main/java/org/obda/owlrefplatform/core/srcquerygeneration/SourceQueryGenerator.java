@@ -3,6 +3,7 @@ package org.obda.owlrefplatform.core.srcquerygeneration;
 import inf.unibz.it.obda.api.io.PrefixManager;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -28,7 +29,7 @@ public interface SourceQueryGenerator {
 	 * @return the souce query
 	 * @throws Exception
 	 */
-	public String generateSourceQuery(DatalogProgram query) throws Exception;
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception;
 	/**
 	 * Updates the current view manager with the new given parameters
 	 * @param man the new prefix manager

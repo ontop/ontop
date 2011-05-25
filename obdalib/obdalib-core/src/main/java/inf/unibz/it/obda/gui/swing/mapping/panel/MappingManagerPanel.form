@@ -1,48 +1,12 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.2" maxVersion="1.2" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+<Form version="1.0" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <NonVisualComponents>
     <Container class="javax.swing.JPopupMenu" name="menuMappings">
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
-      <SubComponents>
-        <MenuItem class="javax.swing.JMenuItem" name="menuValidateAll">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Validate"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuValidateAllActionPerformed"/>
-          </Events>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="menuValidateBody">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Validate body"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuValidateBodyActionPerformed"/>
-          </Events>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="menuValidateHead">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Validate head"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuValidateHeadActionPerformed"/>
-          </Events>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="menuExecuteQuery">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Execute Query"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuExecuteQueryActionPerformed"/>
-          </Events>
-        </MenuItem>
-      </SubComponents>
     </Container>
   </NonVisualComponents>
   <AuxValues>

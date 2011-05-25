@@ -20,6 +20,13 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/***
+ * Action to create individuals into the currently open OWL Ontology using the
+ * existing mappings from ALL datasources
+ * 
+ * @author Mariano Rodriguez Muro
+ * 
+ */
 public class AboxMaterializationAction extends ProtegeAction {
 
 	/**
@@ -27,8 +34,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 	 */
 	private static final long	serialVersionUID	= -1211395039869926309L;
 
-	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
-	
+	private Logger				log					= LoggerFactory.getLogger(AboxMaterializationAction.class);
+
 	@Override
 	public void initialise() throws Exception {
 		// TODO Auto-generated method stub
@@ -58,10 +65,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 		OWLEditorKit kit = (OWLEditorKit) this.getEditorKit();
 		OWLModelManager mm = kit.getOWLModelManager();
 		Container cont = this.getWorkspace().getRootPane().getParent();
-		APIController obdaapi = ((OBDAPluginController)kit.get(APIController.class.getName())).getOBDAManager();
-		
-		
-		
+		APIController obdaapi = ((OBDAPluginController) kit.get(APIController.class.getName())).getOBDAManager();
+
 		try {
 			OWLOntologyManager owlOntManager = mm.getOWLOntologyManager();
 			OWLOntology owl_ont = mm.getActiveOntology();
@@ -75,11 +80,13 @@ public class AboxMaterializationAction extends ProtegeAction {
 			action.run();
 			latch.await();
 			monitor.stop();
-
+			
+			
 
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(cont, "ERROR: could not materialize abox.");
 			log.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(cont, "ERROR: could not create individuals. See the log for more informaiton.", "Error", JOptionPane.ERROR_MESSAGE);
+			
 		}
 
 	}
@@ -87,9 +94,9 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private class MaterializeAction implements OBDAProgressListener {
 
 		private Thread				thread	= null;
-		
+
 		private CountDownLatch		latch	= null;
-		
+
 		private AboxMaterializer	mat		= null;
 		private OWLOntology			owl_ont	= null;
 		private OWLOntologyManager	man		= null;
@@ -104,13 +111,15 @@ public class AboxMaterializationAction extends ProtegeAction {
 			this.latch = latch;
 		}
 
-
 		public void run() {
 			thread = new Thread() {
 				public void run() {
 					try {
-						mat.materializeAbox(obdapi, man, owl_ont);
+						mat.materializeAbox(obdapi, man, owl_ont);						
 						latch.countDown();
+						Container cont = AboxMaterializationAction.this.getWorkspace().getRootPane().getParent();
+
+						JOptionPane.showMessageDialog(cont, "Task completed", "Done", JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e) {
 						latch.countDown();
 						JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");

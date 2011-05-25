@@ -155,17 +155,17 @@
    </extension>
 	
 	<extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Materialize Mappings to OWL"/> 
-		<toolTip value="Materializes the Abox of the currently loaded ontology"/>
+		<name value="Create OWL individuals from mappings..."/> 
+		<toolTip value="Inserts new individuals to the current ontology based on the data comming from the mappings..."/>
 		<class value="inf.unibz.it.obda.protege4.abox.materialization.AboxMaterializationAction"/>
 		<path value="inf.unibz.it.obda.protege4.obdaplugin.menu.obda/SlotA-B"></path>
 		<editorKitId value="OWLEditorKit"/>
 	</extension> -
 	
   <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
-    <name value="Load OWL ABox to DB"/> 
+    <name value="Load OWL individuals (ABox) to a DB..."/> 
     <toolTip value="Stores all ABox data in a database"/>
-    <class value="org.obda.reformulation.protege4.action.AboxToDBAction"/>
+    <class value="org.obda.reformulation.protege4.action.LoadOWLIndividualsToDBAction"/>
     <path value="inf.unibz.it.obda.protege4.obdaplugin.menu.obda/SlotB-C"></path>
     <editorKitId value="OWLEditorKit"/>
   </extension> 

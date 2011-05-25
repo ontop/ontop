@@ -20,7 +20,7 @@ import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.domain.imp.TermFactoryImpl;
 
-public class EntityNameRendererTest extends TestCase {
+public class PrefixRendererTest extends TestCase {
 
 	PrefixManager		pm;
 	DatalogProgram		query;

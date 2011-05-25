@@ -156,8 +156,8 @@ public class Tester {
 
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
-        Statement statement = reasoner.getStatement(fullquery);
-        QueryResultSet result = statement.getResultSet();
+        Statement statement = reasoner.getStatement();
+        QueryResultSet result = statement.executeQuery(fullquery);
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {

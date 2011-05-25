@@ -58,8 +58,8 @@ public class StockExchangeTest extends TestCase {
 		
 		// Getting a prefix for the query
 		
-		Statement st = reasoner.getStatement(sparqlstr);
-		QueryResultSet r = st.getResultSet();
+		Statement st = reasoner.getStatement();
+		QueryResultSet r = st.executeQuery(sparqlstr);
 		int ic = r.getColumCount();
 		while (r.nextRow()) {
 			for (int i = 0; i < ic; i++) {

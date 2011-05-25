@@ -3,7 +3,6 @@ package org.obda.owlrefplatform.core;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.queryanswering.Statement;
 
 import java.net.URI;
@@ -14,8 +13,6 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import org.obda.owlrefplatform.core.abox.ABoxDumpListener;
-import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import org.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
@@ -81,8 +78,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		techwrapper = newTechnique;
 	}
 
-	public Statement getStatement(String query) throws Exception {
-		return techwrapper.getStatement(query);
+	@Override
+	public Statement getStatement() throws Exception {
+		return techwrapper.getStatement();
 	}
 
 	/**

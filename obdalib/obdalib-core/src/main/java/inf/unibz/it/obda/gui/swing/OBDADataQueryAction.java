@@ -14,7 +14,6 @@
 package inf.unibz.it.obda.gui.swing;
 
 import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
-import inf.unibz.it.utils.swing.OBDAProgressListener;
 
 public interface OBDADataQueryAction{
 	

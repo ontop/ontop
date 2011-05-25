@@ -17,7 +17,7 @@ import java.util.Set;
  * @author Josef Hardi <josef.hardi@gmail.com>
  */
 
-@Deprecated
+
 public class DatalogQueryHelper {
 
 	public static final String OBDA_PREFIX_MAPPING_PREDICATE = "obdap";

@@ -18,7 +18,7 @@ public interface TechniqueWrapper {
 	 * @return the answer statement 
 	 * @throws Exception
 	 */
-	public Statement getStatement(String query) throws Exception;
+	public Statement getStatement() throws Exception;
 //	public void updateOntology(DLLiterOntology onto, Set<URI> uris);
 //	public void updateDataSource(DataSource ds);
 

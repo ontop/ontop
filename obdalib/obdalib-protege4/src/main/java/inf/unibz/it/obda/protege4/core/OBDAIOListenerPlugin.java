@@ -7,6 +7,7 @@ import java.net.URI;
 import org.protege.editor.owl.model.io.IOListenerEvent;
 import org.protege.editor.owl.model.io.IOListenerPluginInstance;
 
+@Deprecated
 public class OBDAIOListenerPlugin extends IOListenerPluginInstance {
 
 //	ProtegeManager			pmanager	= null;

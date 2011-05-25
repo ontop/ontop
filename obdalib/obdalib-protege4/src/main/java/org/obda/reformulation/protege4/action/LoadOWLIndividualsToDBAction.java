@@ -23,7 +23,8 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AboxToDBAction extends ProtegeAction {
+
+public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 
 	/**
 	 * 
@@ -31,7 +32,7 @@ public class AboxToDBAction extends ProtegeAction {
 	private static final long	serialVersionUID	= -8210706765886897292L;
 	private SelectDB			selectDialog		= null;
 	
-	Logger log = LoggerFactory.getLogger(AboxToDBAction.class);
+	Logger log = LoggerFactory.getLogger(LoadOWLIndividualsToDBAction.class);
 
 	public void initialise() throws Exception {
 

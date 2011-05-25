@@ -39,6 +39,8 @@ public class QueryPainter {
 	private MappingManagerPreferences	pref			= null;
 	private final APIController			apic;
 
+	private boolean						isValidQuery	= false;
+
 	public QueryPainter(APIController apic, MappingManagerPreferences pref) {
 		this.apic = apic;
 		this.pref = pref;
@@ -337,7 +339,7 @@ public class QueryPainter {
 				doc.addDocumentListener(doc);
 			}
 		}
-
+		setValidQuery(!invalid);
 		alreadyColoring = false;
 	}
 
@@ -358,6 +360,14 @@ public class QueryPainter {
 		}
 
 		return result;
+	}
+
+	public void setValidQuery(boolean isValidQuery) {
+		this.isValidQuery = isValidQuery;
+	}
+
+	public boolean isValidQuery() {
+		return isValidQuery;
 	}
 
 	class ColorTask {

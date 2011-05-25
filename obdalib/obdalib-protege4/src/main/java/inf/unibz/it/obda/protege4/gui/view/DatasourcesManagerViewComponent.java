@@ -30,13 +30,13 @@ public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent {
         DataSourceSelectionPanel selectionpanel = new DataSourceSelectionPanel(apic.getOBDAManager());
         add(selectionpanel, BorderLayout.NORTH);
         
-        DatasourceParameterEditorPanel editor = new DatasourceParameterEditorPanel(apic.getOBDAManager());
+        DatasourceParameterEditorPanel editor = new DatasourceParameterEditorPanel(apic.getOBDAManager().getDatasourcesController());
         add(editor,BorderLayout.CENTER);
         selectionpanel.getDataSourceSelector().addDatasourceListListener(editor);
         apic.getOBDAManager().getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
         
         
-        log.info("Datasource browser initialized");
+        log.debug("Datasource browser initialized");
     }
 
 }

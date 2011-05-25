@@ -80,6 +80,6 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent {
     add(queryPanel, BorderLayout.CENTER);
     add(selectorPanel, BorderLayout.NORTH);
     
-    log.info("SQL Query view initialized");
+    log.debug("SQL Query view initialized");
   }
 }

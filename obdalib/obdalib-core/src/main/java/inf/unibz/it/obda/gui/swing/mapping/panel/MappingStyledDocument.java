@@ -31,18 +31,17 @@ public class MappingStyledDocument extends DefaultStyledDocument implements
 	 * 
 	 */
 	private static final long serialVersionUID = -1541062682306964359L;
-	private boolean				alreadyColoring	= false;
+//	private boolean				alreadyColoring	= false;
 	public StyleContext			context			= null;
 	MappingStyledDocument		myself			= this;
 	public Style				default_style	= null;
 
 	private QueryPainter painter = null;
-	private APIController apic = null;
 	
 	public MappingStyledDocument(StyleContext context, APIController apic,
 			MappingManagerPreferences pref) {
 		super(context);
-		this.apic = apic;
+		
 		
 		painter = new QueryPainter(apic, pref);
 		default_style = context.getStyle(StyleContext.DEFAULT_STYLE);
@@ -66,6 +65,10 @@ public class MappingStyledDocument extends DefaultStyledDocument implements
 		if (painter.isAlreadyColoring())
 			return;
 		painter.startRecoloring(this);
+	}
+	
+	public boolean isValidQuery() {
+		return painter.isValidQuery();
 	}
 
 }
