@@ -91,19 +91,40 @@ public class DAG {
 
                     addEdge(sub_prop, sup_prop, objectprop_nodes);
 
+                    // Add ER ISA ES and ER- ISA ES-
+                    String e_sub;
+                    String e_sup;
+                    String em_sub;
+                    String em_sup;
+
                     String implicit_sub;
                     if (sub_prop.startsWith(owl_inverse)) {
                         implicit_sub = sub_prop.substring(owl_inverse.length());
+
+                        e_sub = owl_inverse_exists_obj + implicit_sub;
+                        em_sub = owl_exists_obj + implicit_sub;
                     } else {
                         implicit_sub = owl_inverse + sub_prop;
+
+                        e_sub = owl_exists_obj + sub_prop;
+                        em_sub = owl_inverse_exists_obj + sub_prop;
                     }
                     String implicit_sup;
                     if (sup_prop.startsWith(owl_inverse)) {
                         implicit_sup = sup_prop.substring(owl_inverse.length());
+
+                        e_sup = owl_inverse_exists_obj + implicit_sup;
+                        em_sup = owl_exists_obj + implicit_sup;
                     } else {
                         implicit_sup = owl_inverse + sup_prop;
+
+                        e_sup = owl_exists_obj + sup_prop;
+                        em_sup = owl_inverse_exists_obj + sup_prop;
                     }
                     addEdge(implicit_sub, implicit_sup, objectprop_nodes);
+
+                    addEdge(e_sub, e_sup, cls_nodes);
+                    addEdge(em_sub, em_sup, cls_nodes);
 
 
                     log.debug("SubProperty: {} {}", sub_prop, sup_prop);
@@ -124,20 +145,15 @@ public class DAG {
                 }
             }
         }
-        log.debug("Starting to remove cycles from classes");
         DAGOperations.removeCycles(cls_nodes, equi_mappings);
-        log.debug("Starting transitive reduction for classes");
         DAGOperations.computeTransitiveReduct(cls_nodes);
 
-        log.debug("Starting to remove cycles from objectprops");
         DAGOperations.removeCycles(objectprop_nodes, equi_mappings);
-        log.debug("Starting transitive reduction for objectprops");
         DAGOperations.computeTransitiveReduct(objectprop_nodes);
 
         DAGOperations.removeCycles(dataprop_nodes, equi_mappings);
         DAGOperations.computeTransitiveReduct(dataprop_nodes);
 
-        log.debug("Starting to index");
         index();
     }
 

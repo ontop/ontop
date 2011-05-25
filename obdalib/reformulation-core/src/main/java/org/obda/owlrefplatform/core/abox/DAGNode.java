@@ -10,17 +10,16 @@ import java.util.Set;
 public class DAGNode implements Comparable<DAGNode> {
 
 
-    private String uri;
+    private final String uri;
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
-    private Set<DAGNode> parents = new HashSet<DAGNode>();
+    private final Set<DAGNode> parents = new HashSet<DAGNode>();
     private Set<DAGNode> children = new HashSet<DAGNode>();
 
-    public Set<DAGNode> ancestors = new HashSet<DAGNode>();
-    public Set<DAGNode> descendans = new HashSet<DAGNode>();
+    public final Set<DAGNode> descendans = new HashSet<DAGNode>();
 
-    public LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
+    public final LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 
 
     public DAGNode(String uri) {
@@ -92,6 +91,10 @@ public class DAGNode implements Comparable<DAGNode> {
 
     public LinkedList<DAGNode> getEquivalents() {
         return equivalents;
+    }
+
+    public void setChildren(Set<DAGNode> children) {
+        this.children = children;
     }
 
 }

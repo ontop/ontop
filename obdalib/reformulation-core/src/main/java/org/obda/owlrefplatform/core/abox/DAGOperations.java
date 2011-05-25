@@ -31,7 +31,6 @@ public class DAGOperations {
                 stack.add(n);
             }
         }
-        log.debug("Got all roots for descendants");
         while (!stack.isEmpty()) {
             DAGNode cur_el = stack.remove();
             for (DAGNode par_node : cur_el.getParents()) {
@@ -46,7 +45,6 @@ public class DAGOperations {
                 stack.add(par_node);
             }
         }
-        log.debug("Got all descendants");
     }
 
     /**
