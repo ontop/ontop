@@ -6,14 +6,15 @@
  */
 package org.obda.query.tools.parser;
 
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
 
 import com.hp.hpl.jena.query.QueryException;
 

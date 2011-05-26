@@ -2,6 +2,8 @@ package org.obda.owlrefplatform.core.abox.tests;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
 
@@ -19,8 +21,6 @@ import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.owlrefplatform.core.abox.DirectMappingGenerator;
 import org.obda.owlrefplatform.core.abox.URIIdentyfier;
 import org.obda.owlrefplatform.core.abox.URIType;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;

@@ -1,9 +1,11 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.model.CQIE;
+
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.obda.query.domain.CQIE;
+
 
 class CQCWorkerThread implements Runnable {
 	private final CountDownLatch	startSignal;

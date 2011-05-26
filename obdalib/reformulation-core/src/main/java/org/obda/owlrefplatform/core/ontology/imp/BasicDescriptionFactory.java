@@ -1,12 +1,13 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
+import inf.unibz.it.obda.model.Predicate;
+
 import java.util.List;
 
 import org.obda.owlrefplatform.core.ontology.BasicConceptDescription;
 import org.obda.owlrefplatform.core.ontology.ConceptDescription;
 import org.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import org.obda.owlrefplatform.core.ontology.RoleDescription;
-import org.obda.query.domain.Predicate;
 
 public class BasicDescriptionFactory implements DescriptionFactory{
 

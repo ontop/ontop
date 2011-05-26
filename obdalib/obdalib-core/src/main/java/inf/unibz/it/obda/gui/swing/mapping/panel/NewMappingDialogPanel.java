@@ -12,6 +12,8 @@ import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 
@@ -34,8 +36,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.StyleContext;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;

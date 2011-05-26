@@ -1,6 +1,10 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
@@ -15,10 +19,6 @@ import junit.framework.TestCase;
 import org.junit.Before;
 import org.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 
 public class CQCUtilitiesTest extends TestCase {
 

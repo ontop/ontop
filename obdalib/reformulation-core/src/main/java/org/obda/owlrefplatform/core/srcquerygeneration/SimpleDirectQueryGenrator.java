@@ -1,5 +1,12 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Constant;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.URIConstant;
+import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 
@@ -15,13 +22,6 @@ import org.obda.owlrefplatform.core.abox.URIIdentyfier;
 import org.obda.owlrefplatform.core.abox.URIType;
 import org.obda.owlrefplatform.core.viewmanager.SimpleDirectViewManager;
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Constant;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.URIConstant;
-import org.obda.query.domain.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

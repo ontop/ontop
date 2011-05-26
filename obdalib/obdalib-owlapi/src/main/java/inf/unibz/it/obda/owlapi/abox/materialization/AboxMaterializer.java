@@ -4,6 +4,8 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 
@@ -14,8 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.Term;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataFactory;

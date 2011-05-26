@@ -1,13 +1,12 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.obda.query.domain.Function;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 import org.obda.query.tools.util.EventGeneratingLinkedList;
 import org.obda.query.tools.util.ListListener;
 

@@ -1,6 +1,7 @@
 package inf.unibz.it.ucq.typing;
 
-import org.obda.query.domain.Term;
+import inf.unibz.it.obda.model.Term;
+;
 
 public class CheckOperationTerm {
 

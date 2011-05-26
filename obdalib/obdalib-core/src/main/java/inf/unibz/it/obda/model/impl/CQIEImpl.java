@@ -1,15 +1,14 @@
 package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.domain.QueryModifiers;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Term;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
 import org.obda.query.tools.util.EventGeneratingLinkedList;
 import org.obda.query.tools.util.ListListener;
 

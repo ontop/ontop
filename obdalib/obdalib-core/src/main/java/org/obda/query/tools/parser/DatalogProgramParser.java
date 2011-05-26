@@ -6,11 +6,13 @@
  */
 package org.obda.query.tools.parser;
 
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
+
 
 /**
  * Executes the parsing process with a reference to a Parser object.

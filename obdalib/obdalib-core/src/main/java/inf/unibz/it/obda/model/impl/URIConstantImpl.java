@@ -2,11 +2,12 @@ package inf.unibz.it.obda.model.impl;
 
 
 
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.URIConstant;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.obda.query.domain.Term;
-import org.obda.query.domain.URIConstant;
 
 /**
  * Provides a storage to put the URI constant.

@@ -10,6 +10,11 @@ package org.obda.owlrefplatform.core.basicoperations;
  * variables ie. A(#1,#2)
  */
 
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.ValueConstant;
+import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.URIConstantImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
@@ -21,11 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.Variable;
 
 public class AtomUnifier {
 

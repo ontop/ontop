@@ -1,4 +1,4 @@
-package org.obda.query.domain;
+package inf.unibz.it.obda.model;
 
 import inf.unibz.it.obda.domain.Query;
 

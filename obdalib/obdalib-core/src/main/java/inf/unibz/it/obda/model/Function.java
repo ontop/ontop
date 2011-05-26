@@ -1,4 +1,4 @@
-package org.obda.query.domain;
+package inf.unibz.it.obda.model;
 
 import java.util.List;
 

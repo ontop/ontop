@@ -1,14 +1,14 @@
 package inf.unibz.it.obda.api.controller;
 
+import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.URIConstant;
+import inf.unibz.it.obda.model.ValueConstant;
+import inf.unibz.it.obda.model.Variable;
+
 import java.net.URI;
 import java.util.List;
-
-import org.obda.query.domain.Function;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.URIConstant;
-import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.Variable;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 

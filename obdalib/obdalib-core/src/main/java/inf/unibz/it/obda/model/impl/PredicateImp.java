@@ -1,10 +1,8 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.PredicateImp;
+import inf.unibz.it.obda.model.Predicate;
 
 import java.net.URI;
-
-import org.obda.query.domain.Predicate;
 
 public class PredicateImp implements Predicate{
 

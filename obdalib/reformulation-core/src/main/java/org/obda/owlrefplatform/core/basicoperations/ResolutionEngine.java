@@ -1,10 +1,11 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.Variable;
+
 import java.util.Map;
 
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.Variable;
 
 public class ResolutionEngine {
 

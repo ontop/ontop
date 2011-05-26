@@ -1,6 +1,13 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.ValueConstant;
+import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
@@ -16,15 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Function;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /***
  * A class that allows you to perform different operations related to query

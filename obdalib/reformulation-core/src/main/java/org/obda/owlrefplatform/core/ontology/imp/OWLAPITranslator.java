@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
@@ -13,7 +14,6 @@ import org.obda.owlrefplatform.core.ontology.ConceptDescription;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import org.obda.owlrefplatform.core.ontology.RoleDescription;
-import org.obda.query.domain.Predicate;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAxiom;

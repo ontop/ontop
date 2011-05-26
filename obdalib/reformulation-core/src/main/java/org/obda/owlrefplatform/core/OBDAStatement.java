@@ -2,6 +2,11 @@ package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 
@@ -20,11 +25,6 @@ import org.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import org.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 import org.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import org.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.Variable;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.SPARQLDatalogTranslator;
 import org.obda.query.tools.renderer.DatalogProgramToTextCodec;

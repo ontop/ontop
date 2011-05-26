@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.URIConstantImpl;
 import inf.unibz.it.obda.model.impl.ValueConstantImpl;
@@ -14,10 +18,6 @@ import java.util.List;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Before;
 import org.junit.Test;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Term;
 
 public class DatalogParserTest {
 

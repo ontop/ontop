@@ -1,18 +1,13 @@
 package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.domain.QueryModifiers;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Predicate;
 
 public class IndexedCQIEImpl implements CQIE {
 
@@ -22,15 +17,15 @@ public class IndexedCQIEImpl implements CQIE {
 	 */
 	private Atom head = null;
 	private List<Atom> body = null;
-	private Map<Predicate, Vector<Atom>> predicateToAtomMap = null;
-	private Map<String, Vector<Atom>> termToAtomMap = null;
+//	private Map<Predicate, Vector<Atom>> predicateToAtomMap = null;
+//	private Map<String, Vector<Atom>> termToAtomMap = null;
 	private final boolean isBoolean = false;
 
 	public IndexedCQIEImpl (Atom head,List<Atom> body){
 		this.head = head;
 		this.body = body;
-		predicateToAtomMap = new HashMap<Predicate, Vector<Atom>>();
-		termToAtomMap = new HashMap<String, Vector<Atom>>();
+//		predicateToAtomMap = new HashMap<Predicate, Vector<Atom>>();
+//		termToAtomMap = new HashMap<String, Vector<Atom>>();
 
 		Iterator<Atom> it = body.iterator();
 		while(it.hasNext()){

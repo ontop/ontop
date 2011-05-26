@@ -16,6 +16,9 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryCodec;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 
@@ -28,9 +31,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
 
 
 

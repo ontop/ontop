@@ -4,6 +4,10 @@
  */
 package org.obda.reformulation.tests;
 
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.Variable;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,9 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import org.obda.owlrefplatform.core.basicoperations.Substitution;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(org.obda.query.domain.Atom, org.obda.query.domain.Atom)}
+	 * {@link org.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(inf.unibz.it.obda.model.Atom, inf.unibz.it.obda.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception

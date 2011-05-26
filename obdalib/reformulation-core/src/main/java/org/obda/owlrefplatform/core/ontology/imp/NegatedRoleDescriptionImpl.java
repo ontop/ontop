@@ -1,7 +1,8 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
+import inf.unibz.it.obda.model.Predicate;
+
 import org.obda.owlrefplatform.core.ontology.GeneralRoleDescription;
-import org.obda.query.domain.Predicate;
 
 public class NegatedRoleDescriptionImpl implements GeneralRoleDescription{
 

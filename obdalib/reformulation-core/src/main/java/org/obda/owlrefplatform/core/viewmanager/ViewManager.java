@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
-import org.obda.query.domain.Atom;
+import inf.unibz.it.obda.model.Atom;
+
 
 /**
  * The view manager interface should be implemented by any class which is used to

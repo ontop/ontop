@@ -2,6 +2,10 @@ package org.obda.reformulation.tests;
 
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.ValueConstant;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
@@ -14,10 +18,6 @@ import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.obda.owlrefplatform.core.unfolding.URIToFunctionMatcher;
-import org.obda.query.domain.Function;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.ValueConstant;
 
 public class URIToFunctionMatcherTest extends TestCase {
 

@@ -1,7 +1,8 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
+import inf.unibz.it.obda.model.Predicate;
+
 import org.obda.owlrefplatform.core.ontology.BasicRoleDescription;
-import org.obda.query.domain.Predicate;
 
 public class AtomicRoleDescriptionImpl implements BasicRoleDescription {
 

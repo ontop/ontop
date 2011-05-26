@@ -13,6 +13,7 @@
 package inf.unibz.it.ucq.swing;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Constant;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.ValueConstantImpl;
 import inf.unibz.it.ucq.domain.QueryResult;
@@ -23,8 +24,6 @@ import java.util.Vector;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-
-import org.obda.query.domain.Constant;
 
 import com.sun.msv.datatype.xsd.StringType;
 import com.sun.msv.datatype.xsd.XSDatatype;

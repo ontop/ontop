@@ -7,6 +7,9 @@ import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
@@ -17,9 +20,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Vector;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

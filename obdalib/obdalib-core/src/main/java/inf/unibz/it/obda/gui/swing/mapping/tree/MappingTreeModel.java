@@ -22,6 +22,7 @@ import inf.unibz.it.obda.domain.SourceQuery;
 import inf.unibz.it.obda.domain.TargetQuery;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
+import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
@@ -39,7 +40,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.CQIE;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;

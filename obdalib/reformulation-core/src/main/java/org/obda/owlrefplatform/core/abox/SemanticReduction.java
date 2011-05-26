@@ -2,6 +2,7 @@ package org.obda.owlrefplatform.core.abox;
 
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
@@ -15,7 +16,6 @@ import org.obda.owlrefplatform.core.ontology.RoleDescription;
 import org.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
-import org.obda.query.domain.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

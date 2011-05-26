@@ -1,12 +1,13 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 
 import java.util.List;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
+
 
 /**
  * @author This filter receives a string like parameter in the constructor and returns true if any mapping contains an atom in the head whose

@@ -2,6 +2,14 @@ package org.obda.owlrefplatform.core.unfolding;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.OperatorAtom;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.URIConstant;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
@@ -10,7 +18,6 @@ import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
-
 import inf.unibz.it.utils.QueryUtils;
 
 import java.util.HashMap;
@@ -25,13 +32,6 @@ import org.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
 import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Function;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.URIConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,7 +299,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 		Atom atom = currentQuery.getBody().get(pos);
 
-		if (atom instanceof org.obda.query.domain.OperatorAtom)
+		if (atom instanceof OperatorAtom)
 			throw new RuntimeException("ComplexMappingUnfolder: Attempting to unfold an operator atom");
 
 		Predicate atomPredicate = atom.getPredicate();

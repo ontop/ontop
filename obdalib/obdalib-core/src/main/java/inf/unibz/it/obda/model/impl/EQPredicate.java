@@ -1,11 +1,8 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.EQPredicate;
-import inf.unibz.it.obda.model.impl.PredicateImp;
+import inf.unibz.it.obda.model.ComparisonOperatorPredicate;
 
 import java.net.URI;
-
-import org.obda.query.domain.ComparisonOperatorPredicate;
 
 public class EQPredicate extends ComparisonOperatorPredicate {
 

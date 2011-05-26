@@ -1,6 +1,10 @@
 package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.domain.QueryModifiers;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Predicate;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -8,10 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Predicate;
 
 public class DatalogProgramImpl implements DatalogProgram {
 

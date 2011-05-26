@@ -1,6 +1,11 @@
 package org.obda.query.tools.parser;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
@@ -10,12 +15,6 @@ import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;

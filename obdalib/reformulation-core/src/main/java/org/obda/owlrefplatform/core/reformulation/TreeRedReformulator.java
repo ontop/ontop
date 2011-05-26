@@ -1,6 +1,10 @@
 package org.obda.owlrefplatform.core.reformulation;
 
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.utils.QueryUtils;
 
@@ -25,10 +29,6 @@ import org.obda.owlrefplatform.core.ontology.imp.AtomicRoleDescriptionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.model.impl;
 
-import org.obda.query.domain.Variable;
+import inf.unibz.it.obda.model.Variable;
+
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 

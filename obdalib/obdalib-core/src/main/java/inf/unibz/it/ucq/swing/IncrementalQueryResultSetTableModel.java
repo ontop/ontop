@@ -1,5 +1,6 @@
 package inf.unibz.it.ucq.swing;
 
+import inf.unibz.it.obda.model.Constant;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.ucq.exception.QueryResultException;
 
@@ -11,8 +12,6 @@ import java.util.Vector;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-
-import org.obda.query.domain.Constant;
 
 public class IncrementalQueryResultSetTableModel implements TableModel{
 

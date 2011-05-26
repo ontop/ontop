@@ -1,4 +1,5 @@
-package org.obda.query.domain;
+package inf.unibz.it.obda.model;
+
 
 public interface OperatorPredicate extends AbstractPredicate {
 

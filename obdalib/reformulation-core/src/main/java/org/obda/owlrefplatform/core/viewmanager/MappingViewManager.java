@@ -2,12 +2,15 @@ package org.obda.owlrefplatform.core.viewmanager;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
-
 
 import java.net.URI;
 import java.util.HashMap;
@@ -17,10 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 
 /**
  * The mapping view manager is the module which allows us to translate CQIEs

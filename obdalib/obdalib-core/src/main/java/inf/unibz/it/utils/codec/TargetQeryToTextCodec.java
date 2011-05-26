@@ -3,15 +3,15 @@ package inf.unibz.it.utils.codec;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;

@@ -1,6 +1,10 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
@@ -21,10 +25,6 @@ import org.obda.owlrefplatform.core.ontology.imp.AtomicRoleDescriptionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 
 public class PositiveInclusionApplicator {
 

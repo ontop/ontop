@@ -1,6 +1,9 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
@@ -9,9 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.obda.owlrefplatform.core.basicoperations.Substitution;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
 
 /***
  * This is an auxiliary class for the MGU generation test. This class is in

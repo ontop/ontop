@@ -1,11 +1,8 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.GTEPredicate;
-import inf.unibz.it.obda.model.impl.PredicateImp;
+import inf.unibz.it.obda.model.ComparisonOperatorPredicate;
 
 import java.net.URI;
-
-import org.obda.query.domain.ComparisonOperatorPredicate;
 
 public class GTEPredicate extends ComparisonOperatorPredicate {
 
@@ -26,6 +23,7 @@ public class GTEPredicate extends ComparisonOperatorPredicate {
 		if(obj == null|| !(obj instanceof PredicateImp)){
 			return false;
 		}else{
+			
 			return this.hashCode() == obj.hashCode();
 		}	
 	}

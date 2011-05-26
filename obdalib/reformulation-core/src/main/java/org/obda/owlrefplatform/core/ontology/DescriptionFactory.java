@@ -1,8 +1,9 @@
 package org.obda.owlrefplatform.core.ontology;
 
+import inf.unibz.it.obda.model.Predicate;
+
 import java.util.List;
 
-import org.obda.query.domain.Predicate;
 
 public interface DescriptionFactory {
 

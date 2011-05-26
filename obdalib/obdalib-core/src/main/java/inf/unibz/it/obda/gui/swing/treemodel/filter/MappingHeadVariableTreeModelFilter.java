@@ -1,13 +1,14 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 
 import java.util.List;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
+
 
 /**
  * @author This Filter receives a string and returns true if any mapping

@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.unfolding;
 
-import org.obda.query.domain.DatalogProgram;
+import inf.unibz.it.obda.model.DatalogProgram;
+
 
 /**
  * The unfolder for the direct partial evaluation

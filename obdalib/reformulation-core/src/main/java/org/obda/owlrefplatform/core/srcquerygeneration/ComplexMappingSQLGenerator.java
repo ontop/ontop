@@ -1,5 +1,12 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
+import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.Constant;
+import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.URIConstant;
+import inf.unibz.it.obda.model.ValueConstant;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
@@ -15,13 +22,6 @@ import org.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Constant;
-import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.URIConstant;
-import org.obda.query.domain.ValueConstant;
 import org.slf4j.LoggerFactory;
 
 /**

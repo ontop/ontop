@@ -1,6 +1,10 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.model.ValueConstant;
+import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
@@ -14,10 +18,6 @@ import junit.framework.TestCase;
 
 import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import org.obda.owlrefplatform.core.basicoperations.Substitution;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.Variable;
 
 public class ThetaGenerationTest extends TestCase {
 

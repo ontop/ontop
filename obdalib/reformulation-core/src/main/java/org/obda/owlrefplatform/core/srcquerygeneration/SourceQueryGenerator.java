@@ -1,9 +1,10 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
+import inf.unibz.it.obda.model.DatalogProgram;
+
 import java.util.List;
 
 import org.obda.owlrefplatform.core.viewmanager.ViewManager;
-import org.obda.query.domain.DatalogProgram;
 
 /**
  * A general interface which should be use to implement new

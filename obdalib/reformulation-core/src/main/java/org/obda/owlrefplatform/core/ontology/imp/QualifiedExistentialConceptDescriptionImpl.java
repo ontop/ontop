@@ -1,10 +1,11 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
+import inf.unibz.it.obda.model.Predicate;
+
 import java.util.List;
 
 import org.obda.owlrefplatform.core.ontology.BasicConceptDescription;
 import org.obda.owlrefplatform.core.ontology.GeneralConceptDescription;
-import org.obda.query.domain.Predicate;
 
 public class QualifiedExistentialConceptDescriptionImpl implements GeneralConceptDescription{
 

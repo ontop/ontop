@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.ontology;
 
-import org.obda.query.domain.Predicate;
+import inf.unibz.it.obda.model.Predicate;
+
 
 public interface RoleDescription {
 

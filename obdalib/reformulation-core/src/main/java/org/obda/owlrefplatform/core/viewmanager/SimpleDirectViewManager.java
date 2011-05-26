@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
 import inf.unibz.it.obda.api.io.PrefixManager;
+import inf.unibz.it.obda.model.Atom;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import org.obda.query.domain.Atom;
 
 /**
 * The SimpleDirectViewManager is the module which allows us 

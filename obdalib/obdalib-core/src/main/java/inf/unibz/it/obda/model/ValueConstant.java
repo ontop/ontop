@@ -1,4 +1,6 @@
-package org.obda.query.domain;
+package inf.unibz.it.obda.model;
+
+import inf.unibz.it.obda.model.Constant;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
