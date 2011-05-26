@@ -1,7 +1,8 @@
 package org.obda.owlrefplatform.core.queryevaluation;
 
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;

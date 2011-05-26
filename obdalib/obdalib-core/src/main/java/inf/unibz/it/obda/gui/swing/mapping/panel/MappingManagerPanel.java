@@ -19,7 +19,6 @@ import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
-import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.MappingValidationDialog;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
@@ -38,8 +37,7 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingPredicateTreeModelFil
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingSQLStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.validator.RDBMSMappingValidator;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
 
@@ -56,7 +54,6 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;

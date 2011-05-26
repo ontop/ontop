@@ -17,7 +17,8 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
+
 
 import javax.swing.JOptionPane;
 

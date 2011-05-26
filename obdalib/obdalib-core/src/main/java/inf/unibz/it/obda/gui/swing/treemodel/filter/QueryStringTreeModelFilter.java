@@ -1,7 +1,8 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+
 
 /**
  * @author This filter receives a string in the constructor and returns true if accepts any query that contains the given text and

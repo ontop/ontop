@@ -1,7 +1,8 @@
 package inf.unibz.it.obda.codec.xml;
 
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
+
 import inf.unibz.it.utils.codec.ObjectXMLCodec;
 
 import java.net.URI;

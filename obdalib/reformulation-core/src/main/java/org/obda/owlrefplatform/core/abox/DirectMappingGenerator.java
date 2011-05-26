@@ -7,8 +7,8 @@ import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 
 import java.net.URI;
 import java.util.HashSet;

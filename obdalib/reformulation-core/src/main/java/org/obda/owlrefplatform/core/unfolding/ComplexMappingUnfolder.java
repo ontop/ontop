@@ -9,7 +9,8 @@ import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
+
 import inf.unibz.it.utils.QueryUtils;
 
 import java.util.HashMap;

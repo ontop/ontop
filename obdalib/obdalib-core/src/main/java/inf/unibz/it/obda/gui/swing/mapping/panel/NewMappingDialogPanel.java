@@ -12,8 +12,8 @@ import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

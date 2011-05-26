@@ -13,7 +13,8 @@
  */
 package inf.unibz.it.obda.gui.swing.mapping.tree;
 
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
+
 
 import javax.swing.tree.DefaultMutableTreeNode;
 

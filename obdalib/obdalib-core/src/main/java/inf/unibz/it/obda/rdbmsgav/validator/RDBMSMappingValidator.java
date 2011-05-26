@@ -18,7 +18,8 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.panels.ResultSetTableModel;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+
 import inf.unibz.it.obda.validator.MappingValidator;
 
 import java.util.Enumeration;

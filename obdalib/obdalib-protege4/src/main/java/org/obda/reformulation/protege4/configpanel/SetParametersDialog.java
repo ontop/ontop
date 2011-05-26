@@ -7,7 +7,7 @@ package org.obda.reformulation.protege4.configpanel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

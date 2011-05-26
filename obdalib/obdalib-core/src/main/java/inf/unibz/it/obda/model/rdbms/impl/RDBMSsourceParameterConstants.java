@@ -11,7 +11,7 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.rdbmsgav.domain;
+package inf.unibz.it.obda.model.rdbms.impl;
 
 public class RDBMSsourceParameterConstants {
 
