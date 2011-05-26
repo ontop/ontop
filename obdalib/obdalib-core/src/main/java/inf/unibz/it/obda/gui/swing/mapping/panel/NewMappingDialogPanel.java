@@ -16,6 +16,8 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.parser.DatalogProgramParser;
+import inf.unibz.it.obda.parser.DatalogQueryHelper;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -36,8 +38,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.StyleContext;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.tools.parser.DatalogProgramParser;
-import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

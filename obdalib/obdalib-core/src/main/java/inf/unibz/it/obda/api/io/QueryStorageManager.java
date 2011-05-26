@@ -25,7 +25,8 @@ import inf.unibz.it.obda.codec.xml.query.XMLReader;
 import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
-import inf.unibz.it.utils.xml.XMLUtils;
+import inf.unibz.it.obda.tool.utils.XMLUtils;
+ils;
 
 public class QueryStorageManager {
 

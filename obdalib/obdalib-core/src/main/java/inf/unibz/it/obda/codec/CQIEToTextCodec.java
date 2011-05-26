@@ -1,4 +1,4 @@
-package org.obda.query.tools.renderer;
+package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;

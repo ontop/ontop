@@ -26,6 +26,8 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.parser.DatalogProgramParser;
+import inf.unibz.it.obda.parser.DatalogQueryHelper;
 import inf.unibz.it.utils.codec.SourceQueryToTextCodec;
 import inf.unibz.it.utils.codec.TargetQeryToTextCodec;
 
@@ -40,10 +42,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.tools.parser.DatalogProgramParser;
-import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 // TODO Make the three model be based on the actual mapping collection
 public class MappingTreeModel extends DefaultTreeModel implements

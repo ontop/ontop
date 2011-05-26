@@ -7,13 +7,13 @@ import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.parser.DatalogProgramParser;
+import inf.unibz.it.obda.parser.DatalogQueryHelper;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.tools.parser.DatalogProgramParser;
-import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

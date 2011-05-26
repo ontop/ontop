@@ -20,6 +20,8 @@ import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.parser.DatalogProgramParser;
+import inf.unibz.it.obda.parser.DatalogQueryHelper;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -40,8 +42,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.tools.parser.DatalogProgramParser;
-import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

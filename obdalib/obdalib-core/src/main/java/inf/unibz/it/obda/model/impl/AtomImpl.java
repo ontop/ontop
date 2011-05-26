@@ -3,13 +3,13 @@ package inf.unibz.it.obda.model.impl;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.tool.utils.EventGeneratingLinkedList;
+import inf.unibz.it.obda.tool.utils.ListListener;
 
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
-import org.obda.query.tools.util.EventGeneratingLinkedList;
-import org.obda.query.tools.util.ListListener;
 
 /***
  * The implentation of an Atom. This implementation is aware of changes in the

@@ -4,7 +4,7 @@
  * Copyright 2010 OBDA-API. All rights reserved.
  * Use is subject to license terms.
  */
-package org.obda.query.tools.parser;
+package inf.unibz.it.obda.parser;
 
 import inf.unibz.it.obda.api.io.PrefixManager;
 

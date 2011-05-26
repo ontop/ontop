@@ -12,6 +12,7 @@ import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.URIConstantImpl;
 import inf.unibz.it.obda.model.impl.ValueConstantImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
+import inf.unibz.it.obda.parser.DatalogProgramParser;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 // $ANTLR 3.3 Nov 30, 2010 12:50:56 Datalog.g 2011-01-05 16:12:30
 
-package org.obda.query.tools.parser;
+package inf.unibz.it.obda.parser;
 
 import java.util.List;
 import java.util.Vector;

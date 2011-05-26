@@ -39,6 +39,8 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingStringTreeModelFilter
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.parser.DatalogProgramParser;
+import inf.unibz.it.obda.parser.DatalogQueryHelper;
 import inf.unibz.it.obda.rdbmsgav.validator.RDBMSMappingValidator;
 import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
 
@@ -65,8 +67,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.tools.parser.DatalogProgramParser;
-import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

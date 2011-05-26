@@ -1,4 +1,4 @@
-package inf.unibz.it.utils.io;
+package inf.unibz.it.obda.tool.utils;
 
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 

@@ -1,6 +1,6 @@
 // $ANTLR 3.3 Nov 30, 2010 12:50:56 Datalog.g 2011-01-05 16:12:30
 
-package org.obda.query.tools.parser;
+package inf.unibz.it.obda.parser;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.Atom;
@@ -15,6 +15,7 @@ import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.parser.DatalogParser;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -26,12 +27,11 @@ import org.antlr.runtime.BitSet;
 import org.antlr.runtime.EarlyExitException;
 import org.antlr.runtime.MismatchedSetException;
 import org.antlr.runtime.NoViableAltException;
+import org.antlr.runtime.Parser;
 import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-
-import org.antlr.runtime.Parser;
 
 
 public class DatalogParser extends Parser {

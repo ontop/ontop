@@ -4,13 +4,13 @@ import inf.unibz.it.obda.domain.QueryModifiers;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;
+import inf.unibz.it.obda.tool.utils.EventGeneratingLinkedList;
+import inf.unibz.it.obda.tool.utils.ListListener;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.obda.query.tools.util.EventGeneratingLinkedList;
-import org.obda.query.tools.util.ListListener;
 
 public class CQIEImpl implements CQIE, ListListener {
 

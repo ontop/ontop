@@ -1,4 +1,4 @@
-package org.obda.query.tools.parser;
+package inf.unibz.it.obda.parser;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.Atom;
