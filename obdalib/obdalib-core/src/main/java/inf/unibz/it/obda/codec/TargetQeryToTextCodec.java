@@ -1,9 +1,8 @@
 package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.codec.ObjectToTextCodec;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.io.PrefixManager;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;

@@ -10,7 +10,7 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.api.io;
+package inf.unibz.it.obda.io;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
@@ -23,6 +23,7 @@ import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.io.PrefixManager;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;

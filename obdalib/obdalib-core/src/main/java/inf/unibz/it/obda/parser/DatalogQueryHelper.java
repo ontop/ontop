@@ -6,7 +6,7 @@
  */
 package inf.unibz.it.obda.parser;
 
-import inf.unibz.it.obda.api.io.PrefixManager;
+import inf.unibz.it.obda.io.PrefixManager;
 
 import java.util.Map;
 import java.util.Set;

@@ -12,14 +12,13 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import inf.unibz.it.obda.api.io.DataManager;
-import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.api.io.SimplePrefixManager;
+import inf.unibz.it.obda.io.DataManager;
+import inf.unibz.it.obda.io.PrefixManager;
+import inf.unibz.it.obda.io.SimplePrefixManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 

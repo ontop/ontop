@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
-import inf.unibz.it.obda.api.io.PrefixManager;
+import inf.unibz.it.obda.io.PrefixManager;
 import inf.unibz.it.obda.model.Atom;
 
 import java.net.URI;

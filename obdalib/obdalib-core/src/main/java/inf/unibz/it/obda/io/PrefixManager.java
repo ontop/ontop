@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.api.io;
+package inf.unibz.it.obda.io;
 
 import java.util.Map;
 

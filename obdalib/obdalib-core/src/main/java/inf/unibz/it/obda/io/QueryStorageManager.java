@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.api.io;
+package inf.unibz.it.obda.io;
 
 import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
