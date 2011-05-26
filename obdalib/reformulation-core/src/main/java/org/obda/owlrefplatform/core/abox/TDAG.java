@@ -15,71 +15,82 @@ public class TDAG {
         for (DAGNode node : dag.getClassIndex().values()) {
 
             DAGNode tnode = dag_nodes.get(node.getUri());
+
             if (tnode == null) {
                 tnode = new DAGNode(node.getUri());
-                dag_nodes.put(tnode.getUri(), tnode);
+                dag_nodes.put(node.getUri(), tnode);
+            }
 
-                // Link the ER- child set to ER child set
-                String er = null;
-                if (tnode.getUri().equals(DAG.owl_inverse_exists_obj)) {
-                    er = DAG.owl_exists_obj + tnode.getUri().substring(DAG.owl_inverse_exists_obj.length());
-                } else if (tnode.getUri().equals(DAG.owl_inverse_exists_data)) {
-                    er = DAG.owl_exists_data + tnode.getUri().substring(DAG.owl_inverse_exists_data.length());
-                } else if (tnode.getUri().equals(DAG.owl_exists_obj)) {
-                    er = DAG.owl_inverse_exists_obj + tnode.getUri().substring(DAG.owl_exists_obj.length());
-                } else if (tnode.getUri().equals(DAG.owl_exists_data)) {
-                    er = DAG.owl_inverse_exists_data + tnode.getUri().substring(DAG.owl_exists_data.length());
+            String er = null;
+            if (node.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
+                er = DAG.owl_exists_obj + node.getUri().substring(DAG.owl_inverse_exists_obj.length());
+            } else if (node.getUri().startsWith(DAG.owl_inverse_exists_data)) {
+                er = DAG.owl_exists_data + node.getUri().substring(DAG.owl_inverse_exists_data.length());
+            } else if (node.getUri().startsWith(DAG.owl_exists_obj)) {
+                er = DAG.owl_inverse_exists_obj + node.getUri().substring(DAG.owl_exists_obj.length());
+            } else if (node.getUri().startsWith(DAG.owl_exists_data)) {
+                er = DAG.owl_inverse_exists_data + node.getUri().substring(DAG.owl_exists_data.length());
+            }
+            DAGNode ern = null;
+            if (er != null) {
+                if ((ern = dag_nodes.get(er)) == null) {
+                    ern = new DAGNode(er);
+                    dag_nodes.put(er, ern);
                 }
-
-                if (er != null) {
-                    DAGNode ern = dag_nodes.get(er);
-                    if (ern == null) {
-                        ern = new DAGNode(er);
-                        dag_nodes.put(er, ern);
-                        // Both ER and ER- share the same children set object
-                        tnode.setChildren(ern.getChildren());
-                    } else {
-                        // ER- exists
-                        tnode.setChildren(ern.getChildren());
-                    }
+                if (tnode.getChildren() != ern.getChildren() ||
+                        tnode.getParents() != ern.getParents()) {
+                    // Both ER and ER- share the same children set object
+                    assert (tnode.getChildren().size() == 0);
+                    assert (tnode.getParents().size() == 0);
+                    tnode.setChildren(ern.getChildren());
+                    tnode.setParents(ern.getParents());
                 }
             }
 
+            DAGNode child_ern = null;
             for (DAGNode child_node : node.getChildren()) {
                 DAGNode tchild_node = dag_nodes.get(child_node.getUri());
-
                 if (tchild_node == null) {
                     tchild_node = new DAGNode(child_node.getUri());
                     dag_nodes.put(tchild_node.getUri(), tchild_node);
+                }
+                String child_er = null;
+                if (child_node.getUri().startsWith(DAG.owl_inverse_exists_obj)) {
+                    child_er = DAG.owl_exists_obj + child_node.getUri().substring(DAG.owl_inverse_exists_obj.length());
+                } else if (child_node.getUri().startsWith(DAG.owl_inverse_exists_data)) {
+                    child_er = DAG.owl_exists_data + child_node.getUri().substring(DAG.owl_inverse_exists_data.length());
+                } else if (child_node.getUri().startsWith(DAG.owl_exists_obj)) {
+                    child_er = DAG.owl_inverse_exists_obj + child_node.getUri().substring(DAG.owl_exists_obj.length());
+                } else if (child_node.getUri().startsWith(DAG.owl_exists_data)) {
+                    child_er = DAG.owl_inverse_exists_data + child_node.getUri().substring(DAG.owl_exists_data.length());
+                }
 
-                    // Link the ER- child set to ER child set
-                    String er = null;
-                    if (tchild_node.getUri().equals(DAG.owl_inverse_exists_obj)) {
-                        er = DAG.owl_exists_obj + tchild_node.getUri().substring(DAG.owl_inverse_exists_obj.length());
-                    } else if (tchild_node.getUri().equals(DAG.owl_inverse_exists_data)) {
-                        er = DAG.owl_exists_data + tchild_node.getUri().substring(DAG.owl_inverse_exists_data.length());
-                    } else if (tchild_node.getUri().equals(DAG.owl_exists_obj)) {
-                        er = DAG.owl_inverse_exists_obj + tchild_node.getUri().substring(DAG.owl_exists_obj.length());
-                    } else if (tchild_node.getUri().equals(DAG.owl_exists_data)) {
-                        er = DAG.owl_inverse_exists_data + tchild_node.getUri().substring(DAG.owl_exists_data.length());
+                if (child_er != null) {
+                    if ((child_ern = dag_nodes.get(child_er)) == null) {
+                        child_ern = new DAGNode(child_er);
+                        dag_nodes.put(child_er, child_ern);
                     }
-
-                    if (er != null) {
-                        DAGNode ern = dag_nodes.get(er);
-                        if (ern == null) {
-                            ern = new DAGNode(er);
-                            dag_nodes.put(er, ern);
-                            // Both ER and ER- share the same children set object
-                            tchild_node.setChildren(ern.getChildren());
-                        } else {
-                            // ER- exists
-                            tchild_node.setChildren(ern.getChildren());
-                        }
+                    if (child_node.getChildren() != child_ern.getChildren() ||
+                            child_node.getParents() != child_ern.getParents()) {
+                        // Both ER and ER- share the same children set object
+                        assert (child_node.getChildren().size() == 0);
+                        assert (child_node.getParents().size() == 0);
+                        child_node.setChildren(child_ern.getChildren());
+                        child_node.setParents(child_ern.getParents());
                     }
                 }
+
                 // Construct edge
                 tnode.getChildren().add(tchild_node);
                 tchild_node.getParents().add(tnode);
+
+                // Black Magic with ER and ER-
+                if (ern != null) {
+                    tchild_node.getParents().add(ern);
+                }
+                if (child_ern != null) {
+                    tnode.getChildren().add(child_ern);
+                }
             }
 
 

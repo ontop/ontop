@@ -14,7 +14,7 @@ public class DAGNode implements Comparable<DAGNode> {
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
-    private final Set<DAGNode> parents = new HashSet<DAGNode>();
+    private Set<DAGNode> parents = new HashSet<DAGNode>();
     private Set<DAGNode> children = new HashSet<DAGNode>();
 
     public final Set<DAGNode> descendans = new HashSet<DAGNode>();
@@ -95,6 +95,10 @@ public class DAGNode implements Comparable<DAGNode> {
 
     public void setChildren(Set<DAGNode> children) {
         this.children = children;
+    }
+
+    public void setParents(Set<DAGNode> parents) {
+        this.parents = parents;
     }
 
 }
