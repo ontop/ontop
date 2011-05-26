@@ -41,8 +41,8 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
-import inf.unibz.it.obda.rdbmsgav.validator.RDBMSMappingValidator;
-import inf.unibz.it.obda.rdbmsgav.validator.SQLQueryValidator;
+import inf.unibz.it.obda.tool.utils.RDBMSMappingValidator;
+import inf.unibz.it.obda.tool.utils.SQLQueryValidator;
 
 import java.awt.Color;
 import java.awt.Dimension;

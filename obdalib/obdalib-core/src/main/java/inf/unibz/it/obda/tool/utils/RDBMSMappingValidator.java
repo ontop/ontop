@@ -11,7 +11,7 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.rdbmsgav.validator;
+package inf.unibz.it.obda.tool.utils;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.DataSource;
@@ -22,7 +22,6 @@ import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
-import inf.unibz.it.obda.validator.MappingValidator;
 
 import java.util.Enumeration;
 import java.util.Iterator;

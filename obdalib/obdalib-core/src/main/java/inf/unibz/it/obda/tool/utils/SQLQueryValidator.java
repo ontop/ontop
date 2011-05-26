@@ -10,14 +10,14 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.rdbmsgav.validator;
+package inf.unibz.it.obda.tool.utils;
 
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.gui.swing.datasource.panels.IncrementalResultSetTableModel;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
-import inf.unibz.it.obda.validator.QueryValidator;
+
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
