@@ -3,9 +3,7 @@ package inf.unibz.it.sql;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.panels.ColumnInspectorTableModel;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
-import inf.unibz.it.sql.JDBCConnectionManager;
-
+import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 
 import java.net.URI;
 import java.sql.Connection;

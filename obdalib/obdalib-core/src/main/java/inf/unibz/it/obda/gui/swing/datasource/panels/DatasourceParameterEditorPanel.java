@@ -13,14 +13,13 @@
 
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
-
+import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 
 import javax.swing.JOptionPane;
+
 
 /**
  * 

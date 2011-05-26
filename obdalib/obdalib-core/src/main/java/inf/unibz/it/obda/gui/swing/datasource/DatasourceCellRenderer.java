@@ -1,8 +1,6 @@
 package inf.unibz.it.obda.gui.swing.datasource;
 
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
-
 
 import java.awt.Component;
 

@@ -13,8 +13,8 @@ import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 
 import java.net.URI;
 import java.util.List;

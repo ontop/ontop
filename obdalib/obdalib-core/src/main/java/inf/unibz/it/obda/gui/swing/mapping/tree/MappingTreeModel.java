@@ -26,8 +26,8 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
 

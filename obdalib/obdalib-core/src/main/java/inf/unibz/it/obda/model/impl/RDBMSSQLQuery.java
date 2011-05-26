@@ -11,15 +11,11 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.model.rdbms.impl;
+package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.domain.QueryModifiers;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
-
-
-
-public class RDBMSSQLQuery implements Query {
+public  class RDBMSSQLQuery implements Query {
 
 
 	private final String sqlQuery;

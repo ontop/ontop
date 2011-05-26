@@ -5,7 +5,7 @@ import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 
 import java.util.List;
 

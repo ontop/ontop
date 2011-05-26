@@ -20,8 +20,8 @@ import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.impl.VariableImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 
 import java.util.Enumeration;
 import java.util.Iterator;

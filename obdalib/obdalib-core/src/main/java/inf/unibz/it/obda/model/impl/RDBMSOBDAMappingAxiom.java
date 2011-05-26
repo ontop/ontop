@@ -11,14 +11,11 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.model.rdbms.impl;
+package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.domain.AbstractOBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.domain.VariableMap;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 
 import java.security.InvalidParameterException;
 

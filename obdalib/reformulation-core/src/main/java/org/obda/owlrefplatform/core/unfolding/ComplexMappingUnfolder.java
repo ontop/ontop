@@ -15,9 +15,9 @@ import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.tool.utils.QueryUtils;
 
 import java.util.HashMap;
@@ -34,6 +34,7 @@ import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Implements the partial evaluation algorithm with obda mappings

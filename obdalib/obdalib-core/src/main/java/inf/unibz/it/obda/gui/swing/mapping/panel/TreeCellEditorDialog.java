@@ -20,7 +20,7 @@ import inf.unibz.it.obda.gui.swing.mapping.tree.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
 import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
 

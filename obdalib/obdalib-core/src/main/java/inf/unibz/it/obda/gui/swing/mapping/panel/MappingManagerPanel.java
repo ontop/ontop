@@ -38,7 +38,7 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingSQLStringTreeModelFil
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
 import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
 import inf.unibz.it.obda.tool.utils.RDBMSMappingValidator;

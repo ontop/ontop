@@ -24,9 +24,9 @@ import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
-import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 import inf.unibz.it.obda.tool.utils.XMLUtils;
 
 import java.io.File;
