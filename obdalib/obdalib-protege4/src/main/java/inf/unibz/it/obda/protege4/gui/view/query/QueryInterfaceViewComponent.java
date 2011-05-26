@@ -8,6 +8,7 @@ import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
 import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
+import inf.unibz.it.obda.gui.swing.table.IncrementalQueryResultSetTableModel;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
@@ -15,7 +16,6 @@ import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 import inf.unibz.it.obda.tool.utils.ResultSetToFileWriter;
-import inf.unibz.it.ucq.swing.IncrementalQueryResultSetTableModel;
 
 import java.awt.BorderLayout;
 import java.io.File;

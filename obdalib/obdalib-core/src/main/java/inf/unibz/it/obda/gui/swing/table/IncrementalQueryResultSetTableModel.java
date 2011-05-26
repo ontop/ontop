@@ -1,8 +1,8 @@
-package inf.unibz.it.ucq.swing;
+package inf.unibz.it.obda.gui.swing.table;
 
+import inf.unibz.it.obda.exception.QueryResultException;
 import inf.unibz.it.obda.model.Constant;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
-import inf.unibz.it.ucq.exception.QueryResultException;
 
 import java.sql.SQLException;
 import java.util.HashSet;

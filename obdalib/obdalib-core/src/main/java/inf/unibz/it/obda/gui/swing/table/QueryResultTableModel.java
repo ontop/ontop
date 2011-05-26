@@ -10,14 +10,14 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.ucq.swing;
+package inf.unibz.it.obda.gui.swing.table;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.exception.QueryResultException;
 import inf.unibz.it.obda.model.Constant;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.ValueConstantImpl;
 import inf.unibz.it.ucq.domain.QueryResult;
-import inf.unibz.it.ucq.exception.QueryResultException;
 
 import java.util.HashSet;
 import java.util.Vector;

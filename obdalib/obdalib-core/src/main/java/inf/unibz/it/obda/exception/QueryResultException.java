@@ -1,4 +1,4 @@
-package inf.unibz.it.ucq.exception;
+package inf.unibz.it.obda.exception;
 
 public class QueryResultException extends Exception {
 

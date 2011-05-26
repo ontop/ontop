@@ -1,7 +1,6 @@
 package inf.unibz.it.ucq.domain;
 
-import inf.unibz.it.obda.model.Constant;
-import inf.unibz.it.ucq.exception.QueryResultException;
+import inf.unibz.it.obda.exception.QueryResultException;
 
 import java.sql.SQLException;
 import java.util.List;
