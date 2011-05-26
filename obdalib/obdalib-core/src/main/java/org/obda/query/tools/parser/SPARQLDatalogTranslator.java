@@ -5,7 +5,6 @@ import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -40,7 +39,7 @@ import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 public class SPARQLDatalogTranslator {
 
 	/** A factory to construct the subject and object terms */
-	private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
+	private OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
 	/** A factory to construct the predicates */
 	private OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();

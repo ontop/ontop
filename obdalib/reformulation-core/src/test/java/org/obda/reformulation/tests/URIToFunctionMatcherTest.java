@@ -3,7 +3,6 @@ package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -26,7 +25,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 	
 	@Before
 	public void setUp() throws Exception {
-		TermFactoryImpl fac = TermFactoryImpl.getInstance();
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		List<Term> variables = new LinkedList<Term>();
 		variables.add(fac.createVariable("x"));
 		variables.add(fac.createVariable("y"));
@@ -43,7 +42,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 	}
 	
 	public void testMatchURI() {
-		TermFactoryImpl fac = TermFactoryImpl.getInstance();
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		Function matchedTerm = matcher.getPossibleFunctionalTermMatch(fac.createURIConstant(URI.create("http://www.obda.com/onto#individual-mariano-rodriguez")));
 		assertTrue(matchedTerm != null);
 		assertTrue(matchedTerm.toString(), matchedTerm.getFunctionSymbol().toString().equals("http://www.obda.com/onto#individual"));

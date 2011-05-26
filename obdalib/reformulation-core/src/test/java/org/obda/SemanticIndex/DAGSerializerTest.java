@@ -1,12 +1,5 @@
 package org.obda.SemanticIndex;
 
-import junit.framework.TestCase;
-import org.obda.owlrefplatform.core.abox.DAG;
-import org.obda.owlrefplatform.core.abox.DAGNode;
-import org.obda.owlrefplatform.core.abox.DAGSerializer;
-import org.obda.owlrefplatform.core.abox.SemanticIndexRange;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
-
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +7,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.TestCase;
+
+import org.obda.owlrefplatform.core.abox.DAG;
+import org.obda.owlrefplatform.core.abox.DAGNode;
+import org.obda.owlrefplatform.core.abox.DAGSerializer;
+import org.obda.owlrefplatform.core.abox.SemanticIndexRange;
+import org.semanticweb.owl.model.OWLOntologyCreationException;
 
 public class DAGSerializerTest extends TestCase {
 

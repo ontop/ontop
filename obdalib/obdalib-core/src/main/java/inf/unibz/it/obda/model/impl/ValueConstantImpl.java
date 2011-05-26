@@ -1,10 +1,9 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.ValueConstantImpl;
-
 import org.obda.query.domain.ValueConstant;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
+
 
 public class ValueConstantImpl implements ValueConstant {
 

@@ -5,7 +5,6 @@ import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -28,7 +27,7 @@ public class CQCUtilitiesTest extends TestCase {
 	PositiveInclusionApplicator	piapplicator	= new PositiveInclusionApplicator();
 
 	OBDADataFactory			pfac			= OBDADataFactoryImpl.getInstance();
-	org.obda.query.domain.OBDADataFactory					tfac			= TermFactoryImpl.getInstance();
+	OBDADataFactory					tfac			= OBDADataFactoryImpl.getInstance();
 
 	Predicate					r				= pfac.createPredicate(URI.create("R"), 2);
 	Predicate					s				= pfac.createPredicate(URI.create("S"), 3);

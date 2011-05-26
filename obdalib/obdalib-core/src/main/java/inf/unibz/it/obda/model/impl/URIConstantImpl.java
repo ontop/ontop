@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.URIConstantImpl;
+
 
 import java.net.URI;
 import java.net.URISyntaxException;

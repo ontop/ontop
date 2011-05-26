@@ -1,7 +1,8 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 
 import java.util.Collection;
@@ -40,7 +41,7 @@ public class CQCUtilities {
 
 	private static QueryAnonymizer	anonymizer			= new QueryAnonymizer();
 
-	private static org.obda.query.domain.OBDADataFactory		termFactory			= TermFactoryImpl.getInstance();
+	private static OBDADataFactory		termFactory			= OBDADataFactoryImpl.getInstance();
 
 	List<Atom>						canonicalbody		= null;
 

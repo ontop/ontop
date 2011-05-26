@@ -1,12 +1,11 @@
 package org.obda.reformulation.tests;
 
+import java.util.Set;
+
 import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 
 public class ReformulationTest extends TestCase {

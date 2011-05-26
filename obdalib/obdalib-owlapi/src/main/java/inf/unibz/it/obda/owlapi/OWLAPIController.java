@@ -1,13 +1,8 @@
 package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.io.SimplePrefixManager;
 
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyChangeListener;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OWLAPIController extends APIController {
 

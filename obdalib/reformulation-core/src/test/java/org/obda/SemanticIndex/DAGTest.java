@@ -1,11 +1,12 @@
 package org.obda.SemanticIndex;
 
+import java.util.List;
+
 import junit.framework.TestCase;
+
 import org.obda.owlrefplatform.core.abox.DAG;
 import org.obda.owlrefplatform.core.abox.DAGNode;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
-
-import java.util.List;
 
 public class DAGTest extends TestCase {
 

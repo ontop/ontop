@@ -1,7 +1,10 @@
 package org.obda.reformulation.tests;
 
 
+import java.util.List;
+
 import junit.framework.TestCase;
+
 import org.obda.SemanticIndex.SemanticIndexHelper;
 import org.obda.owlrefplatform.core.abox.DAG;
 import org.obda.owlrefplatform.core.abox.SDAG;
@@ -9,8 +12,6 @@ import org.obda.owlrefplatform.core.abox.SemanticReduction;
 import org.obda.owlrefplatform.core.abox.TDAG;
 import org.obda.owlrefplatform.core.ontology.Assertion;
 import org.semanticweb.owl.model.OWLOntologyCreationException;
-
-import java.util.List;
 
 public class SemanticReductionTest extends TestCase {
     SemanticIndexHelper helper = new SemanticIndexHelper();

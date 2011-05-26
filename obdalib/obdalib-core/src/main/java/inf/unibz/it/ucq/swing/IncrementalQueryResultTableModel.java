@@ -1,6 +1,7 @@
 package inf.unibz.it.ucq.swing;
 
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.ValueConstantImpl;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.exception.QueryResultException;
@@ -34,7 +35,7 @@ public class IncrementalQueryResultTableModel implements TableModel{
 
 	boolean isAfterLast = false;
 
-	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
+	private final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package

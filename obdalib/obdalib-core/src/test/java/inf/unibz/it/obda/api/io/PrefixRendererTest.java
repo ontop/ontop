@@ -6,7 +6,6 @@ import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.Collections;
@@ -34,7 +33,7 @@ public class PrefixRendererTest extends TestCase {
 //		rend = new EntityNameRenderer(pm);
 		query = new DatalogProgramImpl();
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
-		TermFactoryImpl tfac = TermFactoryImpl.getInstance();
+		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
 		innerterms.add(tfac.createVariable("id"));

@@ -4,7 +4,6 @@ import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.List;
@@ -22,7 +21,7 @@ import org.obda.query.domain.Variable;
 
 public class ThetaGenerationTest extends TestCase {
 
-	org.obda.query.domain.OBDADataFactory termFactory =  TermFactoryImpl.getInstance();
+	OBDADataFactory termFactory =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
 
 	private Vector<Substitution> getMGUAsVector(Map<Variable, Term> mgu) {

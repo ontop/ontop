@@ -5,7 +5,6 @@ import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 
 import java.net.URI;
@@ -27,7 +26,7 @@ import org.obda.query.domain.Variable;
 
 public class ThetaApplicationTest extends TestCase {
 
-	org.obda.query.domain.OBDADataFactory termFactory =  TermFactoryImpl.getInstance();
+	OBDADataFactory termFactory =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
 
 	/*tests the application of given thteas to a given CQIE

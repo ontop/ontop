@@ -21,8 +21,6 @@ import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginLoader;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import org.obda.reformulation.protege4.ProtegeReformulationPlatformPreferences;

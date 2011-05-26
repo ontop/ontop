@@ -7,7 +7,6 @@ import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
@@ -36,7 +35,7 @@ public class DirectMappingGenerator {
 
 
 	private final OBDADataFactory		predicateFactory		= OBDADataFactoryImpl.getInstance();
-	private final TermFactoryImpl				termFactory				= TermFactoryImpl.getInstance();
+	private final OBDADataFactory				termFactory				= OBDADataFactoryImpl.getInstance();
 	private int									mappingcounter			= 1;
 	
 	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);

@@ -2,10 +2,10 @@ package org.obda.owlrefplatform.core.abox.tests;
 import java.net.URI;
 import java.util.Hashtable;
 
+import junit.framework.TestCase;
+
 import org.obda.owlrefplatform.core.abox.URIIdentyfier;
 import org.obda.owlrefplatform.core.abox.URIType;
-
-import junit.framework.TestCase;
 
 
 public class TestURIIdentifier extends TestCase {

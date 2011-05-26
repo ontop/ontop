@@ -6,7 +6,6 @@ import inf.unibz.it.obda.api.io.PrefixManager;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.owl.model.OWLClass;

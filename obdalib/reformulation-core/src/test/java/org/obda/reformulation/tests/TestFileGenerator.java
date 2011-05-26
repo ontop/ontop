@@ -1,14 +1,37 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.owlapi.OWLAPIController;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+
 import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.*;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLObjectPropertyInverse;
+import org.semanticweb.owl.model.OWLObjectSomeRestriction;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.net.URI;
-import java.util.*;
 
 public class TestFileGenerator {
 

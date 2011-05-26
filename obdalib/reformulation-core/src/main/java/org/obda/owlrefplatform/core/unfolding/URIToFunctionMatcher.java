@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.unfolding;
 
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class URIToFunctionMatcher {
 		int pos2 = uristr.substring(pos).indexOf('-');
 		pos = pos + pos2;
 		String base = uristr.substring(0, pos);
-		TermFactoryImpl tFact = TermFactoryImpl.getInstance();
+		OBDADataFactory tFact = OBDADataFactoryImpl.getInstance();
 
 		String[] constanturis = uristr.substring(pos + 1, uristr.length()).split("-");
 		

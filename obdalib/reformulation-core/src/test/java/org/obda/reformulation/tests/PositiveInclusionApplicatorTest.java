@@ -4,7 +4,6 @@ import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -36,8 +35,8 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 	PositiveInclusionApplicator	piapplicator	= new PositiveInclusionApplicator();
 
-	OBDADataFactory			pfac			= OBDADataFactoryImpl.getInstance();
-	org.obda.query.domain.OBDADataFactory					tfac			= TermFactoryImpl.getInstance();
+	OBDADataFactory				pfac			= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory				tfac			= OBDADataFactoryImpl.getInstance();
 
 	Predicate					r				= pfac.createPredicate(URI.create("R"), 2);
 	Predicate					s				= pfac.createPredicate(URI.create("S"), 2);
@@ -172,7 +171,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 	@Test
 	public void testApplyExistentialInclusions() {
-		 // TODO
+		// TODO
 	}
 
 	@Test
@@ -263,7 +262,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 	@Test
 	public void testApplyExistentialInclusion() {
-		 // TODO
+		// TODO
 	}
 
 }

@@ -4,7 +4,6 @@ import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.List;
@@ -38,7 +37,7 @@ public class UnificationTest2 extends TestCase {
 	@Test
 	public void test_1() throws Exception {
 
-		TermFactoryImpl factory = TermFactoryImpl.getInstance();
+		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory predFac = OBDADataFactoryImpl.getInstance();
 
 		Term t1 = factory.createVariable("x");

@@ -3,7 +3,6 @@ package org.obda.reformulation.tests;
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import org.obda.query.domain.Term;
 public class AutomaticMGUTestDataGenerator {
 
 	OBDADataFactory	predFac	= OBDADataFactoryImpl.getInstance();
-	org.obda.query.domain.OBDADataFactory					termFac	= TermFactoryImpl.getInstance();
+	OBDADataFactory					termFac	= OBDADataFactoryImpl.getInstance();
 
 	/***
 	 * Checks if all substitutions in unifier1 are also in unifier2.

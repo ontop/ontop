@@ -1,10 +1,10 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.VariableImpl;
-
 import org.obda.query.domain.Variable;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
+
+
 
 public class VariableImpl implements Variable {
 

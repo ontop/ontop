@@ -2,23 +2,22 @@ package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.Vector;
+
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import org.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
-
-import java.io.File;
-import java.net.URI;
-import java.util.Iterator;
-import java.util.Vector;
 
 public class OntologyLoader {
 

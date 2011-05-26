@@ -1,7 +1,8 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.AtomImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 
 import java.util.Collection;
@@ -28,7 +29,7 @@ import org.obda.query.domain.Term;
 public class PositiveInclusionApplicator {
 
 	AtomUnifier		unifier		= new AtomUnifier();
-	QueryAnonymizer	anonymizer	= new QueryAnonymizer();	org.obda.query.domain.OBDADataFactory		termFactory	= TermFactoryImpl.getInstance();
+	QueryAnonymizer	anonymizer	= new QueryAnonymizer();	OBDADataFactory		termFactory	= OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Check whether the given positive inclusion is applicable to the given

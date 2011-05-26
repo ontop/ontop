@@ -1,6 +1,5 @@
 package org.obda.SemanticIndex;
 
-import junit.framework.TestCase;
 
 
 /**

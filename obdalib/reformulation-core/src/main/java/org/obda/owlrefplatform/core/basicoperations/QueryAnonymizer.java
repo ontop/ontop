@@ -1,10 +1,11 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 
@@ -25,7 +26,7 @@ import org.obda.query.domain.Variable;
 
 public class QueryAnonymizer {
 
-	private final TermFactoryImpl	termFactory	= TermFactoryImpl.getInstance();
+	private final OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
 
 	public DatalogProgram anonymize(DatalogProgram prog) {
 

@@ -10,7 +10,6 @@ import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
@@ -33,7 +32,7 @@ public class SemanticIndexMappingGenerator {
 
     private final Logger log = LoggerFactory.getLogger(SemanticIndexMappingGenerator.class);
 
-    private final static TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
+    private final static OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
     private final static OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
     private int mapcounter;

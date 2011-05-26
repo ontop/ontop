@@ -1,11 +1,12 @@
 package org.obda.owlrefplatform.core.unfolding;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
@@ -27,7 +28,6 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Function;
-import org.obda.query.domain.OBDADataFactory;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
@@ -49,7 +49,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	// private Map<String, LinkedList<OBDAMappingAxiom>> mappingsIndex = null;
 
 	private MappingViewManager		viewManager			= null;
-	private TermFactoryImpl			termFactory			= null;
+	private OBDADataFactory			termFactory			= null;
 	private ResolutionEngine		resolutionEngine	= null;
 
 	/*
@@ -79,7 +79,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		log.debug("Mappings recreived: {}", mappings.size());
 
 		this.mappings = mappings;
-		this.termFactory = TermFactoryImpl.getInstance();
+		this.termFactory = OBDADataFactoryImpl.getInstance();
 		this.viewManager = man;
 		resolutionEngine = new ResolutionEngine();
 		functTermMap = new HashMap<String, Function>();
@@ -461,7 +461,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			CQIE query = it.next();
 			Atom head = query.getHead();
 			Iterator<Term> hit = head.getTerms().iterator();
-			OBDADataFactory factory = TermFactoryImpl.getInstance();
+			OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 			int coutner = 1;
 			int i = 0;
 			LinkedList<Term> newTerms = new LinkedList<Term>();

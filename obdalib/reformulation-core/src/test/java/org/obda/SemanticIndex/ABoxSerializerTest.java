@@ -1,17 +1,18 @@
 package org.obda.SemanticIndex;
 
-import junit.framework.TestCase;
-import org.obda.owlrefplatform.core.abox.ABoxSerializer;
-import org.obda.owlrefplatform.core.abox.DAG;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import junit.framework.TestCase;
+
+import org.obda.owlrefplatform.core.abox.ABoxSerializer;
+import org.obda.owlrefplatform.core.abox.DAG;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyCreationException;
 
 /**
  * @author Sergejs Pugacs

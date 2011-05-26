@@ -1,9 +1,5 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.api.controller.APIController;
-
-import java.net.URI;
-
 import org.protege.editor.owl.model.io.IOListenerEvent;
 import org.protege.editor.owl.model.io.IOListenerPluginInstance;
 
