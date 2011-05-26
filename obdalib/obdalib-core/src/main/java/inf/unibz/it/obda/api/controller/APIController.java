@@ -12,8 +12,6 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import inf.unibz.it.dl.assertion.Assertion;
-import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.io.DataManager;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.api.io.SimplePrefixManager;
@@ -30,17 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class APIController {
 
-	// private static APIController controllerInstance = null;
-
-//	private static APICoupler											couplerInstance			= null;
-
-//	private HashSet<OntologyControllerListener>							ontologyListeners		= null;
-
 	protected URI														currentOntologyURI		= null;
-
-	private HashMap<Class<Assertion>, AssertionController<Assertion>>	assertionControllers	= null;
-
-	private HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>		assertionXMLCodecs		= null;
 
 	protected DataManager												ioManager				= null;
 
@@ -52,17 +40,6 @@ public abstract class APIController {
 
 	private PrefixManager											prefman					= null;
 
-	// renders the Dependency assertions from the obda file
-	// private DependencyAssertionRenderer dependencyRenderer = null;
-	// private ConstraintsRenderer constraintsRenderer = null;
-
-	// the entity name renderer provides the name any entity which belongs to a
-	// loaded ontology.
-//	protected EntityNameRenderer										nameRenderer			= null;
-
-	// a set of all currently loaded ontotlogies
-//	private HashSet<String>												loadedOntologies		= null;
-
 	protected final Logger												log						= LoggerFactory.getLogger(this.getClass());
 
 	public APIController() {
@@ -70,8 +47,6 @@ public abstract class APIController {
 		dscontroller = new DatasourcesController();
 		mapcontroller = new MappingController(dscontroller, this);
 		queryController = new QueryController();
-		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
-		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 		
 		setPrefixManager(new SimplePrefixManager());
 		ioManager = new DataManager(this);
@@ -92,108 +67,12 @@ public abstract class APIController {
 		return this.mapcontroller;
 	}
 
-	public AssertionController<?> getController(Class<?> assertionClass) {
-		return assertionControllers.get(assertionClass);
-	}
-
-//	/***************************************************************************
-//	 * Sets the current APICoupler. An object which is able to interact with the
-//	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
-//	 * operations over it. For example, checking wether a named object is a
-//	 * Property or Concepts, etc.
-//	 * 
-//	 * @param coupler
-//	 */
-//	public void setCoupler(APICoupler coupler) {
-//		APIController.couplerInstance = coupler;
-//		nameRenderer = new EntityNameRenderer(getPrefixManager());
-//	}
-
-//	/***************************************************************************
-//	 * Gets the current APICoupler. An object which is able to interact with the
-//	 * current ontology API (e.g., OWL-API, Protege-OWL, Neon) and do certain
-//	 * operations over it. For example, checking if a named object is a Property
-//	 * or Concepts, etc.
-//	 * 
-//	 * @param coupler
-//	 */
-//	public APICoupler getCoupler() {
-//		return couplerInstance;
-//	}
 
 	public DataManager getIOManager() {
 		return this.ioManager;
 	}
 
-	/***************************************************************************
-	 * Registers a new assertion controller. These are used during
-	 * saving/loading
-	 * 
-	 * @param controller
-	 */
-	public <T extends Assertion> void addAssertionController(Class<T> assertionClass, AssertionController<T> controller,
-			AssertionXMLCodec<T> codec) {
-		assertionControllers.put((Class<Assertion>) assertionClass, (AssertionController<Assertion>) controller);
-		ioManager.addAssertionController(assertionClass, controller, codec);
-		assertionXMLCodecs.put((Class<Assertion>) assertionClass, (AssertionXMLCodec<Assertion>) codec);
 
-	}
-
-	// TODO Fix remove assertion controller, API is wrong, should give the
-	// controller intance to remove
-	/***************************************************************************
-	 * Removes the assertion controller which is currently linked to the given
-	 * assertionClass
-	 * 
-	 * @param assertionClass
-	 */
-	public void removeAssertionController(Class assertionClass) {
-		assertionControllers.remove(assertionClass);
-		assertionXMLCodecs.remove(assertionClass);
-		ioManager.removeAssertionController(assertionClass);
-	}
-
-//	public void addOntologyControllerListener(OntologyControllerListener listener) {
-//		getOntologyControllerListeners().add(listener);
-//	}
-//
-//	public Collection<OntologyControllerListener> getOntologyControllerListeners() {
-//		if (ontologyListeners == null) {
-//			ontologyListeners = new HashSet<OntologyControllerListener>();
-//		}
-//		return ontologyListeners;
-//	}
-
-//	/***
-//	 * Sets the current ontology URI and loads all .obda data for the current
-//	 * obda file.
-//	 * 
-//	 * @param uri
-//	 */
-//	public void setCurrentOntologyURI(URI uri) {
-//		URI oldURI = currentOntologyURI;
-//		currentOntologyURI = uri;
-//		getMapcontroller().activeOntologyChanged();
-//
-//	}
-
-//	public URI getCurrentOntologyURI() {
-//		return currentOntologyURI;
-//	}
-
-	// private void fireCurrentOntologyChanged(URI uri, URI oldURI) {
-	// DatasourcesController.getInstance().removeAllSources();
-	// for (Iterator<OntologyControllerListener> iterator =
-	// ontologyListeners.iterator(); iterator.hasNext();) {
-	// OntologyControllerListener type = (OntologyControllerListener)
-	// iterator.next();
-	// type.currentOntologyChanged(uri, oldURI);
-	// }
-	// }
-
-	// public abstract URI getPhysicalURIOfOntology(URI onto);
-
-	// public abstract File getCurrentOntologyFile();
 
 	public String getVersion() {
 		try {

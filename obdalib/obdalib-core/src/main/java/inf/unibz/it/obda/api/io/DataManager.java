@@ -12,10 +12,7 @@
  */
 package inf.unibz.it.obda.api.io;
 
-import inf.unibz.it.dl.assertion.Assertion;
-import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.AssertionController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
@@ -74,10 +71,6 @@ public class DataManager {
 	public static int													CURRENT_OBDA_FILE_VERSION_MAJOR	= 1;
 	public static int													CURRENT_OBDA_FILE_VERSION_MINOR	= 0;
 
-	protected HashMap<Class<Assertion>, AssertionController<Assertion>>	assertionControllers			= null;
-
-	protected HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>	assertionXMLCodecs				= null;
-
 	/** The XML codec to save/load data sources. */
 	protected DatasourceXMLCodec										dsCodec;
 
@@ -106,26 +99,9 @@ public class DataManager {
 		mapCodec = new MappingXMLCodec(apic);
 		xmlRenderer = new XMLRenderer();
 		xmlReader = new XMLReader();
-		assertionControllers = new HashMap<Class<Assertion>, AssertionController<Assertion>>();
-		assertionXMLCodecs = new HashMap<Class<Assertion>, AssertionXMLCodec<Assertion>>();
 	}
 
-	public <T extends Assertion> void addAssertionController(Class<T> assertionClass, AssertionController<T> controller,
-			AssertionXMLCodec<T> codec) {
-		assertionControllers.put((Class<Assertion>) assertionClass, (AssertionController<Assertion>) controller);
-		assertionXMLCodecs.put((Class<Assertion>) assertionClass, (AssertionXMLCodec<Assertion>) codec);
-	}
 
-	/***************************************************************************
-	 * Removes the assertion controller which is currently linked to the given
-	 * assertionClass
-	 * 
-	 * @param assertionClass
-	 */
-	public void removeAssertionController(Class<Assertion> assertionClass) {
-		assertionControllers.remove(assertionClass);
-		assertionXMLCodecs.remove(assertionClass);
-	}
 
 	public void saveMappingsToFile(File file) throws ParserConfigurationException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -233,27 +209,6 @@ public class DataManager {
 		Vector<QueryControllerEntity> queries = apic.getQueryController().getElements();
 		dumpQueriesToXML(queries);
 
-		/***********************************************************************
-		 * Appending data of the registred controllers
-		 */
-		Set<Class<Assertion>> assertionClasses = assertionControllers.keySet();
-		for (Iterator<Class<Assertion>> assClassIt = assertionClasses.iterator(); assClassIt.hasNext();) {
-			Class<Assertion> assertionClass = assClassIt.next();
-			AssertionXMLCodec<Assertion> xmlCodec = assertionXMLCodecs.get(assertionClass);
-			AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
-			//			
-			Collection<Assertion> assertions = controller.getAssertions();
-			if (assertions.isEmpty())
-				continue;
-			Element controllerElement = doc.createElement(controller.getElementTag());
-			for (Assertion assertion : assertions) {
-				Element assertionElement = xmlCodec.encode(assertion);
-				doc.adoptNode(assertionElement);
-				controllerElement.appendChild(assertionElement);
-			}
-			root.appendChild(controllerElement);
-
-		}
 		XMLUtils.saveDocumentToXMLFile(doc, prefixes, file.toString());
 	}
 
@@ -362,37 +317,12 @@ public class DataManager {
 					}
 					apic.getDatasourcesController().addDataSource(source);
 				}
-				if (node.getNodeName().equals("IDConstraints")) {
-					// TODO Implement something.
-				}
 				if (node.getNodeName().equals("SavedQueries")) {
 					// Found queries block
 					importQueriesFromXML(node);
 				}
 
-				/***************************************************************
-				 * Appending data to the registred controllers based on the XML
-				 * tags for them.
-				 */
-				Set<Class<Assertion>> assertionClasses = assertionControllers.keySet();
-				for (Iterator<Class<Assertion>> assClassIt = assertionClasses.iterator(); assClassIt.hasNext();) {
-					Class<Assertion> assertionClass = assClassIt.next();
-					AssertionXMLCodec<Assertion> xmlCodec = assertionXMLCodecs.get(assertionClass);
-					AssertionController<Assertion> controller = assertionControllers.get(assertionClass);
-					if (node.getNodeName().equals(controller.getElementTag())) {
-						NodeList childrenAssertions = node.getElementsByTagName(xmlCodec.getElementTag());
-						for (int j = 0; j < childrenAssertions.getLength(); j++) {
-							Element assertionElement = (Element) childrenAssertions.item(j);
-							try {
-								Assertion assertion = xmlCodec.decode(assertionElement);
-								controller.addAssertion(assertion);
-							} catch (Exception e) {
-								log.warn("Error loading assertion: {}", e.toString());
-								log.debug(e.getMessage(), e);
-							}
-						}
-					}
-				}
+
 			}
 		}
 	}

@@ -1,10 +1,6 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.dl.assertion.Assertion;
-import inf.unibz.it.dl.codec.xml.AssertionXMLCodec;
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.AssertionController;
-import inf.unibz.it.obda.api.controller.AssertionControllerListener;
 import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
@@ -15,9 +11,6 @@ import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
-import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPlugin;
-import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginInstance;
-import inf.unibz.it.obda.protege4.plugin.AssertionControllerFactoryPluginLoader;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,7 +18,6 @@ import java.util.Set;
 
 import org.obda.reformulation.protege4.ProtegeReformulationPlatformPreferences;
 import org.protege.editor.core.Disposable;
-import org.protege.editor.core.ProtegeApplication;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -138,55 +130,13 @@ public class OBDAPluginController implements Disposable {
 				// Each reasoner factory has its own preference instance.
 				ProtegeReformulationPlatformPreferences reasonerPreference = new ProtegeReformulationPlatformPreferences();
 				obdaFactory.setPreferenceHolder(reasonerPreference);
-				// owlEditorKit.put(ReformulationPlatformPreferences.class.getName(),
-				// reasonerPreference);
 			}
 		}
 		
 //		triggerOBDAModelChangeEvent(oldcontroller, obdacontroller);
 	}
 
-	@Deprecated
-	/***
-	 * This method is used to load the controllers of different kinds of assertions. It was used
-	 * in old versions of the plugin.
-	 */
-	private void loadAssertionControllerFactoryPlugins() {
-		AssertionControllerListener<Assertion> defaultAssertionControllerListener = new AssertionControllerListener<Assertion>() {
-			public void assertionAdded(Assertion assertion) {
-				triggerOntologyChanged();
-			}
 
-			public void assertionChanged(Assertion oldAssertion, Assertion newAssertion) {
-				triggerOntologyChanged();
-			}
-
-			public void assertionRemoved(Assertion assertion) {
-				triggerOntologyChanged();
-			}
-
-			public void assertionsCleared() {
-				triggerOntologyChanged();
-			}
-		};
-
-		AssertionControllerFactoryPluginLoader loader = new AssertionControllerFactoryPluginLoader();
-		for (AssertionControllerFactoryPlugin pl : loader.getPlugins()) {
-			try {
-				AssertionControllerFactoryPluginInstance instance = pl.newInstance();
-				Class assertionClass = instance.getAssertionClass();
-				AssertionController controller = instance.getControllerInstance();
-				AssertionXMLCodec xmlCodec = instance.getXMLCodec();
-				boolean triggerUpddate = instance.triggersOntologyChanged();
-				if (triggerUpddate) {
-					controller.addControllerListener(defaultAssertionControllerListener);
-				}
-				obdacontroller.addAssertionController(assertionClass, controller, xmlCodec);
-			} catch (Throwable e) {
-				ProtegeApplication.getErrorLog().logError(e);
-			}
-		}
-	}
 
 	/***
 	 * Internal class responsible for coordinating actions related to updates in
