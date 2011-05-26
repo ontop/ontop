@@ -13,8 +13,7 @@
 package inf.unibz.it.obda.api.controller;
 
 import inf.unibz.it.obda.codec.DatasourceXMLCodec;
-import inf.unibz.it.obda.domain.DataSource;
-
+import inf.unibz.it.obda.model.DataSource;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;

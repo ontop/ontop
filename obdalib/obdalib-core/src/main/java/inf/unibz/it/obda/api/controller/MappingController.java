@@ -13,11 +13,11 @@
 package inf.unibz.it.obda.api.controller;
 
 import inf.unibz.it.obda.codec.MappingXMLCodec;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
+import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Query;
 
 import java.net.URI;
 import java.util.ArrayList;

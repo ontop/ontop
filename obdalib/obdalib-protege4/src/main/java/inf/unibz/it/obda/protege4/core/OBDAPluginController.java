@@ -5,10 +5,10 @@ import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.QueryControllerListener;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
 

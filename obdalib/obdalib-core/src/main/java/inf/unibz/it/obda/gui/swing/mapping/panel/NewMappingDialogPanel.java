@@ -6,13 +6,13 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;

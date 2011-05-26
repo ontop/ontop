@@ -2,9 +2,9 @@ package inf.unibz.it.obda.protege4.gui.view;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceSelector;
 import inf.unibz.it.obda.gui.swing.datasource.panels.SQLQueryPanel;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;

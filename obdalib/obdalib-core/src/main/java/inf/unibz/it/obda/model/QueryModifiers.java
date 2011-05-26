@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.domain;
+package inf.unibz.it.obda.model;
 
 import java.util.Properties;
 

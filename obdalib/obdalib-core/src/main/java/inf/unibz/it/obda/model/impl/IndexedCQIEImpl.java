@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.domain.QueryModifiers;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.QueryModifiers;
 
 import java.util.Iterator;
 import java.util.LinkedList;

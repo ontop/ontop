@@ -1,11 +1,11 @@
 package org.obda.owlrefplatform.core.unfolding;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.OperatorAtom;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;

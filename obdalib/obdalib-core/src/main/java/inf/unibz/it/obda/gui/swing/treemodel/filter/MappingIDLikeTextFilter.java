@@ -1,7 +1,6 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 
 /**
  * A filter that receives a String str during construction and returns

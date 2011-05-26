@@ -1,10 +1,10 @@
 package org.obda.owlrefplatform.core.reformulation;
 
-import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.tool.utils.QueryUtils;
 

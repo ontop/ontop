@@ -14,10 +14,10 @@
 package inf.unibz.it.obda.tool.utils;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.panels.ResultSetTableModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;

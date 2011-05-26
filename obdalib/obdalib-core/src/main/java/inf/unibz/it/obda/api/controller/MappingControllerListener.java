@@ -13,8 +13,7 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import java.net.URI;
 
 

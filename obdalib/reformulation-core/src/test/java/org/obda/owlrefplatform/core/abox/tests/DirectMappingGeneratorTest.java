@@ -1,8 +1,8 @@
 package org.obda.owlrefplatform.core.abox.tests;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 import inf.unibz.it.sql.JDBCConnectionManager;

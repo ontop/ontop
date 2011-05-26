@@ -13,8 +13,7 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import inf.unibz.it.obda.domain.DataSource;
-
+import inf.unibz.it.obda.model.DataSource;
 
 public interface DatasourcesControllerListener {
 	public void datasourceAdded(DataSource source);

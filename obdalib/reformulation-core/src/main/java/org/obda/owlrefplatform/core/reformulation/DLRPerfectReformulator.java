@@ -1,9 +1,9 @@
 package org.obda.owlrefplatform.core.reformulation;
 
-import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.tool.utils.QueryUtils;
 
@@ -48,11 +48,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	 * @throws Exception
 	 */
 	private DatalogProgram reformulate(DatalogProgram q) throws Exception {
-		
+
 		DatalogProgramImpl prog = new DatalogProgramImpl();
-		
+
 		QueryUtils.copyQueryModifiers(q, prog);
-		
+
 		List<CQIE> queries = q.getRules();
 		prog.appendRule(queries);
 		HashSet<Integer> newRules = new HashSet<Integer>();
@@ -89,7 +89,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 						if (i != j) {
 							CQIE newQuery = unifier.unify(cqie, i, j);
 							if (newQuery != null) {
-								anonymizer.anonymize(newQuery,i);
+								anonymizer.anonymize(newQuery, i);
 								newSet.add(newQuery);
 								loopagain = true;
 							}
@@ -121,7 +121,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 		DatalogProgram prog = (DatalogProgram) input;
 
 		log.debug("Starting query rewrting. Received query: \n{}", prog);
-		
+
 		if (!prog.isUCQ()) {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
@@ -130,11 +130,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 		log.debug("Anonymizing the query");
 		QueryAnonymizer ano = new QueryAnonymizer();
 		DatalogProgram anonymizedProgram = ano.anonymize(prog);
-		
+
 		log.debug("Reformulating");
 		DatalogProgram reformulation = reformulate(anonymizedProgram);
 		log.debug("Done reformulating. Output: \n{}", reformulation);
-		
+
 		return reformulation;
 
 	}

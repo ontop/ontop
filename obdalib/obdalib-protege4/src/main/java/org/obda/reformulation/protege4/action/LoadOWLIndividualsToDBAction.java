@@ -1,8 +1,8 @@
 package org.obda.reformulation.protege4.action;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.event.ActionEvent;

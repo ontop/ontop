@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.reformulation;
 
-import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.Query;
 
 import java.util.List;
 

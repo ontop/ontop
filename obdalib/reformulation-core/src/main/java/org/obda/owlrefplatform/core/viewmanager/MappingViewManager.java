@@ -1,9 +1,9 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;

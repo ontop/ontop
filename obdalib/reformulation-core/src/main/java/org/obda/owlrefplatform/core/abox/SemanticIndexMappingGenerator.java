@@ -3,12 +3,12 @@ package org.obda.owlrefplatform.core.abox;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.OBDADataFactory;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.model.Atom;
+import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;

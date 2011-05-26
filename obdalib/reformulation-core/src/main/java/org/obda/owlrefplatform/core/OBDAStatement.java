@@ -2,10 +2,10 @@ package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.codec.DatalogProgramToTextCodec;
-import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.parser.DatalogProgramParser;

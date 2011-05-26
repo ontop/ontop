@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.domain.QueryModifiers;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.QueryModifiers;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.tool.utils.EventGeneratingLinkedList;
 import inf.unibz.it.obda.tool.utils.ListListener;

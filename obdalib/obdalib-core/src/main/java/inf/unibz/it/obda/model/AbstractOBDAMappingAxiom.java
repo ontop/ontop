@@ -11,9 +11,33 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.domain;
+package inf.unibz.it.obda.model;
+
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 
 
-public interface SourceQuery extends Query {
 
+public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
+
+	private String id = "";
+	
+	public AbstractOBDAMappingAxiom(String id) {
+		this.id = id;
+	}
+	
+	
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+	
+	public abstract Object clone() throws CloneNotSupportedException;
 }

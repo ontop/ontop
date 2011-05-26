@@ -13,11 +13,11 @@
  */
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.domain.AbstractOBDAMappingAxiom;
-import inf.unibz.it.obda.domain.Query;
-import inf.unibz.it.obda.domain.VariableMap;
+import inf.unibz.it.obda.model.AbstractOBDAMappingAxiom;
+import inf.unibz.it.obda.model.Query;
 
 import java.security.InvalidParameterException;
+
 
 public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 
@@ -54,12 +54,6 @@ public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 		this.targetQuery = (CQIEImpl) query;
 	}
 
-	/****
-	 * Warning it doesn't do anything at the moment
-	 */
-	public void setVariableMappings(VariableMap map) {
-		//TODO remove or keep method
-	}
 
 	public RDBMSSQLQuery getSourceQuery() {
 		return sourceQuery;
@@ -69,13 +63,6 @@ public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 		return targetQuery;
 	}
 
-	/****
-	 * Warning doesnt do anything at the moment
-	 */
-	public VariableMap getVariableMappings() {
-		// TODO Remove or keep method
-		return null;
-	}
 
 	@Override
 	public RDBMSOBDAMappingAxiom clone() {

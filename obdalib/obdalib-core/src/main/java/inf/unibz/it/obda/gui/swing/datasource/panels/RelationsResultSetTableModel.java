@@ -12,7 +12,7 @@
  */
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.model.DataSource;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

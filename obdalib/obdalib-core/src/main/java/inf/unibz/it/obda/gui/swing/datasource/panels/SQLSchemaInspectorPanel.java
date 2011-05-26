@@ -14,10 +14,10 @@
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
 import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 import inf.unibz.it.sql.JDBCConnectionManager;
 

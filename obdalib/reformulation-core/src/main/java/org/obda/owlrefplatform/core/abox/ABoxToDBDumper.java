@@ -1,8 +1,8 @@
 package org.obda.owlrefplatform.core.abox;
 
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.sql.JDBCConnectionManager;
 
 import java.sql.Connection;

@@ -2,8 +2,8 @@ package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.sql.JDBCConnectionManager;

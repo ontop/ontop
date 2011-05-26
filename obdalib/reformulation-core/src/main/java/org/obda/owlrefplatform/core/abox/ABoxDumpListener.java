@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.abox;
 
-import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.model.DataSource;
 
 /**
  * A simple listener interface that notifies its classes when a 

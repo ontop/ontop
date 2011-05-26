@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;

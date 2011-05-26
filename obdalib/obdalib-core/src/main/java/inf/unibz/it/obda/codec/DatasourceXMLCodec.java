@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 
 import java.net.URI;

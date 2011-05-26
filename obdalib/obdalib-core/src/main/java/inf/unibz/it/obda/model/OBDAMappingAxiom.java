@@ -11,9 +11,27 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.domain;
+package inf.unibz.it.obda.model;
+
+import inf.unibz.it.obda.model.Query;
 
 
-public  interface TargetQuery extends Query {
+
+public interface OBDAMappingAxiom extends Cloneable {
+
+	public void setSourceQuery(Query query);
+
+	public Query getSourceQuery();
+
+	public void setTargetQuery(Query query);
+
+	public Query getTargetQuery();
+
+	public Object clone() throws CloneNotSupportedException;
+
+	public void setId(String id);
+
+	public String getId();
+
 
 }

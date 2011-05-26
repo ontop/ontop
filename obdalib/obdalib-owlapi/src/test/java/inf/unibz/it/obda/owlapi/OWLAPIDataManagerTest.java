@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.domain.OBDAMappingAxiom;
-import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.Query;
 
 import java.io.File;
 import java.net.URI;

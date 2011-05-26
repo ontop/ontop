@@ -12,9 +12,9 @@
  */
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.exception.NoConnectionException;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 
 import java.net.URI;
