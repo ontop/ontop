@@ -1,13 +1,13 @@
 package inf.unibz.it.obda.owlapi.abox.materialization;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.ResultSet;

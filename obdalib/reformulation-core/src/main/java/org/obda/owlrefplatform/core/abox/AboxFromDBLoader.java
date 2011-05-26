@@ -1,7 +1,8 @@
 package org.obda.owlrefplatform.core.abox;
 
-import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
+
 import inf.unibz.it.obda.domain.DataSource;
+import inf.unibz.it.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.Connection;
