@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-public interface TermFactory {
+public interface OBDADataFactory {
 
 	/**
 	 * Construct a {@link URIConstant} object. This type of term is written

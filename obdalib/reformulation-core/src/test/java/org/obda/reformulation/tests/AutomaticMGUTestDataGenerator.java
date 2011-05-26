@@ -13,7 +13,6 @@ import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 
 /***
  * This is an auxiliary class for the MGU generation test. This class is in
@@ -30,7 +29,7 @@ import org.obda.query.domain.TermFactory;
 public class AutomaticMGUTestDataGenerator {
 
 	OBDADataFactory	predFac	= OBDADataFactoryImpl.getInstance();
-	TermFactory					termFac	= TermFactoryImpl.getInstance();
+	org.obda.query.domain.OBDADataFactory					termFac	= TermFactoryImpl.getInstance();
 
 	/***
 	 * Checks if all substitutions in unifier1 are also in unifier2.

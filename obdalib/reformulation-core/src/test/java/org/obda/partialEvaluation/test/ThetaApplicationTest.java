@@ -22,13 +22,12 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
 
 public class ThetaApplicationTest extends TestCase {
 
-	TermFactory termFactory =  TermFactoryImpl.getInstance();
+	org.obda.query.domain.OBDADataFactory termFactory =  TermFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
 
 	/*tests the application of given thteas to a given CQIE

@@ -1,26 +1,19 @@
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.TermFactoryImpl;
-import inf.unibz.it.obda.model.impl.URIConstantImpl;
-import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
-import inf.unibz.it.obda.model.impl.ValueConstantImpl;
-import inf.unibz.it.obda.model.impl.VariableImpl;
-
 import java.net.URI;
 import java.util.List;
 
 import org.obda.query.domain.Function;
+import org.obda.query.domain.OBDADataFactory;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-public class TermFactoryImpl implements TermFactory {
+public class TermFactoryImpl implements OBDADataFactory {
 
 	protected static TermFactoryImpl instance = null;
 

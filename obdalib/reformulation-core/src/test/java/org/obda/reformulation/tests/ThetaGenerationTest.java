@@ -17,13 +17,12 @@ import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
 
 public class ThetaGenerationTest extends TestCase {
 
-	TermFactory termFactory =  TermFactoryImpl.getInstance();
+	org.obda.query.domain.OBDADataFactory termFactory =  TermFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
 
 	private Vector<Substitution> getMGUAsVector(Map<Variable, Term> mgu) {

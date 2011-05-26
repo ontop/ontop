@@ -24,14 +24,11 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 
 public class PositiveInclusionApplicator {
 
 	AtomUnifier		unifier		= new AtomUnifier();
-	QueryAnonymizer	anonymizer	= new QueryAnonymizer();
-
-	TermFactory		termFactory	= TermFactoryImpl.getInstance();
+	QueryAnonymizer	anonymizer	= new QueryAnonymizer();	org.obda.query.domain.OBDADataFactory		termFactory	= TermFactoryImpl.getInstance();
 
 	/**
 	 * Check whether the given positive inclusion is applicable to the given

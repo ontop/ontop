@@ -27,9 +27,9 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Function;
+import org.obda.query.domain.OBDADataFactory;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.URIConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,7 +230,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 		log.debug("Replacing any URI constants for function symbols if there are matching ones.");
 		inputquery = replaceURIsForFunctions(inputquery);
-		
+
 		LinkedList<CQIE> evaluation = new LinkedList<CQIE>();
 		Iterator<CQIE> qit = inputquery.getRules().iterator();
 		int maxlenght = 0;
@@ -461,7 +461,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			CQIE query = it.next();
 			Atom head = query.getHead();
 			Iterator<Term> hit = head.getTerms().iterator();
-			TermFactory factory = TermFactoryImpl.getInstance();
+			OBDADataFactory factory = TermFactoryImpl.getInstance();
 			int coutner = 1;
 			int i = 0;
 			LinkedList<Term> newTerms = new LinkedList<Term>();

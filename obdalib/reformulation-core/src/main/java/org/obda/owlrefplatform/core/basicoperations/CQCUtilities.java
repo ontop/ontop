@@ -20,7 +20,6 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Function;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class CQCUtilities {
 
 	private static QueryAnonymizer	anonymizer			= new QueryAnonymizer();
 
-	private static TermFactory		termFactory			= TermFactoryImpl.getInstance();
+	private static org.obda.query.domain.OBDADataFactory		termFactory			= TermFactoryImpl.getInstance();
 
 	List<Atom>						canonicalbody		= null;
 

@@ -21,7 +21,6 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.TermFactory;
 
 public class PositiveInclusionApplicatorTest extends TestCase {
 
@@ -38,7 +37,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	PositiveInclusionApplicator	piapplicator	= new PositiveInclusionApplicator();
 
 	OBDADataFactory			pfac			= OBDADataFactoryImpl.getInstance();
-	TermFactory					tfac			= TermFactoryImpl.getInstance();
+	org.obda.query.domain.OBDADataFactory					tfac			= TermFactoryImpl.getInstance();
 
 	Predicate					r				= pfac.createPredicate(URI.create("R"), 2);
 	Predicate					s				= pfac.createPredicate(URI.create("S"), 2);
