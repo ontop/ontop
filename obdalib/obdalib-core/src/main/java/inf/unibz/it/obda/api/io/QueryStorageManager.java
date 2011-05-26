@@ -1,5 +1,13 @@
 package inf.unibz.it.obda.api.io;
 
+import inf.unibz.it.obda.api.controller.QueryController;
+import inf.unibz.it.obda.api.controller.QueryControllerEntity;
+import inf.unibz.it.obda.codec.xml.query.XMLReader;
+import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
+import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
+import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.tool.utils.XMLUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,16 +25,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.QueryController;
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.codec.xml.query.XMLReader;
-import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
-import inf.unibz.it.obda.tool.utils.XMLUtils;
-ils;
 
 public class QueryStorageManager {
 

@@ -2,7 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package inf.unibz.it.utils.swing;
+package inf.unibz.it.obda.gui.swing.utils;
+
+
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

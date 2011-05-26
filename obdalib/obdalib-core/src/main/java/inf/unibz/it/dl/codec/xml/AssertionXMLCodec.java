@@ -1,8 +1,8 @@
 package inf.unibz.it.dl.codec.xml;
 
 import inf.unibz.it.dl.assertion.Assertion;
-import inf.unibz.it.utils.codec.IOCodec;
-import inf.unibz.it.utils.codec.XMLEncodable;
+import inf.unibz.it.obda.codec.IOCodec;
+import inf.unibz.it.obda.codec.XMLEncodable;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

@@ -16,6 +16,8 @@ package inf.unibz.it.obda.gui.swing.mapping.tree;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.controller.MappingControllerListener;
+import inf.unibz.it.obda.codec.SourceQueryToTextCodec;
+import inf.unibz.it.obda.codec.TargetQeryToTextCodec;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.domain.SourceQuery;
@@ -28,8 +30,6 @@ import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
-import inf.unibz.it.utils.codec.SourceQueryToTextCodec;
-import inf.unibz.it.utils.codec.TargetQeryToTextCodec;
 
 import java.net.URI;
 import java.util.ArrayList;

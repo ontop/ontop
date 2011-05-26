@@ -1,6 +1,7 @@
-package inf.unibz.it.utils.codec;
+package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.codec.ObjectToTextCodec;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 

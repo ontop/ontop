@@ -1,4 +1,4 @@
-package inf.unibz.it.utils.codec;
+package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
 

@@ -8,7 +8,6 @@ import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.ValueConstant;
 import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.utils.codec.ObjectToTextCodec;
 
 import java.net.URI;
 import java.util.Iterator;

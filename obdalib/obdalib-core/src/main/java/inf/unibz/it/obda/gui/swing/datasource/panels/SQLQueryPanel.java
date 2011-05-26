@@ -17,15 +17,14 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
-import inf.unibz.it.utils.swing.OBDAProgessMonitor;
-import inf.unibz.it.utils.swing.OBDAProgressListener;
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 

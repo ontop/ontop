@@ -1,13 +1,12 @@
 package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.codec.CQIEToTextCodec;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.utils.codec.ObjectToTextCodec;
 
 import java.util.Iterator;
 import java.util.List;
+
 
 
 /**

@@ -1,4 +1,7 @@
-package inf.unibz.it.utils.codec;
+package inf.unibz.it.obda.codec;
+
+import inf.unibz.it.obda.codec.IOCodec;
+import inf.unibz.it.obda.codec.XMLEncodable;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

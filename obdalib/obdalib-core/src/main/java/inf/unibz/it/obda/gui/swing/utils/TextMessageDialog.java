@@ -4,7 +4,9 @@
  * Created on November 2, 2009, 5:51 PM
  */
 
-package inf.unibz.it.utils.swing;
+package inf.unibz.it.obda.gui.swing.utils;
+
+import inf.unibz.it.obda.gui.swing.utils.TextMessageDialog;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

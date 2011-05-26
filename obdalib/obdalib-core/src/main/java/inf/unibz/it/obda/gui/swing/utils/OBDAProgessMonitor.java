@@ -1,21 +1,21 @@
-package inf.unibz.it.utils.swing;
+package inf.unibz.it.obda.gui.swing.utils;
 
 import java.util.Vector;
 
 import javax.swing.JDialog;
 
-public class OBDAProgessMonitor{
+public class OBDAProgessMonitor {
 
-	private Vector<OBDAProgressListener> listeners = null;
-	private JDialog parent = null;
-	
-	private boolean canceled = false;
-	
-	public OBDAProgessMonitor(){
+	private Vector<OBDAProgressListener>	listeners	= null;
+	private JDialog							parent		= null;
+
+	private boolean							canceled	= false;
+
+	public OBDAProgessMonitor() {
 		listeners = new Vector<OBDAProgressListener>();
 	}
-	
-	public void start(){
+
+	public void start() {
 		ProgressPanel panel = new ProgressPanel(this);
 		parent = new JDialog();
 		parent.setContentPane(panel);
@@ -24,28 +24,28 @@ public class OBDAProgessMonitor{
 		parent.setVisible(true);
 		parent.setLocationRelativeTo(null);
 	}
-	
-	public void stop(){
+
+	public void stop() {
 		parent.setVisible(false);
 		parent.dispose();
 	}
-	
-	public void addProgressListener(OBDAProgressListener list){
+
+	public void addProgressListener(OBDAProgressListener list) {
 		listeners.add(list);
 	}
-	
-	public void removeProgressListener(OBDAProgressListener list){
+
+	public void removeProgressListener(OBDAProgressListener list) {
 		listeners.remove(list);
 	}
-	
-	public void triggerActionCanceled(){
+
+	public void triggerActionCanceled() {
 		canceled = true;
 		parent.setVisible(false);
-		for(OBDAProgressListener pl : listeners){
+		for (OBDAProgressListener pl : listeners) {
 			pl.actionCanceled();
 		}
 	}
-	
+
 	public boolean isCanceled() {
 		return canceled;
 	}

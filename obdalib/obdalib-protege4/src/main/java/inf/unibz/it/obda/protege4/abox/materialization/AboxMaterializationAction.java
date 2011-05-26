@@ -1,10 +1,10 @@
 package inf.unibz.it.obda.protege4.abox.materialization;
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.owlapi.abox.materialization.AboxMaterializer;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
-import inf.unibz.it.utils.swing.OBDAProgessMonitor;
-import inf.unibz.it.utils.swing.OBDAProgressListener;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;

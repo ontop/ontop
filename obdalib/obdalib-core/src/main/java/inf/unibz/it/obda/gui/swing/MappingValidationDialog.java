@@ -13,7 +13,7 @@
 package inf.unibz.it.obda.gui.swing;
 
 
-import inf.unibz.it.utils.swing.DialogUtils;
+import inf.unibz.it.obda.gui.swing.utils.DialogUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

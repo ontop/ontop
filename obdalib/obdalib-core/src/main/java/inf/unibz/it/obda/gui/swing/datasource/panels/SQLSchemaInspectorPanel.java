@@ -17,15 +17,11 @@ import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
-import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
+import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
 
-import inf.unibz.it.sql.parser.SimpleSQLParser.statement_return;
-import inf.unibz.it.utils.swing.OBDAProgessMonitor;
-import inf.unibz.it.utils.swing.OBDAProgressListener;
-
 import java.awt.BorderLayout;
-
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -39,7 +35,6 @@ import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BorderFactory;
-
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;

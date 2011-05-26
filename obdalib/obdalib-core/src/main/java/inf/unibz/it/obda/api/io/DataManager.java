@@ -31,7 +31,6 @@ import inf.unibz.it.obda.model.rdbms.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
 import inf.unibz.it.obda.tool.utils.XMLUtils;
-tils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

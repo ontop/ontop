@@ -1,4 +1,4 @@
-package inf.unibz.it.utils.swing;
+package inf.unibz.it.obda.gui.swing.utils;
 
 import java.awt.Component;
 import java.awt.Container;
