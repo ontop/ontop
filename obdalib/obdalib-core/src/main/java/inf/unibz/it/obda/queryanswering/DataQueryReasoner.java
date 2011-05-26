@@ -1,6 +1,5 @@
-package inf.unibz.it.obda.api.inference.reasoner;
+package inf.unibz.it.obda.queryanswering;
 
-import inf.unibz.it.obda.queryanswering.Statement;
 
 public interface DataQueryReasoner {
 

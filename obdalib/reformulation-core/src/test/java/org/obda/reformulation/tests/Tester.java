@@ -1,12 +1,12 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
+import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
 

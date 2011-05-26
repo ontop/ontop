@@ -11,7 +11,7 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.api.controller.exception;
+package inf.unibz.it.obda.exception;
 
 public class DuplicateMappingException extends Exception {
 	/**

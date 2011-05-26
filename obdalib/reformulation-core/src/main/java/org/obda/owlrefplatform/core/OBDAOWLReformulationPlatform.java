@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.inference.reasoner.DataQueryReasoner;
+import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
 import inf.unibz.it.obda.queryanswering.Statement;
 
 import java.net.URI;
