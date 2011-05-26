@@ -6,7 +6,7 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
-import inf.unibz.it.utils.QueryUtils;
+import inf.unibz.it.obda.tool.utils.QueryUtils;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -1,12 +1,11 @@
 package org.obda.owlrefplatform.core.reformulation;
 
-import org.obda.owlrefplatform.core.ontology.Assertion;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
-import inf.unibz.it.utils.QueryUtils;
+import inf.unibz.it.obda.tool.utils.QueryUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,6 +15,7 @@ import java.util.List;
 import org.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import org.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import org.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
+import org.obda.owlrefplatform.core.ontology.Assertion;
 import org.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

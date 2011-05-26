@@ -1,4 +1,4 @@
-package inf.unibz.it.utils;
+package inf.unibz.it.obda.tool.utils;
 
 import inf.unibz.it.obda.domain.Query;
 
