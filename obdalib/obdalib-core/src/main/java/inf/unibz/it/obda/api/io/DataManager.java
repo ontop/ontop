@@ -15,10 +15,10 @@ package inf.unibz.it.obda.api.io;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
-import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
-import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
-import inf.unibz.it.obda.codec.xml.query.XMLReader;
-import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
+import inf.unibz.it.obda.codec.DatasourceXMLCodec;
+import inf.unibz.it.obda.codec.MappingXMLCodec;
+import inf.unibz.it.obda.codec.QueryGroupXMLReader;
+import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
@@ -34,9 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -78,10 +76,10 @@ public class DataManager {
 	protected MappingXMLCodec											mapCodec;
 
 	/** The XML codec to save queries. */
-	protected XMLRenderer												xmlRenderer;
+	protected QueryGroupXMLRenderer												xmlRenderer;
 
 	/** The XML codec to load queries. */
-	protected XMLReader													xmlReader;
+	 QueryGroupXMLReader													xmlReader;
 
 	// protected PrefixManager prefixManager = null;
 
@@ -97,8 +95,8 @@ public class DataManager {
 
 		dsCodec = new DatasourceXMLCodec();
 		mapCodec = new MappingXMLCodec(apic);
-		xmlRenderer = new XMLRenderer();
-		xmlReader = new XMLReader();
+		xmlRenderer = new QueryGroupXMLRenderer();
+		xmlReader = new QueryGroupXMLReader();
 	}
 
 

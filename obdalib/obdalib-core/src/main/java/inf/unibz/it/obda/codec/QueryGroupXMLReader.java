@@ -11,7 +11,7 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.codec.xml.query;
+package inf.unibz.it.obda.codec;
 
 //TODO: Refactor so that this is actually an instance of a codec
 /*import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryGroupTreeElement;
@@ -22,7 +22,7 @@ import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class XMLReader {
+public class QueryGroupXMLReader {
 	
 	
 	public QueryControllerQuery readQuery(Element dom_query) {

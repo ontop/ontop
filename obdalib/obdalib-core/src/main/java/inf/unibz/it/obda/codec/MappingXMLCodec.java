@@ -1,7 +1,6 @@
-package inf.unibz.it.obda.codec.xml;
+package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.codec.ObjectXMLCodec;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.impl.CQIEImpl;

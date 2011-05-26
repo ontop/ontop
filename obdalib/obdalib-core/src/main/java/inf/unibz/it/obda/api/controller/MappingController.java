@@ -13,7 +13,7 @@
 package inf.unibz.it.obda.api.controller;
 
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
-import inf.unibz.it.obda.codec.xml.MappingXMLCodec;
+import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;

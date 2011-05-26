@@ -1,8 +1,6 @@
-package inf.unibz.it.obda.codec.xml;
+package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.codec.ObjectXMLCodec;
-import inf.unibz.it.obda.codec.TargetQeryToTextCodec;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;

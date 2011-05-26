@@ -12,7 +12,7 @@
  */
 package inf.unibz.it.obda.api.controller;
 
-import inf.unibz.it.obda.codec.xml.DatasourceXMLCodec;
+import inf.unibz.it.obda.codec.DatasourceXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
 
 import java.net.URI;

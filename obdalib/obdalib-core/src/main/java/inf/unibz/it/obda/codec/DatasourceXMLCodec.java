@@ -1,6 +1,5 @@
-package inf.unibz.it.obda.codec.xml;
+package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.codec.ObjectXMLCodec;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.model.rdbms.impl.RDBMSsourceParameterConstants;
 

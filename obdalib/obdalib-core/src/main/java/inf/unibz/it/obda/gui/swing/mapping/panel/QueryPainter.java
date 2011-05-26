@@ -14,7 +14,7 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryXMLCodec;
+import inf.unibz.it.obda.codec.DatalogConjunctiveQueryXMLCodec;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;

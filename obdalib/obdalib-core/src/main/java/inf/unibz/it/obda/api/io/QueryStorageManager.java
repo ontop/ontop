@@ -2,8 +2,8 @@ package inf.unibz.it.obda.api.io;
 
 import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.codec.xml.query.XMLReader;
-import inf.unibz.it.obda.codec.xml.query.XMLRenderer;
+import inf.unibz.it.obda.codec.QueryGroupXMLReader;
+import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.tool.utils.XMLUtils;
@@ -30,16 +30,16 @@ public class QueryStorageManager {
 
 	protected QueryController queryCon = null;
 	protected Element root;
-	protected XMLRenderer xmlRenderer;
-	protected XMLReader xmlReader;
+	QueryGroupXMLRenderer xmlRenderer;
+	QueryGroupXMLReader xmlReader;
 	protected Document doc = null;
 
 	protected final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	public QueryStorageManager(QueryController queryCon){
 		this.queryCon = queryCon;
-		this.xmlRenderer = new XMLRenderer();
-		this.xmlReader = new XMLReader();
+		xmlRenderer = new QueryGroupXMLRenderer();
+		xmlReader = new QueryGroupXMLReader();
 	}
 	
 	public void loadQueries(URI fileUri){
