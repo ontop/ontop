@@ -11,7 +11,9 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.gui;
+package inf.unibz.it.obda.gui.swing;
+
+import inf.unibz.it.obda.gui.swing.IconLoader;
 
 import javax.swing.ImageIcon;
 

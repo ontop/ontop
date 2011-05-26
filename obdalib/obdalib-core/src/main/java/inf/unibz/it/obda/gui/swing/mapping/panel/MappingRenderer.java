@@ -13,7 +13,7 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.gui.IconLoader;
+import inf.unibz.it.obda.gui.swing.IconLoader;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;

@@ -15,7 +15,7 @@ package inf.unibz.it.obda.gui.swing.datasource.panels;
 
 import inf.unibz.it.obda.api.controller.DatasourcesController;
 import inf.unibz.it.obda.domain.DataSource;
-import inf.unibz.it.obda.gui.IconLoader;
+import inf.unibz.it.obda.gui.swing.IconLoader;
 
 import java.awt.Color;
 import java.awt.Component;
