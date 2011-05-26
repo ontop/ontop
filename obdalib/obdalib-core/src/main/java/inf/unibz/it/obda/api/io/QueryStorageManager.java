@@ -44,10 +44,6 @@ public class QueryStorageManager {
 	
 	public void loadQueries(URI fileUri){
 		File obdaFile = new File(fileUri);
-		if (obdaFile == null) {
-			log.error("OBDA file not found.");
-			return;
-		}
 
 		if (!obdaFile.exists()) {
 			return;

@@ -23,7 +23,7 @@ import org.w3c.dom.Element;
  * 
  */
 
-public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
+public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 
 	/**
 	 * The tag used to represent a conjunctive query in XML
@@ -39,7 +39,7 @@ public class DatalogConjunctiveQueryCodec extends ObjectXMLCodec<CQIE> {
 
 	private final Logger		log				= LoggerFactory.getLogger(this.getClass());
 
-	public DatalogConjunctiveQueryCodec(APIController apic) {
+	public DatalogConjunctiveQueryXMLCodec(APIController apic) {
 		this.apic = apic;
 	}
 

@@ -37,7 +37,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
 	 * the datalog conjunctive quey codec used to encode respectively decode the
 	 * head of the mappings.
 	 */
-	DatalogConjunctiveQueryCodec cqcodec = null;
+	DatalogConjunctiveQueryXMLCodec cqcodec = null;
 
 	/**
 	 * The contructor. Creates a new instance of the Codec
@@ -45,7 +45,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
 	 */
 	public MappingXMLCodec(APIController apic){
 		this.apic = apic;
-		cqcodec = new DatalogConjunctiveQueryCodec(apic);
+		cqcodec = new DatalogConjunctiveQueryXMLCodec(apic);
 	}
 
 	/**

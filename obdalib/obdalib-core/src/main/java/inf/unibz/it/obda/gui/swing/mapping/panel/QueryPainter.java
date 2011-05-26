@@ -14,7 +14,7 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryCodec;
+import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryXMLCodec;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
@@ -30,9 +30,6 @@ import java.util.Vector;
 import javax.swing.SwingUtilities;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-
-
-
 
 public class QueryPainter {
 
@@ -120,8 +117,8 @@ public class QueryPainter {
 		}
 
 		SimpleAttributeSet objectProp = new SimpleAttributeSet();
-		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground, pref
-				.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR));
+		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground,
+				pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR));
 		if (!useDefault) {
 			objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 			objectProp
@@ -147,7 +144,7 @@ public class QueryPainter {
 
 		try {
 			input = doc.getText(0, doc.getLength());
-			DatalogConjunctiveQueryCodec c = new DatalogConjunctiveQueryCodec(apic);
+			DatalogConjunctiveQueryXMLCodec c = new DatalogConjunctiveQueryXMLCodec(apic);
 			query = c.decode(input);
 			if (query == null) {
 				invalid = true;
