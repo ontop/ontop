@@ -1,6 +1,7 @@
-package org.obda.query.domain.imp;
+package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.domain.QueryModifiers;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
 
 import java.util.HashMap;
 import java.util.Iterator;

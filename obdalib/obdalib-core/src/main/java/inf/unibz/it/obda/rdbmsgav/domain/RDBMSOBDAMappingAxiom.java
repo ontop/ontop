@@ -16,10 +16,9 @@ package inf.unibz.it.obda.rdbmsgav.domain;
 import inf.unibz.it.obda.domain.AbstractOBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
 import inf.unibz.it.obda.domain.VariableMap;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
 
 import java.security.InvalidParameterException;
-
-import org.obda.query.domain.imp.CQIEImpl;
 
 public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 

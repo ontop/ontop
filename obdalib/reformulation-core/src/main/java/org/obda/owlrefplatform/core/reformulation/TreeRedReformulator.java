@@ -1,6 +1,7 @@
 package org.obda.owlrefplatform.core.reformulation;
 
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.utils.QueryUtils;
 
 import java.util.Collection;
@@ -28,7 +29,6 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.imp.DatalogProgramImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

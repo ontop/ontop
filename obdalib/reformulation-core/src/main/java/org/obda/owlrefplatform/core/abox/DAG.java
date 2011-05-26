@@ -1,10 +1,28 @@
 package org.obda.owlrefplatform.core.abox;
 
-import org.semanticweb.owl.model.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLObject;
+import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyDomainAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyInverse;
+import org.semanticweb.owl.model.OWLObjectPropertyRangeAxiom;
+import org.semanticweb.owl.model.OWLObjectSomeRestriction;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLSubClassAxiom;
+import org.semanticweb.owl.model.OWLSubPropertyAxiom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * Stores the SemanticIndex of TBox and implements operations for serializing

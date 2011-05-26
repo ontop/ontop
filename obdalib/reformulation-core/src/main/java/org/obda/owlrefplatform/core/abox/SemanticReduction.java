@@ -1,6 +1,13 @@
 package org.obda.owlrefplatform.core.abox;
 
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+
+import java.net.URI;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.obda.owlrefplatform.core.ontology.Assertion;
 import org.obda.owlrefplatform.core.ontology.ConceptDescription;
 import org.obda.owlrefplatform.core.ontology.DescriptionFactory;
@@ -9,13 +16,8 @@ import org.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Prune Ontology for redundant assertions based on dependencies
@@ -27,7 +29,7 @@ public class SemanticReduction {
     private final TDAG tdag;
     private final SDAG sdag;
 
-    private final BasicPredicateFactoryImpl predicateFactory;
+    private final OBDADataFactory predicateFactory;
     private final DescriptionFactory descFactory;
 
     public SemanticReduction(DAG dag, TDAG tdag, SDAG sdag) {
@@ -35,7 +37,7 @@ public class SemanticReduction {
         this.tdag = tdag;
         this.sdag = sdag;
 
-        predicateFactory = BasicPredicateFactoryImpl.getInstance();
+        predicateFactory = OBDADataFactoryImpl.getInstance();
         descFactory = new BasicDescriptionFactory();
 
     }

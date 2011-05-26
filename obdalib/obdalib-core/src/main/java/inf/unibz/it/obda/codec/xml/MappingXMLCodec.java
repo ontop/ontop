@@ -2,6 +2,7 @@ package inf.unibz.it.obda.codec.xml;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.utils.codec.ObjectXMLCodec;
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.imp.CQIEImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

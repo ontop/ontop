@@ -7,7 +7,28 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
-import org.obda.owlrefplatform.core.abox.*;
+
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+
+import org.obda.owlrefplatform.core.abox.ABoxSerializer;
+import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import org.obda.owlrefplatform.core.abox.AboxDumpException;
+import org.obda.owlrefplatform.core.abox.AboxFromDBLoader;
+import org.obda.owlrefplatform.core.abox.DAG;
+import org.obda.owlrefplatform.core.abox.DirectMappingGenerator;
+import org.obda.owlrefplatform.core.abox.SDAG;
+import org.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
+import org.obda.owlrefplatform.core.abox.SemanticReduction;
+import org.obda.owlrefplatform.core.abox.TDAG;
 import org.obda.owlrefplatform.core.ontology.Assertion;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
@@ -30,12 +51,6 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.*;
 
 /**
  * The implementation of the factory for creating reformulation's platform reasoner

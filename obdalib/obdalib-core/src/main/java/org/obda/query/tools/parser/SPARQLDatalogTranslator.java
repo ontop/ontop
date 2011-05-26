@@ -1,5 +1,12 @@
 package org.obda.query.tools.parser;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,13 +16,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
@@ -39,10 +40,10 @@ import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 public class SPARQLDatalogTranslator {
 
 	/** A factory to construct the subject and object terms */
-	private final TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
+	private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
 	/** A factory to construct the predicates */
-	private final PredicateFactory predicateFactory = BasicPredicateFactoryImpl.getInstance();
+	private OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * The default constructor.

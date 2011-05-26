@@ -1,19 +1,19 @@
 package org.obda.reformulation.tests;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 /***
  * This is an auxiliary class for the MGU generation test. This class is in
@@ -29,7 +29,7 @@ import org.obda.query.domain.imp.TermFactoryImpl;
  */
 public class AutomaticMGUTestDataGenerator {
 
-	BasicPredicateFactoryImpl	predFac	= BasicPredicateFactoryImpl.getInstance();
+	OBDADataFactory	predFac	= OBDADataFactoryImpl.getInstance();
 	TermFactory					termFac	= TermFactoryImpl.getInstance();
 
 	/***

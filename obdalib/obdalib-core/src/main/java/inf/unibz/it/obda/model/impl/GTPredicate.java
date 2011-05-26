@@ -1,13 +1,16 @@
-package org.obda.query.domain.imp;
+package inf.unibz.it.obda.model.impl;
+
+import inf.unibz.it.obda.model.impl.GTPredicate;
+import inf.unibz.it.obda.model.impl.PredicateImp;
 
 import java.net.URI;
 
 import org.obda.query.domain.ComparisonOperatorPredicate;
 
-public class LTPredicate extends ComparisonOperatorPredicate {
+public class GTPredicate extends ComparisonOperatorPredicate {
 
-	private URI name = URI.create("http://www.obda.org/ucq/predicate/operator/comparison#LT");
-	private int identifier = -3;
+	private URI name = URI.create("http://www.obda.org/ucq/predicate/operator/comparison#GT");
+	private int identifier = -1;
 	
 	public int getArity() {
 		// TODO Auto-generated method stub
@@ -31,8 +34,8 @@ public class LTPredicate extends ComparisonOperatorPredicate {
 		return identifier;
 	}
 
-	public LTPredicate copy() {
-		
-		return new LTPredicate();
+	public GTPredicate copy() {
+		return new GTPredicate();
 	}
+
 }

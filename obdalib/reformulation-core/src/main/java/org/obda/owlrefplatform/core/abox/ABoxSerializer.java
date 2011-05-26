@@ -1,14 +1,18 @@
 package org.obda.owlrefplatform.core.abox;
 
-import org.semanticweb.owl.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
+
+import org.semanticweb.owl.model.OWLClassAssertionAxiom;
+import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLIndividualAxiom;
+import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
+import org.semanticweb.owl.model.OWLOntology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Store ABox assertions in the DB

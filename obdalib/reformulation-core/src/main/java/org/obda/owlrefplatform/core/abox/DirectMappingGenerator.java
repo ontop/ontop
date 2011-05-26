@@ -1,13 +1,17 @@
 package org.obda.owlrefplatform.core.abox;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -17,12 +21,7 @@ import java.util.Vector;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLEntity;
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class DirectMappingGenerator {
 
 
-	private final PredicateFactory				predicateFactory		= BasicPredicateFactoryImpl.getInstance();
+	private final OBDADataFactory		predicateFactory		= OBDADataFactoryImpl.getInstance();
 	private final TermFactoryImpl				termFactory				= TermFactoryImpl.getInstance();
 	private int									mappingcounter			= 1;
 	

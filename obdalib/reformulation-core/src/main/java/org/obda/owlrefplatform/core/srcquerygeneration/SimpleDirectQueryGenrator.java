@@ -1,5 +1,8 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
+import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
+import inf.unibz.it.obda.model.impl.VariableImpl;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,8 +22,6 @@ import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.UndistinguishedVariable;
-import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

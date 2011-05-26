@@ -1,5 +1,9 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.VariableImpl;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,9 +23,6 @@ import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

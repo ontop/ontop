@@ -2,26 +2,27 @@ package org.obda.owlrefplatform.core.abox;
 
 
 import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.api.controller.exception.DuplicateMappingException;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.domain.Query;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Vector;
+
+import org.obda.query.domain.Atom;
+import org.obda.query.domain.Predicate;
+import org.obda.query.domain.Term;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generate the mappings for DAG
@@ -33,7 +34,7 @@ public class SemanticIndexMappingGenerator {
     private final Logger log = LoggerFactory.getLogger(SemanticIndexMappingGenerator.class);
 
     private final static TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
-    private final static PredicateFactory predicateFactory = BasicPredicateFactoryImpl.getInstance();
+    private final static OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
     private int mapcounter;
     private final APIController apic;

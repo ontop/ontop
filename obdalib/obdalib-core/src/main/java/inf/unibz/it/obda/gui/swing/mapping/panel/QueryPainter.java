@@ -16,6 +16,8 @@ import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.codec.xml.DatalogConjunctiveQueryCodec;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.VariableImpl;
 
 import java.awt.Color;
 import java.util.Iterator;
@@ -29,8 +31,8 @@ import javax.swing.text.StyleConstants;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.VariableImpl;
+
+
 
 public class QueryPainter {
 

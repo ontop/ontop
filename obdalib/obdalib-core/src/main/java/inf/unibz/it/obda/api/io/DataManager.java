@@ -26,10 +26,10 @@ import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSsourceParameterConstants;
-import inf.unibz.it.utils.io.FileUtils;
 import inf.unibz.it.utils.xml.XMLUtils;
 
 import java.io.File;
@@ -426,7 +426,7 @@ public class DataManager {
 
 			Element mappingGroup = doc.createElement("mappings");
 			mappingGroup.setAttribute("sourceuri", datasourceUri.toString());
-			mappingGroup.setAttribute("headclass", org.obda.query.domain.imp.CQIEImpl.class.toString());
+			mappingGroup.setAttribute("headclass", CQIEImpl.class.toString());
 			mappingGroup.setAttribute("bodyclass", inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery.class.toString());
 			root.appendChild(mappingGroup);
 

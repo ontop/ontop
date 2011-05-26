@@ -1,6 +1,7 @@
 package inf.unibz.it.obda.gui.swing.treemodel.filter;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.List;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.CQIEImpl;
 
 /**
  * @author This filter receives a string in the constructor and returns true if

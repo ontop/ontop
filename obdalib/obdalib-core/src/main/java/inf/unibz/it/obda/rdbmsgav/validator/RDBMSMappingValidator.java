@@ -16,6 +16,8 @@ package inf.unibz.it.obda.rdbmsgav.validator;
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.gui.swing.datasource.panels.ResultSetTableModel;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 import inf.unibz.it.obda.validator.MappingValidator;
 
@@ -27,8 +29,8 @@ import java.util.Vector;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.VariableImpl;
+
+
 
 public class RDBMSMappingValidator extends MappingValidator {
 

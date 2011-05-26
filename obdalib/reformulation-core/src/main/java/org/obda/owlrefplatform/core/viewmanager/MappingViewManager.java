@@ -1,6 +1,11 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSSQLQuery;
 
 import java.net.URI;
@@ -14,12 +19,7 @@ import java.util.Vector;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.VariableImpl;
 
 /**
  * The mapping view manager is the module which allows us to translate CQIEs
@@ -38,14 +38,14 @@ public class MappingViewManager implements ViewManager {
 	private Map<String, Predicate>					mappingToNarysetMap			= null;
 	private Map<String, Integer>					globalAliases				= null;
 	private Map<URI, AuxSQLMapping>					predicateAuxMappingMap		= null;
-	private PredicateFactory						predFactory					= null;
+	private OBDADataFactory				predFactory					= null;
 	private Map<URI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
 	private Atom									head						= null;
 
 	public MappingViewManager(List<OBDAMappingAxiom> mappings) {
 		this.mappings = mappings;
-		predFactory = BasicPredicateFactoryImpl.getInstance();
+		predFactory = OBDADataFactoryImpl.getInstance();
 		mappingswithsambodyIndex = new HashMap<String, Vector<OBDAMappingAxiom>>();
 		mappingToNarysetMap = new HashMap<String, Predicate>();
 		globalAliases = new HashMap<String, Integer>();

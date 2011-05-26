@@ -1,5 +1,13 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
+import inf.unibz.it.obda.model.impl.VariableImpl;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,13 +20,6 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
-import org.obda.query.domain.imp.VariableImpl;
 
 //TODO This class needs to be restructured
 

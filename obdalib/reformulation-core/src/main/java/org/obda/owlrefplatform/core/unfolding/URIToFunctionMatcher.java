@@ -1,5 +1,7 @@
 package org.obda.owlrefplatform.core.unfolding;
 
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +9,6 @@ import java.util.Map;
 import org.obda.query.domain.Function;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class URIToFunctionMatcher {
 

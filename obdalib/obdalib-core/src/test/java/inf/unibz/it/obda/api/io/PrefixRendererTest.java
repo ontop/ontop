@@ -1,5 +1,13 @@
 package inf.unibz.it.obda.api.io;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -11,14 +19,7 @@ import org.junit.Before;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class PrefixRendererTest extends TestCase {
 
@@ -32,7 +33,7 @@ public class PrefixRendererTest extends TestCase {
 		pm = new SimplePrefixManager();
 //		rend = new EntityNameRenderer(pm);
 		query = new DatalogProgramImpl();
-		PredicateFactory pfac = BasicPredicateFactoryImpl.getInstance();
+		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		TermFactoryImpl tfac = TermFactoryImpl.getInstance();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();

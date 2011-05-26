@@ -15,8 +15,6 @@ package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.APICoupler;
-import inf.unibz.it.obda.api.io.PrefixManager;
 import inf.unibz.it.obda.gui.IconLoader;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 
@@ -25,10 +23,7 @@ import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.net.URI;
 import java.util.EventObject;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -42,10 +37,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.TreeCellEditor;
 
 import org.antlr.runtime.RecognitionException;
-import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.obda.query.tools.parser.DatalogProgramParser;
 import org.obda.query.tools.parser.DatalogQueryHelper;
 import org.slf4j.Logger;

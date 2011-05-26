@@ -1,13 +1,17 @@
 package org.obda.owlrefplatform.core.abox;
 
-import org.obda.owlrefplatform.core.abox.SemanticIndexRange.Interval;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.obda.owlrefplatform.core.abox.SemanticIndexRange.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Store DAG in DB

@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import org.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
-import org.obda.owlrefplatform.exception.OBDAOWLReformulationPlatformException;
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.inference.OWLReasonerException;

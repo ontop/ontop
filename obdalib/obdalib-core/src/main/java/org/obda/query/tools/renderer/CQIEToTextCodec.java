@@ -2,7 +2,7 @@ package org.obda.query.tools.renderer;
 
 import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.api.io.PrefixManager;
-import inf.unibz.it.ucq.domain.Constant;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.utils.codec.ObjectToTextCodec;
 
 import java.net.URI;
@@ -14,7 +14,6 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.FunctionalTermImpl;
 
 /**
  * A class that transforms a CQIE into a string

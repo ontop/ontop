@@ -1,13 +1,16 @@
-package org.obda.query.domain.imp;
+package inf.unibz.it.obda.model.impl;
+
+import inf.unibz.it.obda.model.impl.NEPredicate;
+import inf.unibz.it.obda.model.impl.PredicateImp;
 
 import java.net.URI;
 
 import org.obda.query.domain.ComparisonOperatorPredicate;
 
-public class LTEPredicate extends ComparisonOperatorPredicate {
+public class NEPredicate extends ComparisonOperatorPredicate {
 
-	private URI name = URI.create("http://www.obda.org/ucq/predicate/operator/comparison#LTE");
-	private int identifier = -4;
+	private URI name = URI.create("http://www.obda.org/ucq/predicate/operator/comparison#NE");
+	private int identifier = -5;
 	
 	public int getArity() {
 		// TODO Auto-generated method stub
@@ -31,8 +34,8 @@ public class LTEPredicate extends ComparisonOperatorPredicate {
 		return identifier;
 	}
 
-	public LTEPredicate copy() {
+	public NEPredicate copy() {
 		
-		return new LTEPredicate();
+		return new NEPredicate();
 	}
 }

@@ -1,5 +1,8 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,7 +14,6 @@ import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import org.obda.owlrefplatform.core.ontology.RoleDescription;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAxiom;
@@ -63,13 +65,13 @@ import org.semanticweb.owl.model.OWLUnaryPropertyAxiom;
 public class OWLAPITranslator {
 
 
-	private BasicPredicateFactoryImpl predicateFactory = null;
+	private OBDADataFactory predicateFactory = null;
 	private DescriptionFactory descFactory = null;
 	private HashSet<String> objectproperties = null;
 	private HashSet<String> dataproperties = null;
 
 	public OWLAPITranslator (){
-		predicateFactory = BasicPredicateFactoryImpl.getInstance();
+		predicateFactory = OBDADataFactoryImpl.getInstance();
 		descFactory = new BasicDescriptionFactory();
 		objectproperties = new HashSet<String>();
 		dataproperties = new HashSet<String>();

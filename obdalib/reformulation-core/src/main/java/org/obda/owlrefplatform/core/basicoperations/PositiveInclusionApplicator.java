@@ -1,5 +1,9 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,9 +25,6 @@ import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
 
 public class PositiveInclusionApplicator {
 

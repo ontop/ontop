@@ -1,6 +1,10 @@
 package org.obda.reformulation.tests;
 
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,11 +17,8 @@ import org.junit.Before;
 import org.obda.owlrefplatform.core.unfolding.URIToFunctionMatcher;
 import org.obda.query.domain.Function;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class URIToFunctionMatcherTest extends TestCase {
 
@@ -30,7 +31,7 @@ public class URIToFunctionMatcherTest extends TestCase {
 		variables.add(fac.createVariable("x"));
 		variables.add(fac.createVariable("y"));
 		
-		PredicateFactory pfac = BasicPredicateFactoryImpl.getInstance();
+		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		Predicate p = pfac.createPredicate(URI.create("http://www.obda.com/onto#individual"), 2);
 		
 		Term fterm = fac.createFunctionalTerm(p, variables);

@@ -1,5 +1,13 @@
 package org.obda.partialEvaluation.test;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.VariableImpl;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -13,22 +21,15 @@ import org.obda.owlrefplatform.core.basicoperations.Substitution;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.VariableImpl;
 
 public class ThetaApplicationTest extends TestCase {
 
 	TermFactory termFactory =  TermFactoryImpl.getInstance();
-	PredicateFactory predFactory = BasicPredicateFactoryImpl.getInstance();
+	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
 
 	/*tests the application of given thteas to a given CQIE
 	  scenario settings are as follows

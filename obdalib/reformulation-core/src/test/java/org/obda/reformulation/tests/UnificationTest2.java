@@ -1,4 +1,11 @@
 package org.obda.reformulation.tests;
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Vector;
@@ -13,13 +20,7 @@ import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class UnificationTest2 extends TestCase {
 
@@ -38,7 +39,7 @@ public class UnificationTest2 extends TestCase {
 	public void test_1() throws Exception {
 
 		TermFactoryImpl factory = TermFactoryImpl.getInstance();
-		PredicateFactory predFac = BasicPredicateFactoryImpl.getInstance();
+		OBDADataFactory predFac = OBDADataFactoryImpl.getInstance();
 
 		Term t1 = factory.createVariable("x");
 		Term t2 = factory.createVariable("y");

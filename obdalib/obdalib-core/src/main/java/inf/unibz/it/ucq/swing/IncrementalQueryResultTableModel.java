@@ -1,5 +1,7 @@
 package inf.unibz.it.ucq.swing;
 
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.ValueConstantImpl;
 import inf.unibz.it.ucq.domain.QueryResult;
 import inf.unibz.it.ucq.exception.QueryResultException;
 
@@ -12,8 +14,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import org.obda.query.domain.Constant;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.ValueConstantImpl;
 
 import com.sun.msv.datatype.xsd.StringType;
 import com.sun.msv.datatype.xsd.XSDatatype;

@@ -2,6 +2,13 @@
 
 package org.obda.query.tools.parser;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,11 +32,6 @@ import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
 import org.obda.query.domain.Variable;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 public class DatalogParser extends Parser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "PREFIX", "LESS", "GREATER", "BASE", "INV_IMPLIES", "IMPLIES", "COMMA", "CARET", "LPAREN", "RPAREN", "DOLLAR", "QUESTION", "ASTERISK", "STRING_URI", "ID_PLAIN", "STRING_PREFIX", "COLON", "STRING_LITERAL", "STRING_LITERAL2", "REFERENCE", "SEMI", "DOT", "LSQ_BRACKET", "RSQ_BRACKET", "QUOTE_DOUBLE", "QUOTE_SINGLE", "APOSTROPHE", "UNDERSCORE", "DASH", "AMPERSAND", "AT", "EXCLAMATION", "HASH", "PERCENT", "PLUS", "EQUALS", "SLASH", "DOUBLE_SLASH", "BACKSLASH", "TILDE", "ALPHA", "DIGIT", "ALPHANUM", "ID_START", "ID_CORE", "SCHEMA", "URI_PATH", "ID", "WS"
@@ -117,7 +119,7 @@ public class DatalogParser extends Parser {
     private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
 
     /** A factory to construct the predicates */
-    private BasicPredicateFactoryImpl predicateFactory = BasicPredicateFactoryImpl.getInstance();
+    private OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
     /** Select all flag */
     private boolean isSelectAll = false;

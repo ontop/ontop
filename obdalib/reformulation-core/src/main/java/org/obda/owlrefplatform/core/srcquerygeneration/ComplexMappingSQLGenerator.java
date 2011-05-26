@@ -1,17 +1,16 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
-import inf.unibz.it.obda.api.io.PrefixManager;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
+import inf.unibz.it.obda.model.impl.VariableImpl;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
-import org.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
@@ -23,9 +22,6 @@ import org.obda.query.domain.DatalogProgram;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.URIConstant;
 import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
-import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.LoggerFactory;
 
 /**

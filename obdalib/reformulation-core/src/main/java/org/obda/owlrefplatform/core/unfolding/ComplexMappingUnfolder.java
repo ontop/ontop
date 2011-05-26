@@ -1,6 +1,13 @@
 package org.obda.owlrefplatform.core.unfolding;
 
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
+import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.rdbmsgav.domain.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.utils.QueryUtils;
 
@@ -24,13 +31,6 @@ import org.obda.query.domain.Predicate;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
 import org.obda.query.domain.URIConstant;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.UndistinguishedVariable;
-import org.obda.query.domain.imp.VariableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

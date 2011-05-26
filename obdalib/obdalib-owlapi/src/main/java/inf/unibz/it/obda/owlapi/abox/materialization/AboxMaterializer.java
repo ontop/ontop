@@ -1,24 +1,21 @@
 package inf.unibz.it.obda.owlapi.abox.materialization;
 
 import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.api.datasource.JDBCConnectionManager;
 import inf.unibz.it.obda.domain.DataSource;
 import inf.unibz.it.obda.domain.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 
 import java.net.URI;
 import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.Term;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataFactory;

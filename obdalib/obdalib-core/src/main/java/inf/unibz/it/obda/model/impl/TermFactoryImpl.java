@@ -1,4 +1,11 @@
-package org.obda.query.domain.imp;
+package inf.unibz.it.obda.model.impl;
+
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+import inf.unibz.it.obda.model.impl.URIConstantImpl;
+import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
+import inf.unibz.it.obda.model.impl.ValueConstantImpl;
+import inf.unibz.it.obda.model.impl.VariableImpl;
 
 import java.net.URI;
 import java.util.List;

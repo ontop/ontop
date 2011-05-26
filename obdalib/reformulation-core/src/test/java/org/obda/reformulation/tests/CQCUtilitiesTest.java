@@ -1,5 +1,12 @@
 package org.obda.reformulation.tests;
 
+import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.AtomImpl;
+import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.TermFactoryImpl;
+
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,14 +19,8 @@ import org.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import org.obda.query.domain.Atom;
 import org.obda.query.domain.CQIE;
 import org.obda.query.domain.Predicate;
-import org.obda.query.domain.PredicateFactory;
 import org.obda.query.domain.Term;
 import org.obda.query.domain.TermFactory;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.FunctionalTermImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
 
 public class CQCUtilitiesTest extends TestCase {
 
@@ -27,7 +28,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 	PositiveInclusionApplicator	piapplicator	= new PositiveInclusionApplicator();
 
-	PredicateFactory			pfac			= BasicPredicateFactoryImpl.getInstance();
+	OBDADataFactory			pfac			= OBDADataFactoryImpl.getInstance();
 	TermFactory					tfac			= TermFactoryImpl.getInstance();
 
 	Predicate					r				= pfac.createPredicate(URI.create("R"), 2);
