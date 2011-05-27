@@ -15,17 +15,19 @@ package inf.unibz.it.obda.gui.swing.treemodel;
 
 import inf.unibz.it.obda.codec.SourceQueryToTextCodec;
 import inf.unibz.it.obda.codec.TargetQeryToTextCodec;
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.MappingControllerListener;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
+import inf.unibz.it.obda.model.SQLQuery;
 import inf.unibz.it.obda.model.SourceQuery;
 import inf.unibz.it.obda.model.TargetQuery;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.RDBMSMappingAxiomImpl;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
 
@@ -106,7 +108,8 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			controller.updateTargetQueryMapping(sourceName, (String) parentnode
 					.getUserObject(), newquery);
 		} else if (oldmappingnode instanceof MappingBodyNode) {
-			RDBMSSQLQuery query = new RDBMSSQLQuery((String) newValue);
+			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+			SQLQuery query = fac.getSQLQuery((String) newValue);
 			controller.updateSourceQueryMapping(sourceName, (String) parentnode
 					.getUserObject(), query);
 		}
@@ -149,7 +152,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 //  			return;
 //  		}
 //  		URI src_uri = dsc.getCurrentDataSource().getSourceID();
-  		RDBMSOBDAMappingAxiom mapping = (RDBMSOBDAMappingAxiom) controller.getMapping(srcuri, mapping_id);
+  		RDBMSMappingAxiomImpl mapping = (RDBMSMappingAxiomImpl) controller.getMapping(srcuri, mapping_id);
   		MappingNode mappingNode = getMappingNodeFromMapping(mapping);
 
 			insertNodeInto(mappingNode, root, root
@@ -215,7 +218,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	      if (newmappings != null) {
 	        for (OBDAMappingAxiom dataSourceMapping : newmappings) {
-	          RDBMSOBDAMappingAxiom mappingTest = (RDBMSOBDAMappingAxiom) dataSourceMapping;
+	          RDBMSMappingAxiomImpl mappingTest = (RDBMSMappingAxiomImpl) dataSourceMapping;
 	          if (testFilters(mappingTest))
 	            newnodes
 	                .add(getMappingNodeFromMapping(mappingTest));
@@ -411,7 +414,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * @return allFiltersTrue
 	 *
 	 */
-	private boolean testFilters(RDBMSOBDAMappingAxiom mapping) {
+	private boolean testFilters(RDBMSMappingAxiomImpl mapping) {
 		boolean allFiltersTrue = true;
 		for (int i = 0; i < ListFilters.size(); i++) {
 			allFiltersTrue = allFiltersTrue

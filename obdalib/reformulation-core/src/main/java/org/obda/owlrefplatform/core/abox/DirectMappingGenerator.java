@@ -10,8 +10,8 @@ import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSMappingAxiomImpl;
+import inf.unibz.it.obda.model.impl.SQLQueryImpl;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -69,20 +69,18 @@ public class DirectMappingGenerator {
 						URI name = clazz.getURI();
 						URIIdentyfier id = new URIIdentyfier(name, URIType.CONCEPT);
 						String tablename = tableMap.get(id);
-						Term qt = termFactory.createVariable("x");
+						Term qt = termFactory.getVariable("x");
 						List<Term> terms = new Vector<Term>();
 						terms.add(qt);
-						Predicate predicate = predicateFactory.createPredicate(name, terms.size());
+						Predicate predicate = predicateFactory.getPredicate(name, terms.size());
 						Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
 //						List<Atom> body = new Vector<Atom>();
 //						body.add(bodyAtom); // the body
-						predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+						predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
 						Atom head = predicateFactory.getAtom(predicate, terms); // the head
 						Query cq = predicateFactory.getCQIE(head, bodyAtom);
 						String sql = "SELECT term0 as x FROM " + tablename;
-						OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mappingcounter++);
-						ax.setTargetQuery(cq);
-						ax.setSourceQuery(new RDBMSSQLQuery(sql));
+						OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,cq,predicateFactory.getSQLQuery(sql));
 						mappings.add(ax);
 
 						log.debug("Mapping created: {}", ax.toString());
@@ -91,22 +89,20 @@ public class DirectMappingGenerator {
 					OWLObjectProperty objprop = (OWLObjectProperty) entity;
 					URIIdentyfier id = new URIIdentyfier(objprop.getURI(), URIType.OBJECTPROPERTY);
 					String tablename = tableMap.get(id);
-					Term qt1 = termFactory.createVariable("x");
-					Term qt2 = termFactory.createVariable("y");
+					Term qt1 = termFactory.getVariable("x");
+					Term qt2 = termFactory.getVariable("y");
 					List<Term> terms = new Vector<Term>();
 					terms.add(qt1);
 					terms.add(qt2);
-					Predicate predicate = predicateFactory.createPredicate(objprop.getURI(), terms.size());
+					Predicate predicate = predicateFactory.getPredicate(objprop.getURI(), terms.size());
 					Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
 //					List<Atom> body = new Vector<Atom>();
 //					body.add(bodyAtom); // the body
-					predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+					predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
 					Atom head = predicateFactory.getAtom(predicate, terms); // the head
 					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-					OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mappingcounter++);
-					ax.setTargetQuery(cq);
-					ax.setSourceQuery(new RDBMSSQLQuery(sql));
+					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,cq,predicateFactory.getSQLQuery(sql));
 					log.debug("Mapping created: {}", ax.toString());
 					mappings.add(ax);
 
@@ -114,23 +110,21 @@ public class DirectMappingGenerator {
 
 					OWLDataProperty dataProp = (OWLDataProperty) entity;
 					URIIdentyfier id = new URIIdentyfier(dataProp.getURI(), URIType.DATAPROPERTY);
-					Term qt1 = termFactory.createVariable("x");
+					Term qt1 = termFactory.getVariable("x");
 					String tablename = tableMap.get(id);
-					Term qt2 = termFactory.createVariable("y");
+					Term qt2 = termFactory.getVariable("y");
 					List<Term> terms = new Vector<Term>();
 					terms.add(qt1);
 					terms.add(qt2);
-					Predicate predicate = predicateFactory.createPredicate(dataProp.getURI(), terms.size());
+					Predicate predicate = predicateFactory.getPredicate(dataProp.getURI(), terms.size());
 					Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
 //					List<Atom> body = new Vector<Atom>();
 //					body.add(bodyAtom); // the body
-					predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
+					predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
 					Atom head = predicateFactory.getAtom(predicate, terms); // the head
 					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-					OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mappingcounter++);
-					ax.setTargetQuery(cq);
-					ax.setSourceQuery(new RDBMSSQLQuery(sql));
+					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,cq,predicateFactory.getSQLQuery(sql));
 					mappings.add(ax);
 				}
 			}

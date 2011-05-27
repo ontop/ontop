@@ -5,11 +5,11 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.SQLQuery;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 
 import java.net.URI;
@@ -78,7 +78,7 @@ public class MappingViewManager implements ViewManager {
 		HashSet<String> usedSQL = new HashSet<String>();
 		while (it.hasNext()) {
 			OBDAMappingAxiom ax = it.next();
-			RDBMSSQLQuery sourceQuery = (RDBMSSQLQuery) ax.getSourceQuery();
+			SQLQuery sourceQuery = (SQLQuery) ax.getSourceQuery();
 			String sql = sourceQuery.toString();
 			Vector<OBDAMappingAxiom> sameSQL = mappingswithsambodyIndex.get(sql);
 			if (sameSQL == null) {
@@ -132,7 +132,7 @@ public class MappingViewManager implements ViewManager {
 				vars = sqlVars.toArray(vars);
 				AuxSQLMapping auxmap = new AuxSQLMapping(vars);
 				URI preduri = URI.create(name);
-				Predicate p = predFactory.createPredicate(preduri, vars.length);
+				Predicate p = predFactory.getPredicate(preduri, vars.length);
 				mappingToNarysetMap.put(sql, p);
 				predicateAuxMappingMap.put(preduri, auxmap);
 				predicateToSQLMap.put(preduri, sql);

@@ -77,7 +77,7 @@ public class SemanticReduction {
                         inverted = false;
                     }
                     URI node_uri = URI.create(uri);
-                    Predicate node_p = predicateFactory.createPredicate(node_uri, arity);
+                    Predicate node_p = predicateFactory.getPredicate(node_uri, arity);
                     ConceptDescription node_cd = descFactory.getConceptDescription(node_p, false, inverted);
 
                     // Do same dispatch in child
@@ -103,7 +103,7 @@ public class SemanticReduction {
                         inverted = false;
                     }
                     URI child_uri = URI.create(uri);
-                    Predicate child_p = predicateFactory.createPredicate(child_uri, arity);
+                    Predicate child_p = predicateFactory.getPredicate(child_uri, arity);
                     ConceptDescription child_cd = descFactory.getConceptDescription(child_p, false, inverted);
 
                     rv.add(new DLLiterConceptInclusionImpl(child_cd, node_cd));
@@ -122,7 +122,7 @@ public class SemanticReduction {
                     }
 
                     URI node_uri = URI.create(uri);
-                    Predicate node_p = predicateFactory.createPredicate(node_uri, 2);
+                    Predicate node_p = predicateFactory.getPredicate(node_uri, 2);
                     RoleDescription node_rd = descFactory.getRoleDescription(node_p, inverted);
 
                     uri = child.getUri();
@@ -132,7 +132,7 @@ public class SemanticReduction {
                         inverted = true;
                     }
                     URI child_uri = URI.create(uri);
-                    Predicate child_p = predicateFactory.createPredicate(child_uri, 2);
+                    Predicate child_p = predicateFactory.getPredicate(child_uri, 2);
                     RoleDescription child_rd = descFactory.getRoleDescription(child_p, inverted);
 
                     rv.add(new DLLiterRoleInclusionImpl(child_rd, node_rd));
@@ -151,7 +151,7 @@ public class SemanticReduction {
                     }
 
                     URI node_uri = URI.create(uri);
-                    Predicate node_p = predicateFactory.createPredicate(node_uri, 2);
+                    Predicate node_p = predicateFactory.getPredicate(node_uri, 2);
                     RoleDescription node_rd = descFactory.getRoleDescription(node_p, inverted);
 
                     uri = child.getUri();
@@ -161,7 +161,7 @@ public class SemanticReduction {
                         inverted = true;
                     }
                     URI child_uri = URI.create(uri);
-                    Predicate child_p = predicateFactory.createPredicate(child_uri, 2);
+                    Predicate child_p = predicateFactory.getPredicate(child_uri, 2);
                     RoleDescription child_rd = descFactory.getRoleDescription(child_p, inverted);
 
                     rv.add(new DLLiterRoleInclusionImpl(child_rd, node_rd));

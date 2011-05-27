@@ -14,16 +14,14 @@ package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.QueryModifiers;
+import inf.unibz.it.obda.model.SQLQuery;
 
-public class RDBMSSQLQuery implements Query {
+public class SQLQueryImpl implements Query, SQLQuery {
 
 	private final String	sqlQuery;
 
-	public RDBMSSQLQuery() {
-		this.sqlQuery = null;
-	}
 
-	public RDBMSSQLQuery(String sqlQuery) {
+	protected SQLQueryImpl(String sqlQuery) {
 		this.sqlQuery = sqlQuery;
 	}
 
@@ -35,9 +33,12 @@ public class RDBMSSQLQuery implements Query {
 		return sqlQuery;
 	}
 
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.SQLQuery#clone()
+	 */
 	@Override
-	public RDBMSSQLQuery clone() {
-		RDBMSSQLQuery clone = new RDBMSSQLQuery(new String(sqlQuery));
+	public SQLQueryImpl clone() {
+		SQLQueryImpl clone = new SQLQueryImpl(new String(sqlQuery));
 		return clone;
 	}
 
@@ -46,6 +47,9 @@ public class RDBMSSQLQuery implements Query {
 		return this.toString().hashCode();
 	}
 
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.SQLQuery#getQueryModifiers()
+	 */
 	@Override
 	public QueryModifiers getQueryModifiers() {
 		return new QueryModifiers();

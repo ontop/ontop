@@ -4,8 +4,8 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.SQLQuery;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 import inf.unibz.it.sql.JDBCConnectionManager;
 
@@ -70,7 +70,7 @@ private String file = "src/test/resources/test/ontologies/aboxgeneration/ABoxDum
 		     Iterator<OBDAMappingAxiom> map_it = mappings.iterator();
 		     while(map_it.hasNext()){
 		    	 OBDAMappingAxiom ax = map_it.next();
-		    	 RDBMSSQLQuery body = (RDBMSSQLQuery) ax.getSourceQuery();
+		    	 SQLQuery body = (SQLQuery) ax.getSourceQuery();
 		    	 CQIE head = (CQIE) ax.getTargetQuery();
 		    	 Atom a = head.getBody().get(0);
 		    	 if(a.getArity() == 1){

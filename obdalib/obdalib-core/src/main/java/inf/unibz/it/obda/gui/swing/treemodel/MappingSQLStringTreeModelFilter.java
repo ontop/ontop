@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.gui.swing.treemodel;
 
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.SQLQuery;
 
 /*
  * @author
@@ -30,7 +30,7 @@ public class MappingSQLStringTreeModelFilter implements
 		// TODO Auto-generated method stub
 		boolean filterValue = false;
 		OBDAMappingAxiom mapping = object;
-		RDBMSSQLQuery bodyquery = (RDBMSSQLQuery) mapping.getSourceQuery();
+		SQLQuery bodyquery = (SQLQuery) mapping.getSourceQuery();
 		if (bodyquery.toString().indexOf(srtSQLStringTreeModelFilter) != -1)
 			filterValue = true;
 		return filterValue;

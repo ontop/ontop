@@ -1,8 +1,10 @@
 package inf.unibz.it.obda.codec;
 
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.SQLQuery;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 /*
  * This class should be used to create a target query from a String respectively
@@ -13,6 +15,7 @@ import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
  */
 public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 
+	OBDADataFactory fac= OBDADataFactoryImpl.getInstance();
 	/**
 	 * The constructor. Create a new instance of the SourceQueryToTextCodec
 	 * @param apic the current api controller
@@ -28,8 +31,7 @@ public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 	 */
 	@Override
 	public Query decode(String input) {
-		RDBMSSQLQuery query;
-		query = new RDBMSSQLQuery(input);
+		SQLQuery query = fac.getSQLQuery(input);
 		return query;
 	}
 

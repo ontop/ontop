@@ -3,9 +3,9 @@ package inf.unibz.it.obda.gui.swing.treemodel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.SQLQuery;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class MappingStringTreeModelFilter implements
 		if (mapping.getId().indexOf(srtModelFilter) != -1)
 			filterValue = true;
 		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
-		RDBMSSQLQuery bodyquery = (RDBMSSQLQuery) mapping.getSourceQuery();
+		SQLQuery bodyquery = (SQLQuery) mapping.getSourceQuery();
 
 		List<Atom> atoms = headquery.getBody();
 

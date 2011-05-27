@@ -8,6 +8,8 @@ import inf.unibz.it.obda.model.Function;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.Query;
+import inf.unibz.it.obda.model.RDBMSMappingAxiom;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.URIConstant;
 import inf.unibz.it.obda.model.ValueConstant;
@@ -36,56 +38,58 @@ public class OBDADataFactoryImpl  implements OBDADataFactory {
 		return instance;
 	}
 	
+
+	
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
 
-	public PredicateImpl createPredicate(URI name, int arity) {
+	public PredicateImpl getPredicate(URI name, int arity) {
 		return new PredicateImpl(name, arity);
 	}
 	
 	@Override
-	public URIConstant createURIConstant(URI uri) {
+	public URIConstant getURIConstant(URI uri) {
 		return new URIConstantImpl(uri);
 	}
 
 	@Override
-	public ValueConstant createValueConstant(String value) {
+	public ValueConstant getValueConstant(String value) {
 		return new ValueConstantImpl(value, null);
 	}
 
 	@Override
-	public ValueConstant createValueConstant(String value, XSDatatype type) {
+	public ValueConstant getValueConstant(String value, XSDatatype type) {
 		return new ValueConstantImpl(value, type);
 	}
 
 	@Override
-	public Variable createVariable(String name) {
+	public Variable getVariable(String name) {
 		return new VariableImpl(name, null);
 	}
 
 	@Override
-	public Variable createVariable(String name, XSDatatype type) {
+	public Variable getVariable(String name, XSDatatype type) {
 		return new VariableImpl(name, type);
 	}
 
 	@Override
-	public Variable createUndistinguishedVariable() {
+	public Variable getNondistinguishedVariable() {
 		return new UndistinguishedVariable();
 	}
 
 	@Override
-	public Function createFunctionalTerm(Predicate functor, List<Term> arguments){
+	public Function getFunctionalTerm(Predicate functor, List<Term> arguments){
 		return new FunctionalTermImpl(functor, arguments);
 	}
 	
 	@Override
-	public Function createFunctionalTerm(Predicate functor, Term term1){
+	public Function getFunctionalTerm(Predicate functor, Term term1){
 		return new FunctionalTermImpl(functor, Collections.singletonList(term1));
 	}
 	
 	@Override
-	public Function createFunctionalTerm(Predicate functor, Term term1, Term term2){
+	public Function getFunctionalTerm(Predicate functor, Term term1, Term term2){
 		LinkedList<Term> terms = new LinkedList<Term>();
 		terms.add(term1);
 		terms.add(term2);
@@ -142,6 +146,27 @@ public class OBDADataFactoryImpl  implements OBDADataFactory {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		return p;
+	}
+
+	@Override
+	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, Query sourceQuery, Query targetQuery) {
+		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
+	}
+
+	@Override
+	public SQLQueryImpl getSQLQuery(String query) {
+		return new SQLQueryImpl(query);
+	}
+
+	@Override
+	public RDBMSMappingAxiom getRDBMSMappingAxiom(String id, String sql, Query targetQuery) {
+		return new RDBMSMappingAxiomImpl(id, new SQLQueryImpl(sql), targetQuery);
+	}
+
+	@Override
+	public RDBMSMappingAxiom getRDBMSMappingAxiom(String sql, Query targetQuery) {
+		String id = new String("MAP" + System.currentTimeMillis());
+		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
 
 }

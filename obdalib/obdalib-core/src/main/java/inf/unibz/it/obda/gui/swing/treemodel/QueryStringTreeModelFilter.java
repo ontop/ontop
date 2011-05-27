@@ -1,12 +1,13 @@
 package inf.unibz.it.obda.gui.swing.treemodel;
 
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 
 /*
  * @author This filter receives a string in the constructor and returns true if accepts any query that contains the given text and
  *         implements the interface TreeModelFilter
  */
+
+//TODO This filter is probably wrong, fix. Josef
 
 public class QueryStringTreeModelFilter implements
 		TreeModelFilter<OBDAMappingAxiom> {
@@ -34,7 +35,7 @@ public class QueryStringTreeModelFilter implements
 		boolean filterValue = false;
 		try {
 			OBDAMappingAxiom mapping = object;
-			RDBMSSQLQuery q = new RDBMSSQLQuery();
+			
 			return false;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

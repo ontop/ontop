@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.gui.swing.treemodel;
 
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
+import inf.unibz.it.obda.model.impl.RDBMSMappingAxiomImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -27,7 +27,7 @@ public class MappingNode extends DefaultMutableTreeNode {
 		super(name);
 	}
 
-	public static MappingNode getMappingNodeFromMapping(RDBMSOBDAMappingAxiom mapping) {
+	public static MappingNode getMappingNodeFromMapping(RDBMSMappingAxiomImpl mapping) {
 		MappingNode node = new MappingNode(mapping.getId());
 		MappingBodyNode body = null;
 		MappingHeadNode head = null;

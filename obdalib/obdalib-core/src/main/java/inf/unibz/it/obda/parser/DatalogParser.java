@@ -1126,7 +1126,7 @@ public class DatalogParser extends Parser {
                     Vector<Term> elements = terms20;
                     if (elements == null)
                       elements = new Vector<Term>();
-                    Predicate predicate = predicateFactory.createPredicate(uri, elements.size());
+                    Predicate predicate = predicateFactory.getPredicate(uri, elements.size());
                     
                     Vector<Term> terms = terms20;
                     if (terms == null)
@@ -1503,7 +1503,7 @@ public class DatalogParser extends Parser {
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
                        
-                            value = termFactory.createVariable((id28!=null?input.toString(id28.start,id28.stop):null));
+                            value = termFactory.getVariable((id28!=null?input.toString(id28.start,id28.stop):null));
                             variables.add(value); // collect the variable terms.
                           
                     }
@@ -1516,7 +1516,7 @@ public class DatalogParser extends Parser {
                     match(input,ASTERISK,FOLLOW_ASTERISK_in_variable_term607); if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
-                            value = termFactory.createVariable(OBDA_SELECT_ALL);
+                            value = termFactory.getVariable(OBDA_SELECT_ALL);
                             isSelectAll = true;
                           
                     }
@@ -1561,7 +1561,7 @@ public class DatalogParser extends Parser {
 
                     literal = (string29!=null?input.toString(string29.start,string29.stop):null);
                     literal = literal.substring(1, literal.length()-1); // removes the quote signs.
-                    value = termFactory.createValueConstant(literal);
+                    value = termFactory.getValueConstant(literal);
                   
             }
 
@@ -1608,8 +1608,8 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
 
                     URI uri = URI.create(function30);
-                    Predicate fs = predicateFactory.createPredicate(uri, terms31.size());
-                    value = termFactory.createFunctionalTerm(fs, terms31);
+                    Predicate fs = predicateFactory.getPredicate(uri, terms31.size());
+                    value = termFactory.getFunctionalTerm(fs, terms31);
                   
             }
 
@@ -1651,7 +1651,7 @@ public class DatalogParser extends Parser {
                
                     uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);      
                     URI uri = URI.create(uriText);
-                    value = termFactory.createURIConstant(uri);
+                    value = termFactory.getURIConstant(uri);
                   
             }
 

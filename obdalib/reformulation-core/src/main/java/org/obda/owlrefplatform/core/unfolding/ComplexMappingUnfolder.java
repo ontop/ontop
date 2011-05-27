@@ -7,14 +7,12 @@ import inf.unibz.it.obda.model.Function;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Predicate;
+import inf.unibz.it.obda.model.RDBMSMappingAxiom;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.URIConstant;
-import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
 import inf.unibz.it.obda.utils.QueryUtils;
@@ -103,9 +101,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				List<Atom> newBody = new LinkedList<Atom>();
 				newBody.add(atom);
 				CQIE newCQ = termFactory.getCQIE(head, newBody);
-				RDBMSOBDAMappingAxiom newMap = new RDBMSOBDAMappingAxiom(map.getId() + "_" + counter);
-				newMap.setSourceQuery(map.getSourceQuery());
-				newMap.setTargetQuery(newCQ);
+				RDBMSMappingAxiom newMap = termFactory.getRDBMSMappingAxiom(map.getId() + "_" + counter,map.getSourceQuery(),newCQ);
 				splitMappings.add(newMap);
 			}
 		}
@@ -174,7 +170,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		LinkedList<Term> bodyTerms = new LinkedList<Term>();
 		String name = viewPredicate.getName().getFragment().toLowerCase() + "_";
 		for (int i = 0; i < auxmap.getNrOfVariables(); i++) {
-			bodyTerms.add(termFactory.createVariable(name + i));
+			bodyTerms.add(termFactory.getVariable(name + i));
 		}
 
 		Atom ruleBodyAtom = termFactory.getAtom(viewPredicate, bodyTerms);
@@ -200,15 +196,15 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				while (innerTermsIterator.hasNext()) {
 					Term v = innerTermsIterator.next();
 					int pos = auxmap.getPosOf(v.getName());
-					Term t = termFactory.createVariable(ruleBodyAtom.getTerms().get(pos).getName());
+					Term t = termFactory.getVariable(ruleBodyAtom.getTerms().get(pos).getName());
 					funvec.add(t);
 				}
-				Term t = termFactory.createFunctionalTerm(ft.getFunctionSymbol(), funvec);
+				Term t = termFactory.getFunctionalTerm(ft.getFunctionSymbol(), funvec);
 				headTerms.add(t);
 			} else {
 				String n = currentTerm.getName();
 				int pos = auxmap.getPosOf(n);
-				Term t = termFactory.createVariable(ruleBodyAtom.getTerms().get(pos).getName());
+				Term t = termFactory.getVariable(ruleBodyAtom.getTerms().get(pos).getName());
 				headTerms.add(t);
 			}
 		}
@@ -343,7 +339,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			Term newTerm = null;
 			if (term instanceof VariableImpl) {
 				VariableImpl variable = (VariableImpl) term;
-				newTerm = termFactory.createVariable(variable.getName() + "_" + count);
+				newTerm = termFactory.getVariable(variable.getName() + "_" + count);
 			} else if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
 				List<Term> innerTerms = functionalTerm.getTerms();
@@ -351,13 +347,13 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				for (int j = 0; j < innerTerms.size(); j++) {
 					Term innerTerm = innerTerms.get(j);
 					if (innerTerm instanceof VariableImpl) {
-						newInnerTerms.add(termFactory.createVariable(innerTerm.getName() + "_" + count));
+						newInnerTerms.add(termFactory.getVariable(innerTerm.getName() + "_" + count));
 					} else {
 						newInnerTerms.add(innerTerm.copy());
 					}
 				}
 				Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createFunctionalTerm(newFunctionSymbol,
+				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.getFunctionalTerm(newFunctionSymbol,
 						newInnerTerms);
 				newTerm = newFunctionalTerm;
 			}
@@ -374,7 +370,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				Term newTerm = null;
 				if (term instanceof VariableImpl) {
 					VariableImpl variable = (VariableImpl) term;
-					newTerm = termFactory.createVariable(variable.getName() + "_" + count);
+					newTerm = termFactory.getVariable(variable.getName() + "_" + count);
 				} else if (term instanceof FunctionalTermImpl) {
 					FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
 					List<Term> innerTerms = functionalTerm.getTerms();
@@ -382,13 +378,13 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 					for (int j = 0; j < innerTerms.size(); j++) {
 						Term innerTerm = innerTerms.get(j);
 						if (innerTerm instanceof VariableImpl) {
-							newInnerTerms.add(termFactory.createVariable(innerTerm.getName() + "_" + count));
+							newInnerTerms.add(termFactory.getVariable(innerTerm.getName() + "_" + count));
 						} else {
 							newInnerTerms.add(innerTerm.copy());
 						}
 					}
 					Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-					FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.createFunctionalTerm(newFunctionSymbol,
+					FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.getFunctionalTerm(newFunctionSymbol,
 							newInnerTerms);
 					newTerm = newFunctionalTerm;
 				}
@@ -467,7 +463,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				if (t instanceof UndistinguishedVariable) {
 					String newName = "_uv-" + coutner;
 					coutner++;
-					Term newT = factory.createVariable(newName);
+					Term newT = factory.getVariable(newName);
 					newTerms.add(newT);
 				} else {
 					newTerms.add(t.copy());
@@ -487,7 +483,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 					if (t instanceof UndistinguishedVariable) {
 						String newName = "_uv-" + coutner;
 						coutner++;
-						Term newT = factory.createVariable(newName);
+						Term newT = factory.getVariable(newName);
 						vec.add(newT);
 					} else {
 						vec.add(t.copy());

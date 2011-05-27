@@ -105,13 +105,13 @@ public class CQCUtilities {
 				if (term instanceof VariableImpl) {
 					substitution = currentMap.get(term);
 					if (substitution == null) {
-						ValueConstant newconstant = termFactory.createValueConstant("CAN" + term.getName() + constantcounter);
+						ValueConstant newconstant = termFactory.getValueConstant("CAN" + term.getName() + constantcounter);
 						constantcounter += 1;
 						currentMap.put((Variable) term, newconstant);
 						substitution = newconstant;
 					}
 				} else {
-					ValueConstant newconstant = termFactory.createValueConstant("CAN" + term.getName() + constantcounter);
+					ValueConstant newconstant = termFactory.getValueConstant("CAN" + term.getName() + constantcounter);
 					constantcounter += 1;
 					substitution = newconstant;
 				}
@@ -126,14 +126,14 @@ public class CQCUtilities {
 						if (fterm instanceof VariableImpl) {
 							substitution = currentMap.get(fterm);
 							if (substitution == null) {
-								ValueConstant newconstant = termFactory.createValueConstant("CAN" + fterm.getName() + constantcounter);
+								ValueConstant newconstant = termFactory.getValueConstant("CAN" + fterm.getName() + constantcounter);
 								constantcounter += 1;
 								currentMap.put((Variable) fterm, newconstant);
 								substitution = newconstant;
 
 							}
 						} else {
-							ValueConstant newconstant = termFactory.createValueConstant("CAN" + fterm.getName() + constantcounter);
+							ValueConstant newconstant = termFactory.getValueConstant("CAN" + fterm.getName() + constantcounter);
 							constantcounter += 1;
 							substitution = newconstant;
 						}

@@ -58,9 +58,9 @@ public class URIToFunctionMatcher {
 
 		List<Term> constantTerms = new LinkedList<Term>();
 		for (String constantstr: constanturis) {
-			constantTerms.add(tFact.createValueConstant(constantstr));
+			constantTerms.add(tFact.getValueConstant(constantstr));
 		}
-		return tFact.createFunctionalTerm(existing.getFunctionSymbol(), constantTerms);
+		return tFact.getFunctionalTerm(existing.getFunctionSymbol(), constantTerms);
 		
 	}
 }

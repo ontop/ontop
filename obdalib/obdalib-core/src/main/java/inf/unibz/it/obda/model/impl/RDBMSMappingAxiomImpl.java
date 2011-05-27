@@ -14,38 +14,42 @@
 package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.model.Query;
+import inf.unibz.it.obda.model.RDBMSMappingAxiom;
+import inf.unibz.it.obda.model.SQLQuery;
 
 import java.security.InvalidParameterException;
 
 
-public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
+public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements RDBMSMappingAxiom {
 
-	private RDBMSSQLQuery sourceQuery = null;
+	private SQLQuery sourceQuery = null;
 	private CQIEImpl targetQuery = null;
 
-	public RDBMSOBDAMappingAxiom(String id) {
-		super(id);
-	}
+//	public RDBMSMappingAxiom(String id) {
+//		super(id);
+//	}
 
-	public RDBMSOBDAMappingAxiom(String id, Query sourceQuery, Query targetQuery) {
-		super(id);
+	protected RDBMSMappingAxiomImpl(String id, Query sourceQuery, Query targetQuery) {
+//		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
 	}
 
-	/***
-	 * @param query An RDBMSSQLQuery object.
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#setSourceQuery(inf.unibz.it.obda.model.Query)
 	 */
+	@Override
 	public void setSourceQuery(Query query) {
-		if (!(query instanceof RDBMSSQLQuery)) {
+		if (!(query instanceof SQLQuery)) {
 			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a RDBMSSQLQuery as source query");
 		}
-		this.sourceQuery = (RDBMSSQLQuery) query;
+		this.sourceQuery = (SQLQuery) query;
 	}
 
-	/***
-	 * @param query An OntologyQuery object;
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#setTargetQuery(inf.unibz.it.obda.model.Query)
 	 */
+	@Override
 	public void setTargetQuery(Query query) {
 		if (!(query instanceof CQIEImpl)) {
 			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a OntologyQuery as target query");
@@ -54,21 +58,30 @@ public class RDBMSOBDAMappingAxiom extends AbstractOBDAMappingAxiom {
 	}
 
 
-	public RDBMSSQLQuery getSourceQuery() {
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#getSourceQuery()
+	 */
+	@Override
+	public SQLQuery getSourceQuery() {
 		return sourceQuery;
 	}
 
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#getTargetQuery()
+	 */
+	@Override
 	public CQIEImpl getTargetQuery() {
 		return targetQuery;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#clone()
+	 */
 	@Override
-	public RDBMSOBDAMappingAxiom clone() {
-		RDBMSOBDAMappingAxiom clone = new RDBMSOBDAMappingAxiom(new String(this.getId()));
-		clone.setSourceQuery(sourceQuery.clone());
-		clone.setTargetQuery(targetQuery.clone());
-
+	public RDBMSMappingAxiom clone() {
+		RDBMSMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(),targetQuery.clone());
+		
 		return clone;
 	}
 	

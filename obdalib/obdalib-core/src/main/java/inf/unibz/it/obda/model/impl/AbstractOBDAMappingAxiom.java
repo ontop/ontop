@@ -21,9 +21,9 @@ public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 
 	private String id = "";
 	
-	public AbstractOBDAMappingAxiom(String id) {
-		this.id = id;
-	}
+//	public AbstractOBDAMappingAxiom(String id) {
+//		this.id = id;
+//	}
 	
 	
 	public void setId(String id) {

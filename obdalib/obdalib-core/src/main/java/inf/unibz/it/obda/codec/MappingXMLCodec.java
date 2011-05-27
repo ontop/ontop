@@ -1,11 +1,13 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.RDBMSMappingAxiom;
+import inf.unibz.it.obda.model.SQLQuery;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,34 +17,37 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * The mapping xml codec can be use to encode OBDA mapping axioms
- * into XML respectively decode them from XML
- *
+ * The mapping xml codec can be use to encode OBDA mapping axioms into XML
+ * respectively decode them from XML
+ * 
  * @author Manfred Gerstgrasser
- *
+ * 
  */
 
-public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
+public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 
 	/**
 	 * The xml tag used for representing obda mapping axioms
 	 */
-	private static final String	TAG	= "mapping";
+	private static final String		TAG		= "mapping";
 	/**
 	 * the current api controller
 	 */
-	OBDAModel apic = null;
+	OBDAModel						apic	= null;
 	/**
 	 * the datalog conjunctive quey codec used to encode respectively decode the
 	 * head of the mappings.
 	 */
-	DatalogConjunctiveQueryXMLCodec cqcodec = null;
+	DatalogConjunctiveQueryXMLCodec	cqcodec	= null;
+
+	OBDADataFactory					fac		= OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * The contructor. Creates a new instance of the Codec
+	 * 
 	 * @param apic
 	 */
-	public MappingXMLCodec(OBDAModel apic){
+	public MappingXMLCodec(OBDAModel apic) {
 		this.apic = apic;
 		cqcodec = new DatalogConjunctiveQueryXMLCodec(apic);
 	}
@@ -76,15 +81,11 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
 		String SQLstring = body.getAttribute("string");
 
 		CQIE headquery = cqcodec.decode(head);
-		if(headquery == null){
+		if (headquery == null) {
 			return null;
 		}
-		RDBMSSQLQuery bodyquery=null;
-		RDBMSOBDAMappingAxiom newmapping=null;
-		bodyquery = new RDBMSSQLQuery(SQLstring);
-		newmapping = new RDBMSOBDAMappingAxiom(id);
-		newmapping.setSourceQuery(bodyquery);
-		newmapping.setTargetQuery(headquery);
+		SQLQuery bodyquery = fac.getSQLQuery(SQLstring);
+		RDBMSMappingAxiom newmapping = fac.getRDBMSMappingAxiom(id, bodyquery, headquery);
 		return newmapping;
 	}
 
@@ -102,10 +103,10 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
 		Element mappingheadelement = cqcodec.encode(hq);
 		// the body XML child
 		Element mappingbodyelement = createElement("SQLQuery");
-		RDBMSSQLQuery bq = (RDBMSSQLQuery) input.getSourceQuery();
-		if(bq != null){
+		SQLQuery bq = (SQLQuery) input.getSourceQuery();
+		if (bq != null) {
 			mappingbodyelement.setAttribute("string", bq.toString());
-		}else{
+		} else {
 			mappingbodyelement.setAttribute("string", "");
 		}
 		mappingelement.getOwnerDocument().adoptNode(mappingheadelement);

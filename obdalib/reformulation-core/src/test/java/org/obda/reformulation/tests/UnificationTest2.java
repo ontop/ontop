@@ -41,24 +41,24 @@ public class UnificationTest2 extends TestCase {
 		OBDADataFactory predFac = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 
-		Term t1 = factory.createVariable("x");
-		Term t2 = factory.createVariable("y");
-		Term t3 = factory.createVariable("x");
+		Term t1 = factory.getVariable("x");
+		Term t2 = factory.getVariable("y");
+		Term t3 = factory.getVariable("x");
 
-		Predicate r1 = predFac.createPredicate(URI.create("R"), 2);
-		Predicate r2 = predFac.createPredicate(URI.create("R"), 2);
-		Predicate s = predFac.createPredicate(URI.create("S"), 2);
-		Predicate p = predFac.createPredicate(URI.create("p"), 2);
+		Predicate r1 = predFac.getPredicate(URI.create("R"), 2);
+		Predicate r2 = predFac.getPredicate(URI.create("R"), 2);
+		Predicate s = predFac.getPredicate(URI.create("S"), 2);
+		Predicate p = predFac.getPredicate(URI.create("p"), 2);
 
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
-		terms1.add(factory.createUndistinguishedVariable());
+		terms1.add(factory.getNondistinguishedVariable());
 		List<Term> terms2 = new Vector<Term>();
-		terms2.add(factory.createUndistinguishedVariable());
+		terms2.add(factory.getNondistinguishedVariable());
 		terms2.add(t2);
 		List<Term> terms3 = new Vector<Term>();
 		terms3.add(t3);
-		terms3.add(factory.createUndistinguishedVariable());
+		terms3.add(factory.getNondistinguishedVariable());
 		List<Term> terms4 = new Vector<Term>();
 		terms4.add(t3.copy());
 		terms4.add(t2.copy());

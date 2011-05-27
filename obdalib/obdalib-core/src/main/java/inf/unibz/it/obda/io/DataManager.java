@@ -22,8 +22,8 @@ import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DataSourceImpl;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSMappingAxiomImpl;
+import inf.unibz.it.obda.model.impl.SQLQueryImpl;
 import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
@@ -356,7 +356,7 @@ public class DataManager {
 			Element mappingGroup = doc.createElement("mappings");
 			mappingGroup.setAttribute("sourceuri", datasourceUri.toString());
 			mappingGroup.setAttribute("headclass", CQIEImpl.class.toString());
-			mappingGroup.setAttribute("body", RDBMSSQLQuery.class.toString());
+			mappingGroup.setAttribute("body", SQLQueryImpl.class.toString());
 			root.appendChild(mappingGroup);
 
 			ArrayList<OBDAMappingAxiom> axioms = mappings.get(datasourceUri);
@@ -444,8 +444,8 @@ public class DataManager {
 	 *            the mapping root in the XML file.
 	 * @throws QueryParseException
 	 * @see ConjunctuveQuery
-	 * @see RDBMSSQLQuery
-	 * @see RDBMSOBDAMappingAxiom
+	 * @see SQLQueryImpl
+	 * @see RDBMSMappingAxiomImpl
 	 */
 	protected void importMappingsFromXML(URI datasource, Element mappingRoot) {
 		NodeList childs = mappingRoot.getChildNodes();
@@ -456,7 +456,7 @@ public class DataManager {
 					continue;
 				}
 				Element mapping = (Element) child;
-				RDBMSOBDAMappingAxiom mappingAxiom = (RDBMSOBDAMappingAxiom) mapCodec.decode(mapping);
+				RDBMSMappingAxiomImpl mappingAxiom = (RDBMSMappingAxiomImpl) mapCodec.decode(mapping);
 				if (mappingAxiom == null) {
 					throw new Exception("Error while parsing the conjunctive query of " + "the mapping " + mapping.getAttribute("id"));
 				}

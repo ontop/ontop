@@ -37,25 +37,25 @@ public class ThetaApplicationTest extends TestCase {
 	 */
 	public void test_1() {
 
-		Term t1 = termFactory.createVariable("x");
-		Term t2 = termFactory.createVariable("y");
-		Term t3 = termFactory.createVariable("z");
+		Term t1 = termFactory.getVariable("x");
+		Term t2 = termFactory.getVariable("y");
+		Term t3 = termFactory.getVariable("z");
 
-		Term t4 = termFactory.createVariable("x");
+		Term t4 = termFactory.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t4);
-		Predicate fs = predFactory.createPredicate(URI.create("p"), vars.size());
-		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.createFunctionalTerm(fs, vars);
+		Predicate fs = predFactory.getPredicate(URI.create("p"), vars.size());
+		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs, vars);
 
-		Term t5 = termFactory.createValueConstant("con");
-		Term t51 = termFactory.createValueConstant("st");
+		Term t5 = termFactory.getValueConstant("con");
+		Term t51 = termFactory.getValueConstant("st");
 		List<Term> vars5 = new Vector<Term>();
 		vars5.add(t5);
 		vars5.add(t51);
-		Predicate fs2 = predFactory.createPredicate(URI.create("p"), vars5.size());
-		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.createFunctionalTerm(fs2, vars5);
+		Predicate fs2 = predFactory.getPredicate(URI.create("p"), vars5.size());
+		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs2, vars5);
 
-		Predicate pred1 = predFactory.createPredicate(URI.create("A"), 5);
+		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 5);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
 		terms1.add(t2);
@@ -66,19 +66,19 @@ public class ThetaApplicationTest extends TestCase {
 		Vector<Atom> body = new Vector<Atom>();
 		body.add(atom1);
 
-		Term t7 = termFactory.createVariable("x");
-		Term t6 = termFactory.createVariable("t");
-		Term t8 = termFactory.createVariable("z");
-		Term t9 = termFactory.createValueConstant("elf");
-		Term t10 = termFactory.createVariable("x");
-		Term t11 = termFactory.createVariable("y");
-		Term t12 = termFactory.createVariable("p");
+		Term t7 = termFactory.getVariable("x");
+		Term t6 = termFactory.getVariable("t");
+		Term t8 = termFactory.getVariable("z");
+		Term t9 = termFactory.getValueConstant("elf");
+		Term t10 = termFactory.getVariable("x");
+		Term t11 = termFactory.getVariable("y");
+		Term t12 = termFactory.getVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);
-		Predicate fs3 = predFactory.createPredicate(URI.create("uri"), vars3.size());
-		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.createFunctionalTerm(fs3, vars3);
+		Predicate fs3 = predFactory.getPredicate(URI.create("uri"), vars3.size());
+		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.getFunctionalTerm(fs3, vars3);
 
-		Predicate head = predFactory.createPredicate(URI.create("q"), 1);
+		Predicate head = predFactory.getPredicate(URI.create("q"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t10);
 		Atom h = predFactory.getAtom(head, terms2);

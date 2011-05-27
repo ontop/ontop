@@ -36,7 +36,7 @@ public interface OBDADataFactory {
 	 *            the number of elements inside the predicate.
 	 * @return a predicate object.
 	 */
-	public Predicate createPredicate(URI name, int arity);
+	public Predicate getPredicate(URI name, int arity);
 
 	/**
 	 * Construct a {@link URIConstant} object. This type of term is written as a
@@ -61,7 +61,7 @@ public interface OBDADataFactory {
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public abstract URIConstant createURIConstant(URI uri);
+	public  URIConstant getURIConstant(URI uri);
 
 	/**
 	 * Construct a {@link ValueConstant} object.
@@ -70,7 +70,7 @@ public interface OBDADataFactory {
 	 *            the value of the constant.
 	 * @return the value constant.
 	 */
-	public abstract ValueConstant createValueConstant(String value);
+	public  ValueConstant getValueConstant(String value);
 
 	/**
 	 * Construct a {@link ValueConstant} object with a type definition.
@@ -88,7 +88,7 @@ public interface OBDADataFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public abstract ValueConstant createValueConstant(String value, XSDatatype type);
+	public  ValueConstant getValueConstant(String value, XSDatatype type);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -103,7 +103,7 @@ public interface OBDADataFactory {
 	 *            the name of the variable.
 	 * @return the variable object.
 	 */
-	public abstract Variable createVariable(String name);
+	public  Variable getVariable(String name);
 
 	/**
 	 * Construct a {@link Variable} object with a type definition. The variable
@@ -119,14 +119,14 @@ public interface OBDADataFactory {
 	 *            the name of the variable.
 	 * @return the variable object.
 	 */
-	public abstract Variable createVariable(String name, XSDatatype type);
+	public  Variable getVariable(String name, XSDatatype type);
 
 	/**
 	 * Construct a {@link Variable} object with empty name.
 	 * 
 	 * @return the variable object.
 	 */
-	public abstract Variable createUndistinguishedVariable();
+	public  Variable getNondistinguishedVariable();
 
 	/**
 	 * Construct a {@link Function} object. A function expression consists of
@@ -138,10 +138,18 @@ public interface OBDADataFactory {
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
-	public abstract Function createFunctionalTerm(Predicate functor, List<Term> terms);
+	public  Function getFunctionalTerm(Predicate functor, List<Term> terms);
 	
-	public abstract Function createFunctionalTerm(Predicate functor, Term term1);
+	public  Function getFunctionalTerm(Predicate functor, Term term1);
 	
-	public abstract Function createFunctionalTerm(Predicate functor, Term term1, Term term2);
+	public  Function getFunctionalTerm(Predicate functor, Term term1, Term term2);
+	
+	public RDBMSMappingAxiom getRDBMSMappingAxiom(String id, Query sourceQuery, Query targetQuery);
+	
+	public RDBMSMappingAxiom getRDBMSMappingAxiom(String id, String sql, Query targetQuery);
+	
+	public RDBMSMappingAxiom getRDBMSMappingAxiom(String sql, Query targetQuery);
+	
+	public SQLQuery getSQLQuery(String query);
 
 }

@@ -129,7 +129,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Atom atom = this.predFac.getAtom(predFac.createPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
+		Atom atom = this.predFac.getAtom(predFac.getPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
 		return atom;
 	}
 
@@ -146,16 +146,16 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = predFac.createPredicate(URI.create(termstr.substring(0, 1)), fuctTerms.size());
-			return termFac.createFunctionalTerm(fs, fuctTerms);
+			Predicate fs = predFac.getPredicate(URI.create(termstr.substring(0, 1)), fuctTerms.size());
+			return termFac.getFunctionalTerm(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
-			return termFac.createValueConstant(termstr.substring(1, termstr.length() - 1));
+			return termFac.getValueConstant(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return termFac.createURIConstant(URI.create(termstr.substring(1, termstr.length() - 1)));
+			return termFac.getURIConstant(URI.create(termstr.substring(1, termstr.length() - 1)));
 		} else if (termstr.equals("#")) {
-			return termFac.createUndistinguishedVariable();
+			return termFac.getNondistinguishedVariable();
 		} else {
-			return termFac.createVariable(termstr);
+			return termFac.getVariable(termstr);
 			/* variable */
 		}
 		// }

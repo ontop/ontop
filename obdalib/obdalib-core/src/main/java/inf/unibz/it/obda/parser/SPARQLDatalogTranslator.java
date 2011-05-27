@@ -101,11 +101,11 @@ public class SPARQLDatalogTranslator {
 		int termSize = termNames.size();
 		for (int i = 0; i < termSize; i++) { // iterate the projectors
 			String name = termNames.get(i);
-			Term term = termFactory.createVariable(name);
+			Term term = termFactory.getVariable(name);
 			headTerms.add(term);
 		}
 		Predicate predicate =
-			predicateFactory.createPredicate(URI.create("q"), termSize);
+			predicateFactory.getPredicate(URI.create("q"), termSize);
 
 		return predicateFactory.getAtom(predicate, headTerms);
 	}
@@ -141,19 +141,19 @@ public class SPARQLDatalogTranslator {
 			if (p.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
 				if (s instanceof Var) { // Subject is a variable
 					Var subject = (Var) s;
-					terms.add(termFactory.createVariable(subject.getName()));
+					terms.add(termFactory.getVariable(subject.getName()));
 				}
 				else if (s instanceof Node_Literal) { // Subject is a node literal
 					//TODO Literals shouldn't be allowed with rdf:type
 					/* Literals are no longer suppoerted with rdf:type, only URIs (objects) */
 //					throw new QueryException("Query translation error: literals are not supported as subjects with predicate rdf:type, use only URI's");
 					Node_Literal subject = (Node_Literal) s;
-					terms.add(termFactory.createValueConstant(subject.getLiteralValue().toString()));
+					terms.add(termFactory.getValueConstant(subject.getLiteralValue().toString()));
 				}
 				else if (s instanceof Node_URI) { // Subject is a node URI
 					Node_URI subject = (Node_URI) s;
 					subjectUri = URI.create(subject.getURI());
-					terms.add(termFactory.createURIConstant(subjectUri));
+					terms.add(termFactory.getURIConstant(subjectUri));
 				}
 
 				if (o instanceof Var) { // Object is a variable
@@ -166,38 +166,38 @@ public class SPARQLDatalogTranslator {
 					Node_URI object = (Node_URI) o;
 					objectUri = URI.create(object.getURI());
 				}
-				predicate = predicateFactory.createPredicate(objectUri, 1);
+				predicate = predicateFactory.getPredicate(objectUri, 1);
 			}
 			else { // not equal to "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 				if (s instanceof Var) { // Subject is a variable
 					Var subject = (Var) s;
-					terms.add(termFactory.createVariable(subject.getName()));
+					terms.add(termFactory.getVariable(subject.getName()));
 				}
 				else if (s instanceof Node_Literal) { // Subject is a node literal
 					Node_Literal subject = (Node_Literal) s;
-					terms.add(termFactory.createValueConstant(subject.getLiteralValue().toString()));
+					terms.add(termFactory.getValueConstant(subject.getLiteralValue().toString()));
 				}
 				else if (s instanceof Node_URI) { // Subject is a node URI
 					Node_URI subject = (Node_URI) s;
 					subjectUri = URI.create(subject.getURI());
-					terms.add(termFactory.createURIConstant(subjectUri));
+					terms.add(termFactory.getURIConstant(subjectUri));
 				}
 
 				if (o instanceof Var) { // Object is a variable
 					Var object = (Var) o;
-					terms.add(termFactory.createVariable(object.getName()));
+					terms.add(termFactory.getVariable(object.getName()));
 				}
 				else if (o instanceof Node_Literal) { // Object is a node literal
 					Node_Literal object = (Node_Literal) o;
-					terms.add(termFactory.createValueConstant(object.getLiteralValue().toString()));
+					terms.add(termFactory.getValueConstant(object.getLiteralValue().toString()));
 				}
 				else if (o instanceof Node_URI) { // Object is a node URI
 					Node_URI object = (Node_URI) o;
 					objectUri = URI.create(object.getURI());
-					terms.add(termFactory.createURIConstant(objectUri));
+					terms.add(termFactory.getURIConstant(objectUri));
 				}
 				URI predicateUri = URI.create(p.getURI());
-				predicate = predicateFactory.createPredicate(predicateUri, 2);
+				predicate = predicateFactory.getPredicate(predicateUri, 2);
 			}
 			Atom atom = predicateFactory.getAtom(predicate, terms);
 			body.add(atom);

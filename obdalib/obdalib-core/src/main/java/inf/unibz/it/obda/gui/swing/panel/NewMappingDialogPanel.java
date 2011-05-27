@@ -7,13 +7,15 @@ package inf.unibz.it.obda.gui.swing.panel;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.utils.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.utils.MappingStyledDocument;
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.MappingController;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.OBDADataFactory;
+import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.RDBMSMappingAxiom;
+import inf.unibz.it.obda.model.SQLQuery;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
 import inf.unibz.it.obda.utils.OBDAPreferences;
@@ -64,6 +66,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private JDialog						parent				= null;
 
 	private final Logger				log					= LoggerFactory.getLogger(this.getClass());
+	
+	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/** Creates new form NewMappingDialogPanel */
 	public NewMappingDialogPanel(OBDAModel apic, OBDAPreferences pref, JDialog parent, DataSource dataSource) {
@@ -155,8 +159,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			MappingController mapcon = controller.getMappingController();
 			URI sourceID = selectedSource.getSourceID();
 			String id = mapcon.getNextAvailableMappingID(sourceID);
-			RDBMSSQLQuery body = new RDBMSSQLQuery(bodystring);
-			RDBMSOBDAMappingAxiom mapping = new RDBMSOBDAMappingAxiom(id, body, head);
+			SQLQuery body = fac.getSQLQuery(bodystring);
+			RDBMSMappingAxiom mapping = fac.getRDBMSMappingAxiom(id, body, head);
 			try {
 				mapcon.insertMapping(sourceID, mapping);
 			} catch (DuplicateMappingException e) {

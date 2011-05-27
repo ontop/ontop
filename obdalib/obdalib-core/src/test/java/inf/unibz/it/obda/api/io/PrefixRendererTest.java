@@ -40,16 +40,16 @@ public class PrefixRendererTest extends TestCase {
 		query = tfac.getDatalogProgram();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
-		innerterms.add(tfac.createVariable("id"));
+		innerterms.add(tfac.getVariable("id"));
 
 		List<Term> terms = new LinkedList<Term>();
-		terms.add(tfac.createFunctionalTerm(pfac.createPredicate(URI.create("http://obda.org/onto.owl#person-individual"), 1), innerterms));
+		terms.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("http://obda.org/onto.owl#person-individual"), 1), innerterms));
 
-		Atom body = tfac.getAtom(pfac.createPredicate(URI.create("http://obda.org/onto.owl#Person"), 1), terms);
+		Atom body = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/onto.owl#Person"), 1), terms);
 
 		terms = new LinkedList<Term>();
-		terms.add(tfac.createVariable("id"));
-		Atom head = tfac.getAtom(pfac.createPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
+		terms.add(tfac.getVariable("id"));
+		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
 
 		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);

@@ -13,8 +13,8 @@ import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.impl.RDBMSMappingAxiomImpl;
+import inf.unibz.it.obda.model.impl.SQLQueryImpl;
 
 import java.net.URI;
 import java.util.List;
@@ -177,10 +177,10 @@ public class SemanticIndexMappingGenerator {
             where_clause.delete(where_clause.length() - 3, where_clause.length());
         }
 
-        Term qt = termFactory.createVariable("x");
-        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), 1);
+        Term qt = termFactory.getVariable("x");
+        Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 1);
         Atom bodyAtom = termFactory.getAtom(predicate, qt);
-        predicate = predicateFactory.createPredicate(URI.create("q"), 1);
+        predicate = predicateFactory.getPredicate(URI.create("q"), 1);
         Atom head = termFactory.getAtom(predicate, qt);
         Query cq = termFactory.getCQIE(head, bodyAtom);
 
@@ -189,9 +189,7 @@ public class SemanticIndexMappingGenerator {
             sql += " WHERE " + where_clause.toString();
         }
 
-        OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-        ax.setTargetQuery(cq);
-        ax.setSourceQuery(new RDBMSSQLQuery(sql));
+        OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mapcounter++,cq,predicateFactory.getSQLQuery(sql));
 
 //        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
         apic.getMappingController().insertMapping(ds.getSourceID(), ax);
@@ -211,11 +209,11 @@ public class SemanticIndexMappingGenerator {
             where_clause.delete(where_clause.length() - 4, where_clause.length());
         }
 
-        Term qtx = termFactory.createVariable("X");
-        Term qty = termFactory.createVariable("Y");
-        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), 2);
+        Term qtx = termFactory.getVariable("X");
+        Term qty = termFactory.getVariable("Y");
+        Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 2);
         Atom bodyAtom = termFactory.getAtom(predicate, qtx,qty);
-        predicate = predicateFactory.createPredicate(URI.create("q"), 2);
+        predicate = predicateFactory.getPredicate(URI.create("q"), 2);
         Atom head = termFactory.getAtom(predicate, qtx,qty);
         Query cq = termFactory.getCQIE(head, bodyAtom);
 
@@ -224,9 +222,7 @@ public class SemanticIndexMappingGenerator {
             sql += " WHERE " + where_clause.toString();
         }
 
-        OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mapcounter++);
-        ax.setTargetQuery(cq);
-        ax.setSourceQuery(new RDBMSSQLQuery(sql));
+        OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mapcounter++,cq,predicateFactory.getSQLQuery(sql));
 
 //        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
         apic.getMappingController().insertMapping(ds.getSourceID(), ax);

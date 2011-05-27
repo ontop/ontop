@@ -29,14 +29,16 @@ import inf.unibz.it.obda.gui.swing.treemodel.MappingTreeSelectionModel;
 import inf.unibz.it.obda.gui.swing.treemodel.TreeModelFilter;
 import inf.unibz.it.obda.gui.swing.utils.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.utils.MappingTreeCellRenderer;
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
 import inf.unibz.it.obda.model.MappingController;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
-import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
+import inf.unibz.it.obda.model.SQLQuery;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
 import inf.unibz.it.obda.utils.OBDAPreferences;
@@ -111,6 +113,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private boolean					canceled;
 
 	private final Logger			log					= LoggerFactory.getLogger(this.getClass());
+	
+	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a new panel.
@@ -580,7 +584,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				MappingBodyNode body = node.getBodyNode();
 				MappingHeadNode head = node.getHeadNode();
 				RDBMSMappingValidator v;
-				RDBMSSQLQuery rdbmssqlQuery = new RDBMSSQLQuery(body.getQuery());
+				
+				SQLQuery rdbmssqlQuery = fac.getSQLQuery(body.getQuery());
 				CQIE conjunctiveQuery = parse(head.getQuery());
 				v = new RDBMSMappingValidator(apic, selectedSource, rdbmssqlQuery, conjunctiveQuery);
 				Enumeration<String> errors = v.validate();
@@ -625,7 +630,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 						String id = node.getMappingID();
 						MappingBodyNode body = node.getBodyNode();
 						outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-						validator = new SQLQueryValidator(selectedSource, new RDBMSSQLQuery(body.getQuery()));
+						validator = new SQLQueryValidator(selectedSource, fac.getSQLQuery(body.getQuery()));
 						long timestart = System.currentTimeMillis();
 
 						if (canceled)
@@ -839,7 +844,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		} else if (editedNode instanceof MappingBodyNode) {
 			MappingBodyNode node = (MappingBodyNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();
-			Query b = new RDBMSSQLQuery(str);
+			Query b = fac.getSQLQuery(str);
 			con.updateSourceQueryMapping(sourceName, parent.getMappingID(), b);
 		} else if (editedNode instanceof MappingHeadNode) {
 			MappingHeadNode node = (MappingHeadNode) editedNode;

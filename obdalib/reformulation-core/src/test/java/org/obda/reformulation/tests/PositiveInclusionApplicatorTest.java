@@ -38,17 +38,17 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	OBDADataFactory				pfac			= OBDADataFactoryImpl.getInstance();
 	OBDADataFactory				tfac			= OBDADataFactoryImpl.getInstance();
 
-	Predicate					r				= pfac.createPredicate(URI.create("R"), 2);
-	Predicate					s				= pfac.createPredicate(URI.create("S"), 2);
-	Predicate					q				= pfac.createPredicate(URI.create("q"), 1);
+	Predicate					r				= pfac.getPredicate(URI.create("R"), 2);
+	Predicate					s				= pfac.getPredicate(URI.create("S"), 2);
+	Predicate					q				= pfac.getPredicate(URI.create("q"), 1);
 
-	Term						x				= tfac.createVariable("x");
-	Term						y				= tfac.createVariable("y");
-	Term						z				= tfac.createVariable("z");
-	Term						m				= tfac.createVariable("m");
+	Term						x				= tfac.getVariable("x");
+	Term						y				= tfac.getVariable("y");
+	Term						z				= tfac.getVariable("z");
+	Term						m				= tfac.getVariable("m");
 
-	Term						u1				= tfac.createUndistinguishedVariable();
-	Term						u2				= tfac.createUndistinguishedVariable();
+	Term						u1				= tfac.getNondistinguishedVariable();
+	Term						u2				= tfac.getNondistinguishedVariable();
 
 	@Before
 	public void setUp() throws Exception {
