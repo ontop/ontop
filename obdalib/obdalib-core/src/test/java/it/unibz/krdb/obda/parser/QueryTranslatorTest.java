@@ -4,7 +4,7 @@
  * Copyright 2010 OBDA-API. All rights reserved.
  * Use is subject to license terms.
  */
-package org.obda.query.tools.parser;
+package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;

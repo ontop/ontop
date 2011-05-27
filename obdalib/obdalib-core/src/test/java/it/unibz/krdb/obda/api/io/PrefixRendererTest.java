@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.api.io;
+package it.unibz.krdb.obda.api.io;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;

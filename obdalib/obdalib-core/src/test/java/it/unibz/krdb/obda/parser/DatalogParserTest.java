@@ -1,4 +1,4 @@
-package org.obda.query.tools.parser;
+package it.unibz.krdb.obda.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
