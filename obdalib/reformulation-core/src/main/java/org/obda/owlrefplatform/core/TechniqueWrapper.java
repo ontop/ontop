@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.queryanswering.Statement;
+import it.unibz.krdb.obda.model.Statement;
 
 /**
  * The technique wrapper interface can be used to implement different 

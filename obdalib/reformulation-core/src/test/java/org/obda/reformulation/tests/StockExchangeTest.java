@@ -1,13 +1,13 @@
 package org.obda.reformulation.tests;
 
-import inf.unibz.it.obda.io.DataManager;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
-import inf.unibz.it.obda.queryanswering.QueryResultSet;
-import inf.unibz.it.obda.queryanswering.Statement;
+import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.io.File;
 

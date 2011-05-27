@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
-import inf.unibz.it.obda.model.Atom;
+import it.unibz.krdb.obda.model.Atom;
 
 
 /**

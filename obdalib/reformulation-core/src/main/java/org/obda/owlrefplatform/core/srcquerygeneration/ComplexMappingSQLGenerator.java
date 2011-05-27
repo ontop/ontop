@@ -1,15 +1,15 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.Constant;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.URIConstant;
-import inf.unibz.it.obda.model.ValueConstant;
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
-import inf.unibz.it.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;

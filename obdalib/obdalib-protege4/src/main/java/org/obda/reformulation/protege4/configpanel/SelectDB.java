@@ -5,8 +5,8 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.util.Iterator;
 

@@ -10,16 +10,16 @@ package org.obda.owlrefplatform.core.basicoperations;
  * variables ie. A(#1,#2)
  */
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.ValueConstant;
-import inf.unibz.it.obda.model.Variable;
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.URIConstantImpl;
-import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
-import inf.unibz.it.obda.model.impl.ValueConstantImpl;
-import inf.unibz.it.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.URIConstantImpl;
+import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.LinkedList;

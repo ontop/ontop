@@ -4,15 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.URIConstantImpl;
-import inf.unibz.it.obda.model.impl.ValueConstantImpl;
-import inf.unibz.it.obda.model.impl.VariableImpl;
-import inf.unibz.it.obda.parser.DatalogProgramParser;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.URIConstantImpl;
+import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.parser.DatalogProgramParser;
 
 import java.util.List;
 

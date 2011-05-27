@@ -1,14 +1,14 @@
 package org.obda.reformulation.tests;
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.Predicate;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.impl.AtomImpl;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.impl.AtomImpl;
+import it.unibz.krdb.obda.model.impl.CQIEImpl;
+import it.unibz.krdb.obda.model.impl.DatalogProgramImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.List;

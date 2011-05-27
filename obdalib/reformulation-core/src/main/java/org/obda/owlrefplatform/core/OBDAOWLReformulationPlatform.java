@@ -1,8 +1,8 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
-import inf.unibz.it.obda.queryanswering.Statement;
+import it.unibz.krdb.obda.model.DataQueryReasoner;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Statement;
 
 import java.net.URI;
 import java.util.HashMap;

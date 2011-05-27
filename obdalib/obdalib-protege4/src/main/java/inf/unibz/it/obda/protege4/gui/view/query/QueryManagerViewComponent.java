@@ -1,9 +1,9 @@
 package inf.unibz.it.obda.protege4.gui.view.query;
 
-import inf.unibz.it.obda.gui.swing.panel.SavedQueriesPanel;
-import inf.unibz.it.obda.gui.swing.panel.SavedQueriesPanelListener;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
+import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanel;
+import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.awt.BorderLayout;
 

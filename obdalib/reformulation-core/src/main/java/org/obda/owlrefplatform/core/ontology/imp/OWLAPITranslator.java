@@ -1,8 +1,8 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.Predicate;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.HashSet;

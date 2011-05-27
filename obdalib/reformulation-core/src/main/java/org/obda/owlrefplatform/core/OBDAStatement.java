@@ -1,17 +1,17 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.codec.DatalogProgramToTextCodec;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.model.Query;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.Variable;
-import inf.unibz.it.obda.parser.DatalogProgramParser;
-import inf.unibz.it.obda.parser.SPARQLDatalogTranslator;
-import inf.unibz.it.obda.queryanswering.QueryResultSet;
-import inf.unibz.it.obda.queryanswering.Statement;
+import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.parser.DatalogProgramParser;
+import it.unibz.krdb.obda.parser.SPARQLDatalogTranslator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

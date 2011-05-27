@@ -1,13 +1,13 @@
 package inf.unibz.it.obda.owlapi;
 
-import inf.unibz.it.obda.io.DataManager;
-import inf.unibz.it.obda.model.MappingController;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.Query;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.model.MappingController;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.io.File;
 import java.net.URI;

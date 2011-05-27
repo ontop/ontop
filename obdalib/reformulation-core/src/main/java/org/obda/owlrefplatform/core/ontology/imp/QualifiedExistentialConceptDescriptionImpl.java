@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
-import inf.unibz.it.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate;
 
 import java.util.List;
 

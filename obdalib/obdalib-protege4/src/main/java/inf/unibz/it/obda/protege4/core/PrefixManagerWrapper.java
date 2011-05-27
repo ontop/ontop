@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.io.AbstractPrefixManager;
+import it.unibz.krdb.obda.io.AbstractPrefixManager;
 
 import java.util.Map;
 

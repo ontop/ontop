@@ -1,11 +1,11 @@
 package inf.unibz.it.obda.protege4.abox.materialization;
 
-import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
-import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.owlapi.util.OBDA2OWLDataMaterializer;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
+import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;

@@ -6,10 +6,10 @@
  */
 package org.obda.query.tools.parser;
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.parser.SPARQLDatalogTranslator;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.parser.SPARQLDatalogTranslator;
 
 import java.util.List;
 

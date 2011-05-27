@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
-import inf.unibz.it.obda.model.CQIE;
+import it.unibz.krdb.obda.model.CQIE;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;

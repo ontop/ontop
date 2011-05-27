@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core.viewmanager;
 
-import inf.unibz.it.obda.io.PrefixManager;
-import inf.unibz.it.obda.model.Atom;
+import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.model.Atom;
 
 import java.net.URI;
 import java.util.HashMap;

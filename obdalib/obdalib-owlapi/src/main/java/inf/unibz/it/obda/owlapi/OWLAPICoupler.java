@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.owlapi;
 
-import inf.unibz.it.obda.io.PrefixManager;
-import inf.unibz.it.obda.model.APICoupler;
+import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.model.APICoupler;
 
 import java.net.URI;
 import java.util.HashSet;

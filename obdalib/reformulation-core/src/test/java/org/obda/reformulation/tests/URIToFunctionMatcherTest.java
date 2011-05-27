@@ -1,12 +1,12 @@
 package org.obda.reformulation.tests;
 
 
-import inf.unibz.it.obda.model.Function;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.Predicate;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.ValueConstant;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.HashMap;

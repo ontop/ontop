@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.srcquerygeneration;
 
-import inf.unibz.it.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.DatalogProgram;
 
 import java.util.List;
 

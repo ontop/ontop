@@ -1,13 +1,13 @@
 package inf.unibz.it.obda.protege4.gui.view;
 
-import inf.unibz.it.obda.gui.swing.panel.DatasourceSelector;
-import inf.unibz.it.obda.gui.swing.panel.MappingManagerPanel;
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.DatasourcesController;
-import inf.unibz.it.obda.model.MappingController;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
-import inf.unibz.it.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
+import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.MappingController;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

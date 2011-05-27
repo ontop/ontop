@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.protege4.gui.view.query;
 
-import inf.unibz.it.obda.gui.swing.model.QueryhistoryController;
+import it.unibz.krdb.obda.gui.swing.model.QueryhistoryController;
 
 import java.awt.BorderLayout;
 

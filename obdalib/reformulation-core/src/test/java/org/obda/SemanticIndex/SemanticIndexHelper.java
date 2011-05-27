@@ -1,9 +1,9 @@
 package org.obda.SemanticIndex;
 
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;

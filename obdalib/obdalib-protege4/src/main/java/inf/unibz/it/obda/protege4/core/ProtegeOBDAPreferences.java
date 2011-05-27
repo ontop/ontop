@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import org.protege.editor.core.Disposable;
 

@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.queryanswering.Statement;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Statement;
 
 import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import org.obda.owlrefplatform.core.reformulation.QueryRewriter;

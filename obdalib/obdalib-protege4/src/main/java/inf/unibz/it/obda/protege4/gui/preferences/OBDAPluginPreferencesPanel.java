@@ -1,8 +1,8 @@
 package inf.unibz.it.obda.protege4.gui.preferences;
 
-import inf.unibz.it.obda.gui.swing.panel.OBDAPreferencesPanel;
-import inf.unibz.it.obda.utils.OBDAPreferences;
-import inf.unibz.it.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
+import it.unibz.krdb.obda.gui.swing.panel.OBDAPreferencesPanel;
+import it.unibz.krdb.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
 
 import java.awt.Color;
 import java.awt.GridBagConstraints;

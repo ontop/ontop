@@ -1,9 +1,9 @@
 package inf.unibz.it.obda.protege4.gui.view;
 
-import inf.unibz.it.obda.gui.swing.panel.DataSourceSelectionPanel;
-import inf.unibz.it.obda.gui.swing.panel.DatasourceParameterEditorPanel;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
+import it.unibz.krdb.obda.gui.swing.panel.DataSourceSelectionPanel;
+import it.unibz.krdb.obda.gui.swing.panel.DatasourceParameterEditorPanel;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.awt.BorderLayout;
 

@@ -4,9 +4,9 @@
  */
 package org.obda.reformulation.tests;
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.Variable;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,7 +51,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(inf.unibz.it.obda.model.Atom, inf.unibz.it.obda.model.Atom)}
+	 * {@link org.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception

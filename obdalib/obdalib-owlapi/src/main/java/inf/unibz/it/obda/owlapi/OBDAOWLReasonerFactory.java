@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.owlapi;
 
-import inf.unibz.it.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAModel;
 
 import org.semanticweb.owl.inference.OWLReasonerFactory;
 

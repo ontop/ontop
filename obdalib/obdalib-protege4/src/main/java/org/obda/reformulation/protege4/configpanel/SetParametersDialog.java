@@ -5,11 +5,11 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

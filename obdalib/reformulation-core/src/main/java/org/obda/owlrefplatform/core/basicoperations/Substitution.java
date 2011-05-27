@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
-import inf.unibz.it.obda.model.Term;
+import it.unibz.krdb.obda.model.Term;
 
 
 public class Substitution {

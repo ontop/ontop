@@ -1,13 +1,13 @@
 package org.obda.owlrefplatform.core.reformulation;
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.Query;
-import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.utils.QueryUtils;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.impl.DatalogProgramImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;

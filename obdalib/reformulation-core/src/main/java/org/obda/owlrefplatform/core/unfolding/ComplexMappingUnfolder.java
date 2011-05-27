@@ -1,21 +1,21 @@
 package org.obda.owlrefplatform.core.unfolding;
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.model.Function;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.Predicate;
-import inf.unibz.it.obda.model.RDBMSMappingAxiom;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.URIConstant;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
-import inf.unibz.it.obda.model.impl.VariableImpl;
-import inf.unibz.it.obda.utils.QueryUtils;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.impl.CQIEImpl;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;

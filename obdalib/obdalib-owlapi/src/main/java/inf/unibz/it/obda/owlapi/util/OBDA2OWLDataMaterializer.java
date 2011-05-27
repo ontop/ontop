@@ -1,14 +1,14 @@
 package inf.unibz.it.obda.owlapi.util;
 
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.DataSourceImpl;
-import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
-import inf.unibz.it.sql.JDBCConnectionManager;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.impl.CQIEImpl;
+import it.unibz.krdb.obda.model.impl.DataSourceImpl;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.ResultSet;

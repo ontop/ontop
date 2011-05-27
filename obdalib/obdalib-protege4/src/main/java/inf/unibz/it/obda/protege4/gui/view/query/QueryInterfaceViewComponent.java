@@ -1,21 +1,21 @@
 package inf.unibz.it.obda.protege4.gui.view.query;
 
-import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
-import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
-import inf.unibz.it.obda.gui.swing.panel.QueryInterfacePanel;
-import inf.unibz.it.obda.gui.swing.panel.ResultViewTablePanel;
-import inf.unibz.it.obda.gui.swing.panel.SavedQueriesPanelListener;
-import inf.unibz.it.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableModel;
-import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
-import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
-import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
-import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
-import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
-import inf.unibz.it.obda.queryanswering.QueryResultSet;
-import inf.unibz.it.obda.queryanswering.Statement;
-import inf.unibz.it.obda.utils.OBDAPreferences;
-import inf.unibz.it.obda.utils.ResultSetToFileWriter;
+import it.unibz.krdb.obda.gui.swing.OBDADataQueryAction;
+import it.unibz.krdb.obda.gui.swing.OBDASaveQueryResultToFileAction;
+import it.unibz.krdb.obda.gui.swing.panel.QueryInterfacePanel;
+import it.unibz.krdb.obda.gui.swing.panel.ResultViewTablePanel;
+import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
+import it.unibz.krdb.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableModel;
+import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
+import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
+import it.unibz.krdb.obda.gui.swing.utils.TextMessageFrame;
+import it.unibz.krdb.obda.model.DataQueryReasoner;
+import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.utils.ResultSetToFileWriter;
 
 import java.awt.BorderLayout;
 import java.io.File;

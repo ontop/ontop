@@ -1,8 +1,8 @@
 package org.obda.owlrefplatform.core.basicoperations;
 
-import inf.unibz.it.obda.model.CQIE;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.Variable;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Map;
 

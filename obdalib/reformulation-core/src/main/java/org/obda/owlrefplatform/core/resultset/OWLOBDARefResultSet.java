@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.resultset;
 
-import inf.unibz.it.obda.queryanswering.QueryResultSet;
+import it.unibz.krdb.obda.model.QueryResultSet;
 
 import java.net.URI;
 import java.sql.ResultSet;

@@ -1,18 +1,18 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.io.DataManager;
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.DatasourcesControllerListener;
-import inf.unibz.it.obda.model.MappingControllerListener;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
-import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
-import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
-import inf.unibz.it.obda.queryanswering.QueryControllerListener;
-import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.DatasourcesControllerListener;
+import it.unibz.krdb.obda.model.MappingControllerListener;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
+import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
+import it.unibz.krdb.obda.queryanswering.QueryControllerListener;
+import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
 
 import java.io.IOException;
 import java.net.URI;

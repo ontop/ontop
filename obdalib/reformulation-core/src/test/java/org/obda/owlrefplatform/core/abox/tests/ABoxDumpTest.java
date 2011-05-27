@@ -1,9 +1,9 @@
 package org.obda.owlrefplatform.core.abox.tests;
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDADataFactory;
-import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
-import inf.unibz.it.sql.JDBCConnectionManager;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
 import java.net.URI;
