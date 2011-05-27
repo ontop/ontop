@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core.queryevaluation;
 
 import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,13 +42,13 @@ public class JDBCEngine implements EvaluationEngine {
 
 	private void connect() throws SQLException {
 
-		String driver = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-		String url = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
+		String driver = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		String url = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 
 		log.debug("Connecting to JDBC source: {}", url);
 
-		String username = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-		String password = datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
+		String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		try {
 			Class d = Class.forName(driver);
 		} catch (Exception e) {
@@ -84,7 +84,7 @@ public class JDBCEngine implements EvaluationEngine {
 
 	@Override
 	public void update(DataSource ds) {
-		if (!ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("org.h2.Driver")) {
+		if (!ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("org.h2.Driver")) {
 			if (connection != null) {
 				try {
 					disconnect();

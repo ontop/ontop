@@ -16,7 +16,7 @@ package inf.unibz.it.obda.gui.swing.panel;
 import inf.unibz.it.obda.gui.swing.utils.DatasourceSelectorListener;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 
 import javax.swing.JOptionPane;
 
@@ -380,10 +380,10 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			return;
 		}
 		// currentsrc.setUri(fieldURI.getText());
-		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, fieldDBUser.getText());
-		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
-		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
-		currentDS.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, fieldURL.getText());
+		currentDS.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, fieldDBUser.getText());
+		currentDS.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, fieldDBPassword.getText());
+		currentDS.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, fieldDBDriver.getText());
+		currentDS.setParameter(RDBMSourceParameterConstants.DATABASE_URL, fieldURL.getText());
 		// currentDS.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,
 		// apic.getCurrentOntologyURI().toString());
 		dscontroller.fireParametersUpdated();
@@ -443,10 +443,10 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			labelDSType.setText("RDBMS");
 			labelMapType.setText("OBDAMappings");
 			labelDatasource.setText(currentsource.getSourceID().toString());
-			fieldDBDriver.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
-			fieldDBUser.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME));
-			fieldDBPassword.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD));
-			fieldURL.setText(currentsource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL));
+			fieldDBDriver.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			fieldDBUser.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
+			fieldDBPassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
+			fieldURL.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
 			labelDSType.setEnabled(true);
 			labelMapType.setEnabled(true);
 			labelDatasource.setEnabled(true);

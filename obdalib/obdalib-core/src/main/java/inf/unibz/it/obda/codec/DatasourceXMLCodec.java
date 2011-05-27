@@ -1,7 +1,10 @@
 package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.DataSourceImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 	public DataSource decode(Element input) {
 
  		DataSource new_src = null;
+ 		OBDADataFactory fac =OBDADataFactoryImpl.getInstance();
 
 		String id = input.getAttribute("URI");
 		if(id.equals("")){
@@ -30,13 +34,13 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 		String username = input.getAttribute("databaseUsername");
 		String usage = input.getAttribute("isAboxDump");
 		URI uri = URI.create(id);
-		new_src = new DataSource(uri);
-		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
-		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, dburl);
-		new_src.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
-		new_src.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, uristring);
-		new_src.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, usage);
+		new_src = fac.getDataSource(uri);
+		new_src.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+		new_src.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, pwd);
+		new_src.setParameter(RDBMSourceParameterConstants.DATABASE_URL, dburl);
+		new_src.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+		new_src.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uristring);
+		new_src.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, usage);
 		/***
 		 * This if is only done because before, URI and name were used
 		 * interchangable. Since now URI stands for the ontology URI we check if
@@ -60,12 +64,12 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 	public Element encode(DataSource input) {
 		Element element = createElement(TAG);
 		String id = input.getSourceID().toString();
-		String driver = input.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-		String  uristring= input.getParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI);
-		String pwd = input.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
-		String dburl = input.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		String username = input.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-		String usage = input.getParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
+		String driver = input.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		String  uristring= input.getParameter(RDBMSourceParameterConstants.ONTOLOGY_URI);
+		String pwd = input.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String dburl = input.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = input.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String usage = input.getParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
 		
 		element.setAttribute("URI", id);
 		element.setAttribute("ontouri",uristring);

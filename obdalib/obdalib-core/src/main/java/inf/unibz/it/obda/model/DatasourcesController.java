@@ -13,6 +13,7 @@
 package inf.unibz.it.obda.model;
 
 import inf.unibz.it.obda.codec.DatasourceXMLCodec;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,10 +32,13 @@ public class DatasourcesController {
 	private HashMap<URI, DataSource>					datasources			= null;
 
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
+	
+	OBDADataFactory fac = null;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public DatasourcesController() {
+		fac = OBDADataFactoryImpl.getInstance();
 		datasources = new HashMap<URI, DataSource>();
 		listeners = new ArrayList<DatasourcesControllerListener>();
 	}
@@ -46,7 +50,7 @@ public class DatasourcesController {
 
 	public synchronized void addDataSource(String srcid) {
 		URI dburi = URI.create(srcid);
-		DataSource newsource = new DataSource(dburi);
+		DataSource newsource = fac.getDataSource(dburi);
 		datasources.put(dburi, newsource);
 		fireDatasourceAdded(newsource);
 	}

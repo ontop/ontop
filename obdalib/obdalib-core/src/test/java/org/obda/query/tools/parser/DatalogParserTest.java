@@ -769,7 +769,7 @@ public class DatalogParserTest {
 		//-- The Body
 		EXPECTED_BODY_SIZE = 1;
 		List<Atom> body = rules.get(0).getBody();
-		assertNull("Body is not null!", body);
+		assertTrue("Body is not empty!", body.size() == 0);
 	}
 
 	/**

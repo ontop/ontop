@@ -2,9 +2,9 @@ package org.obda.owlrefplatform.core.abox;
 
 
 import inf.unibz.it.obda.exception.DuplicateMappingException;
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Predicate;
@@ -178,16 +178,11 @@ public class SemanticIndexMappingGenerator {
         }
 
         Term qt = termFactory.createVariable("x");
-        List<Term> terms = new Vector<Term>();
-        terms.add(qt);
-        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
-        Atom bodyAtom = new AtomImpl(predicate, terms);
-        List<Atom> body = new Vector<Atom>();
-        body.add(bodyAtom);
-        predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-
-        Atom head = new AtomImpl(predicate, terms);
-        Query cq = new CQIEImpl(head, body, false);
+        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), 1);
+        Atom bodyAtom = termFactory.getAtom(predicate, qt);
+        predicate = predicateFactory.createPredicate(URI.create("q"), 1);
+        Atom head = termFactory.getAtom(predicate, qt);
+        Query cq = termFactory.getCQIE(head, bodyAtom);
 
         String sql = "SELECT " + projection + " FROM " + table;
         if (where_clause.length() != 0) {
@@ -218,17 +213,11 @@ public class SemanticIndexMappingGenerator {
 
         Term qtx = termFactory.createVariable("X");
         Term qty = termFactory.createVariable("Y");
-        List<Term> terms = new Vector<Term>();
-        terms.add(qtx);
-        terms.add(qty);
-        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), terms.size());
-        Atom bodyAtom = new AtomImpl(predicate, terms);
-        List<Atom> body = new Vector<Atom>();
-        body.add(bodyAtom);
-        predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-
-        Atom head = new AtomImpl(predicate, terms);
-        Query cq = new CQIEImpl(head, body, false);
+        Predicate predicate = predicateFactory.createPredicate(URI.create(uri), 2);
+        Atom bodyAtom = termFactory.getAtom(predicate, qtx,qty);
+        predicate = predicateFactory.createPredicate(URI.create("q"), 2);
+        Atom head = termFactory.getAtom(predicate, qtx,qty);
+        Query cq = termFactory.getCQIE(head, bodyAtom);
 
         String sql = "SELECT " + projection + " FROM " + table;
         if (where_clause.length() != 0) {

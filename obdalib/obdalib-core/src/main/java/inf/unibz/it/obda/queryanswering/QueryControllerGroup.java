@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.queryanswering;
 
-import inf.unibz.it.obda.model.QueryControllerEntity;
 
 import java.util.Vector;
 

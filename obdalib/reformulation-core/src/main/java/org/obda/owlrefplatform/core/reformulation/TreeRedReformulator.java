@@ -3,9 +3,11 @@ package org.obda.owlrefplatform.core.reformulation;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.utils.QueryUtils;
 
 import java.util.Collection;
@@ -51,6 +53,8 @@ public class TreeRedReformulator implements QueryRewriter {
 	private Map<Predicate, Set<PositiveInclusion>>	rightExistentialIndex		= null;
 
 	Logger											log							= LoggerFactory.getLogger(TreeRedReformulator.class);
+
+	OBDADataFactory									fac							= OBDADataFactoryImpl.getInstance();
 
 	public TreeRedReformulator(List<Assertion> assertions) {
 		this.originalassertions = assertions;
@@ -110,8 +114,6 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
-		
-		
 		log.debug("Starting query rewrting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
@@ -274,24 +276,23 @@ public class TreeRedReformulator implements QueryRewriter {
 		log.debug("Removing trivially contained queries");
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
 
-//		if (resultlist.size() < 300) {
-			log.debug("Removing CQC contained queries");
-			CQCUtilities.removeContainedQueriesSorted(resultlist, false);
-//		}
+		// if (resultlist.size() < 300) {
+		log.debug("Removing CQC contained queries");
+		CQCUtilities.removeContainedQueriesSorted(resultlist, false);
+		// }
 
-		DatalogProgram resultprogram = new DatalogProgramImpl();
+		DatalogProgram resultprogram = fac.getDatalogProgram();
 		resultprogram.appendRule(resultlist);
 
 		long endtime = System.currentTimeMillis();
 
 		QueryUtils.copyQueryModifiers(input, resultprogram);
-		
+
 		log.debug("Computed reformulation: \n{}", resultprogram);
 		log.debug("Final size of the reformulation: {}", resultlist.size());
 		double seconds = (endtime - starttime) / 1000;
 		log.info("Time elapsed for reformulation: {}s", seconds);
-		
-		
+
 		return resultprogram;
 	}
 
@@ -343,12 +344,12 @@ public class TreeRedReformulator implements QueryRewriter {
 						DLLiterConceptInclusionImpl ci1 = (DLLiterConceptInclusionImpl) pi1;
 						DLLiterConceptInclusionImpl ci2 = (DLLiterConceptInclusionImpl) pi2;
 						if (ci1.getIncluding().equals(ci2.getIncluded())) {
-							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci1.getIncluded(), ci2
-									.getIncluding());
+							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci1.getIncluded(),
+									ci2.getIncluding());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getIncluded().equals(ci2.getIncluding())) {
-							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci2.getIncluded(), ci1
-									.getIncluding());
+							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci2.getIncluded(),
+									ci1.getIncluding());
 							newInclusions.add(newinclusion);
 						}
 					} else if ((pi1 instanceof DLLiterRoleInclusionImpl) && (pi2 instanceof DLLiterRoleInclusionImpl)) {

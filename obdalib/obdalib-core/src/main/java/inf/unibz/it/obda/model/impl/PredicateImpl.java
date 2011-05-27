@@ -4,13 +4,13 @@ import inf.unibz.it.obda.model.Predicate;
 
 import java.net.URI;
 
-public class PredicateImp implements Predicate{
+public class PredicateImpl implements Predicate{
 
 	private int arity = -1;
 	private URI name = null;
 	private int identifier = -1;
 
-	protected PredicateImp (URI name, int arity){
+	protected PredicateImpl (URI name, int arity){
 		this.name = name;
 		this.identifier = name.toString().hashCode();
 		this.arity = arity;
@@ -33,10 +33,10 @@ public class PredicateImp implements Predicate{
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj == null|| !(obj instanceof PredicateImp))
+		if (obj == null|| !(obj instanceof PredicateImpl))
 			return false;
 
-		PredicateImp pred2 = (PredicateImp) obj;
+		PredicateImpl pred2 = (PredicateImpl) obj;
 		if (pred2.arity != arity)
 			return false;
 
@@ -50,7 +50,7 @@ public class PredicateImp implements Predicate{
 
 	@Override
 	public Predicate copy() {
-		return new PredicateImp(this.name, this.arity);
+		return new PredicateImpl(this.name, this.arity);
 	}
 
 	@Override

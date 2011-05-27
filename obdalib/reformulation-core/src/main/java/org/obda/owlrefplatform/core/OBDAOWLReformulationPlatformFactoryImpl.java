@@ -1,10 +1,12 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.MappingController;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.sql.JDBCConnectionManager;
 
@@ -173,13 +175,14 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 String password = "";
                 Connection connection;
 
-                DataSource source = new DataSource(URI.create("http://www.obda.org/ABOXDUMP"));
-                source.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-                source.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, password);
-                source.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
-                source.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
-                source.setParameter(RDBMSsourceParameterConstants.IS_IN_MEMORY, "true");
-                source.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+                OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+                DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+                source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+                source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+                source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+                source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+                source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+                source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
                 apic.getDatasourcesController().addDataSource(source);
 //                apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
@@ -269,7 +272,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
                 MappingViewManager viewMan = new MappingViewManager(mappings);
                 unfMech = new ComplexMappingUnfolder(mappings, viewMan);
-                JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER));
+                JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
                 gen = new ComplexMappingSQLGenerator(viewMan, util);
             } else if ("material".equals(unfoldingMode)) {
                 unfMech = new DirectMappingUnfolder();

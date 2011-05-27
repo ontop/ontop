@@ -19,8 +19,8 @@ import inf.unibz.it.obda.gui.swing.treemodel.QueryGroupTreeElement;
 import inf.unibz.it.obda.gui.swing.treemodel.QueryTreeElement;
 import inf.unibz.it.obda.gui.swing.treemodel.TreeElement;
 import inf.unibz.it.obda.io.QueryStorageManager;
-import inf.unibz.it.obda.model.QueryController;
-import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.queryanswering.QueryController;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 

@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.model;
+package inf.unibz.it.obda.queryanswering;
 
 
 public abstract class QueryControllerEntity {

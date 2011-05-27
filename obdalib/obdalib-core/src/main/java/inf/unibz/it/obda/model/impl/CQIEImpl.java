@@ -11,27 +11,33 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-
+/***
+ * This is a rule implementation that keeps track of changes in the query by
+ * externals. It is also optimized for .equals calls.
+ * 
+ * @author Mariano Rodriguez Muro
+ * 
+ */
 public class CQIEImpl implements CQIE, ListListener {
 
-	private Atom		head		= null;
-	private List<Atom>	body		= null;
-	private boolean		isBoolean	= false;
+	private Atom				head		= null;
+	private List<Atom>			body		= null;
+	// private boolean isBoolean = false;
 
-	private int			hash		= -1;
+	private int					hash		= -1;
 
-	private boolean		rehash		= true;
+	private boolean				rehash		= true;
 
-	private String		string		= null;
+	private String				string		= null;
 
-	private static final String SPACE = " ";
-	private static final String COMMA = ",";
-	private static final String INV_IMPLIES = ":-";
+	private static final String	SPACE		= " ";
+	private static final String	COMMA		= ",";
+	private static final String	INV_IMPLIES	= ":-";
 
 	// TODO Remove isBoolean from the signature and from any method
-	public CQIEImpl(Atom head, List<Atom> body, boolean isBoolean) {
+	protected CQIEImpl(Atom head, List<Atom> body) {
 
-		this.isBoolean = isBoolean;
+		// this.isBoolean = isBoolean;
 
 		// The syntax for CQ may contain no body, thus, this condition will
 		// check whether the construction of the link list is possible or not.
@@ -87,10 +93,10 @@ public class CQIEImpl implements CQIE, ListListener {
 		return hash;
 	}
 
-	@Override
-	public boolean isBoolean() {
-		return isBoolean;
-	}
+	// @Override
+	// public boolean isBoolean() {
+	// return isBoolean;
+	// }
 
 	@Override
 	public String toString() {
@@ -120,9 +126,9 @@ public class CQIEImpl implements CQIE, ListListener {
 		for (Atom atom : body) {
 			copyBody.add(atom.copy());
 		}
-		boolean copyIsBoolean = isBoolean;
+		// boolean copyIsBoolean = isBoolean;
 
-		return new CQIEImpl(copyHead, copyBody, copyIsBoolean);
+		return new CQIEImpl(copyHead, copyBody);
 	}
 
 	@Override
@@ -139,7 +145,7 @@ public class CQIEImpl implements CQIE, ListListener {
 		string = null;
 
 	}
-	
+
 	@Override
 	public QueryModifiers getQueryModifiers() {
 		return new QueryModifiers();

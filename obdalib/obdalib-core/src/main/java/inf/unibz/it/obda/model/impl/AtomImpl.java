@@ -38,7 +38,7 @@ public class AtomImpl implements Atom, ListListener {
 
 	private int			hash		= 0;
 
-	public AtomImpl(Predicate predicate, List<Term> terms) {
+	protected AtomImpl(Predicate predicate, List<Term> terms) {
 		if (predicate.getArity() != terms.size()) {
 			throw new IllegalArgumentException("There must be the same number of terms as indicated by predicate");
 		}

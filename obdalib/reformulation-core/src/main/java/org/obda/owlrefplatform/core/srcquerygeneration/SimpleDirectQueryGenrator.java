@@ -9,6 +9,7 @@ import inf.unibz.it.obda.model.URIConstant;
 import inf.unibz.it.obda.model.Variable;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
+import inf.unibz.it.obda.utils.QueryUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -115,7 +116,8 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			sb.append(" WHERE ");
 			sb.append(wc);
 		}
-		if (query.isBoolean()) {
+		
+		if (QueryUtils.isBoolean(query)) {
 			sb.append(" LIMIT 1");
 		}
 		return sb.toString();
@@ -133,7 +135,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	private String generateSelectClause(CQIE query) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		int variableCounter = 0;
-		if (query.isBoolean()) {
+		if (QueryUtils.isBoolean(query)) {
 			sb.append("TRUE AS x ");
 		} else {
 			Atom head = query.getHead();

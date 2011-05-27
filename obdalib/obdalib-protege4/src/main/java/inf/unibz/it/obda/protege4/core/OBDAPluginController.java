@@ -4,12 +4,14 @@ import inf.unibz.it.obda.io.DataManager;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesControllerListener;
 import inf.unibz.it.obda.model.MappingControllerListener;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.QueryControllerEntity;
-import inf.unibz.it.obda.model.QueryControllerListener;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerListener;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 import java.io.IOException;
@@ -108,7 +110,8 @@ public class OBDAPluginController implements Disposable {
 			obdacontroller.getMappingController().removeMappingControllerListener(mlistener);
 			obdacontroller.getQueryController().removeListener(qlistener);
 		}
-		obdacontroller = new OBDAModel();
+		OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+        obdacontroller = obdafac.getOBDAModel();
 
 		obdacontroller.getDatasourcesController().addDatasourceControllerListener(dlistener);
 		obdacontroller.getMappingController().addMappingControllerListener(mlistener);

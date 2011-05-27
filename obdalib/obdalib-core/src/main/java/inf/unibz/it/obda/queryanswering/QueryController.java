@@ -10,10 +10,8 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.model;
+package inf.unibz.it.obda.queryanswering;
 
-import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
-import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 import java.util.Iterator;
 import java.util.Vector;

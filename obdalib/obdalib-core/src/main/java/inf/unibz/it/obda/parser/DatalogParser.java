@@ -4,6 +4,7 @@ package inf.unibz.it.obda.parser;
 
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatalogProgram;
 import inf.unibz.it.obda.model.Function;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Predicate;
@@ -11,14 +12,12 @@ import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.URIConstant;
 import inf.unibz.it.obda.model.ValueConstant;
 import inf.unibz.it.obda.model.Variable;
-import inf.unibz.it.obda.model.impl.AtomImpl;
-import inf.unibz.it.obda.model.impl.CQIEImpl;
-import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -133,10 +132,10 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "parse"
     // Datalog.g:103:1: parse returns [DatalogProgramImpl value] : prog EOF ;
-    public final DatalogProgramImpl parse() throws RecognitionException {
-        DatalogProgramImpl value = null;
+    public final DatalogProgram parse() throws RecognitionException {
+    	DatalogProgram value = null;
 
-        DatalogProgramImpl prog1 = null;
+        DatalogProgram prog1 = null;
 
 
         try {
@@ -172,14 +171,15 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "prog"
     // Datalog.g:111:1: prog returns [DatalogProgramImpl value] : ( base )? ( directive )* ( rule )+ ;
-    public final DatalogProgramImpl prog() throws RecognitionException {
-        DatalogProgramImpl value = null;
+    public final DatalogProgram prog() throws RecognitionException {
+        DatalogProgram value = null;
 
         CQIE rule2 = null;
 
 
-
-          value = new DatalogProgramImpl();
+        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+        
+          value = fac.getDatalogProgram();
           CQIE rule = null;
 
         try {
@@ -569,8 +569,8 @@ public class DatalogParser extends Parser {
                     state._fsp--;
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
-
-                            value = new CQIEImpl(null, body8, true);
+                    		
+                            value = termFactory.getCQIE(null, body8);
                           
                     }
 
@@ -705,7 +705,7 @@ public class DatalogParser extends Parser {
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
-                            value = new CQIEImpl(head10, body11, true);
+                            value = termFactory.getCQIE(head10, body11);
                           
                     }
 
@@ -722,7 +722,7 @@ public class DatalogParser extends Parser {
                     match(input,INV_IMPLIES,FOLLOW_INV_IMPLIES_in_datalog_syntax_alt276); if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
-                            value = new CQIEImpl(head12, null, true);
+                            value = termFactory.getCQIE(head12, new LinkedList<Atom>());
                           
                     }
 
@@ -782,7 +782,7 @@ public class DatalogParser extends Parser {
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
-                            value = new CQIEImpl(head13, null, true);
+                            value = termFactory.getCQIE(head13, new LinkedList<Atom>());
                           
                     }
 
@@ -917,7 +917,7 @@ public class DatalogParser extends Parser {
                     if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
-                            value = new CQIEImpl(head15, body16, true);
+                            value = termFactory.getCQIE(head15, body16);
                           
                     }
 
@@ -934,7 +934,7 @@ public class DatalogParser extends Parser {
                     match(input,IMPLIES,FOLLOW_IMPLIES_in_swirl_syntax_alt347); if (state.failed) return value;
                     if ( state.backtracking==0 ) {
 
-                            value = new CQIEImpl(null, body17, true);
+                            value = termFactory.getCQIE(null, body17);
                           
                     }
 
@@ -1132,7 +1132,7 @@ public class DatalogParser extends Parser {
                     if (terms == null)
                       terms = new Vector<Term>();
                       
-                    value = new AtomImpl(predicate, terms);
+                    value = termFactory.getAtom(predicate, terms);
                   
             }
 

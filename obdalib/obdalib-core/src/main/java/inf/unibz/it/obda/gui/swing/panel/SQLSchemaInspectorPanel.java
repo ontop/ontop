@@ -21,7 +21,7 @@ import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 import inf.unibz.it.sql.JDBCConnectionManager;
 
 import java.awt.BorderLayout;
@@ -342,10 +342,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		if (con == null)
 			throw new SQLException("Couldnt establish a connectino for the datsource: {}" + selectedSource.getSourceID());
 
-		if (selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
+		if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
 
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-			String url = selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
+			String url = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 			// jdbc:db2://5.90.168.104:50000/MINIST:currentSchema=PROP;
 			String[] sp1 = url.split("/");
 			String catalog = sp1[sp1.length - 1].split(":")[0];
@@ -355,7 +355,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 					+ "' AND TABLE_SCHEMA = '" + schema + "'");
 			return r;
 		}
-		if (selectedSource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
+		if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
 			// select table_name from user_tables
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			ResultSet r = statement.executeQuery("select table_name from user_tables");

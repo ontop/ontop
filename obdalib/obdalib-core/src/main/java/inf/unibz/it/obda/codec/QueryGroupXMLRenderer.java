@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 

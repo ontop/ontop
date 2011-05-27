@@ -1,7 +1,10 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.io.DataManager;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -177,7 +180,10 @@ public class TestFileGenerator {
             Iterator<OWLOntology> oit = o.iterator();
             while (oit.hasNext()) {
                 OWLOntology onto = oit.next();
-                apic = new OBDAModel();
+                
+                OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+                apic = obdafac.getOBDAModel();
+                
                 String ontoname = onto.getURI().toString();
                 int z = ontoname.lastIndexOf("/");
                 ontoname = ontoname.substring(z + 1, ontoname.length() - 4);

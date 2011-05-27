@@ -25,6 +25,7 @@ package inf.unibz.it.obda.gui.swing.panel;
 import inf.unibz.it.obda.gui.swing.utils.DatasourceSelectorListener;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesControllerListener;
+import inf.unibz.it.obda.model.impl.DataSourceImpl;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

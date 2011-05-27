@@ -1,6 +1,8 @@
 package org.obda.owlrefplatform.core.abox.tests;
 import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.OBDADataFactory;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 import inf.unibz.it.sql.JDBCConnectionManager;
 
 import java.io.File;
@@ -43,13 +45,14 @@ public class ABoxDumpTest extends TestCase {
          String username = "sa";
          String password = "";
 
-         DataSource source = new DataSource(URI.create("http://www.obda.org/ABOXDUMP"));
-         source.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-         source.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, password);
-         source.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
-         source.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, username);
-         source.setParameter(RDBMSsourceParameterConstants.IS_IN_MEMORY, "true");
-         source.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+         OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+         DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+         source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+         source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+         source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+         source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+         source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+         source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 	     
  		 Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
 

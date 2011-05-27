@@ -1,11 +1,12 @@
 package inf.unibz.it.obda.owlapi.util;
 
+import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DataSourceImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.sql.JDBCConnectionManager;
 

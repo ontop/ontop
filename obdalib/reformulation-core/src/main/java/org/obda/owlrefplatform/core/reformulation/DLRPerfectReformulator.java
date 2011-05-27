@@ -3,8 +3,10 @@ package org.obda.owlrefplatform.core.reformulation;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.utils.QueryUtils;
 
 import java.util.HashSet;
@@ -26,6 +28,8 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	private AtomUnifier					unifier			= null;
 	private PositiveInclusionApplicator	piApplicator	= null;
 	private List<Assertion>				assertions		= null;
+	
+	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
@@ -49,7 +53,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	 */
 	private DatalogProgram reformulate(DatalogProgram q) throws Exception {
 
-		DatalogProgramImpl prog = new DatalogProgramImpl();
+		DatalogProgram prog = fac.getDatalogProgram();
 
 		QueryUtils.copyQueryModifiers(q, prog);
 

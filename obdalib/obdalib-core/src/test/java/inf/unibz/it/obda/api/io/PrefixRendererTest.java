@@ -24,18 +24,20 @@ import org.junit.Before;
 
 public class PrefixRendererTest extends TestCase {
 
-	PrefixManager		pm;
-	DatalogProgram		query;
-	CQIE				rule1;
-//	EntityNameRenderer	rend;
+	PrefixManager	pm;
+	DatalogProgram	query;
+	CQIE			rule1;
+
+	// EntityNameRenderer rend;
 
 	@Before
 	public void setUp() throws Exception {
 		pm = new SimplePrefixManager();
-//		rend = new EntityNameRenderer(pm);
-		query = new DatalogProgramImpl();
+		// rend = new EntityNameRenderer(pm);
+
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
+		query = tfac.getDatalogProgram();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
 		innerterms.add(tfac.createVariable("id"));
@@ -43,13 +45,13 @@ public class PrefixRendererTest extends TestCase {
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.createFunctionalTerm(pfac.createPredicate(URI.create("http://obda.org/onto.owl#person-individual"), 1), innerterms));
 
-		Atom body = new AtomImpl(pfac.createPredicate(URI.create("http://obda.org/onto.owl#Person"), 1), terms);
+		Atom body = tfac.getAtom(pfac.createPredicate(URI.create("http://obda.org/onto.owl#Person"), 1), terms);
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.createVariable("id"));
-		Atom head = new AtomImpl(pfac.createPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
+		Atom head = tfac.getAtom(pfac.createPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
 
-		rule1 = new CQIEImpl(head, Collections.singletonList(body), false);
+		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);
 	}
 
@@ -59,53 +61,57 @@ public class PrefixRendererTest extends TestCase {
 	 */
 	public void testNamespace1() {
 		pm.setDefaultNamespace("http://obda.org/onto.owl#");
-		String name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(),true);
+		String name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
-		
-		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(),true);
-		assertTrue(name,name.equals("Person"));
-		
-		name =  pm.getShortForm(((FunctionalTermImpl)query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(),true);
-		assertTrue(name,name.equals("person-individual"));
-		
+
+		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(), true);
+		assertTrue(name, name.equals("Person"));
+
+		name = pm
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+		assertTrue(name, name.equals("person-individual"));
+
 		pm.setDefaultNamespace("http://obda.org/predicates#");
-		name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(),true);
-		assertTrue(name,name.equals("q"));
-		
-		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(),true);
-		assertTrue(name,name.equals("http://obda.org/onto.owl#Person"));
-		
-		name =  pm.getShortForm(((FunctionalTermImpl)query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(),true);
-		assertTrue(name,name.equals("http://obda.org/onto.owl#person-individual"));
+		name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
+		assertTrue(name, name.equals("q"));
+
+		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(), true);
+		assertTrue(name, name.equals("http://obda.org/onto.owl#Person"));
+
+		name = pm
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+		assertTrue(name, name.equals("http://obda.org/onto.owl#person-individual"));
 	}
-	
+
 	/***
 	 * This test checks if the prefix are properly handled
 	 */
 	public void testPrefix1() {
 		pm.setDefaultNamespace("http://obda.org/onto.owl#");
 		pm.addUri("http://obda.org/predicates#", "obdap");
-		
-		String name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(),true);
+
+		String name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
 		assertTrue(name, name.equals("obdap:q"));
-		
-		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(),true);
-		assertTrue(name,name.equals("Person"));
-		
-		name =  pm.getShortForm(((FunctionalTermImpl)query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(),true);
-		assertTrue(name,name.equals("person-individual"));
-		
+
+		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(), true);
+		assertTrue(name, name.equals("Person"));
+
+		name = pm
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+		assertTrue(name, name.equals("person-individual"));
+
 		pm.setDefaultNamespace("http://obda.org/predicates#");
 		pm.addUri("http://obda.org/onto.owl#", "onto");
-		name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(),true);
-		assertTrue(name,name.equals("q"));
-		
-		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(),true);
-		assertTrue(name,name.equals("onto:Person"));
-		
-		name =  pm.getShortForm(((FunctionalTermImpl)query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(),true);
-		assertTrue(name,name.equals("onto:person-individual"));
-		
+		name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
+		assertTrue(name, name.equals("q"));
+
+		name = pm.getShortForm(query.getRules().get(0).getBody().get(0).getPredicate().toString(), true);
+		assertTrue(name, name.equals("onto:Person"));
+
+		name = pm
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+		assertTrue(name, name.equals("onto:person-individual"));
+
 	}
 
 }

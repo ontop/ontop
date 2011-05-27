@@ -2,8 +2,8 @@ package inf.unibz.it.obda.io;
 
 import inf.unibz.it.obda.codec.QueryGroupXMLReader;
 import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
-import inf.unibz.it.obda.model.QueryController;
-import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.queryanswering.QueryController;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 import inf.unibz.it.obda.utils.XMLUtils;

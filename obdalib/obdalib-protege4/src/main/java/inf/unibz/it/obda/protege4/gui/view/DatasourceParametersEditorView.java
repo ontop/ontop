@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.protege4.gui.view;
 
 import inf.unibz.it.obda.gui.swing.panel.DatasourceParameterEditorPanel;
-import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;
@@ -28,7 +28,7 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent {
 	protected void initialiseOWLView() throws Exception {
 
 		
-		apic = getOWLEditorKit().get(OBDAModel.class.getName());
+		apic = getOWLEditorKit().get(OBDAModelImpl.class.getName());
 //		apic.addListener(this);
 		
 		panel = new DatasourceParameterEditorPanel(apic.getOBDAManager().getDatasourcesController());

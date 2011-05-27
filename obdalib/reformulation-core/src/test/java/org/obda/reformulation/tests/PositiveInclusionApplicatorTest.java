@@ -58,26 +58,26 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		List<Term> terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(y);
-		Atom a1 = new AtomImpl(r, terms1);
+		Atom a1 = tfac.getAtom(r, terms1);
 
 		List<Term> terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(z);
-		Atom a2 = new AtomImpl(r, terms2);
+		Atom a2 = tfac.getAtom(r, terms2);
 
 		List<Term> terms3 = new LinkedList<Term>();
 		terms3.add(y);
 		terms3.add(m);
-		Atom a3 = new AtomImpl(s, terms3);
+		Atom a3 = tfac.getAtom(s, terms3);
 
 		List<Term> terms4 = new LinkedList<Term>();
 		terms4.add(z);
 		terms4.add(m);
-		Atom a4 = new AtomImpl(s, terms4);
+		Atom a4 = tfac.getAtom(s, terms4);
 
 		List<Term> termshead = new LinkedList<Term>();
 		termshead.add(x);
-		Atom head = new AtomImpl(q, termshead);
+		Atom head = tfac.getAtom(q, termshead);
 
 		LinkedList<Atom> body = new LinkedList<Atom>();
 		body.add(a1);
@@ -85,17 +85,17 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		body.add(a3);
 		body.add(a4);
 
-		initialquery1 = new CQIEImpl(head, body, false);
+		initialquery1 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(u1);
-		a1 = new AtomImpl(r, terms1);
+		a1 = tfac.getAtom(r, terms1);
 
 		terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(u2);
-		a2 = new AtomImpl(r, terms2);
+		a2 = tfac.getAtom(r, terms2);
 
 		body = new LinkedList<Atom>();
 		body.add(a1);
@@ -103,19 +103,19 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = new AtomImpl(q, termshead);
+		head = tfac.getAtom(q, termshead);
 
-		initialquery2 = new CQIEImpl(head, body, false);
+		initialquery2 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<Term>();
 		terms1.add(u1);
 		terms1.add(x);
-		a1 = new AtomImpl(r, terms1);
+		a1 = tfac.getAtom(r, terms1);
 
 		terms2 = new LinkedList<Term>();
 		terms2.add(u2);
 		terms2.add(x);
-		a2 = new AtomImpl(r, terms2);
+		a2 = tfac.getAtom(r, terms2);
 
 		body = new LinkedList<Atom>();
 		body.add(a1);
@@ -123,19 +123,19 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = new AtomImpl(q, termshead);
+		head = tfac.getAtom(q, termshead);
 
-		initialquery3 = new CQIEImpl(head, body, false);
+		initialquery3 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(u1);
-		a1 = new AtomImpl(r, terms1);
+		a1 = tfac.getAtom(r, terms1);
 
 		terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(y);
-		a2 = new AtomImpl(r, terms2);
+		a2 = tfac.getAtom(r, terms2);
 
 		body = new LinkedList<Atom>();
 		body.add(a1);
@@ -143,19 +143,19 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = new AtomImpl(q, termshead);
+		head = tfac.getAtom(q, termshead);
 
-		initialquery4 = new CQIEImpl(head, body, false);
+		initialquery4 = tfac.getCQIE(head, body);
 
 		terms1 = new LinkedList<Term>();
 		terms1.add(u1);
 		terms1.add(x);
-		a1 = new AtomImpl(r, terms1);
+		a1 = tfac.getAtom(r, terms1);
 
 		terms2 = new LinkedList<Term>();
 		terms2.add(y);
 		terms2.add(x);
-		a2 = new AtomImpl(r, terms2);
+		a2 = tfac.getAtom(r, terms2);
 
 		body = new LinkedList<Atom>();
 		body.add(a1);
@@ -163,9 +163,9 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 		termshead = new LinkedList<Term>();
 		termshead.add(x);
-		head = new AtomImpl(q, termshead);
+		head = tfac.getAtom(q, termshead);
 
-		initialquery5 = new CQIEImpl(head, body, false);
+		initialquery5 = tfac.getCQIE(head, body);
 
 	}
 

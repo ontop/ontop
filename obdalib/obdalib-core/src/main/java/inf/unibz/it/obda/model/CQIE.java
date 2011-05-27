@@ -6,7 +6,7 @@ public interface CQIE extends Query {
 
 	public Atom getHead();
 	public List<Atom> getBody();
-	public boolean isBoolean();
+//	public boolean isBoolean();
 	public void updateHead(Atom head);
 	public void updateBody(List<Atom> body);
 	

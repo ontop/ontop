@@ -3,7 +3,7 @@ package inf.unibz.it.sql;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.gui.swing.treemodel.ColumnInspectorTableModel;
 import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -54,11 +54,11 @@ public class JDBCConnectionManager {
 		if (ds == null) {
 			throw new NoDatasourceSelectedException("No source selected");
 		}
-		String driver = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
+		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 		currentDriver = driver;
-		String url = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		String username = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-		String password = ds.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
+		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		URI connID = ds.getSourceID();
 		
 		Connection con = connectionPool.get(connID);
@@ -212,7 +212,7 @@ public class JDBCConnectionManager {
 		}
 		con = connectionPool.get(ds.getSourceID());
 		
-		if (ds.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER).equals("org.postgresql.Driver")) {
+		if (ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("org.postgresql.Driver")) {
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			String query = "select reltuples from pg_class where relname='" + name+"'";
 			ResultSet r = statement.executeQuery(query);
@@ -272,7 +272,7 @@ public class JDBCConnectionManager {
 		}
 		connection = connectionPool.get(source.getSourceID());
 		
-		String driverClassName = source.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
+		String driverClassName = source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 		
 		if(currentStatement != null){
 			currentStatement.close();

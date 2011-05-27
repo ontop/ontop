@@ -1,10 +1,12 @@
 package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.io.DataManager;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.QueryController;
-import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
+import inf.unibz.it.obda.queryanswering.QueryController;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
@@ -35,7 +37,8 @@ public class OntologyLoader {
             OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
             // Loading the OBDA data (note, the obda file must be in the same folder as the owl file
-            OBDAModel controller = new OBDAModel();
+            OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+            OBDAModel controller = obdafac.getOBDAModel();
             String obdafile = owlfile.substring(0, owlfile.length()-3) + ".obda";
             DataManager ioManager = new DataManager(controller);
             ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), controller.getPrefixManager());;

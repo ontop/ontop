@@ -5,7 +5,6 @@ import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 
@@ -423,7 +422,7 @@ public class PositiveInclusionApplicator {
 					while (tit.hasNext()) {
 						v.add(tit.next().copy());
 					}
-					AtomImpl newatom = new AtomImpl(lefthandside.getPredicate().copy(), v);
+					Atom newatom = termFactory.getAtom(lefthandside.getPredicate().copy(), v);
 
 					body.set(atomindex, newatom);
 
@@ -435,18 +434,18 @@ public class PositiveInclusionApplicator {
 					 */
 					Term t = a.getTerms().get(0);
 					Term anonym = termFactory.createUndistinguishedVariable();
-					AtomImpl newatom = null;
+					Atom newatom = null;
 
 					if (((ExistentialConceptDescriptionImpl) lefthandside).isInverse()) {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, anonym);
 						v.add(1, t);
-						newatom = new AtomImpl(lefthandside.getPredicate().copy(), v);
+						newatom = termFactory.getAtom(lefthandside.getPredicate().copy(), v);
 					} else {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, t);
 						v.add(1, anonym);
-						newatom = new AtomImpl(lefthandside.getPredicate().copy(), v);
+						newatom = termFactory.getAtom(lefthandside.getPredicate().copy(), v);
 					}
 
 					body.set(atomindex, newatom);
@@ -479,19 +478,19 @@ public class PositiveInclusionApplicator {
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
-					newatom = new AtomImpl(lefthandside.getPredicate(), v);
+					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 				} else if (lefthandside.isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
-					newatom = new AtomImpl(lefthandside.getPredicate(), v);
+					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 				} else if (!lefthandside.isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
-					newatom = new AtomImpl(lefthandside.getPredicate(), v);
+					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 				}
 			} else if (t1 instanceof UndistinguishedVariable && righthandside.isInverse()) {
@@ -501,19 +500,19 @@ public class PositiveInclusionApplicator {
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
-					newatom = new AtomImpl(lefthandside.getPredicate(), v);
+					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 				} else if (lefthandside.isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
-					newatom = new AtomImpl(lefthandside.getPredicate(), v);
+					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 				} else if (!lefthandside.isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
-					newatom = new AtomImpl(lefthandside.getPredicate(), v);
+					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 				}
 			}
@@ -542,13 +541,13 @@ public class PositiveInclusionApplicator {
 				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t1);
 				v.add(1, t2);
-				newatom = new AtomImpl(lefthandside.getPredicate(), v);
+				newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 			} else {
 				LinkedList<Term> v = new LinkedList<Term>();
 				v.add(0, t2);
 				v.add(1, t1);
-				newatom = new AtomImpl(lefthandside.getPredicate(), v);
+				newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
 			}
 

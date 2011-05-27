@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.model.impl;
 
-public class RDBMSsourceParameterConstants {
+public class RDBMSourceParameterConstants {
 
 	public static final String DATABASE_USERNAME = "databaseUsername";
 	public static final String DATABASE_PASSWORD = "databasePassword";

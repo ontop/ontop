@@ -2,7 +2,7 @@ package inf.unibz.it.obda.protege4.gui.view.query;
 
 import inf.unibz.it.obda.gui.swing.panel.SavedQueriesPanel;
 import inf.unibz.it.obda.gui.swing.panel.SavedQueriesPanelListener;
-import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;
@@ -30,7 +30,7 @@ public class QueryManagerViewComponent extends AbstractOWLViewComponent {
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAPluginController) getOWLEditorKit().get(OBDAModel.class.getName());
+		obdaController = (OBDAPluginController) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		setLayout(new BorderLayout());
 		panel = new SavedQueriesPanel(obdaController.getOBDAManager().getQueryController());
 

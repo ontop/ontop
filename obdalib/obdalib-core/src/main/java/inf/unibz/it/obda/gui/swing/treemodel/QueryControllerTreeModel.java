@@ -13,9 +13,9 @@
  */
 package inf.unibz.it.obda.gui.swing.treemodel;
 
-import inf.unibz.it.obda.model.QueryControllerEntity;
-import inf.unibz.it.obda.model.QueryControllerListener;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerListener;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 import java.util.Enumeration;

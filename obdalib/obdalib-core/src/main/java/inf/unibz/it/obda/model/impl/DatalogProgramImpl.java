@@ -21,7 +21,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 	
 	private QueryModifiers modifiers;
 
-	public DatalogProgramImpl() {
+	protected DatalogProgramImpl() {
 		modifiers = new QueryModifiers();
 		rules = new Vector<CQIE>();
 		predicateIndex = new HashMap<Predicate, List<CQIE>>();

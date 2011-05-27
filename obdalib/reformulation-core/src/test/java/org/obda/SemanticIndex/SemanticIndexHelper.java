@@ -1,6 +1,9 @@
 package org.obda.SemanticIndex;
 
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -64,7 +67,10 @@ public class SemanticIndexHelper {
     public Set<OWLOntology> load_onto(String ontoname) throws OWLOntologyCreationException {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-        apic = new OBDAModel();
+        
+        OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+        apic = obdafac.getOBDAModel();
+        
 
         Set<OWLOntology> onto_set = new HashSet<OWLOntology>(1);
         onto_set.add(ontology);

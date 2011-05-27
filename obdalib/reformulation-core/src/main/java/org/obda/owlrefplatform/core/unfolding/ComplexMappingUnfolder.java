@@ -14,7 +14,6 @@ import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.DatalogProgramImpl;
 import inf.unibz.it.obda.model.impl.FunctionalTermImpl;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
-import inf.unibz.it.obda.model.impl.OperatorAtom;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.UndistinguishedVariable;
 import inf.unibz.it.obda.model.impl.VariableImpl;
@@ -34,7 +33,6 @@ import org.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import org.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Implements the partial evaluation algorithm with obda mappings
@@ -104,7 +102,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				Atom atom = bit.next();
 				List<Atom> newBody = new LinkedList<Atom>();
 				newBody.add(atom);
-				CQIE newCQ = new CQIEImpl(head, newBody, false);
+				CQIE newCQ = termFactory.getCQIE(head, newBody);
 				RDBMSOBDAMappingAxiom newMap = new RDBMSOBDAMappingAxiom(map.getId() + "_" + counter);
 				newMap.setSourceQuery(map.getSourceQuery());
 				newMap.setTargetQuery(newCQ);
@@ -116,7 +114,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 		/* Creating the compilation of the mappings */
 		log.debug("Computing the compilation of the mappings");
-		DatalogProgram compilationOfM = new DatalogProgramImpl();
+		DatalogProgram compilationOfM = termFactory.getDatalogProgram();
 		for (OBDAMappingAxiom mapping : splitMappings) {
 			CQIE mappingrule = getRule(mapping);
 			compilationOfM.appendRule(mappingrule);
@@ -179,7 +177,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			bodyTerms.add(termFactory.createVariable(name + i));
 		}
 
-		Atom ruleBodyAtom = new AtomImpl(viewPredicate, bodyTerms);
+		Atom ruleBodyAtom = termFactory.getAtom(viewPredicate, bodyTerms);
 		LinkedList<Atom> ruleBody = new LinkedList<Atom>();
 		ruleBody.add(ruleBodyAtom);
 
@@ -215,9 +213,9 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			}
 		}
 
-		Atom ruleHead = new AtomImpl(mappingsBodyAtom.getPredicate(), headTerms);
+		Atom ruleHead = termFactory.getAtom(mappingsBodyAtom.getPredicate(), headTerms);
 
-		CQIE mappingRule = new CQIEImpl(ruleHead, ruleBody, false);
+		CQIE mappingRule = termFactory.getCQIE(ruleHead, ruleBody);
 
 		return mappingRule;
 	}
@@ -279,7 +277,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		partialEvaluation.addAll(cleanset);
 		CQCUtilities.removeContainedQueriesSyntacticSorter(partialEvaluation, true);
 
-		DatalogProgram dp = new DatalogProgramImpl();
+		DatalogProgram dp = termFactory.getDatalogProgram();
 
 		QueryUtils.copyQueryModifiers(inputquery, dp);
 
@@ -299,9 +297,6 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			return partialEvaluations;
 
 		Atom atom = currentQuery.getBody().get(pos);
-
-		if (atom instanceof OperatorAtom)
-			throw new RuntimeException("ComplexMappingUnfolder: Attempting to unfold an operator atom");
 
 		Predicate atomPredicate = atom.getPredicate();
 
@@ -435,13 +430,13 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 						newTerms.add(t);
 					}
 				}
-				Atom newatom = new AtomImpl(atom.getPredicate(), newTerms);
+				Atom newatom = termFactory.getAtom(atom.getPredicate(), newTerms);
 				newbody.add(newatom);
 			}
-			CQIE newrule = new CQIEImpl(rule.getHead(), newbody, rule.isBoolean());
+			CQIE newrule = termFactory.getCQIE(rule.getHead(), newbody);
 			newrules.add(newrule);
 		}
-		DatalogProgram newprogram = new DatalogProgramImpl();
+		DatalogProgram newprogram = termFactory.getDatalogProgram();
 		newprogram.appendRule(newrules);
 		QueryUtils.copyQueryModifiers(dp, newprogram);
 		return newprogram;

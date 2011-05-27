@@ -17,14 +17,15 @@ import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.codec.QueryGroupXMLReader;
 import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.QueryControllerEntity;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
+import inf.unibz.it.obda.model.impl.DataSourceImpl;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 import inf.unibz.it.obda.utils.XMLUtils;
@@ -311,7 +312,7 @@ public class DataManager {
 					DataSource source = dsCodec.decode(node);
 					URI uri = URI.create(prefixManager.getDefaultNamespace());
 					if (uri != null) {
-						source.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, uri.toString());
+						source.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uri.toString());
 					}
 					apic.getDatasourcesController().addDataSource(source);
 				}

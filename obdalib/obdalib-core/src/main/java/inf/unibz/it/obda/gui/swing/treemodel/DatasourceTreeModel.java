@@ -14,6 +14,7 @@ package inf.unibz.it.obda.gui.swing.treemodel;
 
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesControllerListener;
+import inf.unibz.it.obda.model.impl.DataSourceImpl;
 
 import java.net.URI;
 import java.util.Enumeration;

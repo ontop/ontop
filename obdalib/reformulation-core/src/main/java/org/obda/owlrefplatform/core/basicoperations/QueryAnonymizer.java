@@ -30,7 +30,7 @@ public class QueryAnonymizer {
 
 	public DatalogProgram anonymize(DatalogProgram prog) {
 
-		DatalogProgram newProg = new DatalogProgramImpl();
+		DatalogProgram newProg = termFactory.getDatalogProgram();
 		List<CQIE> rules = prog.getRules();
 		Iterator<CQIE> it = rules.iterator();
 		while (it.hasNext()) {
@@ -149,10 +149,10 @@ public class QueryAnonymizer {
 					vex.add(t);
 				}
 			}
-			AtomImpl newatom = new AtomImpl(atom.getPredicate().copy(), vex);
+			Atom newatom = termFactory.getAtom(atom.getPredicate().copy(), vex);
 			newBody.add(newatom);
 		}
-		CQIEImpl query = new CQIEImpl(q.getHead(), newBody, q.isBoolean());
+		CQIE query = termFactory.getCQIE(q.getHead(), newBody);
 		return query;
 	}
 

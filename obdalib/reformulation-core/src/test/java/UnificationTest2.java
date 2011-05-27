@@ -38,6 +38,7 @@ public class UnificationTest2 extends TestCase {
 
 		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory predFac = OBDADataFactoryImpl.getInstance();
+		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 
 		Term t1 = factory.createVariable("x");
 		Term t2 = factory.createVariable("y");
@@ -61,17 +62,17 @@ public class UnificationTest2 extends TestCase {
 		terms4.add(t3.copy());
 		terms4.add(t2.copy());
 
-		Atom a1 = new AtomImpl(r1, terms1);
-		Atom a2 = new AtomImpl(r2, terms2);
-		Atom a3 = new AtomImpl(s, terms3);
-		Atom head = new AtomImpl(p, terms4);
+		Atom a1 = tfac.getAtom(r1, terms1);
+		Atom a2 = tfac.getAtom(r2, terms2);
+		Atom a3 = tfac.getAtom(s, terms3);
+		Atom head = tfac.getAtom(p, terms4);
 
 		Vector<Atom> body = new Vector<Atom>();
 		body.add(a1);
 		body.add(a2);
 		body.add(a3);
-		CQIE query = new CQIEImpl(head, body, true);
-		DatalogProgram prog = new DatalogProgramImpl();
+		CQIE query = tfac.getCQIE(head, body);
+		DatalogProgram prog = tfac.getDatalogProgram();
 		prog.appendRule(query);
 
 		List<Assertion> list = new Vector<Assertion>();

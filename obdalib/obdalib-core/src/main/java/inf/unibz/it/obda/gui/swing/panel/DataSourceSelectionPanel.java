@@ -6,6 +6,7 @@ package inf.unibz.it.obda.gui.swing.panel;
 
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
+import inf.unibz.it.obda.model.impl.DataSourceImpl;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;

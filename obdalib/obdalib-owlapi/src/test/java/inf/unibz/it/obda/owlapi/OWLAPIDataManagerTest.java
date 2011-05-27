@@ -2,9 +2,12 @@ package inf.unibz.it.obda.owlapi;
 
 import inf.unibz.it.obda.io.DataManager;
 import inf.unibz.it.obda.model.MappingController;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 
 import java.io.File;
 import java.net.URI;
@@ -174,8 +177,8 @@ public class OWLAPIDataManagerTest extends TestCase {
         URI obdafileuri = new File(obdafilestr).toURI();
         // Load the OBDA data.
         
-        
-        controller = new OBDAModel();
+        OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+        controller = obdafac.getOBDAModel();
         DataManager ioManager = new DataManager(controller);
         ioManager.loadOBDADataFromURI(obdafileuri,ontology.getURI(),controller.getPrefixManager());
 	}

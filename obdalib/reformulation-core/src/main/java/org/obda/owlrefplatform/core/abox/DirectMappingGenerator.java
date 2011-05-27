@@ -29,23 +29,20 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class DirectMappingGenerator {
 
+	private final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory	termFactory			= OBDADataFactoryImpl.getInstance();
+	private int						mappingcounter		= 1;
 
-	private final OBDADataFactory		predicateFactory		= OBDADataFactoryImpl.getInstance();
-	private final OBDADataFactory				termFactory				= OBDADataFactoryImpl.getInstance();
-	private int									mappingcounter			= 1;
-	
-	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
-	
-	public Set<OBDAMappingAxiom> getMappings(DataSource datasource) throws Exception{
+	private final Logger			log					= LoggerFactory.getLogger(ABoxToDBDumper.class);
+
+	public Set<OBDAMappingAxiom> getMappings(DataSource datasource) throws Exception {
 		throw new Exception("Not yet implemented");
 	}
-	
-	public Set<OBDAMappingAxiom> getMappings(Set<OWLOntology> ontologies, Map<URIIdentyfier,String> tableMap){
-		
+
+	public Set<OBDAMappingAxiom> getMappings(Set<OWLOntology> ontologies, Map<URIIdentyfier, String> tableMap) {
+
 		Iterator<OWLOntology> ontologyIterator = ontologies.iterator();
 		Set<OBDAMappingAxiom> mappings = new HashSet<OBDAMappingAxiom>();
 
@@ -59,14 +56,15 @@ public class DirectMappingGenerator {
 
 			Set<OWLEntity> entities = onto.getSignature();
 			Iterator<OWLEntity> entityIterator = entities.iterator();
-			
+
 			while (entityIterator.hasNext()) {
 				/* For each entity */
 				OWLEntity entity = entityIterator.next();
 
 				if (entity instanceof OWLClass) {
 					OWLClass clazz = (OWLClass) entity;
-					if (!clazz.isOWLThing()) {//if class equal to owl thing just skip it
+					if (!clazz.isOWLThing()) {// if class equal to owl thing
+												// just skip it
 						/* Creating the mapping */
 						URI name = clazz.getURI();
 						URIIdentyfier id = new URIIdentyfier(name, URIType.CONCEPT);
@@ -75,12 +73,12 @@ public class DirectMappingGenerator {
 						List<Term> terms = new Vector<Term>();
 						terms.add(qt);
 						Predicate predicate = predicateFactory.createPredicate(name, terms.size());
-						Atom bodyAtom = new AtomImpl(predicate, terms);
-						List<Atom> body = new Vector<Atom>();
-						body.add(bodyAtom); // the body
+						Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
+//						List<Atom> body = new Vector<Atom>();
+//						body.add(bodyAtom); // the body
 						predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-						Atom head = new AtomImpl(predicate, terms); // the head
-						Query cq = new CQIEImpl(head, body, false);
+						Atom head = predicateFactory.getAtom(predicate, terms); // the head
+						Query cq = predicateFactory.getCQIE(head, bodyAtom);
 						String sql = "SELECT term0 as x FROM " + tablename;
 						OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mappingcounter++);
 						ax.setTargetQuery(cq);
@@ -99,12 +97,12 @@ public class DirectMappingGenerator {
 					terms.add(qt1);
 					terms.add(qt2);
 					Predicate predicate = predicateFactory.createPredicate(objprop.getURI(), terms.size());
-					Atom bodyAtom = new AtomImpl(predicate, terms);
-					List<Atom> body = new Vector<Atom>();
-					body.add(bodyAtom); // the body
+					Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
+//					List<Atom> body = new Vector<Atom>();
+//					body.add(bodyAtom); // the body
 					predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-					Atom head = new AtomImpl(predicate, terms); // the head
-					Query cq = new CQIEImpl(head, body, false);
+					Atom head = predicateFactory.getAtom(predicate, terms); // the head
+					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
 					OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mappingcounter++);
 					ax.setTargetQuery(cq);
@@ -115,7 +113,7 @@ public class DirectMappingGenerator {
 				} else if (entity instanceof OWLDataProperty) {
 
 					OWLDataProperty dataProp = (OWLDataProperty) entity;
-					URIIdentyfier id = new URIIdentyfier(dataProp.getURI(), URIType.DATAPROPERTY);					
+					URIIdentyfier id = new URIIdentyfier(dataProp.getURI(), URIType.DATAPROPERTY);
 					Term qt1 = termFactory.createVariable("x");
 					String tablename = tableMap.get(id);
 					Term qt2 = termFactory.createVariable("y");
@@ -123,12 +121,12 @@ public class DirectMappingGenerator {
 					terms.add(qt1);
 					terms.add(qt2);
 					Predicate predicate = predicateFactory.createPredicate(dataProp.getURI(), terms.size());
-					Atom bodyAtom = new AtomImpl(predicate, terms);
-					List<Atom> body = new Vector<Atom>();
-					body.add(bodyAtom); // the body
+					Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
+//					List<Atom> body = new Vector<Atom>();
+//					body.add(bodyAtom); // the body
 					predicate = predicateFactory.createPredicate(URI.create("q"), terms.size());
-					Atom head = new AtomImpl(predicate, terms); // the head
-					Query cq = new CQIEImpl(head, body, false);
+					Atom head = predicateFactory.getAtom(predicate, terms); // the head
+					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
 					OBDAMappingAxiom ax = new RDBMSOBDAMappingAxiom("id" + mappingcounter++);
 					ax.setTargetQuery(cq);

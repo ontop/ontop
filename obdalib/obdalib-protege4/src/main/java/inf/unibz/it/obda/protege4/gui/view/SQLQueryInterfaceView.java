@@ -2,9 +2,9 @@ package inf.unibz.it.obda.protege4.gui.view;
 
 import inf.unibz.it.obda.gui.swing.panel.DatasourceSelector;
 import inf.unibz.it.obda.gui.swing.panel.SQLQueryPanel;
-import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;
@@ -38,7 +38,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent {
   protected void initialiseOWLView() throws Exception {
     
   	OBDAPluginController apic = 
-  	    getOWLEditorKit().get(OBDAModel.class.getName());
+  	    getOWLEditorKit().get(OBDAModelImpl.class.getName());
   	
   	DatasourcesController dsController = apic.getOBDAManager().getDatasourcesController();
   	Vector<DataSource> vecDatasource = 

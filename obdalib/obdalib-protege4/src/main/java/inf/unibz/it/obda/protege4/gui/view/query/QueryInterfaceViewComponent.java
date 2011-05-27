@@ -9,7 +9,7 @@ import inf.unibz.it.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableMode
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
-import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
@@ -71,7 +71,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAPluginController) getOWLEditorKit().get(OBDAModel.class.getName());
+		obdaController = (OBDAPluginController) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 
 		/***
 		 * Setting up the layout.

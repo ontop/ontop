@@ -6,8 +6,10 @@
 package org.obda.reformulation.protege4.configpanel;
 
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -201,22 +203,22 @@ public class SetParametersDialog extends javax.swing.JDialog {
     	
     		DataSource aux = getOldAboxDump();
     		if(aux != null){
-    			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-    			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, usr);
-    			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
-    			aux.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
+    			aux.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+    			aux.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, usr);
+    			aux.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, pwd);
+    			aux.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 //    			aux.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
-    			aux.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+    			aux.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
     			apic.getDatasourcesController().updateDataSource(aux.getSourceID(), aux);
     		}else{
-	    		
-		    	DataSource ds = new DataSource(URI.create("ABOXDUMP"));
-		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER, driver);
-		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME, usr);
-		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD, pwd);
-		    	ds.setParameter(RDBMSsourceParameterConstants.DATABASE_URL, url);
+	    		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		    	DataSource ds = fac.getDataSource(URI.create("ABOXDUMP"));
+		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, usr);
+		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, pwd);
+		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 //		    	ds.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI, apic.getCurrentOntologyURI().toString());
-		    	ds.setParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+		    	ds.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		    	apic.getDatasourcesController().addDataSource(ds);
     		}
 	    
@@ -231,7 +233,7 @@ public class SetParametersDialog extends javax.swing.JDialog {
     	Iterator<DataSource> it = apic.getDatasourcesController().getAllSources().iterator();
     	while(it.hasNext()){
     		DataSource aux = it.next();
-    		String s = aux.getParameter(RDBMSsourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
+    		String s = aux.getParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
     		if(s != null && s.equals("true")){
     			dump = aux;
     			break;

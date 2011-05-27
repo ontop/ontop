@@ -2,7 +2,7 @@ package inf.unibz.it.obda.protege4.gui.view;
 
 import inf.unibz.it.obda.gui.swing.panel.DataSourceSelectionPanel;
 import inf.unibz.it.obda.gui.swing.panel.DatasourceParameterEditorPanel;
-import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;
@@ -25,7 +25,7 @@ public class DatasourcesManagerViewComponent extends AbstractOWLViewComponent  {
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		OBDAPluginController apic = getOWLEditorKit().get(OBDAModel.class.getName());
+		OBDAPluginController apic = getOWLEditorKit().get(OBDAModelImpl.class.getName());
 
 		setLayout(new BorderLayout());
 

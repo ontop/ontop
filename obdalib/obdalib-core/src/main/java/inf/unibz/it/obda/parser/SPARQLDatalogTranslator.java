@@ -66,11 +66,11 @@ public class SPARQLDatalogTranslator {
 	 * @return the datalog object.
 	 * @throws QueryException the syntax is not supported yet.
 	 */
-	public DatalogProgramImpl parse(String query) throws QueryException {
+	public DatalogProgram parse(String query) throws QueryException {
 
 		Query queryObject = QueryFactory.create(query);
 
-		DatalogProgramImpl datalog = new DatalogProgramImpl();
+		DatalogProgram datalog = this.predicateFactory.getDatalogProgram();
 		if (queryObject.isDistinct())
 			datalog.getQueryModifiers().put("distinct", true);
 
@@ -85,7 +85,7 @@ public class SPARQLDatalogTranslator {
 		for (Element element : elements) {
 			List<Atom> body = getBodyAtoms(element); // Get the body atoms.
 
-			CQIE rule = new CQIEImpl(head, body, queryObject.isAskType());
+			CQIE rule = predicateFactory.getCQIE(head, body);
 			datalog.appendRule(rule);
 		}
 
@@ -107,7 +107,7 @@ public class SPARQLDatalogTranslator {
 		Predicate predicate =
 			predicateFactory.createPredicate(URI.create("q"), termSize);
 
-		return new AtomImpl(predicate, headTerms);
+		return predicateFactory.getAtom(predicate, headTerms);
 	}
 
 	/** Extract the body atoms */
@@ -199,7 +199,7 @@ public class SPARQLDatalogTranslator {
 				URI predicateUri = URI.create(p.getURI());
 				predicate = predicateFactory.createPredicate(predicateUri, 2);
 			}
-			Atom atom = new AtomImpl(predicate, terms);
+			Atom atom = predicateFactory.getAtom(predicate, terms);
 			body.add(atom);
 		}
 		return body;

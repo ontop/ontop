@@ -17,7 +17,7 @@ import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.obda.gui.swing.utils.DialogUtils;
 import inf.unibz.it.obda.gui.swing.utils.SPARQLQueryStyledDocument;
 import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.QueryController;
+import inf.unibz.it.obda.queryanswering.QueryController;
 import inf.unibz.it.obda.utils.OBDAPreferences;
 import inf.unibz.it.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
 

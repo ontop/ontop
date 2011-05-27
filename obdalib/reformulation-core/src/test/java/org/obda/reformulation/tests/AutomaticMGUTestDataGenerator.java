@@ -129,7 +129,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Atom atom = new AtomImpl(predFac.createPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
+		Atom atom = this.predFac.getAtom(predFac.createPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
 		return atom;
 	}
 

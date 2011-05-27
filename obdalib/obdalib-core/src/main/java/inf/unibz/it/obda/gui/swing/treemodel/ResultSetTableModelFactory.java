@@ -15,7 +15,7 @@ package inf.unibz.it.obda.gui.swing.treemodel;
 import inf.unibz.it.obda.exception.NoConnectionException;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
 import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -71,10 +71,10 @@ public class ResultSetTableModelFactory {
 		if (current_datasource == null) {
 			throw new NoDatasourceSelectedException("No source selected");
 		}
-		String driver = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_DRIVER);
-		String url = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_URL);
-		String username = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_USERNAME);
-		String password = current_datasource.getParameter(RDBMSsourceParameterConstants.DATABASE_PASSWORD);
+		String driver = current_datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		String url = current_datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = current_datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = current_datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 
 		ResultSetTableModelFactory rstmfactory = resultsetfactories.get(current_datasource.getSourceID());
 		if (rstmfactory == null) {

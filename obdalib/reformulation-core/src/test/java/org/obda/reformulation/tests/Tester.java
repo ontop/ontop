@@ -2,10 +2,13 @@ package org.obda.reformulation.tests;
 
 import inf.unibz.it.obda.io.DataManager;
 import inf.unibz.it.obda.io.PrefixManager;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAModel;
-import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
+import inf.unibz.it.obda.queryanswering.QueryControllerEntity;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
@@ -192,8 +195,8 @@ public class Tester {
         manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
-        apic = new OBDAModel();
-        String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
+        OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+        apic = obdafac.getOBDAModel();        String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
         // apic.loadData(new File(owlfile).toURI());
 
         DataManager ioManager = new DataManager(apic);

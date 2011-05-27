@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.model.OBDAModel;
+import inf.unibz.it.obda.model.impl.OBDAModelImpl;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.utils.OBDAPreferences;
 
@@ -37,7 +37,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		kit = (OWLEditorKit)getEditorKit();
 		mmgr = (OWLModelManager)kit.getModelManager();
 		mmgr.addListener(instance.getModelManagerListener());
-		getEditorKit().put(OBDAModel.class.getName(), instance);
+		getEditorKit().put(OBDAModelImpl.class.getName(), instance);
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);
