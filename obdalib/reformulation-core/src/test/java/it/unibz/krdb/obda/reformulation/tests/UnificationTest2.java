@@ -1,3 +1,4 @@
+package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
