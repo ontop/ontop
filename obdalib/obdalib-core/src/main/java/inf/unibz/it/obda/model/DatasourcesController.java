@@ -32,8 +32,6 @@ public class DatasourcesController {
 
 	private ArrayList<DatasourcesControllerListener>	listeners			= null;
 
-//	private DataSource									currentdatasource	= null;
-
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public DatasourcesController() {
@@ -95,72 +93,13 @@ public class DatasourcesController {
 		return Collections.unmodifiableList(sources);
 	}
 
-//	/***
-//	 * Gets all sources for Ontology
-//	 *
-//	 * @param ontologyURI
-//	 * @return
-//	 */
-//	public Set<DataSource> getDatasources(URI ontologyURI) {
-//		HashSet<DataSource> ontoSources = new HashSet<DataSource>();
-//		Set<DataSource> allSources = new HashSet(datasources.values());
-//		Collections.unmodifiableSet(allSources);
-////		for (Iterator<DataSource> iterator = allSources.iterator(); iterator.hasNext();) {
-////			DataSource dataSource = iterator.next();
-////			if (dataSource.getSourceID().equals(ontologyURI.toString())) {
-////				ontoSources.add(dataSource);
-////			}
-////		}
-////		return ontoSources;
-//	}
-
-//	// TODO remove this method, no such thing as current datasource, use an
-//	// outside coordinator if needed for GUI code
-//	public synchronized DataSource getCurrentDataSource() {
-//		return currentdatasource;
-//	}
 
 	public synchronized DataSource getDataSource(URI name) {
 
 		return datasources.get(name);
 	}
 
-//	/***
-//	 * Use a DatasourceXML codec instead
-//	 *
-//	 * @param sourceelement
-//	 */
-//	@Deprecated
-//	public void loadDatasourceFromXML(Element sourceelement) {
-//		DatasourceXMLCodec codec = new DatasourceXMLCodec();
-//		DataSource source = codec.decode(sourceelement);
-//		addDataSource(source);
-//	}
 
-//	/***
-//	 * Use a DatasourceXMLCodec instead
-//	 *
-//	 * @param strsources
-//	 * @throws Exception
-//	 */
-//	@Deprecated
-//	public synchronized void loadSourcesFromString(String strsources) throws Exception {
-//		try {
-//			datasources = DataSource.decodeDataSources(strsources);
-//		} catch (Exception e) {
-//			log.error("Error while parsing the data source");
-//			throw e;
-//		}
-//	}
-
-//	public void removeAllSources() {
-//		while (!datasources.values().isEmpty()) {
-//			DataSource source = datasources.values().iterator().next();
-//			datasources.remove(source.getSourceID());
-//		}
-//
-//		fireAllDatasourcesDeleted();
-//	}
 
 	public synchronized void removeDataSource(URI id) {
 
@@ -173,18 +112,7 @@ public class DatasourcesController {
 		listeners.remove(listener);
 	}
 
-//	// TODO Remove this method later!
-//	public synchronized void setCurrentDataSource(URI id) {
-//		DataSource previous = currentdatasource;
-//		if ((id != null) && (!id.equals(""))) {
-//			DataSource ds = datasources.get(id);
-//			currentdatasource = ds;
-//			fireCurrentDatasourceChanged(previous, currentdatasource);
-//		} else {
-//			currentdatasource = null;
-//			fireCurrentDatasourceChanged(previous, currentdatasource);
-//		}
-//	}
+
 
 	public synchronized void updateDataSource(URI id, DataSource dsd) {
 	  datasources.remove(id);

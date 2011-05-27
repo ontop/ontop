@@ -2,6 +2,7 @@ package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.model.Function;
 import inf.unibz.it.obda.model.OBDADataFactory;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.URIConstant;
@@ -27,6 +28,10 @@ public class OBDADataFactoryImpl  implements OBDADataFactory {
 			instance = new OBDADataFactoryImpl();
 		}
 		return instance;
+	}
+	
+	public OBDAModel getOBDAModel() {
+		return new OBDAModel();
 	}
 
 	public PredicateImp createPredicate(URI name, int arity) {

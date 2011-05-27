@@ -7,6 +7,10 @@ import java.util.List;
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 public interface OBDADataFactory {
+	
+	
+	public OBDAModel getOBDAModel();
+	
 	/**
 	 * Construct a {@link Predicate} object.
 	 *
