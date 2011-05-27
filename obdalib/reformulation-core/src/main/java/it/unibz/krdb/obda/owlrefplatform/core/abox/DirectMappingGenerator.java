@@ -58,6 +58,7 @@ public class DirectMappingGenerator {
 			Iterator<OWLEntity> entityIterator = entities.iterator();
 
 			while (entityIterator.hasNext()) {
+				mappingcounter+=1;
 				/* For each entity */
 				OWLEntity entity = entityIterator.next();
 
@@ -80,7 +81,7 @@ public class DirectMappingGenerator {
 						Atom head = predicateFactory.getAtom(predicate, terms); // the head
 						Query cq = predicateFactory.getCQIE(head, bodyAtom);
 						String sql = "SELECT term0 as x FROM " + tablename;
-						OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,cq,predicateFactory.getSQLQuery(sql));
+						OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
 						mappings.add(ax);
 
 						log.debug("Mapping created: {}", ax.toString());
@@ -102,7 +103,7 @@ public class DirectMappingGenerator {
 					Atom head = predicateFactory.getAtom(predicate, terms); // the head
 					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,cq,predicateFactory.getSQLQuery(sql));
+					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
 					log.debug("Mapping created: {}", ax.toString());
 					mappings.add(ax);
 
@@ -124,7 +125,7 @@ public class DirectMappingGenerator {
 					Atom head = predicateFactory.getAtom(predicate, terms); // the head
 					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,cq,predicateFactory.getSQLQuery(sql));
+					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
 					mappings.add(ax);
 				}
 			}

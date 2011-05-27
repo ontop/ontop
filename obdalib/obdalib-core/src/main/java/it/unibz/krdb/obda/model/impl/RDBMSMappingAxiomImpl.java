@@ -30,7 +30,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements R
 //	}
 
 	protected RDBMSMappingAxiomImpl(String id, Query sourceQuery, Query targetQuery) {
-//		super(id);
+		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
 	}
