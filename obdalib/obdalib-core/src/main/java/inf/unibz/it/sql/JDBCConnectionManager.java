@@ -1,7 +1,7 @@
 package inf.unibz.it.sql;
 
-import inf.unibz.it.obda.gui.swing.datasource.panels.ColumnInspectorTableModel;
 import inf.unibz.it.obda.gui.swing.exception.NoDatasourceSelectedException;
+import inf.unibz.it.obda.gui.swing.treemodel.ColumnInspectorTableModel;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 

@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.gui.swing;
 
-import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
+import inf.unibz.it.obda.gui.swing.panel.QueryInterfacePanel;
 
 public interface OBDADataQueryAction{
 	

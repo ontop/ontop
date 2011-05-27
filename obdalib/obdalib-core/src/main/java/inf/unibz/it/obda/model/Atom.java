@@ -1,9 +1,5 @@
 package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.model.Atom;
-import inf.unibz.it.obda.model.Predicate;
-import inf.unibz.it.obda.model.Term;
-
 import java.util.List;
 
 public interface Atom {

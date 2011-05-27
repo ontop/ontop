@@ -14,7 +14,7 @@ package inf.unibz.it.obda.model;
 
 import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
-import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
+import inf.unibz.it.obda.gui.swing.treemodel.MappingTreeModel;
 
 import java.net.URI;
 import java.util.ArrayList;

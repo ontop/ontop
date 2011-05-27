@@ -1,7 +1,5 @@
 package inf.unibz.it.obda.io;
 
-import inf.unibz.it.obda.io.AbstractPrefixManager;
-
 import java.util.HashMap;
 
 

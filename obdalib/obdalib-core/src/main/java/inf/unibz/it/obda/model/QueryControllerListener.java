@@ -13,8 +13,8 @@
  */
 package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 public interface QueryControllerListener {
 

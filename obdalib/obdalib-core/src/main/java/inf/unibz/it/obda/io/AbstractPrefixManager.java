@@ -1,8 +1,5 @@
 package inf.unibz.it.obda.io;
 
-import inf.unibz.it.obda.io.PrefixManager;
-
-import java.util.HashMap;
 import java.util.Iterator;
 
 /**

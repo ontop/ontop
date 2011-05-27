@@ -13,8 +13,6 @@
  */
 package inf.unibz.it.obda.gui.swing;
 
-import inf.unibz.it.obda.gui.swing.IconLoader;
-
 import javax.swing.ImageIcon;
 
 import org.slf4j.Logger;

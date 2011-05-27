@@ -6,8 +6,6 @@
 
 package inf.unibz.it.obda.gui.swing.utils;
 
-import inf.unibz.it.obda.gui.swing.utils.TextMessageDialog;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 

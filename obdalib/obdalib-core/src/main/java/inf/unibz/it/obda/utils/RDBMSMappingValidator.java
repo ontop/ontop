@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.utils;
 
-import inf.unibz.it.obda.gui.swing.datasource.panels.ResultSetTableModel;
+import inf.unibz.it.obda.gui.swing.treemodel.ResultSetTableModel;
 import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;

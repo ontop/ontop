@@ -13,7 +13,6 @@
  */
 package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.model.Query;
 
 
 public interface SourceQuery extends Query {

@@ -5,8 +5,6 @@
 package inf.unibz.it.obda.gui.swing.utils;
 
 
-import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

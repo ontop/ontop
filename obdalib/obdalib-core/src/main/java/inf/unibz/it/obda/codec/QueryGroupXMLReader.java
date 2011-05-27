@@ -16,8 +16,8 @@ package inf.unibz.it.obda.codec;
 //TODO: Refactor so that this is actually an instance of a codec
 /*import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryGroupTreeElement;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryTreeElement;*/
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

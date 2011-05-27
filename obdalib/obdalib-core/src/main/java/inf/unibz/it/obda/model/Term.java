@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.model.Term;
 
 /**
  * This class defines the basic component of the proposition. A proposition

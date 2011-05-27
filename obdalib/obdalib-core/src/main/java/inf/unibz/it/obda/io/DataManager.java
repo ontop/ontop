@@ -17,8 +17,6 @@ import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.codec.QueryGroupXMLReader;
 import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
@@ -27,6 +25,8 @@ import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
+import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 import inf.unibz.it.obda.utils.XMLUtils;
 
 import java.io.File;

@@ -12,7 +12,6 @@
  */
 package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.model.QueryModifiers;
 
 
 

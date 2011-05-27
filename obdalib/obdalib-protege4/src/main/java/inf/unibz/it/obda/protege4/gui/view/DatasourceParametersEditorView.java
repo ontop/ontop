@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.protege4.gui.view;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.gui.swing.datasource.panels.DatasourceParameterEditorPanel;
+import inf.unibz.it.obda.gui.swing.panel.DatasourceParameterEditorPanel;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.BorderLayout;

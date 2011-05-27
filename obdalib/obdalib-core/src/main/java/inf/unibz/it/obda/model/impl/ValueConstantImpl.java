@@ -2,7 +2,6 @@ package inf.unibz.it.obda.model.impl;
 
 import inf.unibz.it.obda.model.ValueConstant;
 
-
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 

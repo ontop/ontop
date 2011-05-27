@@ -13,9 +13,9 @@
  */
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
 import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 import java.util.Vector;
 

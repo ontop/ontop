@@ -1,16 +1,16 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
-import inf.unibz.it.obda.api.controller.MappingControllerListener;
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.api.controller.QueryControllerListener;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
-import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.DatasourcesControllerListener;
+import inf.unibz.it.obda.model.MappingControllerListener;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.model.QueryControllerListener;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
 import inf.unibz.it.obda.owlapi.OWLAPIController;
+import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
+import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
 import java.io.IOException;
 import java.net.URI;

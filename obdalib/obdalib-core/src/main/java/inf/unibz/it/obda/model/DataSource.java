@@ -12,8 +12,6 @@
  */
 package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.model.DataSource;
-
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.HashMap;

@@ -1,21 +1,21 @@
 package inf.unibz.it.obda.protege4.gui.view.query;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.obda.gui.swing.OBDASaveQueryResultToFileAction;
-import inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel;
-import inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel;
-import inf.unibz.it.obda.gui.swing.dataquery.panel.SavedQueriesPanelListener;
-import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
-import inf.unibz.it.obda.gui.swing.table.IncrementalQueryResultSetTableModel;
+import inf.unibz.it.obda.gui.swing.panel.QueryInterfacePanel;
+import inf.unibz.it.obda.gui.swing.panel.ResultViewTablePanel;
+import inf.unibz.it.obda.gui.swing.panel.SavedQueriesPanelListener;
+import inf.unibz.it.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableModel;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.gui.swing.utils.TextMessageFrame;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
-import inf.unibz.it.obda.tool.utils.ResultSetToFileWriter;
+import inf.unibz.it.obda.utils.OBDAPreferences;
+import inf.unibz.it.obda.utils.ResultSetToFileWriter;
 
 import java.awt.BorderLayout;
 import java.io.File;
@@ -85,7 +85,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		panel_query_interface = new QueryInterfacePanel(obdaController.getOBDAManager(), this.getOWLModelManager().getActiveOntology()
 				.getURI(), preference);
 
-		panel_view_results = new inf.unibz.it.obda.gui.swing.dataquery.panel.ResultViewTablePanel(panel_query_interface);
+		panel_view_results = new ResultViewTablePanel(panel_query_interface);
 		panel_right_main.setLayout(new java.awt.BorderLayout());
 		split_right_horizontal.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 		split_right_horizontal.setResizeWeight(0.25);

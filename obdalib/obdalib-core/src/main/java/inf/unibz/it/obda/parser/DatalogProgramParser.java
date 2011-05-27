@@ -8,8 +8,6 @@ package inf.unibz.it.obda.parser;
 
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
-import inf.unibz.it.obda.parser.DatalogLexer;
-import inf.unibz.it.obda.parser.DatalogParser;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
