@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.owlapi.abox.materialization;
 
-import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;

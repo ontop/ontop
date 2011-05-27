@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core.ontology.imp;
 
-import inf.unibz.it.obda.api.controller.OBDADataFactory;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.impl.OBDADataFactoryImpl;
 

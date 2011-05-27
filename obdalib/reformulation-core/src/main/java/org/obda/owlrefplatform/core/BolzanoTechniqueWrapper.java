@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.queryanswering.Statement;
 
 import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;

@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.codec.DatalogProgramToTextCodec;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;

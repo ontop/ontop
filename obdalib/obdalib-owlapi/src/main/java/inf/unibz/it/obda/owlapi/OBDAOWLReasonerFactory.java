@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.owlapi;
 
-import inf.unibz.it.obda.api.controller.APIController;
+import inf.unibz.it.obda.model.APIController;
 
 import org.semanticweb.owl.inference.OWLReasonerFactory;
 

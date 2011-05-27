@@ -1,8 +1,8 @@
 package org.obda.reformulation.tests;
 
 
-import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.model.Function;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.ValueConstant;

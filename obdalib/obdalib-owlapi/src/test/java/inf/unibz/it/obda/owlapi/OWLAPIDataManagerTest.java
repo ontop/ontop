@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.owlapi;
 
-import inf.unibz.it.obda.api.controller.MappingController;
+import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Query;
 

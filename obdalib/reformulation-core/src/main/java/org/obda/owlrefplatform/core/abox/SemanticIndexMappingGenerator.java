@@ -1,11 +1,11 @@
 package org.obda.owlrefplatform.core.abox;
 
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Query;
