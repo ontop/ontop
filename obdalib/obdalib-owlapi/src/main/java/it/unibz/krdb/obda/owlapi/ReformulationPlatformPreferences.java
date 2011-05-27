@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.owlapi;
+package it.unibz.krdb.obda.owlapi;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.owlapi.util;
+package it.unibz.krdb.obda.owlapi.util;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.DataSource;
