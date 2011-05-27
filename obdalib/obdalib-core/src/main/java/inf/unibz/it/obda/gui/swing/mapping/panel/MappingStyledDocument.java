@@ -13,8 +13,8 @@
  */
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferences;
+import inf.unibz.it.obda.model.APIController;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

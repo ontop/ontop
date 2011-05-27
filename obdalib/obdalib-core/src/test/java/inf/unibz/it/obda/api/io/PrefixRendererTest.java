@@ -1,11 +1,11 @@
 package inf.unibz.it.obda.api.io;
 
-import inf.unibz.it.obda.api.controller.OBDADataFactory;
 import inf.unibz.it.obda.io.PrefixManager;
 import inf.unibz.it.obda.io.SimplePrefixManager;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
+import inf.unibz.it.obda.model.OBDADataFactory;
 import inf.unibz.it.obda.model.Term;
 import inf.unibz.it.obda.model.impl.AtomImpl;
 import inf.unibz.it.obda.model.impl.CQIEImpl;

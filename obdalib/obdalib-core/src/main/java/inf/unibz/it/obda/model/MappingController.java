@@ -10,14 +10,11 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.api.controller;
+package inf.unibz.it.obda.model;
 
 import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingTreeModel;
-import inf.unibz.it.obda.model.DataSource;
-import inf.unibz.it.obda.model.OBDAMappingAxiom;
-import inf.unibz.it.obda.model.Query;
 
 import java.net.URI;
 import java.util.ArrayList;

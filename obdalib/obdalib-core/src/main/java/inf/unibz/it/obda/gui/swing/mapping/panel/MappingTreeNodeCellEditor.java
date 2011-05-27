@@ -14,9 +14,9 @@
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.IconLoader;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;

@@ -13,14 +13,14 @@
  */
 package inf.unibz.it.obda.gui.swing.mapping.tree;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.MappingController;
-import inf.unibz.it.obda.api.controller.MappingControllerListener;
 import inf.unibz.it.obda.codec.SourceQueryToTextCodec;
 import inf.unibz.it.obda.codec.TargetQeryToTextCodec;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.FilteredTreeModel;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.MappingController;
+import inf.unibz.it.obda.model.MappingControllerListener;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.SourceQuery;

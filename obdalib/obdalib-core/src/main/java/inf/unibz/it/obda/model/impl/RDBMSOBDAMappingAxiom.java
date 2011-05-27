@@ -13,7 +13,6 @@
  */
 package inf.unibz.it.obda.model.impl;
 
-import inf.unibz.it.obda.model.AbstractOBDAMappingAxiom;
 import inf.unibz.it.obda.model.Query;
 
 import java.security.InvalidParameterException;

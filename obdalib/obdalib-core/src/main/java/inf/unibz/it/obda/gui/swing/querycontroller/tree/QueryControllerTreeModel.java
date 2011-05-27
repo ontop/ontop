@@ -13,8 +13,8 @@
  */
 package inf.unibz.it.obda.gui.swing.querycontroller.tree;
 
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
-import inf.unibz.it.obda.api.controller.QueryControllerListener;
+import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.model.QueryControllerListener;
 
 import java.util.Enumeration;
 import java.util.Vector;

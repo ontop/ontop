@@ -11,32 +11,20 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.tool.utils;
+package inf.unibz.it.obda.utils;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.model.Query;
 
-import java.util.Enumeration;
 
-public abstract class MappingValidator {
+public abstract class QueryValidator {
 
+	private Query query = null;
 
-	protected Query sourceQuery = null;
-	protected Query targetQuery = null;
-	protected APIController apic = null;
+	public QueryValidator(Query q){
 
-	public MappingValidator (APIController apic, Query sq, Query tg){
-		this.apic = apic;
-		sourceQuery = sq;
-		targetQuery = tg;
+		query = q;
 	}
 
-
-	/***
-	 * Returns the set of errors found while validating this mapping if any.
-	 *
-	 * TODO fix api
-	 * @return
-	 */
-	public abstract Enumeration<String> validate();
+	public abstract boolean validate();
+	public abstract Object execute();
 }

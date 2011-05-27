@@ -12,8 +12,6 @@
  */
 package inf.unibz.it.obda.io;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.codec.DatasourceXMLCodec;
 import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.codec.QueryGroupXMLReader;
@@ -21,13 +19,15 @@ import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.QueryControllerEntity;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
 import inf.unibz.it.obda.model.impl.RDBMSOBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
-import inf.unibz.it.obda.tool.utils.XMLUtils;
+import inf.unibz.it.obda.utils.XMLUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -12,13 +12,13 @@
  */
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.mapping.tree.MappingNode;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.CQIE;
+import inf.unibz.it.obda.model.DatasourcesController;
+import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;

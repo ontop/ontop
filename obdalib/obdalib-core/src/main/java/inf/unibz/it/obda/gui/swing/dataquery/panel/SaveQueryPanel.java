@@ -14,8 +14,8 @@
 
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
+import inf.unibz.it.obda.model.QueryController;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;

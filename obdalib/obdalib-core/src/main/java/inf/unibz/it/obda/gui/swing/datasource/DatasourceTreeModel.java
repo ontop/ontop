@@ -12,8 +12,9 @@
  */
 package inf.unibz.it.obda.gui.swing.datasource;
 
-import inf.unibz.it.obda.api.controller.DatasourcesControllerListener;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.DatasourcesControllerListener;
+
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.List;

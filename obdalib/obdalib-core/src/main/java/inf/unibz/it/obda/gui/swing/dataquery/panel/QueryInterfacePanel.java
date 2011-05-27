@@ -13,12 +13,12 @@
 
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.QueryController;
 import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences;
 import inf.unibz.it.obda.gui.swing.preferences.OBDAPreferences.MappingManagerPreferenceChangeListener;
 import inf.unibz.it.obda.gui.swing.utils.DialogUtils;
+import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.QueryController;
 
 import java.awt.Color;
 import java.net.URI;

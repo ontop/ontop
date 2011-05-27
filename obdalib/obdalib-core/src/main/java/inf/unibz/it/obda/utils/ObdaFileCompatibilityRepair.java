@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.tool.file;
+package inf.unibz.it.obda.utils;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -1,12 +1,12 @@
 package inf.unibz.it.obda.io;
 
-import inf.unibz.it.obda.api.controller.QueryController;
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.codec.QueryGroupXMLReader;
 import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
-import inf.unibz.it.obda.tool.utils.XMLUtils;
+import inf.unibz.it.obda.model.QueryController;
+import inf.unibz.it.obda.model.QueryControllerEntity;
+import inf.unibz.it.obda.utils.XMLUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

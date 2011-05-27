@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.tool.utils;
+package inf.unibz.it.obda.utils;
 
 
 public interface ListListener {

@@ -1,11 +1,5 @@
-package inf.unibz.it.obda.api.controller;
+package inf.unibz.it.obda.model;
 
-import inf.unibz.it.obda.model.Function;
-import inf.unibz.it.obda.model.Predicate;
-import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.model.URIConstant;
-import inf.unibz.it.obda.model.ValueConstant;
-import inf.unibz.it.obda.model.Variable;
 
 import java.net.URI;
 import java.util.List;

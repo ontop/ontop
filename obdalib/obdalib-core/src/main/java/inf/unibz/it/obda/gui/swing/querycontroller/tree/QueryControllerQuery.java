@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.gui.swing.querycontroller.tree;
 
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
+import inf.unibz.it.obda.model.QueryControllerEntity;
 
 public class QueryControllerQuery extends QueryControllerEntity{
 

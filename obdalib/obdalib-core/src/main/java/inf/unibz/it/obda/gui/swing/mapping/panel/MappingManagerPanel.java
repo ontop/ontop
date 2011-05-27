@@ -12,9 +12,6 @@
  */
 package inf.unibz.it.obda.gui.swing.mapping.panel;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
-import inf.unibz.it.obda.api.controller.MappingController;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.MappingValidationDialog;
 import inf.unibz.it.obda.gui.swing.datasource.DatasourceSelectorListener;
@@ -34,15 +31,18 @@ import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingPredicateTreeModelFil
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingSQLStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.MappingStringTreeModelFilter;
 import inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.DatasourcesController;
+import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
-import inf.unibz.it.obda.tool.utils.RDBMSMappingValidator;
-import inf.unibz.it.obda.tool.utils.SQLQueryValidator;
+import inf.unibz.it.obda.utils.RDBMSMappingValidator;
+import inf.unibz.it.obda.utils.SQLQueryValidator;
 
 import java.awt.Color;
 import java.awt.Dimension;

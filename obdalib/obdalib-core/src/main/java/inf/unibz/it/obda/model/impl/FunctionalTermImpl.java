@@ -3,8 +3,8 @@ package inf.unibz.it.obda.model.impl;
 import inf.unibz.it.obda.model.Function;
 import inf.unibz.it.obda.model.Predicate;
 import inf.unibz.it.obda.model.Term;
-import inf.unibz.it.obda.tool.utils.EventGeneratingLinkedList;
-import inf.unibz.it.obda.tool.utils.ListListener;
+import inf.unibz.it.obda.utils.EventGeneratingLinkedList;
+import inf.unibz.it.obda.utils.ListListener;
 
 import java.util.Iterator;
 import java.util.List;

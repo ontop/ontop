@@ -1,7 +1,7 @@
-package inf.unibz.it.obda.tool.utils;
+package inf.unibz.it.obda.utils;
 
-import inf.unibz.it.obda.tool.utils.EventGeneratingLinkedList;
-import inf.unibz.it.obda.tool.utils.ListListener;
+import inf.unibz.it.obda.utils.EventGeneratingLinkedList;
+import inf.unibz.it.obda.utils.ListListener;
 
 import java.util.Collection;
 import java.util.LinkedList;

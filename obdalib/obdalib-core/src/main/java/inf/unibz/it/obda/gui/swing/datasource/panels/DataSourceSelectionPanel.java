@@ -4,9 +4,10 @@
  */
 package inf.unibz.it.obda.gui.swing.datasource.panels;
 
-import inf.unibz.it.obda.api.controller.APIController;
-import inf.unibz.it.obda.api.controller.DatasourcesController;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.DatasourcesController;
+
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;

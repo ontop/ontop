@@ -13,8 +13,6 @@
  */
 package inf.unibz.it.obda.gui.swing.dataquery.panel;
 
-import inf.unibz.it.obda.api.controller.QueryController;
-import inf.unibz.it.obda.api.controller.QueryControllerEntity;
 import inf.unibz.it.obda.gui.swing.IconLoader;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerGroup;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryControllerQuery;
@@ -23,6 +21,8 @@ import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryGroupTreeElement;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryTreeElement;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.TreeElement;
 import inf.unibz.it.obda.io.QueryStorageManager;
+import inf.unibz.it.obda.model.QueryController;
+import inf.unibz.it.obda.model.QueryControllerEntity;
 
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;

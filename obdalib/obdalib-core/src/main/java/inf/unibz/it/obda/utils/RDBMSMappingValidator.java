@@ -11,10 +11,10 @@
  *   those of the LGPL.  Information about such licenses can be found in the
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.tool.utils;
+package inf.unibz.it.obda.utils;
 
-import inf.unibz.it.obda.api.controller.APIController;
 import inf.unibz.it.obda.gui.swing.datasource.panels.ResultSetTableModel;
+import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DataSource;

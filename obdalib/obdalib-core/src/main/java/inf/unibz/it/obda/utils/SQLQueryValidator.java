@@ -10,7 +10,7 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.tool.utils;
+package inf.unibz.it.obda.utils;
 
 
 

@@ -1,4 +1,6 @@
-package inf.unibz.it.obda.model;
+package inf.unibz.it.obda.model.impl;
+
+import inf.unibz.it.obda.model.OperatorPredicate;
 
 
 
