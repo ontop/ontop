@@ -1,14 +1,10 @@
 package org.obda.owlrefplatform.core.abox;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Implement Graph specific operations like get all ancestors and get all descendants
@@ -35,8 +31,16 @@ public class DAGOperations {
                 stack.add(n);
             }
         }
+        if (stack.isEmpty()) {
+            log.error("Can not build descendants for graph with cycles");
+        }
         while (!stack.isEmpty()) {
             DAGNode cur_el = stack.remove();
+
+            for (DAGNode eq_node : cur_el.equivalents) {
+                cur_el.descendans.add(eq_node);
+            }
+
             for (DAGNode par_node : cur_el.getParents()) {
 
                 // add child to descendants list

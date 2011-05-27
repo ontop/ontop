@@ -1,16 +1,15 @@
 package org.obda.reformulation.tests;
 
 
+import junit.framework.TestCase;
+import org.obda.owlrefplatform.core.abox.DAG;
+import org.obda.owlrefplatform.core.abox.DAGNode;
+import org.obda.owlrefplatform.core.abox.TDAG;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.TestCase;
-
-import org.obda.owlrefplatform.core.abox.DAG;
-import org.obda.owlrefplatform.core.abox.DAGNode;
-import org.obda.owlrefplatform.core.abox.TDAG;
 
 public class TDAGTest extends TestCase {
 
@@ -135,6 +134,49 @@ public class TDAGTest extends TestCase {
 
         assertEquals(res.get("b").descendans.size(), 0);
         assertEquals(res.get("c").descendans.size(), 0);
+
+    }
+
+
+    public void test_exists_complex_2() {
+        DAGNode a = new DAGNode("a");
+        DAGNode er = new DAGNode(DAG.owl_exists_obj + "r");
+        DAGNode ier = new DAGNode(DAG.owl_inverse_exists_obj + "r");
+
+        // ER- ISA A
+        ier.getParents().add(a);
+        a.getChildren().add(ier);
+
+        // ER- ISA ER
+        ier.getParents().add(er);
+        er.getChildren().add(ier);
+
+        // A ISA ER
+        a.getParents().add(er);
+        er.getChildren().add(a);
+
+        List<DAGNode> ll = new LinkedList<DAGNode>();
+        ll.add(a);
+        ll.add(er);
+        ll.add(ier);
+
+        DAG dag = new DAG(ll, new LinkedList<DAGNode>(), new LinkedList<DAGNode>());
+        TDAG tdag = new TDAG(dag);
+        Map<String, DAGNode> res = tdag.getTDAG();
+        assertTrue(res.get("a").descendans.contains(res.get(DAG.owl_exists_obj + "r")));
+        assertTrue(res.get("a").descendans.contains(res.get(DAG.owl_inverse_exists_obj + "r")));
+        assertTrue(res.get("a").descendans.contains(res.get("a")));
+        assertEquals(res.get("a").descendans.size(), 3);
+
+        assertTrue(res.get(DAG.owl_exists_obj + "r").descendans.contains(res.get(DAG.owl_exists_obj + "r")));
+        assertTrue(res.get(DAG.owl_exists_obj + "r").descendans.contains(res.get(DAG.owl_inverse_exists_obj + "r")));
+        assertTrue(res.get(DAG.owl_exists_obj + "r").descendans.contains(res.get("a")));
+        assertEquals(res.get(DAG.owl_exists_obj + "r").descendans.size(), 3);
+
+        assertTrue(res.get(DAG.owl_inverse_exists_obj + "r").descendans.contains(res.get(DAG.owl_exists_obj + "r")));
+        assertTrue(res.get(DAG.owl_inverse_exists_obj + "r").descendans.contains(res.get(DAG.owl_inverse_exists_obj + "r")));
+        assertTrue(res.get(DAG.owl_inverse_exists_obj + "r").descendans.contains(res.get("a")));
+        assertEquals(res.get(DAG.owl_inverse_exists_obj + "r").descendans.size(), 3);
 
     }
 }

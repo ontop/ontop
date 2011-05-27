@@ -17,7 +17,7 @@ public class DAGNode implements Comparable<DAGNode> {
     private Set<DAGNode> parents = new HashSet<DAGNode>();
     private Set<DAGNode> children = new HashSet<DAGNode>();
 
-    public final Set<DAGNode> descendans = new HashSet<DAGNode>();
+    public Set<DAGNode> descendans = new HashSet<DAGNode>();
 
     public final LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 
