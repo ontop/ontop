@@ -278,6 +278,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	private void jButtonTestActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
 		final JDialog resultquery = new JDialog();
+		resultquery.setModal(true);
 		SQLQueryPanel query_panel = new SQLQueryPanel(selectedSource, jTextPaneBody.getText());
 
 		JPanel panel = new JPanel();

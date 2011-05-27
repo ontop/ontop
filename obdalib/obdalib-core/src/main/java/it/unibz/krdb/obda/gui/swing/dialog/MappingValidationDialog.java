@@ -58,6 +58,7 @@ public class MappingValidationDialog extends JDialog {
 //		parent = tree;
 		createStyles();
 		createContent();
+		this.setModal(true);
 		DialogUtils.centerDialogWRTParent(tree.getParent(), this);
 
 		// this.setVisible(true);

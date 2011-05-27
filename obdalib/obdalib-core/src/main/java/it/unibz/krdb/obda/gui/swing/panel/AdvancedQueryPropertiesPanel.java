@@ -292,6 +292,7 @@ public class AdvancedQueryPropertiesPanel extends javax.swing.JPanel {
 
     	DataSourceSelectorPanel panel = new DataSourceSelectorPanel();
         JDialog newdialog = DialogUtils.createDialogForPanel(dialog, panel);
+        newdialog.setModal(true);
         panel.setParentDialog(newdialog);
         DialogUtils.centerDialogWRTParent(this.dialog, newdialog);
   	    newdialog.setVisible(true);

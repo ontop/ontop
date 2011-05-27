@@ -54,6 +54,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel{
     
     public void show(){
     	parent = new JDialog();
+    	parent.setModal(true);
     	parent.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     	parent.setContentPane(this);
     	parent.setLocationRelativeTo(querypane);   	

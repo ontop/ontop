@@ -185,7 +185,7 @@ public class SelectDB extends javax.swing.JDialog {
 
 	private void jButtonNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonNewActionPerformed
 
-		dialog = new SetParametersDialog(new JFrame(), false, apic);
+		dialog = new SetParametersDialog(new JFrame(), true, apic);
 		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
 

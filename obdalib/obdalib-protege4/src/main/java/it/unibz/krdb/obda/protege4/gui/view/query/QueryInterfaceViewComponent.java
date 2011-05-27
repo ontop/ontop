@@ -162,10 +162,10 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 				try {
 					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					monitor.start();
 					CountDownLatch latch = new CountDownLatch(1);
 					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
 					monitor.addProgressListener(action);
-					monitor.start();
 					long startTime = System.currentTimeMillis();
 					action.run();
 					latch.await();

@@ -299,6 +299,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 
 		
 		JDialog saveDialog = new JDialog();
+		saveDialog.setModal(true);
 		String query = "";
 		SaveQueryPanel savePanel;
 

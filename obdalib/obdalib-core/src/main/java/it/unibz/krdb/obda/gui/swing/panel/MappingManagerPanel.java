@@ -758,6 +758,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private void addMapping() {
 
 		JDialog dialog = new JDialog();
+		dialog.setModal(true);
 		dialog.setContentPane(new NewMappingDialogPanel(apic, pref, dialog, selectedSource));
 		dialog.setSize(500, 300);
 		dialog.setLocationRelativeTo(null);
@@ -782,6 +783,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	private void startExecuteQueryOfMapping(TreePath path) {
 		final JDialog resultquery = new JDialog();
+		resultquery.setModal(true);
 		MappingNode mapping = (MappingNode) path.getLastPathComponent();
 		MappingBodyNode body = mapping.getBodyNode();
 		SQLQueryPanel query_panel = new SQLQueryPanel(selectedSource, body.toString());

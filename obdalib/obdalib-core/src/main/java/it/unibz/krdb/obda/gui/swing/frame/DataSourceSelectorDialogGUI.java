@@ -28,6 +28,7 @@ public class DataSourceSelectorDialogGUI extends javax.swing.JFrame {
 	/** Creates new form AdvancedQueryPropertiesGUI */
     public DataSourceSelectorDialogGUI() {
         initComponents();
+        
         this.setResizable(false);
         //jTable1.setAutoCreateRowSorter(true);
        
@@ -45,7 +46,6 @@ public class DataSourceSelectorDialogGUI extends javax.swing.JFrame {
         column = jTable1.getColumnModel().getColumn(5);
         column.setPreferredWidth(40); //third column is bigger
 //        UIUtils.setAntializaing(this, true);
-
     }
     
     /** This method is called from within the constructor to

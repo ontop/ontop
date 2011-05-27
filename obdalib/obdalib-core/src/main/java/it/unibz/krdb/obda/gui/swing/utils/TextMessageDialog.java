@@ -14,6 +14,10 @@ import java.io.StringWriter;
  * @author mariano
  */
 public class TextMessageDialog extends javax.swing.JDialog {
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 3229901534514938061L;
 	/** A return status code - returned if Cancel button has been pressed */
 	public static final int	RET_CANCEL	= 0;
 	/** A return status code - returned if OK button has been pressed */

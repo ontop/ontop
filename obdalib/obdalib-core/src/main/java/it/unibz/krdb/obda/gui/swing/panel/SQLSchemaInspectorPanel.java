@@ -48,6 +48,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -255,26 +256,33 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 	}
 
 	private void cmdRefreshActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdRefreshActionPerformed
-		try {
-			OBDAProgessMonitor progMonitor = new OBDAProgessMonitor();
-			CountDownLatch latch = new CountDownLatch(1);
-			UpdateRelationTableAction action = new UpdateRelationTableAction(latch);
-			progMonitor.addProgressListener(action);
-			progMonitor.start();
-			action.run();
-			latch.await();
-			progMonitor.stop();
-			ResultSet set = action.getResult();
-			if (set != null) {
-				RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
-				tblRelations.setModel(model);
-				tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
-						* TABLE_ROW_HEIGHT));
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error while updating table.\n Please refer to the log file for more information.");
-			log.error("Error while updating table model.", e);
-		}
+		Runnable run = new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					OBDAProgessMonitor progMonitor = new OBDAProgessMonitor();
+					progMonitor.start();
+					CountDownLatch latch = new CountDownLatch(1);
+					UpdateRelationTableAction action = new UpdateRelationTableAction(latch);
+					progMonitor.addProgressListener(action);
+					action.run();
+					latch.await();
+					progMonitor.stop();
+					ResultSet set = action.getResult();
+					if (set != null) {
+						RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
+						tblRelations.setModel(model);
+						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
+								* TABLE_ROW_HEIGHT));
+					}
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(SQLSchemaInspectorPanel.this, "Error while updating table.\n Please refer to the log file for more information.");
+					log.error("Error while updating table model.", e);
+				}			}
+		};
+		SwingUtilities.invokeLater(run);
+
 	}// GEN-LAST:event_cmdRefreshActionPerformed
 
 	@Override
@@ -539,8 +547,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}
 
 		public void run() {
-			thread = new Thread() {
-				public void run() {
+			
 					try {
 						result = getResultSetForRelations();
 						latch.countDown();
@@ -550,9 +557,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						JOptionPane.showMessageDialog(null,
 								"Error while updating table.\n Please refer to the log file for more information.");
 					}
-				}
-			};
-			thread.start();
+			
+			
 		}
 	}
 

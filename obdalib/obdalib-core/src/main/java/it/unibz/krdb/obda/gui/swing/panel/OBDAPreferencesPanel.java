@@ -928,6 +928,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     		initComponents();
     		JOptionPane pane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
     		JDialog d = pane.createDialog("Color Chooser");
+    		d.setModal(true);
     		d.setVisible(true);
     		Object o = pane.getValue();
             if (pane != null){
@@ -1063,6 +1064,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	    init();
     	    JOptionPane pane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
     		JDialog d = pane.createDialog("Font Chooser");
+    		d.setModal(true);
     		d.setSize(400, 300);
     		d.setResizable(true);
     		d.setVisible(true);
