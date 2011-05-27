@@ -11,7 +11,7 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
-import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

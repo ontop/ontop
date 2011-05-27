@@ -1,6 +1,5 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.DatasourcesControllerListener;
@@ -9,6 +8,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
 import it.unibz.krdb.obda.queryanswering.QueryControllerListener;

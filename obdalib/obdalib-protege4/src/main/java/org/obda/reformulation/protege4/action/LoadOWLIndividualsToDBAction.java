@@ -4,6 +4,7 @@ import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 
 import java.awt.event.ActionEvent;
 import java.net.URI;
@@ -13,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import org.obda.reformulation.protege4.configpanel.SelectDB;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;

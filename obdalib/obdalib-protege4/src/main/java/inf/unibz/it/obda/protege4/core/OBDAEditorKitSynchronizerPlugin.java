@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import org.obda.reformulation.protege4.ProtegeReformulationPlatformPreferences;
