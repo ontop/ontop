@@ -189,7 +189,7 @@ public class SemanticIndexMappingGenerator {
             sql += " WHERE " + where_clause.toString();
         }
 
-        OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mapcounter++,cq,predicateFactory.getSQLQuery(sql));
+        OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mapcounter++,predicateFactory.getSQLQuery(sql),cq);
 
 //        URI dsUri = apic.getDatasourcesController().getCurrentDataSource().getSourceID();
         apic.getMappingController().insertMapping(ds.getSourceID(), ax);
