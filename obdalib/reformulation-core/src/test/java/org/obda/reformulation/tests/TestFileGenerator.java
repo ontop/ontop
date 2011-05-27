@@ -1,6 +1,7 @@
 package org.obda.reformulation.tests;
 
-import inf.unibz.it.obda.owlapi.OWLAPIController;
+import inf.unibz.it.obda.io.DataManager;
+import inf.unibz.it.obda.model.OBDAModel;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -47,7 +48,7 @@ public class TestFileGenerator {
 
     private OWLOntologyManager manager = null;
     private OWLDataFactory dataFactory = null;
-    private OWLAPIController apic = null;
+    private OBDAModel apic = null;
     private org.obda.reformulation.tests.XMLResultWriter writer = null;
     private Vector<String> tests = null;
 
@@ -176,7 +177,7 @@ public class TestFileGenerator {
             Iterator<OWLOntology> oit = o.iterator();
             while (oit.hasNext()) {
                 OWLOntology onto = oit.next();
-                apic = new OWLAPIController();
+                apic = new OBDAModel();
                 String ontoname = onto.getURI().toString();
                 int z = ontoname.lastIndexOf("/");
                 ontoname = ontoname.substring(z + 1, ontoname.length() - 4);
@@ -206,7 +207,8 @@ public class TestFileGenerator {
                     writer.addResult(ids.get(query), queryhead, results);
                 }
                 String loc = obdalocation + ontoname + ".obda";
-                apic.getIOManager().saveOBDAData(URI.create(loc), apic.getPrefixManager());
+                DataManager ioManager = new DataManager(apic);
+                ioManager.saveOBDAData(URI.create(loc), apic.getPrefixManager());
 
                 String owluri = obdalocation + ontoname + ".owl";
                 manager.saveOntology(onto, new File(owluri).toURI());

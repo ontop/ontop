@@ -14,7 +14,7 @@
 package inf.unibz.it.obda.utils;
 
 import inf.unibz.it.obda.gui.swing.treemodel.ResultSetTableModel;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DataSource;
@@ -35,7 +35,7 @@ public class RDBMSMappingValidator extends MappingValidator {
 	private CQIE conjunciveQuery = null;
 	private final DataSource dsc;
 
-	public RDBMSMappingValidator (APIController apic, DataSource dsc, RDBMSSQLQuery sql, CQIE con){
+	public RDBMSMappingValidator (OBDAModel apic, DataSource dsc, RDBMSSQLQuery sql, CQIE con){
 
 		super(apic, sql, con);
 		this.dsc = dsc;

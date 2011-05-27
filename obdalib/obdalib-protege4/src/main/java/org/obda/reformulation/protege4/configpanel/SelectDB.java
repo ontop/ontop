@@ -5,8 +5,8 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
-import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAModel;
 
 import java.util.Iterator;
 
@@ -29,7 +29,7 @@ public class SelectDB extends javax.swing.JDialog {
 	 * 
 	 */
 	private static final long	serialVersionUID	= -1787461016329735072L;
-	private APIController		apic				= null;
+	private OBDAModel		apic				= null;
 	private SetParametersDialog	dialog				= null;
 
 	String						selectedSource		= null;
@@ -38,7 +38,7 @@ public class SelectDB extends javax.swing.JDialog {
 	// private Set<OWLOntology> ontologies = null;
 
 	/** Creates new form SelectDB */
-	public SelectDB(java.awt.Frame parent, boolean modal, APIController apic) {
+	public SelectDB(java.awt.Frame parent, boolean modal, OBDAModel apic) {
 		super(parent, modal);
 		this.apic = apic;
 		// this.dumper = dumper;

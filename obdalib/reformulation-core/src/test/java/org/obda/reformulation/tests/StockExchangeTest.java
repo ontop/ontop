@@ -1,6 +1,7 @@
 package org.obda.reformulation.tests;
 
-import inf.unibz.it.obda.owlapi.OWLAPIController;
+import inf.unibz.it.obda.io.DataManager;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.QueryResultSet;
 import inf.unibz.it.obda.queryanswering.Statement;
@@ -26,9 +27,10 @@ public class StockExchangeTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
 		// Loading the OBDA data (note, the obda file must be in the same folder as the owl file
-		OWLAPIController controller = new OWLAPIController();
+		OBDAModel controller = new OBDAModel();
 		String obdafile = owlfile.substring(0, owlfile.length()-3) + "obda";
-		controller.getIOManager().loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),controller.getPrefixManager());
+		DataManager ioManager = new DataManager(controller);
+		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),controller.getPrefixManager());
 		
 		// Creating a new instance of a quonto reasoner
 		OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();

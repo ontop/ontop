@@ -1,8 +1,8 @@
 package org.obda.reformulation.protege4.action;
 
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
-import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.event.ActionEvent;
@@ -59,7 +59,7 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 
 		Runnable showdialog = new Runnable() {
 			public void run() {
-				OBDAPluginController controller = getEditorKit().get(APIController.class.getName());
+				OBDAPluginController controller = getEditorKit().get(OBDAModel.class.getName());
 				selectDialog = new SelectDB(new JFrame(), true, controller.getOBDAManager());
 				selectDialog.setLocationRelativeTo(getEditorKit().getWorkspace().getParent());
 				selectDialog.setVisible(true);

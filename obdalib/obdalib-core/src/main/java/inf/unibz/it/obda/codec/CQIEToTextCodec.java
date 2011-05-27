@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.io.PrefixManager;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;
@@ -25,7 +25,7 @@ import java.util.List;
 
 public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 
-	public CQIEToTextCodec(APIController apic) {
+	public CQIEToTextCodec(OBDAModel apic) {
 		super(apic);
 		// TODO Auto-generated constructor stub
 	}

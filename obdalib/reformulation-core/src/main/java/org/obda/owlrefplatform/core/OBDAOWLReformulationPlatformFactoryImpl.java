@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 
 public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
 
-    private APIController apic;
+    private OBDAModel apic;
     private ReformulationPlatformPreferences preferences = null;
     private String id;
     private String name;
@@ -101,7 +101,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
     }
 
     @Override
-    public void setOBDAController(APIController apic) {
+    public void setOBDAController(OBDAModel apic) {
         this.apic = apic;
     }
 
@@ -311,7 +311,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
      *
      * @return the current api controller
      */
-    public APIController getApiController() {
+    public OBDAModel getApiController() {
         return apic;
     }
 }

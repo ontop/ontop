@@ -17,7 +17,7 @@ import inf.unibz.it.obda.codec.MappingXMLCodec;
 import inf.unibz.it.obda.codec.QueryGroupXMLReader;
 import inf.unibz.it.obda.codec.QueryGroupXMLRenderer;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.QueryControllerEntity;
@@ -83,14 +83,14 @@ public class DataManager {
 
 	// protected PrefixManager prefixManager = null;
 
-	protected APIController												apic							= null;
+	protected OBDAModel												apic							= null;
 
 	protected Element													root;
 
 	private final Logger												log								= LoggerFactory.getLogger(this
 																												.getClass());
 
-	public DataManager(APIController apic) {
+	public DataManager(OBDAModel apic) {
 		this.apic = apic;
 
 		dsCodec = new DatasourceXMLCodec();

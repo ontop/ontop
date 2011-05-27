@@ -7,7 +7,7 @@ package inf.unibz.it.obda.gui.swing.panel;
 import inf.unibz.it.obda.exception.DuplicateMappingException;
 import inf.unibz.it.obda.gui.swing.utils.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.utils.MappingStyledDocument;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatalogProgram;
@@ -57,7 +57,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * 
 	 */
 	private static final long			serialVersionUID	= 4351696247473906680L;
-	private APIController				controller			= null;
+	private OBDAModel				controller			= null;
 	private DatalogProgramParser		datalogParser		= new DatalogProgramParser();
 	private MappingManagerPreferences	preferences			= null;
 	private DataSource					selectedSource		= null;
@@ -66,7 +66,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private final Logger				log					= LoggerFactory.getLogger(this.getClass());
 
 	/** Creates new form NewMappingDialogPanel */
-	public NewMappingDialogPanel(APIController apic, OBDAPreferences pref, JDialog parent, DataSource dataSource) {
+	public NewMappingDialogPanel(OBDAModel apic, OBDAPreferences pref, JDialog parent, DataSource dataSource) {
 		controller = apic;
 		preferences = pref.getMappingsPreference();
 		this.parent = parent;

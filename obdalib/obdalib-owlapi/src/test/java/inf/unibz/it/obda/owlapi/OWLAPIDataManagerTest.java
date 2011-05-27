@@ -1,7 +1,9 @@
 package inf.unibz.it.obda.owlapi;
 
+import inf.unibz.it.obda.io.DataManager;
 import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
 
 import java.io.File;
@@ -72,7 +74,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 		}
 	};
 
-	private OWLAPIController controller;
+	private OBDAModel controller;
 
 	@Test
 	public void testMappingOnVersionOne() throws Exception {
@@ -173,7 +175,8 @@ public class OWLAPIDataManagerTest extends TestCase {
         // Load the OBDA data.
         
         
-        controller = new OWLAPIController();
-        controller.getIOManager().loadOBDADataFromURI(obdafileuri,ontology.getURI(),controller.getPrefixManager());
+        controller = new OBDAModel();
+        DataManager ioManager = new DataManager(controller);
+        ioManager.loadOBDADataFromURI(obdafileuri,ontology.getURI(),controller.getPrefixManager());
 	}
 }

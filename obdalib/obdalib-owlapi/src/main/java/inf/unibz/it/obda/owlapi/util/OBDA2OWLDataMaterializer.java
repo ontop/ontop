@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.owlapi.util;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
@@ -38,7 +38,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
  */
 public class OBDA2OWLDataMaterializer {
 
-	public void materializeAbox(APIController controller, OWLOntologyManager manager, OWLOntology currentOntology) throws Exception {
+	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology) throws Exception {
 		List<DataSource> sources = controller.getDatasourcesController().getAllSources();
 		Iterator<DataSource> sit = sources.iterator();
 		while (sit.hasNext()) {
@@ -46,7 +46,7 @@ public class OBDA2OWLDataMaterializer {
 		}
 	}
 
-	public void materializeAbox(APIController controller, OWLOntologyManager manager, OWLOntology currentOntology, DataSource targetSource)
+	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology, DataSource targetSource)
 			throws Exception {
 
 		OWLDataFactory factory = manager.getOWLDataFactory();

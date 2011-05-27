@@ -2,7 +2,7 @@ package inf.unibz.it.obda.protege4.gui.view;
 
 import inf.unibz.it.obda.gui.swing.panel.DatasourceSelector;
 import inf.unibz.it.obda.gui.swing.panel.MappingManagerPanel;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
 import inf.unibz.it.obda.model.MappingController;
@@ -38,18 +38,18 @@ public class MappingsManagerView extends AbstractOWLViewComponent {
 
   @Override
   protected void initialiseOWLView() throws Exception {
-    OBDAPluginController apiController = 
-        getOWLEditorKit().get(APIController.class.getName());
+    OBDAPluginController OBDAModel = 
+        getOWLEditorKit().get(OBDAModel.class.getName());
     OBDAPreferences preference = (OBDAPreferences)
          getOWLEditorKit().get(OBDAPreferences.class.getName());
     	
-    MappingController mapController = apiController.getOBDAManager().getMappingController();
-    DatasourcesController dsController = apiController.getOBDAManager().getDatasourcesController();
+    MappingController mapController = OBDAModel.getOBDAManager().getMappingController();
+    DatasourcesController dsController = OBDAModel.getOBDAManager().getDatasourcesController();
     	
     Vector<DataSource> vecDatasource = 
         new Vector<DataSource>(dsController.getAllSources());
  
-    MappingManagerPanel mappingPanel = new MappingManagerPanel(apiController.getOBDAManager(), 
+    MappingManagerPanel mappingPanel = new MappingManagerPanel(OBDAModel.getOBDAManager(), 
         mapController, dsController, preference); 
     DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);
     datasourceSelector.addDatasourceListListener(mappingPanel);

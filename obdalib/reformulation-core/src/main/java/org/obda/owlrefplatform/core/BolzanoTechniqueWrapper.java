@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.queryanswering.Statement;
 
 import org.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -24,11 +24,11 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	private UnfoldingMechanism		unfoldingMechanism	= null;
 	private SourceQueryGenerator	querygenerator		= null;
 	private EvaluationEngine		evaluationEngine	= null;
-	private APIController			apic				= null;
+	private OBDAModel			apic				= null;
 	private final Logger			log					= LoggerFactory.getLogger(this.getClass());
 
 	public BolzanoTechniqueWrapper(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, EvaluationEngine eng,
-			APIController apic) {
+			OBDAModel apic) {
 
 		this.queryRewriter = rew;
 		this.unfoldingMechanism = unf;

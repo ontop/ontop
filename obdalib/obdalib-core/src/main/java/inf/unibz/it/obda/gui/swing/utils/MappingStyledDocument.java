@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.gui.swing.utils;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.utils.OBDAPreferences.MappingManagerPreferences;
 
 import javax.swing.event.DocumentEvent;
@@ -38,7 +38,7 @@ public class MappingStyledDocument extends DefaultStyledDocument implements
 
 	private QueryPainter painter = null;
 	
-	public MappingStyledDocument(StyleContext context, APIController apic,
+	public MappingStyledDocument(StyleContext context, OBDAModel apic,
 			MappingManagerPreferences pref) {
 		super(context);
 		

@@ -15,7 +15,7 @@ package inf.unibz.it.obda.gui.swing.treemodel;
 
 import inf.unibz.it.obda.codec.SourceQueryToTextCodec;
 import inf.unibz.it.obda.codec.TargetQeryToTextCodec;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.MappingController;
 import inf.unibz.it.obda.model.MappingControllerListener;
@@ -55,13 +55,13 @@ public class MappingTreeModel extends DefaultTreeModel implements
 //	private DatasourcesController dsc = null; TODO Remove this ds?
 	private URI currentDataSourceUri;
 	private final List<TreeModelFilter<OBDAMappingAxiom>> ListFilters = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
-	protected APIController apic = null;
+	protected OBDAModel apic = null;
 
 	DatalogProgramParser datalogParser = new DatalogProgramParser();
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingTreeModel(APIController apic,	MappingController controller) {
+	public MappingTreeModel(OBDAModel apic,	MappingController controller) {
 		super(new DefaultMutableTreeNode("Mappings"));
 		this.apic = apic;
 		root = (DefaultMutableTreeNode) getRoot();

@@ -14,7 +14,7 @@ package inf.unibz.it.obda.gui.swing.utils;
 
 import inf.unibz.it.obda.codec.DatalogConjunctiveQueryXMLCodec;
 import inf.unibz.it.obda.io.PrefixManager;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Term;
@@ -36,11 +36,11 @@ public class QueryPainter {
 	private Vector<ColorTask>			tasks			= null;
 	private boolean						alreadyColoring	= false;
 	private MappingManagerPreferences	pref			= null;
-	private final APIController			apic;
+	private final OBDAModel			apic;
 
 	private boolean						isValidQuery	= false;
 
-	public QueryPainter(APIController apic, MappingManagerPreferences pref) {
+	public QueryPainter(OBDAModel apic, MappingManagerPreferences pref) {
 		this.apic = apic;
 		this.pref = pref;
 

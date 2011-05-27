@@ -15,7 +15,7 @@ package inf.unibz.it.obda.gui.swing.panel;
 import inf.unibz.it.obda.gui.swing.IconLoader;
 import inf.unibz.it.obda.gui.swing.treemodel.DatasourceTreeCellRenderer;
 import inf.unibz.it.obda.gui.swing.treemodel.DatasourceTreeModel;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.DatasourcesController;
 
 import java.net.URI;
@@ -39,7 +39,7 @@ public class DatasourceManagerPanel extends javax.swing.JPanel {
 	private DatasourcesController	dscontroller		= null;
 
 	/** Creates new form DatasourceManagerPanel */
-	public DatasourceManagerPanel(APIController apiController) {
+	public DatasourceManagerPanel(OBDAModel apiController) {
 
 		this.dscontroller = apiController.getDatasourcesController();
 		initComponents();

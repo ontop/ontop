@@ -1,7 +1,7 @@
 package inf.unibz.it.obda.codec;
 
 import inf.unibz.it.obda.io.PrefixManager;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.Query;
@@ -36,7 +36,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 	 * @param apic
 	 *            the current api controller
 	 */
-	public TargetQeryToTextCodec(APIController apic) {
+	public TargetQeryToTextCodec(OBDAModel apic) {
 		super(apic);
 	}
 

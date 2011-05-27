@@ -39,7 +39,7 @@ public class MappingController {
 
 	Logger													log						= LoggerFactory.getLogger(MappingController.class);
 
-	public MappingController(DatasourcesController dscontroller, APIController apic) {
+	public MappingController(DatasourcesController dscontroller, OBDAModel apic) {
 		this.dscontroller = dscontroller;
 		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
 		listeners = new ArrayList<MappingControllerListener>();

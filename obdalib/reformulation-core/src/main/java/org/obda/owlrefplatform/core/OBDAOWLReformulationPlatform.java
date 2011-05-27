@@ -1,6 +1,6 @@
 package org.obda.owlrefplatform.core;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
 import inf.unibz.it.obda.queryanswering.Statement;
 
@@ -53,7 +53,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 	private boolean					isClassified		= false;
 
-	protected OBDAOWLReformulationPlatform(APIController apic, OWLOntologyManager manager, TechniqueWrapper wrapper) throws Exception {
+	protected OBDAOWLReformulationPlatform(OBDAModel apic, OWLOntologyManager manager, TechniqueWrapper wrapper) throws Exception {
 
 		this.ontoManager = manager;
 		this.techwrapper = wrapper;

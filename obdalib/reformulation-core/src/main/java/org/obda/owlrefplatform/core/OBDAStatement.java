@@ -1,7 +1,7 @@
 package org.obda.owlrefplatform.core;
 
 import inf.unibz.it.obda.codec.DatalogProgramToTextCodec;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
@@ -48,7 +48,7 @@ public class OBDAStatement implements Statement {
 	private SourceQueryGenerator	querygenerator		= null;
 	private EvaluationEngine		engine				= null;
 	// private DatalogProgram query = null;
-	private APIController			apic				= null;
+	private OBDAModel			apic				= null;
 	private boolean					canceled			= false;
 
 	// private DatalogProgram rewriting = null;
@@ -57,7 +57,7 @@ public class OBDAStatement implements Statement {
 
 	Logger							log					= LoggerFactory.getLogger(OBDAStatement.class);
 
-	public OBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, EvaluationEngine eng, APIController apic) {
+	public OBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, EvaluationEngine eng, OBDAModel apic) {
 
 		this.rewriter = rew;
 		this.unfoldingmechanism = unf;

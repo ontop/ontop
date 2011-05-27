@@ -2,7 +2,7 @@ package org.obda.owlrefplatform.core.abox;
 
 
 import inf.unibz.it.obda.exception.DuplicateMappingException;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Atom;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.OBDADataFactory;
@@ -36,11 +36,11 @@ public class SemanticIndexMappingGenerator {
     private final static OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
     private int mapcounter;
-    private final APIController apic;
+    private final OBDAModel apic;
     private final DAG dag;
     private final DataSource ds;
 
-    public SemanticIndexMappingGenerator(DataSource ds, APIController apic, DAG dag) {
+    public SemanticIndexMappingGenerator(DataSource ds, OBDAModel apic, DAG dag) {
     	this.ds = ds;
         this.apic = apic;
         this.dag = dag;

@@ -16,7 +16,7 @@ import inf.unibz.it.obda.gui.swing.IconLoader;
 import inf.unibz.it.obda.gui.swing.treemodel.MappingBodyNode;
 import inf.unibz.it.obda.gui.swing.treemodel.MappingHeadNode;
 import inf.unibz.it.obda.gui.swing.treemodel.MappingNode;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
@@ -68,13 +68,13 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 	private JTextPane					area							= null;
 	private JPanel						panel							= null;
 	private MappingManagerPreferences	pref							= null;
-	private final APIController	apic;
+	private final OBDAModel	apic;
 
 	DatalogProgramParser datalogParser = new DatalogProgramParser();
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingTreeCellRenderer(APIController apic, OBDAPreferences preference) {
+	public MappingTreeCellRenderer(OBDAModel apic, OBDAPreferences preference) {
 		this.apic = apic;
 		mappingIcon = IconLoader.getImageIcon(PATH_MAPPING_ICON);
 		invalidmappingIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPING_ICON);

@@ -29,7 +29,7 @@ import inf.unibz.it.obda.gui.swing.treemodel.MappingTreeSelectionModel;
 import inf.unibz.it.obda.gui.swing.treemodel.TreeModelFilter;
 import inf.unibz.it.obda.gui.swing.utils.DatasourceSelectorListener;
 import inf.unibz.it.obda.gui.swing.utils.MappingTreeCellRenderer;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesController;
@@ -102,7 +102,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	private DatasourcesController	dsc;
 
-	protected APIController			apic;
+	protected OBDAModel			apic;
 
 	private DatalogProgramParser	datalogParser;
 
@@ -120,7 +120,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(APIController apic, MappingController mapc, DatasourcesController dsc, OBDAPreferences preference) {
+	public MappingManagerPanel(OBDAModel apic, MappingController mapc, DatasourcesController dsc, OBDAPreferences preference) {
 
 		this.apic = apic;
 		this.mapc = mapc;

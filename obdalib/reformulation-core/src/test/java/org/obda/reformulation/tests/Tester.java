@@ -1,8 +1,9 @@
 package org.obda.reformulation.tests;
 
+import inf.unibz.it.obda.io.DataManager;
 import inf.unibz.it.obda.io.PrefixManager;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.QueryControllerEntity;
-import inf.unibz.it.obda.owlapi.OWLAPIController;
 import inf.unibz.it.obda.owlapi.ReformulationPlatformPreferences;
 import inf.unibz.it.obda.queryanswering.DataQueryReasoner;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
@@ -41,7 +42,7 @@ public class Tester {
     private Map<String, Set<String>> queryresults = null;
     private OWLOntologyManager manager = null;
     private OWLOntology ontology = null;
-    private OWLAPIController apic = null;
+    private OBDAModel apic = null;
     private DataQueryReasoner reasoner = null;
     private String owlloc = null;
     private String xmlLoc = null;
@@ -191,11 +192,12 @@ public class Tester {
         manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
-        apic = new OWLAPIController();
+        apic = new OBDAModel();
         String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
         // apic.loadData(new File(owlfile).toURI());
 
-        apic.getIOManager().loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), apic.getPrefixManager());
+        DataManager ioManager = new DataManager(apic);
+        ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), apic.getPrefixManager());
         fillPrefixManager();
     }
 

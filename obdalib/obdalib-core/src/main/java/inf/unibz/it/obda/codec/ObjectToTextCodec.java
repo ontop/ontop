@@ -1,13 +1,13 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 
 
 public abstract class ObjectToTextCodec <ObjectClass extends Object> {
 
-	protected APIController apic = null;
+	protected OBDAModel apic = null;
 
-	public ObjectToTextCodec(APIController apic){
+	public ObjectToTextCodec(OBDAModel apic){
 		this.apic = apic;
 	}
 	

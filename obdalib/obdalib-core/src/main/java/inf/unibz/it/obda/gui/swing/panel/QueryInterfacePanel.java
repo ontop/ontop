@@ -16,7 +16,7 @@ package inf.unibz.it.obda.gui.swing.panel;
 import inf.unibz.it.obda.gui.swing.OBDADataQueryAction;
 import inf.unibz.it.obda.gui.swing.utils.DialogUtils;
 import inf.unibz.it.obda.gui.swing.utils.SPARQLQueryStyledDocument;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.QueryController;
 import inf.unibz.it.obda.utils.OBDAPreferences;
 import inf.unibz.it.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
@@ -64,11 +64,11 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	private double execTime = 0;
 	private String currentGroup = null;
 	private String currentId = null;
-	private APIController apic = null;
+	private OBDAModel apic = null;
 	private URI baseuri = null;
 
 	/** Creates new form QueryInterfacePanel */
-	public QueryInterfacePanel(APIController apic, URI baseuri, OBDAPreferences prefs) {
+	public QueryInterfacePanel(OBDAModel apic, URI baseuri, OBDAPreferences prefs) {
 		this.qc = apic.getQueryController();
 		instance = this;
 		this.apic = apic;

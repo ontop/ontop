@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
 import inf.unibz.it.obda.model.impl.RDBMSSQLQuery;
 
@@ -18,7 +18,7 @@ public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 	 * @param apic the current api controller
 	 */
 
-	public SourceQueryToTextCodec(APIController apic) {
+	public SourceQueryToTextCodec(OBDAModel apic) {
 		super(apic);
 	}
 

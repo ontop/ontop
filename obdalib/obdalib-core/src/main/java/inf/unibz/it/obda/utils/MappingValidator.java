@@ -13,7 +13,7 @@
  */
 package inf.unibz.it.obda.utils;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.Query;
 
 import java.util.Enumeration;
@@ -23,9 +23,9 @@ public abstract class MappingValidator {
 
 	protected Query sourceQuery = null;
 	protected Query targetQuery = null;
-	protected APIController apic = null;
+	protected OBDAModel apic = null;
 
-	public MappingValidator (APIController apic, Query sq, Query tg){
+	public MappingValidator (OBDAModel apic, Query sq, Query tg){
 		this.apic = apic;
 		sourceQuery = sq;
 		targetQuery = tg;

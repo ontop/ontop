@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.DatalogProgram;
 
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class DatalogProgramToTextCodec extends ObjectToTextCodec<DatalogProgram> {
 
-	public DatalogProgramToTextCodec(APIController apic) {
+	public DatalogProgramToTextCodec(OBDAModel apic) {
 		super(apic);
 	}
 

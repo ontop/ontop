@@ -1,15 +1,16 @@
 package org.obda.reformulation.tests;
 
 
-import junit.framework.TestCase;
-import org.obda.owlrefplatform.core.abox.DAG;
-import org.obda.owlrefplatform.core.abox.DAGNode;
-import org.obda.owlrefplatform.core.abox.TDAG;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.TestCase;
+
+import org.obda.owlrefplatform.core.abox.DAG;
+import org.obda.owlrefplatform.core.abox.DAGNode;
+import org.obda.owlrefplatform.core.abox.TDAG;
 
 public class TDAGTest extends TestCase {
 

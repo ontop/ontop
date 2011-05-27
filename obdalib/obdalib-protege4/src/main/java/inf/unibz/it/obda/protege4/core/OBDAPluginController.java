@@ -1,14 +1,14 @@
 package inf.unibz.it.obda.protege4.core;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.io.DataManager;
 import inf.unibz.it.obda.model.DataSource;
 import inf.unibz.it.obda.model.DatasourcesControllerListener;
 import inf.unibz.it.obda.model.MappingControllerListener;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.QueryControllerEntity;
 import inf.unibz.it.obda.model.QueryControllerListener;
 import inf.unibz.it.obda.owlapi.OBDAOWLReasonerFactory;
-import inf.unibz.it.obda.owlapi.OWLAPIController;
 import inf.unibz.it.obda.queryanswering.QueryControllerGroup;
 import inf.unibz.it.obda.queryanswering.QueryControllerQuery;
 
@@ -44,9 +44,9 @@ public class OBDAPluginController implements Disposable {
 
 	OWLOntologyManager								mmgr					= null;
 
-	OWLAPIController								obdacontroller			= null;
+	OBDAModel										obdacontroller			= null;
 
-//	List<OBDAPluginControllerListener>				controllerListeners;
+	// List<OBDAPluginControllerListener> controllerListeners;
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -74,12 +74,12 @@ public class OBDAPluginController implements Disposable {
 		this.owlEditorKit = (OWLEditorKit) editorKit;
 		mmgr = ((OWLModelManager) owlEditorKit.getModelManager()).getOWLOntologyManager();
 
-//		controllerListeners = new LinkedList<OBDAPluginControllerListener>();
-//		OWLModelManager owlmm = owlEditorKit.getModelManager();
-//		owlmm.addListener(getModelManagerListener());
+		// controllerListeners = new LinkedList<OBDAPluginControllerListener>();
+		// OWLModelManager owlmm = owlEditorKit.getModelManager();
+		// owlmm.addListener(getModelManagerListener());
 	}
 
-	public OWLAPIController getOBDAManager() {
+	public OBDAModel getOBDAManager() {
 		return obdacontroller;
 
 	}
@@ -97,18 +97,18 @@ public class OBDAPluginController implements Disposable {
 	 * created.
 	 */
 	private void setupNewOBDAModel() {
-		APIController oldcontroller = obdacontroller;
-		
+		OBDAModel oldcontroller = obdacontroller;
+
 		if (obdacontroller != null) {
 
 			log.warn("WARNING: At the moment, the obda plugin doesn't support editing two ontologies in the same window");
 			log.warn("Open ontologies ONLY IN A NEW WINDOWS, otherwise, the OBDA information and the behaivor of the plugin will be inconsistent");
-			
+
 			obdacontroller.getDatasourcesController().removeDatasourceControllerListener(dlistener);
 			obdacontroller.getMappingController().removeMappingControllerListener(mlistener);
 			obdacontroller.getQueryController().removeListener(qlistener);
 		}
-		obdacontroller = new OWLAPIController();
+		obdacontroller = new OBDAModel();
 
 		obdacontroller.getDatasourcesController().addDatasourceControllerListener(dlistener);
 		obdacontroller.getMappingController().addMappingControllerListener(mlistener);
@@ -132,11 +132,9 @@ public class OBDAPluginController implements Disposable {
 				obdaFactory.setPreferenceHolder(reasonerPreference);
 			}
 		}
-		
-//		triggerOBDAModelChangeEvent(oldcontroller, obdacontroller);
+
+		// triggerOBDAModelChangeEvent(oldcontroller, obdacontroller);
 	}
-
-
 
 	/***
 	 * Internal class responsible for coordinating actions related to updates in
@@ -182,7 +180,8 @@ public class OBDAPluginController implements Disposable {
 						URI obdafile = URI.create(owlfile.toString().substring(0, owlfile.toString().length() - 3) + "obda");
 
 						obdacontroller.getPrefixManager().setDefaultNamespace(activeonto.getURI().toString());
-						obdacontroller.getIOManager().loadOBDADataFromURI(obdafile, activeonto.getURI(), obdacontroller.getPrefixManager());
+						DataManager ioManager = new DataManager(obdacontroller);
+						ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), obdacontroller.getPrefixManager());
 					} catch (Exception e) {
 						log.warn(e.getMessage());
 						log.debug(e.getMessage(), e);
@@ -199,7 +198,8 @@ public class OBDAPluginController implements Disposable {
 					URI obdafile = URI.create(owlfile.toString().substring(0, owlfile.toString().length() - 3) + "obda");
 
 					try {
-						obdacontroller.getIOManager().saveOBDAData(obdafile, true, obdacontroller.getPrefixManager());
+						DataManager ioManager = new DataManager(obdacontroller);
+						ioManager.saveOBDAData(obdafile, true, obdacontroller.getPrefixManager());
 					} catch (IOException e) {
 						log.error("ERROR saving OBDA data to file: {}", obdafile.toString());
 						log.error("ERROR message: {}", e.getMessage());
@@ -217,24 +217,26 @@ public class OBDAPluginController implements Disposable {
 
 	}
 
-//	public void addListener(OBDAPluginControllerListener listener) {
-//		controllerListeners.add(listener);
-//	}
-//
-//	public void removeListener(OBDAPluginControllerListener listener) {
-//		controllerListeners.remove(listener);
-//	}
+	// public void addListener(OBDAPluginControllerListener listener) {
+	// controllerListeners.add(listener);
+	// }
+	//
+	// public void removeListener(OBDAPluginControllerListener listener) {
+	// controllerListeners.remove(listener);
+	// }
 
-//	private void triggerOBDAModelChangeEvent(APIController oldmodel, APIController newmodel) {
-//		for (OBDAPluginControllerListener listener : controllerListeners) {
-//			try {
-//				listener.obdaModelChanged(oldmodel, newmodel);
-//			} catch (Exception e) {
-//				log.warn("Eror notifying listeners of obda model change: {}", e.getMessage());
-//				log.debug(e.getMessage(), e);
-//			}
-//		}
-//	}
+	// private void triggerOBDAModelChangeEvent(APIController oldmodel,
+	// APIController newmodel) {
+	// for (OBDAPluginControllerListener listener : controllerListeners) {
+	// try {
+	// listener.obdaModelChanged(oldmodel, newmodel);
+	// } catch (Exception e) {
+	// log.warn("Eror notifying listeners of obda model change: {}",
+	// e.getMessage());
+	// log.debug(e.getMessage(), e);
+	// }
+	// }
+	// }
 
 	/***
 	 * Protege wont trigger a save action unless it detects that the OWLOntology
@@ -274,12 +276,12 @@ public class OBDAPluginController implements Disposable {
 	 * APIController.class.getName() property with the put method.
 	 */
 	public void dispose() throws Exception {
-//		try {
-//			
-//			owlEditorKit.getModelManager().removeListener(getModelManagerListener());
-//		} catch (Exception e) {
-//			log.warn(e.getMessage());
-//		}
+		// try {
+		//
+		// owlEditorKit.getModelManager().removeListener(getModelManagerListener());
+		// } catch (Exception e) {
+		// log.warn(e.getMessage());
+		// }
 
 	}
 

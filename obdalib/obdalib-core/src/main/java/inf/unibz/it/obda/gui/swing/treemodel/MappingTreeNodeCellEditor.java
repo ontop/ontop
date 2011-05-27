@@ -18,7 +18,7 @@ import inf.unibz.it.obda.gui.swing.IconLoader;
 import inf.unibz.it.obda.gui.swing.panel.MappingManagerPanel;
 import inf.unibz.it.obda.gui.swing.utils.MappingStyledDocument;
 import inf.unibz.it.obda.gui.swing.utils.MappingTreeCellRenderer;
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
@@ -55,7 +55,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	final String	PATH_MAPPINGHEAD_ICON	= "images/head.png";
 	final String	PATH_MAPPINGBODY_ICON	= "images/body.png";
 
-	private APIController controller = null;
+	private OBDAModel controller = null;
 	private MappingEditorPanel me = null;
 	private Vector<CellEditorListener> listener = null;
 	private MappingManagerPanel mappingmanagerpanel = null;
@@ -65,7 +65,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingTreeNodeCellEditor(JTree tree, MappingManagerPanel panel, APIController apic) {
+	public MappingTreeNodeCellEditor(JTree tree, MappingManagerPanel panel, OBDAModel apic) {
 //		super(tree, new MappingRenderer(apic));
 //		super(tree, renderer);
 ////		this.renderer = new MappingRenderer(apic);

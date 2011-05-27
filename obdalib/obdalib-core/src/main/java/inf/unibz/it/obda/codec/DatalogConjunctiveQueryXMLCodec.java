@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.parser.DatalogProgramParser;
 import inf.unibz.it.obda.parser.DatalogQueryHelper;
@@ -31,13 +31,13 @@ public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 	/**
 	 * the current api controller
 	 */
-	APIController				apic			= null;
+	OBDAModel				apic			= null;
 
 	DatalogProgramParser		datalogParser	= new DatalogProgramParser();
 
 	private final Logger		log				= LoggerFactory.getLogger(this.getClass());
 
-	public DatalogConjunctiveQueryXMLCodec(APIController apic) {
+	public DatalogConjunctiveQueryXMLCodec(OBDAModel apic) {
 		this.apic = apic;
 	}
 

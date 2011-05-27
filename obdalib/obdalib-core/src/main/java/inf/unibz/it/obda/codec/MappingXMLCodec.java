@@ -1,6 +1,6 @@
 package inf.unibz.it.obda.codec;
 
-import inf.unibz.it.obda.model.APIController;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.CQIE;
 import inf.unibz.it.obda.model.OBDAMappingAxiom;
 import inf.unibz.it.obda.model.impl.CQIEImpl;
@@ -31,7 +31,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
 	/**
 	 * the current api controller
 	 */
-	APIController apic = null;
+	OBDAModel apic = null;
 	/**
 	 * the datalog conjunctive quey codec used to encode respectively decode the
 	 * head of the mappings.
@@ -42,7 +42,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom>{
 	 * The contructor. Creates a new instance of the Codec
 	 * @param apic
 	 */
-	public MappingXMLCodec(APIController apic){
+	public MappingXMLCodec(OBDAModel apic){
 		this.apic = apic;
 		cqcodec = new DatalogConjunctiveQueryXMLCodec(apic);
 	}

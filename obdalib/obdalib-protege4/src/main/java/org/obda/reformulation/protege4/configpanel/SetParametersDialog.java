@@ -5,8 +5,8 @@
 
 package org.obda.reformulation.protege4.configpanel;
 
-import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.DataSource;
+import inf.unibz.it.obda.model.OBDAModel;
 import inf.unibz.it.obda.model.impl.RDBMSsourceParameterConstants;
 
 import java.awt.event.ActionEvent;
@@ -33,10 +33,10 @@ public class SetParametersDialog extends javax.swing.JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = -395702104656733013L;
-	private APIController apic = null;
+	private OBDAModel apic = null;
 	
     /** Creates new form SetParametersDialog */
-    public SetParametersDialog(java.awt.Frame parent, boolean modal, APIController apic) {
+    public SetParametersDialog(java.awt.Frame parent, boolean modal, OBDAModel apic) {
         super(parent, modal);
         this.apic = apic;
         initComponents();
