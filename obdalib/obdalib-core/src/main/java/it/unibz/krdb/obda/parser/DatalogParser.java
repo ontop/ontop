@@ -267,9 +267,12 @@ public class DatalogParser extends Parser {
             	                                              // API specification. Therefore,
             	                                              // we are going to import all the
             	                                              // data from the Set to a Vector.        
+            	              
+            	              
             	              Atom head = rule.getHead();
-            	              head.updateTerms(variableList);
-            	              rule.updateHead(head);
+            	              
+            	              Atom newhead = fac.getAtom(fac.getPredicate(head.getPredicate().getName(), variableList.size()), variableList);
+            	              rule.updateHead(newhead);
             	              isSelectAll = false;  
             	            }
             	              

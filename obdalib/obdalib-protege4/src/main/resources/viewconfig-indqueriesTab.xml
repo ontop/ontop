@@ -4,13 +4,13 @@
 		<CNode>
 			<Component label="Query manager">
 				<Property id="pluginId"
-					value="inf.unibz.it.obda.protege4.obdaplugin.QueryManagerViewComponent"/>
+					value="it.unibz.krdb.obda.protege4.QueryManagerViewComponent"/>
 			</Component>
 		</CNode>
 		<CNode>
 			<Component label="Query interface">
 				<Property id="pluginId"
-					value="inf.unibz.it.obda.protege4.obdaplugin.QueryInterfaceViewComponent"/>
+					value="it.unibz.krdb.obda.protege4.QueryInterfaceViewComponent"/>
 			</Component>
 		</CNode>
 	</VSNode>

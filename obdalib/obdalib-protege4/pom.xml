@@ -289,7 +289,7 @@
 							dependencies are packed as .classes (uncompressed, no jars) and
 							the rest is packed as .jars
 						-->
-						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,reformulation*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
+						<Embed-Dependency>obdalib*;groupId=it.unibz.krdb;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
 						<!-- necessary for protege 4 plugins -->
 						<Bundle-Category>protege</Bundle-Category>
@@ -297,8 +297,8 @@
 						<!--  general information -->
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
-						<Bundle-Description>The Ontology Based Data Access (OBDA) Plugin for Protege 4</Bundle-Description>
-						<Bundle-Vendor>Free University of Bozen Bolzano</Bundle-Vendor>
+						<Bundle-Description>The OBDA-Plugin for Protege 4.0</Bundle-Description>
+						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research Centre</Bundle-Vendor>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.0.0</Bundle-Version>
@@ -308,7 +308,7 @@
 							The name of the plugin for OSGi dependencies. It has to be
 							singleton or protege wont load it
 						-->
-						<Bundle-SymbolicName>inf.unibz.it.obda.protege4.obdaplugin;singleton:=true</Bundle-SymbolicName>
+						<Bundle-SymbolicName>it.unibz.krdb.obda.protege4;singleton:=true</Bundle-SymbolicName>
 
 						<!--
 							This makes sure ONLY the necessary dependencies are imported. If
@@ -323,7 +323,7 @@
 							This makes sure all OBDA classes are exported and available in
 							dependent projects
 						-->
-						<Export-Package>inf.unibz.it.*,org.obda.*</Export-Package>
+						<Export-Package>it.unibz.krdb.*</Export-Package>
 
 
 						<!--

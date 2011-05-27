@@ -795,6 +795,7 @@ public class DatalogParserTest {
 		uri = head.getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
+		assertEquals(2, head.getPredicate().getArity());
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();

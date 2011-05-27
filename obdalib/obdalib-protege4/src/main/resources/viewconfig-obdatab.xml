@@ -4,19 +4,19 @@
 		<CNode>
 		  <Component label="Datasources Selector">
 		    <Property id="pluginId"
-		      value="inf.unibz.it.obda.protege4.obdaplugin.DatasourcesManagerViewComponent"/>
+		      value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent"/>
 		  </Component>
 		  <Component label="Mappings Manager">
 		    <Property id="pluginId"
-		      value="inf.unibz.it.obda.protege4.obdaplugin.MappingsManagerViewComponent"/>
+		      value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent"/>
 		  </Component>
 		  <Component label="RDBMS source schema inspector">
 		    <Property id="pluginId"
-		      value="inf.unibz.it.obda.protege4.obdaplugin.RDBMSInspectorViewComponent"/>
+		      value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/>
 		  </Component>
 		  <Component label="SQL query interface">
 		    <Property id="pluginId"
-		      value="inf.unibz.it.obda.protege4.obdaplugin.SQLQueryInterfaceViewComponent"/>
+		      value="it.unibz.krdb.obda.protege4.SQLQueryInterfaceViewComponent"/>
 		  </Component>
 		</CNode>
 	</VSNode>

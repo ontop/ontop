@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.protege4.abox.materialization;
+package it.unibz.krdb.obda.protege4.gui.action;
 
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
