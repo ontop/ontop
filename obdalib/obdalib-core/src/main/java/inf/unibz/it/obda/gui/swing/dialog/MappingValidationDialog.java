@@ -10,7 +10,7 @@
  * of the LGPL. Information about such licenses can be found in the file named
  * OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package inf.unibz.it.obda.gui.swing;
+package inf.unibz.it.obda.gui.swing.dialog;
 
 
 import inf.unibz.it.obda.gui.swing.utils.DialogUtils;
@@ -40,7 +40,7 @@ public class MappingValidationDialog extends JDialog {
 	private static final long		serialVersionUID	= -3099215805478663834L;
 	private JDialog					myself				= null;
 	private DefaultStyledDocument	doc					= null;
-	private JTree					parent				= null;
+//	private JTree					parent				= null;
 	private int						index				= 0;
 
 	public Style					VALID				= null;
@@ -55,7 +55,7 @@ public class MappingValidationDialog extends JDialog {
 		super();
 		myself = this;
 		doc = new DefaultStyledDocument();
-		parent = tree;
+//		parent = tree;
 		createStyles();
 		createContent();
 		DialogUtils.centerDialogWRTParent(tree.getParent(), this);
