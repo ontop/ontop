@@ -13,10 +13,10 @@ public class SDAG {
     private final Map<String, DAGNode> dag_nodes = new HashMap<String, DAGNode>();
 
 
-    public SDAG(final TDAG tdag) {
+    public SDAG(TDAG tdag) {
 
 
-        for (final DAGNode node : tdag.getTDAG().values()) {
+        for (DAGNode node : tdag.getTDAG().values()) {
             if (node.getUri().startsWith(DAG.owl_inverse_exists_data) ||
                     node.getUri().startsWith(DAG.owl_inverse_exists_obj) ||
                     node.getUri().startsWith(DAG.owl_exists_data) ||
