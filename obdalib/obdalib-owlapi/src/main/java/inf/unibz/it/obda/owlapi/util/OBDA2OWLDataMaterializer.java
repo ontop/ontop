@@ -1,4 +1,4 @@
-package inf.unibz.it.obda.owlapi.abox.materialization;
+package inf.unibz.it.obda.owlapi.util;
 
 import inf.unibz.it.obda.model.APIController;
 import inf.unibz.it.obda.model.Atom;
@@ -28,38 +28,21 @@ import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 
-public class AboxMaterializer {
-
-	// private OWLAPIController controller = null;
-	// private String owlFile = null;
-	// private OWLOntologyManager manager = null;
-	// private OWLOntology currentOntology = null;
-	// private OWLDataFactory factory = null;
-
-	// private AboxMaterializer(String owlfile){
-	//
-	// this.owlFile= owlfile;
-	// try {
-	// this.manager = OWLManager.createOWLOntologyManager();
-	// this.factory = manager.getOWLDataFactory();
-	// currentOntology = manager.loadOntologyFromPhysicalURI((new
-	// File(owlFile)).toURI());
-	// controller = new OWLAPIController(this.manager, currentOntology);
-	// controller.loadData(new File(owlFile).toURI());
-	// } catch (OWLOntologyCreationException e) {
-	// e.printStackTrace();
-	// }
-	// }
-
-	// public AboxMaterializer(){
-	//
-	// }
+/***
+ * This utility allows you to materialize the data comming from the mappings and
+ * datasources specified in an OBDA model into owl individuals that are inserted
+ * into an OWLOntology.
+ * 
+ * @author Mariano Rodriguez Muro
+ * 
+ */
+public class OBDA2OWLDataMaterializer {
 
 	public void materializeAbox(APIController controller, OWLOntologyManager manager, OWLOntology currentOntology) throws Exception {
 		List<DataSource> sources = controller.getDatasourcesController().getAllSources();
 		Iterator<DataSource> sit = sources.iterator();
 		while (sit.hasNext()) {
-			materializeAbox( controller,  manager,  currentOntology, sit.next());
+			materializeAbox(controller, manager, currentOntology, sit.next());
 		}
 	}
 
@@ -164,8 +147,8 @@ public class AboxMaterializer {
 							OWLIndividual ind = factory.getOWLIndividual(URI.create(sb.toString()));
 							OWLDataProperty prop = factory.getOWLDataProperty(new URI(uri));
 							String value = res.getString(valueVar);
-							OWLDataPropertyAssertionAxiom axiom = factory.getOWLDataPropertyAssertionAxiom(ind, prop, factory
-									.getOWLUntypedConstant(value));
+							OWLDataPropertyAssertionAxiom axiom = factory.getOWLDataPropertyAssertionAxiom(ind, prop,
+									factory.getOWLUntypedConstant(value));
 							// manager.addAxiom(currentOntology, axiom);
 							individuals.add(axiom);
 						}
@@ -223,19 +206,20 @@ public class AboxMaterializer {
 		manager.addAxioms(currentOntology, individuals);
 
 	}
-//
-//	private List<OBDAMappingAxiom> getMappings(APIController controller) {
-//
-//		LinkedList<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>();
-//		MappingController mapcon = controller.getMappingController();
-//		DatasourcesController dscon = controller.getDatasourcesController();
-//		List<DataSource> ds = dscon.getAllSources();
-//		Iterator<DataSource> dsit = ds.iterator();
-//		while (dsit.hasNext()) {
-//			mappings.addAll();
-//		}
-//
-//		return mappings;
-//	}
+	//
+	// private List<OBDAMappingAxiom> getMappings(APIController controller) {
+	//
+	// LinkedList<OBDAMappingAxiom> mappings = new
+	// LinkedList<OBDAMappingAxiom>();
+	// MappingController mapcon = controller.getMappingController();
+	// DatasourcesController dscon = controller.getDatasourcesController();
+	// List<DataSource> ds = dscon.getAllSources();
+	// Iterator<DataSource> dsit = ds.iterator();
+	// while (dsit.hasNext()) {
+	// mappings.addAll();
+	// }
+	//
+	// return mappings;
+	// }
 
 }

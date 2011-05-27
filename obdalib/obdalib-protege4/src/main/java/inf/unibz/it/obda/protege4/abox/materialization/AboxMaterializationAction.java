@@ -3,7 +3,7 @@ package inf.unibz.it.obda.protege4.abox.materialization;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgessMonitor;
 import inf.unibz.it.obda.gui.swing.utils.OBDAProgressListener;
 import inf.unibz.it.obda.model.APIController;
-import inf.unibz.it.obda.owlapi.abox.materialization.AboxMaterializer;
+import inf.unibz.it.obda.owlapi.util.OBDA2OWLDataMaterializer;
 import inf.unibz.it.obda.protege4.core.OBDAPluginController;
 
 import java.awt.Container;
@@ -70,7 +70,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		try {
 			OWLOntologyManager owlOntManager = mm.getOWLOntologyManager();
 			OWLOntology owl_ont = mm.getActiveOntology();
-			AboxMaterializer mat = new AboxMaterializer();
+			OBDA2OWLDataMaterializer mat = new OBDA2OWLDataMaterializer();
 
 			OBDAProgessMonitor monitor = new OBDAProgessMonitor();
 			CountDownLatch latch = new CountDownLatch(1);
@@ -97,12 +97,12 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		private CountDownLatch		latch	= null;
 
-		private AboxMaterializer	mat		= null;
+		private OBDA2OWLDataMaterializer	mat		= null;
 		private OWLOntology			owl_ont	= null;
 		private OWLOntologyManager	man		= null;
 		APIController				obdapi	= null;
 
-		public MaterializeAction(AboxMaterializer mat, APIController obdaapi, OWLOntology owl_ont, OWLOntologyManager man,
+		public MaterializeAction(OBDA2OWLDataMaterializer mat, APIController obdaapi, OWLOntology owl_ont, OWLOntologyManager man,
 				CountDownLatch latch) {
 			this.obdapi = obdaapi;
 			this.mat = mat;
