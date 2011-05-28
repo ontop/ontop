@@ -248,7 +248,7 @@ public class JDBCConnectionManager {
 			throw new SQLException("No data source selected.");
 		}
 		Connection con = connectionPool.get(source.getSourceID());
-		if (con == null) {
+		if ((con == null)||(con.isClosed())) {
 			createConnection(source);
 		}
 		return connectionPool.get(source.getSourceID());

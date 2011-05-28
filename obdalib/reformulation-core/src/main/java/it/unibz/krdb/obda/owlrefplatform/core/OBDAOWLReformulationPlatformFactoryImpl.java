@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The implementation of the factory for creating reformulation's platform reasoner
  *
- * @author Manfred Gerstgrasser
  */
 
 public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
@@ -184,7 +183,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
                 source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-                apic.getDatasourcesController().addDataSource(source);
+//                apic.getDatasourcesController().addDataSource(source);
 //                apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
                 ds = source;
                 connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);

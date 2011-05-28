@@ -23,6 +23,7 @@ public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel
 	public void initialise() throws Exception {
 		preference = (ReformulationPlatformPreferences)
 			getEditorKit().get(ReformulationPlatformPreferences.class.getName());
+		
 		configPanel = new ConfigPanel(preference);
 		this.add(configPanel);
 	}

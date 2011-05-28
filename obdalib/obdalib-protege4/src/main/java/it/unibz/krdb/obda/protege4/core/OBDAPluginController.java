@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.protege4.ProtegeReformulationPlatformPreferences;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
@@ -129,9 +130,12 @@ public class OBDAPluginController implements Disposable {
 			if (protegeOWLReasonerFactory instanceof OBDAOWLReasonerFactory) {
 				OBDAOWLReasonerFactory obdaFactory = (OBDAOWLReasonerFactory) protegeOWLReasonerFactory;
 				obdaFactory.setOBDAController(obdacontroller);
-
+				
+				
 				// Each reasoner factory has its own preference instance.
-				ProtegeReformulationPlatformPreferences reasonerPreference = new ProtegeReformulationPlatformPreferences();
+//				ProtegeReformulationPlatformPreferences reasonerPreference = new ProtegeReformulationPlatformPreferences();
+				
+				ProtegeReformulationPlatformPreferences reasonerPreference = owlEditorKit.get(ReformulationPlatformPreferences.class.getName());
 				obdaFactory.setPreferenceHolder(reasonerPreference);
 			}
 		}

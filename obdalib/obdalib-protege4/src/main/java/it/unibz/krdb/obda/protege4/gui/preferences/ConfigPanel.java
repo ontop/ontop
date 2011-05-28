@@ -16,6 +16,8 @@ import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import org.slf4j.Logger;
+
 /**
  *
  * @author Manfred Gerstgrasser
@@ -28,6 +30,8 @@ public class ConfigPanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = 2263812414027790329L;
 	private ReformulationPlatformPreferences preference = null;
 	
+	private Logger log = org.slf4j.LoggerFactory.getLogger(ConfigPanel.class);
+	
     /** 
 	 * The constructor.
      */
@@ -35,8 +39,7 @@ public class ConfigPanel extends javax.swing.JPanel {
     	this.preference = preference;
         initComponents();
         addActionListener();
-        setSeletions();
-        applyPreferences();
+        setSeletions(preference);
     }
 
     private void addActionListener(){
@@ -78,7 +81,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "direct");
-				
+
 			}
 		});
         jRadioButtonInMemoryDB.addActionListener(new ActionListener() {
@@ -115,23 +118,61 @@ public class ConfigPanel extends javax.swing.JPanel {
 		});
     }
     
-    private void setSeletions(){
-    	
-    	jRadioButtonMaterialAbox.setSelected(false);
-    	jRadioButtonVirualABox.setSelected(true);
-    	jRadioButtonVirualABox.setEnabled(true);
+    private void setSeletions(ReformulationPlatformPreferences p){
+		
+		String value = (String)p.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
+		if (value.equals("virtual")) {
+			jRadioButtonVirualABox.setSelected(true);
+			jRadioButtonMaterialAbox.setSelected(false);
+			jRadioButtonDirect.setEnabled(false);
+	        jRadioButtonSemanticIndex.setEnabled(false);
+	        jRadioButtonUniversal.setEnabled(false);
+	        jRadioButtonUserProvidedDB.setEnabled(false);
+			jRadioButtonInMemoryDB.setEnabled(false);
+			jLabelDataLoc.setEnabled(false);
+			jLabeldbtype.setEnabled(false);
+		} else if (value.equals("material")) {
+			jRadioButtonVirualABox.setSelected(false);
+			jRadioButtonMaterialAbox.setSelected(true);
+			jRadioButtonDirect.setEnabled(true);
+			jRadioButtonSemanticIndex.setEnabled(true);
+			jRadioButtonUniversal.setEnabled(true);
+			jRadioButtonUserProvidedDB.setEnabled(true);
+			jRadioButtonInMemoryDB.setEnabled(true);
+			jLabelDataLoc.setEnabled(true);
+			jLabeldbtype.setEnabled(true);
 
-        jRadioButtonDirect.setSelected(false);
-        jRadioButtonInMemoryDB.setSelected(false);
-        jRadioButtonSemanticIndex.setSelected(false);
-        jRadioButtonUniversal.setSelected(false);
-        jRadioButtonUserProvidedDB.setSelected(false);
-
-        jRadioButtonDirect.setEnabled(false);
-        jRadioButtonInMemoryDB.setEnabled(false);
-        jRadioButtonSemanticIndex.setEnabled(false);
-        jRadioButtonUniversal.setEnabled(false);
-        jRadioButtonUserProvidedDB.setEnabled(false);
+		} else {
+			log.warn("Unknown ABOX mode: {}", value);
+		}
+		
+		value = (String)p.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION);
+		if (value.equals("provided")) {
+			jRadioButtonUserProvidedDB.setSelected(true);
+			jRadioButtonInMemoryDB.setSelected(false);
+		} else if (value.equals("inmemory")) {
+			jRadioButtonUserProvidedDB.setSelected(false);
+			jRadioButtonInMemoryDB.setSelected(true);
+		} else {
+			log.warn("Unknown data store mode: {}", value);
+		}
+		
+		value = (String)p.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
+		if (value.equals("direct")) {
+			jRadioButtonDirect.setSelected(true);
+			jRadioButtonUniversal.setSelected(false);
+			jRadioButtonSemanticIndex.setSelected(false);
+		} else if (value.equals("universal")) {
+			jRadioButtonDirect.setSelected(false);
+			jRadioButtonUniversal.setSelected(true);
+			jRadioButtonSemanticIndex.setSelected(false);
+		} else if (value.equals("semantic")) {
+			jRadioButtonDirect.setSelected(false);
+			jRadioButtonUniversal.setSelected(false);
+			jRadioButtonSemanticIndex.setSelected(true);
+		} else {
+			log.warn("Unknown DB type mode: {}", value);
+		}
     }
     /** This method is called from within the constructor to
      * initialize the form.
@@ -354,24 +395,24 @@ public class ConfigPanel extends javax.swing.JPanel {
         add(pnlTWConfiguration, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void applyPreferences() {
-    	
-    	String aboxmode = (String)preference.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
-    	if(aboxmode.equals("virutal")){
-    		
-    	    jRadioButtonDirect.setEnabled(false);
-    	    jRadioButtonInMemoryDB.setEnabled(false);
-    	    jRadioButtonMaterialAbox.setEnabled(false);
-    	    jRadioButtonSemanticIndex.setEnabled(false);
-    	    jRadioButtonUniversal.setEnabled(false);
-    	    jRadioButtonUserProvidedDB.setEnabled(false);
-    	    jRadioButtonVirualABox.setEnabled(true);
-    	    jRadioButtonVirualABox.setSelected(true);
-    		
-    	}else{
-    		
-    	}
-    }
+//    private void applyPreferences() {
+//    	
+//    	String aboxmode = (String)preference.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
+//    	if(aboxmode.equals("virtual")){
+//    		
+//    	    jRadioButtonDirect.setEnabled(false);
+//    	    jRadioButtonInMemoryDB.setEnabled(false);
+//    	    jRadioButtonMaterialAbox.setEnabled(false);
+//    	    jRadioButtonSemanticIndex.setEnabled(false);
+//    	    jRadioButtonUniversal.setEnabled(false);
+//    	    jRadioButtonUserProvidedDB.setEnabled(false);
+//    	    jRadioButtonVirualABox.setEnabled(true);
+//    	    jRadioButtonVirualABox.setSelected(true);
+//    		
+//    	}else{
+//    		
+//    	}
+//    }
     
     private void cmbTechniqueWrapperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTechniqueWrapperActionPerformed
         // TODO add your handling code here:
