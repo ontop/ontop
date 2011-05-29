@@ -166,7 +166,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 ontology.addAssertions(aux.getAssertions());
             }
 
-            if (useInMemoryDB) {
+            if (useInMemoryDB && ("material".equals(unfoldingMode)||createMappings)) {
                 log.debug("Using in an memory database");
                 String driver = "org.h2.Driver";
                 String url = "jdbc:h2:mem:aboxdump";

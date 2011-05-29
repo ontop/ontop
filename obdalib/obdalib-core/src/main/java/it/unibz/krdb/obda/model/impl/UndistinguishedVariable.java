@@ -6,7 +6,7 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class UndistinguishedVariable implements Variable {
 
-	private String name= "#";
+	private String name= "_";
 	private final int identifier = -4000;
 	private final XSDatatype type = null;
 

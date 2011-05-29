@@ -5,7 +5,6 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.impl.DatalogProgramImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
