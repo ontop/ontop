@@ -172,7 +172,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					monitor.stop();
 					QueryResultSet result = action.getResult();
 					if (result != null) {
-						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result);
+						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result, obdaController.getOBDAManager().getPrefixManager(), panel_query_interface.isShortURISelect());
 						model.addTableModelListener(panel);
 						rows = model.getRowCount();
 						panel_view_results.setTableModel(model);

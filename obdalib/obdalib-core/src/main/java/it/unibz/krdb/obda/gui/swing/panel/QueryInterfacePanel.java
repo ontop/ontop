@@ -109,12 +109,15 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        eqlPopupMenu = new javax.swing.JPopupMenu();
+        getEQLSQLExpansion = new javax.swing.JMenuItem();
         sparqlPopupMenu = new javax.swing.JPopupMenu();
         getSPARQLExpansion = new javax.swing.JMenuItem();
         getSPARQLSQLExpansion = new javax.swing.JMenuItem();
         panel_query_buttons = new javax.swing.JPanel();
         jPanelStatusContainer = new javax.swing.JPanel();
         jLabelStatus = new javax.swing.JLabel();
+        jCheckBoxShort = new javax.swing.JCheckBox();
         buttonAttachPrefix = new javax.swing.JButton();
         buttonExecute = new javax.swing.JButton();
         buttonSaveQuery = new javax.swing.JButton();
@@ -122,6 +125,15 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
         jLabelHeader = new javax.swing.JLabel();
         jScrollQueryPane = new javax.swing.JScrollPane();
         queryTextPane = new javax.swing.JTextPane();
+
+        getEQLSQLExpansion.setText("Get SQL for EQL query...");
+        getEQLSQLExpansion.setEnabled(false);
+        getEQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                getEQLSQLExpansionActionPerformed(evt);
+            }
+        });
+        eqlPopupMenu.add(getEQLSQLExpansion);
 
         sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
 
@@ -153,6 +165,14 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         jPanelStatusContainer.add(jLabelStatus, gridBagConstraints);
+
+        jCheckBoxShort.setText("show short URIs");
+        jCheckBoxShort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxShortActionPerformed(evt);
+            }
+        });
+        jPanelStatusContainer.add(jCheckBoxShort, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
@@ -223,6 +243,10 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
         gridBagConstraints.weighty = 1.0;
         add(jPanelQueryPaneContainer, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
+
+private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxShortActionPerformed
+// TODO add your handling code here:
+}//GEN-LAST:event_jCheckBoxShortActionPerformed
 
 	private void getEQLSQLExpansionActionPerformed(
 			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getEQLSQLExpansionActionPerformed
@@ -386,8 +410,11 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
     private javax.swing.JButton buttonAttachPrefix;
     private javax.swing.JButton buttonExecute;
     private javax.swing.JButton buttonSaveQuery;
+    private javax.swing.JPopupMenu eqlPopupMenu;
+    private javax.swing.JMenuItem getEQLSQLExpansion;
     private javax.swing.JMenuItem getSPARQLExpansion;
     private javax.swing.JMenuItem getSPARQLSQLExpansion;
+    private javax.swing.JCheckBox jCheckBoxShort;
     private javax.swing.JLabel jLabelHeader;
     private javax.swing.JLabel jLabelStatus;
     private javax.swing.JPanel jPanelQueryPaneContainer;
@@ -407,6 +434,10 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 				+ " sec     Number of tuples retrieved: " + rows;
 		jLabelStatus.setText(s);
 
+	}
+	
+	public boolean isShortURISelect() {
+		return jCheckBoxShort.isSelected();
 	}
 
 	public String getQuery(){	

@@ -145,6 +145,10 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		this.compilationOfM = compilationOfM;
 
 	}
+	
+	public DatalogProgram getCompilationOfMappings() {
+		return compilationOfM;
+	}
 
 	/***
 	 * Creates a rule for a mapping at can be used to create the program to be

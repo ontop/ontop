@@ -45,7 +45,7 @@ public class MappingPredicateTreeModelFilter implements
 			Atom atom = atoms.get(i);
 
 			if (atom.getPredicate().getName().toString().indexOf(srtPredicateFilter) != -1)
-				filterValue = true;
+				filterValue = true	;
 
 		}
 		return filterValue;

@@ -13,8 +13,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,8 +29,8 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	private AtomUnifier					unifier			= null;
 	private PositiveInclusionApplicator	piApplicator	= null;
 	private List<Assertion>				assertions		= null;
-	
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+	private OBDADataFactory				fac				= OBDADataFactoryImpl.getInstance();
 
 	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
@@ -52,21 +54,18 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	 */
 	private DatalogProgram reformulate(DatalogProgram q) throws Exception {
 
-		DatalogProgram prog = fac.getDatalogProgram();
-
-		QueryUtils.copyQueryModifiers(q, prog);
-
-		List<CQIE> queries = q.getRules();
-		prog.appendRule(queries);
-		HashSet<Integer> newRules = new HashSet<Integer>();
+		LinkedHashSet<CQIE> prog = new LinkedHashSet<CQIE>();
+		// List<CQIE> queries = q.getRules();
+		prog.addAll(q.getRules());
+		// Linke<Integer> newRules = new HashSet<Integer>();
 		boolean loopagain = true;
 		while (loopagain) {
 			loopagain = false;
-			Iterator<CQIE> it = queries.iterator();
-			LinkedList<CQIE> newSet = new LinkedList<CQIE>();
+			Iterator<CQIE> it = prog.iterator();
+			LinkedHashSet<CQIE> newSet = new LinkedHashSet<CQIE>();
 			while (it.hasNext()) {
 				CQIE cqie = it.next();
-				newRules.add(cqie.hashCode());
+				// newRules.add(cqie);
 				List<Atom> body = cqie.getBody();
 				// Part A
 				for (int atomidx = 0; atomidx < body.size(); atomidx++) {
@@ -78,7 +77,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 							PositiveInclusion pi = (PositiveInclusion) ass;
 							if (piApplicator.isPIApplicable(pi, currentAtom)) {
 								CQIE newquery = piApplicator.applyPI(cqie, pi, atomidx);
-								if (newRules.add(newquery.hashCode())) {
+								if (!prog.contains(newquery)&&!newSet.contains(newquery)) {
 									newSet.add(newquery);
 									loopagain = true;
 								}
@@ -93,8 +92,10 @@ public class DLRPerfectReformulator implements QueryRewriter {
 							CQIE newQuery = unifier.unify(cqie, i, j);
 							if (newQuery != null) {
 								anonymizer.anonymize(newQuery, i);
-								newSet.add(newQuery);
-								loopagain = true;
+								if (!prog.contains(newQuery)&&!newSet.contains(newQuery)) {
+									newSet.add(newQuery);
+									loopagain = true;
+								}
 							}
 						}
 					}
@@ -102,10 +103,17 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 			}
 			// prog.appendRule(newSet);
-			queries = newSet;
-			prog.appendRule(queries);
+//			queries = newSet;
+			prog.addAll(newSet);
 		}
-		return prog;
+
+		DatalogProgram out = fac.getDatalogProgram();
+		QueryUtils.copyQueryModifiers(q, out);
+		for (CQIE rule: prog) {
+			out.appendRule(rule);
+		}
+		
+		return out;
 	}
 
 	// if not an instance of DatalogProgramImpl or if not

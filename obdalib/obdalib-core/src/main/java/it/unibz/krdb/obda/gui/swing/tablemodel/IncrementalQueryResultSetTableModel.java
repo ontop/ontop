@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.gui.swing.tablemodel;
 
 import it.unibz.krdb.obda.exception.QueryResultException;
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.QueryResultSet;
 
@@ -13,16 +14,20 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-public class IncrementalQueryResultSetTableModel implements TableModel{
+public class IncrementalQueryResultSetTableModel implements TableModel {
 
-	QueryResultSet		results;
-	int		numcols, numrows, fetchsize;
+	QueryResultSet						results;
+	int									numcols, numrows, fetchsize;
 
-	Vector<String[]> 	resultsTable	= null;
-	HashSet<String> mergeSet = null;
-	private Vector<TableModelListener> listener = null;
+	Vector<String[]>					resultsTable	= null;
+	HashSet<String>						mergeSet		= null;
+	private Vector<TableModelListener>	listener		= null;
 
-	boolean isAfterLast = false;
+	PrefixManager						prefixman		= null;
+
+	boolean								isAfterLast		= false;
+
+	boolean								useshortform;
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -30,30 +35,33 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public IncrementalQueryResultSetTableModel(QueryResultSet results) throws QueryResultException {
+	public IncrementalQueryResultSetTableModel(QueryResultSet results, PrefixManager prefixman, boolean useshortform)
+			throws QueryResultException {
+		this.prefixman = prefixman;
+		this.useshortform = useshortform;
+
 		try {
 			this.results = results;
 			numcols = results.getColumCount();
 			fetchsize = results.getFetchSize();
-			if(fetchsize == 0){//means it is disabled
+			if (fetchsize == 0) {// means it is disabled
 				fetchsize = 100;
 			}
-			resultsTable= new Vector<String[]>();
+			resultsTable = new Vector<String[]>();
 			listener = new Vector<TableModelListener>();
 			mergeSet = new HashSet<String>();
 			int i = 0;
 			while (i < fetchsize && !isAfterLast) {
 
-				if(results.nextRow()){
+				if (results.nextRow()) {
 
 					String[] crow = new String[numcols];
 					for (int j = 0; j < numcols; j++) {
-						crow[j] = results.getAsString(j+1);
+						crow[j] = results.getAsString(j + 1);
 					}
 					resultsTable.add(crow);
 					i += 1;
-				}
-				else {
+				} else {
 					isAfterLast = true;
 				}
 
@@ -63,7 +71,6 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 			throw new QueryResultException(e);
 		}
 
-
 	}
 
 	/**
@@ -72,10 +79,10 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 	 */
 	public void close() {
 
-			try {
-				results.close();
-			} catch (SQLException e) {
-			}
+		try {
+			results.close();
+		} catch (SQLException e) {
+		}
 
 	}
 
@@ -98,12 +105,12 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 	public String getColumnName(int column) {
 		try {
 			java.util.List<String> signature = results.getSignature();
-			if(signature != null && column < signature.size()){
+			if (signature != null && column < signature.size()) {
 				return results.getSignature().get(column);
-			}else{
+			} else {
 				return "";
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return "NULL";
 		}
@@ -124,25 +131,30 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 	 * numbers start at 0.
 	 */
 	public Object getValueAt(int row, int column) {
-//		try {
-//			Constant c = results.getConstantFromColumn(column); // Go to the
-//																// specified row
-//			return c.toString(); // Convert it to a string
+		// try {
+		// Constant c = results.getConstantFromColumn(column); // Go to the
+		// // specified row
+		// return c.toString(); // Convert it to a string
 
-			try {
-				if(row + 5 > numrows && !isAfterLast){
-					fetchMoreTuples();
-					fireModelChangedEvent();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+		try {
+			if (row + 5 > numrows && !isAfterLast) {
+				fetchMoreTuples();
+				fireModelChangedEvent();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
+		if (useshortform) {
+			return prefixman.getShortForm(resultsTable.get(row)[column].toString());
+		} else {
 			return resultsTable.get(row)[column].toString();
-//		} catch (QueryResultException e) {
-//			e.printStackTrace(System.err);
-//			return e.toString();
-//		}
+		}
+
+		// } catch (QueryResultException e) {
+		// e.printStackTrace(System.err);
+		// return e.toString();
+		// }
 	}
 
 	// Our table isn't editable
@@ -162,43 +174,42 @@ public class IncrementalQueryResultSetTableModel implements TableModel{
 		listener.remove(l);
 	}
 
-	private boolean add(Constant crow[]){
+	private boolean add(Constant crow[]) {
 
-		String row ="";
-		for(int i=0; i< crow.length; i++){
+		String row = "";
+		for (int i = 0; i < crow.length; i++) {
 			row = row + crow[i].toString();
 		}
 		return mergeSet.add(row);
 	}
 
-	private void fetchMoreTuples() throws QueryResultException{
+	private void fetchMoreTuples() throws QueryResultException {
 		try {
 			int i = 0;
 			while (i < fetchsize && !isAfterLast) {
 
-				if(results.nextRow()){
+				if (results.nextRow()) {
 					String[] crow = new String[numcols];
 					for (int j = 0; j < numcols; j++) {
-						crow[j] = results.getAsString(j+1);
+						crow[j] = results.getAsString(j + 1);
 					}
 					resultsTable.add(crow);
 					i += 1;
-				}
-				else {
+				} else {
 					isAfterLast = true;
 				}
 
 			}
-			numrows = numrows+ i;
+			numrows = numrows + i;
 		} catch (SQLException e) {
 			throw new QueryResultException(e);
 		}
 	}
 
-	private void fireModelChangedEvent(){
+	private void fireModelChangedEvent() {
 
 		Iterator<TableModelListener> it = listener.iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			it.next().tableChanged(new TableModelEvent(this));
 		}
 	}

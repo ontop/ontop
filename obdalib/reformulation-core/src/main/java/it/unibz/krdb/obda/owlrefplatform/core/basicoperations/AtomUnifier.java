@@ -130,9 +130,38 @@ public class AtomUnifier {
 	 * @param unifier
 	 */
 	private void applyUnifier(Atom atom, Map<Variable, Term> unifier) {
-
-		for (int i = 0; i < atom.getArity(); i++) {
-			Term t = atom.getTerms().get(i);
+		applyUnifier(atom.getTerms(), unifier);
+//		for (int i = 0; i < atom.getArity(); i++) {
+//			Term t = atom.getTerms().get(i);
+//			/*
+//			 * unifiers only apply to variables, simple or inside functional
+//			 * terms
+//			 */
+//			if (t instanceof VariableImpl) {
+//				Term replacement = unifier.get(t);
+//				if (replacement != null)
+//					atom.getTerms().set(i, replacement);
+//			} else if (t instanceof FunctionalTermImpl) {
+//				List<Term> innerterms = ((FunctionalTermImpl) t).getTerms();
+//				for (int j = 0; j < innerterms.size(); j++) {
+//					Term innert = innerterms.get(j);
+//					/*
+//					 * unifiers only apply to variables, simple or inside
+//					 * functional terms
+//					 */
+//					if (innert instanceof VariableImpl) {
+//						Term replacement = unifier.get(innert);
+//						if (replacement != null)
+//							innerterms.set(j, replacement);
+//					}
+//				}
+//			}
+//		}
+	}
+	
+	private void applyUnifier(List<Term> terms, Map<Variable, Term> unifier) {
+		for (int i = 0; i < terms.size(); i++) {
+			Term t = terms.get(i);
 			/*
 			 * unifiers only apply to variables, simple or inside functional
 			 * terms
@@ -140,7 +169,7 @@ public class AtomUnifier {
 			if (t instanceof VariableImpl) {
 				Term replacement = unifier.get(t);
 				if (replacement != null)
-					atom.getTerms().set(i, replacement);
+					terms.set(i, replacement);
 			} else if (t instanceof FunctionalTermImpl) {
 				List<Term> innerterms = ((FunctionalTermImpl) t).getTerms();
 				for (int j = 0; j < innerterms.size(); j++) {
@@ -158,7 +187,7 @@ public class AtomUnifier {
 			}
 		}
 	}
-
+	
 	/***
 	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports
 	 * atoms with terms: Variable, URIConstant, ValueLiteral, ObjectVariableImpl
@@ -184,8 +213,8 @@ public class AtomUnifier {
 		/* Computing the disagreement set */
 
 		int arity = firstAtom.getPredicate().getArity();
-		List<Term> terms1 = firstAtom.getTerms();
-		List<Term> terms2 = secondAtom.getTerms();
+		List<Term> terms1 = new LinkedList<Term>(firstAtom.getTerms());
+		List<Term> terms2 = new LinkedList<Term>(secondAtom.getTerms());
 
 		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
 
@@ -268,9 +297,19 @@ public class AtomUnifier {
 					composeUnifiers(mgu, s);
 				}
 			}
+			
+			/*
+			 * Applying the newly computed substitution to the 'replacement' of the existing substitutions
+			 */
+			applyUnifier(terms1, mgu);
+			applyUnifier(terms2, mgu);
+			
 		}
 		return mgu;
 	}
+	
+
+
 
 	/***
 	 * This will compose the unfier with the substitution. Note that the unifier
