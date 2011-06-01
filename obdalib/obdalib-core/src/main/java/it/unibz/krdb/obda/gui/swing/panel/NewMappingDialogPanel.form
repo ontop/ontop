@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.1" encoding="UTF-8" ?>
 
-<Form version="1.0" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+<Form version="1.2" maxVersion="1.2" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <Properties>
     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -51,7 +51,7 @@
     </Container>
     <Component class="javax.swing.JLabel" name="jLabelMappingHead">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Mapping Head:"/>
+        <Property name="text" type="java.lang.String" value="Target Query:"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -61,7 +61,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelMappingBody">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Mapping Body"/>
+        <Property name="text" type="java.lang.String" value="Source Query:"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

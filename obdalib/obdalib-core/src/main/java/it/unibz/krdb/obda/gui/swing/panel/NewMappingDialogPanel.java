@@ -180,7 +180,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 */
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
@@ -195,9 +195,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextPaneBody = new javax.swing.JTextPane();
 
+        setBorder(javax.swing.BorderFactory.createTitledBorder("Create Mapping"));
         setLayout(new java.awt.GridBagLayout());
 
-        setBorder(javax.swing.BorderFactory.createTitledBorder("Create Mapping"));
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
         jButtonInsert.setText("Insert");
@@ -209,7 +209,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
                 jButtonCancelActionPerformed(evt);
             }
         });
-
         jPanel1.add(jButtonCancel);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -219,7 +218,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         add(jPanel1, gridBagConstraints);
 
-        jLabelMappingHead.setText("Mapping Head:");
+        jLabelMappingHead.setText("Target Query:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -228,7 +227,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         add(jLabelMappingHead, gridBagConstraints);
 
-        jLabelMappingBody.setText("Mapping Body");
+        jLabelMappingBody.setText("Source Query:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -244,7 +243,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
                 jButtonTestActionPerformed(evt);
             }
         });
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
@@ -273,7 +271,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(jScrollPane2, gridBagConstraints);
-
     }// </editor-fold>//GEN-END:initComponents
 
 	private void jButtonTestActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
