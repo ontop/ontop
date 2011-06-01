@@ -590,7 +590,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblEditMappingHead">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Edit Mapping Head: *"/>
+                    <Property name="text" type="java.lang.String" value="Edit Target Query: *"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[100, 20]"/>
                     </Property>
@@ -632,7 +632,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblEditMappingBody">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Edit Mapping Body: *"/>
+                    <Property name="text" type="java.lang.String" value="Edit Source Query: *"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[100, 20]"/>
                     </Property>

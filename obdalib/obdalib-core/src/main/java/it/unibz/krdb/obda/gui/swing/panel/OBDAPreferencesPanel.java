@@ -760,7 +760,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
         pnlShortcutSettings.add(lblDeleteMappingKey, gridBagConstraints);
 
-        lblEditMappingHead.setText("Edit Mapping Head: *");
+        lblEditMappingHead.setText("Edit Target Query: *");
         lblEditMappingHead.setMaximumSize(new java.awt.Dimension(100, 20));
         lblEditMappingHead.setMinimumSize(new java.awt.Dimension(100, 20));
         lblEditMappingHead.setPreferredSize(new java.awt.Dimension(50, 20));
@@ -782,7 +782,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
         pnlShortcutSettings.add(lblEditMappingHeadKey, gridBagConstraints);
 
-        lblEditMappingBody.setText("Edit Mapping Body: *");
+        lblEditMappingBody.setText("Edit Source Query: *");
         lblEditMappingBody.setMaximumSize(new java.awt.Dimension(100, 20));
         lblEditMappingBody.setMinimumSize(new java.awt.Dimension(100, 20));
         lblEditMappingBody.setPreferredSize(new java.awt.Dimension(50, 20));
