@@ -11,13 +11,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Prune Ontology for redundant assertions based on dependencies
@@ -48,6 +47,11 @@ public class SemanticReduction {
 
 
         for (DAGNode node : dag.getClassIndex().values()) {
+
+            // Ingore all edges from T
+            if (node.getUri().equals(DAG.owl_thing)) {
+                continue;
+            }
 
             for (DAGNode child : node.descendans) {
 
@@ -192,6 +196,10 @@ public class SemanticReduction {
         DAGNode sc = sdag.getTDAG().get(child.getUri());
         DAGNode tc = tdag.getTDAG().get(child.getUri());
 
+        if (sp == null || sc == null || tc == null) {
+            return false;
+
+        }
         return (sp.descendans.contains(sc) && sc.descendans.containsAll(tc.descendans));
 
     }
