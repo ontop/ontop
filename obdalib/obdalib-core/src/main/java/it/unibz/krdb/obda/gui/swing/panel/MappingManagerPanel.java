@@ -748,6 +748,11 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private void cmdAddMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addMappingButtonActionPerformed
 		if (selectedSource != null) {
 			addMapping();
+			
+			// Make sure the user can see the new node.
+			MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
+			MappingNode newNode = model.getLastMappingNode();
+			mappingsTree.scrollPathToVisible(new TreePath(newNode.getPath()));
 		} else {
 			JOptionPane.showMessageDialog(this, "Select the data source first!", "Warning", JOptionPane.WARNING_MESSAGE);
 			return;

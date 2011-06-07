@@ -55,6 +55,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	private MappingController controller = null;
 	private DefaultMutableTreeNode root = null;
 //	private DatasourcesController dsc = null; TODO Remove this ds?
+	private MappingNode mappingnode = null;
 	private URI currentDataSourceUri;
 	private final List<TreeModelFilter<OBDAMappingAxiom>> ListFilters = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 	protected OBDAModel apic = null;
@@ -155,9 +156,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
   		RDBMSMappingAxiomImpl mapping = (RDBMSMappingAxiomImpl) controller.getMapping(srcuri, mapping_id);
   		MappingNode mappingNode = getMappingNodeFromMapping(mapping);
 
-			insertNodeInto(mappingNode, root, root
-					.getChildCount());
-			nodeStructureChanged(root);
+			insertNodeInto(mappingNode, root, root.getChildCount());
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -262,7 +261,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * @return
 	 */
 	private MappingNode getMappingNodeFromMapping(OBDAMappingAxiom mapping) {
-		MappingNode mappingnode = new MappingNode(mapping.getId());
+		mappingnode = new MappingNode(mapping.getId());
 		Query srcquery = mapping.getSourceQuery();
 		CQIE tgtquery = (CQIEImpl) mapping.getTargetQuery();
 		MappingBodyNode body = null;
@@ -283,6 +282,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		mappingnode.add(body);
 
 		return mappingnode;
+	}
+	
+	public MappingNode getLastMappingNode() {
+	  return mappingnode;
 	}
 
 	/**
