@@ -611,13 +611,11 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
 		final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
-		System.out.println("Tests");
 		Runnable action = new Runnable() {
 			@Override
 			public void run() {
 				canceled = false;
 				final TreePath path[] = mappingsTree.getSelectionPaths();
-				outputField.setVisible(true);
 				if (path == null) {
 					return;
 				}
@@ -653,6 +651,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 							return;
 					}
 				}
+        outputField.setVisible(true);
 			}
 		};
 		validatorThread = new Thread(action);
