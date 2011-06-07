@@ -115,6 +115,7 @@ public class JDBCConnectionManager {
 	}
 
 	public ResultSet executeQuery(URI connID, String query, DataSource ds) throws SQLException {
+	  ResultSet result = null;
 		Connection con = connectionPool.get(connID);
 		if (con == null || con.isClosed()) {
 			try {
@@ -133,13 +134,19 @@ public class JDBCConnectionManager {
 			}
 			int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
 			int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
-			Statement st = con.createStatement(type, concur);
 			int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
-			st.setFetchSize(fetchsize);
-			statementList.add(st);
-			currentStatement = st;
-			return st.executeQuery(query);
+			try {
+			  Statement st = con.createStatement(type, concur);
+			  st.setFetchSize(fetchsize);
+			  result = st.executeQuery(query);
+	      statementList.add(st);
+	      currentStatement = st;
+			} catch (SQLException e) {
+        con.rollback();
+        throw e;
+			}
 		}
+    return result;
 	}
 
 	public ResultSet executeQuery(DataSource ds, String query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
