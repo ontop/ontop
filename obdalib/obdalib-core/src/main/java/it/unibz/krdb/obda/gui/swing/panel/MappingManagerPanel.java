@@ -380,6 +380,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
         pnlExtraButtons = new javax.swing.JPanel();
         cmdSelectAll = new javax.swing.JButton();
         cmdDeselectAll = new javax.swing.JButton();
+        cmdExpandAll = new javax.swing.JButton();
+        cmdCollapseAll = new javax.swing.JButton();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -485,13 +487,14 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
         pnlMappingManager.add(scrMappingsTree, java.awt.BorderLayout.CENTER);
 
-        pnlExtraButtons.setMinimumSize(new java.awt.Dimension(296, 25));
+        pnlExtraButtons.setMinimumSize(new java.awt.Dimension(532, 25));
         pnlExtraButtons.setPreferredSize(new java.awt.Dimension(532, 25));
         pnlExtraButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 2));
 
         cmdSelectAll.setText("Select All");
         cmdSelectAll.setToolTipText("Select all");
         cmdSelectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdSelectAll.setMaximumSize(new java.awt.Dimension(70, 21));
         cmdSelectAll.setMinimumSize(new java.awt.Dimension(70, 21));
         cmdSelectAll.setPreferredSize(new java.awt.Dimension(70, 21));
         cmdSelectAll.addActionListener(new java.awt.event.ActionListener() {
@@ -504,6 +507,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
         cmdDeselectAll.setText("Deselect All");
         cmdDeselectAll.setToolTipText("Deselect all");
         cmdDeselectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdDeselectAll.setMaximumSize(new java.awt.Dimension(70, 21));
         cmdDeselectAll.setMinimumSize(new java.awt.Dimension(70, 21));
         cmdDeselectAll.setPreferredSize(new java.awt.Dimension(70, 21));
         cmdDeselectAll.addActionListener(new java.awt.event.ActionListener() {
@@ -512,6 +516,32 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
             }
         });
         pnlExtraButtons.add(cmdDeselectAll);
+
+        cmdExpandAll.setText("Expand All");
+        cmdExpandAll.setToolTipText("Expand all the mapping nodes or the selected ones");
+        cmdExpandAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdExpandAll.setMaximumSize(new java.awt.Dimension(70, 21));
+        cmdExpandAll.setMinimumSize(new java.awt.Dimension(70, 21));
+        cmdExpandAll.setPreferredSize(new java.awt.Dimension(70, 21));
+        cmdExpandAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdExpandAllActionPerformed(evt);
+            }
+        });
+        pnlExtraButtons.add(cmdExpandAll);
+
+        cmdCollapseAll.setText("Collapse All");
+        cmdCollapseAll.setToolTipText("Collapse all the mapping nodes or the selected ones");
+        cmdCollapseAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdCollapseAll.setMaximumSize(new java.awt.Dimension(70, 21));
+        cmdCollapseAll.setMinimumSize(new java.awt.Dimension(70, 21));
+        cmdCollapseAll.setPreferredSize(new java.awt.Dimension(70, 21));
+        cmdCollapseAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCollapseAllActionPerformed(evt);
+            }
+        });
+        pnlExtraButtons.add(cmdCollapseAll);
 
         pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
 
@@ -523,31 +553,57 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdSelectAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectAllActionPerformed
-        final MappingTreeModel mapModel = (MappingTreeModel) mappingsTree.getModel();
-        final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mapModel.getRoot();
-        final int nChild = root.getChildCount();
-        
-        if (nChild > 0) {
-          for (int i = 0; i < nChild; i++) {
-            MappingNode child = (MappingNode) root.getChildAt(i);
-            mappingsTree.addSelectionPath(new TreePath(child.getPath()));
-          }
-        }
+       TreePath[] paths = getAllMappingNodePaths();
+       mappingsTree.addSelectionPaths(paths);
     }//GEN-LAST:event_cmdSelectAllActionPerformed
 
     private void cmdDeselectAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDeselectAllActionPerformed
+      TreePath[] paths = getAllMappingNodePaths();
+      mappingsTree.removeSelectionPaths(paths);
+    }//GEN-LAST:event_cmdDeselectAllActionPerformed
+
+    private void cmdExpandAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdExpandAllActionPerformed
+        final int nSelectedNode = mappingsTree.getSelectionCount();
+        
+        TreePath[] paths = getAllMappingNodePaths();
+        if (nSelectedNode > 1) {
+          paths = mappingsTree.getSelectionPaths();
+        }
+        
+        for (int i = 0; i < paths.length; i++) {
+          mappingsTree.expandPath(paths[i]);
+        }        
+    }//GEN-LAST:event_cmdExpandAllActionPerformed
+
+    private void cmdCollapseAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseAllActionPerformed
+        final int nSelectedNode = mappingsTree.getSelectionCount();
+        
+        TreePath[] paths = getAllMappingNodePaths();
+        if (nSelectedNode > 1) {
+          paths = mappingsTree.getSelectionPaths();
+        }
+        
+        for (int i = 0; i < paths.length; i++) {
+          mappingsTree.collapsePath(paths[i]);
+        } 
+    }//GEN-LAST:event_cmdCollapseAllActionPerformed
+
+    private TreePath[] getAllMappingNodePaths() {
       final MappingTreeModel mapModel = (MappingTreeModel) mappingsTree.getModel();
       final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mapModel.getRoot();
       final int nChild = root.getChildCount();
-      
+     
+      TreePath[] paths = new TreePath[nChild]; // initialize
+
       if (nChild > 0) {
         for (int i = 0; i < nChild; i++) {
           MappingNode child = (MappingNode) root.getChildAt(i);
-          mappingsTree.removeSelectionPath(new TreePath(child.getPath()));
+          paths[i] = new TreePath(child.getPath());
         }
       }
-    }//GEN-LAST:event_cmdDeselectAllActionPerformed
-
+      return paths;
+    }
+    
 	/***
 	 * The action for the search field and the search checkbox. If the checkbox
 	 * is not selected it cleans the filters. If it is selected it updates to
@@ -842,8 +898,10 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkFilter;
     private javax.swing.JButton cmdAddMapping;
+    private javax.swing.JButton cmdCollapseAll;
     private javax.swing.JButton cmdDeselectAll;
     private javax.swing.JButton cmdDuplicateMapping;
+    private javax.swing.JButton cmdExpandAll;
     private javax.swing.JButton cmdRemoveMapping;
     private javax.swing.JButton cmdSelectAll;
     private javax.swing.JLabel lblInsertFilter;
