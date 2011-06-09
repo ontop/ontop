@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
+import it.unibz.krdb.obda.utils.TargetQueryValidator;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -28,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.net.URI;
+import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -40,6 +42,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.StyleContext;
 
 import org.antlr.runtime.RecognitionException;
+import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,26 +58,38 @@ import org.slf4j.LoggerFactory;
  */
 public class NewMappingDialogPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-	/**
-	 * 
-	 */
-	private static final long			serialVersionUID	= 4351696247473906680L;
-	private OBDAModel				controller			= null;
-	private DatalogProgramParser		datalogParser		= new DatalogProgramParser();
-	private MappingManagerPreferences	preferences			= null;
-	private DataSource					selectedSource		= null;
-	private JDialog						parent				= null;
-
-	private final Logger				log					= LoggerFactory.getLogger(this.getClass());
+	private static final long serialVersionUID = 4351696247473906680L;
 	
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
-	/** Creates new form NewMappingDialogPanel */
-	public NewMappingDialogPanel(OBDAModel apic, OBDAPreferences pref, JDialog parent, DataSource dataSource) {
-		controller = apic;
-		preferences = pref.getMappingsPreference();
+	/** Fields */
+	private OBDAModel	controller = null;
+	private MappingManagerPreferences	preferences = null;
+	private DataSource dataSource	= null;
+	private JDialog	parent = null;
+	private TargetQueryValidator validator = null;
+	
+	private DatalogProgramParser datalogParser = new DatalogProgramParser();
+	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+	
+	/** Logger */
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	/** 
+	 * Create the dialog for inserting a new mapping.
+	 * 
+	 * @param controller
+	 * @param preference
+	 * @param parent
+	 * @param dataSource
+	 * @param ontology
+	 */
+	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, DataSource dataSource, OWLOntology ontology) {
+		this.controller = controller;
+		this.preferences = preference.getMappingsPreference();
 		this.parent = parent;
-		selectedSource = dataSource;
+		this.dataSource = dataSource;
+		
+    validator = new TargetQueryValidator(ontology);
+		
 		initComponents();
 		init();
 	}
@@ -149,29 +164,42 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void insertMapping() {
-
-		String headstring = jTextPaneHead.getText();
-		String bodystring = jTextPaneBody.getText();
-		CQIE head = parse(headstring);
-		if (head != null) {
-			parent.setVisible(false);
-			parent.dispose();
-			MappingController mapcon = controller.getMappingController();
-			URI sourceID = selectedSource.getSourceID();
-			String id = mapcon.getNextAvailableMappingID(sourceID);
-			SQLQuery body = fac.getSQLQuery(bodystring);
-			RDBMSMappingAxiom mapping = fac.getRDBMSMappingAxiom(id, body, head);
-			try {
-				mapcon.insertMapping(sourceID, mapping);
-			} catch (DuplicateMappingException e) {
-				JOptionPane.showMessageDialog(null, "Error while inserting mapping.\n " + e.getMessage()
-						+ "\nPlease refer to the log file for more information.");
-				log.error("Error while counting tuples.", e);
-			}
+		final String targetQueryString = jTextPaneHead.getText();
+		final String sourceQueryString = jTextPaneBody.getText();
+		
+		CQIE targetQuery = parse(targetQueryString);
+		if (targetQuery != null) {		  
+		  final boolean isValid = validator.validate(targetQuery);
+		  if(isValid) {  			
+  			try {
+  			  MappingController mapcon = controller.getMappingController();
+  	      URI sourceID = dataSource.getSourceID();
+  	      String id = mapcon.getNextAvailableMappingID(sourceID);
+  	      SQLQuery body = dataFactory.getSQLQuery(sourceQueryString);
+  	      RDBMSMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(id, body, targetQuery);
+  				mapcon.insertMapping(sourceID, mapping);
+  			} 
+  			catch (DuplicateMappingException e) {
+  				JOptionPane.showMessageDialog(null, "Error while inserting mapping.\n " + e.getMessage()
+  						+ "\nPlease refer to the log file for more information.");
+  				log.error("Error while counting tuples.", e);
+  			}
+  			parent.setVisible(false);
+        parent.dispose();
+		  }
+		  else {
+		    // List of invalid predicates that are found by the validator.
+		    Vector<String> invalidPredicates = validator.getInvalidPredicates();
+		    String invalidList = "";
+		    for(String predicate : invalidPredicates) {
+		      invalidList += "- " + predicate + "\n";
+		    }
+		    JOptionPane.showMessageDialog(null, 
+		        "This list of predicates is unknown by the ontology: \n" + invalidList, 
+		        "New Mapping", JOptionPane.WARNING_MESSAGE);
+		  }      
 		}
-	}
-	
-	
+	}	
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -276,7 +304,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private void jButtonTestActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
 		final JDialog resultquery = new JDialog();
 		resultquery.setModal(true);
-		SQLQueryPanel query_panel = new SQLQueryPanel(selectedSource, jTextPaneBody.getText());
+		SQLQueryPanel query_panel = new SQLQueryPanel(dataSource, jTextPaneBody.getText());
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
@@ -343,6 +371,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	@Override
 	public void datasourceChanged(DataSource oldSource, DataSource newSource) {
-		selectedSource = newSource;
+		dataSource = newSource;
 	}
 }

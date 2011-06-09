@@ -70,6 +70,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.RecognitionException;
+import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +91,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private final String			TEXT				= "text";
 
 	private DefaultMutableTreeNode	editedNode;
-	private OBDAPreferences			pref;
+	private OBDAPreferences			preference;
 	private KeyStroke				addMapping;
 	private KeyStroke				editBody;
 	private KeyStroke				editHead;
@@ -105,6 +106,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private DatasourcesController	dsc;
 
 	protected OBDAModel			apic;
+	
+	private OWLOntology  ontology;
 
 	private DatalogProgramParser	datalogParser;
 
@@ -124,12 +127,14 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(OBDAModel apic, MappingController mapc, DatasourcesController dsc, OBDAPreferences preference) {
+	public MappingManagerPanel(OBDAModel apic, MappingController mapc, DatasourcesController dsc, OBDAPreferences preference, OWLOntology ontology) {
 
 		this.apic = apic;
 		this.mapc = mapc;
 		this.dsc = dsc;
-		pref = preference;
+		this.preference = preference;
+		this.ontology = ontology;
+		
 		datalogParser = new DatalogProgramParser();
 
 		initComponents();
@@ -155,7 +160,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		cmdAddMapping.setToolTipText("Add a new mapping");
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
-		pref.getMappingsPreference().registerPreferenceChangedListener(this);
+		preference.getMappingsPreference().registerPreferenceChangedListener(this);
 	}
 
 	private void registerAction() {
@@ -187,13 +192,13 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		cmdDuplicateMapping.setPreferredSize(new Dimension(60, 21));
 		cmdDuplicateMapping.setMinimumSize(new Dimension(60, 21));
 
-		String add = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.ADD_MAPPING);
+		String add = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.ADD_MAPPING);
 		addMapping = KeyStroke.getKeyStroke(add);
-		String body = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_BODY);
+		String body = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_BODY);
 		editBody = KeyStroke.getKeyStroke(body);
-		String head = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_HEAD);
+		String head = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_HEAD);
 		editHead = KeyStroke.getKeyStroke(head);
-		String id = pref.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_ID);
+		String id = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_ID);
 		editID = KeyStroke.getKeyStroke(id);
 
 		AbstractAction addAction = new AbstractAction() {
@@ -859,7 +864,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 		JDialog dialog = new JDialog();
 		dialog.setModal(true);
-		dialog.setContentPane(new NewMappingDialogPanel(apic, pref, dialog, selectedSource));
+		dialog.setContentPane(new NewMappingDialogPanel(apic, preference, dialog, selectedSource, ontology));
 		dialog.setSize(500, 300);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);

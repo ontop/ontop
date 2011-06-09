@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.DatasourcesController;
 import it.unibz.krdb.obda.model.MappingController;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.protege4.core.OBDAPluginController;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
@@ -21,7 +21,9 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.Logger;
+import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.semanticweb.owl.model.OWLOntology;
 
 public class MappingsManagerView extends AbstractOWLViewComponent {
 
@@ -38,23 +40,28 @@ public class MappingsManagerView extends AbstractOWLViewComponent {
 
   @Override
   protected void initialiseOWLView() throws Exception {
-    OBDAPluginController OBDAModel = 
-        getOWLEditorKit().get(OBDAModelImpl.class.getName());
-    OBDAPreferences preference = (OBDAPreferences)
-         getOWLEditorKit().get(OBDAPreferences.class.getName());
-    	
-    MappingController mapController = OBDAModel.getOBDAManager().getMappingController();
-    DatasourcesController dsController = OBDAModel.getOBDAManager().getDatasourcesController();
-    	
-    Vector<DataSource> vecDatasource = 
-        new Vector<DataSource>(dsController.getAllSources());
- 
-    MappingManagerPanel mappingPanel = new MappingManagerPanel(OBDAModel.getOBDAManager(), 
-        mapController, dsController, preference); 
+    // Retrieve the editor kit.
+    final OWLEditorKit editor = getOWLEditorKit();
+    
+    OBDAPluginController controller = editor.get(OBDAModelImpl.class.getName());
+    OBDAPreferences preference = (OBDAPreferences) editor.get(OBDAPreferences.class.getName());
+    
+    // Retrieve the components for initializing the Mapping Manager panel.
+    OBDAModel obdaModel = controller.getOBDAManager();
+    MappingController mapController = obdaModel.getMappingController();
+    DatasourcesController dsController = obdaModel.getDatasourcesController();
+    OWLOntology ontology = editor.getModelManager().getActiveOntology();
+    
+    // Init the Mapping Manager panel.
+    MappingManagerPanel mappingPanel = new MappingManagerPanel(obdaModel, mapController, dsController, preference, ontology); 
+    
+    // Init the Data source Selector.
+    Vector<DataSource> vecDatasource = new Vector<DataSource>(dsController.getAllSources());
     DatasourceSelector datasourceSelector = new DatasourceSelector(vecDatasource);
     datasourceSelector.addDatasourceListListener(mappingPanel);
     dsController.addDatasourceControllerListener(datasourceSelector);
     
+    // Construt the layout of the panel.
     JPanel selectorPanel = new JPanel();
     selectorPanel.setLayout(new GridBagLayout());
     
