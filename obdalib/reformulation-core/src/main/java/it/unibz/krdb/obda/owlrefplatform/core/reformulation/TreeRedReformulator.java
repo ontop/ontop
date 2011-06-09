@@ -81,6 +81,14 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	}
 
+	/***
+	 * This method adds to the TBox a pair of axioms ER ISA ES and ER- ISA ES-
+	 * for each role inclusion R ISA S found in the ontology.
+	 * 
+	 * @return The set of extra existential assertions that need to be added to
+	 *         the ontology to account for the semantics of role inclusions
+	 *         w.r.t. their domains and ranges.
+	 */
 	private Set<Assertion> computeExistentials() {
 		HashSet<Assertion> newassertion = new HashSet<Assertion>(1000);
 		for (Assertion assertion : originalassertions) {

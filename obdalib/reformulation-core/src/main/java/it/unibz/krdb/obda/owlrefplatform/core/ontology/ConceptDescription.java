@@ -3,8 +3,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology;
 import it.unibz.krdb.obda.model.Predicate;
 
 
-public interface ConceptDescription {
+public interface ConceptDescription extends Description {
 
-	public Predicate getPredicate();
-	public boolean isInverse();
 }

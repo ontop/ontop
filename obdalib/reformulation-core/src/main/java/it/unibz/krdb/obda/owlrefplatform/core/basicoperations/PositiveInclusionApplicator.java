@@ -7,7 +7,9 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
@@ -24,11 +26,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
 public class PositiveInclusionApplicator {
 
 	AtomUnifier		unifier		= new AtomUnifier();
-	QueryAnonymizer	anonymizer	= new QueryAnonymizer();	OBDADataFactory		termFactory	= OBDADataFactoryImpl.getInstance();
+	QueryAnonymizer	anonymizer	= new QueryAnonymizer();
+	OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Check whether the given positive inclusion is applicable to the given
@@ -61,7 +63,12 @@ public class PositiveInclusionApplicator {
 			 */
 			Predicate pred = atom.getPredicate();
 			ConceptDescription inc = ((DLLiterConceptInclusionImpl) pi).getIncluding();
-			Predicate inc_predicate = inc.getPredicate();
+			Predicate inc_predicate = null;
+			if (inc instanceof AtomicConceptDescription) {
+				inc_predicate = ((AtomicConceptDescription) inc).getPredicate();
+			} else if (inc instanceof ExistentialConceptDescription) {
+				inc_predicate = ((ExistentialConceptDescription) inc).getPredicate();
+			}
 
 			if (!pred.equals(inc_predicate))
 				return false;
@@ -79,14 +86,14 @@ public class PositiveInclusionApplicator {
 						 * I is applicable to an atom P(x1, x2) if (1) x2 = _
 						 * and the right-hand side of I is exist P
 						 */
-						return !including.isInverse();
+						return !imp.isInverse();
 
 					} else if (t1 instanceof UndistinguishedVariable && imp.isInverse()) {
 						/*
 						 * I is applicable to an atom P(x1, x2) if (1) x1 = _
 						 * and the right-hand side of I is exist P-
 						 */
-						return including.isInverse();
+						return imp.isInverse();
 					} else {
 						return false;
 					}
@@ -270,13 +277,15 @@ public class PositiveInclusionApplicator {
 							 * equal to ax1 except for the presence of y instead
 							 * of $z$
 							 */
-//							if (unify)
-//								unify = unify && matchingAtoms(currentcq, ta10, ta20);
+							// if (unify)
+							// unify = unify && matchingAtoms(currentcq, ta10,
+							// ta20);
 
 						} else {
 							unify = ta10 instanceof UndistinguishedVariable || ta20 instanceof UndistinguishedVariable || ta10.equals(ta20);
-//							if (unify)
-//								unify = unify && matchingAtoms(currentcq, ta11, ta21);
+							// if (unify)
+							// unify = unify && matchingAtoms(currentcq, ta11,
+							// ta21);
 						}
 
 						if (unify) {
@@ -371,7 +380,15 @@ public class PositiveInclusionApplicator {
 
 	public Collection<CQIE> applyExistentialInclusion(CQIE cq, PositiveInclusion pi) throws Exception {
 		DLLiterConceptInclusionImpl cinc = (DLLiterConceptInclusionImpl) pi;
-		Predicate predicate = cinc.getIncluding().getPredicate();
+
+		Predicate predicate = null;
+
+		if (cinc.getIncluding() instanceof AtomicConceptDescription) {
+			predicate = ((AtomicConceptDescription) cinc.getIncluding()).getPredicate();
+		} else if (cinc.getIncluding() instanceof ExistentialConceptDescription) {
+			predicate = ((ExistentialConceptDescription) cinc.getIncluding()).getPredicate();
+		}
+
 		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) cinc.getIncluding();
 
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
@@ -422,7 +439,16 @@ public class PositiveInclusionApplicator {
 					while (tit.hasNext()) {
 						v.add(tit.next().copy());
 					}
-					Atom newatom = termFactory.getAtom(lefthandside.getPredicate().copy(), v);
+
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+
+					Atom newatom = termFactory.getAtom(predicate.copy(), v);
 
 					body.set(atomindex, newatom);
 
@@ -440,12 +466,28 @@ public class PositiveInclusionApplicator {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, anonym);
 						v.add(1, t);
-						newatom = termFactory.getAtom(lefthandside.getPredicate().copy(), v);
+
+						Predicate predicate = null;
+
+						if (lefthandside instanceof AtomicConceptDescription) {
+							predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+						} else if (lefthandside instanceof ExistentialConceptDescription) {
+							predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+						}
+						newatom = termFactory.getAtom(predicate.copy(), v);
 					} else {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, t);
 						v.add(1, anonym);
-						newatom = termFactory.getAtom(lefthandside.getPredicate().copy(), v);
+
+						Predicate predicate = null;
+
+						if (lefthandside instanceof AtomicConceptDescription) {
+							predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+						} else if (lefthandside instanceof ExistentialConceptDescription) {
+							predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+						}
+						newatom = termFactory.getAtom(predicate.copy(), v);
 					}
 
 					body.set(atomindex, newatom);
@@ -464,7 +506,7 @@ public class PositiveInclusionApplicator {
 
 			DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl) inclusion;
 			ConceptDescription lefthandside = inc.getIncluded();
-			ConceptDescription righthandside = inc.getIncluding();
+			ExistentialConceptDescription righthandside = (ExistentialConceptDescription) inc.getIncluding();
 
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);
@@ -478,19 +520,43 @@ public class PositiveInclusionApplicator {
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
-					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
-				} else if (lefthandside.isInverse()) {
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+					newatom = termFactory.getAtom(predicate, v);
+
+				} else if (((ExistentialConceptDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
-					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
-				} else if (!lefthandside.isInverse()) {
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+					newatom = termFactory.getAtom(predicate, v);
+
+				} else if (!((ExistentialConceptDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
-					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
+
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+					newatom = termFactory.getAtom(predicate, v);
 
 				}
 			} else if (t1 instanceof UndistinguishedVariable && righthandside.isInverse()) {
@@ -500,19 +566,43 @@ public class PositiveInclusionApplicator {
 				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
-					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
-				} else if (lefthandside.isInverse()) {
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+					newatom = termFactory.getAtom(predicate, v);
+
+				} else if (((ExistentialConceptDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
-					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
 
-				} else if (!lefthandside.isInverse()) {
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+					newatom = termFactory.getAtom(predicate, v);
+
+				} else if (!((ExistentialConceptDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
-					newatom = termFactory.getAtom(lefthandside.getPredicate(), v);
+
+					Predicate predicate = null;
+
+					if (lefthandside instanceof AtomicConceptDescription) {
+						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof ExistentialConceptDescription) {
+						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					}
+					newatom = termFactory.getAtom(predicate, v);
 
 				}
 			}

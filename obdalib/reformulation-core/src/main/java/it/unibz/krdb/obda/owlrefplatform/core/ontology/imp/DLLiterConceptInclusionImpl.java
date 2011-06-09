@@ -11,7 +11,8 @@ public class DLLiterConceptInclusionImpl implements PositiveInclusion {
 	String string = null;
 	
 	public DLLiterConceptInclusionImpl(ConceptDescription concept1, ConceptDescription concept2){
-		
+		if (concept1 == null || concept2 == null)
+			throw new RuntimeException("Recieved null in concept inclusion");
 		included = concept1;
 		including = concept2;
 		

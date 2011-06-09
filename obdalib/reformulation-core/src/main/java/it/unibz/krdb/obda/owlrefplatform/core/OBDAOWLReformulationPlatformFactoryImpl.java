@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.TDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.LanguageProfile;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;

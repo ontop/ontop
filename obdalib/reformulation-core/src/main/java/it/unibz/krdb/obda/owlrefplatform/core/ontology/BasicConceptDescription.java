@@ -1,5 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology;
 
-public interface BasicConceptDescription extends ConceptDescription{
+public interface BasicConceptDescription extends ConceptDescription {
 
 }

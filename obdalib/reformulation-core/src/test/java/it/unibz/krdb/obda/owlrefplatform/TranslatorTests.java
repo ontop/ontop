@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
@@ -51,7 +52,6 @@ public class TranslatorTests extends TestCase {
 		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) a.getIncluded();
 		assertEquals(true, ex.isInverse());
 		AtomicConceptDescriptionImpl con = (AtomicConceptDescriptionImpl) a.getIncluding();
-		assertEquals(false, con.isInverse());
 		
 	}
 	
@@ -78,7 +78,6 @@ public class TranslatorTests extends TestCase {
 		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) a.getIncluded();
 		assertEquals(false, ex.isInverse());
 		AtomicConceptDescriptionImpl con = (AtomicConceptDescriptionImpl) a.getIncluding();
-		assertEquals(false, con.isInverse());
 		
 	}
 	
@@ -143,14 +142,14 @@ public class TranslatorTests extends TestCase {
 		DLLiterConceptInclusionImpl c1 = (DLLiterConceptInclusionImpl) ass.get(0);
 		DLLiterConceptInclusionImpl c2 = (DLLiterConceptInclusionImpl) ass.get(1);
 		
-		ConceptDescription included = (ConceptDescription) c1.getIncluded();
+		AtomicConceptDescription included = (AtomicConceptDescription) c1.getIncluded();
 		assertEquals("A", included.getPredicate().getName().toString());
-		ConceptDescription indlucing = (ConceptDescription) c1.getIncluding();
+		AtomicConceptDescription indlucing = (AtomicConceptDescription) c1.getIncluding();
 		assertEquals("B", indlucing.getPredicate().getName().toString());
 		
-		included = (ConceptDescription) c2.getIncluded();
+		included = (AtomicConceptDescription) c2.getIncluded();
 		assertEquals("B", included.getPredicate().getName().toString());
-		indlucing = (ConceptDescription) c2.getIncluding();
+		indlucing = (AtomicConceptDescription) c2.getIncluding();
 		assertEquals("A", indlucing.getPredicate().getName().toString());
 		
 	}

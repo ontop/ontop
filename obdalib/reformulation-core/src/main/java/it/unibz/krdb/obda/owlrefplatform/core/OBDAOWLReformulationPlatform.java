@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.DataQueryReasoner;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.LanguageProfile;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 

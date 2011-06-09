@@ -82,7 +82,12 @@ public class SemanticReduction {
                     }
                     URI node_uri = URI.create(uri);
                     Predicate node_p = predicateFactory.getPredicate(node_uri, arity);
-                    ConceptDescription node_cd = descFactory.getConceptDescription(node_p, false, inverted);
+                    ConceptDescription node_cd = null;
+                    if (arity == 1) {
+                     node_cd = descFactory.getAtomicConceptDescription(node_p);
+                    } else {
+                    	node_cd = descFactory.getExistentialConceptDescription(node_p, inverted);
+                    }
 
                     // Do same dispatch in child
                     uri = child.getUri();
@@ -108,7 +113,13 @@ public class SemanticReduction {
                     }
                     URI child_uri = URI.create(uri);
                     Predicate child_p = predicateFactory.getPredicate(child_uri, arity);
-                    ConceptDescription child_cd = descFactory.getConceptDescription(child_p, false, inverted);
+                    
+                    ConceptDescription child_cd = null;
+                    if (arity == 1) {
+                    	child_cd = descFactory.getAtomicConceptDescription(child_p);
+                    } else {
+                    	child_cd = descFactory.getExistentialConceptDescription(child_p, inverted);
+                    }
 
                     rv.add(new DLLiterConceptInclusionImpl(child_cd, node_cd));
                 }
