@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.DatasourcesController;
 import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAPluginController;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
