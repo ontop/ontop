@@ -46,13 +46,22 @@ public class TargetQueryValidator
       // of these components (i.e., class, object property, data property).
       boolean isPredicateValid = isClass || isObjectProp || isDataProp;
       
-      log.debug("\nPerdicate: " + predicate + "\n" +
-          "\tClass: " + isClass + "\n" +
-          "\tObject property: " + isObjectProp + "\n" +
-          "\tData property: " + isDataProp);
-
-      if(!isPredicateValid) {
+      String debugMsg = "This predicate: " + predicate.toString();
+      if (isPredicateValid) {
+        if (isClass) {
+          debugMsg += " is a Class.";
+        }
+        else if (isObjectProp) {
+          debugMsg += " is an Object property.";
+        }
+        else if (isDataProp) {
+          debugMsg += " is a Data property.";
+        }
+        log.debug(debugMsg);
+      }
+      else {
         invalidPredicates.add(predicate.toString());
+        log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
       }
     }
     
