@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-public class SQLQueryValidator {
+public class SourceQueryValidator {
 
 	private Query			sourceQuery		= null;
 	private IncrementalResultSetTableModel	model			= null;
@@ -35,7 +35,7 @@ public class SQLQueryValidator {
 
 	DataSource					source			= null;
 
-	public SQLQueryValidator(DataSource source, Query q) {
+	public SourceQueryValidator(DataSource source, Query q) {
 		this.source = source;
 		sourceQuery = q;
 	}

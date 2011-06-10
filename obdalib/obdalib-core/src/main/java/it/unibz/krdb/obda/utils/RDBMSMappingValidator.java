@@ -50,7 +50,7 @@ public class RDBMSMappingValidator extends MappingValidator {
 	@Override
 	public Enumeration<String> validate() {
 
-		SQLQueryValidator v = new SQLQueryValidator(dsc, sqlQuery);
+		SourceQueryValidator v = new SourceQueryValidator(dsc, sqlQuery);
 		Vector<String> errors = new Vector<String>();
 
 		if(!v.validate()) {
@@ -160,7 +160,7 @@ public class RDBMSMappingValidator extends MappingValidator {
 
 	}
 
-	private Vector<String> getVariables(SQLQueryValidator v){
+	private Vector<String> getVariables(SourceQueryValidator v){
 
 		Vector <String> str = new Vector<String>();
 		ResultSetTableModel model = (ResultSetTableModel) v.execute();

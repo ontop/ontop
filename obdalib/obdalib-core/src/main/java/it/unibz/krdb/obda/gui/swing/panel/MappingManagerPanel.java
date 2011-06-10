@@ -45,7 +45,7 @@ import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 import it.unibz.krdb.obda.utils.RDBMSMappingValidator;
-import it.unibz.krdb.obda.utils.SQLQueryValidator;
+import it.unibz.krdb.obda.utils.SourceQueryValidator;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -99,7 +99,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	private Thread					validatorThread;
 
-	private SQLQueryValidator		validator;
+	private SourceQueryValidator	validator;
 
 	private MappingController		mapc;
 
@@ -729,7 +729,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 						String id = node.getMappingID();
 						MappingBodyNode body = node.getBodyNode();
 						outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-						validator = new SQLQueryValidator(selectedSource, fac.getSQLQuery(body.getQuery()));
+						validator = new SourceQueryValidator(selectedSource, fac.getSQLQuery(body.getQuery()));
 						long timestart = System.currentTimeMillis();
 
 						if (canceled)
