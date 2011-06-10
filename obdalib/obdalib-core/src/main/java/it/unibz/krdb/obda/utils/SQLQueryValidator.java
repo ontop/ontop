@@ -24,7 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-public class SQLQueryValidator extends QueryValidator {
+public class SQLQueryValidator {
 
 	private Query			sourceQuery		= null;
 	private IncrementalResultSetTableModel	model			= null;
@@ -36,12 +36,10 @@ public class SQLQueryValidator extends QueryValidator {
 	DataSource					source			= null;
 
 	public SQLQueryValidator(DataSource source, Query q) {
-		super(q);
 		this.source = source;
 		sourceQuery = q;
 	}
 
-	@Override
 	public Object execute() {
 
 		if (model != null) {
@@ -55,7 +53,6 @@ public class SQLQueryValidator extends QueryValidator {
 		}
 	}
 
-	@Override
 	public boolean validate() {
 
 		try {
