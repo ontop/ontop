@@ -26,8 +26,8 @@ public class CQCUtilitiesTest extends TestCase {
 
 	PositiveInclusionApplicator	piapplicator	= new PositiveInclusionApplicator();
 
-	OBDADataFactory			pfac			= OBDADataFactoryImpl.getInstance();
-	OBDADataFactory					tfac			= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory				pfac			= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory				tfac			= OBDADataFactoryImpl.getInstance();
 
 	Predicate					r				= pfac.getPredicate(URI.create("R"), 2);
 	Predicate					s				= pfac.getPredicate(URI.create("S"), 3);
@@ -186,9 +186,66 @@ public class CQCUtilitiesTest extends TestCase {
 
 		CQIE q4 = tfac.getCQIE(head, body);
 
+		// Query 5 - q() :- S(x,y)
+
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0), new LinkedList<Term>());
+		body = new LinkedList<Atom>();
+		body.add(pfac.getAtom(pfac.getPredicate(URI.create("S"), 2), pfac.getVariable("x"), pfac.getVariable("y")));
+
+		CQIE q5 = pfac.getCQIE(head, body);
+
+		// Query 6 - q() :- S(_,_))
+
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 0), new LinkedList<Term>());
+		body = new LinkedList<Atom>();
+		body.add(pfac.getAtom(pfac.getPredicate(URI.create("S"), 2), pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
+
+		CQIE q6 = pfac.getCQIE(head, body);
+		
+		// Query 7 - q(x,y) :- R(x,y), P(x,_)
+
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 2), pfac.getVariable("x"), pfac.getVariable("y"));
+		body = new LinkedList<Atom>();
+		body.add(pfac.getAtom(pfac.getPredicate(URI.create("R"), 2), pfac.getVariable("x"), pfac.getVariable("y")));
+		body.add(pfac.getAtom(pfac.getPredicate(URI.create("P"), 2), pfac.getVariable("y"), pfac.getNondistinguishedVariable()));
+
+		CQIE q7 = pfac.getCQIE(head, body);
+
+		// Query 8 - q(x,y) :- R(x,y), P(_,_)
+
+		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 2), pfac.getVariable("x"), pfac.getVariable("y"));
+		body = new LinkedList<Atom>();
+		body.add(pfac.getAtom(pfac.getPredicate(URI.create("R"), 2), pfac.getVariable("x"), pfac.getVariable("y")));
+		body.add(pfac.getAtom(pfac.getPredicate(URI.create("P"), 2), pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
+
+
+		CQIE q8 = pfac.getCQIE(head, body);
+		
+		
+		
+		// Checking containment 5 in 6 and viceversa
+		
+		CQCUtilities cqcu = new CQCUtilities(q6);
+		assertTrue(cqcu.isContainedIn(q5));
+		
+		cqcu = new CQCUtilities(q5);
+		assertTrue(cqcu.isContainedIn(q6));
+		
+
+		// checking containment of 7 in 8
+		cqcu = new CQCUtilities(q7);
+		assertTrue(cqcu.isContainedIn(q8));
+		
+		// checking non-containment of 8 in 7
+		cqcu = new CQCUtilities(q8);
+		assertFalse(cqcu.isContainedIn(q7));
+		
+
+		
+		
 		// Checking contaiment q2 <= q1
 
-		CQCUtilities cqcu = new CQCUtilities(q2);
+		cqcu = new CQCUtilities(q2);
 		assertTrue(cqcu.isContainedIn(q1));
 
 		// Checking contaiment q1 <= q2
@@ -348,40 +405,39 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(tfac.getAtom(pfac.getPredicate(URI.create("A"), 1), terms));
 
 		CQIE q3 = tfac.getCQIE(head, body);
-		
+
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
 		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
-		
-		assertTrue(queries.size()==1);
+
+		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
-		
-		
+
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
 		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
-		
-		assertTrue(queries.size()==1);
+
+		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
-		
+
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
 		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
-		
-		assertTrue(queries.size()==2);
+
+		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
 		assertTrue(queries.contains(q3));
-		
+
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
 		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
 
-		assertTrue(queries.size()==2);
+		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
 		assertTrue(queries.contains(q3));
 	}

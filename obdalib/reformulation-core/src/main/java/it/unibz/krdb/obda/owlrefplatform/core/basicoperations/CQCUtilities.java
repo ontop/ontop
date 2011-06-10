@@ -389,7 +389,6 @@ public class CQCUtilities {
 	 */
 	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
 
-		boolean threaded = false;
 		
 		int initialsize = queries.size();
 		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
@@ -409,54 +408,21 @@ public class CQCUtilities {
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQCUtilities cqc = new CQCUtilities(queries.get(i));
-			if (!threaded || queries.size() < 6) {
 				for (int j = queries.size() - 1; j > i; j--) {
 					if (cqc.isContainedIn(queries.get(j))) {
 						queries.remove(i);
-						i = -1;
+						i -= 1;
 						break;
 					}
 				}
-			} else {
-				/*
-				 * Executing a multithreaded check over the queries in the list
-				 * 
-				 * NOTE: NOT TESTED DONT USE
-				 */
-				CountDownLatch startSignal = new CountDownLatch(1);
-				CountDownLatch doneSignal = new CountDownLatch(2);
-				boolean[] stopflag = new boolean[] { false };
-				int middle = queries.size() / 2;
-
-				/* Preparing working threads */
-				new Thread(new CQCWorkerThread(startSignal, doneSignal, queries.size(), middle, queries, cqc, stopflag), "CQCWorkerThread1")
-						.start();
-				new Thread(new CQCWorkerThread(startSignal, doneSignal, middle, i, queries, cqc, stopflag), "CQCWorkerThread2").start();
-
-				/* Starting them up */
-				startSignal.countDown();
-
-				try {
-					doneSignal.await();
-				} catch (InterruptedException e) {
-					throw new RuntimeException("CQCUtilities: error with threaded CQC", e);
-				}
-
-				if (stopflag[0] == true) {
-					queries.remove(i);
-					i = -1;
-					continue;
-				}
-			}
 		}
 
 		if (twopasses) {
-			for (int i = queries.size() - 1; i > 0; i--) {
+			for (int i = (queries.size() - 1); i >= 0; i--) {
 				CQCUtilities cqc = new CQCUtilities(queries.get(i));
 				for (int j = 0; j < i; j++) {
 					if (cqc.isContainedIn(queries.get(j))) {
 						queries.remove(i);
-						i = +1;
 						break;
 					}
 				}

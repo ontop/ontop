@@ -6,14 +6,17 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.impl.DatalogProgramImpl;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
@@ -56,6 +59,8 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	OBDADataFactory									fac							= OBDADataFactoryImpl.getInstance();
 
+	SemanticQueryOptimizer							sqoOptimizer				= null;
+
 	public TreeRedReformulator(List<Assertion> assertions) {
 		this.originalassertions = assertions;
 		log.debug("Given assertions: {}", assertions);
@@ -75,9 +80,13 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		log.debug("Computed assertions: {}", this.assertions);
 
-		piApplicator = new PositiveInclusionApplicator();
+		
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
+		
+		sqoOptimizer = new SemanticQueryOptimizer(fac, rightAssertionIndex);
+		
+		piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
 
 	}
 
@@ -239,9 +248,9 @@ public class TreeRedReformulator implements QueryRewriter {
 				 */
 
 				newqueriesbyunificationandPI.addAll(CQCUtilities.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
-						relevantQueries, relevantinverse)));
+						relevantQueries, relevantinverse, rightAssertionIndex)));
 				newqueriesbyunificationandPI.addAll(CQCUtilities.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
-						relevantQueries, relevantnotinverse)));
+						relevantQueries, relevantnotinverse, rightAssertionIndex)));
 			}
 
 			/*
@@ -249,18 +258,16 @@ public class TreeRedReformulator implements QueryRewriter {
 			 */
 
 			newqueriesbyPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyPI);
-			newqueriesbyunificationandPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyunificationandPI);
-
-			/* Removing trivially redundant queries */
-			LinkedList<CQIE> newquerieslist = new LinkedList<CQIE>();
-			// newquerieslist.addAll(newqueriesbyPI);
-			newquerieslist.addAll(newqueriesbyunificationandPI);
+			/* These queries are final, no need for new passes on these */
+			result.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyPI));
 
 			/*
 			 * Preparing the set of queries for the next iteration.
 			 */
 
-			result.addAll(newqueriesbyPI);
+			newqueriesbyunificationandPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyunificationandPI);
+			LinkedList<CQIE> newquerieslist = new LinkedList<CQIE>();
+			newquerieslist.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyunificationandPI));
 
 			oldqueries = new HashSet<CQIE>(newquerieslist.size() * 2);
 			for (CQIE newquery : newquerieslist) {
@@ -270,10 +277,6 @@ public class TreeRedReformulator implements QueryRewriter {
 				}
 			}
 
-			// loop = loop | result.addAll(newqueries);
-			// if (loop) {
-			// oldqueries = newqueries;
-			// }
 		}
 		log.debug("Main loop ended");
 		LinkedList<CQIE> resultlist = new LinkedList<CQIE>();
@@ -286,7 +289,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		// if (resultlist.size() < 300) {
 		log.debug("Removing CQC contained queries");
-		CQCUtilities.removeContainedQueriesSorted(resultlist, false);
+		CQCUtilities.removeContainedQueriesSorted(resultlist, true);
 		// }
 
 		DatalogProgram resultprogram = fac.getDatalogProgram();
@@ -341,7 +344,7 @@ public class TreeRedReformulator implements QueryRewriter {
 			}
 		}
 
-		/* Saturating loop */
+		/* Saturating is-a hierachy loop */
 		boolean loop = true;
 		while (loop) {
 			loop = false;
@@ -378,6 +381,27 @@ public class TreeRedReformulator implements QueryRewriter {
 			if (loop)
 				indexAll(newInclusions);
 		}
+
+		// /* saturating A ISA ER (if A ISA ER and R ISA S -> A ISA ES) */
+		// /* This will be used for SQO and for optimizing the applicaiton of
+		// existential restrictions */
+		// HashSet<PositiveInclusion> newExistentials = new
+		// HashSet<PositiveInclusion>();
+		// for (PositiveInclusion pi: assertions) {
+		// if (!(pi instanceof DLLiterConceptInclusionImpl))
+		// continue;
+		// DLLiterConceptInclusionImpl ci = (DLLiterConceptInclusionImpl)pi;
+		// if (!(ci.getIncluding() instanceof
+		// ExistentialConceptDescriptionImpl)) {
+		// continue;
+		// }
+		// ExistentialConceptDescriptionImpl ex =
+		// (ExistentialConceptDescriptionImpl)ci.getIncluding();
+		//
+		//
+		//
+		// }
+
 	}
 
 	private void indexAll(Collection<PositiveInclusion> pis) {

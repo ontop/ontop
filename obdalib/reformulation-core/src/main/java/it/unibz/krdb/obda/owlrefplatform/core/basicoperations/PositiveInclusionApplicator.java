@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
@@ -17,6 +18,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicRoleDescription
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.SemanticQueryOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,13 +27,22 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class PositiveInclusionApplicator {
 
-	AtomUnifier		unifier		= new AtomUnifier();
-	QueryAnonymizer	anonymizer	= new QueryAnonymizer();
-	OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
+	AtomUnifier						unifier		= new AtomUnifier();
+	QueryAnonymizer					anonymizer	= new QueryAnonymizer();
+	OBDADataFactory					termFactory	= OBDADataFactoryImpl.getInstance();
+	private SemanticQueryOptimizer	sqoOptimizer;
+
+	public PositiveInclusionApplicator(SemanticQueryOptimizer sqoOptimizer) {
+		this.sqoOptimizer = sqoOptimizer;
+	}
+
+	public PositiveInclusionApplicator() {
+	}
 
 	/**
 	 * Check whether the given positive inclusion is applicable to the given
@@ -136,7 +148,11 @@ public class PositiveInclusionApplicator {
 			newqueries.addAll(currentatomresults);
 		}
 		LinkedList<CQIE> result = new LinkedList<CQIE>();
-		result.addAll(newqueries);
+		if (sqoOptimizer != null) {
+			result.addAll(sqoOptimizer.optimizeBySQO(newqueries));
+		} else {
+			result.addAll(newqueries);
+		}
 		return result;
 	}
 
@@ -153,7 +169,8 @@ public class PositiveInclusionApplicator {
 	 * @throws Exception
 	 * @throws Exception
 	 */
-	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) throws Exception {
+	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<PositiveInclusion> pis,
+			Map<Predicate, Set<PositiveInclusion>> rightIndex) throws Exception {
 
 		// HashSet<CQIE> result = new HashSet<CQIE>(6000);
 		if (pis == null || pis.isEmpty())
@@ -180,7 +197,11 @@ public class PositiveInclusionApplicator {
 				List<Atom> body = query.getBody();
 				for (int i = 0; i < body.size(); i++) {
 					if (isPIApplicable(pi, body.get(i))) {
-						results.add(anonymizer.anonymize((applyPI(query, pi, i))));
+						if (sqoOptimizer != null) {
+							results.add(anonymizer.anonymize(sqoOptimizer.optimizeBySQO(applyPI(query, pi, i))));
+						} else {
+							results.add(anonymizer.anonymize(applyPI(query, pi, i)));
+						}
 					}
 				}
 
@@ -190,14 +211,15 @@ public class PositiveInclusionApplicator {
 		return results;
 	}
 
-	public Collection<CQIE> applyExistentialInclusions(CQIE cq, Collection<PositiveInclusion> pis) throws Exception {
-		HashSet<CQIE> result = new HashSet<CQIE>(6000);
-
-		for (PositiveInclusion pi : pis) {
-			result.addAll(applyExistentialInclusion(cq, pi));
-		}
-		return result;
-	}
+	// public Collection<CQIE> applyExistentialInclusions(CQIE cq,
+	// Collection<PositiveInclusion> pis) throws Exception {
+	// HashSet<CQIE> result = new HashSet<CQIE>(6000);
+	//
+	// for (PositiveInclusion pi : pis) {
+	// result.addAll(applyExistentialInclusion(cq, pi));
+	// }
+	// return result;
+	// }
 
 	/**
 	 * This will saturate by unifying atoms that share some terms already. If is
@@ -303,113 +325,120 @@ public class PositiveInclusionApplicator {
 		return saturatedset;
 	}
 
-	/***
-	 * This function is used in an optimization that still needs to be tested
-	 * 
-	 * @param q
-	 * @param t1
-	 * @param t2
-	 * @return
-	 */
-	private boolean matchingAtoms(CQIE q, Term t1, Term t2) {
-		for (Atom a1 : q.getBody()) {
-			int t1idx = a1.getFirstOcurrance(t1, 0);
-			if (t1idx == -1)
-				continue;
-			/* this atom conatains the focus term, t1 */
+	// /***
+	// * This function is used in an optimization that still needs to be tested
+	// *
+	// * @param q
+	// * @param t1
+	// * @param t2
+	// * @return
+	// */
+	// private boolean matchingAtoms(CQIE q, Term t1, Term t2) {
+	// for (Atom a1 : q.getBody()) {
+	// int t1idx = a1.getFirstOcurrance(t1, 0);
+	// if (t1idx == -1)
+	// continue;
+	// /* this atom conatains the focus term, t1 */
+	//
+	// for (Atom a2 : q.getBody()) {
+	//
+	// /*
+	// * we dont want to compare against the same atom, not
+	// * interesting
+	// */
+	// if (a2.equals(a1))
+	// continue;
+	//
+	// int t2idx = a2.getFirstOcurrance(t2, 0);
+	// if (t2idx != -1)
+	// continue;
+	//
+	// /*
+	// * the atom contains t2, now we need to check that they match,
+	// * except for the t1 and t2
+	// */
+	//
+	// /*
+	// * If the predicates are different, stop, any unification of t1
+	// * and t2 will fail
+	// */
+	// if (!a1.getPredicate().equals(a2.getPredicate()))
+	// return false;
+	//
+	// List<Term> terms1 = a1.getTerms();
+	// List<Term> terms2 = a2.getTerms();
+	// for (int m = 0; m < a1.getPredicate().getArity(); m++) {
+	// Term a1t = terms1.get(m);
+	// Term a2t = terms2.get(m);
+	//
+	// /*
+	// * if the any of the terms are #, its safe to unify, check
+	// * another term
+	// */
+	//
+	// if ((a1t instanceof UndistinguishedVariable) || (a2t instanceof
+	// UndistinguishedVariable))
+	// continue;
+	//
+	// /*
+	// * If the terms are different, but equal to t1 and t2, its
+	// * also safe
+	// */
+	//
+	// if ((a1t.equals(t1) && (a2t.equals(t2))) || (a1t.equals(t2) &&
+	// (a2t.equals(t1))))
+	// continue;
+	//
+	// /*
+	// * if the terms are actually different, then there is no
+	// * point in unifying
+	// */
+	// if (!a1t.equals(a2t))
+	// return false;
+	// }
+	//
+	// }
+	// }
+	// return true;
+	// }
 
-			for (Atom a2 : q.getBody()) {
-
-				/*
-				 * we dont want to compare against the same atom, not
-				 * interesting
-				 */
-				if (a2.equals(a1))
-					continue;
-
-				int t2idx = a2.getFirstOcurrance(t2, 0);
-				if (t2idx != -1)
-					continue;
-
-				/*
-				 * the atom contains t2, now we need to check that they match,
-				 * except for the t1 and t2
-				 */
-
-				/*
-				 * If the predicates are different, stop, any unification of t1
-				 * and t2 will fail
-				 */
-				if (!a1.getPredicate().equals(a2.getPredicate()))
-					return false;
-
-				List<Term> terms1 = a1.getTerms();
-				List<Term> terms2 = a2.getTerms();
-				for (int m = 0; m < a1.getPredicate().getArity(); m++) {
-					Term a1t = terms1.get(m);
-					Term a2t = terms2.get(m);
-
-					/*
-					 * if the any of the terms are #, its safe to unify, check
-					 * another term
-					 */
-
-					if ((a1t instanceof UndistinguishedVariable) || (a2t instanceof UndistinguishedVariable))
-						continue;
-
-					/*
-					 * If the terms are different, but equal to t1 and t2, its
-					 * also safe
-					 */
-
-					if ((a1t.equals(t1) && (a2t.equals(t2))) || (a1t.equals(t2) && (a2t.equals(t1))))
-						continue;
-
-					/*
-					 * if the terms are actually different, then there is no
-					 * point in unifying
-					 */
-					if (!a1t.equals(a2t))
-						return false;
-				}
-
-			}
-		}
-		return true;
-	}
-
-	public Collection<CQIE> applyExistentialInclusion(CQIE cq, PositiveInclusion pi) throws Exception {
-		DLLiterConceptInclusionImpl cinc = (DLLiterConceptInclusionImpl) pi;
-
-		Predicate predicate = null;
-
-		if (cinc.getIncluding() instanceof AtomicConceptDescription) {
-			predicate = ((AtomicConceptDescription) cinc.getIncluding()).getPredicate();
-		} else if (cinc.getIncluding() instanceof ExistentialConceptDescription) {
-			predicate = ((ExistentialConceptDescription) cinc.getIncluding()).getPredicate();
-		}
-
-		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) cinc.getIncluding();
-
-		HashSet<CQIE> initialset = new HashSet<CQIE>();
-		initialset.add(cq);
-		Set<CQIE> saturatedset = saturateByUnification(initialset, predicate, ex.isInverse());
-
-		HashSet<CQIE> results = new HashSet<CQIE>(2500);
-		/* Now we try to apoly the inclusions and collect only the results */
-
-		for (CQIE query : saturatedset) {
-			List<Atom> body = query.getBody();
-			for (int i = 0; i < body.size(); i++) {
-				if (isPIApplicable(pi, body.get(i))) {
-					results.add(applyPI(query, pi, i));
-				}
-			}
-
-		}
-
-		return results;
-	}
+	// public Collection<CQIE> applyExistentialInclusion(CQIE cq,
+	// PositiveInclusion pi) throws Exception {
+	// DLLiterConceptInclusionImpl cinc = (DLLiterConceptInclusionImpl) pi;
+	//
+	// Predicate predicate = null;
+	//
+	// if (cinc.getIncluding() instanceof AtomicConceptDescription) {
+	// predicate = ((AtomicConceptDescription)
+	// cinc.getIncluding()).getPredicate();
+	// } else if (cinc.getIncluding() instanceof ExistentialConceptDescription)
+	// {
+	// predicate = ((ExistentialConceptDescription)
+	// cinc.getIncluding()).getPredicate();
+	// }
+	//
+	// ExistentialConceptDescriptionImpl ex =
+	// (ExistentialConceptDescriptionImpl) cinc.getIncluding();
+	//
+	// HashSet<CQIE> initialset = new HashSet<CQIE>();
+	// initialset.add(cq);
+	// Set<CQIE> saturatedset = saturateByUnification(initialset, predicate,
+	// ex.isInverse());
+	//
+	// HashSet<CQIE> results = new HashSet<CQIE>(2500);
+	// /* Now we try to apoly the inclusions and collect only the results */
+	//
+	// for (CQIE query : saturatedset) {
+	// List<Atom> body = query.getBody();
+	// for (int i = 0; i < body.size(); i++) {
+	// if (isPIApplicable(pi, body.get(i))) {
+	// results.add(applyPI(query, pi, i));
+	// }
+	// }
+	//
+	// }
+	// return results;
+	// }
 
 	public CQIE applyPI(CQIE q, PositiveInclusion inclusion, int atomindex) {
 
