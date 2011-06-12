@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -7,10 +9,11 @@ import java.util.Set;
 /**
  * @author Sergejs Pugacs
  */
-public class DAGNode implements Comparable<DAGNode> {
+public class DAGNode {
 
 
-    private final String uri;
+    private final Description description;
+
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
@@ -22,8 +25,8 @@ public class DAGNode implements Comparable<DAGNode> {
     public final LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 
 
-    public DAGNode(String uri) {
-        this.uri = uri;
+    public DAGNode(Description description) {
+        this.description = description;
     }
 
     @Override
@@ -36,29 +39,26 @@ public class DAGNode implements Comparable<DAGNode> {
             return false;
 
         DAGNode otherNode = (DAGNode) other;
-        return this.uri.equals(otherNode.uri);
-//                && this.range.equals(otherNode.range)
-//                && this.index == otherNode.index;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result += 37 * result + this.uri.hashCode();
-//        result += 37 * result + this.range.hashCode();
-//        result += 37 * result + this.index;
-        return result;
-
+        return this.description.equals(otherNode.description)
+                && this.range.equals(otherNode.range)
+                && this.index == otherNode.index;
     }
 
     @Override
     public String toString() {
-        return String.format("URI:%s, Range:%s, Idx: %d", uri, range, index);
+        return "DAGNode{" +
+                "description=" + description +
+                ", range=" + range +
+                ", index=" + index +
+                '}';
     }
 
     @Override
-    public int compareTo(DAGNode o) {
-        return this.uri.compareTo(o.uri);
+    public int hashCode() {
+        int result = description != null ? description.hashCode() : 0;
+        result = 31 * result + (range != null ? range.hashCode() : 0);
+        result = 31 * result + index;
+        return result;
     }
 
     public int getIndex() {
@@ -85,10 +85,6 @@ public class DAGNode implements Comparable<DAGNode> {
         return children;
     }
 
-    public String getUri() {
-        return uri;
-    }
-
     public LinkedList<DAGNode> getEquivalents() {
         return equivalents;
     }
@@ -101,4 +97,7 @@ public class DAGNode implements Comparable<DAGNode> {
         this.parents = parents;
     }
 
+    public Description getDescription() {
+        return description;
+    }
 }

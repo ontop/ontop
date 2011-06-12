@@ -7,6 +7,5 @@
         <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#C" index="4" range="4:5"/>
         <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746417548.owl#D" index="5" range="5:5"/>
     </classes>
-    <objectproperties/>
-    <dataproperties/>
+    <rolles/>
 </dag>

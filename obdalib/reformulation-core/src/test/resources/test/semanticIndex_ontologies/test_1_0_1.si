@@ -10,6 +10,5 @@
         <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#F" index="8" range="8:8"/>
         <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#G" index="4" range="4:4"/>
     </classes>
-    <objectproperties/>
-    <dataproperties/>
+    <rolles/>
 </dag>

@@ -1,18 +1,21 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRange.Interval;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Store DAG in DB
@@ -21,8 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class DAGSerializer {
 
-    private final static Logger log = LoggerFactory
-            .getLogger(DAGSerializer.class);
+    private final static Logger log = LoggerFactory.getLogger(DAGSerializer.class);
 
     public final static String index_table = "IDX";
 
@@ -42,6 +44,9 @@ public final class DAGSerializer {
 
     private final static String select_query = "SELECT * FROM " + index_table;
 
+    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+
     public static void recreate_tables(Connection conn) {
         try {
             log.debug("Recreating DAG tables");
@@ -53,8 +58,7 @@ public final class DAGSerializer {
     }
 
     public final static int CLASS_TYPE = 1;
-    public final static int OBJECTPROPERTY_TYPE = 2;
-    public final static int DATAPROPERTY_TYPE = 3;
+    public final static int ROLE_TYPE = 2;
 
     /**
      * Save dag in the database
@@ -64,53 +68,39 @@ public final class DAGSerializer {
      * @throws SQLException
      */
     public static void DAG2DB(DAG dag, Connection conn) throws SQLException {
-        Map<String, DAGNode> index = dag.getClassIndex();
         PreparedStatement stm = conn.prepareStatement(insert_query);
-        for (DAGNode node : index.values()) {
-            String uri = node.getUri();
+        for (DAGNode node : dag.getClasses()) {
+
+            ConceptDescription description = (ConceptDescription) node.getDescription();
+
+            String uri = description.toString();
+
 
             for (Interval it : node.getRange().getIntervals()) {
                 stm.setString(1, uri);
                 stm.setInt(2, node.getIndex());
-                stm.setInt(2, it.getStart());
-                stm.setInt(3, it.getEnd());
-                stm.setInt(4, CLASS_TYPE);
+                stm.setInt(3, it.getStart());
+                stm.setInt(4, it.getEnd());
+                stm.setInt(5, CLASS_TYPE);
                 stm.addBatch();
             }
         }
         stm.executeBatch();
 
-        index = dag.getObjectPropertyIndex();
-        for (DAGNode node : index.values()) {
-            String uri = node.getUri();
+        for (DAGNode node : dag.getRoles()) {
+            RoleDescription description = (RoleDescription) node.getDescription();
+            String uri = description.toString();
 
             for (Interval it : node.getRange().getIntervals()) {
                 stm.setString(1, uri);
                 stm.setInt(2, node.getIndex());
-                stm.setInt(2, it.getStart());
-                stm.setInt(3, it.getEnd());
-                stm.setInt(4, OBJECTPROPERTY_TYPE);
+                stm.setInt(3, it.getStart());
+                stm.setInt(4, it.getEnd());
+                stm.setInt(5, ROLE_TYPE);
                 stm.addBatch();
             }
         }
         stm.executeBatch();
-
-        index = dag.getDataPropertyIndex();
-        for (DAGNode node : index.values()) {
-            String uri = node.getUri();
-
-            for (Interval it : node.getRange().getIntervals()) {
-                stm.setString(1, uri);
-                stm.setInt(2, node.getIndex());
-                stm.setInt(2, it.getStart());
-                stm.setInt(3, it.getEnd());
-                stm.setInt(4, DATAPROPERTY_TYPE);
-                stm.addBatch();
-            }
-        }
-        stm.executeBatch();
-
-
     }
 
     /**
@@ -122,9 +112,8 @@ public final class DAGSerializer {
 
         log.debug("Checking if SemanticIndex exists in DB");
 
-        Map<String, DAGNode> res_classes = new HashMap<String, DAGNode>();
-        Map<String, DAGNode> res_obj_props = new HashMap<String, DAGNode>();
-        Map<String, DAGNode> res_data_props = new HashMap<String, DAGNode>();
+        Map<Description, DAGNode> res_classes = new HashMap<Description, DAGNode>();
+        Map<Description, DAGNode> res_roles = new HashMap<Description, DAGNode>();
         Map<String, DAGNode> tmp;
         try {
             DatabaseMetaData md = conn.getMetaData();
@@ -139,24 +128,62 @@ public final class DAGSerializer {
                     int end_idx = res_rows.getInt(4);
                     int type = res_rows.getInt(5);
 
+                    Predicate p;
                     if (type == CLASS_TYPE) {
-                        tmp = res_classes;
-                    } else if (type == OBJECTPROPERTY_TYPE) {
-                        tmp = res_obj_props;
-                    } else if (type == DATAPROPERTY_TYPE) {
-                        tmp = res_data_props;
-                    } else {
-                        log.error("Unsupported DAG element type: " + type);
-                        tmp = null;
-                    }
 
-                    if (tmp.containsKey(uri)) {
-                        tmp.get(uri).getRange().addInterval(start_idx, end_idx);
-                    } else {
-                        DAGNode node = new DAGNode(uri);
-                        node.setIndex(idx);
-                        node.setRange(new SemanticIndexRange(start_idx, end_idx));
-                        tmp.put(uri, node);
+                        boolean exists = false;
+                        boolean inverse = false;
+
+                        // ExistentialNode
+                        if (uri.startsWith("E")) {
+                            exists = true;
+                            uri = uri.substring(1);
+                        }
+                        // Inverse
+                        if (uri.endsWith("-")) {
+                            uri = uri.substring(0, uri.length() - 2);
+                            inverse = true;
+                        }
+                        ConceptDescription description;
+
+                        if (exists) {
+                            p = predicateFactory.getPredicate(URI.create(uri), 2);
+                            description = descFactory.getExistentialConceptDescription(p, inverse);
+                        } else {
+                            p = predicateFactory.getPredicate(URI.create(uri), 1);
+                            description = descFactory.getAtomicConceptDescription(p);
+                        }
+
+                        if (res_classes.containsKey(description)) {
+                            res_classes.get(description).getRange().addInterval(start_idx, end_idx);
+                        } else {
+                            DAGNode node = new DAGNode(description);
+                            node.setIndex(idx);
+                            node.setRange(new SemanticIndexRange(start_idx, end_idx));
+                            res_classes.put(description, node);
+                        }
+
+                    } else if (type == ROLE_TYPE) {
+
+                        RoleDescription description;
+                        boolean inverse = false;
+
+                        // Inverse
+                        if (uri.endsWith("-")) {
+                            uri = uri.substring(0, uri.length() - 2);
+                            inverse = true;
+                        }
+                        p = predicateFactory.getPredicate(URI.create(uri), 2);
+                        description = descFactory.getRoleDescription(p, inverse);
+
+                        if (res_roles.containsKey(description)) {
+                            res_roles.get(description).getRange().addInterval(start_idx, end_idx);
+                        } else {
+                            DAGNode node = new DAGNode(description);
+                            node.setIndex(idx);
+                            node.setRange(new SemanticIndexRange(start_idx, end_idx));
+                            res_roles.put(description, node);
+                        }
                     }
                 }
             } else {
@@ -166,7 +193,7 @@ public final class DAGSerializer {
             // FIXME: add proper error handling
             e.printStackTrace();
         }
-        return new DAG((List) res_classes.values(), (List) res_obj_props.values(), (List) res_data_props.values());
+        return new DAG(res_classes, res_roles);
     }
 }
 

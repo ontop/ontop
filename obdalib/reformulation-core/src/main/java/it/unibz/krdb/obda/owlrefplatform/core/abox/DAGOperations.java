@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,7 @@ public class DAGOperations {
      * @param dagnodes a DAG
      * @return Map from uri to the Set of their descendants
      */
-    public static void buildDescendants(Map<String, DAGNode> dagnodes) {
+    public static void buildDescendants(Map<Description, DAGNode> dagnodes) {
         Queue<DAGNode> stack = new LinkedList<DAGNode>();
 
         // Start with bottom nodes, that don't have children
@@ -31,7 +32,7 @@ public class DAGOperations {
                 stack.add(n);
             }
         }
-        if (stack.isEmpty()) {
+        if (stack.isEmpty() && !dagnodes.isEmpty()) {
             log.error("Can not build descendants for graph with cycles");
         }
         while (!stack.isEmpty()) {
@@ -111,7 +112,7 @@ public class DAGOperations {
     }
 
 
-    public static void computeTransitiveReduct(Map<String, DAGNode> dagnodes) {
+    public static void computeTransitiveReduct(Map<Description, DAGNode> dagnodes) {
         buildDescendants(dagnodes);
 
         LinkedList<Edge> redundantEdges = new LinkedList<Edge>();
@@ -131,7 +132,7 @@ public class DAGOperations {
         }
     }
 
-    public static void removeCycles(Map<String, DAGNode> dagnodes, Map<String, String> equi_mapp) {
+    public static void removeCycles(Map<Description, DAGNode> dagnodes, Map<Description, Description> equi_mapp) {
         for (ArrayList<DAGNode> component : scc(dagnodes)) {
 
             DAGNode cyclehead = component.get(0);
@@ -149,8 +150,8 @@ public class DAGOperations {
                     addParentEdge(childchild, cyclehead);
                 }
 
-                dagnodes.remove(equivnode.getUri());
-                equi_mapp.put(equivnode.getUri(), cyclehead.getUri());
+                dagnodes.remove(equivnode.getDescription());
+                equi_mapp.put(equivnode.getDescription(), cyclehead.getDescription());
                 cyclehead.equivalents.add(equivnode);
             }
         }
@@ -163,7 +164,7 @@ public class DAGOperations {
     private static Map<DAGNode, Integer> t_idx;
     private static Map<DAGNode, Integer> t_low_idx;
 
-    private static ArrayList<ArrayList<DAGNode>> scc(Map<String, DAGNode> list) {
+    private static ArrayList<ArrayList<DAGNode>> scc(Map<Description, DAGNode> list) {
         stack = new ArrayList<DAGNode>();
         SCC = new ArrayList<ArrayList<DAGNode>>();
         t_idx = new HashMap<DAGNode, Integer>();

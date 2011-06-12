@@ -15,13 +15,18 @@
         <class uri="::__inverse__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#C"
                index="6" range="6:6"/>
     </classes>
-    <objectproperties>
+    <rolles>
         <objectproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#A" index="1"
                         range="1:3"/>
         <objectproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#B" index="2"
                         range="2:3"/>
         <objectproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#C" index="3"
                         range="3:3"/>
-    </objectproperties>
-    <dataproperties/>
+        <objectproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#A" index="1"
+                        range="1:3"/>
+        <objectproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#B" index="2"
+                        range="2:3"/>
+        <objectproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299162625932.owl#C" index="3"
+                        range="3:3"/>
+    </rolles>
 </dag>

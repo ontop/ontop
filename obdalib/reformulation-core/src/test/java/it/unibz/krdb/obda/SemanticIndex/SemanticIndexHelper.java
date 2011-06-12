@@ -1,35 +1,20 @@
 package it.unibz.krdb.obda.SemanticIndex;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRange;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import org.h2.jdbcx.JdbcDataSource;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +23,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Helper class to load ontologies and comapre computed values to expected results
@@ -49,9 +45,16 @@ public class SemanticIndexHelper {
             .getLogger(SemanticIndexHelper.class);
 
     public static final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-    public static OBDAModel apic;
+    //    public static OBDAModel apic;
     public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     public Connection conn;
+
+    private final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+    private final DescriptionFactory descFactory = new BasicDescriptionFactory();
+
+    private final static String owl_exists = "::__exists__::";
+    private final static String owl_inverse_exists = "::__inverse__exists__::";
+    private final static String owl_inverse = "::__inverse__::";
 
     public SemanticIndexHelper() {
         JdbcDataSource ds = new JdbcDataSource();
@@ -64,21 +67,19 @@ public class SemanticIndexHelper {
         }
     }
 
-    public Set<OWLOntology> load_onto(String ontoname) throws OWLOntologyCreationException {
+    public DLLiterOntology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
-        OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-        
-        OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-        apic = obdafac.getOBDAModel();
-        
+        OWLOntology owlOntology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+        OWLAPITranslator translator = new OWLAPITranslator();
 
-        Set<OWLOntology> onto_set = new HashSet<OWLOntology>(1);
-        onto_set.add(ontology);
-        return onto_set;
+        DLLiterOntology ontology;
+        return translator.translate(owlOntology);
+
     }
 
-    public DAG load_dag(String ontoname) throws OWLOntologyCreationException {
-        return new DAG(load_onto(ontoname));
+    public DAG load_dag(String ontoname) throws Exception {
+
+        return DAGConstructor.getISADAG(load_onto(ontoname));
     }
 
     public List<List<DAGNode>> get_results(String resname) {
@@ -100,15 +101,12 @@ public class SemanticIndexHelper {
         }
 
         doc.getDocumentElement().normalize();
-        //Node root = doc.getElementsByTagName("dag");
         List<DAGNode> cls = get_dag_type(doc, "classes");
-        List<DAGNode> obj_props = get_dag_type(doc, "objectproperties");
-        List<DAGNode> data_props = get_dag_type(doc, "dataproperties");
+        List<DAGNode> roles = get_dag_type(doc, "rolles");
 
-        List<List<DAGNode>> rv = new ArrayList<List<DAGNode>>(3);
+        List<List<DAGNode>> rv = new ArrayList<List<DAGNode>>(2);
         rv.add(cls);
-        rv.add(obj_props);
-        rv.add(data_props);
+        rv.add(roles);
         return rv;
     }
 
@@ -130,7 +128,41 @@ public class SemanticIndexHelper {
                 String uri = node.getAttribute("uri");
                 int idx = Integer.parseInt(node.getAttribute("index"));
 
-                DAGNode _node = new DAGNode(uri);
+                int arity = 1;
+                boolean inverse = false;
+                boolean exists = false;
+                Predicate p;
+                Description description;
+
+                if (uri.startsWith(owl_exists)) {
+                    uri = uri.substring(owl_exists.length());
+                    arity = 2;
+                    exists = true;
+
+                } else if (uri.startsWith(owl_inverse_exists)) {
+                    uri = uri.substring(owl_inverse_exists.length());
+                    arity = 2;
+                    inverse = true;
+                    exists = true;
+                } else if (uri.startsWith(owl_inverse)) {
+                    uri = uri.substring(owl_inverse.length());
+                    inverse = true;
+                }
+
+                p = predicateFactory.getPredicate(URI.create(uri), arity);
+
+                if (type.equals("classes")) {
+                    if (exists)
+                        description = descFactory.getExistentialConceptDescription(p, inverse);
+                    else
+                        description = descFactory.getAtomicConceptDescription(p);
+                } else {
+                    description = descFactory.getRoleDescription(p, inverse);
+                }
+
+
+                DAGNode _node = new DAGNode(description);
+
                 _node.setIndex(idx);
                 _node.setRange(new SemanticIndexRange());
 

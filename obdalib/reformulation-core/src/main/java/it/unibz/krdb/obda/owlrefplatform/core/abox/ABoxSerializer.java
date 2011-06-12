@@ -1,18 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import org.semanticweb.owl.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Set;
-
-import org.semanticweb.owl.model.OWLClassAssertionAxiom;
-import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLIndividualAxiom;
-import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLOntology;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Store ABox assertions in the DB
@@ -24,62 +19,44 @@ public class ABoxSerializer {
             .getLogger(ABoxSerializer.class);
 
     public static final String class_table = "class";
-    public static final String objectprop_table = "role";
-    public static final String dataprop_table = "literal";
+    public static final String role_table = "role";
 
     public static final String class_table_create =
             "CREATE TABLE " + class_table + " ( "
                     + "URI VARCHAR(100),"
                     + "IDX INTEGER" + ");";
 
-    public static final String objectprop_table_create =
-            "CREATE TABLE " + objectprop_table + " ( "
+    public static final String role_table_create =
+            "CREATE TABLE " + role_table + " ( "
                     + "URI1 VARCHAR(100), "
                     + "URI2 VARCHAR(100), "
                     + "IDX INTEGER" + ");";
 
-    public static final String dataprop_table_create =
-            "CREATE TABLE " + dataprop_table + " ( "
-                    + "URI VARCHAR(100),"
-                    + "LITERAL VARCHAR(100),"
-                    + "IDX INTEGER" + ");";
 
     public static final String class_table_drop = "DROP TABLE IF EXISTS " + class_table;
 
-    public static final String objectprop_table_drop = "DROP TABLE IF EXISTS " + objectprop_table;
-
-    public static final String dataprop_table_drop = "DROP TABLE IF EXISTS " + dataprop_table;
+    public static final String role_table_drop = "DROP TABLE IF EXISTS " + role_table;
 
     public static final String class_insert = "INSERT INTO " + class_table
             + " (URI, IDX) VALUES (?, ?)";
 
-    public static final String role_insert = "INSERT INTO " + objectprop_table
+    public static final String role_insert = "INSERT INTO " + role_table
             + " (URI1, URI2, IDX) VALUES (?, ?, ?)";
 
-    public static final String literal_insert = "INSERT INTO " + dataprop_table
-            + " (URI, LITERAL, IDX) VALUES (?, ?, ?)";
 
     public static void recreate_tables(Connection conn) throws SQLException {
         log.debug("Recreating ABox tables");
         conn.createStatement().execute(class_table_drop);
-        conn.createStatement().execute(objectprop_table_drop);
-        conn.createStatement().execute(dataprop_table_drop);
+        conn.createStatement().execute(role_table_drop);
 
         conn.createStatement().execute(class_table_create);
-        conn.createStatement().execute(objectprop_table_create);
-        conn.createStatement().execute(dataprop_table_create);
+        conn.createStatement().execute(role_table_create);
 
     }
 
     public static void ABOX2DB(Set<OWLOntology> ontologies, DAG dag, Connection conn) throws SQLException {
         PreparedStatement cls_stm = conn.prepareStatement(class_insert);
         PreparedStatement role_stm = conn.prepareStatement(role_insert);
-        PreparedStatement lit_stm = conn.prepareStatement(literal_insert);
-
-        Map<String, DAGNode> cls_index = dag.getClassIndex();
-        Map<String, DAGNode> obj_index = dag.getObjectPropertyIndex();
-        Map<String, DAGNode> data_index = dag.getDataPropertyIndex();
-
 
         for (OWLOntology onto : ontologies) {
             onto.getIndividualAxioms();
@@ -91,19 +68,13 @@ public class ABoxSerializer {
                     String uri = triple.getSubject().asOWLIndividual().getURI().toString();
                     String lit = triple.getObject().getLiteral();
 
-                    DAGNode node = data_index.get(prop);
-                    int idx;
-                    if (node == null) {
-                        // search equivalent mappings
-                        idx = data_index.get(dag.equi_mappings.get(prop)).getIndex();
-                    } else {
-                        idx = node.getIndex();
-                    }
+                    DAGNode node = dag.getRoleNode(prop);
+                    int idx = node.getIndex();
 
-                    lit_stm.setString(1, uri);
-                    lit_stm.setString(2, lit);
-                    lit_stm.setInt(3, idx);
-                    lit_stm.addBatch();
+                    role_stm.setString(1, uri);
+                    role_stm.setString(2, lit);
+                    role_stm.setInt(3, idx);
+                    role_stm.addBatch();
 
                 } else if (ax instanceof OWLObjectPropertyAssertionAxiom) {
                     OWLObjectPropertyAssertionAxiom triple = (OWLObjectPropertyAssertionAxiom) ax;
@@ -112,15 +83,8 @@ public class ABoxSerializer {
                     String uri2 = triple.getObject().asOWLIndividual().getURI().toString();
 
 
-                    DAGNode node = obj_index.get(prop);
-                    int idx;
-                    if (node == null) {
-                        // search equivalent mappings
-                        idx = obj_index.get(dag.equi_mappings.get(prop)).getIndex();
-                    } else {
-                        idx = node.getIndex();
-                    }
-
+                    DAGNode node = dag.getRoleNode(prop);
+                    int idx = node.getIndex();
 
                     role_stm.setString(1, uri1);
                     role_stm.setString(2, uri2);
@@ -131,17 +95,11 @@ public class ABoxSerializer {
                     OWLClassAssertionAxiom triple = (OWLClassAssertionAxiom) ax;
                     String cls = triple.getDescription().asOWLClass().getURI().toString();
                     // XXX: strange behaviour - owlapi generates an extra assertion of the form ClassAssertion(Thing, i)
-                    if (!cls.equals(DAG.owl_thing)) {
+                    if (!cls.equals(DAG.thingStr)) {
                         String uri = triple.getIndividual().getURI().toString();
 
-                        DAGNode node = cls_index.get(cls);
-                        int idx;
-                        if (node == null) {
-                            // search equivalent mappings
-                            idx = cls_index.get(dag.equi_mappings.get(cls)).getIndex();
-                        } else {
-                            idx = node.getIndex();
-                        }
+                        DAGNode node = dag.getClassNode(cls);
+                        int idx = node.getIndex();
 
                         cls_stm.setString(1, uri);
                         cls_stm.setInt(2, idx);
@@ -152,6 +110,5 @@ public class ABoxSerializer {
         }
         cls_stm.executeBatch();
         role_stm.executeBatch();
-        lit_stm.executeBatch();
     }
 }

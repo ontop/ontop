@@ -1,26 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.MappingController;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxSerializer;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxDumpException;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxFromDBLoader;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DirectMappingGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.TDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.*;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.LanguageProfile;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -37,27 +25,20 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DirectMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
+
 /**
  * The implementation of the factory for creating reformulation's platform reasoner
- *
  */
 
 public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
@@ -141,7 +122,6 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
 
 
-        
         QueryRewriter rewriter;
         TechniqueWrapper techniqueWrapper;
         UnfoldingMechanism unfMech = null;
@@ -165,9 +145,12 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 uris.add(onto.getURI());
                 DLLiterOntology aux = translator.translate(onto);
                 ontology.addAssertions(aux.getAssertions());
+
+                ontology.addConcepts(new ArrayList<ConceptDescription>(aux.getConcepts()));
+                ontology.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
             }
 
-            if (useInMemoryDB && ("material".equals(unfoldingMode)||createMappings)) {
+            if (useInMemoryDB && ("material".equals(unfoldingMode) || createMappings)) {
                 log.debug("Using in an memory database");
                 String driver = "org.h2.Driver";
                 String url = "jdbc:h2:mem:aboxdump";
@@ -190,7 +173,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
                 if (dbType.equals("semantic")) {
                     //perform semantic import
-                    dag = new DAG(ontologies);
+                    dag = DAGConstructor.getISADAG(ontology);
+                    dag.index();
                     ABoxSerializer.recreate_tables(connection);
                     ABoxSerializer.ABOX2DB(ontologies, dag, connection);
                 } else if (dbType.equals("direct")) {
@@ -246,11 +230,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             List<Assertion> onto;
             if (dbType.equals("semantic")) {
 
-                // Reachability DAGs
-                TDAG tdag = new TDAG(dag);
-                SDAG sdag = new SDAG(tdag);
-
-                SemanticReduction reducer = new SemanticReduction(dag, tdag, sdag);
+                SemanticReduction reducer = new SemanticReduction(dag, DAGConstructor.getSigma(ontology));
                 onto = reducer.reduce();
             } else {
                 onto = ontology.getAssertions();
@@ -266,8 +246,11 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 
             if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
                 if (dbType.equals("semantic")) {
-                    SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(ds, apic, dag);
-                    map_gen.build();
+
+                    for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(dag)) {
+                        log.debug(map.toString());
+                        apic.getMappingController().insertMapping(ds.getSourceID(), map);
+                    }
                 }
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
                 MappingViewManager viewMan = new MappingViewManager(mappings);
@@ -285,10 +268,10 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             /***
              * Done, sending a new reasoner with the modules we just configured
              */
-            
+
             techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
-            log.debug("... Quest has been setup and is ready for querying");           
-            
+            log.debug("... Quest has been setup and is ready for querying");
+
             return new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
 
         } catch (Exception e) {

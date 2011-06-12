@@ -9,9 +9,10 @@
         <class uri="::__inverse__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#C"
                index="4" range="4:4"/>
     </classes>
-    <objectproperties>
-        <objectproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#C" index="1"
-                        range="1:1"/>
-    </objectproperties>
-    <dataproperties/>
+    <rolles>
+            <objectproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#C" index="1"
+                        range="1:3"/>
+            <objectproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#C" index="1"
+                        range="1:3"/>
+    </rolles>
 </dag>
