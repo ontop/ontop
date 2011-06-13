@@ -92,7 +92,6 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<testExcludes>
-						<exclude>**/*.java</exclude>
 						<exclude>**/MappingToRuleTester.java</exclude>
 						<exclude>**/PartialEvaluationTest.java</exclude>
 					</testExcludes>
@@ -103,7 +102,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/*.java</exclude>
 						<exclude>**/MappingToRuleTester.java</exclude>
 						<exclude>**/PartialEvaluationTest.java</exclude>
 					</excludes>
