@@ -5,13 +5,15 @@ import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
-import it.unibz.krdb.obda.model.impl.DataSourceImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -96,21 +98,7 @@ public class OBDA2OWLDataMaterializer {
 							Iterator<Term> teit = terms.iterator();
 							while (teit.hasNext()) {
 								FunctionalTermImpl ft = (FunctionalTermImpl) teit.next();
-								StringBuffer sb = new StringBuffer();
-								sb.append(ft.getName());
-								sb.append("-");
-								List<Term> parameters = ft.getTerms();
-								Iterator<Term> pit = parameters.iterator();
-								StringBuffer aux = new StringBuffer();
-								while (pit.hasNext()) {
-									if (aux.length() > 0) {
-										aux.append("-");
-									}
-									Term qt = pit.next();
-									String s = res.getString(qt.getName());
-									aux.append(s);
-								}
-								sb.append(aux.toString());
+								String sb = getObjectURI(res, ft);
 								// System.out.println(sb.toString());
 								OWLIndividual ind = factory.getOWLIndividual(URI.create(sb.toString()));
 								OWLClass clazz = factory.getOWLClass(new URI(uri));
@@ -127,24 +115,11 @@ public class OBDA2OWLDataMaterializer {
 				} else {
 					if (dataProperties.contains(uri)) {
 						while (res.next()) {
-							String valueVar = atom.getTerms().get(1).getName();
+							String valueVar = ((Variable)atom.getTerms().get(1)).getName();
 							FunctionalTermImpl ft = (FunctionalTermImpl) atom.getTerms().get(0);
-							StringBuffer sb = new StringBuffer();
-							sb.append(ft.getName());
-							sb.append("-");
-							List<Term> parameters = ft.getTerms();
-							Iterator<Term> pit = parameters.iterator();
-							StringBuffer aux = new StringBuffer();
-							while (pit.hasNext()) {
-								if (aux.length() > 0) {
-									aux.append("-");
-								}
-								Term qt = pit.next();
-								String s = res.getString(qt.getName());
-								aux.append(s);
-							}
-							sb.append(aux.toString());
-							// System.out.println(sb.toString());
+							String sb = getObjectURI(res, ft);
+
+							
 							OWLIndividual ind = factory.getOWLIndividual(URI.create(sb.toString()));
 							OWLDataProperty prop = factory.getOWLDataProperty(new URI(uri));
 							String value = res.getString(valueVar);
@@ -156,39 +131,11 @@ public class OBDA2OWLDataMaterializer {
 					} else if (objectProperties.contains(uri)) {
 						while (res.next()) {
 							FunctionalTermImpl ft1 = (FunctionalTermImpl) atom.getTerms().get(0);
-							StringBuffer sb1 = new StringBuffer();
-							sb1.append(ft1.getName());
-							sb1.append("-");
-							List<Term> parameters = ft1.getTerms();
-							Iterator<Term> pit = parameters.iterator();
-							StringBuffer aux = new StringBuffer();
-							while (pit.hasNext()) {
-								if (aux.length() > 0) {
-									aux.append("-");
-								}
-								Term qt = pit.next();
-								String s = res.getString(qt.getName());
-								aux.append(s);
-							}
-							sb1.append(aux.toString());
-							// System.out.println(sb1.toString());
+							String sb1 = getObjectURI(res, ft1);
+							
 							FunctionalTermImpl ft2 = (FunctionalTermImpl) atom.getTerms().get(1);
-							StringBuffer sb2 = new StringBuffer();
-							sb2.append(ft2.getName());
-							sb2.append("-");
-							List<Term> parameters2 = ft2.getTerms();
-							Iterator<Term> pit2 = parameters2.iterator();
-							StringBuffer aux2 = new StringBuffer();
-							while (pit2.hasNext()) {
-								if (aux2.length() > 0) {
-									aux2.append("-");
-								}
-								Term qt = pit2.next();
-								String s = res.getString(qt.getName());
-								aux2.append(s);
-							}
-							sb2.append(aux2.toString());
-							// System.out.println(sb2.toString());
+							String sb2 = getObjectURI(res, ft2);
+							
 							OWLIndividual ind1 = factory.getOWLIndividual(URI.create(sb1.toString()));
 							OWLIndividual ind2 = factory.getOWLIndividual(URI.create(sb2.toString()));
 							OWLObjectProperty prop = factory.getOWLObjectProperty(new URI(uri));
@@ -207,20 +154,41 @@ public class OBDA2OWLDataMaterializer {
 		manager.addAxioms(currentOntology, individuals);
 
 	}
-	//
-	// private List<OBDAMappingAxiom> getMappings(APIController controller) {
-	//
-	// LinkedList<OBDAMappingAxiom> mappings = new
-	// LinkedList<OBDAMappingAxiom>();
-	// MappingController mapcon = controller.getMappingController();
-	// DatasourcesController dscon = controller.getDatasourcesController();
-	// List<DataSource> ds = dscon.getAllSources();
-	// Iterator<DataSource> dsit = ds.iterator();
-	// while (dsit.hasNext()) {
-	// mappings.addAll();
-	// }
-	//
-	// return mappings;
-	// }
+
+	/**
+	 * Transforms a functional term into an Object URI by grounding any variable
+	 * that appears in the term with the value of the column in the current row
+	 * of the result set.
+	 * 
+	 * @param res
+	 * @param functionalTerm
+	 * @return
+	 * @throws SQLException
+	 */
+	private String getObjectURI(ResultSet res, FunctionalTermImpl functionalTerm) throws SQLException {
+		StringBuffer objectURIString = new StringBuffer();
+		objectURIString.append(functionalTerm.getFunctionSymbol().toString());
+		objectURIString.append("-");
+
+		StringBuffer aux = new StringBuffer();
+		for (Term qt : functionalTerm.getTerms()) {
+			if (aux.length() > 0) {
+				aux.append("-");
+			}
+
+			if (qt instanceof Variable) {
+				String s = res.getString(((Variable) qt).getName());
+				aux.append(s);
+			} else if (qt instanceof ValueConstant) {
+
+				aux.append(((ValueConstant) qt).getValue());
+			} else {
+				throw new RuntimeException("Invalid term type in function symbol");
+			}
+
+		}
+		objectURIString.append(aux.toString());
+		return objectURIString.toString();
+	}
 
 }

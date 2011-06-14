@@ -48,8 +48,8 @@ public class URIToFunctionMatcherTest extends TestCase {
 		assertTrue(matchedTerm.toString(), matchedTerm.getFunctionSymbol().toString().equals("http://www.obda.com/onto#individual"));
 		assertTrue(matchedTerm.toString(), matchedTerm.getTerms().get(0) instanceof ValueConstant);
 		assertTrue(matchedTerm.toString(), matchedTerm.getTerms().get(1) instanceof ValueConstant);
-		assertTrue(matchedTerm.getTerms().get(0).toString(), matchedTerm.getTerms().get(0).getName().equals("mariano"));
-		assertTrue(matchedTerm.getTerms().get(1).toString(), matchedTerm.getTerms().get(1).getName().equals("rodriguez"));
+		assertTrue(matchedTerm.getTerms().get(0).toString(), ((ValueConstant) matchedTerm.getTerms().get(0)).getValue().equals("mariano"));
+		assertTrue(matchedTerm.getTerms().get(1).toString(), ((ValueConstant) matchedTerm.getTerms().get(1)).getValue().equals("rodriguez"));
 	}
 
 }

@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AtomImpl;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.DatalogProgramImpl;
@@ -95,9 +96,9 @@ public class UnificationTest2 extends TestCase {
 		Term term3 = at2.getTerms().get(0);
 		Term term4 = at2.getTerms().get(1);
 
-		assertEquals("x", term1.getName());
-		assertEquals("y", term2.getName());
-		assertEquals("x", term3.getName());
+		assertEquals("x", ((Variable) term1).getName());
+		assertEquals("y", ((Variable) term2).getName());
+		assertEquals("x", ((Variable) term3).getName());
 		assertTrue(term4 instanceof UndistinguishedVariable);
 
 	}

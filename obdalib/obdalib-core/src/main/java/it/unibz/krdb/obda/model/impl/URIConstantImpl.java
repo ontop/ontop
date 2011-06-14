@@ -47,10 +47,10 @@ public class URIConstantImpl implements URIConstant {
 		return uri;
 	}
 
-	@Override
-	public String getName() {
-		return uri.toString();
-	}
+//	@Override
+//	public String getName() {
+//		return uri.toString();
+//	}
 
 	@Override
 	public Term copy() {
@@ -64,6 +64,6 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public String toString() {
-		return getName();
+		return uri.toString();
 	}
 }

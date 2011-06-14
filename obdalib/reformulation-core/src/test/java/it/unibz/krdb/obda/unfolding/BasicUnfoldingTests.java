@@ -162,7 +162,7 @@ public class BasicUnfoldingTests extends TestCase {
 
 		DatalogProgram mapprogram = unfolder.getCompilationOfMappings();
 		
-		CQIE  fresh = unfolder.getFreshRule(mapprogram.getRules().get(0), 0);
+		CQIE  fresh = unfolder.getFreshRule(mapprogram.getRules().get(2), 0);
 		Function t1 = (Function)fresh.getHead().getTerms().get(0);
 		Function t2 = (Function)fresh.getHead().getTerms().get(1);
 		
@@ -170,7 +170,7 @@ public class BasicUnfoldingTests extends TestCase {
 		assertTrue(t2.toString(), t2.equals(fac.getFunctionalTerm(fac.getPredicate(URI.create("m"),1), fac.getVariable("aux3_0_0"))));
 		
 		
-		 fresh = unfolder.getFreshRule(mapprogram.getRules().get(0), 1);
+		 fresh = unfolder.getFreshRule(mapprogram.getRules().get(2), 1);
 		t1 = (Function)fresh.getHead().getTerms().get(0);
 		 t2 = (Function)fresh.getHead().getTerms().get(1);
 		

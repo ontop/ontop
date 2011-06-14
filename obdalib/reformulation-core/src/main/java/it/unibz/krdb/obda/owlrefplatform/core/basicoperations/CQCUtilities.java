@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -26,7 +27,6 @@ import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /***
  * A class that allows you to perform different operations related to query
  * containment on conjunctive queries.
@@ -42,7 +42,7 @@ public class CQCUtilities {
 
 	private static QueryAnonymizer	anonymizer			= new QueryAnonymizer();
 
-	private static OBDADataFactory		termFactory			= OBDADataFactoryImpl.getInstance();
+	private static OBDADataFactory	termFactory			= OBDADataFactoryImpl.getInstance();
 
 	List<Atom>						canonicalbody		= null;
 
@@ -102,16 +102,20 @@ public class CQCUtilities {
 			Term term = headterms.get(i);
 			if (term instanceof Variable) {
 				Term substitution = null;
-				if (term instanceof VariableImpl) {
+				if (term instanceof Variable) {
 					substitution = currentMap.get(term);
 					if (substitution == null) {
-						ValueConstant newconstant = termFactory.getValueConstant("CAN" + term.getName() + constantcounter);
+						ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((Variable) term).getName() + constantcounter);
 						constantcounter += 1;
 						currentMap.put((Variable) term, newconstant);
 						substitution = newconstant;
 					}
-				} else {
-					ValueConstant newconstant = termFactory.getValueConstant("CAN" + term.getName() + constantcounter);
+				} else if (term instanceof ValueConstant) {
+					ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((ValueConstant) term).getValue() + constantcounter);
+					constantcounter += 1;
+					substitution = newconstant;
+				} else if (term instanceof URIConstant) {
+					ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((URIConstant) term).getURI() + constantcounter);
 					constantcounter += 1;
 					substitution = newconstant;
 				}
@@ -126,14 +130,16 @@ public class CQCUtilities {
 						if (fterm instanceof VariableImpl) {
 							substitution = currentMap.get(fterm);
 							if (substitution == null) {
-								ValueConstant newconstant = termFactory.getValueConstant("CAN" + fterm.getName() + constantcounter);
+								ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((VariableImpl) fterm).getName()
+										+ constantcounter);
 								constantcounter += 1;
 								currentMap.put((Variable) fterm, newconstant);
 								substitution = newconstant;
 
 							}
 						} else {
-							ValueConstant newconstant = termFactory.getValueConstant("CAN" + fterm.getName() + constantcounter);
+							ValueConstant newconstant = termFactory.getValueConstant("CAN" + ((ValueConstant) fterm).getValue()
+									+ constantcounter);
 							constantcounter += 1;
 							substitution = newconstant;
 						}
@@ -311,7 +317,7 @@ public class CQCUtilities {
 		int initialsize = queries.size();
 		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
 		long startime = System.currentTimeMillis();
-		
+
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
 			@Override
@@ -344,11 +350,10 @@ public class CQCUtilities {
 			}
 		}
 
-		
 		int newsize = queries.size();
 		int queriesremoved = initialsize - newsize;
 		long endtime = System.currentTimeMillis();
-		long time = (endtime - startime)/1000;
+		long time = (endtime - startime) / 1000;
 		log.debug("Done. Time elapse: {}s", time);
 		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
@@ -389,13 +394,11 @@ public class CQCUtilities {
 	 */
 	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
 
-		
 		int initialsize = queries.size();
 		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
-		
+
 		long startime = System.currentTimeMillis();
-		
-		
+
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
 			@Override
@@ -408,13 +411,13 @@ public class CQCUtilities {
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQCUtilities cqc = new CQCUtilities(queries.get(i));
-				for (int j = queries.size() - 1; j > i; j--) {
-					if (cqc.isContainedIn(queries.get(j))) {
-						queries.remove(i);
-						i -= 1;
-						break;
-					}
+			for (int j = queries.size() - 1; j > i; j--) {
+				if (cqc.isContainedIn(queries.get(j))) {
+					queries.remove(i);
+					i -= 1;
+					break;
 				}
+			}
 		}
 
 		if (twopasses) {
@@ -431,10 +434,9 @@ public class CQCUtilities {
 
 		int newsize = queries.size();
 		int queriesremoved = initialsize - newsize;
-		
-		
+
 		long endtime = System.currentTimeMillis();
-		long time = (endtime - startime)/1000;
+		long time = (endtime - startime) / 1000;
 		log.debug("Done. Time elapse: {}s", time);
 		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 

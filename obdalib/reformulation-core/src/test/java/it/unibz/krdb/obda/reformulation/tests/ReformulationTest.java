@@ -30,7 +30,7 @@ public class ReformulationTest extends TestCase {
             Set<String> res = tester.executeQuery(id);
             assertTrue(exp.size() == res.size());
             for (String realResult : res) {
-                assertTrue(exp.contains(realResult));
+                assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
             }
         }
 
@@ -42,7 +42,7 @@ public class ReformulationTest extends TestCase {
             Set<String> res = tester.executeQuery(id);
             assertTrue(exp.size() == res.size());
             for (String realResult : res) {
-                assertTrue(exp.contains(realResult));
+                assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(),exp.contains(realResult));
             }
         }
 //        log.debug("Testing in-memory db/SemanticIndex");

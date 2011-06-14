@@ -21,8 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-
-//TODO This class needs to be restructured
+// TODO This class needs to be restructured
 
 public class QueryAnonymizer {
 
@@ -109,7 +108,13 @@ public class QueryAnonymizer {
 	}
 
 	public CQIE anonymize(CQIE q) {
+
 		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
+
+		/*
+		 * Collecting all variables and the places where they appear (Atom and
+		 * position)
+		 */
 		List<Atom> body = q.getBody();
 		Iterator<Atom> it = body.iterator();
 		while (it.hasNext()) {
@@ -119,16 +124,16 @@ public class QueryAnonymizer {
 			Iterator<Term> term_it = terms.iterator();
 			while (term_it.hasNext()) {
 				Term t = term_it.next();
-				if (t instanceof Variable) {
+				if (t instanceof VariableImpl) {
 					Object[] obj = new Object[2];
 					obj[0] = atom;
 					obj[1] = pos;
-					List<Object[]> list = auxmap.get(t.getName());
+					List<Object[]> list = auxmap.get(((VariableImpl) t).getName());
 					if (list == null) {
 						list = new LinkedList<Object[]>();
 					}
 					list.add(obj);
-					auxmap.put(t.getName(), list);
+					auxmap.put(((VariableImpl) t).getName(), list);
 				}
 			}
 		}
@@ -142,7 +147,10 @@ public class QueryAnonymizer {
 			LinkedList<Term> vex = new LinkedList<Term>();
 			while (term_it.hasNext()) {
 				Term t = term_it.next();
-				List<Object[]> list = auxmap.get(t.getName());
+				List<Object[]> list = null;
+				if (t instanceof VariableImpl) {
+					list = auxmap.get(((VariableImpl) t).getName());
+				}
 				if (list != null && list.size() < 2 && !isVariableInHead(q, t)) {
 					vex.add(termFactory.getNondistinguishedVariable());
 				} else {
@@ -164,7 +172,7 @@ public class QueryAnonymizer {
 		List<Term> headterms = head.getTerms();
 		for (Term headterm : headterms) {
 			if (headterm instanceof FunctionalTermImpl) {
-				FunctionalTermImpl fterm = (FunctionalTermImpl)headterm;
+				FunctionalTermImpl fterm = (FunctionalTermImpl) headterm;
 				if (fterm.containsTerm(t))
 					return true;
 			} else if (headterm.equals(t))

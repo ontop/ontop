@@ -113,7 +113,7 @@ public class RDBMSMappingValidator extends MappingValidator {
 					Iterator para_it = para.iterator();
 					while (para_it.hasNext()){
 
-						Term p = (VariableImpl)para_it.next();
+						VariableImpl p = (VariableImpl)para_it.next();
 						String str = p.getName();
 						v.add(str);
 
@@ -139,7 +139,7 @@ public class RDBMSMappingValidator extends MappingValidator {
 						Iterator para_it = para.iterator();
 						while (para_it.hasNext()){
 
-							Term p = (VariableImpl)para_it.next();
+							VariableImpl p = (VariableImpl)para_it.next();
 							String str = p.getName();
 							v.add(str);
 

@@ -134,53 +134,45 @@
 
 		<!-- JDBC Drivers (to be removed soon) -->
 
-		<!--
-			These are temporarily required, soon we will use another mechanism
-			for declaring JDBC drivers and these dependencies will be removed.
-		-->
-
-<!--  
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.12</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc14</artifactId>
-			<version>10.2.0.1.0</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.4-701.jdbc4</version>
-			<scope>runtime</scope>
-		</dependency>
 		<dependency>
 			<groupId>com.ibm</groupId>
 			<artifactId>db2jcc_license</artifactId>
 			<version>1.3.1</version>
 			<scope>runtime</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.ibm</groupId>
-			<artifactId>db2jcc</artifactId>
-			<version>9.0</version>
-			<scope>runtime</scope>
-		</dependency> -->
+
+
+		<!--
+			These are temporarily required, soon we will use another mechanism
+			for declaring JDBC drivers and these dependencies will be removed.
+		-->
+
+		<!--
+			<dependency> <groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.12</version> <scope>runtime</scope> </dependency>
+			<dependency> <groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId> <version>10.2.0.1.0</version>
+			<scope>runtime</scope> </dependency> <dependency>
+			<groupId>postgresql</groupId> <artifactId>postgresql</artifactId>
+			<version>8.4-701.jdbc4</version> <scope>runtime</scope> </dependency>
+			<dependency> <groupId>com.ibm</groupId>
+			<artifactId>db2jcc_license</artifactId> <version>1.3.1</version>
+			<scope>runtime</scope> </dependency> <dependency>
+			<groupId>com.ibm</groupId> <artifactId>db2jcc</artifactId>
+			<version>9.0</version> <scope>runtime</scope> </dependency>
+		-->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<version>1.0.20070304</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>10.6.1.0</version>
-		</dependency> -->
+		<!--
+			<dependency> <groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId> <version>10.6.1.0</version>
+			</dependency>
+		-->
 
 		<!--
 			Note the use of "provided" scope. These are only used for compilation
@@ -299,7 +291,8 @@
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
 						<Bundle-Description>The OBDA-Plugin for Protege 4.0</Bundle-Description>
-						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research Centre</Bundle-Vendor>
+						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research
+							Centre</Bundle-Vendor>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.0.0</Bundle-Version>
@@ -318,7 +311,7 @@
 							lead to class not found exceptions. It's very important to assure
 							only the needed depdencies are imported.
 						-->
-						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*,org.protege.osgi.jdbc</Import-Package>
+						<Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.manchester.*,!*,org.protege.osgi.jdbc</Import-Package>
 
 						<!--
 							This makes sure all OBDA classes are exported and available in

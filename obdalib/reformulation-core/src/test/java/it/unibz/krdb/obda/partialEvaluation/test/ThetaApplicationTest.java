@@ -111,7 +111,7 @@ public class ThetaApplicationTest extends TestCase {
 		FunctionalTermImpl term5 = (FunctionalTermImpl) terms.get(4);
 
 		assertEquals("t", term1.getName());
-		assertEquals("elf", term3.getName());
+		assertEquals("elf", term3.getValue());
 
 		List<Term> para_t2 = term2.getTerms();
 		List<Term> para_t4 = term4.getTerms();
@@ -121,10 +121,10 @@ public class ThetaApplicationTest extends TestCase {
 		assertEquals(1, para_t4.size());
 		assertEquals(2, para_t5.size());
 
-		assertEquals("p", para_t2.get(0).getName());
-		assertEquals("t", para_t4.get(0).getName());
-		assertEquals("con", para_t5.get(0).getName());
-		assertEquals("st", para_t5.get(1).getName());
+		assertEquals("p", ((Variable) para_t2.get(0)).getName());
+		assertEquals("t", ((Variable) para_t4.get(0)).getName());
+		assertEquals("con", ((ValueConstant) para_t5.get(0)).getValue());
+		assertEquals("st", ((ValueConstant) para_t5.get(1)).getValue());
 
 	}
 

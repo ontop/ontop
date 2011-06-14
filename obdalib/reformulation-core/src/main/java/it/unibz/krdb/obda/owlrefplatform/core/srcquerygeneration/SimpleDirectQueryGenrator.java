@@ -2,12 +2,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.URIIdentyfier;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.URIType;
@@ -66,7 +65,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		Object tempdist = query.getQueryModifiers().get("distinct");
 		boolean distinct = false;
 		if (tempdist != null)
-			distinct = (Boolean)tempdist;
+			distinct = (Boolean) tempdist;
 
 		while (it.hasNext()) {
 			if (sb.length() > 0) {
@@ -80,10 +79,10 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			}
 			if (isDPBoolean(query)) {
 				sb.append("(");
-				sb.append(generateSourceQuery(it.next(),distinct && rules.size() == 1));
+				sb.append(generateSourceQuery(it.next(), distinct && rules.size() == 1));
 				sb.append(")");
 			} else {
-				sb.append(generateSourceQuery(it.next(),distinct && rules.size() == 1));
+				sb.append(generateSourceQuery(it.next(), distinct && rules.size() == 1));
 			}
 		}
 		String output = sb.toString();
@@ -116,7 +115,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			sb.append(" WHERE ");
 			sb.append(wc);
 		}
-		
+
 		if (QueryUtils.isBoolean(query)) {
 			sb.append(" LIMIT 1");
 		}
@@ -147,7 +146,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 				}
 				Term t = it.next();
 				if (t instanceof VariableImpl) {
-					List<Object[]> list = termMap.get(t.getName());
+					List<Object[]> list = termMap.get(((VariableImpl) t).getName());
 					if (list != null && list.size() > 0) {
 						Object[] obj = list.get(0);
 						String table = aliasMapper.get(((Atom) obj[0]));
@@ -157,13 +156,13 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 						aux.append(".");
 						aux.append(column);
 						aux.append(" as ");
-						aux.append(t.getName());
+						aux.append(((VariableImpl) t).getName());
 						sb.append(aux.toString());
 					}
 				} else if (t instanceof URIConstant) {
 					URIConstant uriterm = (URIConstant) t;
 					sb.append("'");
-					sb.append(uriterm.getName().trim());
+					sb.append(uriterm.getURI().toString().trim());
 					sb.append("' as auxvar");
 					sb.append(variableCounter);
 					variableCounter += 1;
@@ -294,29 +293,38 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			Iterator<Term> term_it = terms.iterator();
 			while (term_it.hasNext()) {
 				Term t = term_it.next();
-				if (t instanceof Variable) {
-					if (!(t instanceof UndistinguishedVariable)) {
-						Object[] obj = new Object[2];
-						obj[0] = atom;
-						obj[1] = pos;
-						List<Object[]> list = termMap.get(t.getName());
-						if (list == null) {
-							list = new Vector<Object[]>();
-						}
-						list.add(obj);
-						termMap.put(t.getName(), list);
-					}
-				} else if (t instanceof Constant) {
+				if (t instanceof VariableImpl) {
 					Object[] obj = new Object[2];
 					obj[0] = atom;
 					obj[1] = pos;
-					List<Object[]> list = constMap.get(t.getName());
+					List<Object[]> list = termMap.get(((VariableImpl) t).getName());
 					if (list == null) {
 						list = new Vector<Object[]>();
 					}
 					list.add(obj);
-					constMap.put(t.getName(), list);
-				}
+					termMap.put(((VariableImpl) t).getName(), list);
+
+				} else if (t instanceof ValueConstant) {
+					Object[] obj = new Object[2];
+					obj[0] = atom;
+					obj[1] = pos;
+					List<Object[]> list = constMap.get(((ValueConstant) t).getValue());
+					if (list == null) {
+						list = new Vector<Object[]>();
+					}
+					list.add(obj);
+					constMap.put(((ValueConstant) t).getValue(), list);
+				} else if (t instanceof URIConstant) {
+					Object[] obj = new Object[2];
+					obj[0] = atom;
+					obj[1] = pos;
+					List<Object[]> list = constMap.get(((URIConstant) t).getURI().toString());
+					if (list == null) {
+						list = new Vector<Object[]>();
+					}
+					list.add(obj);
+					constMap.put(((URIConstant) t).getURI().toString(), list);
+				} 
 				pos++;
 			}
 		}

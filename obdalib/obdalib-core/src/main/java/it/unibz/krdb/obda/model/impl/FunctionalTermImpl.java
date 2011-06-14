@@ -59,12 +59,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 		return identifier;
 	}
 
-	//TODO FunctionalTerm: getName doesn't make sense in this class
-	@Override
-	public String getName() {
-		return functor.getName().toString();
-	}
-
 	@Override
 	public Predicate getFunctionSymbol() {
 		return functor;
@@ -100,7 +94,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 			if (sb_t.length() > 0) {
 				sb_t.append(",");
 			}
-			sb_t.append(terms.get(i).getName());
+			sb_t.append(terms.get(i).toString());
 		}
 		StringBuffer sb_name = new StringBuffer();
 		sb_name.append(this.functor.getName());

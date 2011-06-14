@@ -82,21 +82,21 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 			}
 			if (t instanceof FunctionalTermImpl) {
 				FunctionalTermImpl f = (FunctionalTermImpl)t;
-				atomString.append(pm.getShortForm(f.getName()));
+				atomString.append(pm.getShortForm(f.getFunctionSymbol().toString()));
 				Iterator<Term> innerterms = f.getTerms().iterator();
 				while (innerterms.hasNext()) {
-					atomvar.append(innerterms.next().getName());
+					atomvar.append(innerterms.next().toString());
 					if (innerterms.hasNext())
 						atomvar.append(",");
 				}
 			} else if (t instanceof Variable){
 				atomvar.append("?");
-				atomvar.append(t.getName());
+				atomvar.append(((Variable)t).getName());
 			} else if (t instanceof ValueConstant){
 				atomvar.append("'");
-				atomvar.append(t.getName());
+				atomvar.append(((ValueConstant)t).getValue());
 			} else {
-				atomvar.append(t.getName());
+				throw new RuntimeException("invalid term found in atom.");
 			}
 			
 		}

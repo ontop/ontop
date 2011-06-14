@@ -223,14 +223,15 @@ public class QueryPainter {
 						if (t instanceof FunctionalTermImpl) {
 
 							FunctionalTermImpl f = (FunctionalTermImpl) t;
-							String function = man.getShortForm(f.getName());
+							String function = man.getShortForm(f.getFunctionSymbol().toString());
 
 							List<Term> para = f.getTerms();
 							Iterator<Term> para_it = para.iterator();
 							while (para_it.hasNext()) {
 
 								Term p = para_it.next();
-								String str = "$" + p.getName();
+								//TODO NOT SAFE!
+								String str = "$" + p.toString();
 								ColorTask task2 = new ColorTask(str, variable);
 								tasks.add(task2);
 							}
@@ -262,7 +263,7 @@ public class QueryPainter {
 							Iterator para_it = para.iterator();
 							while (para_it.hasNext()) {
 
-								Term p = (VariableImpl) para_it.next();
+								VariableImpl p = (VariableImpl) para_it.next();
 								String str = "$" + p.getName();
 
 								ColorTask task2 = new ColorTask(str, variable);
@@ -283,13 +284,13 @@ public class QueryPainter {
 						if (terms.get(1) instanceof FunctionalTermImpl) {
 
 							FunctionalTermImpl f = (FunctionalTermImpl) terms.get(1);
-							String function = man.getShortForm(f.getName());
+							String function = man.getShortForm(f.getFunctionSymbol().toString());
 							//
 							List<Term> para = f.getTerms();
 							Iterator<Term> para_it = para.iterator();
 							while (para_it.hasNext()) {
 
-								Term p = para_it.next();
+								VariableImpl p = (VariableImpl)para_it.next();
 								String str = "$" + p.getName();
 
 								ColorTask task2 = new ColorTask(str, variable);
@@ -312,7 +313,7 @@ public class QueryPainter {
 
 						}
 					} else {
-						// TODO Throw an exception.
+						throw new RuntimeException("Unexpected parameter");
 					}
 				}
 

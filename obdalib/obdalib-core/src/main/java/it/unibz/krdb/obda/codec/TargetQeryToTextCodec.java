@@ -103,7 +103,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 					}
 					if (qt instanceof FunctionalTermImpl) {
 						FunctionalTermImpl ft = (FunctionalTermImpl) qt;
-						String fname = man.getShortForm(ft.getName());
+						String fname = man.getShortForm(ft.getFunctionSymbol().toString());
 						term_sb.append(fname);
 						term_sb.append("(");
 						List<Term> t_list2 = ft.getTerms();
@@ -114,14 +114,14 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 								para.append(",");
 							}
 							Term qt2 = tit2.next();
-							String n = qt2.getName();
+							String n = qt2.toString();
 							para.append("$" + n);
 						}
 						term_sb.append(para);
 						term_sb.append(")");
 					} else {
 						term_sb.append("$");
-						term_sb.append(qt.getName());
+						term_sb.append(qt.toString());
 					}
 				}
 				sb.append(term_sb);

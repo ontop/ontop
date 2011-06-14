@@ -54,7 +54,7 @@ public class MappingFunctorTreeModelFilter implements
 
 				if (term instanceof FunctionalTermImpl) {
 					FunctionalTermImpl functionTerm = (FunctionalTermImpl) term;
-					if(functionTerm.getName().indexOf(strMappingFunctor)!= -1)
+					if(functionTerm.getFunctionSymbol().toString().indexOf(strMappingFunctor)!= -1)
 					{
 						filterValue = true;
 					}

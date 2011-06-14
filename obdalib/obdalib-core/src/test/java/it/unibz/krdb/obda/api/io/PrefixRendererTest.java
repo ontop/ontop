@@ -68,7 +68,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("Person"));
 
 		name = pm
-				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("person-individual"));
 
 		pm.setDefaultNamespace("http://obda.org/predicates#");
@@ -79,7 +79,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("http://obda.org/onto.owl#Person"));
 
 		name = pm
-				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/onto.owl#person-individual"));
 	}
 
@@ -97,7 +97,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("Person"));
 
 		name = pm
-				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("person-individual"));
 
 		pm.setDefaultNamespace("http://obda.org/predicates#");
@@ -109,7 +109,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("onto:Person"));
 
 		name = pm
-				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getName().toString(), true);
+				.getShortForm(((FunctionalTermImpl) query.getRules().get(0).getBody().get(0).getTerms().get(0)).getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("onto:person-individual"));
 
 	}

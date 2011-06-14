@@ -2,15 +2,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.SQLQuery;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -104,26 +104,26 @@ public class MappingViewManager implements ViewManager {
 					Iterator<Term> tit = terms.iterator();
 					while (tit.hasNext()) {
 						Term t = tit.next();
-						if (t instanceof FunctionalTermImpl) {
-							FunctionalTermImpl ft = (FunctionalTermImpl) t;
+						if (t instanceof Function) {
+							Function ft = (Function) t;
 							List<Term> para = ft.getTerms();
 							Iterator<Term> pit = para.iterator();
 							while (pit.hasNext()) {
 								Term qt = pit.next();
-								if (qt instanceof VariableImpl) {
-									if (!sqlVars.contains(qt.getName())) {
-										sqlVars.add(qt.getName());
+								if (qt instanceof Variable) {
+									if (!sqlVars.contains(((Variable) qt).getName())) {
+										sqlVars.add(((Variable) qt).getName());
 									}
 								} else {
-									throw new Exception("Function terms can only have variables as parameter!");
+									throw new Exception("Function terms can only have variables as parameter.");
 								}
 							}
-						} else if (t instanceof VariableImpl) {
-							if (!sqlVars.contains(t.getName())) {
-								sqlVars.add(t.getName());
+						} else if (t instanceof Variable) {
+							if (!sqlVars.contains(((Variable) t).getName())) {
+								sqlVars.add(((Variable) t).getName());
 							}
 						} else {
-							throw new Exception("Mappings cannot contain constants!");
+							throw new Exception("Mappings cannot contain constants.");
 						}
 					}
 

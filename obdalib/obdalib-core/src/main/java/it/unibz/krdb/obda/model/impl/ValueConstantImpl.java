@@ -4,37 +4,38 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-
 public class ValueConstantImpl implements ValueConstant {
 
-	private String value = null;
-	private XSDatatype type = null;
-	private int identifier = -1;
+	private String		value		= null;
+	private XSDatatype	type		= null;
+	private int			identifier	= -1;
 
 	/**
 	 * The default constructor.
-	 *
-	 * @param value the constant value.
-	 * @param type the constant type.
+	 * 
+	 * @param value
+	 *            the constant value.
+	 * @param type
+	 *            the constant type.
 	 */
-	protected ValueConstantImpl(String value, XSDatatype type){
+	protected ValueConstantImpl(String value, XSDatatype type) {
 		this.value = value;
 		this.type = type;
 		this.identifier = value.hashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj){
+	public boolean equals(Object obj) {
 
-		 if(obj == null || !(obj instanceof ValueConstantImpl))
-			 return false;
+		if (obj == null || !(obj instanceof ValueConstantImpl))
+			return false;
 
-		 ValueConstantImpl value2 = (ValueConstantImpl) obj;
-		 return this.identifier == value2.identifier;
-	 }
+		ValueConstantImpl value2 = (ValueConstantImpl) obj;
+		return this.identifier == value2.identifier;
+	}
 
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return identifier;
 	}
 
@@ -44,7 +45,7 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public String getName() {
+	public String getValue() {
 		return value;
 	}
 
@@ -56,6 +57,6 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public String toString() {
 		// TODO add the data type support
-		return "\"" + getName().toString() + "\"";
+		return "\"" + getValue().toString() + "\"";
 	}
 }

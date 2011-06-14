@@ -330,7 +330,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof ValueConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((ValueConstantImpl)term).getName(), "Person");
+				((ValueConstantImpl)term).getValue(), "Person");
 
 		//---- Body atom #2
 		uri = body.get(1).getPredicate().getName().toString();
@@ -346,7 +346,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
 		assertEquals("Mismatch variable name!",
-				((FunctionalTermImpl)term).getName(),
+				((FunctionalTermImpl)term).getFunctionSymbol().toString(),
 				"http://base.org/stuff/1.0/s");
 
 		//------ Object term
@@ -364,14 +364,14 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((ValueConstantImpl)objVarTerm).getName(), "Student");
+				((ValueConstantImpl)objVarTerm).getValue(), "Student");
 		//------ Object term ends.
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
 				term instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)term).getName(),
+				((URIConstantImpl)term).getURI().toString(),
 				"http://example.org/stuff/1.1/FUB");
 	}
 
@@ -439,7 +439,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof ValueConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((ValueConstantImpl)term).getName(), "Person");
+				((ValueConstantImpl)term).getValue(), "Person");
 
 		//----------//
 		// Rule #2  //
@@ -490,7 +490,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)term).getName(),
+				((URIConstantImpl)term).getURI().toString(),
 				"http://example.org/stuff/1.1/FUB");
 
 		//----------//
@@ -542,7 +542,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
 		assertEquals("Mismatch variable name!",
-				((FunctionalTermImpl)term).getName(),
+				((FunctionalTermImpl)term).getFunctionSymbol().toString(),
 				"http://base.org/stuff/1.0/f");
 
 		//------- Object term
@@ -554,14 +554,14 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)objVarTerm).getName(),
+				((URIConstantImpl)objVarTerm).getURI().toString(),
 				"http://example.org/stuff/1.2/Occupation");
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((ValueConstantImpl)objVarTerm).getName(), "Student");
+				((ValueConstantImpl)objVarTerm).getValue(), "Student");
 	}
 
 	/**
@@ -626,7 +626,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
 		assertEquals("Mismatch variable name!",
-				((FunctionalTermImpl)term).getName(),
+				((FunctionalTermImpl)term).getFunctionSymbol().toString(),
 				"http://example.org/stuff/1.0/r");
 
 		//------ Object term I1
@@ -638,14 +638,14 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)objVarTerm).getName(),
+				((URIConstantImpl)objVarTerm).getURI().toString(),
 				"http://example.org/stuff/1.1/FUB");
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof FunctionalTermImpl);
 		assertEquals("Mismatch variable name!",
-				((FunctionalTermImpl)objVarTerm).getName(),
+				((FunctionalTermImpl)objVarTerm).getFunctionSymbol().toString(),
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term I2
@@ -657,14 +657,14 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)objVarTerm).getName(),
+				((URIConstantImpl)objVarTerm).getURI().toString(),
 				"http://example.org/stuff/1.2/Occupation");
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof FunctionalTermImpl);
 		assertEquals("Mismatch variable name!",
-				((FunctionalTermImpl)objVarTerm).getName(),
+				((FunctionalTermImpl)objVarTerm).getFunctionSymbol().toString(),
 				"http://example.org/stuff/1.0/t");
 
 		//------ Object term I3
@@ -676,14 +676,14 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)objVarTerm).getName(),
+				((URIConstantImpl)objVarTerm).getURI().toString(),
 				"http://example.org/stuff/1.3/Degree");
 
 		objVarTerm = objVarTerms.get(1);
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((ValueConstantImpl)objVarTerm).getName(),
+				((ValueConstantImpl)objVarTerm).getValue(),
 				"Master");
 	}
 
@@ -1082,7 +1082,7 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				term instanceof FunctionalTermImpl);
 		assertEquals("Mismatch variable name!",
-				((FunctionalTermImpl)term).getName(),
+				((FunctionalTermImpl)term).getFunctionSymbol().toString(),
 				"http://example.org/stuff/1.0/s");
 
 		//------ Object term
@@ -1100,14 +1100,14 @@ public class DatalogParserTest {
 		assertTrue("Mismatch term type!",
 				objVarTerm instanceof ValueConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((ValueConstantImpl)objVarTerm).getName(), "Student");
+				((ValueConstantImpl)objVarTerm).getValue(), "Student");
 		//------ Object term ends.
 
 		term = terms.get(1);
 		assertTrue("Mismatch term type!",
 				term instanceof URIConstantImpl);
 		assertEquals("Mismatch variable name!",
-				((URIConstantImpl)term).getName(),
+				((URIConstantImpl)term).getURI().toString(),
 				"http://example.org/stuff/1.1/FUB");
 	}
 }

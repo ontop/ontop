@@ -7,7 +7,7 @@ package it.unibz.krdb.obda.model;
  * combined. In this scenario, term means the subject (or sometimes can be
  * the object) of a preposition.
  */
-public interface Term {
+public interface Term extends Expr {
 
 	/**
 	 * Duplicate the object by performing a deep cloning.
@@ -16,17 +16,11 @@ public interface Term {
 	 */
 	public Term copy();
 
-	/**
-	 * Get the name of the term object.
-	 *
-	 * @return a string name.
-	 */
-	public String getName();
+//	/**
+//	 * Get the name of the term object.
+//	 *
+//	 * @return a string name.
+//	 */
+//	public String getName();
 
-	/**
-	 * Get the string representation of the term object.
-	 *
-	 * @return a string text.
-	 */
-	public String toString();
 }

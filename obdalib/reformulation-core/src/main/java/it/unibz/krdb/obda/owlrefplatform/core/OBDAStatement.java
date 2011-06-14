@@ -150,7 +150,7 @@ public class OBDAStatement implements Statement {
 		List<String> signature = new LinkedList<String>();
 		for (Term term : program.getRules().get(0).getHead().getTerms()) {
 			if (term instanceof Variable) {
-				signature.add(term.getName());
+				signature.add(((Variable)term).getName());
 			} else {
 				throw new Exception("Only variables are allowed in the head of queries");
 			}

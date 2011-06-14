@@ -90,8 +90,8 @@ public class ThetaGenerationTest extends TestCase {
 			Term t = s0.getTerm();
 			Term v = s0.getVariable();
 
-			assertEquals("y", t.getName());
-			assertEquals("x", v.getName());
+			assertEquals("y", ((Variable) t).getName());
+			assertEquals("x", ((Variable) v).getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 			assertEquals(false, true);
@@ -101,7 +101,7 @@ public class ThetaGenerationTest extends TestCase {
 	//A(x),A('y')
 	public void test_3(){
 
-		try {
+		
 			Term t1 = termFactory.getVariable("x");
 			Term t2 = termFactory.getValueConstant("y");
 
@@ -123,12 +123,9 @@ public class ThetaGenerationTest extends TestCase {
 			ValueConstant t = (ValueConstant) s0.getTerm();
 			Term v = s0.getVariable();
 
-			assertEquals("y", t.getName());
-			assertEquals("x", v.getName());
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
+			assertEquals("y", t.getValue());
+			assertEquals("x", ((Variable) v).getName());
+		
 	}
 
 		//A(x),A('p(y)')
@@ -170,7 +167,6 @@ public class ThetaGenerationTest extends TestCase {
 	//A('y'),A(x)
 	public void test_5(){
 
-		try {
 			Term t2 = termFactory.getVariable("x");
 			Term t1 = termFactory.getValueConstant("y");
 
@@ -192,18 +188,14 @@ public class ThetaGenerationTest extends TestCase {
 			ValueConstant t = (ValueConstant) s0.getTerm();
 			Term v = s0.getVariable();
 
-			assertEquals("y", t.getName());
-			assertEquals("x", v.getName());
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
+			assertEquals(t + " y", "y", ((ValueConstant) t).getValue());
+			assertEquals(t + " x", "x", ((Variable) v).getName());
 	}
 
 	//A('y'),A('y')
 	public void test_6(){
 
-		try {
+
 			Term t2 = termFactory.getValueConstant("y");
 			Term t1 = termFactory.getValueConstant("y");
 
@@ -220,10 +212,7 @@ public class ThetaGenerationTest extends TestCase {
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(false, true);
-		}
+		
 	}
 
 	//A('y'),A('p(x)')
@@ -367,9 +356,9 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 
-		assertEquals("y", var.getName());
+		assertEquals("y", ((Variable) var).getName());
 		assertEquals(1, para.size());
-		assertEquals("x", para.get(0).getName());
+		assertEquals("x", ((Variable) para.get(0)).getName());
 
 	}
 
@@ -463,8 +452,8 @@ public class ThetaGenerationTest extends TestCase {
 		Term term = sub.getTerm();
 		Term var = sub.getVariable();
 
-		assertEquals("y", term.getName());
-		assertEquals("x", var.getName());
+		assertEquals("y", ((Variable) term).getName());
+		assertEquals("x", ((Variable) var).getName());
 	}
 
 	//A(p(x)), A(p(y,z))
@@ -530,8 +519,8 @@ public class ThetaGenerationTest extends TestCase {
 		ValueConstant term = (ValueConstant) sub.getTerm();
 		Term var = sub.getVariable();
 
-		assertEquals("123", term.getName());
-		assertEquals("x", var.getName());
+		assertEquals("123", term.getValue());
+		assertEquals("x", ((Variable) var).getName());
 	}
 
 	//A(p(x)), A(p('123',z))
@@ -681,9 +670,9 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> para = term.getTerms();
 		Term var = sub.getVariable();
 
-		assertEquals("y", var.getName());
+		assertEquals("y", ((Variable) var).getName());
 		assertEquals(1, para.size());
-		assertEquals("x", para.get(0).getName());
+		assertEquals("x", ((Variable) para.get(0)).getName());
 
 	}
 
@@ -748,8 +737,8 @@ public class ThetaGenerationTest extends TestCase {
 		Term term = sub.getTerm();
 		Term var = sub.getVariable();
 
-		assertEquals("x", term.getName());
-		assertEquals("y", var.getName());
+		assertEquals("x", ((Variable) term).getName());
+		assertEquals("y", ((Variable) var).getName());
 	}
 
 	// A(p(y,z)), A(p(x))
@@ -815,8 +804,8 @@ public class ThetaGenerationTest extends TestCase {
 		ValueConstant term = (ValueConstant) sub.getTerm();
 		Term var = sub.getVariable();
 
-		assertEquals("123", term.getName());
-		assertEquals("x", var.getName());
+		assertEquals("123", term.getValue());
+		assertEquals("x", ((Variable) var).getName());
 	}
 
 	//A(p('123',z)),A(p(x))

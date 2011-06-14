@@ -7,6 +7,7 @@ import com.sun.msv.datatype.xsd.XSDatatype;
  */
 public interface ValueConstant extends Constant {
 
+	public String getValue();
 	/**
 	 * Get the data type of the constant.
 	 *

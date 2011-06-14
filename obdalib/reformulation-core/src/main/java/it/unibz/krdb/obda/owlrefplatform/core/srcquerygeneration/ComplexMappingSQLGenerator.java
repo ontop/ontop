@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -18,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.ViewManager;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -45,7 +47,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
 	public ComplexMappingSQLGenerator(MappingViewManager man, JDBCUtility util) {
 		viewManager = man;
-		
+
 		this.util = util;
 	}
 
@@ -96,12 +98,12 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					o[0] = a;
 					o[1] = i;
 					i++;
-					List<Object[]> aux = termoccurenceIndex.get(t.getName());
+					List<Object[]> aux = termoccurenceIndex.get(((VariableImpl) t).getName());
 					if (aux == null) {
-						aux = new Vector<Object[]>();
+						aux = new LinkedList<Object[]>();
 					}
 					aux.add(o);
-					termoccurenceIndex.put(t.getName(), aux);
+					termoccurenceIndex.put(((VariableImpl) t).getName(), aux);
 				} else if (t instanceof FunctionalTermImpl) {
 					FunctionalTermImpl ov = (FunctionalTermImpl) t;
 					List<Term> vars = ov.getTerms();
@@ -112,24 +114,35 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 						o[0] = a;
 						o[1] = i;
 						i++;
-						List<Object[]> aux = termoccurenceIndex.get(v.getName());
+						List<Object[]> aux = termoccurenceIndex.get(((Variable) v).getName());
 						if (aux == null) {
 							aux = new Vector<Object[]>();
 						}
 						aux.add(o);
-						termoccurenceIndex.put(v.getName(), aux);
+						termoccurenceIndex.put(((Variable) v).getName(), aux);
 					}
-				} else if (t instanceof Constant) {
+				} else if (t instanceof ValueConstant) {
 					Object[] o = new Object[2];
 					o[0] = a;
 					o[1] = i;
 					i++;
-					List<Object[]> aux = constantoccurenceIndex.get(t.getName());
+					List<Object[]> aux = constantoccurenceIndex.get(((ValueConstant) t).getValue());
 					if (aux == null) {
 						aux = new Vector<Object[]>();
 					}
 					aux.add(o);
-					constantoccurenceIndex.put(t.getName(), aux);
+					constantoccurenceIndex.put(((ValueConstant) t).getValue(), aux);
+				} else if (t instanceof URIConstant) {
+					Object[] o = new Object[2];
+					o[0] = a;
+					o[1] = i;
+					i++;
+					List<Object[]> aux = constantoccurenceIndex.get(((URIConstant) t).getURI().toString());
+					if (aux == null) {
+						aux = new Vector<Object[]>();
+					}
+					aux.add(o);
+					constantoccurenceIndex.put(((URIConstant) t).getURI().toString(), aux);
 				}
 			}
 		}
@@ -139,24 +152,24 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception {
 		log.info("Generating source query");
 		List<CQIE> queries = query.getRules();
-		
-		if (queries.size() < 1) 
+
+		if (queries.size() < 1)
 			return "";
 		Iterator<CQIE> it = queries.iterator();
-		
+
 		sqlqueries = new Vector<String>();
-		
+
 		Object tempdist = query.getQueryModifiers().get("distinct");
 		boolean distinct = false;
 		if (tempdist != null)
-			distinct = (Boolean)tempdist;		
-		
+			distinct = (Boolean) tempdist;
+
 		StringBuilder finalquery = new StringBuilder();
 		while (it.hasNext()) {
 			CQIE q = it.next();
 			prepareIndex(q);
 			String from = getFromClause(q);
-			String select = getSelectClause(q,signature);
+			String select = getSelectClause(q, signature);
 			String where = getWhereClause(q);
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -190,11 +203,12 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		return result;
 	}
 
-//	@Override
-//	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	// @Override
+	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
+	// uris) {
+	// // TODO Auto-generated method stub
+	//
+	// }
 
 	/**
 	 * produces the from clause of the sql query for the given CQIE
@@ -250,8 +264,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			while (term_it.hasNext()) {
 				Term term = term_it.next();
 				if (term instanceof VariableImpl) {
-					if (!processedTerms.contains(term.getName())) {
-						List<Object[]> list = termoccurenceIndex.get(term.getName());
+					if (!processedTerms.contains(((VariableImpl) term).getName())) {
+						List<Object[]> list = termoccurenceIndex.get(((VariableImpl) term).getName());
 						if (list == null) {
 							throw new Exception("Unknown term in body");
 						}
@@ -286,8 +300,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 									FunctionalTermImpl ov2 = (FunctionalTermImpl) term_N;
 									if (ov1.getTerms().size() == ov2.getTerms().size()) {
 										for (int j = 0; j < ov1.getTerms().size(); j++) {
-//											Term t0 = ov1.getTerms().get(j);
-//											Term tn = ov2.getTerms().get(j);
+											// Term t0 = ov1.getTerms().get(j);
+											// Term tn = ov2.getTerms().get(j);
 											String sqlVar_0 = map.getSQLVariableAt(pos_0);
 											String sqlVar_N = map_N.getSQLVariableAt(pos_N);
 											StringBuilder equ = new StringBuilder();
@@ -320,7 +334,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					equ.append(".");
 					equ.append(sqlVar);
 					equ.append("='");
-					equ.append(ct.getName());
+					equ.append(((ValueConstant) ct).getValue());
 					equ.append("'");
 					equalities.add(equ.toString());
 				} else if (term instanceof URIConstant) {
@@ -342,8 +356,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					Iterator<Term> vit = vars.iterator();
 					while (vit.hasNext()) {
 						Term v = vit.next();
-						if (!processedTerms.contains(v.getName())) {
-							List<Object[]> list = termoccurenceIndex.get(v.getName());
+						if (!processedTerms.contains(((Variable) v).getName())) {
+							List<Object[]> list = termoccurenceIndex.get(((Variable) v).getName());
 							if (list == null) {
 								throw new Exception("Unknown term in body");
 							}
@@ -378,8 +392,10 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 										FunctionalTermImpl ov2 = (FunctionalTermImpl) term_N;
 										if (ov1.getTerms().size() == ov2.getTerms().size()) {
 											for (int j = 0; j < ov1.getTerms().size(); j++) {
-//												Term t0 = ov1.getTerms().get(j);
-//												Term tn = ov2.getTerms().get(j);
+												// Term t0 =
+												// ov1.getTerms().get(j);
+												// Term tn =
+												// ov2.getTerms().get(j);
 												String sqlVar_0 = map.getSQLVariableAt(pos_0);
 												String sqlVar_N = map_N.getSQLVariableAt(pos_N);
 												StringBuilder equ = new StringBuilder();
@@ -434,7 +450,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	 *            the query
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(CQIE q,List<String> signature) throws Exception {
+	private String getSelectClause(CQIE q, List<String> signature) throws Exception {
 		Atom head = q.getHead();
 		List<Term> headterms = head.getTerms();
 		StringBuilder sb = new StringBuilder();
@@ -448,14 +464,15 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 				}
 
 				if (ht instanceof VariableImpl) {
-					List<Object[]> list = termoccurenceIndex.get(ht.getName());
+					List<Object[]> list = termoccurenceIndex.get(((VariableImpl) ht).getName());
 					if (list == null) {
 						throw new Exception("Unknown term in head");
 					}
 					Object[] o = list.get(0);
 					Atom a = (Atom) o[0];
 					Integer pos = (Integer) o[1];
-//					String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
+					// String sql =
+					// viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
 					String alias = localAliasMap.get(a.hashCode());
 					AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
 					String sqlvar = map.getSQLVariableAt(pos);
@@ -468,21 +485,22 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					// TODO ComplexMappingSQLGenerator: This code is probably
 					// wrong, we need unit test to check it
 					FunctionalTermImpl ov = (FunctionalTermImpl) ht;
-					String name = ov.getName();
+					String name = ov.getFunctionSymbol().toString();
 					List<Term> terms = ov.getTerms();
 					Iterator<Term> it = terms.iterator();
 					Vector<String> vex = new Vector<String>();
 					while (it.hasNext()) {
 						Term v = it.next();
 						if (v instanceof VariableImpl) {
-							List<Object[]> list = termoccurenceIndex.get(v.getName());
+							List<Object[]> list = termoccurenceIndex.get(((VariableImpl) v).getName());
 							if (list == null) {
 								throw new Exception("Unknown term in head:" + v + " The query was: " + q);
 							}
 							Object[] o = list.get(0);
 							Atom a = (Atom) o[0];
 							Integer pos = (Integer) o[1];
-//							String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
+							// String sql =
+							// viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
 							String alias = localAliasMap.get(a.hashCode());
 							AuxSQLMapping map = viewManager.getAuxSQLMapping(a.getPredicate().getName());
 							String sqlvar = map.getSQLVariableAt(pos);
@@ -494,24 +512,36 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							var.append(".");
 							var.append(sqlvar);
 							vex.add(var.toString());
-						} else {
+						} else if (v instanceof ValueConstant) {
 							StringBuilder var = new StringBuilder();
-							var.append("'" + v.getName() + "'");
+							var.append("'" + ((ValueConstant) v).getValue() + "'");
 							vex.add(var.toString());
+						} else if (v instanceof URIConstant) {
+							StringBuilder var = new StringBuilder();
+							var.append("'" + ((URIConstant) v).getURI().toString() + "'");
+							vex.add(var.toString());
+						} else {
+							throw new RuntimeException("Invalid term in the head");
 						}
 					}
 					String concat = util.getConcatination(name, vex);
 					sb.append(concat);
 					sb.append(" as ");
-					sb.append(viewManager.getOrgHeadVariableName(hpos,signature));
+					sb.append(viewManager.getOrgHeadVariableName(hpos, signature));
 
-				} else {
+				} else if (ht instanceof ValueConstant) {
 					sb.append("'");
-					sb.append(ht.getName());
+					sb.append(((ValueConstant) ht).getValue());
 					sb.append("'");
 					sb.append(" as ");
-					sb.append(viewManager.getOrgHeadVariableName(hpos,signature));
-				}
+					sb.append(viewManager.getOrgHeadVariableName(hpos, signature));
+				} else if (ht instanceof URIConstant) {
+					sb.append("'");
+					sb.append(((URIConstant) ht).getURI().toString());
+					sb.append("'");
+					sb.append(" as ");
+					sb.append(viewManager.getOrgHeadVariableName(hpos, signature));
+				} 
 
 				if (hit.hasNext()) {
 					sb.append(", ");

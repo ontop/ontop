@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -24,6 +25,7 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +84,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		resolutionEngine = new ResolutionEngine();
 		functTermMap = new HashMap<String, Function>();
 
-		splitMappings = new HashSet<OBDAMappingAxiom>();
+		splitMappings = new LinkedHashSet<OBDAMappingAxiom>();
 		// mappingsIndex = new HashMap<String, LinkedList<OBDAMappingAxiom>>();
 
 		Iterator<OBDAMappingAxiom> mappingsIterator = mappings.iterator();
@@ -101,8 +103,9 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				List<Atom> newBody = new LinkedList<Atom>();
 				newBody.add(atom);
 				CQIE newCQ = termFactory.getCQIE(head, newBody);
-				RDBMSMappingAxiom newMap = termFactory.getRDBMSMappingAxiom(map.getId() + "_" + counter,map.getSourceQuery(),newCQ);
-				splitMappings.add(newMap);
+				RDBMSMappingAxiom newMap = termFactory.getRDBMSMappingAxiom(map.getId() + "_" + counter, map.getSourceQuery(), newCQ);
+				if (!splitMappings.contains(newMap))
+					splitMappings.add(newMap);
 			}
 		}
 
@@ -145,7 +148,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		this.compilationOfM = compilationOfM;
 
 	}
-	
+
 	public DatalogProgram getCompilationOfMappings() {
 		return compilationOfM;
 	}
@@ -160,8 +163,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	 * 
 	 * C(p(aux_1) :- Aux(aux_1, aux_2)
 	 * 
-	 * Where Aux is the auxiliary predicate assocaited to the view for the SQL
-	 * query sql1.
+	 * Where Aux is the binary auxiliary predicate assocaited to the view for
+	 * the SQL query sql1.
 	 * 
 	 * @param mapping
 	 * @return
@@ -199,16 +202,16 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				LinkedList<Term> funvec = new LinkedList<Term>();
 				while (innerTermsIterator.hasNext()) {
 					Term v = innerTermsIterator.next();
-					int pos = auxmap.getPosOf(v.getName());
-					Term t = termFactory.getVariable(ruleBodyAtom.getTerms().get(pos).getName());
+					int pos = auxmap.getPosOf(((Variable) v).getName());
+					Term t = termFactory.getVariable(((Variable) ruleBodyAtom.getTerms().get(pos)).getName());
 					funvec.add(t);
 				}
 				Term t = termFactory.getFunctionalTerm(ft.getFunctionSymbol(), funvec);
 				headTerms.add(t);
 			} else {
-				String n = currentTerm.getName();
+				String n = ((Variable) currentTerm).getName();
 				int pos = auxmap.getPosOf(n);
-				Term t = termFactory.getVariable(ruleBodyAtom.getTerms().get(pos).getName());
+				Term t = termFactory.getVariable(((Variable) ruleBodyAtom.getTerms().get(pos)).getName());
 				headTerms.add(t);
 			}
 		}
@@ -351,14 +354,13 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				for (int j = 0; j < innerTerms.size(); j++) {
 					Term innerTerm = innerTerms.get(j);
 					if (innerTerm instanceof VariableImpl) {
-						newInnerTerms.add(termFactory.getVariable(innerTerm.getName() + "_" + count));
+						newInnerTerms.add(termFactory.getVariable(((Variable) innerTerm).getName() + "_" + count));
 					} else {
 						newInnerTerms.add(innerTerm.copy());
 					}
 				}
 				Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.getFunctionalTerm(newFunctionSymbol,
-						newInnerTerms);
+				FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.getFunctionalTerm(newFunctionSymbol, newInnerTerms);
 				newTerm = newFunctionalTerm;
 			}
 			if (newTerm != null)
@@ -375,21 +377,20 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				if (term instanceof VariableImpl) {
 					VariableImpl variable = (VariableImpl) term;
 					newTerm = termFactory.getVariable(variable.getName() + "_" + count);
-				} else if (term instanceof FunctionalTermImpl) {
-					FunctionalTermImpl functionalTerm = (FunctionalTermImpl) term;
+				} else if (term instanceof Function) {
+					Function functionalTerm = (Function) term;
 					List<Term> innerTerms = functionalTerm.getTerms();
 					List<Term> newInnerTerms = new LinkedList<Term>();
 					for (int j = 0; j < innerTerms.size(); j++) {
 						Term innerTerm = innerTerms.get(j);
-						if (innerTerm instanceof VariableImpl) {
-							newInnerTerms.add(termFactory.getVariable(innerTerm.getName() + "_" + count));
+						if (innerTerm instanceof Variable) {
+							newInnerTerms.add(termFactory.getVariable(((Variable) innerTerm).getName() + "_" + count));
 						} else {
 							newInnerTerms.add(innerTerm.copy());
 						}
 					}
 					Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-					FunctionalTermImpl newFunctionalTerm = (FunctionalTermImpl) termFactory.getFunctionalTerm(newFunctionSymbol,
-							newInnerTerms);
+					Function newFunctionalTerm = (Function) termFactory.getFunctionalTerm(newFunctionSymbol, newInnerTerms);
 					newTerm = newFunctionalTerm;
 				}
 				if (newTerm != null)
