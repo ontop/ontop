@@ -1,10 +1,10 @@
 /***
  * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
- * 
+ *
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
  * include:
- * 
+ *
  * a) The OBDA-API developed by the author and licensed under the LGPL; and, b)
  * third-party components licensed under terms that may be different from those
  * of the LGPL. Information about such licenses can be found in the file named
@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -80,7 +81,7 @@ import org.slf4j.LoggerFactory;
 public class MappingManagerPanel extends JPanel implements MappingManagerPreferenceChangeListener, DatasourceSelectorListener {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long		serialVersionUID	= -486013653814714526L;
 	private final String			ID					= "id";
@@ -106,7 +107,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private DatasourcesController	dsc;
 
 	protected OBDAModel			apic;
-	
+
 	private OWLOntology  ontology;
 
 	private DatalogProgramParser	datalogParser;
@@ -116,12 +117,12 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private boolean					canceled;
 
 	private final Logger			log					= LoggerFactory.getLogger(this.getClass());
-	
+
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a new panel.
-	 * 
+	 *
 	 * @param apic
 	 *            The API controller object.
 	 * @param preference
@@ -134,7 +135,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		this.dsc = dsc;
 		this.preference = preference;
 		this.ontology = ontology;
-		
+
 		datalogParser = new DatalogProgramParser();
 
 		initComponents();
@@ -161,6 +162,10 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
 		preference.getMappingsPreference().registerPreferenceChangedListener(this);
+	}
+
+	public OWLOntology getSourceOntology() {
+	  return ontology;
 	}
 
 	private void registerAction() {
@@ -406,6 +411,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
         txtFilter.setPreferredSize(new java.awt.Dimension(250, 20));
         txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 sendFilters(evt);
             }
@@ -569,35 +575,35 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
     private void cmdExpandAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdExpandAllActionPerformed
         final int nSelectedNode = mappingsTree.getSelectionCount();
-        
+
         TreePath[] paths = getAllMappingNodePaths();
         if (nSelectedNode > 1) {
           paths = mappingsTree.getSelectionPaths();
         }
-        
+
         for (int i = 0; i < paths.length; i++) {
           mappingsTree.expandPath(paths[i]);
-        }        
+        }
     }//GEN-LAST:event_cmdExpandAllActionPerformed
 
     private void cmdCollapseAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseAllActionPerformed
         final int nSelectedNode = mappingsTree.getSelectionCount();
-        
+
         TreePath[] paths = getAllMappingNodePaths();
         if (nSelectedNode > 1) {
           paths = mappingsTree.getSelectionPaths();
         }
-        
+
         for (int i = 0; i < paths.length; i++) {
           mappingsTree.collapsePath(paths[i]);
-        } 
+        }
     }//GEN-LAST:event_cmdCollapseAllActionPerformed
 
     private TreePath[] getAllMappingNodePaths() {
       final MappingTreeModel mapModel = (MappingTreeModel) mappingsTree.getModel();
       final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mapModel.getRoot();
       final int nChild = root.getChildCount();
-     
+
       TreePath[] paths = new TreePath[nChild]; // initialize
 
       if (nChild > 0) {
@@ -608,7 +614,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
       }
       return paths;
     }
-    
+
 	/***
 	 * The action for the search field and the search checkbox. If the checkbox
 	 * is not selected it cleans the filters. If it is selected it updates to
@@ -634,7 +640,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	/***
 	 * Action for the filter checkbox
-	 * 
+	 *
 	 * @param evt
 	 * @throws Exception
 	 */
@@ -645,7 +651,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	/***
 	 * Action for key's entered in the search textbox
-	 * 
+	 *
 	 * @param evt
 	 * @throws Exception
 	 */
@@ -685,7 +691,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				MappingBodyNode body = node.getBodyNode();
 				MappingHeadNode head = node.getHeadNode();
 				RDBMSMappingValidator v;
-				
+
 				SQLQuery rdbmssqlQuery = fac.getSQLQuery(body.getQuery());
 				CQIE conjunctiveQuery = parse(head.getQuery());
 				v = new RDBMSMappingValidator(apic, selectedSource, rdbmssqlQuery, conjunctiveQuery);
@@ -849,7 +855,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	private void cmdAddMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addMappingButtonActionPerformed
 		if (selectedSource != null) {
 			addMapping();
-			
+
 			// Make sure the user can see the new node.
 			MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
 			MappingNode newNode = model.getLastMappingNode();
@@ -977,6 +983,17 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 					updateNode(txt);
 				}
 			}
+			else {
+			  // List of invalid predicates that are found by the validator.
+        Vector<String> invalidPredicates = editor.getInvalidPredicates();
+        String invalidList = "";
+        for(String predicate : invalidPredicates) {
+          invalidList += "- " + predicate + "\n";
+        }
+        JOptionPane.showMessageDialog(this,
+            "This list of predicates is unknown by the ontology: \n" + invalidList,
+            "New Mapping", JOptionPane.WARNING_MESSAGE);
+			}
 		}
 	}
 
@@ -986,7 +1003,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	/***
 	 * Parses the string in the search field.
-	 * 
+	 *
 	 * @param textToParse
 	 * @return A list of filter objects or null if the string was empty or
 	 *         erroneous
@@ -1022,7 +1039,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	/***
 	 * This function given the kind of filter and the string for it, is added to
 	 * a list of current filters.
-	 * 
+	 *
 	 * @param filter
 	 * @param strFilter
 	 */
@@ -1047,8 +1064,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	/***
 	 * This function add the list of current filters to the model and then the
 	 * Tree is refreshed shows the mappings after the filters have been applied
-	 * 
-	 * 
+	 *
+	 *
 	 * @param ListOfMappings
 	 */
 	private void applyFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {

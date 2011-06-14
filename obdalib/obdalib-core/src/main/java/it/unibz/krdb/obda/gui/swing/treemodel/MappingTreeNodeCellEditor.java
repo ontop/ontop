@@ -22,6 +22,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
+import it.unibz.krdb.obda.utils.TargetQueryValidator;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -42,6 +43,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.TreeCellEditor;
 
 import org.antlr.runtime.RecognitionException;
+import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,8 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	private MappingEditorPanel me = null;
 	private Vector<CellEditorListener> listener = null;
 	private MappingManagerPanel mappingmanagerpanel = null;
+	private TargetQueryValidator validator = null;
+
 	private boolean editingCanceled = false;
 
 	DatalogProgramParser datalogParser = new DatalogProgramParser();
@@ -78,8 +82,8 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
 		me = new MappingEditorPanel(tree);
 
-
-
+    OWLOntology ontology = mappingmanagerpanel.getSourceOntology();
+    validator = new TargetQueryValidator(ontology);
 	}
 //
 //	public HeadNodeTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer, TreeCellEditor editor, APIController apic) {
@@ -120,22 +124,24 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		return me;
 	}
 
-	public boolean isInputValid(){
+	public boolean isInputValid() {
 
 		if(me.getEditingObject() instanceof MappingHeadNode){
 			String txt = me.getText();
 			try {
 				CQIE query = parse(txt);
-//				checkValidityOfConjunctiveQuery(query );
-				return true;
+				return validator.validate(query);
 			} catch (Exception e) {
 				return false;
 			}
-		}else {
+		} else {
 			return true;
 		}
-
 	}
+
+	public Vector<String> getInvalidPredicates() {
+    return validator.getInvalidPredicates();
+  }
 
 	private CQIE parse(String query) {
 		CQIE cq = null;
