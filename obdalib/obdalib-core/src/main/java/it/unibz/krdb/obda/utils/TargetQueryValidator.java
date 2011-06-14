@@ -46,7 +46,7 @@ public class TargetQueryValidator
       // of these components (i.e., class, object property, data property).
       boolean isPredicateValid = isClass || isObjectProp || isDataProp;
       
-      String debugMsg = "This predicate: " + predicate.toString();
+      String debugMsg = "The predicate: [" + predicate.toString() + "]";
       if (isPredicateValid) {
         if (isClass) {
           debugMsg += " is a Class.";
