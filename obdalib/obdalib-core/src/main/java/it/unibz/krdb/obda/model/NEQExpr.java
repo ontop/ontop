@@ -6,6 +6,6 @@ package it.unibz.krdb.obda.model;
  * @author Mariano Rodriguez Muro
  *
  */
-public interface NotequalsExpr extends BooleanExpr, BinaryExpr {
+public interface NEQExpr extends BooleanExpr, BinaryExpr {
 
 }
