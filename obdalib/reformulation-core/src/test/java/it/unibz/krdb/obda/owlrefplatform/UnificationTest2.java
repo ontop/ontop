@@ -4,11 +4,9 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AtomImpl;
-import it.unibz.krdb.obda.model.impl.CQIEImpl;
-import it.unibz.krdb.obda.model.impl.DatalogProgramImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
@@ -62,15 +60,15 @@ public class UnificationTest2 extends TestCase {
 		terms3.add(t3);
 		terms3.add(factory.getNondistinguishedVariable());
 		List<Term> terms4 = new Vector<Term>();
-		terms4.add(t3.copy());
-		terms4.add(t2.copy());
+		terms4.add(t3.clone());
+		terms4.add(t2.clone());
 
-		Atom a1 = tfac.getAtom(r1, terms1);
-		Atom a2 = tfac.getAtom(r2, terms2);
-		Atom a3 = tfac.getAtom(s, terms3);
-		Atom head = tfac.getAtom(p, terms4);
+		PredicateAtom a1 = tfac.getAtom(r1, terms1);
+		PredicateAtom a2 = tfac.getAtom(r2, terms2);
+		PredicateAtom a3 = tfac.getAtom(s, terms3);
+		PredicateAtom head = tfac.getAtom(p, terms4);
 
-		Vector<Atom> body = new Vector<Atom>();
+		List<Atom> body = new Vector<Atom>();
 		body.add(a1);
 		body.add(a2);
 		body.add(a3);
@@ -91,10 +89,10 @@ public class UnificationTest2 extends TestCase {
 		Atom at1 = newbody.get(0);
 		Atom at2 = newbody.get(1);
 
-		Term term1 = at1.getTerms().get(0);
-		Term term2 = at1.getTerms().get(1);
-		Term term3 = at2.getTerms().get(0);
-		Term term4 = at2.getTerms().get(1);
+		Term term1 = ((PredicateAtom) at1).getTerms().get(0);
+		Term term2 = ((PredicateAtom) at1).getTerms().get(1);
+		Term term3 = ((PredicateAtom) at2).getTerms().get(0);
+		Term term4 = ((PredicateAtom) at2).getTerms().get(1);
 
 		assertEquals("x", ((Variable) term1).getName());
 		assertEquals("y", ((Variable) term2).getName());

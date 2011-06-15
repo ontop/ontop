@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
@@ -44,7 +45,7 @@ public class MappingHeadVariableTreeModelFilter implements
 		List<Atom> headAtom = headquery.getBody(); // atoms
 
 		for (int i = 0; i < headAtom.size(); i++) {
-			Atom atom = headAtom.get(i);
+			PredicateAtom atom = (PredicateAtom) headAtom.get(i);
 			if (atom.getPredicate().getName().toString().indexOf(srtHeadVariableFilter) != -1) {
 				filterValue = true;
 			}

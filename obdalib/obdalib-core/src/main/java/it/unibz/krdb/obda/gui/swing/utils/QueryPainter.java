@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -205,8 +206,10 @@ public class QueryPainter {
 
 				Iterator<Atom> it = atoms.iterator();
 				while (it.hasNext()) {
-
-					Atom at = it.next();
+					Atom a1 = it.next();
+				      if (!(a1 instanceof PredicateAtom))
+				    	  continue;
+					PredicateAtom at = (PredicateAtom) a1;
 					int arity = at.getArity();
 					if (arity == 1) { // concept query atom
 

@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -89,7 +90,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 				if (sb.length() > 0) {
 					sb.append(",");
 				}
-				Atom at = it.next();
+				PredicateAtom at = (PredicateAtom) it.next();
 				String name = man.getShortForm(at.getPredicate().toString());
 				sb.append(name);
 				sb.append("(");

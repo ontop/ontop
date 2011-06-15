@@ -49,8 +49,8 @@ public class PredicateImpl implements Predicate{
 	}
 
 	@Override
-	public Predicate copy() {
-		return new PredicateImpl(this.name, this.arity);
+	public Predicate clone() {
+		return new PredicateImpl(URI.create(this.name.toString()), this.arity);
 	}
 
 	@Override

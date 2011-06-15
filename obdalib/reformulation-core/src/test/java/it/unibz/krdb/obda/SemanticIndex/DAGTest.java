@@ -2,9 +2,10 @@ package it.unibz.krdb.obda.SemanticIndex;
 
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
-import junit.framework.TestCase;
 
 import java.util.List;
+
+import junit.framework.TestCase;
 
 public class DAGTest extends TestCase {
 

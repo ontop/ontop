@@ -2,19 +2,25 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generate the mappings for DAG
@@ -141,9 +147,9 @@ public class SemanticIndexMappingGenerator {
 
         Term qt = predicateFactory.getVariable("x");
         Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 1);
-        Atom bodyAtom = predicateFactory.getAtom(predicate, qt);
+        PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qt);
         predicate = predicateFactory.getPredicate(URI.create("q"), 1);
-        Atom head = predicateFactory.getAtom(predicate, qt);
+        PredicateAtom head = predicateFactory.getAtom(predicate, qt);
         Query cq = predicateFactory.getCQIE(head, bodyAtom);
 
         String sql = "SELECT " + projection + " FROM " + table;
@@ -173,9 +179,9 @@ public class SemanticIndexMappingGenerator {
         Term qtx = predicateFactory.getVariable("X");
         Term qty = predicateFactory.getVariable("Y");
         Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 2);
-        Atom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
+        PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
         predicate = predicateFactory.getPredicate(URI.create("q"), 2);
-        Atom head = predicateFactory.getAtom(predicate, qtx, qty);
+        PredicateAtom head = predicateFactory.getAtom(predicate, qtx, qty);
         Query cq = predicateFactory.getCQIE(head, bodyAtom);
 
         String sql = "SELECT " + projection + " FROM " + table;

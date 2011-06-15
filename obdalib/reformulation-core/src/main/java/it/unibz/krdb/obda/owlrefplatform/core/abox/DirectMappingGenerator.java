@@ -1,17 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.AtomImpl;
-import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
-import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -74,11 +70,11 @@ public class DirectMappingGenerator {
 						List<Term> terms = new Vector<Term>();
 						terms.add(qt);
 						Predicate predicate = predicateFactory.getPredicate(name, terms.size());
-						Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
+						PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
 //						List<Atom> body = new Vector<Atom>();
 //						body.add(bodyAtom); // the body
 						predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
-						Atom head = predicateFactory.getAtom(predicate, terms); // the head
+						PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the head
 						Query cq = predicateFactory.getCQIE(head, bodyAtom);
 						String sql = "SELECT term0 as x FROM " + tablename;
 						OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
@@ -96,11 +92,11 @@ public class DirectMappingGenerator {
 					terms.add(qt1);
 					terms.add(qt2);
 					Predicate predicate = predicateFactory.getPredicate(objprop.getURI(), terms.size());
-					Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
+					PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
 //					List<Atom> body = new Vector<Atom>();
 //					body.add(bodyAtom); // the body
 					predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
-					Atom head = predicateFactory.getAtom(predicate, terms); // the head
+					PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the head
 					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
 					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
@@ -118,11 +114,11 @@ public class DirectMappingGenerator {
 					terms.add(qt1);
 					terms.add(qt2);
 					Predicate predicate = predicateFactory.getPredicate(dataProp.getURI(), terms.size());
-					Atom bodyAtom = predicateFactory.getAtom(predicate, terms);
+					PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
 //					List<Atom> body = new Vector<Atom>();
 //					body.add(bodyAtom); // the body
 					predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
-					Atom head = predicateFactory.getAtom(predicate, terms); // the head
+					PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the head
 					Query cq = predicateFactory.getCQIE(head, bodyAtom);
 					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
 					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);

@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -72,7 +73,7 @@ public class SPARQLDatalogTranslator {
 			datalog.getQueryModifiers().put("distinct", true);
 
 		// Get the head atom.
-		Atom head = getHeadAtom(queryObject);
+		PredicateAtom head = getHeadAtom(queryObject);
 
 		Element pattern = queryObject.getQueryPattern();
 		ElementGroup root = (ElementGroup) pattern;
@@ -90,7 +91,7 @@ public class SPARQLDatalogTranslator {
 	}
 
 	/** Extract the head atom */
-	private Atom getHeadAtom(Query query) throws QueryException {
+	private PredicateAtom getHeadAtom(Query query) throws QueryException {
 
 		Vector<Term> headTerms = new Vector<Term>();
 		List<String> termNames = query.getResultVars();
@@ -196,7 +197,7 @@ public class SPARQLDatalogTranslator {
 				URI predicateUri = URI.create(p.getURI());
 				predicate = predicateFactory.getPredicate(predicateUri, 2);
 			}
-			Atom atom = predicateFactory.getAtom(predicate, terms);
+			PredicateAtom atom = predicateFactory.getAtom(predicate, terms);
 			body.add(atom);
 		}
 		return body;

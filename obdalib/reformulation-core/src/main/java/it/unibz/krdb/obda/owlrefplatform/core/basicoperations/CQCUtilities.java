@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -22,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class CQCUtilities {
 
 	List<Atom>						canonicalbody		= null;
 
-	Atom							canonicalhead		= null;
+	PredicateAtom							canonicalhead		= null;
 
 	Set<Predicate>					canonicalpredicates	= new HashSet<Predicate>(50);
 
@@ -56,8 +56,9 @@ public class CQCUtilities {
 		this.canonicalQuery = getCanonicalQuery(query);
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
-		for (Atom atom : canonicalbody) {
-			canonicalpredicates.add(atom.getPredicate());
+		for (Atom atom : canonicalbody)  {
+			PredicateAtom patom = (PredicateAtom)atom;
+			canonicalpredicates.add(patom.getPredicate());
 		}
 	}
 
@@ -76,7 +77,7 @@ public class CQCUtilities {
 		int constantcounter = 1;
 
 		Map<Variable, Term> substitution = new HashMap<Variable, Term>(50);
-		Atom head = canonicalquery.getHead();
+		PredicateAtom head = canonicalquery.getHead();
 		constantcounter = getCanonicalAtom(head, constantcounter, substitution);
 
 		for (Atom atom : canonicalquery.getBody()) {
@@ -97,7 +98,7 @@ public class CQCUtilities {
 	 * @return
 	 */
 	private static int getCanonicalAtom(Atom atom, int constantcounter, Map<Variable, Term> currentMap) {
-		List<Term> headterms = atom.getTerms();
+		List<Term> headterms = ((PredicateAtom) atom).getTerms();
 		for (int i = 0; i < headterms.size(); i++) {
 			Term term = headterms.get(i);
 			if (term instanceof Variable) {
@@ -165,7 +166,7 @@ public class CQCUtilities {
 			return false;
 
 		for (Atom queryatom : query.getBody()) {
-			if (!canonicalpredicates.contains(queryatom.getPredicate())) {
+			if (!canonicalpredicates.contains(((PredicateAtom) queryatom).getPredicate())) {
 				return false;
 			}
 		}
@@ -184,10 +185,10 @@ public class CQCUtilities {
 
 		List<Atom> body = query.getBody();
 		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
-			Atom currentAtomTry = body.get(atomidx);
+			PredicateAtom currentAtomTry = (PredicateAtom) body.get(atomidx);
 
 			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
-				Atom currentGroundAtom = canonicalbody.get(groundatomidx);
+				PredicateAtom currentGroundAtom = (PredicateAtom) canonicalbody.get(groundatomidx);
 
 				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu == null)
@@ -229,7 +230,7 @@ public class CQCUtilities {
 			Atom currentAtomTry = body.get(atomidx);
 
 			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
-				Atom currentGroundAtom = canonicalbody.get(groundatomidx);
+				PredicateAtom currentGroundAtom = (PredicateAtom) canonicalbody.get(groundatomidx);
 
 				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu != null) {
@@ -262,9 +263,9 @@ public class CQCUtilities {
 		for (CQIE cq : queries) {
 			List<Atom> body = cq.getBody();
 			for (int i = 0; i < body.size(); i++) {
-				Atom currentAtom = body.get(i);
+				PredicateAtom currentAtom = (PredicateAtom) body.get(i);
 				for (int j = i + 1; j < body.size(); j++) {
-					Atom comparisonAtom = body.get(j);
+					PredicateAtom comparisonAtom = (PredicateAtom) body.get(j);
 					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
 						if (currentAtom.equals(comparisonAtom)) {
 							body.remove(j);

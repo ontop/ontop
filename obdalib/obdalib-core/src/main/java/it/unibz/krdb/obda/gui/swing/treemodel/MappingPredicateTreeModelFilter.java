@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class MappingPredicateTreeModelFilter implements
 		List<Atom> atoms = headquery.getBody();
 		int atomscount = atoms.size();
 		for (int i = 0; i < atomscount; i++) {
-			Atom atom = atoms.get(i);
+			PredicateAtom atom = (PredicateAtom) atoms.get(i);
 
 			if (atom.getPredicate().getName().toString().indexOf(srtPredicateFilter) != -1)
 				filterValue = true	;

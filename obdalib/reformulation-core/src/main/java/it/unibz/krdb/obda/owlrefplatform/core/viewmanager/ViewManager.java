@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.PredicateAtom;
 
 
 /**
@@ -23,7 +23,7 @@ public interface ViewManager {
 	 * @return the alias of the atom
 	 * @throws Exception
 	 */
-	public String getTranslatedName(Atom atom) throws Exception;
+	public String getTranslatedName(PredicateAtom atom) throws Exception;
 	
 	/**
 	 * Stores the original query head, so that also the source generator 
@@ -32,5 +32,5 @@ public interface ViewManager {
 	 * implement
 	 * @param head original head of the input query
 	 */
-	public void storeOrgQueryHead(Atom head);
+	public void storeOrgQueryHead(PredicateAtom head);
 }

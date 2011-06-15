@@ -4,9 +4,8 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.AtomImpl;
-import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
@@ -63,7 +62,7 @@ public class CQCUtilitiesTest extends TestCase {
 		fterms1.add(y);
 		headTerms.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("f"), 2), fterms1));
 
-		Atom head = tfac.getAtom(q, headTerms);
+		PredicateAtom head = tfac.getAtom(q, headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -95,11 +94,11 @@ public class CQCUtilitiesTest extends TestCase {
 		assertTrue(f1.getTerms().get(0).equals(tfac.getValueConstant("CANx1")));
 		assertTrue(f1.getTerms().get(1).equals(tfac.getValueConstant("CANy2")));
 
-		head = groundedcq.getBody().get(0).getTerms();
+		head = ((PredicateAtom) groundedcq.getBody().get(0)).getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
 		assertTrue(head.get(1).equals(tfac.getValueConstant("CANy2")));
 
-		head = groundedcq.getBody().get(1).getTerms();
+		head = ((PredicateAtom) groundedcq.getBody().get(1)).getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("m")));
 		f1 = (FunctionalTermImpl) head.get(1);
 		assertTrue(f1.getTerms().get(0).equals(tfac.getValueConstant("CANx1")));
@@ -114,7 +113,7 @@ public class CQCUtilitiesTest extends TestCase {
 		headTerms.add(x);
 		headTerms.add(y);
 
-		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 2), headTerms);
+		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 2), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -282,7 +281,7 @@ public class CQCUtilitiesTest extends TestCase {
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(x);
 
-		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
+		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -355,7 +354,7 @@ public class CQCUtilitiesTest extends TestCase {
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(x);
 
-		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
+		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 

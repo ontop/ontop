@@ -12,6 +12,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -59,7 +60,7 @@ public class AtomUnifier {
 
 		Atom atom1 = q.getBody().get(i);
 		Atom atom2 = q.getBody().get(j);
-		Atom newatom = unify(atom1, atom2, mgu);
+		Atom newatom = unify((PredicateAtom)atom1, (PredicateAtom)atom2, mgu);
 		unifiedQ.getBody().add(i, newatom);
 
 		return unifiedQ;
@@ -82,8 +83,8 @@ public class AtomUnifier {
 	 * @param unifier
 	 * @return
 	 */
-	private Atom unify(Atom atom1, Atom atom2, Map<Variable, Term> unifier) {
-		Atom newatom = atom1.copy();
+	private PredicateAtom unify(PredicateAtom atom1, PredicateAtom atom2, Map<Variable, Term> unifier) {
+		PredicateAtom newatom = (PredicateAtom)atom1.clone();
 		for (int i = 0; i < atom1.getTerms().size(); i++) {
 			Term t1 = atom1.getTerms().get(i);
 			Term t2 = atom2.getTerms().get(i);
@@ -109,7 +110,7 @@ public class AtomUnifier {
 		CQIE newq = q.clone();
 
 		/* applying the unifier to every term in the head */
-		Atom head = newq.getHead();
+		PredicateAtom head = newq.getHead();
 		applyUnifier(head, unifier);
 		for (Atom bodyatom : newq.getBody()) {
 			applyUnifier(bodyatom, unifier);
@@ -129,34 +130,9 @@ public class AtomUnifier {
 	 * @param atom
 	 * @param unifier
 	 */
-	private void applyUnifier(Atom atom, Map<Variable, Term> unifier) {
+	private void applyUnifier(Atom atom2, Map<Variable, Term> unifier) {
+		PredicateAtom atom = (PredicateAtom)atom2;
 		applyUnifier(atom.getTerms(), unifier);
-//		for (int i = 0; i < atom.getArity(); i++) {
-//			Term t = atom.getTerms().get(i);
-//			/*
-//			 * unifiers only apply to variables, simple or inside functional
-//			 * terms
-//			 */
-//			if (t instanceof VariableImpl) {
-//				Term replacement = unifier.get(t);
-//				if (replacement != null)
-//					atom.getTerms().set(i, replacement);
-//			} else if (t instanceof FunctionalTermImpl) {
-//				List<Term> innerterms = ((FunctionalTermImpl) t).getTerms();
-//				for (int j = 0; j < innerterms.size(); j++) {
-//					Term innert = innerterms.get(j);
-//					/*
-//					 * unifiers only apply to variables, simple or inside
-//					 * functional terms
-//					 */
-//					if (innert instanceof VariableImpl) {
-//						Term replacement = unifier.get(innert);
-//						if (replacement != null)
-//							innerterms.set(j, replacement);
-//					}
-//				}
-//			}
-//		}
 	}
 	
 	private void applyUnifier(List<Term> terms, Map<Variable, Term> unifier) {
@@ -198,8 +174,11 @@ public class AtomUnifier {
 	 * @param secondAtom
 	 * @return
 	 */
-	public Map<Variable, Term> getMGU(Atom firstAtom, Atom secondAtom) {
+	public Map<Variable, Term> getMGU(Atom first, Atom second) {
 
+		PredicateAtom firstAtom = (PredicateAtom)first;
+		PredicateAtom secondAtom = (PredicateAtom)second;
+		
 		/*
 		 * Basic case, predicates are different or their arity is different,
 		 * then no unifier
@@ -342,7 +321,7 @@ public class AtomUnifier {
 			} else if (t instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl)t;
 				List<Term> innerTerms = function.getTerms();
-				FunctionalTermImpl fclone = function.copy();
+				FunctionalTermImpl fclone = function.clone();
 				boolean innerchanges = false;
 				//TODO this ways of changing inner terms in functions is not optimal, modify
 				

@@ -53,7 +53,7 @@ public class URIConstantImpl implements URIConstant {
 //	}
 
 	@Override
-	public Term copy() {
+	public URIConstant clone() {
 		try {
 			return new URIConstantImpl(new URI(uri.toString()));
 		}

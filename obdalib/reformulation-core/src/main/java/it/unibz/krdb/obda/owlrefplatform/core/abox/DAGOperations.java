@@ -2,10 +2,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  * Implement Graph specific operations like get all ancestors and get all descendants

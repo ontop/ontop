@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;

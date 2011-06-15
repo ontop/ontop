@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.QueryResultSet;
 import it.unibz.krdb.obda.model.Statement;
@@ -288,7 +288,7 @@ public class OBDAStatement implements Statement {
 		boolean bool = true;
 		while (it.hasNext() && bool) {
 			CQIE query = it.next();
-			Atom a = query.getHead();
+			PredicateAtom a = query.getHead();
 			if (a.getTerms().size() != 0) {
 				bool = false;
 			}

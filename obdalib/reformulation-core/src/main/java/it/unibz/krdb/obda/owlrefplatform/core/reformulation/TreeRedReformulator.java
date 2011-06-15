@@ -5,18 +5,15 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
@@ -171,7 +168,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 				HashSet<PositiveInclusion> relevantInclusions = new HashSet<PositiveInclusion>(1000);
 				for (Atom atom : oldquery.getBody()) {
-					relevantInclusions.addAll(getRightNotExistential(atom.getPredicate()));
+					relevantInclusions.addAll(getRightNotExistential(((PredicateAtom) atom).getPredicate()));
 				}
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
@@ -201,13 +198,13 @@ public class TreeRedReformulator implements QueryRewriter {
 			HashSet<Predicate> predicates = new HashSet<Predicate>(1000);
 			for (CQIE oldquery : oldqueries) {
 				for (Atom atom : oldquery.getBody()) {
-					predicates.add(atom.getPredicate());
+					predicates.add(((PredicateAtom) atom).getPredicate());
 				}
 			}
 
 			for (CQIE oldquery : newqueriesbyPI) {
 				for (Atom atom : oldquery.getBody()) {
-					predicates.add(atom.getPredicate());
+					predicates.add(((PredicateAtom) atom).getPredicate());
 				}
 			}
 
@@ -309,7 +306,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	private boolean containsPredicate(CQIE q, Predicate predicate) {
 		for (Atom atom : q.getBody()) {
-			if (atom.getPredicate().equals(predicate))
+			if (((PredicateAtom) atom).getPredicate().equals(predicate))
 				return true;
 		}
 		return q.getHead().getPredicate().equals(predicate);

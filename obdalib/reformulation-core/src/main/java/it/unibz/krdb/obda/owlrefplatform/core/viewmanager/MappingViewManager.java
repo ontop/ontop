@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.SQLQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
@@ -41,7 +42,7 @@ public class MappingViewManager implements ViewManager {
 	private OBDADataFactory				predFactory					= null;
 	private Map<URI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
-	private Atom									head						= null;
+	private PredicateAtom									head						= null;
 
 	public MappingViewManager(List<OBDAMappingAxiom> mappings) {
 		this.mappings = mappings;
@@ -59,7 +60,7 @@ public class MappingViewManager implements ViewManager {
 	}
 
 	@Override
-	public String getTranslatedName(Atom atom) throws Exception {
+	public String getTranslatedName(PredicateAtom atom) throws Exception {
 		throw new Exception("Method is not implemented for the MappingViewManager");
 	}
 
@@ -99,7 +100,7 @@ public class MappingViewManager implements ViewManager {
 				Iterator<Atom> ait = atoms.iterator();
 				List<String> sqlVars = new Vector<String>();
 				while (ait.hasNext()) {
-					Atom a = ait.next();
+					PredicateAtom a = (PredicateAtom) ait.next();
 					List<Term> terms = a.getTerms();
 					Iterator<Term> tit = terms.iterator();
 					while (tit.hasNext()) {
@@ -194,8 +195,8 @@ public class MappingViewManager implements ViewManager {
 	 * initial sparql query. E.g. if the user does "Select $a $b $c where ...."
 	 * we will name the columns in the answer also a, b, c.
 	 */
-	public void storeOrgQueryHead(Atom head) {
-		this.head = head.copy();
+	public void storeOrgQueryHead(PredicateAtom head) {
+		this.head = (PredicateAtom) head.clone();
 	}
 
 	/**

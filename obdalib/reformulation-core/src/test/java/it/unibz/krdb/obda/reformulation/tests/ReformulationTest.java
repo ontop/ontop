@@ -1,7 +1,5 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;

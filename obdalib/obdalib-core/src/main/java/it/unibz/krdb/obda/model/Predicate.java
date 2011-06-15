@@ -10,7 +10,7 @@ import java.net.URI;
  * by {@code P(x)} written <code>{x|P(x)</code> is just a collection of all
  * the objects for which {@code P} is true.
  */
-public interface Predicate {
+public interface Predicate extends Cloneable {
 
 	/**
 	 * Get the name of the predicate. In practice, the predicate name
@@ -32,5 +32,6 @@ public interface Predicate {
 	 *
 	 * @return the copy of the object.
 	 */
-	public Predicate copy();
+	public Predicate clone();
+
 }

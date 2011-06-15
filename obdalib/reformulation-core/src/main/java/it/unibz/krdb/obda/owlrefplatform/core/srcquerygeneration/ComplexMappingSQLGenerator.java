@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -65,7 +66,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		boolean bool = true;
 		while (it.hasNext() && bool) {
 			CQIE query = it.next();
-			Atom a = query.getHead();
+			PredicateAtom a = query.getHead();
 			if (a.getTerms().size() != 0) {
 				bool = false;
 			}
@@ -85,7 +86,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		List<Atom> body = q.getBody();
 		Iterator<Atom> it = body.iterator();
 		while (it.hasNext()) {
-			Atom a = it.next();
+			PredicateAtom a = (PredicateAtom) it.next();
 			List<Term> terms = a.getTerms();
 			Iterator<Term> tit = terms.iterator();
 			int i = 0;
@@ -225,7 +226,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		Iterator<Atom> ait = atoms.iterator();
 		StringBuilder sb = new StringBuilder();
 		while (ait.hasNext()) {
-			Atom a = ait.next();
+			PredicateAtom a = (PredicateAtom) ait.next();
 			String sql = viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
 			String alias = viewManager.getAlias(sql);
 			if (sb.length() > 0) {
@@ -257,7 +258,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		HashSet<String> equalities = new HashSet<String>();
 		HashSet<String> processedTerms = new HashSet<String>();
 		while (atomIterator.hasNext()) {
-			Atom a = atomIterator.next();
+			PredicateAtom a = (PredicateAtom) atomIterator.next();
 			List<Term> terms = a.getTerms();
 			Iterator<Term> term_it = terms.iterator();
 			int p = 0;
@@ -271,14 +272,14 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 						}
 						if (list.size() > 1) {
 							Object[] first_O = list.get(0);
-							Atom a_0 = (Atom) first_O[0];
+							PredicateAtom a_0 = (PredicateAtom) first_O[0];
 							Integer pos_0 = (Integer) first_O[1];
 							String alias_0 = localAliasMap.get(a_0.hashCode());
 							Term term_0 = a_0.getTerms().get(pos_0);
 							AuxSQLMapping map = viewManager.getAuxSQLMapping(a_0.getPredicate().getName());
 							for (int i = 1; i < list.size(); i++) {
 								Object[] first_N = list.get(i);
-								Atom a_N = (Atom) first_N[0];
+								PredicateAtom a_N = (PredicateAtom) first_N[0];
 								Integer pos_N = (Integer) first_N[1];
 								Term term_N = a_N.getTerms().get(pos_N);
 								String alias_N = localAliasMap.get(a_N.hashCode());
@@ -363,14 +364,14 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							}
 							if (list.size() > 1) {
 								Object[] first_O = list.get(0);
-								Atom a_0 = (Atom) first_O[0];
+								PredicateAtom a_0 = (PredicateAtom) first_O[0];
 								Integer pos_0 = (Integer) first_O[1];
 								String alias_0 = localAliasMap.get(a_0.hashCode());
 								Term term_0 = a_0.getTerms().get(pos_0);
 								AuxSQLMapping map = viewManager.getAuxSQLMapping(a_0.getPredicate().getName());
 								for (int i = 1; i < list.size(); i++) {
 									Object[] first_N = list.get(i);
-									Atom a_N = (Atom) first_N[0];
+									PredicateAtom a_N = (PredicateAtom) first_N[0];
 									Integer pos_N = (Integer) first_N[1];
 									Term term_N = a_N.getTerms().get(pos_N);
 									String alias_N = localAliasMap.get(a_N.hashCode());
@@ -451,7 +452,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(CQIE q, List<String> signature) throws Exception {
-		Atom head = q.getHead();
+		PredicateAtom head = q.getHead();
 		List<Term> headterms = head.getTerms();
 		StringBuilder sb = new StringBuilder();
 		if (headterms.size() > 0) {
@@ -469,7 +470,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 						throw new Exception("Unknown term in head");
 					}
 					Object[] o = list.get(0);
-					Atom a = (Atom) o[0];
+					PredicateAtom a = (PredicateAtom) o[0];
 					Integer pos = (Integer) o[1];
 					// String sql =
 					// viewManager.getSQLForAuxPredicate(a.getPredicate().getName());
@@ -497,7 +498,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 								throw new Exception("Unknown term in head:" + v + " The query was: " + q);
 							}
 							Object[] o = list.get(0);
-							Atom a = (Atom) o[0];
+							PredicateAtom a = (PredicateAtom) o[0];
 							Integer pos = (Integer) o[1];
 							// String sql =
 							// viewManager.getSQLForAuxPredicate(a.getPredicate().getName());

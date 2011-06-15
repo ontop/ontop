@@ -7,9 +7,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import junit.framework.TestCase;
 
 import java.util.List;
+
+import junit.framework.TestCase;
 
 public class SemanticReductionTest extends TestCase {
     SemanticIndexHelper helper = new SemanticIndexHelper();

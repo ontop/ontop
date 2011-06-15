@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.QueryModifiers;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class CQIEImpl implements CQIE, ListListener {
 
-	private Atom				head		= null;
+	private PredicateAtom				head		= null;
 	private List<Atom>			body		= null;
 	// private boolean isBoolean = false;
 
@@ -35,7 +36,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String	INV_IMPLIES	= ":-";
 
 	// TODO Remove isBoolean from the signature and from any method
-	protected CQIEImpl(Atom head, List<Atom> body) {
+	protected CQIEImpl(PredicateAtom head, List<Atom> body) {
 
 		// this.isBoolean = isBoolean;
 
@@ -64,11 +65,11 @@ public class CQIEImpl implements CQIE, ListListener {
 		return body;
 	}
 
-	public Atom getHead() {
+	public PredicateAtom getHead() {
 		return head;
 	}
 
-	public void updateHead(Atom head) {
+	public void updateHead(PredicateAtom head) {
 
 		EventGeneratingLinkedList<Term> headterms = (EventGeneratingLinkedList<Term>) head.getTerms();
 		headterms.removeListener(this);
@@ -121,12 +122,11 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public CQIEImpl clone() {
-		Atom copyHead = head.copy();
+		PredicateAtom copyHead = (PredicateAtom)head.clone();
 		List<Atom> copyBody = new LinkedList<Atom>();
 		for (Atom atom : body) {
-			copyBody.add(atom.copy());
+			copyBody.add(atom.clone());
 		}
-		// boolean copyIsBoolean = isBoolean;
 
 		return new CQIEImpl(copyHead, copyBody);
 	}

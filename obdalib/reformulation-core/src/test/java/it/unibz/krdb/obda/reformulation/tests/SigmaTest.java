@@ -13,9 +13,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescrip
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import junit.framework.TestCase;
 
 import java.net.URI;
+
+import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
 

@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
@@ -9,7 +9,6 @@ import it.unibz.krdb.obda.utils.ListListener;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
-
 
 /***
  * The implentation of an Atom. This implementation is aware of changes in the
@@ -23,7 +22,7 @@ import java.util.List;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class AtomImpl implements Atom, ListListener {
+public class PredicateAtomImpl implements PredicateAtom, ListListener, Cloneable {
 
 	private Predicate	predicate	= null;
 	private List<Term>	terms		= null;
@@ -38,7 +37,7 @@ public class AtomImpl implements Atom, ListListener {
 
 	private int			hash		= 0;
 
-	protected AtomImpl(Predicate predicate, List<Term> terms) {
+	protected PredicateAtomImpl(Predicate predicate, List<Term> terms) {
 		if (predicate.getArity() != terms.size()) {
 			throw new IllegalArgumentException("There must be the same number of terms as indicated by predicate");
 		}
@@ -48,7 +47,6 @@ public class AtomImpl implements Atom, ListListener {
 		eventlist.addAll(terms);
 		this.terms = eventlist;
 
-		
 		eventlist.addListener(this);
 
 		for (Term term : terms) {
@@ -59,7 +57,7 @@ public class AtomImpl implements Atom, ListListener {
 			}
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
 		if (rehash) {
@@ -68,7 +66,6 @@ public class AtomImpl implements Atom, ListListener {
 		}
 		return hash;
 	}
-	
 
 	public int getArity() {
 		return terms.size();
@@ -83,7 +80,7 @@ public class AtomImpl implements Atom, ListListener {
 	}
 
 	public void updateTerms(List<Term> newterms) {
-		
+
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
@@ -91,10 +88,10 @@ public class AtomImpl implements Atom, ListListener {
 				innertermlist.removeListener(this);
 			}
 		}
-		
+
 		terms.clear();
 		terms.addAll(newterms);
-		
+
 		for (Term term : terms) {
 			if (term instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) term;
@@ -104,13 +101,13 @@ public class AtomImpl implements Atom, ListListener {
 		}
 	}
 
-	public Atom copy() {
+	public PredicateAtom clone() {
 		EventGeneratingLinkedList<Term> v = new EventGeneratingLinkedList<Term>();
 		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {
-			v.add(it.next().copy());
+			v.add(it.next().clone());
 		}
-		return new AtomImpl(predicate.copy(), v);
+		return new PredicateAtomImpl(predicate.clone(), v);
 	}
 
 	@Override
@@ -119,8 +116,29 @@ public class AtomImpl implements Atom, ListListener {
 			return string;
 
 		StringBuffer bf = new StringBuffer();
-		URI predicateURI = predicate.getName();
-		bf.append(predicateURI.toString());
+
+		if (predicate == OBDAVocabulary.EQ) {
+			bf.append("EQ");
+		} else if (predicate == OBDAVocabulary.NEQ) {
+			bf.append("NEQ");
+		} else if (predicate == OBDAVocabulary.GT) {
+			bf.append("GT");
+		} else if (predicate == OBDAVocabulary.GTE) {
+			bf.append("GTE");
+		} else if (predicate == OBDAVocabulary.LT) {
+			bf.append("LT");
+		} else if (predicate == OBDAVocabulary.LTE) {
+			bf.append("LTE");
+		} else if (predicate == OBDAVocabulary.NOT) {
+			bf.append("NOT");
+		} else if (predicate == OBDAVocabulary.AND) {
+			bf.append(" && ");
+		} else if (predicate == OBDAVocabulary.OR) {
+			bf.append("OR");
+		} else {
+			bf.append(this.predicate.getName().toString());
+		}
+
 		bf.append("(");
 		for (int i = 0; i < terms.size(); i++) {
 			bf.append(terms.get(i));
@@ -140,8 +158,8 @@ public class AtomImpl implements Atom, ListListener {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof AtomImpl) {
-			AtomImpl a2 = (AtomImpl) obj;
+		if (obj instanceof PredicateAtomImpl) {
+			PredicateAtomImpl a2 = (PredicateAtomImpl) obj;
 			return this.hashCode() == a2.hashCode();
 		}
 		return false;
@@ -159,7 +177,7 @@ public class AtomImpl implements Atom, ListListener {
 		for (int j = 0; j < size; j++) {
 			Term t2 = terms.get(j);
 			if (t2 instanceof FunctionalTermImpl) {
-				FunctionalTermImpl f = (FunctionalTermImpl)t2;
+				FunctionalTermImpl f = (FunctionalTermImpl) t2;
 				int newindex = f.getFirstOcurrance(t, 0);
 				if (newindex != -1)
 					return j;
@@ -169,6 +187,16 @@ public class AtomImpl implements Atom, ListListener {
 			}
 		}
 		return -1;
+	}
+
+	@Override
+	public Term getTerm(int index) {
+		return terms.get(index);
+	}
+
+	@Override
+	public Term setTerm(int index, Term newTerm) {
+		return terms.set(index, newTerm);
 	}
 
 }

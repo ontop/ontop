@@ -2,11 +2,12 @@ package it.unibz.krdb.obda.SemanticIndex;
 
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGSerializer;
-import junit.framework.TestCase;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import junit.framework.TestCase;
 
 public class DAGSerializerTest extends TestCase {
 

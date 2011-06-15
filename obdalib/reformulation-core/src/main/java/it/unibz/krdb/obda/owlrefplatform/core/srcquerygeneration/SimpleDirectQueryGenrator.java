@@ -3,10 +3,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.URIIdentyfier;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.URIType;
@@ -39,7 +39,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	private Map<URIIdentyfier, String>		mapper		= null;
 	private HashMap<String, List<Object[]>>	termMap		= null;
 	private HashMap<String, List<Object[]>>	constMap	= null;
-	private Map<Atom, String>				aliasMapper	= null;
+	private Map<PredicateAtom, String>				aliasMapper	= null;
 	private int								counter		= 1;
 	private SimpleDirectViewManager			viewManager	= null;
 
@@ -48,7 +48,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 	public SimpleDirectQueryGenrator(Map<URIIdentyfier, String> mapper) {
 
 		this.mapper = mapper;
-		aliasMapper = new HashMap<Atom, String>();
+		aliasMapper = new HashMap<PredicateAtom, String>();
 		viewManager = new SimpleDirectViewManager();
 	}
 
@@ -137,7 +137,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		if (QueryUtils.isBoolean(query)) {
 			sb.append("TRUE AS x ");
 		} else {
-			Atom head = query.getHead();
+			PredicateAtom head = query.getHead();
 			List<Term> headterms = head.getTerms();
 			Iterator<Term> it = headterms.iterator();
 			while (it.hasNext()) {
@@ -149,7 +149,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 					List<Object[]> list = termMap.get(((VariableImpl) t).getName());
 					if (list != null && list.size() > 0) {
 						Object[] obj = list.get(0);
-						String table = aliasMapper.get(((Atom) obj[0]));
+						String table = aliasMapper.get(((PredicateAtom) obj[0]));
 						String column = "term" + obj[1];
 						StringBuffer aux = new StringBuffer();
 						aux.append(table);
@@ -195,7 +195,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		List<Atom> body = query.getBody();
 		Iterator<Atom> it = body.iterator();
 		while (it.hasNext()) {
-			Atom a = it.next();
+			PredicateAtom a = (PredicateAtom) it.next();
 			if (sb.length() > 0) {
 				sb.append(", ");
 			}
@@ -225,11 +225,11 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			List<Object[]> list = termMap.get(it.next());
 			if (list != null && list.size() > 1) {
 				Object[] obj1 = list.get(0);
-				String t1 = aliasMapper.get(((Atom) obj1[0]));
+				String t1 = aliasMapper.get(((PredicateAtom) obj1[0]));
 				String col1 = "term" + obj1[1].toString();
 				for (int i = 1; i < list.size(); i++) {
 					Object[] obj2 = list.get(i);
-					String t2 = aliasMapper.get(((Atom) obj2[0]));
+					String t2 = aliasMapper.get(((PredicateAtom) obj2[0]));
 					String col2 = "term" + obj2[1].toString();
 					StringBuffer aux = new StringBuffer();
 					aux.append(t1);
@@ -250,7 +250,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 			List<Object[]> list = constMap.get(con);
 			for (int i = 0; i < list.size(); i++) {
 				Object[] obj2 = list.get(i);
-				String t2 = aliasMapper.get(((Atom) obj2[0]));
+				String t2 = aliasMapper.get(((PredicateAtom) obj2[0]));
 				String col2 = "term" + obj2[1].toString();
 				StringBuffer aux = new StringBuffer();
 				aux.append(t2);
@@ -287,7 +287,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		List<Atom> body = q.getBody();
 		Iterator<Atom> it = body.iterator();
 		while (it.hasNext()) {
-			Atom atom = it.next();
+			PredicateAtom atom = (PredicateAtom) it.next();
 			List<Term> terms = atom.getTerms();
 			int pos = 0;
 			Iterator<Term> term_it = terms.iterator();
@@ -354,7 +354,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		boolean bool = true;
 		while (it.hasNext() && bool) {
 			CQIE query = it.next();
-			Atom a = query.getHead();
+			PredicateAtom a = query.getHead();
 			if (a.getTerms().size() != 0) {
 				bool = false;
 			}
@@ -362,7 +362,7 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		return bool;
 	}
 
-	private String getTablename(Atom atom) {
+	private String getTablename(PredicateAtom atom) {
 
 		String tablename = null;
 		if (atom.getArity() == 1) {

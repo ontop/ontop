@@ -1,10 +1,9 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.AtomImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
@@ -108,20 +107,20 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param atomstrs
 	 * @return
 	 */
-	public List<Atom> getAtoms(String atomstrs) {
+	public List<PredicateAtom> getAtoms(String atomstrs) {
 		atomstrs = atomstrs.trim();
-		List<Atom> atoms = new ArrayList<Atom>();
+		List<PredicateAtom> atoms = new ArrayList<PredicateAtom>();
 		String[] atomstr = atomstrs.split("\\|");
 		String str1 = atomstr[0].trim();
-		Atom atom1 = getAtom(str1);
+		PredicateAtom atom1 = getAtom(str1);
 		atoms.add(atom1);
 		String str2 = atomstr[1].trim();
-		Atom atom2 = getAtom(str2);
+		PredicateAtom atom2 = getAtom(str2);
 		atoms.add(atom2);
 		return atoms;
 	}
 
-	public Atom getAtom(String atomstr) {
+	public PredicateAtom getAtom(String atomstr) {
 		String termstr = atomstr.substring(2, atomstr.length() - 1);
 		List<Term> terms = new ArrayList<Term>();
 
@@ -129,7 +128,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Atom atom = this.predFac.getAtom(predFac.getPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
+		PredicateAtom atom = this.predFac.getAtom(predFac.getPredicate(URI.create(atomstr.substring(0, 1)), terms.size()), terms);
 		return atom;
 	}
 

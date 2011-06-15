@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -45,7 +46,7 @@ public class MappingFunctorTreeModelFilter implements
 		List<Atom> atoms = headquery.getBody();
 
 		for (int i = 0; i < atoms.size(); i++) {
-			Atom atom = atoms.get(i);
+			PredicateAtom atom = (PredicateAtom) atoms.get(i);
 
 			List<Term> queryTerms = atom.getTerms();
 

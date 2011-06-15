@@ -40,7 +40,7 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public ValueConstant copy() {
+	public ValueConstant clone() {
 		return new ValueConstantImpl(new String(value), this.type);
 	}
 

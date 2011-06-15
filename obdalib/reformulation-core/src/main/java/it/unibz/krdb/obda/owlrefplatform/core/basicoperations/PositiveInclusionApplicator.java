@@ -4,10 +4,10 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
@@ -19,7 +19,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusi
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.SemanticQueryOptimizer;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +54,7 @@ public class PositiveInclusionApplicator {
 	 * @return true if the positive inclusion is applicable to the atom, false
 	 *         otherwise
 	 */
-	public boolean isPIApplicable(PositiveInclusion pi, Atom atom) {
+	public boolean isPIApplicable(PositiveInclusion pi, PredicateAtom atom) {
 		/*
 		 * checks: (3) I is a role inclusion assertion and its right-hand side
 		 * is either P or P-
@@ -137,7 +136,7 @@ public class PositiveInclusionApplicator {
 			HashSet<CQIE> currentatomresults = new HashSet<CQIE>(bodysize * pis.size() * 2);
 			for (CQIE cq : newqueries) {
 				List<Atom> body = cq.getBody();
-				Atom atom = body.get(atomindex);
+				PredicateAtom atom = (PredicateAtom) body.get(atomindex);
 
 				for (PositiveInclusion pi : pis) {
 					if (isPIApplicable(pi, atom)) {
@@ -196,7 +195,7 @@ public class PositiveInclusionApplicator {
 			for (CQIE query : saturatedset) {
 				List<Atom> body = query.getBody();
 				for (int i = 0; i < body.size(); i++) {
-					if (isPIApplicable(pi, body.get(i))) {
+					if (isPIApplicable(pi, (PredicateAtom) body.get(i))) {
 						if (sqoOptimizer != null) {
 							results.add(anonymizer.anonymize(sqoOptimizer.optimizeBySQO(applyPI(query, pi, i))));
 						} else {
@@ -252,7 +251,7 @@ public class PositiveInclusionApplicator {
 				List<Atom> body = currentcq.getBody();
 				for (int i = 0; i < body.size(); i++) {
 					/* Predicates are diferent, dont even try to unify */
-					if (!body.get(i).getPredicate().equals(predicate))
+					if (!((PredicateAtom) body.get(i)).getPredicate().equals(predicate))
 						continue;
 					/*
 					 * We found an atom with the correct predicate, try to unify
@@ -260,11 +259,11 @@ public class PositiveInclusionApplicator {
 					 */
 					for (int j = i + 1; j < body.size(); j++) {
 
-						if (!body.get(j).getPredicate().equals(predicate))
+						if (!((PredicateAtom) body.get(j)).getPredicate().equals(predicate))
 							continue;
 
-						Atom a1 = body.get(i);
-						Atom a2 = body.get(j);
+						PredicateAtom a1 = (PredicateAtom) body.get(i);
+						PredicateAtom a2 = (PredicateAtom) body.get(j);
 
 						Term ta10 = a1.getTerms().get(0);
 						Term ta11 = a1.getTerms().get(1);
@@ -445,7 +444,7 @@ public class PositiveInclusionApplicator {
 		CQIE newquery = q.clone();
 
 		List<Atom> body = newquery.getBody();
-		Atom a = body.get(atomindex);
+		PredicateAtom a = (PredicateAtom) body.get(atomindex);
 
 		if (a.getArity() == 1) {
 
@@ -466,7 +465,7 @@ public class PositiveInclusionApplicator {
 					LinkedList<Term> v = new LinkedList<Term>();
 					Iterator<Term> tit = terms.iterator();
 					while (tit.hasNext()) {
-						v.add(tit.next().copy());
+						v.add(tit.next().clone());
 					}
 
 					Predicate predicate = null;
@@ -477,7 +476,7 @@ public class PositiveInclusionApplicator {
 						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
 					}
 
-					Atom newatom = termFactory.getAtom(predicate.copy(), v);
+					PredicateAtom newatom = termFactory.getAtom(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
@@ -489,7 +488,7 @@ public class PositiveInclusionApplicator {
 					 */
 					Term t = a.getTerms().get(0);
 					Term anonym = termFactory.getNondistinguishedVariable();
-					Atom newatom = null;
+					PredicateAtom newatom = null;
 
 					if (((ExistentialConceptDescriptionImpl) lefthandside).isInverse()) {
 						LinkedList<Term> v = new LinkedList<Term>();
@@ -503,7 +502,7 @@ public class PositiveInclusionApplicator {
 						} else if (lefthandside instanceof ExistentialConceptDescription) {
 							predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
 						}
-						newatom = termFactory.getAtom(predicate.copy(), v);
+						newatom = termFactory.getAtom(predicate.clone(), v);
 					} else {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, t);
@@ -516,7 +515,7 @@ public class PositiveInclusionApplicator {
 						} else if (lefthandside instanceof ExistentialConceptDescription) {
 							predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
 						}
-						newatom = termFactory.getAtom(predicate.copy(), v);
+						newatom = termFactory.getAtom(predicate.clone(), v);
 					}
 
 					body.set(atomindex, newatom);
@@ -540,7 +539,7 @@ public class PositiveInclusionApplicator {
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);
 
-			Atom newatom = null;
+			PredicateAtom newatom = null;
 
 			if (t2 instanceof UndistinguishedVariable && !righthandside.isInverse()) {
 
@@ -649,7 +648,7 @@ public class PositiveInclusionApplicator {
 			RoleDescription lefthandside = inc.getIncluded();
 			RoleDescription righthandside = inc.getIncluding();
 
-			Atom newatom = null;
+			PredicateAtom newatom = null;
 
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);

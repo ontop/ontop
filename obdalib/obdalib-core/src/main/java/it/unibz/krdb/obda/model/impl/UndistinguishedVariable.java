@@ -35,7 +35,7 @@ public class UndistinguishedVariable implements Variable {
 	}
 
 	@Override
-	public Variable copy() {
+	public Variable clone() {
 		return new UndistinguishedVariable();
 	}
 

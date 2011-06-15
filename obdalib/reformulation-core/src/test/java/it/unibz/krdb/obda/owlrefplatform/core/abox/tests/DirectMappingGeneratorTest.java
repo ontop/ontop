@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.SQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -73,17 +74,17 @@ private String file = "src/test/resources/test/ontologies/aboxgeneration/ABoxDum
 		    	 SQLQuery body = (SQLQuery) ax.getSourceQuery();
 		    	 CQIE head = (CQIE) ax.getTargetQuery();
 		    	 Atom a = head.getBody().get(0);
-		    	 if(a.getArity() == 1){
+		    	 if(((PredicateAtom) a).getArity() == 1){
 		    		 
-		    		 URIIdentyfier id = new URIIdentyfier(a.getPredicate().getName(), URIType.CONCEPT);
+		    		 URIIdentyfier id = new URIIdentyfier(((PredicateAtom) a).getPredicate().getName(), URIType.CONCEPT);
 		    		 String tablename = mapper.get(id);
 		    		 String expectedSQL = "SELECT term0 as x FROM " + tablename;
 		    		 assertEquals(expectedSQL.toLowerCase(), body.toString().toLowerCase());
 		    	 }else{
-		    		 URIIdentyfier id = new URIIdentyfier(a.getPredicate().getName(), URIType.OBJECTPROPERTY);
+		    		 URIIdentyfier id = new URIIdentyfier(((PredicateAtom) a).getPredicate().getName(), URIType.OBJECTPROPERTY);
 		    		 String tablename = mapper.get(id);
 		    		 if(tablename == null){
-		    			 id = new URIIdentyfier(a.getPredicate().getName(), URIType.DATAPROPERTY);
+		    			 id = new URIIdentyfier(((PredicateAtom) a).getPredicate().getName(), URIType.DATAPROPERTY);
 		    			 tablename = mapper.get(id);
 		    		 }
 		    		 String expectedSQL = "SELECT term0 as x, term1 as y FROM " + tablename;
