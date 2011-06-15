@@ -13,12 +13,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxDumpException;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxFromDBLoader;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DirectMappingGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.MappingValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -40,6 +43,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -163,6 +167,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 uris.add(onto.getURI());
                 DLLiterOntology aux = translator.translate(onto);
                 ontology.addAssertions(aux.getAssertions());
+                ontology.addConcepts(new ArrayList<ConceptDescription>(aux.getConcepts()));
+                ontology.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
             }
 
             if (useInMemoryDB && ("material".equals(unfoldingMode)||createMappings)) {
@@ -188,7 +194,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
                 if (dbType.equals("semantic")) {
                     //perform semantic import
-                    dag = new DAG(ontologies);
+                    dag = DAGConstructor.getISADAG(ontology);
+                    dag.index();
                     ABoxSerializer.recreate_tables(connection);
                     ABoxSerializer.ABOX2DB(ontologies, dag, connection);
                 } else if (dbType.equals("direct")) {
@@ -245,10 +252,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             if (dbType.equals("semantic")) {
 
                 // Reachability DAGs
-                TDAG tdag = new TDAG(dag);
-                SDAG sdag = new SDAG(tdag);
-
-                SemanticReduction reducer = new SemanticReduction(dag, tdag, sdag);
+                SemanticReduction reducer = new SemanticReduction(dag, DAGConstructor.getSigma(ontology));
                 onto = reducer.reduce();
             } else {
                 onto = ontology.getAssertions();
@@ -264,8 +268,10 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 
             if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
                 if (dbType.equals("semantic")) {
-                    SemanticIndexMappingGenerator map_gen = new SemanticIndexMappingGenerator(ds, apic, dag);
-                    map_gen.build();
+                  for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(dag)) {
+                    log.debug(map.toString());
+                    apic.getMappingController().insertMapping(ds.getSourceID(), map);
+                  }
                 }
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
 
