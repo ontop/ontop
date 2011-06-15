@@ -2,25 +2,19 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generate the mappings for DAG
@@ -54,7 +48,7 @@ public class SemanticIndexMappingGenerator {
 
             String uri = nodeDescription.getPredicate().getName().toString();
             String tablename = ABoxSerializer.class_table;
-            String projection = "URI as X";
+            String projection = " URI as X ";
             SemanticIndexRange range = node.getRange();
 
             rv.add(get_unary_mapping(uri, projection, tablename, range));
@@ -82,11 +76,11 @@ public class SemanticIndexMappingGenerator {
                     RoleDescription roleInv = descFactory.getRoleDescription(p, true);
 
                     if (isInverse) {
-                        projection = "URI2 as X";
-                        projection_inverse = "URI1 as X";
+                        projection = " URI2 as X ";
+                        projection_inverse = " URI1 as X ";
                     } else {
-                        projection = "URI1 as X";
-                        projection_inverse = "URI2 as X";
+                        projection = " URI1 as X ";
+                        projection_inverse = " URI2 as X ";
                     }
 
                     descRange = dag.getRoleNode(role).getRange();
@@ -107,7 +101,7 @@ public class SemanticIndexMappingGenerator {
             String projection = " URI1 as X, URI2 as Y ";
 
             if (description.isInverse()) {
-                projection = " URI2 as X, URI1 as Y ";
+                projection = " URI1 as Y, URI2 as X ";
             }
             String table = ABoxSerializer.role_table;
             SemanticIndexRange range = node.getRange();
@@ -123,7 +117,7 @@ public class SemanticIndexMappingGenerator {
 
                     String equiProjection = " URI1 as X, URI2 as Y ";
                     if (equiDescription.isInverse()) {
-                        equiProjection = " URI2 as X, URI1 as Y ";
+                        equiProjection = " URI1 as Y, URI2 as X ";
                     }
                     rv.add(get_binary_mapping(equiUri, equiProjection, table, range));
                 }
