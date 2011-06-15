@@ -15,19 +15,15 @@ package it.unibz.krdb.obda.gui.swing.panel;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.dialog.MappingValidationDialog;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingBodyNode;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingFunctorTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadNode;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadVariableTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingIDTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingNode;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingPredicateTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingSQLStringTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingStringTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeNodeCellEditor;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeSelectionModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
+import it.unibz.krdb.obda.gui.swing.utils.MappingFilterLexer;
+import it.unibz.krdb.obda.gui.swing.utils.MappingFilterParser;
 import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataSource;
@@ -70,6 +66,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
@@ -84,12 +82,6 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	 *
 	 */
 	private static final long		serialVersionUID	= -486013653814714526L;
-	private final String			ID					= "id";
-	private final String			FUNCT				= "funct";
-	private final String			PRED				= "pred";
-	private final String			HEAD				= "head";
-	private final String			SQL					= "sql";
-	private final String			TEXT				= "text";
 
 	private DefaultMutableTreeNode	editedNode;
 	private OBDAPreferences			preference;
@@ -1010,55 +1002,22 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	 * @throws Exception
 	 */
 	private List<TreeModelFilter<OBDAMappingAxiom>> parseSearchString(String textToParse) throws Exception {
-		List<TreeModelFilter<OBDAMappingAxiom>> ListOfFilters = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
-		if (textToParse != null) {
-			String[] textFilter = textToParse.split(",");
-			for (int i = 0; i < textFilter.length; i++) {
-				if (textFilter[i].contains(":")) {
-					String[] components = textFilter[i].split(":");
-					String head = components[0].trim();
-					String body = components[1].trim();
-					if ((body.startsWith("\"") && body.endsWith("\"")) || (body.startsWith("'") && body.endsWith("'"))) {
-						body = body.replaceAll("[\"|']", ""); // removes the
-																// quote signs.
-						String[] keywords = body.split(" ");
-						for (int j = 0; j < keywords.length; j++) {
-							TreeModelFilter<OBDAMappingAxiom> filter = createFilter(head, keywords[j]);
-							if (filter != null)
-								ListOfFilters.add(filter);
-						}
-					} else {
-						return null;
-					}
-				}
-			}
-		}
-		return ListOfFilters;
-	}
 
-	/***
-	 * This function given the kind of filter and the string for it, is added to
-	 * a list of current filters.
-	 *
-	 * @param filter
-	 * @param strFilter
-	 */
-	private TreeModelFilter<OBDAMappingAxiom> createFilter(String filter, String strFilter) {
-		TreeModelFilter<OBDAMappingAxiom> typeOfFilter = null;
-		if (filter.trim().equals(HEAD)) {
-			typeOfFilter = new MappingHeadVariableTreeModelFilter(strFilter);
-		} else if (filter.trim().equals(FUNCT)) {
-			typeOfFilter = new MappingFunctorTreeModelFilter(strFilter);
-		} else if (filter.trim().equals(PRED)) {
-			typeOfFilter = new MappingPredicateTreeModelFilter(strFilter);
-		} else if (filter.trim().equals(SQL)) {
-			typeOfFilter = new MappingSQLStringTreeModelFilter(strFilter);
-		} else if (filter.trim().equals(TEXT)) {
-			typeOfFilter = new MappingStringTreeModelFilter(strFilter);
-		} else if (filter.trim().equals(ID)) {
-			typeOfFilter = new MappingIDTreeModelFilter(strFilter);
+	  List<TreeModelFilter<OBDAMappingAxiom>> listOfFilters = null;
+
+	  if (textToParse != null) {
+		  ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
+		  MappingFilterLexer lexer = new MappingFilterLexer(inputStream);
+	    CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+	    MappingFilterParser parser = new MappingFilterParser(tokenStream);
+
+	    listOfFilters = parser.parse();
+
+	    if (parser.getNumberOfSyntaxErrors() != 0) {
+	      throw new Exception("Syntax Error: The filter string is unrecognized!");
+	    }
 		}
-		return typeOfFilter;
+		return listOfFilters;
 	}
 
 	/***

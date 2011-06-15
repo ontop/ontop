@@ -11,45 +11,43 @@ import java.util.List;
 
 
 /**
- * @author This filter receives a string like parameter in the constructor and returns true if any mapping contains an atom in the head whose
- *         predicate matches predicate
- *
+ * This filter receives a string like parameter in the constructor and returns
+ * true if any mapping contains an atom in the head whose predicate matches
+ * predicate.
  */
-public class MappingPredicateTreeModelFilter implements
-		TreeModelFilter<OBDAMappingAxiom> {
+public class MappingPredicateTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
 
-	private final String srtPredicateFilter;
+  public MappingPredicateTreeModelFilter() {
+    super.bNegation = false;
+  }
 
-	/**
-	 * @param srtPredicateFilter
-	 *            Constructor of the filter
-	 */
-	public MappingPredicateTreeModelFilter(String srtPredicateFilter) {
-		this.srtPredicateFilter = srtPredicateFilter;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
-	 * .lang.Object)
-	 */
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		boolean filterValue = false;
-		OBDAMappingAxiom mapping = object;
-		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
-		List<Atom> atoms = headquery.getBody();
-		int atomscount = atoms.size();
-		for (int i = 0; i < atomscount; i++) {
-			PredicateAtom atom = (PredicateAtom) atoms.get(i);
 
-			if (atom.getPredicate().getName().toString().indexOf(srtPredicateFilter) != -1)
-				filterValue = true	;
+	  final CQIE headquery = (CQIEImpl) object.getTargetQuery();
+		final List<Atom> atoms = headquery.getBody();
 
-		}
-		return filterValue;
+		boolean isMatch = false;
+
+    String[] vecKeyword = strFilter.split(" ");
+    for (String keyword : vecKeyword) {
+  		for (int i = 0; i < atoms.size(); i++) {
+  			PredicateAtom predicate = (PredicateAtom) atoms.get(i);
+  			isMatch = match(keyword, predicate);
+  		}
+  		if (isMatch) {
+  		  break;  // end loop if a match is found!
+  		}
+    }
+		return (bNegation ? !isMatch : isMatch);
 	}
 
+  /** A helper method to check a match */
+  private boolean match(String keyword, PredicateAtom predicate) {
+
+    if (predicate.getPredicate().getName().toString().indexOf(keyword) != -1) {
+      return true;
+    }
+    return false;
+  }
 }

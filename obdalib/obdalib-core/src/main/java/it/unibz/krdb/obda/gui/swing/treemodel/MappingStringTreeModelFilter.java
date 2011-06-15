@@ -12,58 +12,49 @@ import java.util.List;
 
 
 /**
- * @author This filter receives a string in the constructor and returns true if
- *         accepts any mapping containing the string in the head or body
+ * This filter receives a string in the constructor and returns true if
+ * accepts any mapping containing the string in the head or body
  *
  */
-public class MappingStringTreeModelFilter implements
-		TreeModelFilter<OBDAMappingAxiom> {
-	private final String srtModelFilter;
+public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
 
-	/**
-	 * @param strModeFilter
-	 *            Constructor of the filter that receives a mapping
-	 */
-	public MappingStringTreeModelFilter(String strModeFilter) {
-		this.srtModelFilter = strModeFilter;
-	}
+  public MappingStringTreeModelFilter() {
+    super.bNegation = false;
+  }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
-	 * .lang.Object)
-	 */
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		boolean filterValue = false;
-		OBDAMappingAxiom mapping = object;
-		if (mapping.getId().indexOf(srtModelFilter) != -1)
-			filterValue = true;
-		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
-		SQLQuery bodyquery = (SQLQuery) mapping.getSourceQuery();
 
-		List<Atom> atoms = headquery.getBody();
+	  boolean isMatch = false;
 
-		for (int i = 0; i < atoms.size(); i++) {
-			PredicateAtom atom = (PredicateAtom) atoms.get(i);
-			if (atom.getPredicate().getName().toString().indexOf(srtModelFilter) != -1) {
-				filterValue = true;
-			}
-			List<Term> queryTerms = atom.getTerms();
+		String[] vecKeyword = strFilter.split(" ");
+    for (String keyword : vecKeyword) {
+  		// Check in the Mapping ID
+      final String mappingId = object.getId();
+      isMatch = MappingIDTreeModelFilter.match(keyword, mappingId);
+      if (isMatch) {
+        break; // end loop if a match is found!
+      }
 
-			for (int j = 0; j < queryTerms.size(); j++) {
-				Term term = queryTerms.get(j);
-				if (term.toString().indexOf(srtModelFilter) != -1)
-					filterValue = true;
+  		// Check in the Mapping Target Query
+  		final CQIE headquery = (CQIEImpl) object.getTargetQuery();
+  		final List<Atom> atoms = headquery.getBody();
+      for (int i = 0; i < atoms.size(); i++) {
+        PredicateAtom predicate = (PredicateAtom) atoms.get(i);
+        isMatch = MappingHeadVariableTreeModelFilter.match(keyword, predicate);
+      }
+      if (isMatch) {
+        break; // end loop if a match is found!
+      }
 
-			}
-		}
-		if (bodyquery.toString().indexOf(srtModelFilter) != -1)
-			filterValue = true;
-
-		return filterValue;
+  		// Check in the Mapping Source Query
+  		final SQLQuery query = (SQLQuery) object.getSourceQuery();
+  		isMatch = MappingSQLStringTreeModelFilter.match(keyword, query.toString());
+  		if (isMatch) {
+        break; // end loop if a match is found!
+      }
+  	}
+    // no match found!
+    return (bNegation ? !isMatch : isMatch);
 	}
-
 }

@@ -2,23 +2,34 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 
-public class MappingIDTreeModelFilter implements
-		TreeModelFilter<OBDAMappingAxiom> {
+public class MappingIDTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
 
-	private final String srtIDTreeModelFilter;
-
-	public MappingIDTreeModelFilter(String srtIDTreeModelFilter) {
-		this.srtIDTreeModelFilter = srtIDTreeModelFilter;
-	}
+  public MappingIDTreeModelFilter() {
+    super.bNegation = false;
+  }
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		// TODO Auto-generated method stub
-		boolean filterValue = false;
-		OBDAMappingAxiom mapping = object;
-		if (mapping.getId().indexOf(srtIDTreeModelFilter) != -1)
-			filterValue = true;
-		return filterValue;
+
+	  boolean isMatch = false;
+
+		String[] vecKeyword = strFilter.split(" ");
+		for (String keyword : vecKeyword) {
+		  isMatch = match(keyword, object.getId());
+		  if(isMatch) {
+		    break;  // end loop if a match is found!
+		  }
+		}
+		// no match found!
+    return (bNegation ? !isMatch : isMatch);
 	}
 
+  /** A helper method to check a match */
+	public static boolean match(String keyword, String mappingId) {
+
+	  if (mappingId.indexOf(keyword) != -1) {  // match found!
+      return true;
+    }
+	  return false;
+	}
 }

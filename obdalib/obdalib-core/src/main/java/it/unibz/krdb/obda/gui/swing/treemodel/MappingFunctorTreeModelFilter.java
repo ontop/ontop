@@ -13,75 +13,56 @@ import java.util.List;
 
 
 /**
- * @author This filter receives a string and returns true if any mapping
- *         contains the functor in some of the atoms in the head
- *
+ * This filter receives a string and returns true if any mapping contains
+ * the functor in some of the atoms in the head
  */
 
-public class MappingFunctorTreeModelFilter implements
-		TreeModelFilter<OBDAMappingAxiom> {
+public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
 
-	private String strMappingFunctor = "";
+  public MappingFunctorTreeModelFilter() {
+    super.bNegation = false;
+  }
 
-	/**
-	 * @param strMappingFunctor
-	 *            Constructor of the function
-	 */
-	public MappingFunctorTreeModelFilter(String strMappingFunctor) {
-		this.strMappingFunctor = strMappingFunctor;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
-	 * .lang.Object)
-	 */
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		boolean filterValue = false;
-		OBDAMappingAxiom mapping = object;
-		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
-		List<Atom> atoms = headquery.getBody();
 
-		for (int i = 0; i < atoms.size(); i++) {
-			PredicateAtom atom = (PredicateAtom) atoms.get(i);
+	  final CQIE headquery = (CQIEImpl) object.getTargetQuery();
+    final List<Atom> atoms = headquery.getBody();
 
-			List<Term> queryTerms = atom.getTerms();
+    boolean isMatch = false;
 
-			for (int j = 0; j < queryTerms.size(); j++) {
-				Term term = queryTerms.get(j);
-
-				if (term instanceof FunctionalTermImpl) {
-					FunctionalTermImpl functionTerm = (FunctionalTermImpl) term;
-					if(functionTerm.getFunctionSymbol().toString().indexOf(strMappingFunctor)!= -1)
-					{
-						filterValue = true;
-					}
-
-				}
-
-				if (term instanceof VariableImpl) {
-					VariableImpl variableTerm = (VariableImpl) term;
-					if(variableTerm.getName().indexOf(strMappingFunctor)!= -1)
-					{
-						filterValue = true;
-					}
-
-				}
-
-				/*
-				 * if(term.getName().indexOf(strMappingFunctor) != -1)
-				 * filterValue = true; if (term instanceof VariableTerm) { if
-				 * (term.toString().indexOf(strMappingFunctor) != -1)
-				 * filterValue = true; } else
-				 */
-
-			}
-		}
-
-		return filterValue;
+	  String[] vecKeyword = strFilter.split(" ");
+    for (String keyword : vecKeyword) {
+  		for (int i = 0; i < atoms.size(); i++) {
+  			PredicateAtom predicate = (PredicateAtom) atoms.get(i);
+  			isMatch = match(keyword, predicate);
+  		}
+  		if (isMatch) {
+  		  break;  // end loop if a match is found!
+  		}
+    }
+		return (bNegation ? !isMatch : isMatch);
 	}
 
+	/** A helper method to check a match */
+	public static boolean match(String keyword, PredicateAtom predicate) {
+
+	  List<Term> queryTerms = predicate.getTerms();
+    for (int j = 0; j < queryTerms.size(); j++) {
+      Term term = queryTerms.get(j);
+      if (term instanceof FunctionalTermImpl) {
+        FunctionalTermImpl functionTerm = (FunctionalTermImpl) term;
+        if (functionTerm.getFunctionSymbol().toString().indexOf(keyword)!= -1) { // match found!
+          return true;
+        }
+      }
+      if (term instanceof VariableImpl) {
+        VariableImpl variableTerm = (VariableImpl) term;
+        if(variableTerm.getName().indexOf(keyword)!= -1) { // match found!
+          return true;
+        }
+      }
+    }
+    return false;
+	}
 }

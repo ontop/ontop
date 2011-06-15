@@ -12,52 +12,53 @@ import java.util.List;
 
 
 /**
- * @author This Filter receives a string and returns true if any mapping
- *         contains the string given in any of its head atoms
+ * This Filter receives a string and returns true if any mapping contains
+ * the string given in any of its head atoms.
  */
-public class MappingHeadVariableTreeModelFilter implements
-		TreeModelFilter<OBDAMappingAxiom> {
+public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> {
 
-	private final String srtHeadVariableFilter;
+  public MappingHeadVariableTreeModelFilter() {
+    super.bNegation = false;
+  }
 
-	/**
-	 * @param srtHeadVariableFilter
-	 *            Constructor of the MappingHeadVariableTreeModelFilter
-	 */
-	public MappingHeadVariableTreeModelFilter(String srtHeadVariableFilter) {
-		this.srtHeadVariableFilter = srtHeadVariableFilter;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * inf.unibz.it.obda.gui.swing.treemodel.filter.TreeModelFilter#match(java
-	 * .lang.Object)
-	 */
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		// TODO Auto-generated method stub
-		boolean filterValue = false;
-		OBDAMappingAxiom mapping = object;
-		CQIE headquery = (CQIEImpl) mapping.getTargetQuery();
 
-		List<Atom> headAtom = headquery.getBody(); // atoms
+	  final CQIE headquery = (CQIEImpl) object.getTargetQuery();
+    final List<Atom> atoms = headquery.getBody();
 
-		for (int i = 0; i < headAtom.size(); i++) {
-			PredicateAtom atom = (PredicateAtom) headAtom.get(i);
-			if (atom.getPredicate().getName().toString().indexOf(srtHeadVariableFilter) != -1) {
-				filterValue = true;
-			}
-			List<Term> terms = atom.getTerms();
-			for (int j = 0; j < terms.size(); j++) {
-				if ((terms.get(j).toString()).indexOf(srtHeadVariableFilter) != -1) {
-					filterValue = true;
-				}
-			}
+    boolean isMatch = false;
 
-		}
-		return filterValue;
+	  String[] vecKeyword = strFilter.split(" ");
+    for (String keyword : vecKeyword) {
+	    for (int i = 0; i < atoms.size(); i++) {
+	      PredicateAtom predicate = (PredicateAtom) atoms.get(i);
+	      isMatch = match(keyword, predicate);
+	    }
+	    if (isMatch) {
+	      break;  // end loop if a match is found!
+	    }
+    }
+    // no match found!
+    return (bNegation ? !isMatch : isMatch);
 	}
 
+  /** A helper method to check a match */
+  public static boolean match(String keyword, PredicateAtom predicate) {
+
+    if (predicate.getPredicate().getName().toString().indexOf(keyword) != -1) {  // match found!
+      return true;
+    }
+
+    // If the predicate name is mismatch, perhaps the terms.
+    final List<Term> queryTerms = predicate.getTerms();
+
+    for (int j = 0; j < queryTerms.size(); j++) {
+      Term term = queryTerms.get(j);
+      if (term.toString().indexOf(keyword) != -1) {  // match found!
+        return true;
+      }
+    }
+    return false;
+  }
 }
