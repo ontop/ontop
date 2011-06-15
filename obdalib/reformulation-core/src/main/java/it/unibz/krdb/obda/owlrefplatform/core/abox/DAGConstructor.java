@@ -3,12 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 
@@ -37,8 +32,8 @@ public class DAGConstructor {
                 if (parent instanceof ExistentialConceptDescription) {
                     continue;
                 }
-                sigma.addAssertion(assertion);
             }
+            sigma.addAssertion(assertion);
         }
 
         sigma.addConcepts(new ArrayList<ConceptDescription>(ontology.getConcepts()));
