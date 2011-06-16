@@ -77,12 +77,11 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		log.debug("Computed assertions: {}", this.assertions);
 
-		
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
-		
-		sqoOptimizer = new SemanticQueryOptimizer(fac, rightAssertionIndex);
-		
+
+		// sqoOptimizer = new SemanticQueryOptimizer(fac, rightAssertionIndex);
+
 		piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
 
 	}
@@ -256,7 +255,11 @@ public class TreeRedReformulator implements QueryRewriter {
 
 			newqueriesbyPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyPI);
 			/* These queries are final, no need for new passes on these */
-			result.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyPI));
+			if (sqoOptimizer != null) {
+				result.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyPI));
+			} else {
+				result.addAll(newqueriesbyPI);
+			}
 
 			/*
 			 * Preparing the set of queries for the next iteration.
@@ -264,7 +267,11 @@ public class TreeRedReformulator implements QueryRewriter {
 
 			newqueriesbyunificationandPI = CQCUtilities.removeDuplicateAtoms(newqueriesbyunificationandPI);
 			LinkedList<CQIE> newquerieslist = new LinkedList<CQIE>();
-			newquerieslist.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyunificationandPI));
+			if (sqoOptimizer != null) {
+				newquerieslist.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyunificationandPI));
+			} else {
+				newquerieslist.addAll(newqueriesbyunificationandPI);
+			}
 
 			oldqueries = new HashSet<CQIE>(newquerieslist.size() * 2);
 			for (CQIE newquery : newquerieslist) {
