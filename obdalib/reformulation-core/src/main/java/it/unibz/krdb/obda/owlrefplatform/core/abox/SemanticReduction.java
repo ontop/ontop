@@ -73,7 +73,7 @@ public class SemanticReduction {
             }
         }
 
-        log.debug("Finished semantic-reduction");
+        log.debug("Finished semantic-reduction {}", rv);
         return rv;
     }
 
@@ -109,8 +109,8 @@ public class SemanticReduction {
                 childDesc.isInverse()
         );
 
-        DAGNode exists_parent = new DAGNode(existParentDesc);
-        DAGNode exists_child = new DAGNode(existChildDesc);
+        DAGNode exists_parent = isa.getClassNode(existParentDesc);
+        DAGNode exists_child = isa.getClassNode(existChildDesc);
 
         return check_directly_redundant(parent, child) && check_directly_redundant(exists_parent, exists_child);
     }
@@ -134,12 +134,12 @@ public class SemanticReduction {
         DAGNode sp = sigmaChain.chain().get(parent.getDescription());
         DAGNode sc = sigmaChain.chain().get(child.getDescription());
         DAGNode tc = isaChain.chain().get(child.getDescription());
-//
-//        if (sp == null || sc == null || tc == null) {
-//            return false;
-//        }
 
-        return (sp.descendans.contains(sc) && sc.descendans.containsAll(tc.descendans));
+        if (sp == null || sc == null || tc == null) {
+            return false;
+        }
+
+        return (sp.getChildren().contains(sc) && sc.descendans.containsAll(tc.descendans));
 
     }
 
