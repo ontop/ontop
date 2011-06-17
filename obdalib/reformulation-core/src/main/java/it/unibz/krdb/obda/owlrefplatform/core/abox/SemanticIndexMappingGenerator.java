@@ -89,40 +89,52 @@ public class SemanticIndexMappingGenerator {
                     rv.add(get_unary_mapping(uri, projection, ABoxSerializer.role_table, descRange));
                     rv.add(get_unary_mapping(uri, projection_inverse, ABoxSerializer.role_table, descRangeInv));
                 }
-
             }
         }
         for (DAGNode node : dag.getRoles()) {
-            RoleDescription description = (RoleDescription) node.getDescription();
-            Predicate p = description.getPredicate();
 
+            List<DAGNode> equiNodes = new ArrayList<DAGNode>(node.getEquivalents().size() + 1);
+            equiNodes.add(node);
+            equiNodes.addAll(node.getEquivalents());
 
-            String uri = p.getName().toString();
-            String projection = " URI1 as X, URI2 as Y ";
+            for (DAGNode equiNode : equiNodes) {
 
-            if (description.isInverse()) {
-                projection = " URI1 as Y, URI2 as X ";
+                RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
+
+                if (equiNodeDesc.isInverse()) {
+                    continue;
+                }
+
+                rv.add(get_binary_mapping(
+                        equiNodeDesc.getPredicate().getName().toString(),
+                        " URI1 as X, URI2 as Y ",
+                        ABoxSerializer.role_table,
+                        node.getRange()));
             }
-            String table = ABoxSerializer.role_table;
-            SemanticIndexRange range = node.getRange();
 
-            rv.add(get_binary_mapping(uri, projection, table, range));
+            for (DAGNode child : node.getChildren()) {
+                RoleDescription childDesc = (RoleDescription) child.getDescription();
 
-            // Handle equivalent nodes
-            for (DAGNode equi : node.getEquivalents()) {
-                if (equi.getDescription() instanceof RoleDescription) {
-                    RoleDescription equiDescription = (RoleDescription) equi.getDescription();
-                    Predicate equiPred = equiDescription.getPredicate();
-                    String equiUri = equiPred.getName().toString();
+                if (childDesc.isInverse()) {
+                    continue;
+                }
 
-                    String equiProjection = " URI1 as X, URI2 as Y ";
-                    if (equiDescription.isInverse()) {
-                        equiProjection = " URI1 as Y, URI2 as X ";
+                for (DAGNode equiNode : equiNodes) {
+
+                    RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
+                    if (!equiNodeDesc.isInverse()) {
+                        continue;
                     }
-                    rv.add(get_binary_mapping(equiUri, equiProjection, table, range));
+
+                    rv.add(get_binary_mapping(
+                            equiNodeDesc.getPredicate().getName().toString(),
+                            " URI1 AS Y, URI2 AS X ",
+                            ABoxSerializer.role_table,
+                            child.getRange()));
                 }
             }
         }
+
         return rv;
     }
 
