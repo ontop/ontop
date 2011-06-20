@@ -68,6 +68,12 @@ public class SQL99ParserTest extends TestCase
   }
 
   @Test
+  public void test_1_10() {
+    final boolean result = parse("SELECT t1.id, t2.name FROM \"schema\".\"student\" as t1");
+    assertTrue(result);
+  }
+
+  @Test
   public void test_2_1() {
     final boolean result = parse("SELECT id FROM student WHERE id=1");
     assertTrue(result);
@@ -92,14 +98,40 @@ public class SQL99ParserTest extends TestCase
   @Test
   public void test_2_4() {
     final boolean result = parse("SELECT undergraduate.id, undergraduate.name " +
-    		"FROM student as undergraduate " +
-    		"WHERE undergraduate.name<>\"John\"");
+    		"FROM student as undergraduate WHERE undergraduate.name<>\"John\"");
+    assertTrue(result);
+  }
+
+  public void test_2_5() {
+    final boolean result = parse("SELECT id, name, grade FROM student WHERE grade is null");
+    assertTrue(result);
+  }
+
+  public void test_2_6() {
+    final boolean result = parse("SELECT id, name, grade FROM student WHERE grade is not null");
+    assertTrue(result);
+  }
+
+  public void test_2_7() {
+    final boolean result = parse("SELECT id, name, grade FROM student WHERE grade is null AND name<>\"John\"");
     assertTrue(result);
   }
 
   @Test
-  public void test_2_5() {
+  public void test_2_8() {
     final boolean result = parse("SELECT id, name FROM \"Public\".\"student\" WHERE name<>\"John\"");
+    assertTrue(result);
+  }
+
+  public void test_2_9() {
+    final boolean result = parse("SELECT t1.id, t1.name FROM \"Public\".\"student\" as t1 " +
+    		"WHERE t1.name<>\"John\"");
+    assertTrue(result);
+  }
+
+  public void test_2_10() {
+    final boolean result = parse("SELECT t1.id, t1.name, t1.grade FROM \"Public\".\"student\" as t1 " +
+        "WHERE t1.grede is not null AND t1.name<>\"John\"");
     assertTrue(result);
   }
 
