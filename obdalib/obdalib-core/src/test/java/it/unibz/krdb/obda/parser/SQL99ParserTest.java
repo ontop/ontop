@@ -102,16 +102,19 @@ public class SQL99ParserTest extends TestCase
     assertTrue(result);
   }
 
+  @Test
   public void test_2_5() {
     final boolean result = parse("SELECT id, name, grade FROM student WHERE grade is null");
     assertTrue(result);
   }
 
+  @Test
   public void test_2_6() {
     final boolean result = parse("SELECT id, name, grade FROM student WHERE grade is not null");
     assertTrue(result);
   }
 
+  @Test
   public void test_2_7() {
     final boolean result = parse("SELECT id, name, grade FROM student WHERE grade is null AND name<>\"John\"");
     assertTrue(result);
@@ -123,15 +126,125 @@ public class SQL99ParserTest extends TestCase
     assertTrue(result);
   }
 
+  @Test
   public void test_2_9() {
     final boolean result = parse("SELECT t1.id, t1.name FROM \"Public\".\"student\" as t1 " +
     		"WHERE t1.name<>\"John\"");
     assertTrue(result);
   }
 
+  @Test
   public void test_2_10() {
     final boolean result = parse("SELECT t1.id, t1.name, t1.grade FROM \"Public\".\"student\" as t1 " +
         "WHERE t1.grede is not null AND t1.name<>\"John\"");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_1() {
+    final boolean result = parse("select id, street, number, city, state, country from address");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_2() {
+    final boolean result = parse("select id, name, lastname, dateofbirth, ssn from broker");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_3() {
+    final boolean result = parse("select id, addressid from broker");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_4() {
+    final boolean result = parse("select id, name, lastname, dateofbirth, ssn from client");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_5() {
+    final boolean result = parse("select id, name, lastname, addressid from client");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_6() {
+    final boolean result = parse("select id, name, marketshares, networth from company");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_7() {
+    final boolean result = parse("select id, addressid from company");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_8() {
+    final boolean result = parse("select id, numberofshares, sharetype from stockinformation");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_9() {
+    final boolean result = parse("select distinct date from stockbooklist");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_10() {
+    final boolean result = parse("select brokerid, clientid from brokerworksfor where clientid IS NOT NULL");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_11() {
+    final boolean result = parse("select brokerid, companyid from brokerworksfor where companyid IS NOT NULL");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_12() {
+    final boolean result = parse("select id, date from transaction");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_13() {
+    final boolean result = parse("select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_14() {
+    final boolean result = parse("select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_15() {
+    final boolean result = parse("select id, companyid from stockinformation");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_16() {
+    final boolean result = parse("select date, stockid from stockbooklist");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_17() {
+    final boolean result = parse("select clientid from broker,client,brokerworksfor where client.id = broker.id and brokerid=broker.id and client.id=clientid");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_stockexchange_18() {
+    final boolean result = parse("SELECT id FROM transaction WHERE type=true");
     assertTrue(result);
   }
 
