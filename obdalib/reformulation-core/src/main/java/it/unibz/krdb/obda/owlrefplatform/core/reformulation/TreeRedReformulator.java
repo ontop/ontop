@@ -21,6 +21,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicRoleDescription
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.Collection;
@@ -282,9 +283,14 @@ public class TreeRedReformulator implements QueryRewriter {
 			}
 
 		}
-		log.debug("Main loop ended");
-		LinkedList<CQIE> resultlist = new LinkedList<CQIE>();
+
+		List<CQIE> resultlist = new LinkedList<CQIE>();
 		resultlist.addAll(result);
+		log.debug("Main loop ended. Queries produced: {}", resultlist.size());
+
+		log.debug("Removing auxiliary queries...");
+		resultlist = cleanAuxiliaryQueries(resultlist);
+		log.debug("Done. New size: {}", resultlist.size());
 
 		/* One last pass of the syntactic containment checker */
 
@@ -516,6 +522,34 @@ public class TreeRedReformulator implements QueryRewriter {
 			rightExistentialIndex.put(pred, assertions);
 		}
 		return assertions;
+	}
+
+	/***
+	 * Some queries produced by the reformulator might be auxiliary. Queries
+	 * that use auxiliary predicates only meant to encode exists.R.C given that
+	 * we are not handling natively the qualified existential. In the future we
+	 * will do it natively, in the meantime we just remove the aux queries.
+	 * 
+	 * @param originalQueries
+	 * @return
+	 */
+	private List<CQIE> cleanAuxiliaryQueries(List<CQIE> originalQueries) {
+		List<CQIE> newQueries = new LinkedList<CQIE>();
+		for (CQIE query : originalQueries) {
+			List<Atom> body = query.getBody();
+			boolean auxiliary = false;
+			for (Atom atom : body) {
+				if (atom.getPredicate().getName().toString().substring(0, OWLAPITranslator.AUXROLEURI.length())
+						.equals(OWLAPITranslator.AUXROLEURI)) {
+					auxiliary = true;
+					break;
+				}
+			}
+			if (!auxiliary) {
+				newQueries.add(query);
+			}
+		}
+		return newQueries;
 	}
 
 	@Override

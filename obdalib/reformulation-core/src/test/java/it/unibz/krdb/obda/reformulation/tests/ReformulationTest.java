@@ -1,5 +1,8 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -19,41 +22,42 @@ public class ReformulationTest extends TestCase {
     }
 
     private void test_function(String ontoname) throws Exception {
-        log.debug("Test case: {}", ontoname);
-        log.debug("Testing in-memory db/material abox");
-        tester.load(ontoname, "material");
-        for (String id : tester.getQueryIds()) {
-            log.debug("Testing query: {}", id);
-            Set<String> exp = tester.getExpectedResult(id);
-            Set<String> res = tester.executeQuery(id);
-            assertTrue(exp.size() == res.size());
-            for (String realResult : res) {
-                assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
-            }
-        }
-
-        log.debug("Testing in-memory db/vitual abox");
-        tester.load(ontoname, "virtual");
-        for (String id : tester.getQueryIds()) {
-            log.debug("Testing query: {}", id);
-            Set<String> exp = tester.getExpectedResult(id);
-            Set<String> res = tester.executeQuery(id);
-            assertTrue(exp.size() == res.size());
-            for (String realResult : res) {
-                assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(),exp.contains(realResult));
-            }
-        }
-//        log.debug("Testing in-memory db/SemanticIndex");
-//        tester.load(ontoname, "virtual", "semantic");
+//        log.debug("Test case: {}", ontoname);
+//        log.debug("Testing in-memory db/material abox");
+//        tester.load(ontoname, "material");
 //        for (String id : tester.getQueryIds()) {
 //            log.debug("Testing query: {}", id);
 //            Set<String> exp = tester.getExpectedResult(id);
 //            Set<String> res = tester.executeQuery(id);
-//            List<String> exp_list = new LinkedList<String>(exp);
-//            List<String> res_list = new LinkedList<String>(res);
-//            assertEquals(exp_list, res_list);
+//            assertTrue(exp.size() == res.size());
+//            for (String realResult : res) {
+//                assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
+//            }
 //        }
-
+//
+//        log.debug("Testing in-memory db/vitual abox");
+//        tester.load(ontoname, "virtual");
+//        for (String id : tester.getQueryIds()) {
+//            log.debug("Testing query: {}", id);
+//            Set<String> exp = tester.getExpectedResult(id);
+//            Set<String> res = tester.executeQuery(id);
+//            assertTrue(exp.size() == res.size());
+//            for (String realResult : res) {
+//                assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(),exp.contains(realResult));
+//            }
+//        }
+        log.debug("Testing in-memory db/SemanticIndex");
+        tester.load(ontoname, "virtual", "semantic");
+        for (String id : tester.getQueryIds()) {
+            log.debug("Testing query: {}", id);
+            Set<String> exp = tester.getExpectedResult(id);
+            Set<String> res = tester.executeQuery(id);
+            List<String> exp_list = new LinkedList<String>(exp);
+            List<String> res_list = new LinkedList<String>(res);
+            Collections.sort(exp_list);
+            Collections.sort(res_list);
+            assertEquals(exp_list, res_list);
+        }
     }
 
     public void test_1_0_0() throws Exception {

@@ -11,23 +11,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-
 public class DLLiterOntologyImpl implements DLLiterOntology {
 
-	private List<Assertion> assertions = null;
-	private Set<ConceptDescription> concepts = null;
-	private Set<RoleDescription> roles = null;
-	private URI ontouri = null;
-	
-	public DLLiterOntologyImpl (URI uri){
+	private List<Assertion>			assertions	= null;
+	private Set<ConceptDescription>	concepts	= null;
+	private Set<RoleDescription>	roles		= null;
+	private URI						ontouri		= null;
+
+	public DLLiterOntologyImpl(URI uri) {
 		ontouri = uri;
 		assertions = new Vector<Assertion>();
 		concepts = new HashSet<ConceptDescription>();
 		roles = new HashSet<RoleDescription>();
 	}
-	
+
 	public void addAssertion(Assertion assertion) {
-		
+		if (assertions.contains(assertion))
+			return;
 		assertions.add(assertion);
 	}
 
@@ -36,7 +36,7 @@ public class DLLiterOntologyImpl implements DLLiterOntology {
 	}
 
 	public void addAssertions(List<Assertion> ass) {
-		assertions.addAll(ass);	
+		assertions.addAll(ass);
 	}
 
 	public void addConcept(ConceptDescription cd) {

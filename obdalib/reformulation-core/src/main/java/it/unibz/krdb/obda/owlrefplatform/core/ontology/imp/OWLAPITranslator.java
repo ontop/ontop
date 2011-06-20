@@ -7,16 +7,21 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.FunctionalRoleAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.LanguageProfile;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.QualifiedExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.owl.model.OWLAnnotationAxiom;
@@ -56,14 +61,25 @@ import org.slf4j.LoggerFactory;
 
 public class OWLAPITranslator {
 
-	private OBDADataFactory		predicateFactory	= null;
-	private DescriptionFactory	descFactory			= null;
-	private HashSet<String>		objectproperties	= null;
-	private HashSet<String>		dataproperties		= null;
-	
-	private final LanguageProfile profile = LanguageProfile.DLLITEA;
+	private OBDADataFactory									predicateFactory	= null;
+	private DescriptionFactory								descFactory			= null;
+	private HashSet<String>									objectproperties	= null;
+	private HashSet<String>									dataproperties		= null;
 
-	Logger						log					= LoggerFactory.getLogger(OWLAPITranslator.class);
+	private final LanguageProfile							profile				= LanguageProfile.DLLITEA;
+
+	Logger													log					= LoggerFactory.getLogger(OWLAPITranslator.class);
+
+	public static String									AUXROLEURI			= "ER.A-AUXROLE";
+
+	/*
+	 * If we need to construct auxiliary subclass axioms for A ISA exists R.C we
+	 * put them in this map to avoid generating too many auxiliary
+	 * roles/classes.
+	 */
+	final Map<ConceptDescription, List<PositiveInclusion>>	auxiliaryAssertions	= new HashMap<ConceptDescription, List<PositiveInclusion>>();
+
+	int														auxRoleCounter		= 0;
 
 	public OWLAPITranslator() {
 		predicateFactory = OBDADataFactoryImpl.getInstance();
@@ -122,7 +138,7 @@ public class OWLAPITranslator {
 				if (axiom instanceof OWLEquivalentClassesAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
-					
+
 					OWLEquivalentClassesAxiom aux = (OWLEquivalentClassesAxiom) axiom;
 					Set<OWLDescription> equivalents = aux.getDescriptions();
 					List<ConceptDescription> vec = getSubclassExpressions(equivalents);
@@ -149,7 +165,6 @@ public class OWLAPITranslator {
 
 				} else if (axiom instanceof OWLDataSubPropertyAxiom) {
 
-					
 					OWLDataSubPropertyAxiom aux = (OWLDataSubPropertyAxiom) axiom;
 					RoleDescription subrole = getRoleExpression(aux.getSubProperty());
 					RoleDescription superrole = getRoleExpression(aux.getSuperProperty());
@@ -159,7 +174,7 @@ public class OWLAPITranslator {
 					dl_onto.addAssertion(roleinc);
 
 				} else if (axiom instanceof OWLEquivalentDataPropertiesAxiom) {
-					
+
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
 
@@ -171,7 +186,7 @@ public class OWLAPITranslator {
 
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
-					
+
 					OWLEquivalentObjectPropertiesAxiom aux = (OWLEquivalentObjectPropertiesAxiom) axiom;
 					List<RoleDescription> vec = getObjectRoleExpressions(aux.getProperties());
 					addRoleEquivalences(dl_onto, vec);
@@ -188,7 +203,7 @@ public class OWLAPITranslator {
 				} else if (axiom instanceof OWLInverseObjectPropertiesAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
-					
+
 					OWLInverseObjectPropertiesAxiom aux = (OWLInverseObjectPropertiesAxiom) axiom;
 					OWLObjectPropertyExpression exp1 = aux.getFirstProperty();
 					OWLObjectPropertyExpression exp2 = aux.getSecondProperty();
@@ -296,8 +311,51 @@ public class OWLAPITranslator {
 			if (superDescription == null || subDescription == null) {
 				log.warn("NULL: {} {}", subDescription, superDescription);
 			}
-			DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(subDescription, superDescription);
-			dl_onto.addAssertion(inc);
+
+			if (!(superDescription instanceof QualifiedExistentialConceptDescription)) {
+				DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(subDescription, superDescription);
+				dl_onto.addAssertion(inc);
+			} else {
+				log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
+				/*
+				 * We found an existential, we need to get an auxiliary set of
+				 * subClassAssertion
+				 */
+				List<PositiveInclusion> aux = auxiliaryAssertions.get(superDescription);
+				if (aux == null) {
+					/*
+					 * no aux subclass assertions found for this exists R.A,
+					 * creating a new one
+					 */
+					QualifiedExistentialConceptDescription eR = (QualifiedExistentialConceptDescription) superDescription;
+					Predicate role = eR.getPredicate();
+					AtomicConceptDescription filler = eR.getFiller();
+
+					RoleDescription auxRole = descFactory.getRoleDescription(predicateFactory.getPredicate(
+							URI.create(AUXROLEURI + auxRoleCounter), 2));
+					auxRoleCounter += 1;
+
+					/* Creating the new subrole assertions */
+					DLLiterRoleInclusionImpl subrole = new DLLiterRoleInclusionImpl(auxRole, descFactory.getRoleDescription(role,
+							eR.isInverse()));
+					/* Creatin the range assertion */
+					DLLiterConceptInclusionImpl subclass = new DLLiterConceptInclusionImpl(descFactory.getExistentialConceptDescription(
+							auxRole.getPredicate(), true), filler);
+					aux = new LinkedList<PositiveInclusion>();
+					aux.add(subclass);
+					aux.add(subrole);
+
+					dl_onto.addAssertion(subclass);
+					dl_onto.addAssertion(subrole);
+				}
+
+				DLLiterRoleInclusionImpl roleinclusion = (DLLiterRoleInclusionImpl) aux.get(1);
+				RoleDescription role = roleinclusion.getIncluded();
+				ExistentialConceptDescription domain = descFactory.getExistentialConceptDescription(role.getPredicate(), false);
+				/* Taking the domain of the aux role as the including */
+				DLLiterConceptInclusionImpl inc = new DLLiterConceptInclusionImpl(subDescription, domain);
+
+			}
 		}
 	}
 
@@ -392,29 +450,30 @@ public class OWLAPITranslator {
 			for (OWLDescription operand : operands) {
 				result.addAll(getSuperclassExpressions(operand));
 			}
-		} if (owlExpression instanceof OWLObjectSomeRestriction) {
+		} else if (owlExpression instanceof OWLObjectSomeRestriction) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
-			
+
 			OWLObjectSomeRestriction someexp = (OWLObjectSomeRestriction) owlExpression;
 			OWLObjectPropertyExpression property = someexp.getProperty();
 			OWLDescription filler = someexp.getFiller();
 			if (!(filler instanceof OWLClass)) {
 				throw new TranslationException();
 			}
-			
+
 			if (filler.isOWLThing()) {
 				result.add(getSubclassExpression(owlExpression));
 			} else {
 				RoleDescription role = getRoleExpression(property);
-				ConceptDescription cd = descFactory.getExistentialConceptDescription(role.getPredicate(), role.isInverse(), (AtomicConceptDescription)getSubclassExpression(filler));
-				result.add(cd);	
+				ConceptDescription cd = descFactory.getExistentialConceptDescription(role.getPredicate(), role.isInverse(),
+						(AtomicConceptDescription) getSubclassExpression(filler));
+				result.add(cd);
 			}
-			
-		} if (owlExpression instanceof OWLDataSomeRestriction) {
+
+		} else if (owlExpression instanceof OWLDataSomeRestriction) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
-			
+
 			OWLDataSomeRestriction someexp = (OWLDataSomeRestriction) owlExpression;
 			OWLDataPropertyExpression property = someexp.getProperty();
 			OWLDataRange filler = someexp.getFiller();
@@ -422,10 +481,10 @@ public class OWLAPITranslator {
 				log.warn("WARNING: Found typed existential data property. Typing will be ignored: {}", owlExpression.toString());
 			}
 			RoleDescription role = getRoleExpression(property);
-			
+
 			ConceptDescription cd = descFactory.getExistentialConceptDescription(role.getPredicate(), role.isInverse());
 			result.add(cd);
-			
+
 		} else {
 			result.add(getSubclassExpression(owlExpression));
 		}
