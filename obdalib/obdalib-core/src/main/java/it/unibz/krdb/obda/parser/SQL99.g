@@ -83,6 +83,7 @@ predicate
   
 comparison_predicate
   : column_reference comp_op value
+  | column_reference comp_op column_reference
   ;
 
 comp_op
@@ -132,7 +133,7 @@ identifier
   ;
 
 value
-  : STRING 
+  : NUMERIC 
   | STRING_WITH_QUOTE
   ;
 
@@ -236,6 +237,8 @@ fragment DIGIT: '0'..'9';
 fragment ALPHANUM: (ALPHA|DIGIT);
 
 fragment CHAR: (ALPHANUM|UNDERSCORE|DASH);
+
+NUMERIC: DIGIT+;
 
 STRING: CHAR*;
 
