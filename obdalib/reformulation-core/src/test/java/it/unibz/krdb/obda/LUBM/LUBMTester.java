@@ -18,16 +18,41 @@ public class LUBMTester {
 
     static long starttime;
     static long endtime;
+    static String dataDirectory = "./";
 
 
     static String[] queries = {
-            "SELECT $a WHERE {$a ub:worksFor $b. $b ub:affiliatedOrganizationOf $c }"
+            "SELECT ?a WHERE {?a :worksFor ?b . ?b :affiliatedOrganizationOf ?c }",
+            "SELECT ?a ?b WHERE {?a rdf:type :Person . ?a :teacherOf ?b . ?b rdf:type :Course }",
+            "SELECT ?a ?b ?c WHERE {" +
+                    " ?a rdf:type :Student . ?a :advisor ?b . " +
+                    " ?b rdf:type :FacultyStaff . ?a :takesCourse ?c . " +
+                    " ?b :teacherOf ?c . ?c rdf:type :Course }",
+            "SELECT ?a ?b WHERE {?a rdf:type :Person . ?a :worksFor ?b . ?b rdf:type :Organization}",
+            "SELECT ?a WHERE {" +
+                    " ?a rdf:type :Person . ?a :worksFor ?b . " +
+                    " ?b rdf:type :University . ?b :hasAlumnus ?a }"
     };
 
 
     public static void main(String[] args) throws Exception {
+
+        // Prepare reasoner
+        DataQueryReasoner reasoner = TBoxLoader.loadReasoner(dataDirectory);
+
+        for (String query : queries) {
+            starttime = System.nanoTime();
+            Set<String> res = execute(query, reasoner);
+            endtime = System.nanoTime();
+            log.info("Result size {}", res.size());
+            log.info("Executing query {} took: {}", query, (endtime - starttime) * 1.0e-9);
+        }
+
+    }
+
+    private static void dumpData() throws Exception {
+
         int universityCount = 1;
-        String dataDirectory = "./";
 
         starttime = System.nanoTime();
         DLLiterOntology ontology = TBoxLoader.loadOnto(dataDirectory);
@@ -48,17 +73,6 @@ public class LUBMTester {
         loader.recreateDB();
         loader.loadData();
         loader.makeIndexes();
-
-        // Prepare reasoner
-        DataQueryReasoner reasoner = TBoxLoader.loadReasoner(dataDirectory);
-
-        for (String query : queries) {
-            starttime = System.nanoTime();
-            Set<String> res = execute(query, reasoner);
-            endtime = System.nanoTime();
-            log.info("Executing query {} took: {}", query, (endtime - starttime) * 1.0e-9);
-        }
-
     }
 
     private static Set<String> execute(String query, DataQueryReasoner reasoner) throws Exception {
@@ -101,6 +115,5 @@ public class LUBMTester {
 
         return queryString;
     }
-
 
 }

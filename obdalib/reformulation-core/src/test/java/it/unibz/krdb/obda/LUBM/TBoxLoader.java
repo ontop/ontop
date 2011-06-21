@@ -44,7 +44,7 @@ public class TBoxLoader {
     public static DataQueryReasoner loadReasoner(String dataDir) throws OWLOntologyCreationException {
         String owlfile = dataDir + "univ-bench.owl";
         final long startTime = System.nanoTime();
-
+        ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
         OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
         OBDAModel apic = obdafac.getOBDAModel();
         PrefixManager man = apic.getPrefixManager();
