@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:50:56 SQL99.g 2011-06-21 10:13:26
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 SQL99.g 2011-06-21 16:24:47
 
 package it.unibz.krdb.obda.parser;
 
@@ -35,47 +35,49 @@ public class SQL99Lexer extends Lexer {
     public static final int NOT=26;
     public static final int NULL=27;
     public static final int IN=28;
-    public static final int JOIN=29;
-    public static final int STRING=30;
-    public static final int STRING_WITH_QUOTE=31;
-    public static final int TRUE=32;
-    public static final int FALSE=33;
-    public static final int NUMERIC=34;
-    public static final int EQUALS=35;
-    public static final int LESS=36;
-    public static final int GREATER=37;
-    public static final int ORDER=38;
-    public static final int BY=39;
-    public static final int ON=40;
-    public static final int LEFT=41;
-    public static final int RIGHT=42;
-    public static final int SEMI=43;
-    public static final int LSQ_BRACKET=44;
-    public static final int RSQ_BRACKET=45;
-    public static final int QUESTION=46;
-    public static final int DOLLAR=47;
-    public static final int QUOTE_DOUBLE=48;
-    public static final int QUOTE_SINGLE=49;
-    public static final int APOSTROPHE=50;
-    public static final int UNDERSCORE=51;
-    public static final int DASH=52;
-    public static final int AMPERSAND=53;
-    public static final int AT=54;
-    public static final int EXCLAMATION=55;
-    public static final int HASH=56;
-    public static final int PERCENT=57;
-    public static final int PLUS=58;
-    public static final int COLON=59;
-    public static final int SLASH=60;
-    public static final int DOUBLE_SLASH=61;
-    public static final int BACKSLASH=62;
-    public static final int TILDE=63;
-    public static final int CARET=64;
-    public static final int ALPHA=65;
-    public static final int DIGIT=66;
-    public static final int ALPHANUM=67;
-    public static final int CHAR=68;
-    public static final int WS=69;
+    public static final int GROUP=29;
+    public static final int BY=30;
+    public static final int JOIN=31;
+    public static final int STRING=32;
+    public static final int STRING_WITH_QUOTE_DOUBLE=33;
+    public static final int TRUE=34;
+    public static final int FALSE=35;
+    public static final int NUMERIC=36;
+    public static final int STRING_WITH_QUOTE=37;
+    public static final int EQUALS=38;
+    public static final int LESS=39;
+    public static final int GREATER=40;
+    public static final int ORDER=41;
+    public static final int ON=42;
+    public static final int LEFT=43;
+    public static final int RIGHT=44;
+    public static final int SEMI=45;
+    public static final int LSQ_BRACKET=46;
+    public static final int RSQ_BRACKET=47;
+    public static final int QUESTION=48;
+    public static final int DOLLAR=49;
+    public static final int QUOTE_DOUBLE=50;
+    public static final int QUOTE_SINGLE=51;
+    public static final int APOSTROPHE=52;
+    public static final int UNDERSCORE=53;
+    public static final int DASH=54;
+    public static final int AMPERSAND=55;
+    public static final int AT=56;
+    public static final int EXCLAMATION=57;
+    public static final int HASH=58;
+    public static final int PERCENT=59;
+    public static final int PLUS=60;
+    public static final int COLON=61;
+    public static final int SLASH=62;
+    public static final int DOUBLE_SLASH=63;
+    public static final int BACKSLASH=64;
+    public static final int TILDE=65;
+    public static final int CARET=66;
+    public static final int ALPHA=67;
+    public static final int DIGIT=68;
+    public static final int ALPHANUM=69;
+    public static final int CHAR=70;
+    public static final int WS=71;
 
     // delegates
     // delegators
@@ -95,8 +97,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SELECT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:217:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // SQL99.g:217:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // SQL99.g:254:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // SQL99.g:254:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -168,8 +170,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DISTINCT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:219:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // SQL99.g:219:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // SQL99.g:256:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // SQL99.g:256:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
@@ -259,8 +261,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ALL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:221:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:221:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // SQL99.g:258:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // SQL99.g:258:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -305,8 +307,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AVG;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:223:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
-            // SQL99.g:223:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
+            // SQL99.g:260:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
+            // SQL99.g:260:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -351,8 +353,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MAX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:225:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
-            // SQL99.g:225:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
+            // SQL99.g:262:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
+            // SQL99.g:262:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
@@ -397,8 +399,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:227:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:227:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // SQL99.g:264:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // SQL99.g:264:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
@@ -443,8 +445,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SUM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:229:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
-            // SQL99.g:229:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
+            // SQL99.g:266:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
+            // SQL99.g:266:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -489,8 +491,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EVERY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:231:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
-            // SQL99.g:231:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
+            // SQL99.g:268:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
+            // SQL99.g:268:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
@@ -553,8 +555,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ANY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:233:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
-            // SQL99.g:233:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
+            // SQL99.g:270:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
+            // SQL99.g:270:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -599,8 +601,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SOME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:235:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
-            // SQL99.g:235:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
+            // SQL99.g:272:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
+            // SQL99.g:272:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -654,8 +656,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COUNT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:237:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
-            // SQL99.g:237:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
+            // SQL99.g:274:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
+            // SQL99.g:274:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
                 input.consume();
@@ -718,8 +720,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FROM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:239:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
-            // SQL99.g:239:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
+            // SQL99.g:276:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
+            // SQL99.g:276:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -773,8 +775,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WHERE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:241:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
-            // SQL99.g:241:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
+            // SQL99.g:278:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
+            // SQL99.g:278:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='W'||input.LA(1)=='w' ) {
                 input.consume();
@@ -837,8 +839,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:243:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
-            // SQL99.g:243:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
+            // SQL99.g:280:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
+            // SQL99.g:280:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -883,8 +885,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:245:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
-            // SQL99.g:245:5: ( 'O' | 'o' ) ( 'R' | 'r' )
+            // SQL99.g:282:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
+            // SQL99.g:282:5: ( 'O' | 'o' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -920,8 +922,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:247:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
-            // SQL99.g:247:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
+            // SQL99.g:284:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
+            // SQL99.g:284:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -966,8 +968,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ORDER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:249:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:249:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // SQL99.g:286:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // SQL99.g:286:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1025,13 +1027,77 @@ public class SQL99Lexer extends Lexer {
     }
     // $ANTLR end "ORDER"
 
+    // $ANTLR start "GROUP"
+    public final void mGROUP() throws RecognitionException {
+        try {
+            int _type = GROUP;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // SQL99.g:288:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
+            // SQL99.g:288:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
+            {
+            if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "GROUP"
+
     // $ANTLR start "BY"
     public final void mBY() throws RecognitionException {
         try {
             int _type = BY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:251:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
-            // SQL99.g:251:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
+            // SQL99.g:290:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
+            // SQL99.g:290:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
@@ -1067,8 +1133,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:253:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
-            // SQL99.g:253:5: ( 'A' | 'a' ) ( 'S' | 's' )
+            // SQL99.g:292:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
+            // SQL99.g:292:5: ( 'A' | 'a' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -1104,8 +1170,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = JOIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:255:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:255:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // SQL99.g:294:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // SQL99.g:294:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='J'||input.LA(1)=='j' ) {
                 input.consume();
@@ -1159,8 +1225,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:257:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // SQL99.g:257:5: ( 'O' | 'o' ) ( 'N' | 'n' )
+            // SQL99.g:296:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // SQL99.g:296:5: ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1196,8 +1262,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:259:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:259:5: ( 'I' | 'i' ) ( 'N' | 'n' )
+            // SQL99.g:298:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // SQL99.g:298:5: ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1233,8 +1299,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LEFT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:261:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
-            // SQL99.g:261:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
+            // SQL99.g:300:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
+            // SQL99.g:300:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
@@ -1288,8 +1354,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RIGHT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:263:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
-            // SQL99.g:263:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
+            // SQL99.g:302:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
+            // SQL99.g:302:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
@@ -1352,8 +1418,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:265:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
-            // SQL99.g:265:5: ( 'I' | 'i' ) ( 'S' | 's' )
+            // SQL99.g:304:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
+            // SQL99.g:304:5: ( 'I' | 'i' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1389,8 +1455,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:267:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:267:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // SQL99.g:306:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // SQL99.g:306:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -1444,8 +1510,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FALSE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:269:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // SQL99.g:269:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // SQL99.g:308:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // SQL99.g:308:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -1508,8 +1574,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TRUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:271:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-            // SQL99.g:271:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            // SQL99.g:310:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // SQL99.g:310:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
@@ -1563,8 +1629,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:273:5: ( ';' )
-            // SQL99.g:273:16: ';'
+            // SQL99.g:312:5: ( ';' )
+            // SQL99.g:312:16: ';'
             {
             match(';'); 
 
@@ -1583,8 +1649,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:274:4: ( '.' )
-            // SQL99.g:274:16: '.'
+            // SQL99.g:313:4: ( '.' )
+            // SQL99.g:313:16: '.'
             {
             match('.'); 
 
@@ -1603,8 +1669,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:275:6: ( ',' )
-            // SQL99.g:275:16: ','
+            // SQL99.g:314:6: ( ',' )
+            // SQL99.g:314:16: ','
             {
             match(','); 
 
@@ -1623,8 +1689,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:276:12: ( '[' )
-            // SQL99.g:276:16: '['
+            // SQL99.g:315:12: ( '[' )
+            // SQL99.g:315:16: '['
             {
             match('['); 
 
@@ -1643,8 +1709,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:277:12: ( ']' )
-            // SQL99.g:277:16: ']'
+            // SQL99.g:316:12: ( ']' )
+            // SQL99.g:316:16: ']'
             {
             match(']'); 
 
@@ -1663,8 +1729,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:278:7: ( '(' )
-            // SQL99.g:278:16: '('
+            // SQL99.g:317:7: ( '(' )
+            // SQL99.g:317:16: '('
             {
             match('('); 
 
@@ -1683,8 +1749,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:279:7: ( ')' )
-            // SQL99.g:279:16: ')'
+            // SQL99.g:318:7: ( ')' )
+            // SQL99.g:318:16: ')'
             {
             match(')'); 
 
@@ -1703,8 +1769,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:280:9: ( '?' )
-            // SQL99.g:280:16: '?'
+            // SQL99.g:319:9: ( '?' )
+            // SQL99.g:319:16: '?'
             {
             match('?'); 
 
@@ -1723,8 +1789,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:281:7: ( '$' )
-            // SQL99.g:281:16: '$'
+            // SQL99.g:320:7: ( '$' )
+            // SQL99.g:320:16: '$'
             {
             match('$'); 
 
@@ -1743,8 +1809,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:282:13: ( '\"' )
-            // SQL99.g:282:16: '\"'
+            // SQL99.g:321:13: ( '\"' )
+            // SQL99.g:321:16: '\"'
             {
             match('\"'); 
 
@@ -1763,8 +1829,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:283:13: ( '\\'' )
-            // SQL99.g:283:16: '\\''
+            // SQL99.g:322:13: ( '\\'' )
+            // SQL99.g:322:16: '\\''
             {
             match('\''); 
 
@@ -1783,8 +1849,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:284:11: ( '`' )
-            // SQL99.g:284:16: '`'
+            // SQL99.g:323:11: ( '`' )
+            // SQL99.g:323:16: '`'
             {
             match('`'); 
 
@@ -1803,8 +1869,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:285:11: ( '_' )
-            // SQL99.g:285:16: '_'
+            // SQL99.g:324:11: ( '_' )
+            // SQL99.g:324:16: '_'
             {
             match('_'); 
 
@@ -1823,8 +1889,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:286:5: ( '-' )
-            // SQL99.g:286:16: '-'
+            // SQL99.g:325:5: ( '-' )
+            // SQL99.g:325:16: '-'
             {
             match('-'); 
 
@@ -1843,8 +1909,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:287:9: ( '*' )
-            // SQL99.g:287:16: '*'
+            // SQL99.g:326:9: ( '*' )
+            // SQL99.g:326:16: '*'
             {
             match('*'); 
 
@@ -1863,8 +1929,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:288:10: ( '&' )
-            // SQL99.g:288:16: '&'
+            // SQL99.g:327:10: ( '&' )
+            // SQL99.g:327:16: '&'
             {
             match('&'); 
 
@@ -1883,8 +1949,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:289:3: ( '@' )
-            // SQL99.g:289:16: '@'
+            // SQL99.g:328:3: ( '@' )
+            // SQL99.g:328:16: '@'
             {
             match('@'); 
 
@@ -1903,8 +1969,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:290:12: ( '!' )
-            // SQL99.g:290:16: '!'
+            // SQL99.g:329:12: ( '!' )
+            // SQL99.g:329:16: '!'
             {
             match('!'); 
 
@@ -1923,8 +1989,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:291:5: ( '#' )
-            // SQL99.g:291:16: '#'
+            // SQL99.g:330:5: ( '#' )
+            // SQL99.g:330:16: '#'
             {
             match('#'); 
 
@@ -1943,8 +2009,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:292:8: ( '%' )
-            // SQL99.g:292:16: '%'
+            // SQL99.g:331:8: ( '%' )
+            // SQL99.g:331:16: '%'
             {
             match('%'); 
 
@@ -1963,8 +2029,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:293:5: ( '+' )
-            // SQL99.g:293:16: '+'
+            // SQL99.g:332:5: ( '+' )
+            // SQL99.g:332:16: '+'
             {
             match('+'); 
 
@@ -1983,8 +2049,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:294:7: ( '=' )
-            // SQL99.g:294:16: '='
+            // SQL99.g:333:7: ( '=' )
+            // SQL99.g:333:16: '='
             {
             match('='); 
 
@@ -2003,8 +2069,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:295:6: ( ':' )
-            // SQL99.g:295:16: ':'
+            // SQL99.g:334:6: ( ':' )
+            // SQL99.g:334:16: ':'
             {
             match(':'); 
 
@@ -2023,8 +2089,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:296:5: ( '<' )
-            // SQL99.g:296:16: '<'
+            // SQL99.g:335:5: ( '<' )
+            // SQL99.g:335:16: '<'
             {
             match('<'); 
 
@@ -2043,8 +2109,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:297:8: ( '>' )
-            // SQL99.g:297:16: '>'
+            // SQL99.g:336:8: ( '>' )
+            // SQL99.g:336:16: '>'
             {
             match('>'); 
 
@@ -2063,8 +2129,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:298:6: ( '/' )
-            // SQL99.g:298:16: '/'
+            // SQL99.g:337:6: ( '/' )
+            // SQL99.g:337:16: '/'
             {
             match('/'); 
 
@@ -2083,8 +2149,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:299:13: ( '//' )
-            // SQL99.g:299:16: '//'
+            // SQL99.g:338:13: ( '//' )
+            // SQL99.g:338:16: '//'
             {
             match("//"); 
 
@@ -2104,8 +2170,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:300:10: ( '\\\\' )
-            // SQL99.g:300:16: '\\\\'
+            // SQL99.g:339:10: ( '\\\\' )
+            // SQL99.g:339:16: '\\\\'
             {
             match('\\'); 
 
@@ -2124,8 +2190,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:301:6: ( '~' )
-            // SQL99.g:301:16: '~'
+            // SQL99.g:340:6: ( '~' )
+            // SQL99.g:340:16: '~'
             {
             match('~'); 
 
@@ -2144,8 +2210,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:302:6: ( '^' )
-            // SQL99.g:302:16: '^'
+            // SQL99.g:341:6: ( '^' )
+            // SQL99.g:341:16: '^'
             {
             match('^'); 
 
@@ -2162,8 +2228,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // SQL99.g:304:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
-            // SQL99.g:304:17: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // SQL99.g:343:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // SQL99.g:343:17: ( 'a' .. 'z' | 'A' .. 'Z' )
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2186,8 +2252,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // SQL99.g:306:15: ( '0' .. '9' )
-            // SQL99.g:306:17: '0' .. '9'
+            // SQL99.g:345:15: ( '0' .. '9' )
+            // SQL99.g:345:17: '0' .. '9'
             {
             matchRange('0','9'); 
 
@@ -2202,8 +2268,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // SQL99.g:308:18: ( ( ALPHA | DIGIT ) )
-            // SQL99.g:308:20: ( ALPHA | DIGIT )
+            // SQL99.g:347:18: ( ( ALPHA | DIGIT ) )
+            // SQL99.g:347:20: ( ALPHA | DIGIT )
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2226,8 +2292,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "CHAR"
     public final void mCHAR() throws RecognitionException {
         try {
-            // SQL99.g:310:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
-            // SQL99.g:310:16: ( ALPHANUM | UNDERSCORE | DASH )
+            // SQL99.g:349:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
+            // SQL99.g:349:16: ( ALPHANUM | UNDERSCORE | DASH )
             {
             if ( input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2252,10 +2318,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NUMERIC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:312:8: ( ( DIGIT )+ )
-            // SQL99.g:312:10: ( DIGIT )+
+            // SQL99.g:351:8: ( ( DIGIT )+ )
+            // SQL99.g:351:10: ( DIGIT )+
             {
-            // SQL99.g:312:10: ( DIGIT )+
+            // SQL99.g:351:10: ( DIGIT )+
             int cnt1=0;
             loop1:
             do {
@@ -2269,7 +2335,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt1) {
             	case 1 :
-            	    // SQL99.g:312:10: DIGIT
+            	    // SQL99.g:351:10: DIGIT
             	    {
             	    mDIGIT(); 
 
@@ -2301,10 +2367,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = STRING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:314:7: ( ( CHAR )* )
-            // SQL99.g:314:9: ( CHAR )*
+            // SQL99.g:353:7: ( ( CHAR )* )
+            // SQL99.g:353:9: ( CHAR )*
             {
-            // SQL99.g:314:9: ( CHAR )*
+            // SQL99.g:353:9: ( CHAR )*
             loop2:
             do {
                 int alt2=2;
@@ -2317,7 +2383,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt2) {
             	case 1 :
-            	    // SQL99.g:314:9: CHAR
+            	    // SQL99.g:353:9: CHAR
             	    {
             	    mCHAR(); 
 
@@ -2340,24 +2406,16 @@ public class SQL99Lexer extends Lexer {
     }
     // $ANTLR end "STRING"
 
-    // $ANTLR start "STRING_WITH_QUOTE"
-    public final void mSTRING_WITH_QUOTE() throws RecognitionException {
+    // $ANTLR start "STRING_WITH_QUOTE_DOUBLE"
+    public final void mSTRING_WITH_QUOTE_DOUBLE() throws RecognitionException {
         try {
-            int _type = STRING_WITH_QUOTE;
+            int _type = STRING_WITH_QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:316:18: ( ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE ) )
-            // SQL99.g:316:20: ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE )
+            // SQL99.g:355:25: ( QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE )
+            // SQL99.g:355:27: QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE
             {
-            if ( input.LA(1)=='\"'||input.LA(1)=='\'' ) {
-                input.consume();
-
-            }
-            else {
-                MismatchedSetException mse = new MismatchedSetException(null,input);
-                recover(mse);
-                throw mse;}
-
-            // SQL99.g:316:48: ( CHAR )*
+            mQUOTE_DOUBLE(); 
+            // SQL99.g:355:40: ( CHAR )*
             loop3:
             do {
                 int alt3=2;
@@ -2370,7 +2428,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt3) {
             	case 1 :
-            	    // SQL99.g:316:48: CHAR
+            	    // SQL99.g:355:40: CHAR
             	    {
             	    mCHAR(); 
 
@@ -2379,6 +2437,60 @@ public class SQL99Lexer extends Lexer {
 
             	default :
             	    break loop3;
+                }
+            } while (true);
+
+            mQUOTE_DOUBLE(); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end "STRING_WITH_QUOTE_DOUBLE"
+
+    // $ANTLR start "STRING_WITH_QUOTE"
+    public final void mSTRING_WITH_QUOTE() throws RecognitionException {
+        try {
+            int _type = STRING_WITH_QUOTE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // SQL99.g:357:18: ( ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE ) )
+            // SQL99.g:357:20: ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE )
+            {
+            if ( input.LA(1)=='\"'||input.LA(1)=='\'' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            // SQL99.g:357:48: ( CHAR )*
+            loop4:
+            do {
+                int alt4=2;
+                int LA4_0 = input.LA(1);
+
+                if ( (LA4_0=='-'||(LA4_0>='0' && LA4_0<='9')||(LA4_0>='A' && LA4_0<='Z')||LA4_0=='_'||(LA4_0>='a' && LA4_0<='z')) ) {
+                    alt4=1;
+                }
+
+
+                switch (alt4) {
+            	case 1 :
+            	    // SQL99.g:357:48: CHAR
+            	    {
+            	    mCHAR(); 
+
+            	    }
+            	    break;
+
+            	default :
+            	    break loop4;
                 }
             } while (true);
 
@@ -2407,82 +2519,82 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:318:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // SQL99.g:318:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // SQL99.g:359:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // SQL99.g:359:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // SQL99.g:318:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
-            int cnt5=0;
-            loop5:
+            // SQL99.g:359:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            int cnt6=0;
+            loop6:
             do {
-                int alt5=4;
+                int alt6=4;
                 switch ( input.LA(1) ) {
                 case ' ':
                     {
-                    alt5=1;
+                    alt6=1;
                     }
                     break;
                 case '\t':
                     {
-                    alt5=2;
+                    alt6=2;
                     }
                     break;
                 case '\n':
                 case '\r':
                     {
-                    alt5=3;
+                    alt6=3;
                     }
                     break;
 
                 }
 
-                switch (alt5) {
+                switch (alt6) {
             	case 1 :
-            	    // SQL99.g:318:6: ' '
+            	    // SQL99.g:359:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // SQL99.g:318:10: '\\t'
+            	    // SQL99.g:359:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // SQL99.g:318:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // SQL99.g:359:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // SQL99.g:318:15: ( '\\n' | '\\r' ( '\\n' ) )
-            	    int alt4=2;
-            	    int LA4_0 = input.LA(1);
+            	    // SQL99.g:359:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    int alt5=2;
+            	    int LA5_0 = input.LA(1);
 
-            	    if ( (LA4_0=='\n') ) {
-            	        alt4=1;
+            	    if ( (LA5_0=='\n') ) {
+            	        alt5=1;
             	    }
-            	    else if ( (LA4_0=='\r') ) {
-            	        alt4=2;
+            	    else if ( (LA5_0=='\r') ) {
+            	        alt5=2;
             	    }
             	    else {
             	        NoViableAltException nvae =
-            	            new NoViableAltException("", 4, 0, input);
+            	            new NoViableAltException("", 5, 0, input);
 
             	        throw nvae;
             	    }
-            	    switch (alt4) {
+            	    switch (alt5) {
             	        case 1 :
-            	            // SQL99.g:318:16: '\\n'
+            	            // SQL99.g:359:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // SQL99.g:318:21: '\\r' ( '\\n' )
+            	            // SQL99.g:359:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
-            	            // SQL99.g:318:25: ( '\\n' )
-            	            // SQL99.g:318:26: '\\n'
+            	            // SQL99.g:359:25: ( '\\n' )
+            	            // SQL99.g:359:26: '\\n'
             	            {
             	            match('\n'); 
 
@@ -2499,12 +2611,12 @@ public class SQL99Lexer extends Lexer {
             	    break;
 
             	default :
-            	    if ( cnt5 >= 1 ) break loop5;
+            	    if ( cnt6 >= 1 ) break loop6;
                         EarlyExitException eee =
-                            new EarlyExitException(5, input);
+                            new EarlyExitException(6, input);
                         throw eee;
                 }
-                cnt5++;
+                cnt6++;
             } while (true);
 
             _channel=HIDDEN;
@@ -2520,10 +2632,10 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR end "WS"
 
     public void mTokens() throws RecognitionException {
-        // SQL99.g:1:8: ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | BY | AS | JOIN | ON | IN | LEFT | RIGHT | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | NUMERIC | STRING | STRING_WITH_QUOTE | WS )
-        int alt6=62;
-        alt6 = dfa6.predict(input);
-        switch (alt6) {
+        // SQL99.g:1:8: ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | GROUP | BY | AS | JOIN | ON | IN | LEFT | RIGHT | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | NUMERIC | STRING | STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE | WS )
+        int alt7=64;
+        alt7 = dfa7.predict(input);
+        switch (alt7) {
             case 1 :
                 // SQL99.g:1:10: SELECT
                 {
@@ -2644,315 +2756,329 @@ public class SQL99Lexer extends Lexer {
                 }
                 break;
             case 18 :
-                // SQL99.g:1:95: BY
+                // SQL99.g:1:95: GROUP
+                {
+                mGROUP(); 
+
+                }
+                break;
+            case 19 :
+                // SQL99.g:1:101: BY
                 {
                 mBY(); 
 
                 }
                 break;
-            case 19 :
-                // SQL99.g:1:98: AS
+            case 20 :
+                // SQL99.g:1:104: AS
                 {
                 mAS(); 
 
                 }
                 break;
-            case 20 :
-                // SQL99.g:1:101: JOIN
+            case 21 :
+                // SQL99.g:1:107: JOIN
                 {
                 mJOIN(); 
 
                 }
                 break;
-            case 21 :
-                // SQL99.g:1:106: ON
+            case 22 :
+                // SQL99.g:1:112: ON
                 {
                 mON(); 
 
                 }
                 break;
-            case 22 :
-                // SQL99.g:1:109: IN
+            case 23 :
+                // SQL99.g:1:115: IN
                 {
                 mIN(); 
 
                 }
                 break;
-            case 23 :
-                // SQL99.g:1:112: LEFT
+            case 24 :
+                // SQL99.g:1:118: LEFT
                 {
                 mLEFT(); 
 
                 }
                 break;
-            case 24 :
-                // SQL99.g:1:117: RIGHT
+            case 25 :
+                // SQL99.g:1:123: RIGHT
                 {
                 mRIGHT(); 
 
                 }
                 break;
-            case 25 :
-                // SQL99.g:1:123: IS
+            case 26 :
+                // SQL99.g:1:129: IS
                 {
                 mIS(); 
 
                 }
                 break;
-            case 26 :
-                // SQL99.g:1:126: NULL
+            case 27 :
+                // SQL99.g:1:132: NULL
                 {
                 mNULL(); 
 
                 }
                 break;
-            case 27 :
-                // SQL99.g:1:131: FALSE
+            case 28 :
+                // SQL99.g:1:137: FALSE
                 {
                 mFALSE(); 
 
                 }
                 break;
-            case 28 :
-                // SQL99.g:1:137: TRUE
+            case 29 :
+                // SQL99.g:1:143: TRUE
                 {
                 mTRUE(); 
 
                 }
                 break;
-            case 29 :
-                // SQL99.g:1:142: SEMI
+            case 30 :
+                // SQL99.g:1:148: SEMI
                 {
                 mSEMI(); 
 
                 }
                 break;
-            case 30 :
-                // SQL99.g:1:147: DOT
+            case 31 :
+                // SQL99.g:1:153: DOT
                 {
                 mDOT(); 
 
                 }
                 break;
-            case 31 :
-                // SQL99.g:1:151: COMMA
+            case 32 :
+                // SQL99.g:1:157: COMMA
                 {
                 mCOMMA(); 
 
                 }
                 break;
-            case 32 :
-                // SQL99.g:1:157: LSQ_BRACKET
+            case 33 :
+                // SQL99.g:1:163: LSQ_BRACKET
                 {
                 mLSQ_BRACKET(); 
 
                 }
                 break;
-            case 33 :
-                // SQL99.g:1:169: RSQ_BRACKET
+            case 34 :
+                // SQL99.g:1:175: RSQ_BRACKET
                 {
                 mRSQ_BRACKET(); 
 
                 }
                 break;
-            case 34 :
-                // SQL99.g:1:181: LPAREN
+            case 35 :
+                // SQL99.g:1:187: LPAREN
                 {
                 mLPAREN(); 
 
                 }
                 break;
-            case 35 :
-                // SQL99.g:1:188: RPAREN
+            case 36 :
+                // SQL99.g:1:194: RPAREN
                 {
                 mRPAREN(); 
 
                 }
                 break;
-            case 36 :
-                // SQL99.g:1:195: QUESTION
+            case 37 :
+                // SQL99.g:1:201: QUESTION
                 {
                 mQUESTION(); 
 
                 }
                 break;
-            case 37 :
-                // SQL99.g:1:204: DOLLAR
+            case 38 :
+                // SQL99.g:1:210: DOLLAR
                 {
                 mDOLLAR(); 
 
                 }
                 break;
-            case 38 :
-                // SQL99.g:1:211: QUOTE_DOUBLE
+            case 39 :
+                // SQL99.g:1:217: QUOTE_DOUBLE
                 {
                 mQUOTE_DOUBLE(); 
 
                 }
                 break;
-            case 39 :
-                // SQL99.g:1:224: QUOTE_SINGLE
+            case 40 :
+                // SQL99.g:1:230: QUOTE_SINGLE
                 {
                 mQUOTE_SINGLE(); 
 
                 }
                 break;
-            case 40 :
-                // SQL99.g:1:237: APOSTROPHE
+            case 41 :
+                // SQL99.g:1:243: APOSTROPHE
                 {
                 mAPOSTROPHE(); 
 
                 }
                 break;
-            case 41 :
-                // SQL99.g:1:248: UNDERSCORE
+            case 42 :
+                // SQL99.g:1:254: UNDERSCORE
                 {
                 mUNDERSCORE(); 
 
                 }
                 break;
-            case 42 :
-                // SQL99.g:1:259: DASH
+            case 43 :
+                // SQL99.g:1:265: DASH
                 {
                 mDASH(); 
 
                 }
                 break;
-            case 43 :
-                // SQL99.g:1:264: ASTERISK
+            case 44 :
+                // SQL99.g:1:270: ASTERISK
                 {
                 mASTERISK(); 
 
                 }
                 break;
-            case 44 :
-                // SQL99.g:1:273: AMPERSAND
+            case 45 :
+                // SQL99.g:1:279: AMPERSAND
                 {
                 mAMPERSAND(); 
 
                 }
                 break;
-            case 45 :
-                // SQL99.g:1:283: AT
+            case 46 :
+                // SQL99.g:1:289: AT
                 {
                 mAT(); 
 
                 }
                 break;
-            case 46 :
-                // SQL99.g:1:286: EXCLAMATION
+            case 47 :
+                // SQL99.g:1:292: EXCLAMATION
                 {
                 mEXCLAMATION(); 
 
                 }
                 break;
-            case 47 :
-                // SQL99.g:1:298: HASH
+            case 48 :
+                // SQL99.g:1:304: HASH
                 {
                 mHASH(); 
 
                 }
                 break;
-            case 48 :
-                // SQL99.g:1:303: PERCENT
+            case 49 :
+                // SQL99.g:1:309: PERCENT
                 {
                 mPERCENT(); 
 
                 }
                 break;
-            case 49 :
-                // SQL99.g:1:311: PLUS
+            case 50 :
+                // SQL99.g:1:317: PLUS
                 {
                 mPLUS(); 
 
                 }
                 break;
-            case 50 :
-                // SQL99.g:1:316: EQUALS
+            case 51 :
+                // SQL99.g:1:322: EQUALS
                 {
                 mEQUALS(); 
 
                 }
                 break;
-            case 51 :
-                // SQL99.g:1:323: COLON
+            case 52 :
+                // SQL99.g:1:329: COLON
                 {
                 mCOLON(); 
 
                 }
                 break;
-            case 52 :
-                // SQL99.g:1:329: LESS
+            case 53 :
+                // SQL99.g:1:335: LESS
                 {
                 mLESS(); 
 
                 }
                 break;
-            case 53 :
-                // SQL99.g:1:334: GREATER
+            case 54 :
+                // SQL99.g:1:340: GREATER
                 {
                 mGREATER(); 
 
                 }
                 break;
-            case 54 :
-                // SQL99.g:1:342: SLASH
+            case 55 :
+                // SQL99.g:1:348: SLASH
                 {
                 mSLASH(); 
 
                 }
                 break;
-            case 55 :
-                // SQL99.g:1:348: DOUBLE_SLASH
+            case 56 :
+                // SQL99.g:1:354: DOUBLE_SLASH
                 {
                 mDOUBLE_SLASH(); 
 
                 }
                 break;
-            case 56 :
-                // SQL99.g:1:361: BACKSLASH
+            case 57 :
+                // SQL99.g:1:367: BACKSLASH
                 {
                 mBACKSLASH(); 
 
                 }
                 break;
-            case 57 :
-                // SQL99.g:1:371: TILDE
+            case 58 :
+                // SQL99.g:1:377: TILDE
                 {
                 mTILDE(); 
 
                 }
                 break;
-            case 58 :
-                // SQL99.g:1:377: CARET
+            case 59 :
+                // SQL99.g:1:383: CARET
                 {
                 mCARET(); 
 
                 }
                 break;
-            case 59 :
-                // SQL99.g:1:383: NUMERIC
+            case 60 :
+                // SQL99.g:1:389: NUMERIC
                 {
                 mNUMERIC(); 
 
                 }
                 break;
-            case 60 :
-                // SQL99.g:1:391: STRING
+            case 61 :
+                // SQL99.g:1:397: STRING
                 {
                 mSTRING(); 
 
                 }
                 break;
-            case 61 :
-                // SQL99.g:1:398: STRING_WITH_QUOTE
+            case 62 :
+                // SQL99.g:1:404: STRING_WITH_QUOTE_DOUBLE
+                {
+                mSTRING_WITH_QUOTE_DOUBLE(); 
+
+                }
+                break;
+            case 63 :
+                // SQL99.g:1:429: STRING_WITH_QUOTE
                 {
                 mSTRING_WITH_QUOTE(); 
 
                 }
                 break;
-            case 62 :
-                // SQL99.g:1:416: WS
+            case 64 :
+                // SQL99.g:1:447: WS
                 {
                 mWS(); 
 
@@ -2964,77 +3090,82 @@ public class SQL99Lexer extends Lexer {
     }
 
 
-    protected DFA6 dfa6 = new DFA6(this);
-    static final String DFA6_eotS =
-        "\21\57\11\uffff\1\113\1\115\1\uffff\1\116\1\117\13\uffff\1\121\3"+
-        "\uffff\1\122\2\uffff\7\57\1\133\7\57\1\144\1\145\2\57\1\150\1\57"+
-        "\1\152\1\153\3\57\10\uffff\1\57\1\160\2\57\1\163\1\164\1\165\1\166"+
-        "\1\uffff\1\167\1\170\6\57\2\uffff\1\177\1\57\1\uffff\1\57\2\uffff"+
-        "\4\57\1\uffff\1\u0086\1\57\6\uffff\2\57\1\u008a\3\57\1\uffff\1\u008e"+
-        "\1\u008f\1\u0090\1\57\1\u0092\1\57\1\uffff\1\57\1\u0095\1\u0096"+
-        "\1\uffff\1\u0097\1\u0098\1\u0099\3\uffff\1\u009a\1\uffff\1\u009b"+
-        "\1\57\7\uffff\1\57\1\u009e\1\uffff";
-    static final String DFA6_eofS =
-        "\u009f\uffff";
-    static final String DFA6_minS =
+    protected DFA7 dfa7 = new DFA7(this);
+    static final String DFA7_eotS =
+        "\22\60\11\uffff\1\115\1\121\1\uffff\1\122\1\123\13\uffff\1\125\3"+
+        "\uffff\1\126\2\uffff\7\60\1\137\7\60\1\150\1\151\3\60\1\155\1\60"+
+        "\1\157\1\160\3\60\12\uffff\1\60\1\166\2\60\1\171\1\172\1\173\1\174"+
+        "\1\uffff\1\175\1\176\6\60\2\uffff\1\u0085\2\60\1\uffff\1\60\2\uffff"+
+        "\3\60\1\uffff\1\60\1\uffff\1\u008d\1\60\6\uffff\2\60\1\u0091\3\60"+
+        "\1\uffff\1\u0095\1\60\1\u0097\1\u0098\1\60\1\u009a\1\60\1\uffff"+
+        "\1\60\1\u009d\1\u009e\1\uffff\1\u009f\1\u00a0\1\u00a1\1\uffff\1"+
+        "\u00a2\2\uffff\1\u00a3\1\uffff\1\u00a4\1\60\10\uffff\1\60\1\u00a7"+
+        "\1\uffff";
+    static final String DFA7_eofS =
+        "\u00a8\uffff";
+    static final String DFA7_minS =
         "\1\11\1\105\1\111\1\114\1\101\1\126\1\117\1\101\1\110\1\116\1\117"+
-        "\1\131\1\117\1\116\1\105\1\111\1\122\11\uffff\2\42\1\uffff\2\55"+
-        "\13\uffff\1\57\3\uffff\1\55\2\uffff\1\114\2\115\1\123\1\114\1\107"+
-        "\1\104\1\55\1\130\1\116\1\105\1\125\1\117\1\114\1\105\2\55\1\124"+
-        "\1\114\1\55\1\111\2\55\1\106\1\107\1\125\10\uffff\1\105\1\55\1\105"+
-        "\1\124\4\55\1\uffff\2\55\1\122\1\116\1\115\1\123\1\122\1\105\2\uffff"+
-        "\1\55\1\114\1\uffff\1\116\2\uffff\1\124\1\110\1\105\1\103\1\uffff"+
-        "\1\55\1\111\6\uffff\1\131\1\124\1\55\2\105\1\122\1\uffff\3\55\1"+
-        "\124\1\55\1\124\1\uffff\1\116\2\55\1\uffff\3\55\3\uffff\1\55\1\uffff"+
-        "\1\55\1\103\7\uffff\1\124\1\55\1\uffff";
-    static final String DFA6_maxS =
+        "\1\122\1\131\1\117\1\116\1\105\1\111\1\122\11\uffff\2\42\1\uffff"+
+        "\2\55\13\uffff\1\57\3\uffff\1\55\2\uffff\1\114\2\115\1\123\1\114"+
+        "\1\107\1\104\1\55\1\130\1\116\1\105\1\125\1\117\1\114\1\105\2\55"+
+        "\1\124\1\114\1\117\1\55\1\111\2\55\1\106\1\107\1\125\1\uffff\1\42"+
+        "\10\uffff\1\105\1\55\1\105\1\124\4\55\1\uffff\2\55\1\122\1\116\1"+
+        "\115\1\123\1\122\1\105\2\uffff\1\55\1\114\1\125\1\uffff\1\116\2"+
+        "\uffff\1\124\1\110\1\105\1\uffff\1\103\1\uffff\1\55\1\111\6\uffff"+
+        "\1\131\1\124\1\55\2\105\1\122\1\uffff\1\55\1\120\2\55\1\124\1\55"+
+        "\1\124\1\uffff\1\116\2\55\1\uffff\3\55\1\uffff\1\55\2\uffff\1\55"+
+        "\1\uffff\1\55\1\103\10\uffff\1\124\1\55\1\uffff";
+    static final String DFA7_maxS =
         "\1\176\1\165\1\151\1\166\1\151\1\166\1\157\1\162\1\150\1\162\1\165"+
-        "\1\171\1\157\1\163\1\145\1\151\1\162\11\uffff\2\172\1\uffff\2\172"+
-        "\13\uffff\1\57\3\uffff\1\172\2\uffff\1\154\2\155\1\163\1\154\1\147"+
-        "\1\171\1\172\1\170\1\156\1\145\1\165\1\157\1\154\1\145\2\172\1\164"+
-        "\1\154\1\172\1\151\2\172\1\146\1\147\1\165\10\uffff\1\145\1\172"+
-        "\1\145\1\164\4\172\1\uffff\2\172\1\162\1\156\1\155\1\163\1\162\1"+
-        "\145\2\uffff\1\172\1\154\1\uffff\1\156\2\uffff\1\164\1\150\1\145"+
-        "\1\143\1\uffff\1\172\1\151\6\uffff\1\171\1\164\1\172\2\145\1\162"+
-        "\1\uffff\3\172\1\164\1\172\1\164\1\uffff\1\156\2\172\1\uffff\3\172"+
-        "\3\uffff\1\172\1\uffff\1\172\1\143\7\uffff\1\164\1\172\1\uffff";
-    static final String DFA6_acceptS =
-        "\21\uffff\1\35\1\36\1\37\1\40\1\41\1\42\1\43\1\44\1\45\2\uffff\1"+
-        "\50\2\uffff\1\53\1\54\1\55\1\56\1\57\1\60\1\61\1\62\1\63\1\64\1"+
-        "\65\1\uffff\1\70\1\71\1\72\1\uffff\1\74\1\76\32\uffff\1\46\1\75"+
-        "\1\47\1\51\1\52\1\67\1\66\1\73\10\uffff\1\23\10\uffff\1\17\1\25"+
-        "\2\uffff\1\22\1\uffff\1\26\1\31\4\uffff\1\7\2\uffff\1\3\1\4\1\11"+
-        "\1\16\1\5\1\6\6\uffff\1\20\6\uffff\1\12\3\uffff\1\14\3\uffff\1\32"+
-        "\1\24\1\27\1\uffff\1\34\2\uffff\1\10\1\13\1\33\1\15\1\21\1\30\1"+
-        "\1\2\uffff\1\2";
-    static final String DFA6_specialS =
-        "\u009f\uffff}>";
-    static final String[] DFA6_transitionS = {
-            "\2\60\2\uffff\1\60\22\uffff\1\60\1\42\1\32\1\43\1\31\1\44\1"+
-            "\40\1\33\1\26\1\27\1\37\1\45\1\23\1\36\1\22\1\52\12\56\1\47"+
-            "\1\21\1\50\1\46\1\51\1\30\1\41\1\3\1\13\1\6\1\2\1\5\1\7\2\uffff"+
-            "\1\15\1\14\1\uffff\1\16\1\4\1\12\1\11\2\uffff\1\17\1\1\1\20"+
-            "\2\uffff\1\10\3\uffff\1\24\1\53\1\25\1\55\1\35\1\34\1\3\1\13"+
-            "\1\6\1\2\1\5\1\7\2\uffff\1\15\1\14\1\uffff\1\16\1\4\1\12\1\11"+
-            "\2\uffff\1\17\1\1\1\20\2\uffff\1\10\6\uffff\1\54",
-            "\1\61\11\uffff\1\63\5\uffff\1\62\17\uffff\1\61\11\uffff\1\63"+
-            "\5\uffff\1\62",
-            "\1\64\37\uffff\1\64",
-            "\1\65\1\uffff\1\67\4\uffff\1\70\2\uffff\1\66\25\uffff\1\65"+
-            "\1\uffff\1\67\4\uffff\1\70\2\uffff\1\66",
-            "\1\71\7\uffff\1\72\27\uffff\1\71\7\uffff\1\72",
-            "\1\73\37\uffff\1\73",
+        "\1\162\1\171\1\157\1\163\1\145\1\151\1\162\11\uffff\2\172\1\uffff"+
+        "\2\172\13\uffff\1\57\3\uffff\1\172\2\uffff\1\154\2\155\1\163\1\154"+
+        "\1\147\1\171\1\172\1\170\1\156\1\145\1\165\1\157\1\154\1\145\2\172"+
+        "\1\164\1\154\1\157\1\172\1\151\2\172\1\146\1\147\1\165\1\uffff\1"+
+        "\172\10\uffff\1\145\1\172\1\145\1\164\4\172\1\uffff\2\172\1\162"+
+        "\1\156\1\155\1\163\1\162\1\145\2\uffff\1\172\1\154\1\165\1\uffff"+
+        "\1\156\2\uffff\1\164\1\150\1\145\1\uffff\1\143\1\uffff\1\172\1\151"+
+        "\6\uffff\1\171\1\164\1\172\2\145\1\162\1\uffff\1\172\1\160\2\172"+
+        "\1\164\1\172\1\164\1\uffff\1\156\2\172\1\uffff\3\172\1\uffff\1\172"+
+        "\2\uffff\1\172\1\uffff\1\172\1\143\10\uffff\1\164\1\172\1\uffff";
+    static final String DFA7_acceptS =
+        "\22\uffff\1\36\1\37\1\40\1\41\1\42\1\43\1\44\1\45\1\46\2\uffff\1"+
+        "\51\2\uffff\1\54\1\55\1\56\1\57\1\60\1\61\1\62\1\63\1\64\1\65\1"+
+        "\66\1\uffff\1\71\1\72\1\73\1\uffff\1\75\1\100\33\uffff\1\47\1\uffff"+
+        "\1\76\1\77\1\50\1\52\1\53\1\70\1\67\1\74\10\uffff\1\24\10\uffff"+
+        "\1\17\1\26\3\uffff\1\23\1\uffff\1\27\1\32\3\uffff\1\76\1\uffff\1"+
+        "\7\2\uffff\1\3\1\4\1\11\1\16\1\5\1\6\6\uffff\1\20\7\uffff\1\12\3"+
+        "\uffff\1\14\3\uffff\1\33\1\uffff\1\25\1\30\1\uffff\1\35\2\uffff"+
+        "\1\10\1\13\1\34\1\15\1\21\1\22\1\31\1\1\2\uffff\1\2";
+    static final String DFA7_specialS =
+        "\u00a8\uffff}>";
+    static final String[] DFA7_transitionS = {
+            "\2\61\2\uffff\1\61\22\uffff\1\61\1\43\1\33\1\44\1\32\1\45\1"+
+            "\41\1\34\1\27\1\30\1\40\1\46\1\24\1\37\1\23\1\53\12\57\1\50"+
+            "\1\22\1\51\1\47\1\52\1\31\1\42\1\3\1\14\1\6\1\2\1\5\1\7\1\13"+
+            "\1\uffff\1\16\1\15\1\uffff\1\17\1\4\1\12\1\11\2\uffff\1\20\1"+
+            "\1\1\21\2\uffff\1\10\3\uffff\1\25\1\54\1\26\1\56\1\36\1\35\1"+
+            "\3\1\14\1\6\1\2\1\5\1\7\1\13\1\uffff\1\16\1\15\1\uffff\1\17"+
+            "\1\4\1\12\1\11\2\uffff\1\20\1\1\1\21\2\uffff\1\10\6\uffff\1"+
+            "\55",
+            "\1\62\11\uffff\1\64\5\uffff\1\63\17\uffff\1\62\11\uffff\1\64"+
+            "\5\uffff\1\63",
+            "\1\65\37\uffff\1\65",
+            "\1\66\1\uffff\1\70\4\uffff\1\71\2\uffff\1\67\25\uffff\1\66"+
+            "\1\uffff\1\70\4\uffff\1\71\2\uffff\1\67",
+            "\1\72\7\uffff\1\73\27\uffff\1\72\7\uffff\1\73",
             "\1\74\37\uffff\1\74",
-            "\1\76\20\uffff\1\75\16\uffff\1\76\20\uffff\1\75",
-            "\1\77\37\uffff\1\77",
-            "\1\101\3\uffff\1\100\33\uffff\1\101\3\uffff\1\100",
-            "\1\102\5\uffff\1\103\31\uffff\1\102\5\uffff\1\103",
-            "\1\104\37\uffff\1\104",
+            "\1\75\37\uffff\1\75",
+            "\1\77\20\uffff\1\76\16\uffff\1\77\20\uffff\1\76",
+            "\1\100\37\uffff\1\100",
+            "\1\102\3\uffff\1\101\33\uffff\1\102\3\uffff\1\101",
+            "\1\103\5\uffff\1\104\31\uffff\1\103\5\uffff\1\104",
             "\1\105\37\uffff\1\105",
-            "\1\106\4\uffff\1\107\32\uffff\1\106\4\uffff\1\107",
-            "\1\110\37\uffff\1\110",
-            "\1\111\37\uffff\1\111",
+            "\1\106\37\uffff\1\106",
+            "\1\107\37\uffff\1\107",
+            "\1\110\4\uffff\1\111\32\uffff\1\110\4\uffff\1\111",
             "\1\112\37\uffff\1\112",
+            "\1\113\37\uffff\1\113",
+            "\1\114\37\uffff\1\114",
             "",
             "",
             "",
@@ -3044,15 +3175,13 @@ public class SQL99Lexer extends Lexer {
             "",
             "",
             "",
-            "\1\114\4\uffff\1\114\5\uffff\1\114\2\uffff\12\114\7\uffff\32"+
-            "\114\4\uffff\1\114\1\uffff\32\114",
-            "\1\114\4\uffff\1\114\5\uffff\1\114\2\uffff\12\114\7\uffff\32"+
-            "\114\4\uffff\1\114\1\uffff\32\114",
+            "\1\117\4\uffff\1\120\5\uffff\1\116\2\uffff\12\116\7\uffff\32"+
+            "\116\4\uffff\1\116\1\uffff\32\116",
+            "\1\120\4\uffff\1\120\5\uffff\1\120\2\uffff\12\120\7\uffff\32"+
+            "\120\4\uffff\1\120\1\uffff\32\120",
             "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "",
-            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
             "",
             "",
             "",
@@ -3062,114 +3191,124 @@ public class SQL99Lexer extends Lexer {
             "",
             "",
             "",
-            "\1\120",
+            "",
+            "",
+            "\1\124",
             "",
             "",
             "",
-            "\1\57\2\uffff\12\56\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\60\2\uffff\12\57\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
             "",
             "",
-            "\1\123\37\uffff\1\123",
-            "\1\124\37\uffff\1\124",
-            "\1\125\37\uffff\1\125",
-            "\1\126\37\uffff\1\126",
             "\1\127\37\uffff\1\127",
             "\1\130\37\uffff\1\130",
-            "\1\132\24\uffff\1\131\12\uffff\1\132\24\uffff\1\131",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\131\37\uffff\1\131",
+            "\1\132\37\uffff\1\132",
+            "\1\133\37\uffff\1\133",
             "\1\134\37\uffff\1\134",
-            "\1\135\37\uffff\1\135",
-            "\1\136\37\uffff\1\136",
-            "\1\137\37\uffff\1\137",
+            "\1\136\24\uffff\1\135\12\uffff\1\136\24\uffff\1\135",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
             "\1\140\37\uffff\1\140",
             "\1\141\37\uffff\1\141",
             "\1\142\37\uffff\1\142",
-            "\1\57\2\uffff\12\57\7\uffff\3\57\1\143\26\57\4\uffff\1\57\1"+
-            "\uffff\3\57\1\143\26\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\143\37\uffff\1\143",
+            "\1\144\37\uffff\1\144",
+            "\1\145\37\uffff\1\145",
             "\1\146\37\uffff\1\146",
-            "\1\147\37\uffff\1\147",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\151\37\uffff\1\151",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\60\2\uffff\12\60\7\uffff\3\60\1\147\26\60\4\uffff\1\60\1"+
+            "\uffff\3\60\1\147\26\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\152\37\uffff\1\152",
+            "\1\153\37\uffff\1\153",
             "\1\154\37\uffff\1\154",
-            "\1\155\37\uffff\1\155",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
             "\1\156\37\uffff\1\156",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "\1\157\37\uffff\1\157",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
             "\1\161\37\uffff\1\161",
             "\1\162\37\uffff\1\162",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\163\37\uffff\1\163",
             "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\171\37\uffff\1\171",
-            "\1\172\37\uffff\1\172",
-            "\1\173\37\uffff\1\173",
-            "\1\174\37\uffff\1\174",
-            "\1\175\37\uffff\1\175",
-            "\1\176\37\uffff\1\176",
+            "\1\117\4\uffff\1\120\5\uffff\1\116\2\uffff\12\116\7\uffff\32"+
+            "\116\4\uffff\1\116\1\uffff\32\116",
             "",
             "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "\1\165\37\uffff\1\165",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\167\37\uffff\1\167",
+            "\1\170\37\uffff\1\170",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\177\37\uffff\1\177",
             "\1\u0080\37\uffff\1\u0080",
-            "",
             "\1\u0081\37\uffff\1\u0081",
-            "",
-            "",
             "\1\u0082\37\uffff\1\u0082",
             "\1\u0083\37\uffff\1\u0083",
             "\1\u0084\37\uffff\1\u0084",
-            "\1\u0085\37\uffff\1\u0085",
             "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u0086\37\uffff\1\u0086",
             "\1\u0087\37\uffff\1\u0087",
             "",
-            "",
-            "",
-            "",
-            "",
-            "",
             "\1\u0088\37\uffff\1\u0088",
+            "",
+            "",
             "\1\u0089\37\uffff\1\u0089",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\u008a\37\uffff\1\u008a",
             "\1\u008b\37\uffff\1\u008b",
+            "",
             "\1\u008c\37\uffff\1\u008c",
-            "\1\u008d\37\uffff\1\u008d",
             "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\u0091\37\uffff\1\u0091",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u008e\37\uffff\1\u008e",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "\1\u008f\37\uffff\1\u008f",
+            "\1\u0090\37\uffff\1\u0090",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u0092\37\uffff\1\u0092",
             "\1\u0093\37\uffff\1\u0093",
-            "",
             "\1\u0094\37\uffff\1\u0094",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
             "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u0096\37\uffff\1\u0096",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u0099\37\uffff\1\u0099",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u009b\37\uffff\1\u009b",
             "",
-            "",
-            "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
-            "",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
             "\1\u009c\37\uffff\1\u009c",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "",
+            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
+            "\1\u00a5\37\uffff\1\u00a5",
             "",
             "",
             "",
@@ -3177,42 +3316,43 @@ public class SQL99Lexer extends Lexer {
             "",
             "",
             "",
-            "\1\u009d\37\uffff\1\u009d",
-            "\1\57\2\uffff\12\57\7\uffff\32\57\4\uffff\1\57\1\uffff\32\57",
+            "",
+            "\1\u00a6\37\uffff\1\u00a6",
+            "\1\60\2\uffff\12\60\7\uffff\32\60\4\uffff\1\60\1\uffff\32\60",
             ""
     };
 
-    static final short[] DFA6_eot = DFA.unpackEncodedString(DFA6_eotS);
-    static final short[] DFA6_eof = DFA.unpackEncodedString(DFA6_eofS);
-    static final char[] DFA6_min = DFA.unpackEncodedStringToUnsignedChars(DFA6_minS);
-    static final char[] DFA6_max = DFA.unpackEncodedStringToUnsignedChars(DFA6_maxS);
-    static final short[] DFA6_accept = DFA.unpackEncodedString(DFA6_acceptS);
-    static final short[] DFA6_special = DFA.unpackEncodedString(DFA6_specialS);
-    static final short[][] DFA6_transition;
+    static final short[] DFA7_eot = DFA.unpackEncodedString(DFA7_eotS);
+    static final short[] DFA7_eof = DFA.unpackEncodedString(DFA7_eofS);
+    static final char[] DFA7_min = DFA.unpackEncodedStringToUnsignedChars(DFA7_minS);
+    static final char[] DFA7_max = DFA.unpackEncodedStringToUnsignedChars(DFA7_maxS);
+    static final short[] DFA7_accept = DFA.unpackEncodedString(DFA7_acceptS);
+    static final short[] DFA7_special = DFA.unpackEncodedString(DFA7_specialS);
+    static final short[][] DFA7_transition;
 
     static {
-        int numStates = DFA6_transitionS.length;
-        DFA6_transition = new short[numStates][];
+        int numStates = DFA7_transitionS.length;
+        DFA7_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA6_transition[i] = DFA.unpackEncodedString(DFA6_transitionS[i]);
+            DFA7_transition[i] = DFA.unpackEncodedString(DFA7_transitionS[i]);
         }
     }
 
-    class DFA6 extends DFA {
+    class DFA7 extends DFA {
 
-        public DFA6(BaseRecognizer recognizer) {
+        public DFA7(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 6;
-            this.eot = DFA6_eot;
-            this.eof = DFA6_eof;
-            this.min = DFA6_min;
-            this.max = DFA6_max;
-            this.accept = DFA6_accept;
-            this.special = DFA6_special;
-            this.transition = DFA6_transition;
+            this.decisionNumber = 7;
+            this.eot = DFA7_eot;
+            this.eof = DFA7_eof;
+            this.min = DFA7_min;
+            this.max = DFA7_max;
+            this.accept = DFA7_accept;
+            this.special = DFA7_special;
+            this.transition = DFA7_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | BY | AS | JOIN | ON | IN | LEFT | RIGHT | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | NUMERIC | STRING | STRING_WITH_QUOTE | WS );";
+            return "1:1: Tokens : ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | GROUP | BY | AS | JOIN | ON | IN | LEFT | RIGHT | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | NUMERIC | STRING | STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE | WS );";
         }
     }
  

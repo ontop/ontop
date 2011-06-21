@@ -40,16 +40,24 @@ qualified_asterisk
   ;
   
 derived_column
-  : value_expression (AS alias_name)?
+  : value_expression (AS? alias_name)?
   ;  
  
 value_expression
-  : column_reference
-  | set_function_specification
+  : reference_value_expression
+  | collection_value_expression
   ;
-  
+
+reference_value_expression
+  : column_reference
+  ;
+
 column_reference
   : (table_identifier DOT)? column_name
+  ;  
+  
+collection_value_expression
+  : set_function_specification
   ;
 
 set_function_specification
@@ -73,7 +81,7 @@ set_function_op
   ;  
     
 table_expression
-  : from_clause (where_clause)?
+  : from_clause (where_clause)? (group_by_clause)?
   ;
   
 from_clause
@@ -146,12 +154,33 @@ value_list
   : value (COMMA value)*
   ;
 
+group_by_clause
+  : GROUP BY grouping_element_list
+  ;
+
+grouping_element_list
+  : grouping_element (COMMA grouping_element)*
+  ;
+  
+grouping_element
+  : grouping_column_reference
+  | LPAREN grouping_column_reference_list RPAREN 
+  ;
+  
+grouping_column_reference
+  : column_reference
+  ;  
+
+grouping_column_reference_list
+  : column_reference (COMMA column_reference)*
+  ;  
+
 joined_table
   : JOIN
   ;
 
 table_primary
-  : table_name (AS alias_name)?
+  : table_name (AS? alias_name)?
   ; 
  
 table_name
@@ -175,8 +204,16 @@ column_name
   ;
   
 identifier
-  : STRING 
-  | STRING_WITH_QUOTE
+  : regular_identifier 
+  | delimited_identifier
+  ;
+
+regular_identifier
+  : STRING
+  ;
+
+delimited_identifier
+  : STRING_WITH_QUOTE_DOUBLE
   ;
 
 value
@@ -248,6 +285,8 @@ NOT: ('N'|'n')('O'|'o')('T'|'t');
 
 ORDER: ('O'|'o')('R'|'r')('D'|'d')('E'|'e')('R'|'r');
 
+GROUP: ('G'|'g')('R'|'r')('O'|'o')('U'|'u')('P'|'p');
+
 BY:	('B'|'b')('Y'|'y');
 
 AS:	('A'|'a')('S'|'s');
@@ -312,6 +351,8 @@ fragment CHAR: (ALPHANUM|UNDERSCORE|DASH);
 NUMERIC: DIGIT+;
 
 STRING: CHAR*;
+
+STRING_WITH_QUOTE_DOUBLE: QUOTE_DOUBLE CHAR* QUOTE_DOUBLE;
 
 STRING_WITH_QUOTE: (QUOTE_SINGLE|QUOTE_DOUBLE) CHAR* (QUOTE_SINGLE|QUOTE_DOUBLE);
 
