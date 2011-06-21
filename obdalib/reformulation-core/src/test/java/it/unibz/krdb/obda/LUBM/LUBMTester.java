@@ -1,9 +1,8 @@
 package it.unibz.krdb.obda.LUBM;
 
 
-import it.unibz.krdb.obda.model.DataQueryReasoner;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import org.slf4j.Logger;
@@ -18,8 +17,10 @@ public class LUBMTester {
 
     static long starttime;
     static long endtime;
-    static String dataDirectory = "/Users/mariano/Documents/Archive/Work/projects/semantic-index/uba1.7/";
-
+    static String dataDirectory = "./";
+    static TBoxLoader tboxHelper;
+    static OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+    static OBDAModel apic = obdafac.getOBDAModel();
 
     static String[] queries = {
             "SELECT ?a WHERE {?a :worksFor ?b . ?b :affiliatedOrganizationOf ?c }",
@@ -38,7 +39,9 @@ public class LUBMTester {
     public static void main(String[] args) throws Exception {
 
         // Prepare reasoner
-        DataQueryReasoner reasoner = TBoxLoader.loadReasoner(dataDirectory);
+        tboxHelper = new TBoxLoader(dataDirectory);
+
+        DataQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
 
         for (String query : queries) {
             starttime = System.nanoTime();
@@ -55,7 +58,7 @@ public class LUBMTester {
         int universityCount = 1;
 
         starttime = System.nanoTime();
-        DLLiterOntology ontology = TBoxLoader.loadOnto(dataDirectory);
+        DLLiterOntology ontology = tboxHelper.loadOnto();
         DAG dag = new DAG(ontology);
         endtime = System.nanoTime();
         log.info("Building DAG took: {}", (endtime - starttime) * 1.0e-9);
