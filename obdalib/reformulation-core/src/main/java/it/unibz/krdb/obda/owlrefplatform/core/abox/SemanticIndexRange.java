@@ -9,128 +9,136 @@ import java.util.List;
  */
 public class SemanticIndexRange {
 
-	private List<Interval> intervals = new LinkedList<Interval>();
+    private List<Interval> intervals = new LinkedList<Interval>();
 
-	public SemanticIndexRange() {
-	}
+    public SemanticIndexRange() {
+    }
 
-	public SemanticIndexRange(int start, int end) {
-		intervals.add(new Interval(start, end));
-	}
+    public SemanticIndexRange(int start, int end) {
+        intervals.add(new Interval(start, end));
+    }
 
-	public SemanticIndexRange addInterval(int start, int end) {
-		intervals.add(new Interval(start, end));
-		merge();
+    public SemanticIndexRange addInterval(int start, int end) {
+        intervals.add(new Interval(start, end));
+        merge();
 
-		return this;
-	}
+        return this;
+    }
 
-	public SemanticIndexRange addRange(SemanticIndexRange other) {
-		for (Interval it : other.intervals) {
-			intervals.add(it);
-		}
-		merge();
-		return this;
-	}
+    public SemanticIndexRange addRange(SemanticIndexRange other) {
 
-	/**
-	 * Sort in ascending order and collapse overlapping intervals
-	 */
-	private void merge() {
+        if (this.intervals == other.intervals)
+            return this;
 
-		Collections.sort(intervals);
-		List<Interval> new_intervals = new LinkedList<Interval>();
+        for (Interval it : other.intervals) {
+            intervals.add(it);
+        }
+        merge();
+        return this;
+    }
 
-		int min = intervals.get(0).start;
-		int max = intervals.get(0).end;
+    /**
+     * Sort in ascending order and collapse overlapping intervals
+     */
+    private void merge() {
 
-		for (int i = 1; i < intervals.size(); ++i) {
-			Interval item = intervals.get(i);
-			if (item.end > max + 1 && item.start > max + 1) {
-				new_intervals.add(new Interval(min, max));
-				min = item.start;
-			}
-			max = (max > item.end) ? max : item.end;
-		}
-		new_intervals.add(new Interval(min, max));
-		intervals = new_intervals;
-	}
+        Collections.sort(intervals);
+        List<Interval> new_intervals = new LinkedList<Interval>();
 
-	@Override
-	public boolean equals(Object other) {
+        int min = intervals.get(0).start;
+        int max = intervals.get(0).end;
 
-		if (other == null)
-			return false;
-		if (other == this)
-			return true;
-		if (this.getClass() != other.getClass())
-			return false;
-		SemanticIndexRange otherRange = (SemanticIndexRange) other;
+        for (int i = 1; i < intervals.size(); ++i) {
+            Interval item = intervals.get(i);
+            if (item.end > max + 1 && item.start > max + 1) {
+                new_intervals.add(new Interval(min, max));
+                min = item.start;
+            }
+            max = (max > item.end) ? max : item.end;
+        }
+        new_intervals.add(new Interval(min, max));
+        intervals = new_intervals;
+    }
 
-		return this.intervals.equals(otherRange.intervals);
-	}
+    @Override
+    public boolean equals(Object other) {
 
-	@Override
-	public String toString() {
-		return intervals.toString();
-	}
+        if (other == null)
+            return false;
+        if (other == this)
+            return true;
+        if (this.getClass() != other.getClass())
+            return false;
+        SemanticIndexRange otherRange = (SemanticIndexRange) other;
 
-	public List<Interval> getIntervals() {
-		return intervals;
-	}
+        return this.intervals.equals(otherRange.intervals);
+    }
 
-	/**
-	 * Continues interval between 2 points
-	 * @author Sergejs Pugacs
-	 */
-	class Interval implements Comparable<Interval> {
+    @Override
+    public String toString() {
+        return intervals.toString();
+    }
 
-		private int start, end;
+    public List<Interval> getIntervals() {
+        return intervals;
+    }
 
-		public Interval(int start, int end) {
-			this.start = start;
-			this.end = end;
-		}
+    /**
+     * Continues interval between 2 points
+     *
+     * @author Sergejs Pugacs
+     */
+    class Interval implements Comparable<Interval> {
 
-		@Override
-		public boolean equals(Object other) {
+        private int start, end;
 
-			if (other == null)
-				return false;
-			if (other == this)
-				return true;
-			if (this.getClass() != other.getClass())
-				return false;
-			Interval otherInterval = (Interval) other;
+        public Interval(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
 
-			return (this.start == otherInterval.start && this.end == otherInterval.end);
-		}
+        @Override
+        public boolean equals(Object other) {
 
-		@Override
-		public int hashCode() {
-			int result = 17;
-			result += 37 * result + start;
-			result += 37 * result + end;
-			return result;
-		}
+            if (other == null)
+                return false;
+            if (other == this)
+                return true;
+            if (this.getClass() != other.getClass())
+                return false;
+            Interval otherInterval = (Interval) other;
 
-		@Override
-		public int compareTo(Interval o) {
-			return this.start - o.start;
-		};
+            return (this.start == otherInterval.start && this.end == otherInterval.end);
+        }
 
-		@Override
-		public String toString() {
-			return String.format("[%s:%s]", start, end);
-		}
+        @Override
+        public int hashCode() {
+            int result = 17;
+            result += 37 * result + start;
+            result += 37 * result + end;
+            return result;
+        }
 
-		public int getStart() {
-			return start;
-		}
-		public int getEnd() {
-			return end;
-		}
+        @Override
+        public int compareTo(Interval o) {
+            return this.start - o.start;
+        }
 
-	}
+        ;
+
+        @Override
+        public String toString() {
+            return String.format("[%s:%s]", start, end);
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+
+    }
 
 }
