@@ -40,7 +40,7 @@ qualified_asterisk
   ;
   
 column_reference
-  : (table_identifier DOT)? column_name
+  : (table_identifier DOT)? column_name (AS alias_name)?
   ;
     
 table_expression
@@ -133,7 +133,9 @@ identifier
   ;
 
 value
-  : NUMERIC 
+  : TRUE
+  | FALSE
+  | NUMERIC 
   | STRING_WITH_QUOTE
   ;
 
@@ -199,6 +201,10 @@ IS: ('I'|'i')('S'|'s');
 
 NULL: ('N'|'n')('U'|'u')('L'|'l')('L'|'l');
 
+FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
+
+TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
+
 SEMI:          ';';
 DOT:           '.';
 COMMA:         ',';
@@ -242,6 +248,6 @@ NUMERIC: DIGIT+;
 
 STRING: CHAR*;
 
-STRING_WITH_QUOTE: QUOTE_DOUBLE CHAR* QUOTE_DOUBLE;
+STRING_WITH_QUOTE: (QUOTE_SINGLE|QUOTE_DOUBLE) CHAR* (QUOTE_SINGLE|QUOTE_DOUBLE);
 
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};
