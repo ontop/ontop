@@ -38,10 +38,10 @@ public class CSVLoader {
 
     public String role_load_sql;
 
-    final String driver = "org.postgresql.Driver";
-    final String url = "jdbc:postgresql://localhost/semindex-iswc-5unis:";
-    final String username = "obda";
-    final String password = "obda09";
+    public static final String driver = "org.postgresql.Driver";
+    public static final String url = "jdbc:postgresql://localhost/test:";
+    public static final String username = "test";
+    public static final String password = "test";
     public Connection connection;
 
     private String dataDir;

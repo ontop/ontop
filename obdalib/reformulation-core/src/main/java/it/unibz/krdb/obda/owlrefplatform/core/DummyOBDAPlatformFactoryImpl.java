@@ -132,7 +132,6 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
             List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
             for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(isa)) {
                 mappings.add(map);
-                log.debug(map.toString());
                 apic.getMappingController().insertMapping(ds.getSourceID(), map);
             }
 
