@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="nap">
+        <mapping id="Wheelchair">
+            <CQ string="Wheelchair(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9328,9268,9292,9280) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Motorised Wheelchair">
+            <CQ string="Motorised_Wheelchair(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 9280 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Manual Wheelchair">
+            <CQ string="Manual_Wheelchair(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9268,9328,9292) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Foldable Wheelchair">
+            <CQ string="Foldable_Wheelchair(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9268,9328) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Light weight Foldable Wheelchair">
+            <CQ string="LightweightFoldable_Wheelchair(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (9268,9328) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Light weight Wheelchair">
+            <CQ string="Lightweight_Wheelchair(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 9292 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Assistive Device">
+            <CQ string="AssistiveDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement,  description_contentelement,  content,  i18ncontent,  rainbowcontent  where  rainbowcontent.grouping_grouping_id in (5588, 9292, 9268, 9280, 9328, 10311, 10323, 10335, 10431, 10527, 10827, 10743, 10347, 145643) and  rainbowcontent.rainbowcontent_id =  i18ncontent.rainbowcontent_rainbowcontent_id and  i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and  content.language = 0 and  content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Communication Device">
+            <CQ string="Communication_Device(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (5588, 145643,10323,10335,10311,10347,10431) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Face To Face Communication Device">
+            <CQ string="FaceToFaceCommunicationDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from  name_contentelement ,  description_contentelement ,  content ,  i18ncontent ,  rainbowcontent   where  rainbowcontent.grouping_grouping_id in ( 10311,10347) and rainbowcontent .rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Face To Face Communication Software">
+            <CQ string="FaceToFaceCommunicationSoftware(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10347 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Symbol Board">
+            <CQ string="SymbolBoard(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10311 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Listen Device">
+            <CQ string="ListenDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10431 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Reading Device">
+            <CQ string="ReadingDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id in (10827, 10743) and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Tactile Reading">
+            <CQ string="TactileReading(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10827 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Talking Reading">
+            <CQ string="TalkingReading(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10743 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Speech Device">
+            <CQ string="SpeechDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10431 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Writing Device">
+            <CQ string="WritingDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10527 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Braille Writing Device">
+            <CQ string="BrailleWritingDevice(getObj($name,$description))"/>
+            <SQLQuery string="select name, description from name_contentelement, description_contentelement, content, i18ncontent, rainbowcontent where rainbowcontent.grouping_grouping_id = 10527 and rainbowcontent.rainbowcontent_id = i18ncontent.rainbowcontent_rainbowcontent_id and i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and content.language = 0 and content.name_fk = name_contentelement.name_ce_id and content.description_fk = description_contentelement.description_ce_id"/>
+        </mapping>
+        <mapping id="Upper Limb Mobility">
+            <CQ string="UpperLimbMobility(getObj($ability_descr))"/>
+            <SQLQuery string="select * from ability where ability_id = '19'"/>
+        </mapping>
+        <mapping id="Lower Limb Mobility">
+            <CQ string="LowerLimbMobility(getObj($ability_descr))"/>
+            <SQLQuery string="select * from ability where ability_id = '20'"/>
+        </mapping>
+        <mapping id="Assists with Upper Limb Mobility">
+            <CQ string="assistsWith(getObj($n,$d),getObj($ab1))"/>
+            <SQLQuery string="select ability.ability_descr as ab1,  name_contentelement.name as n,  description_contentelement.description as d from  ability,  name_contentelement,  description_contentelement,  content,  i18ncontent,  rainbowcontent  where  rainbowcontent.grouping_grouping_id = 9280 and  rainbowcontent.rainbowcontent_id =  i18ncontent.rainbowcontent_rainbowcontent_id and  i18ncontent.i18ncontent_id = content.i18ncontent_i18ncontent_id and  content.language = 0 and  content.name_fk = name_contentelement.name_ce_id and  content.description_fk = description_contentelement.description_ce_id and  ability.ability_id = 19 "/>
+        </mapping>
+    </mappings>
+    <dataSource URI="nap" databaseDriver="org.postgresql.Driver"
+        databaseName="nap" databasePassword="ndeipi"
+        databaseURL="jdbc:postgresql://localhost:5433/"
+        databaseUsername="napdba" isAboxDump="" name="nap" ontouri="http://ksg.meraka.co.za/adolenaSlim.owl"/>
+    <SavedQueries/>
+</OBDA>

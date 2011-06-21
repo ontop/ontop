@@ -1,0 +1,1219 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Operation_noyau "ttp://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#2008" >
+    <!ENTITY Operation_noyau2 "ttp://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#2008-" >
+    <!ENTITY Ontology13058076616376 "http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#" >
+    <!ENTITY Ontology1305807661637 "http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#2008" >
+    <!ENTITY Ontology13058076616375 "http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#2009" >
+    <!ENTITY Ontology13058076616372 "http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#2010" >
+    <!ENTITY Ontology13058076616373 "http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#2008-" >
+    <!ENTITY Ontology13058076616374 "http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#2010-" >
+]>
+
+
+<rdf:RDF xmlns="http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#"
+     xml:base="http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl"
+     xmlns:Operation_noyau2="&Operation_noyau;-"
+     xmlns:Ontology1305807661637="&Ontology13058076616376;2008"
+     xmlns:Operation_noyau="ttp://www.mgdis.fr/ontologies/2011/01/Operation_noyau.owl#2008"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:Ontology13058076616376="http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#"
+     xmlns:Ontology13058076616374="&Ontology13058076616376;2010-"
+     xmlns:Ontology13058076616375="&Ontology13058076616376;2009"
+     xmlns:Ontology13058076616372="&Ontology13058076616376;2010"
+     xmlns:Ontology13058076616373="&Ontology13058076616376;2008-">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="#estVerse"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#APCPaPourEngageComptable -->
+
+    <owl:ObjectProperty rdf:about="#APCPaPourEngageComptable">
+        <rdfs:range rdf:resource="#Engagement"/>
+        <rdfs:subPropertyOf rdf:resource="#aPourEngagement"/>
+        <owl:inverseOf rdf:resource="#estEngageComptable"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#AutorisationProgramme"/>
+                    <rdf:Description rdf:about="#CreditPaiement"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#APestConsommePar -->
+
+    <owl:ObjectProperty rdf:about="#APestConsommePar">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AutorisationProgramme"/>
+        <rdfs:range rdf:resource="#Mandat"/>
+        <rdfs:subPropertyOf rdf:resource="#estConsommePar"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#CPestConsommePar -->
+
+    <owl:ObjectProperty rdf:about="#CPestConsommePar">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#CreditPaiement"/>
+        <rdfs:range rdf:resource="#Mandat"/>
+        <rdfs:subPropertyOf rdf:resource="#estConsommePar"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourAffectation -->
+
+    <owl:ObjectProperty rdf:about="#aPourAffectation">
+        <rdfs:range rdf:resource="#Affectation"/>
+        <rdfs:domain rdf:resource="#AutorisationProgramme"/>
+        <owl:inverseOf rdf:resource="#estAffecte"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourEngagement -->
+
+    <owl:ObjectProperty rdf:about="#aPourEngagement"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourMandat -->
+
+    <owl:ObjectProperty rdf:about="#aPourMandat">
+        <rdfs:domain rdf:resource="#Contrat"/>
+        <rdfs:range rdf:resource="#Mandat"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourMode -->
+
+    <owl:ObjectProperty rdf:about="#aPourMode">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#ModeMontant"/>
+        <rdfs:domain rdf:resource="#Montant"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourMontant -->
+
+    <owl:ObjectProperty rdf:about="#aPourMontant">
+        <rdfs:range rdf:resource="#Montant"/>
+        <rdfs:domain rdf:resource="#QuantiteTemporelle"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourType -->
+
+    <owl:ObjectProperty rdf:about="#aPourType">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Montant"/>
+        <rdfs:range rdf:resource="#TypeMontant"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourUniteTemporelle -->
+
+    <owl:ObjectProperty rdf:about="#aPourUniteTemporelle">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Montant"/>
+        <rdfs:range rdf:resource="#UniteTemporelle"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourVote -->
+
+    <owl:ObjectProperty rdf:about="#aPourVote">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#QuantiteTemporelle"/>
+        <rdfs:range rdf:resource="#Vote"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#affectAPourEngageComptable -->
+
+    <owl:ObjectProperty rdf:about="#affectAPourEngageComptable">
+        <rdfs:domain rdf:resource="#Affectation"/>
+        <rdfs:range rdf:resource="#Engagement"/>
+        <rdfs:subPropertyOf rdf:resource="#aPourEngagement"/>
+        <owl:inverseOf rdf:resource="#estEngageComptableAffect"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#affectDestineA -->
+
+    <owl:ObjectProperty rdf:about="#affectDestineA">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Affectation"/>
+        <rdfs:range rdf:resource="#OperationPhysique"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#consomme -->
+
+    <owl:ObjectProperty rdf:about="#consomme"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#consommeAP -->
+
+    <owl:ObjectProperty rdf:about="#consommeAP">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#AutorisationProgramme"/>
+        <rdfs:domain rdf:resource="#Mandat"/>
+        <rdfs:subPropertyOf rdf:resource="#consomme"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#consommeCP -->
+
+    <owl:ObjectProperty rdf:about="#consommeCP">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#CreditPaiement"/>
+        <rdfs:domain rdf:resource="#Mandat"/>
+        <rdfs:subPropertyOf rdf:resource="#consomme"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#consommeEng -->
+
+    <owl:ObjectProperty rdf:about="#consommeEng">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Engagement"/>
+        <rdfs:domain rdf:resource="#Mandat"/>
+        <rdfs:subPropertyOf rdf:resource="#consomme"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#engEstConsommePar -->
+
+    <owl:ObjectProperty rdf:about="#engEstConsommePar">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Engagement"/>
+        <rdfs:range rdf:resource="#Mandat"/>
+        <rdfs:subPropertyOf rdf:resource="#estConsommePar"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estAffecte -->
+
+    <owl:ObjectProperty rdf:about="#estAffecte">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Affectation"/>
+        <rdfs:range rdf:resource="#AutorisationProgramme"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estConsolide -->
+
+    <owl:ObjectProperty rdf:about="#estConsolide"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estConsolidePgr -->
+
+    <owl:ObjectProperty rdf:about="#estConsolidePgr">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Programme"/>
+        <rdfs:domain rdf:resource="#Projet"/>
+        <rdfs:subPropertyOf rdf:resource="#estConsolide"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estConsolidePjt -->
+
+    <owl:ObjectProperty rdf:about="#estConsolidePjt">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#OperationPhysique"/>
+        <rdfs:range rdf:resource="#Projet"/>
+        <rdfs:subPropertyOf rdf:resource="#estConsolide"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estConsommePar -->
+
+    <owl:ObjectProperty rdf:about="#estConsommePar"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estEngage -->
+
+    <owl:ObjectProperty rdf:about="#estEngage"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estEngageComptable -->
+
+    <owl:ObjectProperty rdf:about="#estEngageComptable">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Engagement"/>
+        <rdfs:subPropertyOf rdf:resource="#estEngage"/>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#AutorisationProgramme"/>
+                    <rdf:Description rdf:about="#CreditPaiement"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estEngageComptableAffect -->
+
+    <owl:ObjectProperty rdf:about="#estEngageComptableAffect">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Affectation"/>
+        <rdfs:domain rdf:resource="#Engagement"/>
+        <rdfs:subPropertyOf rdf:resource="#estEngage"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estEngageJuridique -->
+
+    <owl:ObjectProperty rdf:about="#estEngageJuridique">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Contrat"/>
+        <rdfs:domain rdf:resource="#Engagement"/>
+        <rdfs:subPropertyOf rdf:resource="#estEngage"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estFinance -->
+
+    <owl:ObjectProperty rdf:about="#estFinance"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estFinanceAP -->
+
+    <owl:ObjectProperty rdf:about="#estFinanceAP">
+        <rdfs:range rdf:resource="#AutorisationProgramme"/>
+        <rdfs:domain rdf:resource="#Programme"/>
+        <rdfs:subPropertyOf rdf:resource="#estFinance"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estLocalise -->
+
+    <owl:ObjectProperty rdf:about="#estLocalise">
+        <rdfs:range rdf:resource="#Localisation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estMandatePour -->
+
+    <owl:ObjectProperty rdf:about="#estMandatePour">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Contrat"/>
+        <rdfs:domain rdf:resource="#Mandat"/>
+        <owl:inverseOf rdf:resource="#aPourMandat"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estRealisePar -->
+
+    <owl:ObjectProperty rdf:about="#estRealisePar">
+        <rdfs:range rdf:resource="#Contrat"/>
+        <rdfs:domain rdf:resource="#OperationPhysique"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estVentile -->
+
+    <owl:ObjectProperty rdf:about="#estVentile"/>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estVentileCP -->
+
+    <owl:ObjectProperty rdf:about="#estVentileCP">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#AutorisationProgramme"/>
+        <rdfs:range rdf:resource="#CreditPaiement"/>
+        <rdfs:subPropertyOf rdf:resource="#estVentile"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estVentileOpe -->
+
+    <owl:ObjectProperty rdf:about="#estVentileOpe">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#OperationPhysique"/>
+        <rdfs:domain rdf:resource="#Projet"/>
+        <rdfs:subPropertyOf rdf:resource="#estVentile"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#estVentilePjt -->
+
+    <owl:ObjectProperty rdf:about="#estVentilePjt">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Programme"/>
+        <rdfs:range rdf:resource="#Projet"/>
+        <rdfs:subPropertyOf rdf:resource="#estVentile"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#financeOpe -->
+
+    <owl:ObjectProperty rdf:about="#financeOpe">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Mandat"/>
+        <rdfs:range rdf:resource="#OperationPhysique"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#fixe -->
+
+    <owl:ObjectProperty rdf:about="#fixe">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Budget"/>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#Depense"/>
+                    <rdf:Description rdf:about="#Recette"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#realise -->
+
+    <owl:ObjectProperty rdf:about="#realise">
+        <rdfs:domain rdf:resource="#Contrat"/>
+        <rdfs:range rdf:resource="#OperationPhysique"/>
+        <owl:inverseOf rdf:resource="#estRealisePar"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourArrivee -->
+
+    <owl:DatatypeProperty rdf:about="#aPourArrivee">
+        <rdfs:domain rdf:resource="#UniteTemporelle"/>
+        <rdfs:range rdf:resource="&xsd;gYear"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourDate -->
+
+    <owl:DatatypeProperty rdf:about="#aPourDate">
+        <rdfs:domain rdf:resource="#UniteTemporelle"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourDepart -->
+
+    <owl:DatatypeProperty rdf:about="#aPourDepart">
+        <rdfs:domain rdf:resource="#UniteTemporelle"/>
+        <rdfs:range rdf:resource="&xsd;gYear"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourDescription -->
+
+    <owl:DatatypeProperty rdf:about="#aPourDescription">
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourDuree -->
+
+    <owl:DatatypeProperty rdf:about="#aPourDuree">
+        <rdfs:domain rdf:resource="#UniteTemporelle"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourID -->
+
+    <owl:DatatypeProperty rdf:about="#aPourID">
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourLibelle -->
+
+    <owl:DatatypeProperty rdf:about="#aPourLibelle">
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#aPourMontantDecimal -->
+
+    <owl:DatatypeProperty rdf:about="#aPourMontantDecimal">
+        <rdfs:domain rdf:resource="#Montant"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#voteLe -->
+
+    <owl:DatatypeProperty rdf:about="#voteLe">
+        <rdfs:domain rdf:resource="#Vote"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:subPropertyOf rdf:resource="&owl;topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#topDataProperty -->
+
+    <owl:DatatypeProperty rdf:about="&owl;topDataProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Affectation -->
+
+    <owl:Class rdf:about="#Affectation">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom rdf:resource="#Montant"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estAffecte"/>
+                <owl:onClass rdf:resource="#AutorisationProgramme"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#affectDestineA"/>
+                <owl:onClass rdf:resource="#OperationPhysique"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >L&#8217;affectation d&#8217;une AP est la d&#233;cision de la collectivit&#233; de mettre en r&#233;serve un montant de cr&#233;dits destin&#233; &#224; la r&#233;alisation d&#8217;une op&#233;ration d&#8217;investissement identifi&#233;e et financi&#232;rement &#233;valu&#233;e.
+L&#8217;affectation d&#8217;une AE est la contrepartie d&#8217;un engagement juridique envers un tiers, au titre duquel les cr&#233;dits sont r&#233;serv&#233;s.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#AutorisationEngagement -->
+
+    <owl:Class rdf:about="#AutorisationEngagement">
+        <rdfs:subClassOf rdf:resource="#Depense"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >L&#39;autorisation d&#39;engagement correspond &#224; l&#39;autorisation juridique d&#39;engager la d&#233;pense. Les autorisations d&#8217;engagement constituent la limite sup&#233;rieure des d&#233;penses pouvant &#234;tre engag&#233;es pour une op&#233;ration de d&#233;penses ordinaires (fonctionnement, intervention). Les AE sont valable pour l&#8217;ann&#233;e.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#AutorisationProgramme -->
+
+    <owl:Class rdf:about="#AutorisationProgramme">
+        <rdfs:subClassOf rdf:resource="#Depense"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourVote"/>
+                <owl:someValuesFrom rdf:resource="#Vote"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Class>
+                                <owl:intersectionOf rdf:parseType="Collection">
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                        <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                                    </owl:Restriction>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="#aPourDepart"/>
+                                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                                        <owl:onDataRange rdf:resource="&xsd;gYear"/>
+                                    </owl:Restriction>
+                                </owl:intersectionOf>
+                            </owl:Class>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Les autorisations de programme constituent la limite sup&#233;rieure des d&#233;penses qui peuvent &#234;tre engag&#233;es pour le financement des investissements. Elles demeurent valables sans limitation de dur&#233;e jusqu&#39;&#224; ce qu&#39;il soit proc&#233;d&#233; &#224; leur annulation. Elles peuvent &#234;tre r&#233;vis&#233;es.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Budget -->
+
+    <owl:Class rdf:about="#Budget">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="#BudgetPrimitif"/>
+                    <rdf:Description rdf:about="#DecisionModificative"/>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom rdf:resource="#Montant"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourVote"/>
+                <owl:someValuesFrom rdf:resource="#Vote"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#fixe"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Depense"/>
+                            <rdf:Description rdf:about="#Recette"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Il s&#39;agit de l&#39;acte par lequel sont pr&#233;vues et autoris&#233;es les recettes et les d&#233;penses annuelles d&#39;un organisme public. Il se subdivise pour les collectivit&#233;s locales en deux sections : le budget de fonctionnement et le budget d&#39;investissement. Dans chacune des sections, les recettes et les d&#233;penses sont class&#233;es par chapitre et par article en application du principe budg&#233;taire de sp&#233;cialit&#233;</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#BudgetPrimitif -->
+
+    <owl:Class rdf:about="#BudgetPrimitif">
+        <rdfs:subClassOf rdf:resource="#Budget"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Le budget primitif constitue le premier acte obligatoire du cycle budg&#233;taire annuel de la collectivit&#233;.Il pr&#233;voit et autorise pour le prochain exercice budg&#233;taire, l&#39;ensemble des ressources et des charges d&#39;un organisme public.Il doit &#234;tre vot&#233; par l&#8217;assembl&#233;e d&#233;lib&#233;rante avant le 31 mars de l&#8217;ann&#233;e &#224; laquelle il se rapporte (loi du 2 mars 1982). Il d&#233;finit les potentialit&#233;s financi&#232;res de la collectivit&#233; et d&#233;limite son p&#233;rim&#232;tre d&#39;intervention. Par cet acte, l&#39;ordonnateur est autoris&#233; &#224; effectuer les op&#233;rations de recettes et de d&#233;penses inscrites au budget, pour la p&#233;riode qui s&#8217;&#233;tend du 1er janvier au 31 d&#233;cembre de l&#8217;ann&#233;e civile.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#BudgetSuplementaire -->
+
+    <owl:Class rdf:about="#BudgetSuplementaire">
+        <rdfs:subClassOf rdf:resource="#DecisionModificative"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Le budget suppl&#233;mentaire, &#233;tabli g&#233;n&#233;ralement au second semestre de l&#8217;ann&#233;e (apr&#232;s le vote du compte administratif), a essentiellement pour objectif de reprendre les r&#233;sultats budg&#233;taires de l&#8217;exercice pr&#233;c&#233;dent. C&#39;est une modification en cours d&#39;exercice des dispositions du budget primitif de fonctionnement. Elle doit se conformer aux principes budg&#233;taires et &#224; la r&#232;gle concernant l&#39;&#233;quilibre du budget. Elle prend le plus souvent la forme d&#39;une redistribution de cr&#233;dits existants ou d&#39;une augmentation de d&#233;penses gag&#233;es par des augmentations de recettes et doit &#234;tre vot&#233;e par le conseil municipal.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Contrat -->
+
+    <owl:Class rdf:about="#Contrat">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#realise"/>
+                <owl:someValuesFrom rdf:resource="#OperationPhysique"/>
+            </owl:Restriction>
+        </owl:equivalentClass>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Accord de volont&#233; entre deux ou plusieurs personnes et faisant na&#238;tre des obligations entre elles.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#CreditPaiement -->
+
+    <owl:Class rdf:about="#CreditPaiement">
+        <rdfs:subClassOf rdf:resource="#Depense"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Class>
+                                <owl:intersectionOf rdf:parseType="Collection">
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                        <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                                    </owl:Restriction>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="#aPourDepart"/>
+                                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                                        <owl:onDataRange rdf:resource="&xsd;gYear"/>
+                                    </owl:Restriction>
+                                </owl:intersectionOf>
+                            </owl:Class>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourVote"/>
+                <owl:someValuesFrom rdf:resource="#Vote"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Les cr&#233;dits de paiement inscrits au budget sont la mat&#233;rialisation des AE et des AP. Ils constituent la limite sup&#233;rieure des d&#233;penses pouvant &#234;tre mandat&#233;es pendant l&#8217;ann&#233;e pour la couverture des engagements contract&#233;s dans le cadre des autorisations  de programme correspondantes. En fin d&#8217;ann&#233;e, les cr&#233;dits non consomm&#233;s sont r&#233;int&#233;gr&#233;s dans l&#8217;enveloppe globale de l&#8217;AP.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#DecisionModificative -->
+
+    <owl:Class rdf:about="#DecisionModificative">
+        <rdfs:subClassOf rdf:resource="#Budget"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Les pr&#233;visions inscrites au budget primitif peuvent &#234;tre modifi&#233;es en cours d&#8217;exercice par l&#8217;assembl&#233;e d&#233;lib&#233;rante, qui votent des d&#233;cisions modificatives.
+Une DM est un BP &#224; l&#39;exeption pr&#232;s qu&#39;il ne vote pas l&#39;impot.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Depense -->
+
+    <owl:Class rdf:about="#Depense">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Recette"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >La somme d&#39;argent d&#233;pens&#233;e pour investir ou mintenir un fonctionnement de quelque chose.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Engagement -->
+
+    <owl:Class rdf:about="#Engagement">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estEngageJuridique"/>
+                <owl:onClass rdf:resource="#Contrat"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="#estEngageComptable"/>
+                        <owl:onClass rdf:resource="#AutorisationProgramme"/>
+                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="#estEngageComptable"/>
+                        <owl:onClass rdf:resource="#CreditPaiement"/>
+                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="#estEngageComptableAffect"/>
+                        <owl:onClass rdf:resource="#Affectation"/>
+                        <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                    </owl:Restriction>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Un engagement comptable pr&#233;alable &#224; un engagement juridique. L&#39;engagement de l&#39;AP constitue le blocage de cr&#233;dits pluriannuels qui permettra d&#39;assurer &#224; terme le paiement de la dette contract&#233;e envers le tiers. Il est suivi imm&#233;diatement de l&#39;engagement juridique.
+Plusieurs engagements doivent pouvoir &#234;tre pass&#233;s pour une m&#234;me op&#233;ration d&#8217;investissement.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Localisation -->
+
+    <owl:Class rdf:about="#Localisation">
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Emplacement o&#249; se situe une chose ou un ph&#233;nom&#232;ne.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Mandat -->
+
+    <owl:Class rdf:about="#Mandat">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom rdf:resource="#Montant"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#financeOpe"/>
+                <owl:onClass rdf:resource="#OperationPhysique"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#consommeEng"/>
+                <owl:onClass rdf:resource="#Engagement"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#consommeCP"/>
+                <owl:onClass rdf:resource="#CreditPaiement"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estMandatePour"/>
+                <owl:onClass rdf:resource="#Contrat"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Titre par lequel une collectivit&#233; donne ordre au comptable publique de payer &#224; un tiers (contrat) une certaine somme.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#ModeMontant -->
+
+    <owl:Class rdf:about="#ModeMontant">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourLibelle"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Le mode se rapporte au montant</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Montant -->
+
+    <owl:Class rdf:about="#Montant">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontantDecimal"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;decimal"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#OperationPhysique -->
+
+    <owl:Class rdf:about="#OperationPhysique">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estConsolidePjt"/>
+                <owl:onClass rdf:resource="#Projet"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estLocalise"/>
+                <owl:someValuesFrom rdf:resource="#Localisation"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourDescription"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >La loi n&#176;85-704 du 12 juillet 1985 relative &#224; la ma&#238;trise d&#39;ouvrage pr&#233;cise en son article 2 qu&#39;il appartient au ma&#238;tre d&#39;ouvrage, apr&#232;s s&#8217;&#234;tre assur&#233; de la faisabilit&#233; et de l&#8217;opportunit&#233; de l&#8217;op&#233;ration envisag&#233;e, d&#8217;en d&#233;terminer la localisation, d&#8217;en d&#233;finir le programme, d&#8217;en arr&#234;ter l&#8217;enveloppe financi&#232;re pr&#233;visionnelle &#8230;</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Programme -->
+
+    <owl:Class rdf:about="#Programme">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estVentilePjt"/>
+                <owl:someValuesFrom rdf:resource="#Projet"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Le programme constitue un niveau interm&#233;diaire entre la politique publique et le projet.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Projet -->
+
+    <owl:Class rdf:about="#Projet">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estConsolidePgr"/>
+                <owl:onClass rdf:resource="#Programme"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#estVentileOpe"/>
+                <owl:someValuesFrom rdf:resource="#OperationPhysique"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Travail pr&#233;paratoire, premi&#232;re r&#233;daction.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#QuantiteTemporelle -->
+
+    <owl:Class rdf:about="#QuantiteTemporelle">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <owl:Class>
+                                <owl:intersectionOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="#Montant"/>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="#aPourType"/>
+                                        <owl:someValuesFrom rdf:resource="#TypeMontant"/>
+                                    </owl:Restriction>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                        <owl:someValuesFrom rdf:resource="#UniteTemporelle"/>
+                                    </owl:Restriction>
+                                </owl:intersectionOf>
+                            </owl:Class>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourMode"/>
+                                <owl:onClass rdf:resource="#ModeMontant"/>
+                                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </owl:equivalentClass>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourVote"/>
+                <owl:someValuesFrom rdf:resource="#Vote"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Une quantit&#233; temporelle est un montant  rattach&#233; &#224; une unit&#233; temporelle, un mode, un type et occasionnellement un vote.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#RecFonctionnement -->
+
+    <owl:Class rdf:about="#RecFonctionnement">
+        <rdfs:subClassOf rdf:resource="#Recette"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#RecInvestissement -->
+
+    <owl:Class rdf:about="#RecInvestissement">
+        <rdfs:subClassOf rdf:resource="#Recette"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Recette -->
+
+    <owl:Class rdf:about="#Recette">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourMontant"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="#Montant"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="#aPourUniteTemporelle"/>
+                                <owl:onClass rdf:resource="#UniteTemporelle"/>
+                                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >La somme d&#39;argent re&#231;cu pour finac&#233; les d&#233;penses d&#39;investissement ou de fonctionnement.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#TypeMontant -->
+
+    <owl:Class rdf:about="#TypeMontant">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourLibelle"/>
+                <owl:qualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >les quantit&#233;s peuvent &#234;tre li&#233;es &#224; un budget, elles seront alors typ&#233; d&#233;pense ou recette, maivent peuvent aussi &#234;tre le r&#233;sultat d&#39;une op&#233;ration arithm&#233;tique ou autres, elles sont alors typ&#233;es autre.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#UniteTemporelle -->
+
+    <owl:Class rdf:about="#UniteTemporelle">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourDuree"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;duration"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourDepart"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;gYear"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#aPourArrivee"/>
+                <owl:maxQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:maxQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&xsd;gYear"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >L&#8217;unit&#233; temporelle des quantit&#233;s observ&#233;es (ann&#233;es)</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#Vote -->
+
+    <owl:Class rdf:about="#Vote">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:comment rdf:datatype="&xsd;string"
+            >Une quantit&#233; peut &#234;tre vot&#233;. Un vote va comporter un lieu, une assembl&#233;e, une date.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+

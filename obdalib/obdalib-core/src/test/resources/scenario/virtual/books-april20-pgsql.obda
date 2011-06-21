@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="datasource">
+        <mapping id="M1:Editor">
+            <CQ string="Editor(edtr($ed_code)), name(edtr($ed_code),$ed_name)"/>
+            <SQLQuery string="SELECT ed_code, ed_name FROM tb_editor"/>
+        </mapping>
+        <mapping id="M2:PrintedBook">
+            <CQ string="PrintedBook(bk($bk_code)), title(bk($bk_code),$bk_title)"/>
+            <SQLQuery string="SELECT bk_code, bk_title FROM tb_books WHERE bk_type = 'P'"/>
+        </mapping>
+        <mapping id="M3:EBook">
+            <CQ string="EBook(bk($bk_code)), title(bk($bk_code),$bk_title)"/>
+            <SQLQuery string="SELECT bk_code, bk_title FROM tb_books WHERE bk_type = 'E'"/>
+        </mapping>
+        <mapping id="M4:AudioBook">
+            <CQ string="AudioBook(bk($bk_code)), title(bk($bk_code),$bk_title)"/>
+            <SQLQuery string="SELECT bk_code, bk_title FROM tb_books WHERE bk_type = 'A'"/>
+        </mapping>
+        <mapping id="M5:IneditedBook">
+            <CQ string="IneditedBook(bk($bk_code))"/>
+            <SQLQuery string="SELECT bk_code FROM tb_books WHERE bk_code NOT IN ( SELECT bk_id FROM tb_edition )"/>
+        </mapping>
+        <mapping id="M6:genre">
+            <CQ string="genre(bk($id_bk),$gen_name)"/>
+            <SQLQuery string="SELECT id_bk, gen_name FROM tb_bk_gen"/>
+        </mapping>
+        <mapping id="M7:writtenBy">
+            <CQ string="writtenBy(bk($bk_code),aut($wr_id))"/>
+            <SQLQuery string="SELECT bk_code, wr_id FROM tb_authors"/>
+        </mapping>
+        <mapping id="M8:Author">
+            <CQ string="Author(aut($wr_code)), name(aut($wr_code),$wr_name)"/>
+            <SQLQuery string="SELECT wr_code, wr_name FROM tb_affiliated_writers"/>
+        </mapping>
+        <mapping id="M9:EmergingWriter">
+            <CQ string="EmergingWriter(aut($wr_code)), name(aut($wr_code),$wr_name)"/>
+            <SQLQuery string="SELECT wr_code, wr_name FROM tb_on_prob_wr"/>
+        </mapping>
+        <mapping id="M10:Edition">
+            <CQ string="Edition(ed($ed_code)), dateOfPublication(ed($ed_code),$pub_date), editionNumber(ed($ed_code),$n_edt), editedBy(ed($ed_code),edtr($editor)), hasEdition(bk($bk_id),ed($ed_code))"/>
+            <SQLQuery string="SELECT ed_code, pub_date, n_edt, editor, bk_id FROM tb_edition"/>
+        </mapping>
+        <mapping id="M11:SpecialEdition">
+            <CQ string="SpecialEdition(ed($ed_code))"/>
+            <SQLQuery string="SELECT ed_code  FROM tb_edition WHERE ed_type = 'S'"/>
+        </mapping>
+        <mapping id="M12:EconomicEdition">
+            <CQ string="EconomicEdition(ed($ed_code))"/>
+            <SQLQuery string="SELECT ed_code  FROM tb_edition WHERE ed_type = 'E'"/>
+        </mapping>
+        <mapping id="M13:dateOfFirstPublication">
+            <CQ string="dateOfFirstPublication(ed($ed_code),$mindata)"/>
+            <SQLQuery string="SELECT ed_code, MIN(pub_date) AS mindata FROM tb_edition GROUP BY ed_code"/>
+        </mapping>
+    </mappings>
+    <dataSource URI="datasource" databaseDriver="org.postgresql.Driver"
+        databaseName="example.books3" databasePassword="habana10"
+        databaseURL="jdbc:postgresql://localhost/"
+        databaseUsername="kbdbhabana" isAboxDump="" name="datasource" ontouri="http://meraka/moss/exampleBooks.owl"/>
+    <SavedQueries>
+        <QueryGroup id="SARQL queries">
+            <Query id="query1" text="# tile of books written by an emerging writer&#xd;&#xa;SELECT $tl WHERE{ $bk :title $tl. $bk :writtenBy $au. $au rdf:type 'EmergingWriter' }"/>
+            <Query id="query2" text="# name of all editors which have edited almost one book written by an emerging writer&#xd;&#xa;SELECT $na WHERE{$bk :hasEdition $ed. $ed :editedBy $edt. $edt :name $na. $bk :writtenBy $au. $au rdf:type 'EmergingWriter' }"/>
+            <Query id="query3" text="# title of every book edited by Eric Jonnes&#xd;&#xa;SELECT $tl WHERE{$bk :title $tl. $bk :hasEdition $ed. $ed :editedBy $edtr. $edtr :name 'Eric Jonnes'  }"/>
+        </QueryGroup>
+        <QueryGroup id="EQL queries">
+            <Query id="queryEQL1" text="-- title of all books which are not written by an emerging writer &#xd;&#xa;SELECT books.tl &#xd;&#xa;FROM sparqltable(&#xd;&#xa;&#x9;SELECT $bk $tl WHERE {$bk rdf:type 'Book'. $bk :title $tl}) books&#xd;&#xa;WHERE books.bk NOT IN (&#xd;&#xa;&#x9;SELECT temp.bk&#xd;&#xa;&#x9;FROM sparqltable(SELECT $bk WHERE{ $bk :writtenBy $au. $au rdf:type 'EmergingWriter' })temp&#xd;&#xa;)"/>
+            <Query id="queryEQL2" text="-- the name of all authors which have never written an E-Book neither a PaperBook  &#xd;&#xa;SELECT aut.na &#xd;&#xa;FROM sparqltable(&#xd;&#xa;&#x9;SELECT $na $bk WHERE {$bk rdf:type 'Book'. $bk :writtenBy $au. $au :name $na}) aut&#xd;&#xa;WHERE aut.bk NOT IN (&#xd;&#xa;&#x9;SELECT temp1.bk&#xd;&#xa;&#x9;FROM sparqltable(SELECT $bk WHERE{ $bk rdf:type 'E-Book' })temp1&#xd;&#xa;&#x9;UNION&#xd;&#xa;&#x9;SELECT temp2.bk&#xd;&#xa;&#x9;FROM sparqltable(SELECT $bk WHERE{ $bk rdf:type 'PrintedBook' })temp2&#xd;&#xa;)"/>
+        </QueryGroup>
+    </SavedQueries>
+    <DenialConstraints>
+        <denialConstraint annotation="" constraint="deny( ASK { $bk rdf:type 'AudioBook'. $bk :hasEdition $ed. $ed rdf:type 'EconomicEdition' } )"/>
+    </DenialConstraints>
+    <EQLConstraints>
+        <eqlConstraint annotation="" constraint="EQLC( verify not exists (SELECT temp.writer FROM sparqltable( SELECT $writer $bk1 $bk2 $ed1 $ed2  WHERE { $writer rdf:type 'EmergingWriter'.  $bk1 :writtenBy $writer. $bk2 :writtenBy $writer. $bk1 :hasEdition $ed1. $bk2 :hasEdition $ed2} )temp  WHERE temp.bk1 &lt;> temp.bk2 ) )"/>
+        <eqlConstraint annotation="" constraint="EQLC(verify not exists ( select book.x from sparqltable( select ?x &#x9;where{ ?x rdf:type 'Book' }) book where book.x not in ( select printedBook.x from sparqltable( select ?x where{ ?x rdf:type 'PrintedBook' }) printedBook UNION select eBook.x from sparqltable( select ?x where{ ?x rdf:type 'E-Book' }) eBook UNION select audioBook.x from sparqltable( select ?x where{ ?x rdf:type 'AudioBook' }) audioBook ) ) )"/>
+    </EQLConstraints>
+    <IDConstraints>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(hasEdition), editionNumber Edition)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(hasEdition), dateOfPublication Edition)"/>
+        <idConstraint annotation="" constraint="KeyFor(writtenBy, title Book)    "/>
+    </IDConstraints>
+</OBDA>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="HGT">
+        <mapping id="Organism">
+            <CQ string="Organism(getOrganism($Abbrev))"/>
+            <SQLQuery string="SELECT ABBREV FROM HGTDB.ORGANISME "/>
+        </mapping>
+        <mapping id="HGTPredictions and OrganismHasHGTPredictions">
+            <CQ string="HGTPredictions(getHGTPredictions($Abbrev)), OrganismHasHGTPredictions(getOrganism($Abbrev),getHGTPredictions($Abbrev))"/>
+            <SQLQuery string="SELECT ABBREV FROM HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="HGTPredictions Attributes">
+            <CQ string="Percentage(getHGTPredictions($Abbrev),$Percentage), NrPredHGTgenes(getHGTPredictions($Abbrev),$HGT)"/>
+            <SQLQuery string="SELECT ABBREV, HGT, PERCENTAGE FROM  HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="OrganismInfo and OrganismHasOrganismInfo">
+            <CQ string="OrganismInfo(getOrganismInfo($Abbrev)), OrganismHasOrganismInfo(getOrganism($Abbrev),getOrganismInfo($Abbrev))"/>
+            <SQLQuery string="SELECT ABBREV FROM HGTDB.ORGANISME "/>
+        </mapping>
+        <mapping id="OrganismInfo Attributes">
+            <CQ string="PB(getOrganismInfo($Abbrev),$PB), NrGenes(getOrganismInfo($Abbrev),$NGenes), OrganismName(getOrganismInfo($Abbrev),$Name), GenCode(getOrganismInfo($Abbrev),$GenCode)"/>
+            <SQLQuery string="SELECT ABBREV, PB, NGENES, GENCODE, NAME FROM HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="AltCode and OrganismHasAltCode">
+            <CQ string="AltCode(getAltCode($Abbrev)), OrganismHasAltCode(getOrganism($Abbrev),getAltCode($Abbrev))"/>
+            <SQLQuery string="SELECT ABBREV FROM HGTDB.ORGANISME "/>
+        </mapping>
+        <mapping id="AltCode Attributes [Note Gbref is not in the db]">
+            <CQ string="NCBIID(getAltCode($Abbrev),$NCBIID), TaxID(getAltCode($Abbrev),$TaxId), KEGGCode(getAltCode($Abbrev),$KEGGCode)"/>
+            <SQLQuery string="SELECT ABBREV, NCBIID, TAXID, KEGGCODE FROM HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="Organism Attribute">
+            <CQ string="Abbrev(getOrganism($Abbrev),$Abbrev)"/>
+            <SQLQuery string="SELECT ABBREV FROM HGTDB.ORGANISME "/>
+        </mapping>
+        <mapping id="Gene">
+            <CQ string="Gene(getGene($ID))"/>
+            <SQLQuery string="SELECT ID FROM HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GCstatsOrg and OrganismHasGCstatsOrg">
+            <CQ string="GCstatsOrg(getGCstatsOrg($Abbrev)), OrganismHasGCstatsOrg(getOrganism($Abbrev),getGCstatsOrg($Abbrev))"/>
+            <SQLQuery string="SELECT ABBREV FROM HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="GCstatsOrg GC attributes">
+            <CQ string="GCValue(getGCstatsOrg($Abbrev),$GC), GC1(getGCstatsOrg($Abbrev),$GC1), GC2(getGCstatsOrg($Abbrev),$GC2), GC3(getGCstatsOrg($Abbrev),$GC3)"/>
+            <SQLQuery string="SELECT ABBREV, GC, GC1, GC2, GC3 FROM HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="GCstatsOrg StDev attributes">
+            <CQ string="StDevGC(getGCstatsOrg($Abbrev),$SDGC), StDevGC1(getGCstatsOrg($Abbrev),$SDGC1), StDevGC2(getGCstatsOrg($Abbrev),$SDGC2), StDevGC3(getGCstatsOrg($Abbrev),$SDGC3)"/>
+            <SQLQuery string="SELECT ABBREV, SDGC, SDGC1,SDGC2, SDGC3 FROM HGTDB.ORGANISME"/>
+        </mapping>
+        <mapping id="GeneHasOrganism">
+            <CQ string="GeneHasOrganism(getGene($ID),getOrganism($Abbrev))"/>
+            <SQLQuery string="SELECT ID, ABBREV FROM HGTDB.ORGANISME  JOIN HGTDB.GENES  ON ABBREV = IDORGANISME"/>
+        </mapping>
+        <mapping id="Gene attribute">
+            <CQ string="ID(getGene($ID),$ID)"/>
+            <SQLQuery string="SELECT ID FROM HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GeneStats and GeneHasGeneStats">
+            <CQ string="GeneStats(getGeneStats($ID)), GeneHasGeneStats(getGene($ID),getGeneStats($ID))"/>
+            <SQLQuery string="SELECT ID FROM HGTDB.GENES"/>
+        </mapping>
+        <mapping id="HGTPredictionGene and GeneHasHGTPredictionGene">
+            <CQ string="HGTPredictionGene(getHGTPredictionGene($ID)), GeneHasHGTPredictionGene(getGene($ID),getHGTPredictionGene($ID))"/>
+            <SQLQuery string="SELECT ID FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="Coordinates And GeneHasCoordinates">
+            <CQ string="Coordinates(getCoordinates($ID)), GeneHasCoordinates(getGene($ID),getCoordinates($ID))"/>
+            <SQLQuery string="SELECT ID FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GeneIDInfo and GeneHasGeneIDInfo">
+            <CQ string="GeneIDInfo(getGeneIDInfo($ID)), GeneHasGeneIDInfo(getGene($ID),getGeneIDInfo($ID))"/>
+            <SQLQuery string="SELECT ID FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GeneFunction GeneHasGeneFunction">
+            <CQ string="GeneFunction(getGeneFunction($ID)), GeneHasGeneFunction(getGene($ID),getGeneFunction($ID))"/>
+            <SQLQuery string="SELECT ID FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GCstatsGene and GeneHasGCstatsGene">
+            <CQ string="GCstatsGene(getGCstatsGene($ID)), GeneHasGCstatsGene(getGene($ID),getGCstatsGene($ID))"/>
+            <SQLQuery string="SELECT ID FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GeneFunction attributes">
+            <CQ string="Function(getGeneFunction($ID),$Function), KEGG(getGeneFunction($ID),$KEGG), PATH(getGeneFunction($ID),$PATH)"/>
+            <SQLQuery string="SELECT ID, KEGG, PATH, FUNCTION FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="HGTPredictionGene attributes">
+            <CQ string="Prediction(getHGTPredictionGene($ID),$Prediction), GCregion(getHGTPredictionGene($ID),$GCREGION)"/>
+            <SQLQuery string="SELECT ID, PREDICTION, GCREGION FROM  HGTDB.GENES"/>
+        </mapping>
+        <mapping id="GCstatsGene GC attributes">
+            <CQ string="GCValue(getGCstatsGene($ID),$GC), GC1(getGCstatsGene($ID),$GC1), GC2(getGCstatsGene($ID),$GC2), GC3(getGCstatsGene($ID),$GC3)"/>
+            <SQLQuery string="SELECT ID, GC, GC1, GC2, GC3 FROM GENES"/>
+        </mapping>
+        <mapping id="GCstatsGene Dif attributes">
+            <CQ string="GCDif(getGCstatsGene($ID),$GCDIF), GCDif1(getGCstatsGene($ID),$GCDIF1), GCDif2(getGCstatsGene($ID),$GCDIF2), GCDif3(getGCstatsGene($ID),$GCDIF3), Sim(getGCstatsGene($ID),$SIMGC)"/>
+            <SQLQuery string="SELECT ID, GCDIF1, GCDIF2, GCDIF3, GCDIF, SIMGC FROM GENES"/>
+        </mapping>
+        <mapping id="GeneStats Attributes">
+            <CQ string="Mah(getGeneStats($ID),$MAH), SimMah(getGeneStats($ID),$SIMMAH), SimGC(getGeneStats($ID),$SIMGC), DevAA(getGeneStats($ID),$DEVAA), Chi2(getGeneStats($ID),$CHI2), ICDI(getGeneStats($ID),$ICDI), Nc(getGeneStats($ID),$NC), P2(getGeneStats($ID),$P2)"/>
+            <SQLQuery string="SELECT ID, MAH, SIMMAH, SIMGC, DEVAA, CHI2, ICDI, NC, P2 FROM HGTDB.GENES"/>
+        </mapping>
+        <mapping id="Coordinates Attributes">
+            <CQ string="Begin(getCoordinates($ID),$BEGIN), End(getCoordinates($ID),$END), Length(getCoordinates($ID),$LENGTH), Strand(getCoordinates($ID),$STRAND)"/>
+            <SQLQuery string="SELECT ID, BEGIN, END, LENGTH, STRAND FROM GENES"/>
+        </mapping>
+        <mapping id="GeneIDInfo Attributes">
+            <CQ string="Synonym(getGeneIDInfo($ID),$SYNONYM), PID(getGeneIDInfo($ID),$PID), GeneName(getGeneIDInfo($ID),$GENENAME)"/>
+            <SQLQuery string="SELECT ID, SYNONYM_, GENENAME, PID FROM GENES"/>
+        </mapping>
+        <mapping id="Taxonomy and OrganismHasTaxonomy">
+            <CQ string="Taxonomy(getTaxonomy($ABBREV)), OrganismHasTaxonomy(getOrganism($ABBREV),getTaxonomy($ABBREV))"/>
+            <SQLQuery string="SELECT ABBREV FROM ORGANISME"/>
+        </mapping>
+        <mapping id="Encoding codons">
+            <CQ string="EncodingCodon(getEncodingCodon($CODON)), TripletCode(getEncodingCodon($CODON),$CODON)"/>
+            <SQLQuery string="SELECT CODON FROM ENCODINGCODONS"/>
+        </mapping>
+        <mapping id="Ending codons">
+            <CQ string="EndingCodon(getEndingCodon($CODON)), TripletCode(getEndingCodon($CODON),$CODON)"/>
+            <SQLQuery string="SELECT CODON FROM ENDINGCODONS"/>
+        </mapping>
+        <mapping id="OrganismHasCodon">
+            <CQ string="OHCHasOrganism(getOrganismHasCodon($BUNDLEID),getOrganism($ID)), OHCHasCodon(getOrganismHasCodon($BUNDLEID),getCodon($CODON)), OrganismHasCodon(getOrganismHasCodon($BUNDLEID)), CodonValueOrg(getOrganismHasCodon($BUNDLEID),$CODONVALUE), CodonSD(getOrganismHasCodon($BUNDLEID),$CODONSD), RSCUorg(getOrganismHasCodon($BUNDLEID),$RSCU), SDRSCU(getOrganismHasCodon($BUNDLEID),$SDRSCU)"/>
+            <SQLQuery string="SELECT ID, CODON, CODONVALUE, CODONSD, BUNDLEID, RSCU, SDRSCU FROM ORGANISMHASCODON"/>
+        </mapping>
+        <mapping id="GeneHasCodon">
+            <CQ string="GHCHasGene(getGeneHasCodon($BUNDLEID),getGene($ID)), GHCHasCodon(getGeneHasCodon($BUNDLEID),getCodon($CODON)), GeneHasCodon(getGeneHasCodon($BUNDLEID)), CodonValueGene(getGeneHasCodon($BUNDLEID),$CODONVALUE), RSCUgene(getGeneHasCodon($BUNDLEID),$RSCU)"/>
+            <SQLQuery string="SELECT ID, CODON, CODONVALUE, BUNDLEID, RSCU FROM GENEHASCODON"/>
+        </mapping>
+        <mapping id="OrganismHasAminoAcid">
+            <CQ string="OHAHasOrganism(getOrganismHasAminoAcid($BUNDLEID),getOrganism($ID)), OHAHasAminoAcid(getOrganismHasAminoAcid($BUNDLEID),getAminoAcid($AMINOACID)), AminoAcid(getAminoAcid($AMINOACID)), AACode(getAminoAcid($AMINOACID),$AMINOACID), OrganismHasAminoAcid(getOrganismHasAminoAcid($BUNDLEID)), AAvalueOrg(getOrganismHasAminoAcid($BUNDLEID),$AAVALUE), AASD(getOrganismHasAminoAcid($BUNDLEID),$AASD)"/>
+            <SQLQuery string="SELECT ID, AMINOACID, AAVALUE, AASD, BUNDLEID FROM ORGANISMHASAMINOACID"/>
+        </mapping>
+        <mapping id="GeneHasAminoAcid">
+            <CQ string="GHAHasAminoAcid(getGeneHasAminoAcid($BUNDLEID),getAminoAcid($AMINOACID)), GHAHasGene(getGeneHasAminoAcid($BUNDLEID),getGene($ID)), GeneHasAminoAcid(getGeneHasAminoAcid($BUNDLEID)), AAvalueGene(getGeneHasAminoAcid($BUNDLEID),$AAVALUE)"/>
+            <SQLQuery string="SELECT ID, AMINOACID, AAVALUE, BUNDLEID FROM GENEHASAMINOACID"/>
+        </mapping>
+        <mapping id="StrictHGTGeneCluster">
+            <CQ string="StrictHGTGeneCluster(stricthgtcluster($IDORGANISME,$START_GENE,$END_GENE))"/>
+            <SQLQuery string="select IDORGANISME, START_GENE, END_GENE, CLUSTER_LENGTH from hgtdb.hgtcluster where cluster_length > 1"/>
+        </mapping>
+        <mapping id="FlexHGTClusters">
+            <CQ string="FlexibleHGTGeneCluster(flexhgtcluster($idorganisme,$cstart,$cend))"/>
+            <SQLQuery string="select idorganisme, cstart, cend, clength from hgtdb.comclustg2"/>
+        </mapping>
+        <mapping id="flex-containsStrictHGTGeneCluste">
+            <CQ string="containsStrictHGTGeneCluster(flexhgtcluster($idorganisme,$fstart,$fend),stricthgtcluster($idorganisme,$sstart,$send))"/>
+            <SQLQuery string="SELECT &#xa;  hgtcluster.idorganisme as idorganisme,&#xa;  comclustg2.cstart as fstart,&#xa;  comclustg2.cend as fend,&#xa;  hgtcluster.start_gene as sstart,&#xa;  hgtcluster.end_gene as send&#xa;FROM hgtdb.comclustg2,hgtdb.hgtcluster WHERE&#xa;  hgtcluster.idorganisme = comclustg2.idorganisme and&#xa;  hgtcluster.start_gene >= comclustg2.cstart and&#xa;  hgtcluster.end_gene &lt;= comclustg2.cend"/>
+        </mapping>
+        <mapping id="flex-GeneClusterContainsGene">
+            <CQ string="GeneClusterContainsGene(flexhgtcluster($idorganisme,$fstart,$fend),getGene($gene))"/>
+            <SQLQuery string="SELECT &#xa;  comclustg2.idorganisme as idorganisme,&#xa;  comclustg2.cstart as fstart,&#xa;  comclustg2.cend as fend,&#xa;  genemeta.id as gene&#xa;FROM hgtdb.comclustg2, hgtdb.genemeta WHERE&#xa;  genemeta.idorganisme = genemeta.idorganisme and&#xa;  genemeta.position >= comclustg2.cstart and&#xa;  genemeta.position &lt;= comclustg2.cend"/>
+        </mapping>
+        <mapping id="strict-GeneClusterConstainsGene">
+            <CQ string="GeneClusterContainsGene(stricthgtcluster($idorganisme,$fstart,$fend),getGene($gene))"/>
+            <SQLQuery string="SELECT &#xa;  hgtcluster.idorganisme as idorganisme,&#xa;  hgtcluster.start_gene as fstart,&#xa;  hgtcluster.end_gene as fend,&#xa;  genemeta.id as gene&#xa;FROM hgtdb.hgtcluster, hgtdb.genemeta WHERE&#xa;  hgtcluster.idorganisme = genemeta.idorganisme and&#xa;  genemeta.position >= hgtcluster.start_gene and&#xa;  genemeta.position &lt;= hgtcluster.end_gene and&#xa;  hgtcluster.cluster_length > 1;"/>
+        </mapping>
+    </mappings>
+    <dataSource URI="HGT" databaseDriver="oracle.jdbc.driver.OracleDriver"
+        databaseName="obda" databasePassword="hgt"
+        databaseURL="jdbc:oracle:thin:@obdalin.inf.unibz.it:1522/"
+        databaseUsername="hgtdb" isAboxDump="" name="HGT" ontouri="http://www.owl-ontologies.com/Ontology1222766179.owl"/>
+    <SavedQueries>
+        <Query id="1" text="SELECT * WHERE { &#xa;&#x9;&#x9;&#x9;&#x9;$x  :Abbrev 'aaur' . &#xa;&#x9;&#x9;&#x9;&#x9;$y :GeneHasOrganism $x .&#xa;&#x9;&#x9;&#x9;&#x9;$y :GeneHasGeneStats $a .&#xa;&#x9;&#x9;&#x9;&#x9;$a :Mah $z&#xa;&#x9;&#x9;&#x9;}"/>
+        <Query id="2" text="SELECT $gene WHERE {&#xa;            $fun :Function 'multidrug resistance protein' .&#xa;            $gene :GeneHasGeneFunction $fun .&#xa;            $gene :GeneHasHGTPredictionGene $pred .&#xa;            $pred :Prediction 'hgt'&#xa;     &#x9;}"/>
+        <Query id="3" text="SELECT $abbrev $geneCode WHERE { &#xa;&#x9;&#x9;&#x9;$orgInfo :OrganismName 'Acidovorax_avenae_citrulli_AAC00-1' . &#xa;&#x9;&#x9;&#x9;$org :OrganismHasOrganismInfo $orgInfo .&#xa;&#x9;&#x9;&#x9;$org :Abbrev $abbrev .&#xa;&#x9;&#x9;&#x9;$orgInfo :GenCode  $geneCode&#xa;&#x9;&#x9;}"/>
+        <Query id="4" text="SELECT $x $tot $gc1  $gc2 $gc3 WHERE {&#xa;&#x9;&#x9;&#x9;$x  :Abbrev 'aaur' . &#xa;&#x9;&#x9;&#x9;$x :OrganismHasGCstatsOrg $org .&#xa;&#x9;&#x9;&#x9;$org :GCValue $tot . &#xa;&#x9;&#x9;&#x9;$org :GC1 $gc1 .&#xa;&#x9;&#x9;&#x9;$org :GC2 $gc2 .&#xa;&#x9;&#x9;&#x9;$org :GC3 $gc3&#xa;&#x9;&#x9;}"/>
+        <Query id="5" text="SELECT $gene WHERE {&#xa;            $info   :OrganismName               'Rickettsia_conorii' .&#xa;            $org    :OrganismHasOrganismInfo    $info .&#xa;            $gene   :GeneHasOrganism            $org .&#xa;            $gene   :GeneHasHGTPredictionGene   $hgt .&#xa;            $hgt    :Prediction                 'hgt'&#xa;        }"/>
+        <Query id="6" text="SELECT $gene $pred WHERE {&#xa;            $info   :OrganismName               'Rickettsia_conorii' .&#xa;            $org    :OrganismHasOrganismInfo    $info .&#xa;            $gene   :GeneHasOrganism            $org .&#xa;            $gene   :GeneHasGeneIDInfo          $ginfo .&#xa;            $ginfo  :GeneName                   'dnaA' .&#xa;            $gene   :GeneHasHGTPredictionGene   $hgt .&#xa;            $hgt    :Prediction                 $pred&#xa;        }"/>
+        <Query id="7" text="SELECT $gene WHERE {&#xa; &#x9;&#x9;&#x9;{&#xa;            &#x9;$info       :OrganismName               'Rickettsia_conorii' .&#xa;            &#x9;$org        :OrganismHasOrganismInfo    $info .&#xa;            &#x9;$gene       :GeneHasOrganism            $org .&#xa;            &#x9;$gene       :GeneHasHGTPredictionGene   $hgt .&#xa;            &#x9;$hgt        :GCregion                   'high' .&#xa;            &#xa;        &#x9;} {&#xa;            &#x9;$info       :OrganismName               'Rickettsia_conorii' .&#xa;            &#x9;$org        :OrganismHasOrganismInfo    $info .&#xa;            &#x9;$gene       :GeneHasOrganism            $org .&#xa;            &#x9;$gene       :GeneHasHGTPredictionGene   $hgt .&#xa;            &#x9;$hgt        :GCregion                   'low'.&#xa;        &#x9;}&#xa;&#x9;&#x9;}"/>
+        <Query id="8" text="SELECT $y $z WHERE {&#xa;&#x9;$x :OHCHasOrganism $y .&#xa;&#x9;$x :CodonSD $z&#xa;}"/>
+        <Query id="eql:q1" text="SELECT * FROM sparqltable (&#xa;SELECT ?x ?abbrev ?y ?a ?z WHERE { &#xa;&#x9;$x  :Abbrev ?abbrev . &#xa;&#x9;$y :GeneHasOrganism $x .&#xa;&#x9;$y :GeneHasGeneStats $a .&#xa;&#x9;$a :Mah $z&#xa;      }&#xa;) q1 WHERE q1.abbrev LIKE 'aaur'        "/>
+        <Query id="eql:q3" text="SELECT * FROM sparqltable (&#xa;SELECT $abbrev $geneCode ?name WHERE { &#xa;&#x9;&#x9;&#x9;$orgInfo :OrganismName ?name . &#xa;&#x9;&#x9;&#x9;$org :OrganismHasOrganismInfo $orgInfo .&#xa;&#x9;&#x9;&#x9;$org :Abbrev $abbrev .&#xa;&#x9;&#x9;&#x9;$orgInfo :GenCode  $geneCode&#xa;&#x9;&#x9;}&#xa;) q1 WHERE q1.name LIKE 'Acidovorax_avenae_citrulli_AAC00-1'"/>
+        <Query id="eql:q4" text="SELECT * FROM sparqltable (&#xa;SELECT $x $tot $gc1  $gc2 $gc3 ?abbrev WHERE {&#xa;&#x9;&#x9;&#x9;$x  :Abbrev ?abbrev . &#xa;&#x9;&#x9;&#x9;$x :OrganismHasGCstatsOrg $org .&#xa;&#x9;&#x9;&#x9;$org :GCValue $tot . &#xa;&#x9;&#x9;&#x9;$org :GC1 $gc1 .&#xa;&#x9;&#x9;&#x9;$org :GC2 $gc2 .&#xa;&#x9;&#x9;&#x9;$org :GC3 $gc3&#xa;&#x9;&#x9;}&#xa;) q1 WHERE q1.abbrev LIKE 'aaur'"/>
+        <Query id="eql:q5" text="SELECT * FROM sparqltable (&#xa;SELECT $gene ?name WHERE {&#xa;            $info   :OrganismName               ?name .&#xa;            $org    :OrganismHasOrganismInfo    $info .&#xa;            $gene   :GeneHasOrganism            $org .&#xa;            $gene   :GeneHasHGTPredictionGene   $hgt .&#xa;            $hgt    :Prediction                 'hgt'&#xa;        }&#xa;) q1 WHERE q1.name LIKE 'Rickettsia_conorii'"/>
+        <Query id="eql:q6" text="SELECT * FROM sparqltable (&#xa;SELECT $gene $pred ?name ?genename WHERE {&#xa;            $info   :OrganismName               ?name.&#xa;            $org    :OrganismHasOrganismInfo    $info .&#xa;            $gene   :GeneHasOrganism            $org .&#xa;            $gene   :GeneHasGeneIDInfo          $ginfo .&#xa;            $ginfo  :GeneName                   ?genename .&#xa;            $gene   :GeneHasHGTPredictionGene   $hgt .&#xa;            $hgt    :Prediction                 $pred&#xa;        }&#xa;) q1 WHERE q1.name LIKE 'Rickettsia_conorii' AND q1.genename = 'dnaA'        "/>
+        <Query id="eql:q7" text="SELECT * FROM sparqltable (&#xa;SELECT $gene ?region WHERE {&#xa; &#x9;&#x9;?info       :OrganismName               'Rickettsia_conorii' .&#xa;            &#x9;$org        :OrganismHasOrganismInfo    $info .&#xa;            &#x9;$gene       :GeneHasOrganism            $org .&#xa;            &#x9;$gene       :GeneHasHGTPredictionGene   $hgt .&#xa;            &#x9;$hgt        :GCregion                   ?region .&#xa;           &#x9;&#xa;        &#x9;}&#xa;) q1 WHERE (q1.region = 'high' OR q1.region = 'low')"/>
+        <Query id="eql:q9" text="SELECT * FROM sparqltable ( &#xa; SELECT $gene ?gcdif3 WHERE {&#xa;            $info       :OrganismName               'Rickettsia_conorii' .&#xa;            $org        :OrganismHasOrganismInfo    $info .&#xa;            $gene       :GeneHasOrganism            $org .&#xa;            $gene       :GeneHasGCstatsGene         $geneStat .&#xa;            $geneStat   :GCDif3                        ?gcdif3 .&#xa;        } &#xa;) q1 WHERE q1.gcdif3 > 1"/>
+    </SavedQueries>
+</OBDA>

@@ -1,0 +1,1655 @@
+<?xml version="1.0"?>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://www.owl-ontologies.com/Ontology1222766179.owl#"
+  xml:base="http://www.owl-ontologies.com/Ontology1222766179.owl">
+  <owl:Ontology rdf:about=""/>
+  <owl:Class rdf:ID="GCstatsOrg">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="GCstats"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="StDevGC1"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="StDevGC"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="StDevGC2"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="StDevGC3"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="GeneStats">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="P2"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Mah"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="DevAA"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="SimGC"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Nc"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="ICDI"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="SimMah"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Chi2"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  </owl:Class>
+  <owl:Class rdf:ID="AminoAcid">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="AACode"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="AAName"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  </owl:Class>
+  <owl:Class rdf:ID="AltCode">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="NCBIID"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="KEGGCode"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="TaxID"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="OrganismInfo">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="OrganismName"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GenCode"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="NrGenes"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="PB"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="GeneHasAminoAcid">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GHAHasAminoAcid"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GHAHasGene"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="AAvalueGene"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="EndingCodon">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Codon"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="GCstatsGene">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#GCstats"/>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GCDif"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GCDif1"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GCDif2"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GCDif3"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Sim"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="GeneIDInfo">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GeneName"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Synonym"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="PID"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Codon">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="TripletCode"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  </owl:Class>
+  <owl:Class rdf:about="#GCstats">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GCValue"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GC1"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GC2"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GC3"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="GeneHasCodon">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GHCHasCodon"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GHCHasGene"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="CodonValueGene"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="RSCUgene"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="HGTPredictionGene">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GCregion"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Prediction"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Taxonomy">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="NoRank"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Order"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Phylum"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Class"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Species"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="SuperKingdom"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Genus"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Family"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Gene">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="ID"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GeneHasOrganism"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GeneHasGeneStats"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GeneHasGeneIDInfo"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="GeneHasGeneFunction"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Coordinates">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Begin"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="End"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Length"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Strand"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="HGTPredictions">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Percentage"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="NrPredHGTgenes"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="GeneFunction">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Function"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  </owl:Class>
+  <owl:Class rdf:ID="EncodingCodon">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="EncodingCodonEncodesAminoAcid"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="#Codon"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Organism">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="OrganismHasTaxonomy"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="OrganismHasOrganismInfo"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="OrganismHasAltCode"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="Abbrev"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="OrganismHasCodon">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="CodonSD"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="SDRSCU"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="RSCUorg"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="CodonValueOrg"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="OHCHasOrganism"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="OHCHasCodon"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="OrganismHasAminoAcid">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="AASD"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="AAvalueOrg"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="OHAHasOrganism"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="OHAHasAminoAcid"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="OrganismInfoIsOfOrganism">
+    <rdfs:range rdf:resource="#Organism"/>
+    <rdfs:domain rdf:resource="#OrganismInfo"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="TaxonomyIsOfOrganism">
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdfs:range rdf:resource="#Organism"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#OHCHasCodon">
+    <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    <rdfs:range rdf:resource="#Codon"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#OHCHasOrganism">
+    <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    <rdfs:range rdf:resource="#Organism"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#OrganismHasOrganismInfo">
+    <rdfs:range rdf:resource="#OrganismInfo"/>
+    <rdfs:domain rdf:resource="#Organism"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#OrganismHasAltCode">
+    <rdfs:domain rdf:resource="#Organism"/>
+    <rdfs:range rdf:resource="#AltCode"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="HGTPredictionsIfOfOrganism">
+    <rdfs:domain rdf:resource="#HGTPredictions"/>
+    <rdfs:range rdf:resource="#Organism"/>
+  </owl:ObjectProperty>
+  <owl:FunctionalProperty rdf:about="#CodonValueOrg">
+    <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GCregion">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#HGTPredictionGene"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GeneHasGeneStats">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="#Gene"/>
+    <rdfs:range rdf:resource="#GeneStats"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Synonym">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#GeneIDInfo"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#AAName">
+    <rdfs:domain rdf:resource="#AminoAcid"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#StDevGC2">
+    <rdfs:domain rdf:resource="#GCstatsOrg"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Abbrev">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#Organism"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Begin">
+    <rdfs:domain rdf:resource="#Coordinates"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#StDevGC3">
+    <rdfs:domain rdf:resource="#GCstatsOrg"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#OrganismHasTaxonomy">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#Taxonomy"/>
+    <rdfs:domain rdf:resource="#Organism"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#NCBIID">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#AltCode"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="OrganismHasHGTPredictions">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#HGTPredictions"/>
+    <rdfs:domain rdf:resource="#Organism"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="GeneHasCoordinates">
+    <rdfs:domain rdf:resource="#Gene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#Coordinates"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GC1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GCstats"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#StDevGC1">
+    <rdfs:domain rdf:resource="#GCstatsOrg"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#SuperKingdom">
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#RSCUorg">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#OHAHasOrganism">
+    <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#Organism"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#PID">
+    <rdfs:domain rdf:resource="#GeneIDInfo"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="OrganismHasGCstatsOrg">
+    <rdfs:domain rdf:resource="#Organism"/>
+    <rdfs:range rdf:resource="#GCstatsOrg"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#EncodingCodonEncodesAminoAcid">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="#EncodingCodon"/>
+    <rdfs:range rdf:resource="#AminoAcid"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GC2">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GCstats"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#OrganismName">
+    <rdfs:domain rdf:resource="#OrganismInfo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GCDif3">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GCstatsGene"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GHAHasGene">
+    <rdfs:range rdf:resource="#Gene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="#GeneHasAminoAcid"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Order">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Genus">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#RSCUgene">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GeneHasCodon"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#StDevGC">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GCstatsOrg"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#AASD">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GCDif">
+    <rdfs:domain rdf:resource="#GCstatsGene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#NoRank">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GHAHasAminoAcid">
+    <rdfs:domain rdf:resource="#GeneHasAminoAcid"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#AminoAcid"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GCValue">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GCstats"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#AAvalueOrg">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#SimMah">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GeneStats"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Species">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Sim">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#GCstatsGene"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#PB">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:domain rdf:resource="#OrganismInfo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#AAvalueGene">
+    <rdfs:domain rdf:resource="#GeneHasAminoAcid"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#KEGGCode">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#AltCode"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GHCHasGene">
+    <rdfs:domain rdf:resource="#GeneHasCodon"/>
+    <rdfs:range rdf:resource="#Gene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Prediction">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="#HGTPredictionGene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GenCode">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:domain rdf:resource="#OrganismInfo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#P2">
+    <rdfs:domain rdf:resource="#GeneStats"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#AACode">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#AminoAcid"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#TripletCode">
+    <rdfs:domain rdf:resource="#Codon"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Class">
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="KEGG">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GeneFunction"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Chi2">
+    <rdfs:domain rdf:resource="#GeneStats"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="PATH">
+    <rdfs:domain rdf:resource="#GeneFunction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GC3">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GCstats"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Function">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GeneFunction"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="GeneHasGCstatsGene">
+    <rdfs:range rdf:resource="#GCstatsGene"/>
+    <rdfs:domain rdf:resource="#Gene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#CodonValueGene">
+    <rdfs:domain rdf:resource="#GeneHasCodon"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#TaxID">
+    <rdfs:domain rdf:resource="#AltCode"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Percentage">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#HGTPredictions"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Mah">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GeneStats"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#NrPredHGTgenes">
+    <rdfs:domain rdf:resource="#HGTPredictions"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Strand">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#Coordinates"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#CodonSD">
+    <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GHCHasCodon">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="#GeneHasCodon"/>
+    <rdfs:range rdf:resource="#Codon"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GeneHasGeneFunction">
+    <rdfs:domain rdf:resource="#Gene"/>
+    <rdfs:range rdf:resource="#GeneFunction"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#OHAHasAminoAcid">
+    <rdfs:domain rdf:resource="#OrganismHasAminoAcid"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#AminoAcid"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GCDif1">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GCstatsGene"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#SimGC">
+    <rdfs:domain rdf:resource="#GeneStats"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GeneHasOrganism">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#Organism"/>
+    <rdfs:domain rdf:resource="#Gene"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Phylum">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#End">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#Coordinates"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Nc">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GeneStats"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#DevAA">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#GeneStats"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:ID="GeneHasHGTPredictionGene">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:range rdf:resource="#HGTPredictionGene"/>
+    <rdfs:domain rdf:resource="#Gene"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GeneHasGeneIDInfo">
+    <rdfs:range rdf:resource="#GeneIDInfo"/>
+    <rdfs:domain rdf:resource="#Gene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#ICDI">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GeneStats"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#NrGenes">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdfs:domain rdf:resource="#OrganismInfo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GCDif2">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#GCstatsGene"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#SDRSCU">
+    <rdfs:domain rdf:resource="#OrganismHasCodon"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#ID">
+    <rdfs:domain rdf:resource="#Gene"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#GeneName">
+    <rdfs:domain rdf:resource="#GeneIDInfo"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Family">
+    <rdfs:domain rdf:resource="#Taxonomy"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#Length">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+    <rdfs:domain rdf:resource="#Coordinates"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:FunctionalProperty>
+  <EncodingCodon rdf:ID="GAT">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="D">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >D</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Aspartic acid</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GAT</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TAT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TAT</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="Y">
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Tyrosine</AAName>
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Y</AACode>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TGC">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TGC</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="C">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >C</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Cysteine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AGA">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="R">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >R</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Arginine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AGA</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ATT">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="I">
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Isoleucine</AAName>
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >I</AACode>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ATT</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CCG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CCG</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="P">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >P</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Proline</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CGG">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CGG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ACG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ACG</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="T">
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Threonine</AAName>
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >T</AACode>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ACC">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ACC</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CTC">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="L">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >L</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Leucine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CTC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GTT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GTT</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="V">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >V</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Valine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AGG">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AGG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ATC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#I"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ATC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TCT">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="S">
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Serine</AAName>
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >S</AACode>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TCT</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ATA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ATA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#I"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TGT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TGT</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#C"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GGA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GGA</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="G">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >G</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Glycine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CTT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CTT</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CCC">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CCC</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GTG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GTG</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+  </EncodingCodon>
+  <EndingCodon rdf:ID="TGA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TGA</TripletCode>
+  </EndingCodon>
+  <EncodingCodon rdf:ID="ACT">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ACT</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AAT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AAT</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="N">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >N</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Asparagine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CGC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CGC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ACA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ACA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#T"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TTT">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="F">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >F</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Phenylalanine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TTT</TripletCode>
+  </EncodingCodon>
+  <EndingCodon rdf:ID="TAG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TAG</TripletCode>
+  </EndingCodon>
+  <EncodingCodon rdf:ID="TCA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TCA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CGA">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CGA</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AGC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AGC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GTA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GTA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GCG">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="A">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >A</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Alanine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GCG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="ATG">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="M">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >M</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Methionine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ATG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GGT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GGT</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TGG">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="W">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >W</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Tryptophan</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TGG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TTG">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TTG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CAC">
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="H">
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Histidine</AAName>
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >H</AACode>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CAC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GCC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GCC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GAC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#D"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GAC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CGT">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#R"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CGT</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GAG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GAG</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="E">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >E</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Glutamic acid</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AGT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AGT</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CAG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CAG</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="Q">
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Glutamine</AAName>
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Q</AACode>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GGC">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GGC</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TCC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TCC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GAA">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#E"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GAA</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GGG">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#G"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GGG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CAT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CAT</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#H"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GCT">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GCT</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CTG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CTG</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AAG">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AAG</TripletCode>
+    <EncodingCodonEncodesAminoAcid>
+      <AminoAcid rdf:ID="K">
+        <AACode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >K</AACode>
+        <AAName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Lysine</AAName>
+      </AminoAcid>
+    </EncodingCodonEncodesAminoAcid>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CAA">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#Q"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CAA</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CCA">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CCA</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CCT">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#P"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CCT</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AAC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#N"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AAC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="CTA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CTA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#L"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TAC">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#Y"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TAC</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="TTC">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TTC</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#F"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="AAA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AAA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#K"/>
+  </EncodingCodon>
+  <EndingCodon rdf:ID="TAA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TAA</TripletCode>
+  </EndingCodon>
+  <EncodingCodon rdf:ID="TCG">
+    <EncodingCodonEncodesAminoAcid rdf:resource="#S"/>
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TCG</TripletCode>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GTC">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GTC</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#V"/>
+  </EncodingCodon>
+  <EncodingCodon rdf:ID="GCA">
+    <TripletCode rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GCA</TripletCode>
+    <EncodingCodonEncodesAminoAcid rdf:resource="#A"/>
+  </EncodingCodon>
+</rdf:RDF>
+
+<!-- Created with Protege (with OWL Plugin 3.3.1, Build 430)  http://protege.stanford.edu -->

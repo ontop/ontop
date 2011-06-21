@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#" xmlns="http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="sourceGCC">
+        <mapping id="M:1 - Cliente,NGR,timestampI">
+            <CQ string="Cliente(cl($cd_ngr)), NGR(cl($cd_ngr),$cd_ngr), timestampI(cl($cd_ngr),$ts_iniz)"/>
+            <SQLQuery string="select  cd_ngr,  min(ts_iniz_val) as ts_iniz  from  gruppo.gz0001e_entita  where cd_stato_rich  =  'C'  group  by  cd_ngr "/>
+        </mapping>
+        <mapping id="M:2 - timestampF">
+            <CQ string="timestampF(cl($cd_ngr),$ts_fin)"/>
+            <SQLQuery string="select cd_ngr, max(ts_fine_val) as ts_fin from gruppo.gz0001e_entita  where cd_stato_rich  =  'C' and cd_ngr not in (select cd_ngr from gruppo.gz0001e_entita  where YEAR(ts_fine_val)  =  9999  ) group by  cd_ngr "/>
+        </mapping>
+        <mapping id="M:3 . ClienteAttuale&#xd;">
+            <CQ string="ClienteAttuale(cl($cd_ngr))"/>
+            <SQLQuery string="select  cd_ngr  from  gruppo.gz0001e_entita   where  cd_stato_rich  =  'C' and   YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:4 - ClienteFittizio">
+            <CQ string="ClienteFittizio(cl($cd_ngr))"/>
+            <SQLQuery string="select  cd_ngr  from  gruppo.gz0001e_entita  where cd_ngr  0 and  cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:5 - NGR, Composizione, haCommposizione, inComposizione, timestampI">
+            <CQ string="NGR(cl($cd_ngr1),$cd_ngr1), NGR(cl($cd_ngr2),$cd_ngr2), Composizione(comp($cd_ngr1,$cd_ngr2,$ts_iniz_val)), haComposizione(cl($cd_ngr2),comp($cd_ngr1,$cd_ngr2,$ts_iniz_val)), inComposizione(cl($cd_ngr1),comp($cd_ngr1,$cd_ngr2,$ts_iniz_val)), timestampI(comp($cd_ngr1,$cd_ngr2,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  cd_ngr1,  cd_ngr2,  ts_iniz_val  from  gruppo.gz0005r_leg_soci where  cd_tp_legame  =  504  and  cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:6 - timestampF">
+            <CQ string="timestampF(comp($cd_ngr1,$cd_ngr2,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr1,  cd_ngr2,  ts_iniz_val,  ts_fine_val   from gruppo.gz0005r_leg_soci  where  cd_tp_legame  =  504  and   cd_stato_rich  = 'C'   and  YEAR(ts_fine_val)  >  9999"/>
+        </mapping>
+        <mapping id="M:7 - NGR, Capofila, timestampI, haComposizione, inComposizione">
+            <CQ string="NGR(cl($cd_ngr),$cd_ngr), Capofila(capf($cd_ngr,$cd_ngr_cf,$ts_iniz_val)), timestampI(capf($cd_ngr,$cd_ngr_cf,$ts_iniz_val),$ts_iniz_val), haComposizione(cl($cd_ngr),capf($cd_ngr,$cd_ngr_cf,$ts_iniz_val)), inComposizione(cl($cd_ngr_cf),capf($cd_ngr,$cd_ngr_cf,$ts_iniz_val))"/>
+            <SQLQuery string="select  cd_ngr,  cd_ngr_cf,  ts_iniz_val   from  gruppo.gz0015e_gge   where cd_stato_rich  =  'C'   and  cd_ngr_cf  >  0"/>
+        </mapping>
+        <mapping id="M:8 - timestampF">
+            <CQ string="timestampF(capf($cd_ngr,$cd_ngr_cf,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  cd_ngr_cf,  ts_iniz_val,  ts_fine_val   from gruppo.gz0015e_gge   where  cd_stato_rich  =  'C'   and  cd_ngr_cf  >  0 "/>
+        </mapping>
+        <mapping id="M:9 - DatiBilancio, haDatiBilancio, timestampI, dataBilancio">
+            <CQ string="DatiBilancio(dati_bil($cd_ngr,$ts_iniz_val)), timestampI(dati_bil($cd_ngr,$ts_iniz_val),$ts_iniz_val), haDatiBilancio(cl($cd_ngr),dati_bil($cd_ngr,$ts_iniz_val)), dataBilancio(dati_bil($cd_ngr,$ts_iniz_val),$dt_bil_civ)"/>
+            <SQLQuery string="select  cd_ngr,  dt_bil_civ,  ts_iniz_val  from  gruppo.gz0001e_entita where  fg_bil_civ  =  'S'  and  cd_stato_rich  =  'C' "/>
+        </mapping>
+        <mapping id="M:10 - timestampF">
+            <CQ string="timestampF(dati_bil($cd_ngr,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  ts_fine_val,  ts_iniz_val  from  gruppo.gz0001e_entita where  fg_bil_civ  =  'S'  and  cd_stato_rich  =  'C'  and  YEAR(ts_fine_val)  >  9999"/>
+        </mapping>
+        <mapping id="M:11 - importoFatturato">
+            <CQ string="importoFatturato(dati_bil($cd_ngr,$ts_iniz_val),$im_fatturato)"/>
+            <SQLQuery string="select  cd_ngr,  im_fatturato,  ts_iniz_val  from  gruppo.gz0001e_entita where  fg_bil_civ  =  'S'  and  cd_stato_rich  =  'C'  "/>
+        </mapping>
+        <mapping id="M:12 - importoUtile">
+            <CQ string="importoUtile(dati_bil($cd_ngr,$ts_iniz_val),$im_utile)"/>
+            <SQLQuery string="select  cd_ngr,    im_utile,  ts_iniz_val  from  gruppo.gz0001e_entita where  fg_bil_civ  =  'S'  and  cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:13 - importoPatrimonioNetto">
+            <CQ string="importoPatrimonioNetto(dati_bil($cd_ngr,$ts_iniz_val),$im_patrim_net)"/>
+            <SQLQuery string="select  cd_ngr,    im_patrim_net,  ts_iniz_val  from gruppo.gz0001e_entita  where  fg_bil_civ  =  'S'  and  cd_stato_rich  =  'C' "/>
+        </mapping>
+        <mapping id="M:14 - PatrimonioResponsabile, importoPatrimonioResponsabile, dataPatrimonioResponsabile, Banca, haPatrimonioResponsabile, ottenutoDa, ABI, timestampI, NGR">
+            <CQ string="PatrimonioResponsabile(pat_res($cd_ngr,$ts_iniz_val)), importoPatrimonioResponsabile(pat_res($cd_ngr,$ts_iniz_val),$im_patrim_resp), dataPatrimonioResponsabile(pat_res($cd_ngr,$ts_iniz_val),$dt_patrim_resp), Banca(bnc($cd_az_patrim_resp)), haPatrimonioResponsabile(cl($cd_ngr),pat_res($cd_ngr,$ts_iniz_val)), ottenutoDa(pat_res($cd_ngr,$ts_iniz_val),bnc($cd_az_patrim_resp)), timestampI(pat_res($cd_ngr,$ts_iniz_val),$ts_iniz_val), codiceABI(bnc($cd_az_patrim_resp),$cd_az_patrim_resp), NGR(cl($cd_ngr),$cd_ngr)"/>
+            <SQLQuery string="select  cd_ngr,  ts_iniz_val,  im_patrim_resp,  dt_patrim_resp, cd_az_patrim_resp  from  gruppo.gz0012e_dati_ext  where  fg_patrim_resp =  'S'"/>
+        </mapping>
+        <mapping id="M:15 - timestampF">
+            <CQ string="timestampF(pat_res($cd_ngr,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  ts_iniz_val,  ts_fine_val   from  gruppo.gz0012e_dati_ext where  fg_patrim_resp  =  'S'   and  YEAR(ts_fine_val)  > 9999"/>
+        </mapping>
+        <mapping id="M:16 - Affidamenti, haAffidamenti, importoTotFidi, timestampI, NGR">
+            <CQ string="Affidamenti(aff($cd_ngr,$ts_iniz_val)), haAffidamenti(cl($cd_ngr),aff($cd_ngr,$ts_iniz_val)), importoTotFidi(aff($cd_ngr,$ts_iniz_val),$im_tot_acc_fidi), timestampI(aff($cd_ngr,$ts_iniz_val),$ts_iniz_val), NGR(cl($cd_ngr),$cd_ngr)"/>
+            <SQLQuery string="select  cd_ngr,  im_tot_acc_fidi,  ts_iniz_val  from  gruppo.gz0012e_dati_ext where  fl_im_cons  =  'S'"/>
+        </mapping>
+        <mapping id="M:17 - timestampF">
+            <CQ string="timestampF(aff($cd_ngr,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  ts_iniz_val,  ts_fine_val  from  gruppo.gz0012e_dati_ext where  fl_im_cons  =  'S'  and  YEAR(ts_fine_val)  >  9999"/>
+        </mapping>
+        <mapping id="M:18 - Affidamenti, haAffidamenti, importoFidiFG, timestampI, NGR">
+            <CQ string="Affidamenti(aff($cd_ngr,$ts_iniz_val)), haAffidamenti(cl($cd_ngr),aff($cd_ngr,$ts_iniz_val)), importoFidiFG(aff($cd_ngr,$ts_iniz_val),$im_fidi_p_fg), timestampI(aff($cd_ngr,$ts_iniz_val),$ts_iniz_val), NGR(cl($cd_ngr),$cd_ngr)"/>
+            <SQLQuery string="select  cd_ngr,  im_fidi_p_fg,  ts_iniz_val  from gruppo.gz0012e_dati_ext  where  fl_im_p_fg  =  'S'"/>
+        </mapping>
+        <mapping id="M:19 - timestampF">
+            <CQ string="timestampF(aff($cd_ngr,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  ts_iniz_val,  ts_fine_val  from  gruppo.gz0012e_dati_ext where  fl_im_p_fg  =  'S'  and YEAR(ts_fine_val)  >  9999"/>
+        </mapping>
+        <mapping id="M:20 - Affidamenti, haAffidamenti, importoFidiPEF, timstampI, NGR">
+            <CQ string="Affidamenti(aff($cd_ngr,$ts_iniz_val)), haAffidamenti(cl($cd_ngr),aff($cd_ngr,$ts_iniz_val)), importoFidiPEF(aff($cd_ngr,$ts_iniz_val),$im_fidi_p_pef), timestampI(aff($cd_ngr,$ts_iniz_val),$ts_iniz_val), NGR(cl($cd_ngr),$cd_ngr)"/>
+            <SQLQuery string="select  cd_ngr,  im_fidi_p_pef,  ts_iniz_val  from gruppo.gz0012e_dati_ext  where  fl_im_p_pef  =  'S'"/>
+        </mapping>
+        <mapping id="M:21 - timestampF">
+            <CQ string="timestampF(aff($cd_ngr,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  ts_iniz_val,  ts_fine_val  from  gruppo.gz0012e_dati_ext where  fl_im_p_pef  =  'S'  and  YEAR(ts_fine_val)  >  9999"/>
+        </mapping>
+        <mapping id="M:22 - Appartenenza, inAppartenenza, haAppartenenza, timestampI, IGA">
+            <CQ string="Appartenenza(app($cd_ngr,$id_gruppo,$ts_iniz_val)), inAppartenenza(cl($cd_ngr),app($cd_ngr,$id_gruppo,$ts_iniz_val)), haAppartenenza(grup($id_gruppo),app($cd_ngr,$id_gruppo,$ts_iniz_val)), timestampI(app($cd_ngr,$id_gruppo,$ts_iniz_val),$ts_iniz_val), IGA(grup($id_gruppo),$id_gruppo)"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  ts_iniz_val  from  gruppo.gz0001e_entita where  cd_stato_rich  =  'C'  and  id_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:23 - percentualeFatturato">
+            <CQ string="percentualeFatturato(app($cd_ngr,$id_gruppo,$ts_iniz_val),$pc_fatt_gruppo)"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  pc_fatt_gruppo,  ts_iniz_val  from gruppo.gz0001e_entita  where  cd_stato_rich  =  'C'  and  id_gruppo  >  0 and  pc_fatt_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:24 - quotaGruppo">
+            <CQ string="quotaGruppo(app($cd_ngr,$id_gruppo,$ts_iniz_val),$pc_qt_gruppo)"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  pc_qt_gruppo,  ts_iniz_val  from gruppo.gz0001e_entita  where  cd_stato_rich  =  'C'  and  id_gruppo  >  0 and  pc_qt_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:25 - AppartenenzaAttuale">
+            <CQ string="AppartenenzaAttuale(app($cd_ngr,$id_gruppo,$ts_iniz_val))"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  ts_iniz_val  from  gruppo.gz0001e_entita where  cd_stato_rich  =  'C'  and  YEAR(ts_fine_val)  =  9999 and  id_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:26 - timestampF">
+            <CQ string="timestampF(app($cd_ngr,$id_gruppo,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  ts_iniz_val,  ts_fine_val  from gruppo.gz0001e_entita  where  cd_stato_rich  =  'C'  and   YEAR(ts_fine_val)  >  9999  and  id_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:27 - Holding">
+            <CQ string="Holding(app($cd_ngr,$id_gruppo,$ts_iniz_val))"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  ts_iniz_val  from  gruppo.gz0001e_entita where  fg_ent_cg  =  'S'  and  cd_stato_rich  =  'C'  and  id_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:28 - inAreaConsolidamento">
+            <CQ string="InAreaConsolidamento(app($cd_ngr,$id_gruppo,$ts_iniz_val))"/>
+            <SQLQuery string="select  cd_ngr,  id_gruppo,  ts_iniz_val  from  gruppo.gz0001e_entita&#xd; where  fg_area_cons  =  'S'  and  cd_stato_rich  =  'C'  and  id_gruppo  >  0"/>
+        </mapping>
+        <mapping id="M:29 - GruppoAziendale, IGA, timestampI">
+            <CQ string="GruppoAziendale(grup($id_gruppo)), IGA(grup($id_gruppo),$id_gruppo), timestampI(grup($id_gruppo),$ts_min)"/>
+            <SQLQuery string="select  id_gruppo,  min(ts_iniz_val) as ts_min  from  gruppo.gz0007e_gruppi  where cd_stato_rich  =  'C'  group  by  id_gruppo"/>
+        </mapping>
+        <mapping id="M:30 - timestampF">
+            <CQ string="timestampF(grup($id_gruppo),$ts_fine)"/>
+            <SQLQuery string="select  id_gruppo,  max(ts_fine_val) as ts_fine  from  gruppo.gz0007e_gruppi  where cd_stato_rich  =  'C'  and id_gruppo not in (select id_gruppo from gruppo.gz0007e_gruppi where  YEAR(ts_fine_val)  =  9999 )   group by  id_gruppo"/>
+        </mapping>
+        <mapping id="M:31 - GruppoAziendaleAttuale">
+            <CQ string="GruppoAziendaleAttuale(grup($id_gruppo))"/>
+            <SQLQuery string="select  id_gruppo  from  gruppo.gz0007e_gruppi  where  cd_stato_rich  = 'C'  and  YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:32 - Denominazione, haDenominazione, stringaDenominazione, timestampI">
+            <CQ string="Denominazione(denom($id_gruppo,$ts_iniz_val)), haDenominazione(grup($id_gruppo),denom($id_gruppo,$ts_iniz_val)), stringaDenominazione(denom($id_gruppo,$ts_iniz_val),$tx_denom), timestampI(denom($id_gruppo,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_gruppo,  tx_denom,  ts_iniz_val  from  gruppo.gz0007e_gruppi where  cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:33 - timestampF">
+            <CQ string="timestampF(denom($id_gruppo,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  id_gruppo,  ts_iniz_val,  ts_fine_val  from gruppo.gz0007e_gruppi  where  cd_stato_rich  =  'C'   and  YEAR(ts_fine_val)  >  9999"/>
+        </mapping>
+        <mapping id="M:34 - LegameFittizio">
+            <CQ string="LegameFittizio(leg_giur($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0002r_leg_giur  where  cd_stato_rich  =  'C' and  cd_tp_legame  =  201"/>
+        </mapping>
+        <mapping id="M:35 - LegameGiuridico">
+            <CQ string="LegameGiuridico(leg_giur($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0002r_leg_giur  where  cd_stato_rich  =  'C' and  cd_tp_legame  =  202"/>
+        </mapping>
+        <mapping id="M:36 - MaggioranzaRelativa">
+            <CQ string="MaggioranzaRelativa(leg_giur($id_leg))"/>
+            <SQLQuery string=" select  id_leg  from  gruppo.gz0002r_leg_giur  where  cd_stato_rich  =  'C' and  cd_tp_legame  =  202  and  fg_magg_rel  =  'S'"/>
+        </mapping>
+        <mapping id="M:37 - LegameDirezioneCoordinamento">
+            <CQ string="LegameDirezioneCoordinamento(leg_giur($id_leg))"/>
+            <SQLQuery string=" select  id_leg  from  gruppo.gz0002r_leg_giur  where  cd_stato_rich  =  'C' and  cd_tp_legame  =  203"/>
+        </mapping>
+        <mapping id="M:38 - timestampF">
+            <CQ string="timestampF(leg_giur($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, max(ts_fine_val) as ts  from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0002r_leg_giur where YEAR(ts_fine_val) = 9999) group by id_leg"/>
+        </mapping>
+        <mapping id="M:39 - LegameAttuale">
+            <CQ string="LegameAttuale(leg_giur($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0002r_leg_giur  where  cd_stato_rich  =  'C' and  YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:40 - LegameRilevanteCalcolato">
+            <CQ string="LegameRilevanteCalcolato(leg_giur($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0002r_leg_giur   where  cd_stato_rich  = 'C'   and  fg_rilev_calc  =  'S'"/>
+        </mapping>
+        <mapping id="M:41 - LegameRilevanteEffettivo">
+            <CQ string="LegameRilevanteEffettivo(leg_giur($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0002r_leg_giur  where  fg_rilev_calc  =  'S' and  fg_rilev_forz  =  ' '  and  cd_stato_rich  =  'C' union select  id_leg from  gruppo.gz0002r_leg_giur  where  fg_rilev_forz  =  'S'  and cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:42 - LegameGaranziaProposto">
+            <CQ string="LegameGaranziaProposto(leg_gar($id_leg))"/>
+            <SQLQuery string="select  id_leg from  gruppo.gz0003r_leg_gar  where  cd_stato_rich  =  'C' and  cd_tp_legame  =  302"/>
+        </mapping>
+        <mapping id="M:43 - LegameGaranziaProposto">
+            <CQ string="LegameGaranziaProposto(leg_gar($id_leg))"/>
+            <SQLQuery string="select  id_leg  from&#xd;&#xd; gruppo.gz0003r_leg_gar  where  cd_stato_rich  =  'C'  and  cd_tp_legame  =&#xd;&#xd; 303"/>
+        </mapping>
+        <mapping id="M:44 - LegameGaranziaConsolidato">
+            <CQ string="LegameGaranziaConsolidato(leg_gar($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0003r_leg_gar&#xd; where  cd_stato_rich  =  'C'  and  cd_tp_legame  =  301"/>
+        </mapping>
+        <mapping id="M:45 - timestampF">
+            <CQ string="timestampF(leg_gar($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, max(ts_fine_val) as ts from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0003r_leg_gar where YEAR(ts_fine_val) = 9999) group by id_leg"/>
+        </mapping>
+        <mapping id="M:46 - LegameAttuale">
+            <CQ string="LegameAttuale(leg_gar($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0003r_leg_gar  where  cd_stato_rich  =  'C' and  YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:47 - LegameRilevanteCalcolato">
+            <CQ string="LegameRilevanteCalcolato(leg_gar($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0003r_leg_gar  where  cd_stato_rich  = 'C'  and  fg_rilev_calc  =  'S'"/>
+        </mapping>
+        <mapping id="M:48 - LegameRilevanteEffettivo">
+            <CQ string="LegameRilevanteEffettivo(leg_giur($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0003r_leg_gar  where  fg_rilev_calc  =  'S' and  fg_rilev_forz  =  ' '  and  cd_stato_rich  =  'C' union select  id_leg  from  gruppo.gz0003r_leg_gar  where  fg_rilev_forz  =  'S' and  cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:49 - LegameFatturato">
+            <CQ string="LegameFatturato(leg_eco($id_leg))"/>
+            <SQLQuery string="select  id_leg from  gruppo.gz0004r_leg_econ  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  401"/>
+        </mapping>
+        <mapping id="M:50 - LegameFinanziamento">
+            <CQ string="LegameFinanziamento(leg_eco($id_leg))"/>
+            <SQLQuery string="select  id_leg from  gruppo.gz0004r_leg_econ  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  402"/>
+        </mapping>
+        <mapping id="M:51 - LegameCashPooling ">
+            <CQ string="LegameCashPooling(leg_eco($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0004r_leg_econ  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  403"/>
+        </mapping>
+        <mapping id="M:52 - LegameFidiPlurimi">
+            <CQ string="LegameFidiPlurimi(leg_eco($id_leg))"/>
+            <SQLQuery string="select  id_leg from  gruppo.gz0004r_leg_econ  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  404"/>
+        </mapping>
+        <mapping id="M:53 - LegameGCOL">
+            <CQ string="LegameGCOL(leg_eco($id_leg))"/>
+            <SQLQuery string="select  id_leg from  gruppo.gz0004r_leg_econ  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  405"/>
+        </mapping>
+        <mapping id="M:54 - timestampF">
+            <CQ string="timestampF(leg_eco($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, max(ts_fine_val) as ts  from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0004r_leg_econ where YEAR(ts_fine_val) = 9999) group by id_leg"/>
+        </mapping>
+        <mapping id="M:55 - LegameAttuale">
+            <CQ string="LegameAttuale(leg_eco($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0004r_leg_econ   where  cd_stato_rich  = 'C'   and  YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:56 - LegameRilevanteCalcolato">
+            <CQ string="LegameRilevanteCalcolato(leg_econ($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0004r_leg_econ   where  cd_stato_rich  = 'C'   and  fg_rilev_calc  =  'S'"/>
+        </mapping>
+        <mapping id="M:57 - LegameRilevanteEffettivo">
+            <CQ string="LegameRilevanteEffettivo(leg_econ($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0004r_leg_econ  where  fg_rilev_calc  =  'S' and  fg_rilev_forz  =  ' '  and  cd_stato_rich  =  'C' union select  id_leg  from  gruppo.gz0004r_leg_econ  where  fg_rilev_forz  =  'S'  and cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:58 - LegameAmministatore">
+            <CQ string="LegameAmministratore(leg_soc($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0005r_leg_soci  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  501"/>
+        </mapping>
+        <mapping id="M:59 - LegameSLR">
+            <CQ string="LegameSLR(leg_soc($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0005r_leg_soci  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  502"/>
+        </mapping>
+        <mapping id="M:60 - LegameSIR">
+            <CQ string="LegameSIR(leg_soc($id_leg))"/>
+            <SQLQuery string="select  id_leg from  gruppo.gz0005r_leg_soci  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  503"/>
+        </mapping>
+        <mapping id="M:61 - timestampF">
+            <CQ string="timestampF(leg_soc($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, max(ts_fine_val) as ts  from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0005r_leg_soci where YEAR(ts_fine_val) = 9999) group by id_leg"/>
+        </mapping>
+        <mapping id="M:62 - LegameAttuale">
+            <CQ string="LegameAttuale(leg_soc($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0005r_leg_soci  where  cd_stato_rich  = 'C'  and  YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:63 - LegameRilevanteCalcolato">
+            <CQ string="LegameRilevanteCalcolato(leg_soc($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0005r_leg_soci  where  cd_stato_rich  = 'C'  and  fg_rilev_calc  =  'S'"/>
+        </mapping>
+        <mapping id="M:64 - LegameRilevanteEffettivo">
+            <CQ string="LegameRilevanteEffettivo(leg_soc($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0005r_leg_soci  where  fg_rilev_calc  =  'S' and  fg_rilev_forz  =  ' '  and  cd_stato_rich  =  'C' union select  id_leg  from  gruppo.gz0005r_leg_soci  where  fg_rilev_forz  =  'S' and  cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:65 - LegamePatrimonialeManuale">
+            <CQ string="LegamePatrimonialeManuale(leg_patr($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0006r_beni_ent  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  601"/>
+        </mapping>
+        <mapping id="M:66 - LegamePatrimonialeAutomativo">
+            <CQ string="LegamePatrimonialeAutomatico(leg_patr($id_leg))"/>
+            <SQLQuery string=" select  id_leg  from  gruppo.gz0006r_beni_ent  where cd_stato_rich  =  'C'  and  cd_tp_legame  =  602"/>
+        </mapping>
+        <mapping id="M:67 - timestampF">
+            <CQ string="timestampF(leg_patr($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, max(ts_fine_val) as ts  from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' and id_leg not in ( select id_leg from gruppo.gz0006r_beni_ent where YEAR(ts_fine_val) = 9999) group by id_leg"/>
+        </mapping>
+        <mapping id="M:68 - LegameAttuale">
+            <CQ string="LegameAttuale(leg_patr($id_leg))"/>
+            <SQLQuery string="select  id_leg    from  gruppo.gz0006r_beni_ent  where  cd_stato_rich  = 'C'  and  YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:69 - LegameRilevanteCalcolato">
+            <CQ string="LegameRilevanteCalcolato(leg_patr($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0006r_beni_ent  where  cd_stato_rich  =  'C' and  fg_rilev_calc  =  'S'"/>
+        </mapping>
+        <mapping id="M:70 - LegameRilevanteEffettivo">
+            <CQ string="LegameRilevanteEffettivo(leg_patr($id_leg))"/>
+            <SQLQuery string="select  id_leg  from  gruppo.gz0006r_beni_ent  where  fg_rilev_calc  =  'S' and  fg_rilev_forz  =  ' '  and  cd_stato_rich  =  'C' union select  id_leg  from  gruppo.gz0006r_beni_ent  where  fg_rilev_forz  =  'S'  and cd_stato_rich  =  'C'"/>
+        </mapping>
+        <mapping id="M:71 - IGCC, timestampI">
+            <CQ string="IGCC(gcc($id_perimetro,$ts_iniz_val),$id_perimetro), timestampI(gcc($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val  from  gruppo.gz0102e_prm"/>
+        </mapping>
+        <mapping id="M:72 - GCCAttuale">
+            <CQ string="GCCAttuale(gcc($id_perimetro,$ts_iniz_val))"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val  from  gruppo.gz0102e_prm  where YEAR(ts_fine_val)  =  9999"/>
+        </mapping>
+        <mapping id="M:73 - ConnessioneCalcolata, haConnessioneCalcolata, gradoConnessioneCalcolato, timestampI">
+            <CQ string="ConnessioneCalcolata(con_calc($id_perimetro,$ts_iniz_val)), haConnessioneCalcolata(gcc($id_perimetro,$ts_iniz_val),con_calc($id_perimetro,$ts_iniz_val)), gradoConnessioneCalcolato(con_calc($id_perimetro,$ts_iniz_val),$cd_gr_conn_calc), timestampI(con_calc($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  cd_gr_conn_calc  from gruppo.gz0102e_prm  where  cd_gr_conn_calc  >  0"/>
+        </mapping>
+        <mapping id="M:74 - timestampF">
+            <CQ string="timestampF(con_calc($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string=" select  id_perimetro,  ts_iniz_val,  ts_fine_val  from gruppo.gz0102e_prm  where  cd_gr_conn_calc  >  0  and  YEAR(ts_fine_val) >  9999"/>
+        </mapping>
+        <mapping id="M:75 - ConnessioneCalcolata, haConnessioneCalcolata, livelloConnessioneCalcolata, timestampI">
+            <CQ string="ConnessioneCalcolata(con_calc($id_perimetro,$ts_iniz_val)), haConnessioneCalcolata(gcc($id_perimetro,$ts_iniz_val),con_calc($id_perimetro,$ts_iniz_val)), livelloConnessioneGaranzia(con_calc($id_perimetro,$ts_iniz_val),$cd_gr_conn1), timestampI(con_calc($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  cd_gr_conn1  from gruppo.gz0102e_prm  where  cd_gr_conn1  >  0"/>
+        </mapping>
+        <mapping id="M:76 - timestampF">
+            <CQ string="timestampF(con_calc($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  ts_fine_val  from gruppo.gz0102e_prm  where  cd_gr_conn1  >  0  and  YEAR(ts_fine_val)  > 9999"/>
+        </mapping>
+        <mapping id="M:77 - ConnessioneCalcolata, haConnessioneCalcolata, livelloConnessioneGiuridico, timestampI">
+            <CQ string="ConnessioneCalcolata(con_calc($id_perimetro,$ts_iniz_val)), haConnessioneCalcolata(gcc($id_perimetro,$ts_iniz_val),con_calc($id_perimetro,$ts_iniz_val)), livelloConnessioneGiuridico(con_calc($id_perimetro,$ts_iniz_val),$cd_gr_conn3), timestampI(con_calc($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  cd_gr_conn3  from gruppo.gz0102e_prm  where  cd_gr_conn3  >  0"/>
+        </mapping>
+        <mapping id="M:78 - timestampF">
+            <CQ string="timestampF(con_calc($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  ts_fine_val  from gruppo.gz0102e_prm  where  cd_gr_conn3  >  0  and  YEAR(ts_fine_val)  > 9999"/>
+        </mapping>
+        <mapping id="M:79 - ConnessioneCalcolata, haConnessioneCalcolata, livelloConnessioneAltraNatura, timestampI">
+            <CQ string="ConnessioneCalcolata(con_calc($id_perimetro,$ts_iniz_val)), haConnessioneCalcolata(gcc($id_perimetro,$ts_iniz_val),con_calc($id_perimetro,$ts_iniz_val)), livelloConnessioneAltraNatura(con_calc($id_perimetro,$ts_iniz_val),$cd_gr_conn2), timestampI(con_calc($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  cd_gr_conn2  from gruppo.gz0102e_prm  where  cd_gr_conn2  >  0 "/>
+        </mapping>
+        <mapping id="M:80 - timestampF">
+            <CQ string="timestampF(con_calc($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  ts_fine_val  from gruppo.gz0102e_prm  where  cd_gr_conn2  >  0  and  YEAR(ts_fine_val)  > 9999"/>
+        </mapping>
+        <mapping id="M:81 - ConnessioneForzata, haConnessioneForzata, gradoConnessioneForzato, timestampI">
+            <CQ string="ConnessioneForzata(con_forz($id_perimetro,$ts_iniz_val)), haConnessioneForzata(gcc($id_perimetro,$ts_iniz_val),con_forz($id_perimetro,$ts_iniz_val)), gradoConnessioneForzato(con_forz($id_perimetro,$ts_iniz_val),$cd_gr_conn_forz), timestampI(con_forz($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  cd_gr_conn_forz  from gruppo.gz0102e_prm  where  cd_gr_conn_forz  >  0"/>
+        </mapping>
+        <mapping id="M:82 - timestampF">
+            <CQ string="timestampF(con_forz($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select  id_perimetro,  ts_iniz_val,  ts_fine_val  from gruppo.gz0102e_prm  where  cd_gr_conn_forz  >  0  and  YEAR(ts_fine_val) >  9999"/>
+        </mapping>
+        <mapping id="M:83 - CalcoloRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_giur($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select  id_leg,  ts_iniz_val  from  gruppo.gz0002r_leg_giur  where fg_rilev_calc  =  'S'"/>
+        </mapping>
+        <mapping id="M:84 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:85 - CalcoloNonRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_giur($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'N'"/>
+        </mapping>
+        <mapping id="M:86 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_calc = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:87 - ForzaturaRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_giur($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'S'"/>
+        </mapping>
+        <mapping id="M:88 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:89 - ForzatoNonRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_giur($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'N'"/>
+        </mapping>
+        <mapping id="M:90 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where fg_rilev_forz = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:91 - CalcoloRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_gar($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'S'"/>
+        </mapping>
+        <mapping id="M:92 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:93 - CalcoloNonRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_gar($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'N'"/>
+        </mapping>
+        <mapping id="M:94 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_calc = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:95 - ForzatoRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_gar($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'S'"/>
+        </mapping>
+        <mapping id="M:96 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:97 - ForzatoNonRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_gar($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'N'"/>
+        </mapping>
+        <mapping id="M:98 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where fg_rilev_forz = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:99 - CalcoloRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_eco($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'S'"/>
+        </mapping>
+        <mapping id="M:100 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:101 - CalcoloNonRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_eco($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'N'"/>
+        </mapping>
+        <mapping id="M:102 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_calc = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:103 - ForzatoRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_eco($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'S'"/>
+        </mapping>
+        <mapping id="M:104 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:105 - ForzatoNonRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_eco($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'N'"/>
+        </mapping>
+        <mapping id="M:106 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where fg_rilev_forz = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:107 - CalcoloRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_soc($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'S'"/>
+        </mapping>
+        <mapping id="M:108 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:109 - CalcoloNonRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_soc($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'N'"/>
+        </mapping>
+        <mapping id="M:110 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_calc = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:111 - ForzaturaRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_soc($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'S'"/>
+        </mapping>
+        <mapping id="M:112 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:113 - ForzatoNonRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_soc($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'N'"/>
+        </mapping>
+        <mapping id="M:114 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where fg_rilev_forz = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:115 - CalcoloRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_patr($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'S'"/>
+        </mapping>
+        <mapping id="M:116 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:117 - CalcoloNonRilevante, inEventoLegame, timestampI">
+            <CQ string="CalcoloNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_patr($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'N'"/>
+        </mapping>
+        <mapping id="M:118 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_calc = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:119 - ForzatoRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_patr($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'S'"/>
+        </mapping>
+        <mapping id="M:120 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'S' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:121 - ForzatoNonRilevante, inEventoLegame, timestampI">
+            <CQ string="ForzatoNonRilevante(evento_leg($id_leg,$ts_iniz_val)), inEventoLegame(leg_patr($id_leg),evento_leg($id_leg,$ts_iniz_val)), timestampI(evento_leg($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'N'"/>
+        </mapping>
+        <mapping id="M:122 - timestampF">
+            <CQ string="timestampF(evento_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0006r_beni_ent where fg_rilev_forz = 'N' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:123 - PerimetrazioneEffettiva, haCliente, inGCC, NGR, IGCC, timestampI&#x9;">
+            <CQ string="PerimetrazioneEffettiva(per($cd_ngr,$id_perim_eff,$ts_iniz_val)), haCliente(per($cd_ngr,$id_perim_eff,$ts_iniz_val),cl($cd_ngr)), inGCC(per($cd_ngr,$id_perim_eff,$ts_iniz_val),gcc($id_perim_eff,$ts_iniz_val)), NGR(cl($cd_ngr),$cd_ngr), IGCC(gcc($id_perim_eff,$ts_iniz_val),$id_perim_eff), timestampI(gcc($id_perim_eff,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_eff from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:124 - timestampF">
+            <CQ string="timestampF(per($cd_ngr,$id_perim_eff,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_eff, ts_fine_val from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:125 - PerimetrazioneEffettivaConEsclusioneRischio">
+            <CQ string="PerimetrazioneEffettivaConEsclusioneRischio(per($cd_ngr,$id_perim_eff,$ts_iniz_val))"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_eff from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C' and fg_ent_iso = 'S'"/>
+        </mapping>
+        <mapping id="M:126 - PerimetrazioneCalcolata, haCliente, inGCC, NGR, IGCC, timestampI">
+            <CQ string="PerimetrazioneCalcolata(per($cd_ngr,$id_perim_calc,$ts_iniz_val)), haCliente(per($cd_ngr,$id_perim_calc,$ts_iniz_val),cl($cd_ngr)), inGCC(per($cd_ngr,$id_perim_calc,$ts_iniz_val),gcc($id_perim_calc,$ts_iniz_val)), NGR(cl($cd_ngr),$cd_ngr), IGCC(gcc($id_perim_calc,$ts_iniz_val),$id_perim_calc), timestampI(gcc($id_perim_calc,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc from gruppo.gz0101e_prm_e where id_perim_calc > 0 and id_perim_eff = id_perim_calc and fg_escluso= 'N' and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:127 - PerimetrazioneAttuale">
+            <CQ string="PerimetrazioneAttuale(per($cd_ngr,$id_perim_eff,$ts_iniz_val))"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_eff from gruppo.gz0101e_prm_e where id_perim_eff > 0 and cd_stato_rich = 'C' and YEAR(ts_fine_val) = 9999"/>
+        </mapping>
+        <mapping id="M:128 - PeriodoValidita, timestampI">
+            <CQ string="PeriodoValidita(perival($cd_ngr,$ts_iniz_val)), timestampI(perival($cd_ngr,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val from GRUPPO.GZ0015E_GGE where fg_gge_rep = 'S'"/>
+        </mapping>
+        <mapping id="M:129 - timestampF">
+            <CQ string="timestampF(perival($cd_ngr,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, ts_fine_val from GRUPPO.GZ0015E_GGE where fg_gge_rep = 'S' and cd_stato_rich = 'C' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:130 - Coordinamento, IGCC, LaboratorioFidiCoordinatore, haCoordinamento, CodiceLaboratorioFidi, Banca, codiceABI, inCoordinamento, timestampI">
+            <CQ string="Coordinamento(coord($id_perimetro,$ts_iniz_val,$cd_azienda)), IGCC(gcc($id_perimetro,$ts_iniz_val),$id_perimetro), LaboratorioFidiCoordinatore(labfidico($cd_lfc)), haCoordinamento(labfidico($cd_lfc),coord($id_perimetro,$ts_iniz_val,$cd_azienda)), codiceLaboratorioFidi(labfidico($cd_lfc),$cd_lfc), Banca(bnc($cd_azienda)), codiceABI(bnc($cd_azienda),$cd_azienda), inCoordinamento(gcc($id_perimetro,$ts_iniz_val),coord($id_perimetro,$ts_iniz_val,$cd_azienda)), timestampI(gcc($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val, cd_lfc, cd_azienda from GRUPPO.GZ0104E_PRM_LFC where cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:131 - timestampF">
+            <CQ string="timestampF(coord($id_perimetro,$ts_iniz_val,$cd_azienda),$ts_fine_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val, cd_azienda, ts_fine_val from GRUPPO.GZ0104E_PRM_LFC where cd_stato_rich = 'C' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:132 - CalcoloNelPerimetro, GCCRelativo, inEventoPerimetrazione, NGR, IGCC, timestampI">
+            <CQ string="CalcoloNelPerimetro(calper($cd_ngr,$id_perim_calc,$ts_iniz_val)), GCCRelativo(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),gcc($id_perim_calc,$ts_iniz_val)), inEventoPerimetrazione(cl($cd_ngr),calper($cd_ngr,$id_perim_calc,$ts_iniz_val)), NGR(cl($cd_ngr),$cd_ngr), IGCC(gcc($id_perim_calc,$ts_iniz_val),$id_perim_calc), timestampI(gcc($id_perim_calc,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:133 - timestampF">
+            <CQ string="timestampF(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc, ts_fine_val from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and YEAR(ts_fine_val) > 9999 and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:134 - causalePerimetrazione">
+            <CQ string="causalePerimetrazione(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),$cd_step)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc, cd_step from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step > 0"/>
+        </mapping>
+        <mapping id="M:135 - causalePerimetrazione">
+            <CQ string="causalePerimetrazione(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),$cd_step2)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc, cd_step2 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step2 > 0"/>
+        </mapping>
+        <mapping id="M:136 - causalePerimetrazione">
+            <CQ string="causalePerimetrazione(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),$cd_step3)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc, cd_step3 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step3 > 0"/>
+        </mapping>
+        <mapping id="M:137 - causalePerimetrazione">
+            <CQ string="causalePerimetrazione(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),$cd_step4)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc, cd_step4 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step4 > 0"/>
+        </mapping>
+        <mapping id="M:138 - causalePerimetrazione">
+            <CQ string="causalePerimetrazione(calper($cd_ngr,$id_perim_calc,$ts_iniz_val),$cd_step5)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc, cd_step5 from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and cd_step5 > 0"/>
+        </mapping>
+        <mapping id="M:139 - CalcoloNelPerimetroConEsclusioneRischio">
+            <CQ string="CalcoloNelPerimetroConEsclusioneRischio(calper($cd_ngr,$id_perim_calc,$ts_iniz_val))"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_calc from GRUPPO.GZ0101E_PRM_E where id_perim_calc > 0 and id_perim_calc = id_perim_eff and cd_stato_rich = 'C' and fg_ent_iso = 'S'"/>
+        </mapping>
+        <mapping id="M:140 - ForzaturaNelPerimetro, GCCRelatico, inEventoPerimetrazione, NGR, IGCC, timestampI">
+            <CQ string="ForzaturaNelPerimetro(forzper($cd_ngr,$id_perim_forz,$ts_iniz_val)), GCCRelativo(forzper($cd_ngr,$id_perim_forz,$ts_iniz_val),gcc($id_perim_forz,$ts_iniz_val)), inEventoPerimetrazione(cl($cd_ngr),forzper($cd_ngr,$id_perim_forz,$ts_iniz_val)), NGR(cl($cd_ngr),$cd_ngr), IGCC(gcc($id_perim_forz,$ts_iniz_val),$id_perim_forz), timestampI(gcc($id_perim_forz,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_forz from GRUPPO.GZ0101E_PRM_E where id_perim_forz > 0 and id_perim_forz = id_perim_eff and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:141 - ForzaturaNelPerimetroConEsclusioneRischio">
+            <CQ string="ForzaturaNelPerimetroConEsclusioneRischio(forzper($cd_ngr,$id_perim_forz,$ts_iniz_val))"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val, id_perim_forz from GRUPPO.GZ0101E_PRM_E where id_perim_forz > 0 and id_perim_forz = id_perim_eff and cd_stato_rich = 'C' and fg_ent_iso = 'S'"/>
+        </mapping>
+        <mapping id="M:142 - Isolamento, inEventoPerimetrazione, NGR">
+            <CQ string="Isolamento(isol($cd_ngr,$ts_iniz_val)), inEventoPerimetrazione(cl($cd_ngr),isol($cd_ngr,$ts_iniz_val)), NGR(cl($cd_ngr),$cd_ngr)"/>
+            <SQLQuery string="select cd_ngr, ts_iniz_val from GRUPPO.GZ0101E_PRM_E where id_perim_eff = 0 and id_perim_eff = id_perim_forz and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:143 - eSottoReportistica, IGCC">
+            <CQ string="eSottoReportistica(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper   from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where  rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:144 - eSottoReportistica, IGCC">
+            <CQ string="eSottoReportistica(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper   from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where  rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:145 - eSottoReportistica, IGCC">
+            <CQ string="eSottoReportistica(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper   from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where  rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:146 - eSottoReportistica, IGCC">
+            <CQ string="eSottoReportistica(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper   from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where  rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_rep = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:147 - eSottoMonitoraggio, IGCC">
+            <CQ string="eSottoMonitoraggio(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:148 - eSottoMonitoraggio, IGCC">
+            <CQ string="eSottoMonitoraggio(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:149 - eSottoMonitoraggio, IGCC">
+            <CQ string="eSottoMonitoraggio(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val >= per.ts_iniz_val and rm.ts_fine_val = per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:150 - eSottoMonitoraggio, IGCC">
+            <CQ string="eSottoMonitoraggio(gcc($idgcc,$tiper),perival($ngr,$tirm)), IGCC(gcc($idgcc,$tiper),$idgcc)"/>
+            <SQLQuery string="select rm.cd_ngr as ngr, rm.ts_iniz_val as tirm, per.id_perim_eff as idgcc, per.ts_iniz_val as tiper from GRUPPO.GZ0015E_GGE as rm, GRUPPO.GZ0101E_PRM_E as per where rm.cd_stato_rich = 'C' and per.cd_stato_rich = 'C' and fg_gge_mon = 'S' and rm.cd_ngr = per.cd_ngr and rm.ts_iniz_val = per.ts_iniz_val and rm.ts_fine_val >= per.ts_fine_val and rm.ts_iniz_val = per.ts_fine_val"/>
+        </mapping>
+        <mapping id="M:151 - CalcoloGradoDiConnessione, GCCRelativo, timestampI">
+            <CQ string="CalcoloGradoDiConnessione(e_calc_gra_conn($id_perimetro,$ts_iniz_val)), GCCRelativo(e_calc_gra_conn($id_perimetro,$ts_iniz_val),gcc($id_perimetro,$ts_iniz_val)), timestampI(e_forz_gra_conn($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_calc > 0 and id_perimetro > 0 and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:152 - ForzaturaGradoDiConnessione, GCCRelativo, timestampI">
+            <CQ string="ForzaturaGradoDiConnessione(e_forz_gra_conn($id_perimetro,$ts_iniz_val)), GCCRelativo(e_forz_gra_conn($id_perimetro,$ts_iniz_val),gcc($id_perimetro,$ts_iniz_val)), timestampI(e_forz_gra_conn($id_perimetro,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val from GRUPPO.GZ0102E_PRM  where cd_gr_conn_forz > 0 and id_perimetro > 0 and cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:153 - timestampF">
+            <CQ string="timestampF(e_calc_gra_conn($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val, ts_fine_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_calc > 0 and id_perimetro > 0 and cd_stato_rich = 'C' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:154 - timestampF">
+            <CQ string="timestampF(e_forz_gra_conn($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val, ts_fine_val from GRUPPO.GZ0102E_PRM where cd_gr_conn_forz > 0 and id_perimetro > 0 and cd_stato_rich = 'C' and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:155 - GCCGiuridico">
+            <CQ string="GCCGiuridico(gcc($idgcc,$ti))"/>
+            <SQLQuery string="select perimetro.igcc as idgcc, perimetro.ts_iniz_val as ti from (select id_perimetro as igcc, ts_iniz_val from gruppo.gz0102e_prm where cd_stato_rich = 'C' and id_perimetro > 0 union select id_perim_eff as igcc, ts_iniz_val from gruppo.gz0101e_prm_e where cd_stato_rich = 'C' and id_perim_eff > 0) as perimetro, (select id_gruppo as iga from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0 union select id_gruppo as iga from gruppo.gz0007e_gruppi where cd_stato_rich = 'C' and id_gruppo > 0) as gruppo where perimetro.igcc = gruppo.iga"/>
+        </mapping>
+        <mapping id="M:156 - GCCEconomico">
+            <CQ string="GCCEconomico(gcc($gcce,$tie))"/>
+            <SQLQuery string="select perimetroe.igcc as gcce, perimetroe.ts_iniz_val as tie from (select id_perimetro as igcc, ts_iniz_val from gruppo.gz0102e_prm where cd_stato_rich = 'C' and id_perimetro > 0 union select id_perim_eff as igcc, ts_iniz_val from gruppo.gz0101e_prm_e where cd_stato_rich = 'C' and id_perim_eff > 0) as perimetroe where perimetroe.igcc not in ( select perimetro.igcc from (select id_perimetro as igcc, ts_iniz_val from gruppo.gz0102e_prm where cd_stato_rich = 'C' and id_perimetro > 0 union select id_perim_eff as igcc, ts_iniz_val from gruppo.gz0101e_prm_e where cd_stato_rich = 'C' and id_perim_eff > 0) as perimetro, (select id_gruppo as iga from gruppo.gz0001e_entita where cd_stato_rich = 'C' and id_gruppo > 0 union select id_gruppo as iga from gruppo.gz0007e_gruppi where cd_stato_rich = 'C' and id_gruppo > 0) as gruppo where perimetro.igcc = gruppo.iga )"/>
+        </mapping>
+        <mapping id="M:157 - timestampI">
+            <CQ string="timestampI(leg_giur($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, min(ts_iniz_val) as ts from gruppo.gz0002r_leg_giur where&#xd; cd_stato_rich = 'C' group by id_leg"/>
+        </mapping>
+        <mapping id="M:158 - timestampI">
+            <CQ string="timestampI(leg_gar($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, min(ts_iniz_val) as ts from gruppo.gz0003r_leg_gar where&#xd; cd_stato_rich = 'C' group by id_leg"/>
+        </mapping>
+        <mapping id="M:159 - timestampI">
+            <CQ string="timestampI(leg_eco($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, min(ts_iniz_val) as ts from gruppo.gz0004r_leg_econ where&#xd;&#xd; cd_stato_rich = 'C' group by id_leg"/>
+        </mapping>
+        <mapping id="M:160 - timestampI">
+            <CQ string="timestampI(leg_soc($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, min(ts_iniz_val) as ts from gruppo.gz0005r_leg_soci where&#xd; cd_stato_rich = 'C' group by id_leg"/>
+        </mapping>
+        <mapping id="M:161 - timestampI">
+            <CQ string="timestampI(leg_patr($id_leg),$ts)"/>
+            <SQLQuery string="select id_leg, min(ts_iniz_val) as ts from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C' group by id_leg"/>
+        </mapping>
+        <mapping id="M:162 - PartecipazioneALegame, quota, timestampI, haPartecipazioneALegame">
+            <CQ string="PartecipazioneALegame(par_a_leg($id_leg,$ts_iniz_val)), quota(par_a_leg($id_leg,$ts_iniz_val),$pc_qt_partecip), timestampI(par_a_leg($id_leg,$ts_iniz_val),$ts_iniz_val), haPartecipazioneALegame(leg_giur($id_leg),par_a_leg($id_leg,$ts_iniz_val))"/>
+            <SQLQuery string="select id_leg, pc_qt_partecip, ts_iniz_val from&#xd; gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame =&#xd; 202 and pc_qt_partecip > 0"/>
+        </mapping>
+        <mapping id="M:163 - timestampF">
+            <CQ string="timestampF(par_a_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C' and cd_tp_legame = 202 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:164 - eCollegato, eCollegante, tipoLegame, NGR">
+            <CQ string="tipoLegame(leg_giur($id_leg),$cd_tp_legame), eCollegato(cl($cd_ngr2),leg_giur($id_leg)), eCollegante(cl($cd_ngr1),leg_giur($id_leg)), NGR(cl($cd_ngr1),$cd_ngr1), NGR(cl($cd_ngr2),$cd_ngr2)"/>
+            <SQLQuery string="select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0002r_leg_giur where cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:165 - GaranziaFGProposta, haFGProposto, timestampI, importoGaranziaFG">
+            <CQ string="GaranziaFGProposta(gar_fg_prop($id_leg,$ts_iniz_val)), haFGProposto(leg_gar($id_leg),gar_fg_prop($id_leg,$ts_iniz_val)), timestampI(gar_fg_prop($id_leg,$ts_iniz_val),$ts_iniz_val), importoGaranziaFG(gar_fg_prop($id_leg,$ts_iniz_val),$im_garanzia)"/>
+            <SQLQuery string="select id_leg, im_garanzia, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302"/>
+        </mapping>
+        <mapping id="M:166 - timestampF">
+            <CQ string="timestampF(gar_fg_prop($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_fine_val, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:167 - proponeFG, Banca, codiceABI">
+            <CQ string="Banca(bnc($cd_azienda)), codiceABI(bnc($cd_azienda),$cd_azienda), proponeFG(bnc($cd_azienda),gar_fg_prop($id_leg,$ts_iniz_val))"/>
+            <SQLQuery string="select id_leg, cd_azienda, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 302 and cd_azienda > 0"/>
+        </mapping>
+        <mapping id="M:168 - GaranziaPEFProposta, haPEFProposto, importoGaranziaPEF, timestampI">
+            <CQ string="GaranziaPEFProposta(gar_pef_prop($id_leg,$ts_iniz_val)), haPEFProposto(leg_gar($id_leg),gar_pef_prop($id_leg,$ts_iniz_val)), timestampI(gar_pef_prop($id_leg,$ts_iniz_val),$ts_iniz_val), importoGaranziaPEF(gar_pef_prop($id_leg,$ts_iniz_val),$im_garanzia)"/>
+            <SQLQuery string="select id_leg, im_garanzia, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303"/>
+        </mapping>
+        <mapping id="M:169 - timestampF">
+            <CQ string="timestampF(gar_pef_prop($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_fine_val, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:170 - proponePEF, Banca, codiceABI">
+            <CQ string="Banca(bnc($cd_azienda)), codiceABI(bnc($cd_azienda),$cd_azienda), proponePEF(bnc($cd_azienda),gar_pef_prop($id_leg,$ts_iniz_val))"/>
+            <SQLQuery string="select id_leg, cd_azienda, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 303 and cd_azienda > 0"/>
+        </mapping>
+        <mapping id="M:171 - GaranziaConsolidata, importoGaranziaConsolidato, haGaranziaConsolidata, timestampF">
+            <CQ string="GaranziaConsolidata(gara_cons($id_leg,$ts_iniz_val)), importoGaranziaConsolidata(gara_cons($id_leg,$ts_iniz_val),$im_garanzia), haGaranziaConsolidata(leg_gar($id_leg),gara_cons($id_leg,$ts_iniz_val)), timestampI(gara_cons($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, im_garanzia, ts_iniz_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 301"/>
+        </mapping>
+        <mapping id="M:172 - timestampF">
+            <CQ string="timestampF(gara_cons($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, im_garanzia, ts_iniz_val, ts_fine_val from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C' and cd_tp_legame = 301 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:173 - tipoLegame, eCollegato, eCollegante, NGR">
+            <CQ string="tipoLegame(leg_gar($id_leg),$cd_tp_legame), eCollegato(cl($cd_ngr2),leg_gar($id_leg)), eCollegante(cl($cd_ngr1),leg_gar($id_leg)), NGR(cl($cd_ngr1),$cd_ngr1), NGR(cl($cd_ngr2),$cd_ngr2)"/>
+            <SQLQuery string="select id_leg, cd_ngr1, cd_ngr2, cd_tp_legame, cd_azienda from gruppo.gz0003r_leg_gar where cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:174 - InformazioniFatturato, haInformazioniFatturato, timestampI">
+            <CQ string="InformazioniFatturato(info_fat($id_leg,$ts_iniz_val)), haInformazioniFatturato(leg_eco($id_leg),info_fat($id_leg,$ts_iniz_val)), timestampI(info_fat($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401"/>
+        </mapping>
+        <mapping id="M:175 - vendite">
+            <CQ string="vendite(info_fat($id_leg,$ts_iniz_val),$pc_vendite)"/>
+            <SQLQuery string="select id_leg, pc_acquisti, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401 and pc_vendite > 0"/>
+        </mapping>
+        <mapping id="M:176 - acquisti">
+            <CQ string="acquisti(info_fat($id_leg,$ts_iniz_val),$pc_acquisti)"/>
+            <SQLQuery string="select id_leg, pc_acquisti, ts_iniz_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401 and pc_acquisti >0"/>
+        </mapping>
+        <mapping id="M:177 - timestampF">
+            <CQ string="timestampF(info_fat($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 401 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:178 - InformazioniFinanziamento, haInformazioniFinanziamento, timestampI">
+            <CQ string="InformazioniFinanziamento(info_fin($id_leg,$ts_iniz_val)), haInformazioniFinanziamento(leg_eco($id_leg),info_fin($id_leg,$ts_iniz_val)), timestampI(info_fin($id_leg,$ts_iniz_val),$ts_iniz_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val  from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402"/>
+        </mapping>
+        <mapping id="M:179 - credito">
+            <CQ string="credito(info_fin($id_leg,$ts_iniz_val),$pc_credito)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, pc_credito from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402 and pc_credito > 0"/>
+        </mapping>
+        <mapping id="M:180 - debito">
+            <CQ string="debito(info_fin($id_leg,$ts_iniz_val),$pc_debito)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, pc_debito from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402 and pc_debito > 0"/>
+        </mapping>
+        <mapping id="M:181 - timestampF">
+            <CQ string="timestampF(info_fin($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val  from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C' and cd_tp_legame = 402 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:182 - eCollegato, eCollegante, tipoLegame, NGR">
+            <CQ string="tipoLegame(leg_eco($id_leg),$cd_tp_legame), eCollegato(cl($cd_ngr2),leg_eco($id_leg)), eCollegante(cl($cd_ngr1),leg_eco($id_leg)), NGR(cl($cd_ngr1),$cd_ngr1), NGR(cl($cd_ngr2),$cd_ngr2)"/>
+            <SQLQuery string="select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0004r_leg_econ where cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:183 - quota, PartecipazioneALegame, haPartecipazioneALegame, timestampI">
+            <CQ string="PartecipazioneALegame(par_a_leg($id_leg,$ts_iniz_val)), quota(par_a_leg($id_leg,$ts_iniz_val),$pc_qt_partecip), timestampI(par_a_leg($id_leg,$ts_iniz_val),$ts_iniz_val), haPartecipazioneALegame(leg_soc($id_leg),par_a_leg($id_leg,$ts_iniz_val))"/>
+            <SQLQuery string="select id_leg, pc_qt_partecip, ts_iniz_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 502 and pc_qt_partecip > 0"/>
+        </mapping>
+        <mapping id="M:184 - timestampF">
+            <CQ string="timestampF(par_a_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 502 and pc_qt_partecip > 0 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:185 - quota, PartecipazioneALegame, haPartecipazioneALegame, timestampI">
+            <CQ string="PartecipazioneALegame(par_a_leg($id_leg,$ts_iniz_val)), quota(par_a_leg($id_leg,$ts_iniz_val),$pc_qt_partecip), timestampI(par_a_leg($id_leg,$ts_iniz_val),$ts_iniz_val), haPartecipazioneALegame(leg_soc($id_leg),par_a_leg($id_leg,$ts_iniz_val))"/>
+            <SQLQuery string="select id_leg, pc_qt_partecip, ts_iniz_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 503 and pc_qt_partecip > 0"/>
+        </mapping>
+        <mapping id="M:186 - timestampF">
+            <CQ string="timestampF(par_a_leg($id_leg,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_leg, ts_iniz_val, ts_fine_val from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C' and cd_tp_legame = 503 and pc_qt_partecip > 0 and YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+        <mapping id="M:187 - eCollegato, eCollegante, tipoLegame, NGR">
+            <CQ string="tipoLegame(leg_soc($id_leg),$cd_tp_legame), eCollegato(cl($cd_ngr2),leg_soc($id_leg)), eCollegante(cl($cd_ngr1),leg_soc($id_leg)), NGR(cl($cd_ngr1),$cd_ngr1), NGR(cl($cd_ngr2),$cd_ngr2)"/>
+            <SQLQuery string="select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0005r_leg_soci where cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:188 - eCollegato, eCollegante, tipoLegame, NGR">
+            <CQ string="tipoLegame(leg_patr($id_leg),$cd_tp_legame), eCollegato(cl($cd_ngr2),leg_patr($id_leg)), eCollegante(cl($cd_ngr1),leg_patr($id_leg)), NGR(cl($cd_ngr1),$cd_ngr1), NGR(cl($cd_ngr2),$cd_ngr2)"/>
+            <SQLQuery string="select id_leg, cd_tp_legame, cd_ngr1, cd_ngr2 from gruppo.gz0006r_beni_ent where cd_stato_rich = 'C'"/>
+        </mapping>
+        <mapping id="M:189 - timestampF">
+            <CQ string="timestampF(gcc($id_perimetro,$ts_iniz_val),$ts_fine_val)"/>
+            <SQLQuery string="select id_perimetro, ts_iniz_val, ts_fine_val from gz0102e_prm where YEAR(ts_fine_val) > 9999"/>
+        </mapping>
+    </mappings>
+    <dataSource URI="sourceGCC" databaseDriver="com.ibm.db2.jcc.DB2Driver"
+        databaseName="GCC_DB:currentSchema=GRUPPO;"
+        databasePassword="obda09"
+        databaseURL="jdbc:db2://obdawin.inf.unibz.it:50000/"
+        databaseUsername="obda" isAboxDump="" name="sourceGCC" ontouri="http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl"/>
+    <SavedQueries>
+        <QueryGroup id="Query Campione ">
+            <Query id="QUERY 1" text="/*QUERY 1 Per un determinato NGR, esporre i dati (NGR1, NGR2, Tipo legame, Timestamp di inizio validità) di tutti i legami (dati grezzi) cui esso partecipa (come collegante o come collegato) ad un certo Timestamp di riferimento. */ SELECT 'ngr1', cliente.ngr2, cliente.ti, cliente.tl FROM sparqltable( select ?ngr2 ?ti ?tf ?tl where { &#x9;?x rdf:type 'Cliente'. &#x9;?x :NGR 'ngr1'. &#x9;?y rdf:type 'Cliente'. &#x9;?y :NGR ?ngr2. &#x9;?x :eCollegato ?l. &#x9;?y :eCollegante ?l. &#x9;?l :tipoLegame ?tl. &#x9;?l :timestampI ?ti. &#x9;?I :timestampF ?tf } ) cliente WHERE cliente.tf > '06/07/2008' UNION SELECT 'ngr1',cliente.ngr2, cliente.ti, cliente.tl FROM sparqltable( select ?ngr2 ?ti ?tf ?tl where { &#x9;?x rdf:type 'Cliente'. &#x9;?x :NGR 'ngr1'. &#x9;?y rdf:type 'Cliente'. &#x9;?y :NGR ?ngr2. &#x9;?y :eCollegato ?l. &#x9;?x :eCollegante ?l. &#x9;?l :tipoLegame ?tl. &#x9;?l :timestampI ?ti. &#x9;?I :timestampF ?tf } ) cliente WHERE cliente.tf > '06/07/2008' "/>
+            <Query id="QUERY 2" text="/*QUERY 2 Estrarre l&#x2019;elenco delle entità appartenenti a GCC giuridici &quot;In Monitoraggio&quot;, evidenziando, ad un certo Timestamp, i seguenti dati: NGR, ID_PERIMETRO, DENOMINAZIONE DEL GRUPPO AZIENDALE relativo al perimetro, FLAG CAPOGRUPPO S/N. */ SELECT temp.ngr, temp.igcc, temp.nomeG, 'TRUE' FROM sparqltable( &#x9;select ?ngr ?igcc ?nomeG ?c ?H &#x9;where { &#x9;&#x9;?x rdf:type 'GCCGiuridico'. &#x9;&#x9;?x :eSottoMonitoraggio ?pv. &#x9;&#x9;?pv :timestampI 't1'. &#x9;&#x9;?x :IGCC ?igcc. &#x9;&#x9;?per :inGCC ?x. &#x9;&#x9;?per :haCliente ?c. &#x9;&#x9;?c :NGR ?ngr. &#x9;&#x9;?perH :inGCC ?x. &#x9;&#x9;?perH :haCliente ?H. &#x9;&#x9;?H :inAppartenenza ?app. &#x9;&#x9;?app rdf:type 'Holding'. &#x9;&#x9;?G :haAppartenenza ?app. &#x9;&#x9;?G :haDenominazione ?d. &#x9;&#x9;?d :stringaDenominazione ?nomeG } &#x9;) temp WHERE temp.c = temp.H UNION SELECT temp.ngr, temp.igcc, temp.nomeG, 'FALSE' FROM sparqltable( &#x9;select ?ngr ?igcc ?nomeG ?c ?H &#x9;where { &#x9;&#x9;?x rdf:type 'GCCGiuridico'. &#x9;&#x9;?x :eSottoMonitoraggio ?pv. &#x9;&#x9;?pv :timestampI 't1'. &#x9;&#x9;?x :IGCC ?igcc. &#x9;&#x9;?per :inGCC ?x. &#x9;&#x9;?per :haCliente ?c. &#x9;&#x9;?c :NGR ?ngr. &#x9;&#x9;?perH :inGCC ?x. &#x9;&#x9;?perH :haCliente ?H. &#x9;&#x9;?H :inAppartenenza ?app. &#x9;&#x9;?app rdf:type 'Holding'. &#x9;&#x9;?G :haAppartenenza ?app. &#x9;&#x9;?G :haDenominazione ?d. &#x9;&#x9;?d :stringaDenominazione ?nomeG } &#x9;) temp WHERE temp.c > temp.H "/>
+        </QueryGroup>
+        <QueryGroup id="Query epistemiche valutate">
+            <Query id="Clienti_non_fittizi" text="/* i Clienti non fittizi */ select cliente.x &#x9;from&#x9;sparqltable( &#x9;&#x9;&#x9;select ?x &#x9;&#x9;&#x9;where{ ?x rdf:type 'Cliente' } &#x9;&#x9;                    ) cliente &#x9;where cliente.x not in ( &#x9;&#x9;          select clienteFit.x  &#x9;&#x9;          from&#x9;sparqltable( &#x9;&#x9;&#x9;&#x9;select ?x &#x9;&#x9;&#x9;&#x9;where{ ?x rdf:type 'ClienteFittizio' } &#x9;&#x9;&#x9;                      ) clienteFit &#x9;&#x9; &#x9;&#x9;          ) "/>
+        </QueryGroup>
+        <QueryGroup id="Query Valutate">
+            <Query id="clienti-evento perimetrazione" text="#Coppie di clienti associati al medesimo GCC da un evento di perimetrazione  select ?c1 ?c2 where{ &#x9;&#x9;?c1 rdf:type 'Cliente'. &#x9;&#x9;?c2 rdf:type 'Cliente'. &#x9;&#x9;?c1 :inEventoPerimetrazione ?e1. &#x9;&#x9;?c2 :inEventoPerimetrazione ?e2. &#x9;&#x9;?e1 rdf:type 'Evento'. &#x9;&#x9;?e2 rdf:type 'Evento'. &#x9;&#x9;?e1 :GCCRelativo ?g. &#x9;&#x9;?e2 :GCCRelativo ?g&#x9;&#x9; &#x9;} "/>
+            <Query id="clienti-legame economico" text="# Coppie di clienti legate da un legame di tipo economico&quot; select ?c1 ?c2 where{&#x9;&#x9;?c1 rdf:type 'Cliente'. &#x9;&#x9;?c2 rdf:type 'Cliente'. &#x9;&#x9;?c1 :eCollegato ?l. &#x9;&#x9;?c2 :eCollegante ?l. &#x9;&#x9;?l rdf:type 'LegameTpEconomico' . &#x9;}   "/>
+            <Query id="cliente_specifico-gcc" text="#Calcolare tutti tutti i GCC a cui appartiene il cliente con NGR = 25 SELECT $gcc   WHERE { &#x9;&#x9;    $cl :NGR '25^^xsd:integer'. &#x9;&#x9;    $per :haCliente $cl. &#x9;&#x9;    $per :inGCC $gcc. &#x9;&#x9;   }"/>
+            <Query id="gcc_specifico-clienti" text="#Calcolare tutti i clienti che appartengono al perimetro con IGA = 1 e timestampI = 2006-09-27 23:59:59.0 &#x9;SELECT $cl   WHERE { &#x9;&#x9;    $gcc :IGCC '1^^xsd:integer'. &#x9;&#x9;    $gcc :timestampI '2006-09-27 23:59:59.0^^xsd:dateTime'. &#x9;&#x9;    $per :inGCC $gcc.&#x9; &#x9;&#x9;    $per :haCliente $cl&#x9; &#x9;&#x9;   }"/>
+            <Query id="cliente_specifico-nome Gruppo Aziendale" text="#Calcolare il nome del gruppo aziendale a cui appartiene il cliente con ngr = 7611 SELECT $nome   WHERE { &#x9;&#x9;    $cl :NGR '7611^^xsd:integer'. &#x9;&#x9;    $cl :inAppartenenza $app. &#x9;&#x9;    $ga :haAppartenenza $app. &#x9;&#x9;    $ga :haDenominazione $den. &#x9;&#x9;    $den :stringaDenominazione $nome&#x9;&#x9; &#x9;&#x9;   }"/>
+            <Query id="clienteFittizio_specifico-clienti" text="#Calcolare i clienti che compongono il ClienteFittizio con NGR = -24805 SELECT $cl   WHERE { &#x9;&#x9;    $cf rdf:type 'ClienteFittizio'. &#x9;&#x9;    $cf :NGR '-24805^^xsd:integer'. &#x9;&#x9;   $cf :haComposizione $comp. &#x9;&#x9;   $cl :inComposizione $comp.&#x9; &#x9;&#x9;   }"/>
+            <Query id="gcc_sotto_reportistica" text="#Calcolare l'IGCC di tutti i GCC che sono sotto Reportistica SELECT $igcc WHERE { &#x9;&#x9;    $gcc :eSottoReportistica $pv. &#x9;&#x9;    $gcc :IGCC $igcc&#x9;&#x9;&#x9; &#x9;&#x9;   }"/>
+            <Query id="igcc_dei_GCCGiuridici" text="#Calcolare l'IGCC di tutti i GCC Giuridici SELECT $igcc WHERE { &#x9;&#x9;    $gcc rdf:type 'GCCGiuridico'. &#x9;&#x9;    $gcc :IGCC $igcc&#x9;&#x9;&#x9; &#x9;&#x9;   }"/>
+            <Query id="Clienti_Capogruppo" text="#Capogruppo select ?c where{ &#x9;?c rdf:type 'Cliente'. &#x9;?c :inAppartenenza ?h. &#x9;?h rdf:type 'Holding'&#x9; }  "/>
+            <Query id="ngr-importoFatturato" text="# restituire importo fatturato ed ngr di ongi cliente SELECT $ngr $imp WHERE { $cl :NGR $ngr. &#x9;&#x9;$cl :haDatiBilancio $db. &#x9;&#x9;$db  :importoFatturato $imp }"/>
+            <Query id="gcc_specifico-ngr-clienti" text="#Calcolare l'NGR di tutti i clienti che appartengono al perimetro con IGCC = 1 e timestampI = 2006-09-27 23:59:59.0 &#x9;SELECT $ngr   WHERE { &#x9;&#x9;    $gcc :IGCC '1^^xsd:integer'. &#x9;&#x9;    $gcc :timestampI '2006-09-27 23:59:59.0^^xsd:dateTime'. &#x9;&#x9;    $per :inGCC $gcc.&#x9; &#x9;&#x9;    $per :haCliente $cl. &#x9;&#x9;    $cl :NGR $ngr&#x9; &#x9;&#x9;   }"/>
+            <Query id="cliente-ga-legame_economico" text="# Coppie di clienti legate da un legame di tipo economico ed appartenenti al medesimo gruppo aziendale - nota ogni disgiunto della query unfoldata è valutabile sul DB, ma non è eseguita dal sistema  select ?x ?y&#x9; where{ &#x9;&#x9;?x rdf:type 'Cliente'. &#x9;&#x9;?x :eCollegato ?l. &#x9;&#x9;?l rdf:type 'LegameTpEconomico' . &#x9;&#x9;?y :eCollegante ?l. &#x9;&#x9;?x :inAppartenenza ?a1. &#x9;&#x9;?y :inAppartenenza ?a2. &#x9;&#x9;?g :haAppartenenza ?a1. &#x9;&#x9;?g :haAppartenenza ?a2 &#x9;}  "/>
+            <Query id="NGR componenti di cliente fittizio" text="#Calcolare l'NGR dei clienti che compongono il ClienteFittizio con NGR = -24805 SELECT $ngr  WHERE { &#x9;&#x9;    $cf rdf:type 'ClienteFittizio'. &#x9;&#x9;    $cf :NGR '-24805^^xsd:int'. &#x9;&#x9;   $cf :haComposizione $comp. &#x9;&#x9;   $cl :inComposizione $comp. &#x9;&#x9;   $cl :NGR $ngr&#x9;&#x9; &#x9;&#x9;   }"/>
+        </QueryGroup>
+        <QueryGroup id="Query non valutate">
+            <Query id="cliente_specifico-igcc-timestampI_perimetro" text="#Calcolare tutti IGCC e timestampI di tutti i perimetri a cui appartiene il cliente con NGR = 25 SELECT $igcc $ti   WHERE { &#x9;&#x9;    $cl :NGR '25^^xsd:integer'. &#x9;&#x9;    $per :haCliente $cl. &#x9;&#x9;    $per :inGCC $gcc. &#x9;&#x9;    $gcc :timestampI $ti. &#x9;&#x9;    $gcc :IGCC $igcc&#x9; &#x9;&#x9;   }"/>
+            <Query id="clienti-legame-gcc" text="# Coppie di clienti legate da un legame di tipo economico ed appartenenti al medesimo GCC in modo &quot;Effettivo&quot; select ?x ?y where{ &#x9;&#x9;?x rdf:type 'Cliente'. &#x9;&#x9;?x :eCollegato ?l. &#x9;&#x9;?l rdf:type 'LegameTpEconomico' . &#x9;&#x9;?y :eCollegante ?l. &#x9;&#x9;?p1 :haCliente ?x. &#x9;&#x9;?p2 :haCliente ?y. &#x9;&#x9;?p1 :inGCC ?g. &#x9;&#x9;?p2 :inGCC ?g. &#x9;&#x9;?p1 rdf:type 'PerimetrazioneEffettiva'. &#x9;&#x9;?p2 rdf:type 'PerimetrazioneEffettiva'. &#x9;}   "/>
+            <Query id="Corrispondenza_gcc-ga" text="# Coppie di clienti legate da un legame di tipo economico ed appartenenti al medesimo GCC in modo &quot;Effettivo&quot; select ?x ?y where{ &#x9;&#x9;?x rdf:type 'Cliente'. &#x9;&#x9;?x :eCollegato ?l. &#x9;&#x9;?l rdf:type 'LegameTpEconomico' . &#x9;&#x9;?y :eCollegante ?l. &#x9;&#x9;?p1 :haCliente ?x. &#x9;&#x9;?p2 :haCliente ?y. &#x9;&#x9;?p1 :inGCC ?g. &#x9;&#x9;?p2 :inGCC ?g. &#x9;&#x9;?p1 rdf:type 'PerimetrazioneEffettiva'. &#x9;&#x9;?p2 rdf:type 'PerimetrazioneEffettiva'. &#x9;}   "/>
+        </QueryGroup>
+        <QueryGroup id="">
+            <Query id="mariano" text="select ?x where {?x rdf:type 'GruppoAziendale'. ?x :IGA '83901^^xsd:integer'}"/>
+        </QueryGroup>
+    </SavedQueries>
+    <IDConstraints>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(haDatiBilancio), timestampI DatiBilancio)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(haAffidamenti), timestampI Affidamenti)"/>
+        <idConstraint annotation="" constraint="KeyFor(IGA GruppoAziendale)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(haDenominazione), timestampI Denominazione)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(inAppartenenza), timestampI Appartenenza)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(inAppartenenza) AppartenenzaAttuale)"/>
+        <idConstraint annotation="" constraint="KeyFor(IGCC, timestampI GCC)"/>
+        <idConstraint annotation="" constraint="KeyFor(IGCC GCCAttuale)"/>
+        <idConstraint annotation="" constraint="KeyFor(CompositionOf(InverseObjectPropertyOf(inGCC) TestRole(PerimetrazioneEffettiva) haCliente inAppartenenza TestRole(Holding) InverseObjectPropertyOf(haAppartenenza)), timestampI GCCGiuridico)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(haConnessioneCalcolata), timestampI ConnessioneCalcolata)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(haConnessioneForzata), timestampI ConnessioneForzata)"/>
+        <idConstraint annotation="" constraint="KeyFor(codiceABI Banca)"/>
+        <idConstraint annotation="" constraint="KeyFor(codiceLaboratorioFidi LaboratorioFidiCoordinatore)"/>
+        <idConstraint annotation="" constraint="KeyFor(haCliente, timestampI Perimetrazione)"/>
+        <idConstraint annotation="" constraint="KeyFor(haCliente PerimetrazioneAttuale)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(haComposizione), timestampI Capofila)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameCashPooling)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameFatturato)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameFidiPlurimi)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameFinanziamento)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameGCOL)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameGaranziaConsolidato)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameGaranziaProposto)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameDirezioneCoordinamento)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameFittizio)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameGiuridico)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegamePatrimonialeAutomatico)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegamePatrimonialeManuale)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameAmministratore)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameSIR)"/>
+        <idConstraint annotation="" constraint="KeyFor(InverseObjectPropertyOf(eCollegante), InverseObjectPropertyOf(eCollegato), timestampI LegameSLR)"/>
+        <idConstraint annotation="" constraint="KeyFor(NGR Cliente)"/>
+    </IDConstraints>
+</OBDA>

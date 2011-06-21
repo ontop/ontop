@@ -1,0 +1,328 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY example2 "http://meraka/moss/example2.owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://meraka/moss/example2.owl#"
+     xml:base="http://meraka/moss/exampleBooks.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:example2="http://meraka/moss/example2.owl#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://meraka/moss/example2.owl#editedBy -->
+
+    <owl:ObjectProperty rdf:about="&example2;editedBy">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&example2;Edition"/>
+        <rdfs:range rdf:resource="&example2;Editor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#hasEdition -->
+
+    <owl:ObjectProperty rdf:about="&example2;hasEdition">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="&example2;Book"/>
+        <rdfs:range rdf:resource="&example2;Edition"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#writtenBy -->
+
+    <owl:ObjectProperty rdf:about="&example2;writtenBy">
+        <rdfs:range rdf:resource="&example2;Author"/>
+        <rdfs:domain rdf:resource="&example2;Book"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://meraka/moss/example2.owl#dateOfFirstPublication -->
+
+    <owl:DatatypeProperty rdf:about="&example2;dateOfFirstPublication">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&example2;Edition"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#dateOfPublication -->
+
+    <owl:DatatypeProperty rdf:about="&example2;dateOfPublication">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&example2;Edition"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#editionNumber -->
+
+    <owl:DatatypeProperty rdf:about="&example2;editionNumber">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&example2;Edition"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#genre -->
+
+    <owl:DatatypeProperty rdf:about="&example2;genre">
+        <rdfs:domain rdf:resource="&example2;Book"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#name -->
+
+    <owl:DatatypeProperty rdf:about="&example2;name">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#title -->
+
+    <owl:DatatypeProperty rdf:about="&example2;title">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="&example2;Book"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://meraka/moss/example2.owl#AudioBook -->
+
+    <owl:Class rdf:about="&example2;AudioBook">
+        <rdfs:subClassOf rdf:resource="&example2;Book"/>
+        <owl:disjointWith rdf:resource="&example2;E-Book"/>
+        <owl:disjointWith rdf:resource="&example2;PrintedBook"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#Author -->
+
+    <owl:Class rdf:about="&example2;Author">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="&example2;writtenBy"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;name"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="&example2;Book"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#Book -->
+
+    <owl:Class rdf:about="&example2;Book">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;title"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;writtenBy"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;genre"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="&example2;Edition"/>
+        <owl:disjointWith rdf:resource="&example2;Editor"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#E-Book -->
+
+    <owl:Class rdf:about="&example2;E-Book">
+        <rdfs:subClassOf rdf:resource="&example2;Book"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#EconomicEdition -->
+
+    <owl:Class rdf:about="&example2;EconomicEdition">
+        <rdfs:subClassOf rdf:resource="&example2;Edition"/>
+        <owl:disjointWith rdf:resource="&example2;SpecialEdition"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#Edition -->
+
+    <owl:Class rdf:about="&example2;Edition">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;editionNumber"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;dateOfPublication"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="&example2;hasEdition"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;editedBy"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;dateOfFirstPublication"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#Editor -->
+
+    <owl:Class rdf:about="&example2;Editor">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;name"/>
+                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
+                <owl:onDataRange rdf:resource="&rdf;XMLLiteral"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#EmergingWriter -->
+
+    <owl:Class rdf:about="&example2;EmergingWriter">
+        <rdfs:subClassOf rdf:resource="&example2;Author"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#IneditedBook -->
+
+    <owl:Class rdf:about="&example2;IneditedBook">
+        <rdfs:subClassOf rdf:resource="&example2;Book"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&example2;hasEdition"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#PrintedBook -->
+
+    <owl:Class rdf:about="&example2;PrintedBook">
+        <rdfs:subClassOf rdf:resource="&example2;Book"/>
+    </owl:Class>
+    
+
+
+    <!-- http://meraka/moss/example2.owl#SpecialEdition -->
+
+    <owl:Class rdf:about="&example2;SpecialEdition">
+        <rdfs:subClassOf rdf:resource="&example2;Edition"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+

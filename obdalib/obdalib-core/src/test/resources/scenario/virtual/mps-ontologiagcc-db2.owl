@@ -1,0 +1,2320 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1226933337593 "http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#"
+     xml:base="http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:Ontology1226933337593="http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GCCRelativo -->
+
+    <owl:ObjectProperty rdf:about="#GCCRelativo">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Evento"/>
+        <rdfs:range rdf:resource="#GCC"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#associatoA -->
+
+    <owl:ObjectProperty rdf:about="#associatoA">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Banca"/>
+        <rdfs:domain rdf:resource="#LaboratorioFidiCoordinatore"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#attribuitoA -->
+
+    <owl:ObjectProperty rdf:about="#attribuitoA">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Evento"/>
+        <rdfs:range rdf:resource="#Operatore"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#eCollegante -->
+
+    <owl:ObjectProperty rdf:about="#eCollegante">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#Legame"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#eCollegato -->
+
+    <owl:ObjectProperty rdf:about="#eCollegato">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#Legame"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#eSottoMonitoraggio -->
+
+    <owl:ObjectProperty rdf:about="#eSottoMonitoraggio">
+        <rdfs:domain rdf:resource="#GCC"/>
+        <rdfs:range rdf:resource="#PeriodoValidita"/>
+        <rdfs:subPropertyOf rdf:resource="#eSottoReportistica"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#eSottoReportistica -->
+
+    <owl:ObjectProperty rdf:about="#eSottoReportistica">
+        <rdfs:domain rdf:resource="#GCC"/>
+        <rdfs:range rdf:resource="#PeriodoValidita"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haAffidamenti -->
+
+    <owl:ObjectProperty rdf:about="#haAffidamenti">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#Affidamenti"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haAppartenenza -->
+
+    <owl:ObjectProperty rdf:about="#haAppartenenza">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#Appartenenza"/>
+        <rdfs:domain rdf:resource="#GruppoAziendale"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haBilancioConsolidato -->
+
+    <owl:ObjectProperty rdf:about="#haBilancioConsolidato">
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#PeriodoValiditaBilancioCons"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haCliente -->
+
+    <owl:ObjectProperty rdf:about="#haCliente">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Cliente"/>
+        <rdfs:domain rdf:resource="#Perimetrazione"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haComposizione -->
+
+    <owl:ObjectProperty rdf:about="#haComposizione">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#ClienteFittizio"/>
+        <rdfs:range rdf:resource="#Composizione"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haConnessioneCalcolata -->
+
+    <owl:ObjectProperty rdf:about="#haConnessioneCalcolata">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#ConnessioneCalcolata"/>
+        <rdfs:domain rdf:resource="#GCC"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haConnessioneForzata -->
+
+    <owl:ObjectProperty rdf:about="#haConnessioneForzata">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#ConnessioneForzata"/>
+        <rdfs:domain rdf:resource="#GCC"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haCoordinamento -->
+
+    <owl:ObjectProperty rdf:about="#haCoordinamento">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#Coordinamento"/>
+        <rdfs:domain rdf:resource="#LaboratorioFidiCoordinatore"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haDatiBilancio -->
+
+    <owl:ObjectProperty rdf:about="#haDatiBilancio">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#DatiBilancio"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haDenominazione -->
+
+    <owl:ObjectProperty rdf:about="#haDenominazione">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#Denominazione"/>
+        <rdfs:domain rdf:resource="#GruppoAziendale"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haFGProposto -->
+
+    <owl:ObjectProperty rdf:about="#haFGProposto">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#GaranziaFGProposta"/>
+        <rdfs:domain rdf:resource="#LegameGaranziaProposto"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haGaranziaConsolidata -->
+
+    <owl:ObjectProperty rdf:about="#haGaranziaConsolidata">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#GaranziaConsolidata"/>
+        <rdfs:domain rdf:resource="#LegameGaranziaConsolidato"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haInformazioniFatturato -->
+
+    <owl:ObjectProperty rdf:about="#haInformazioniFatturato">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#InformazioniFatturato"/>
+        <rdfs:domain rdf:resource="#LegameFatturato"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haInformazioniFinanziamento -->
+
+    <owl:ObjectProperty rdf:about="#haInformazioniFinanziamento">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#InformazioniFinanziamento"/>
+        <rdfs:domain rdf:resource="#LegameFinanziamento"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haPEFProposto -->
+
+    <owl:ObjectProperty rdf:about="#haPEFProposto">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#GaranziaPEFProposta"/>
+        <rdfs:domain rdf:resource="#LegameGaranziaProposto"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haPartecipazioneALegame -->
+
+    <owl:ObjectProperty rdf:about="#haPartecipazioneALegame">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Legame"/>
+        <rdfs:range rdf:resource="#PartecipazioneALegame"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#haPatrimonioResponsabile -->
+
+    <owl:ObjectProperty rdf:about="#haPatrimonioResponsabile">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#PatrimonioResponsabile"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#inAppartenenza -->
+
+    <owl:ObjectProperty rdf:about="#inAppartenenza">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#Appartenenza"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#inComposizione -->
+
+    <owl:ObjectProperty rdf:about="#inComposizione">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#Composizione"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#inCoordinamento -->
+
+    <owl:ObjectProperty rdf:about="#inCoordinamento">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#Coordinamento"/>
+        <rdfs:domain rdf:resource="#GCCGiuridico"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#inEventoLegame -->
+
+    <owl:ObjectProperty rdf:about="#inEventoLegame">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:range rdf:resource="#EventoLegame"/>
+        <rdfs:domain rdf:resource="#Legame"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#inEventoPerimetrazione -->
+
+    <owl:ObjectProperty rdf:about="#inEventoPerimetrazione">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="#EventoPerimetrazione"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#inGCC -->
+
+    <owl:ObjectProperty rdf:about="#inGCC">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#GCC"/>
+        <rdfs:domain rdf:resource="#Perimetrazione"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ottenutoDa -->
+
+    <owl:ObjectProperty rdf:about="#ottenutoDa">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="#Banca"/>
+        <rdfs:domain rdf:resource="#PatrimonioResponsabile"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#proponeFG -->
+
+    <owl:ObjectProperty rdf:about="#proponeFG">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Banca"/>
+        <rdfs:range rdf:resource="#GaranziaFGProposta"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#proponePEF -->
+
+    <owl:ObjectProperty rdf:about="#proponePEF">
+        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Banca"/>
+        <rdfs:range rdf:resource="#GaranziaPEFProposta"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#IGA -->
+
+    <owl:DatatypeProperty rdf:about="#IGA">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GruppoAziendale"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#IGCC -->
+
+    <owl:DatatypeProperty rdf:about="#IGCC">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GCC"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#NGR -->
+
+    <owl:DatatypeProperty rdf:about="#NGR">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Cliente"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#acquisti -->
+
+    <owl:DatatypeProperty rdf:about="#acquisti">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#InformazioniFatturato"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#causalePerimetrazione -->
+
+    <owl:DatatypeProperty rdf:about="#causalePerimetrazione">
+        <rdfs:domain rdf:resource="#CalcoloNelPerimetro"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#codiceABI -->
+
+    <owl:DatatypeProperty rdf:about="#codiceABI">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Banca"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#codiceLaboratorioFidi -->
+
+    <owl:DatatypeProperty rdf:about="#codiceLaboratorioFidi">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#credito -->
+
+    <owl:DatatypeProperty rdf:about="#credito">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#InformazioniFinanziamento"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#dataBilancio -->
+
+    <owl:DatatypeProperty rdf:about="#dataBilancio">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#DatiBilancio"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#dataBilancioConsolidato -->
+
+    <owl:DatatypeProperty rdf:about="#dataBilancioConsolidato">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#PeriodoValiditaBilancioCons"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#dataPatrimonioResponsabile -->
+
+    <owl:DatatypeProperty rdf:about="#dataPatrimonioResponsabile">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#PatrimonioResponsabile"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#debito -->
+
+    <owl:DatatypeProperty rdf:about="#debito">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#InformazioniFinanziamento"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#gradoConnessioneCalcolato -->
+
+    <owl:DatatypeProperty rdf:about="#gradoConnessioneCalcolato">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#ConnessioneCalcolata"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#gradoConnessioneForzato -->
+
+    <owl:DatatypeProperty rdf:about="#gradoConnessioneForzato">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#ConnessioneForzata"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#idOperatore -->
+
+    <owl:DatatypeProperty rdf:about="#idOperatore">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Operatore"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoFatturato -->
+
+    <owl:DatatypeProperty rdf:about="#importoFatturato">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#DatiBilancio"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoFidiFG -->
+
+    <owl:DatatypeProperty rdf:about="#importoFidiFG">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Affidamenti"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoFidiPEF -->
+
+    <owl:DatatypeProperty rdf:about="#importoFidiPEF">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Affidamenti"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoGaranziaConsolidata -->
+
+    <owl:DatatypeProperty rdf:about="#importoGaranziaConsolidata">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GaranziaConsolidata"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoGaranziaFG -->
+
+    <owl:DatatypeProperty rdf:about="#importoGaranziaFG">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GaranziaFGProposta"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoGaranziaPEF -->
+
+    <owl:DatatypeProperty rdf:about="#importoGaranziaPEF">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#GaranziaPEFProposta"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoMaxFidi -->
+
+    <owl:DatatypeProperty rdf:about="#importoMaxFidi">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Affidamenti"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoPatrimonioNetto -->
+
+    <owl:DatatypeProperty rdf:about="#importoPatrimonioNetto">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#DatiBilancio"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoPatrimonioResponsabile -->
+
+    <owl:DatatypeProperty rdf:about="#importoPatrimonioResponsabile">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#PatrimonioResponsabile"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoTotFidi -->
+
+    <owl:DatatypeProperty rdf:about="#importoTotFidi">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Affidamenti"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#importoUtile -->
+
+    <owl:DatatypeProperty rdf:about="#importoUtile">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#DatiBilancio"/>
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#livelloConnessioneAltraNatura -->
+
+    <owl:DatatypeProperty rdf:about="#livelloConnessioneAltraNatura">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#ConnessioneCalcolata"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#livelloConnessioneGaranzia -->
+
+    <owl:DatatypeProperty rdf:about="#livelloConnessioneGaranzia">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#ConnessioneCalcolata"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#livelloConnessioneGiuridico -->
+
+    <owl:DatatypeProperty rdf:about="#livelloConnessioneGiuridico">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#ConnessioneCalcolata"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#percentualeFatturato -->
+
+    <owl:DatatypeProperty rdf:about="#percentualeFatturato">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Appartenenza"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#quota -->
+
+    <owl:DatatypeProperty rdf:about="#quota">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#PartecipazioneALegame"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#quotaGruppo -->
+
+    <owl:DatatypeProperty rdf:about="#quotaGruppo">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Appartenenza"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#stringaDenominazione -->
+
+    <owl:DatatypeProperty rdf:about="#stringaDenominazione">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Denominazione"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#timestampF -->
+
+    <owl:DatatypeProperty rdf:about="#timestampF">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#timestampI -->
+
+    <owl:DatatypeProperty rdf:about="#timestampI">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="&xsd;date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#tipoLegame -->
+
+    <owl:DatatypeProperty rdf:about="#tipoLegame">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#Legame"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#vendite -->
+
+    <owl:DatatypeProperty rdf:about="#vendite">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:domain rdf:resource="#InformazioniFatturato"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Affidamenti -->
+
+    <owl:Class rdf:about="#Affidamenti">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haAffidamenti"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Appartenenza"/>
+        <owl:disjointWith rdf:resource="#Banca"/>
+        <owl:disjointWith rdf:resource="#Cliente"/>
+        <owl:disjointWith rdf:resource="#Composizione"/>
+        <owl:disjointWith rdf:resource="#ConnessioneCalcolata"/>
+        <owl:disjointWith rdf:resource="#ConnessioneForzata"/>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Appartenenza -->
+
+    <owl:Class rdf:about="#Appartenenza">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haAppartenenza"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inAppartenenza"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#quotaGruppo"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#percentualeFatturato"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Banca"/>
+        <owl:disjointWith rdf:resource="#Cliente"/>
+        <owl:disjointWith rdf:resource="#Composizione"/>
+        <owl:disjointWith rdf:resource="#ConnessioneCalcolata"/>
+        <owl:disjointWith rdf:resource="#ConnessioneForzata"/>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#AppartenenzaAttuale -->
+
+    <owl:Class rdf:about="#AppartenenzaAttuale">
+        <rdfs:subClassOf rdf:resource="#Appartenenza"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Banca -->
+
+    <owl:Class rdf:about="#Banca">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#codiceABI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Cliente"/>
+        <owl:disjointWith rdf:resource="#Composizione"/>
+        <owl:disjointWith rdf:resource="#ConnessioneCalcolata"/>
+        <owl:disjointWith rdf:resource="#ConnessioneForzata"/>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#CalcoloGradoDiConnessione -->
+
+    <owl:Class rdf:about="#CalcoloGradoDiConnessione">
+        <rdfs:subClassOf rdf:resource="#EventoGradoDiConnessione"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#CalcoloNelPerimetro -->
+
+    <owl:Class rdf:about="#CalcoloNelPerimetro">
+        <rdfs:subClassOf rdf:resource="#EventoPerimetrazione"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inEventoPerimetrazione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCCRelativo"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#CalcoloNelPerimetroConEsclusioneRischio -->
+
+    <owl:Class rdf:about="#CalcoloNelPerimetroConEsclusioneRischio">
+        <rdfs:subClassOf rdf:resource="#CalcoloNelPerimetro"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#attribuitoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#CalcoloNonRilevante -->
+
+    <owl:Class rdf:about="#CalcoloNonRilevante">
+        <rdfs:subClassOf rdf:resource="#EventoLegame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#CalcoloRilevante -->
+
+    <owl:Class rdf:about="#CalcoloRilevante">
+        <rdfs:subClassOf rdf:resource="#EventoLegame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Capofila -->
+
+    <owl:Class rdf:about="#Capofila">
+        <rdfs:subClassOf rdf:resource="#Composizione"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Cliente -->
+
+    <owl:Class rdf:about="#Cliente">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#NGR"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Composizione"/>
+        <owl:disjointWith rdf:resource="#ConnessioneCalcolata"/>
+        <owl:disjointWith rdf:resource="#ConnessioneForzata"/>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ClienteAttuale -->
+
+    <owl:Class rdf:about="#ClienteAttuale">
+        <rdfs:subClassOf rdf:resource="#Cliente"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ClienteFittizio -->
+
+    <owl:Class rdf:about="#ClienteFittizio">
+        <rdfs:subClassOf rdf:resource="#Cliente"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haComposizione"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Composizione -->
+
+    <owl:Class rdf:about="#Composizione">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inComposizione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haComposizione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#ConnessioneCalcolata"/>
+        <owl:disjointWith rdf:resource="#ConnessioneForzata"/>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ConnessioneCalcolata -->
+
+    <owl:Class rdf:about="#ConnessioneCalcolata">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#gradoConnessioneCalcolato"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haConnessioneCalcolata"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#ConnessioneForzata"/>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ConnessioneForzata -->
+
+    <owl:Class rdf:about="#ConnessioneForzata">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haConnessioneForzata"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#gradoConnessioneForzato"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Coordinamento"/>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Coordinamento -->
+
+    <owl:Class rdf:about="#Coordinamento">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inCoordinamento"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haCoordinamento"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#DatiBilancio"/>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#DatiBilancio -->
+
+    <owl:Class rdf:about="#DatiBilancio">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoUtile"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoPatrimonioNetto"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoFatturato"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#dataBilancio"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haDatiBilancio"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Denominazione"/>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Denominazione -->
+
+    <owl:Class rdf:about="#Denominazione">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#stringaDenominazione"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haDenominazione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Evento"/>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Evento -->
+
+    <owl:Class rdf:about="#Evento">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#EventoGradoDiConnessione -->
+
+    <owl:Class rdf:about="#EventoGradoDiConnessione">
+        <rdfs:subClassOf rdf:resource="#Evento"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCCRelativo"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#EventoLegame -->
+
+    <owl:Class rdf:about="#EventoLegame">
+        <rdfs:subClassOf rdf:resource="#Evento"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inEventoLegame"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#EventoPerimetrazione -->
+
+    <owl:Class rdf:about="#EventoPerimetrazione">
+        <rdfs:subClassOf rdf:resource="#Evento"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inEventoPerimetrazione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ForzatoNonRilevante -->
+
+    <owl:Class rdf:about="#ForzatoNonRilevante">
+        <rdfs:subClassOf rdf:resource="#EventoLegame"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#attribuitoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ForzatoRilevante -->
+
+    <owl:Class rdf:about="#ForzatoRilevante">
+        <rdfs:subClassOf rdf:resource="#EventoLegame"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#attribuitoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ForzaturaGradoDiConnessione -->
+
+    <owl:Class rdf:about="#ForzaturaGradoDiConnessione">
+        <rdfs:subClassOf rdf:resource="#EventoGradoDiConnessione"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#attribuitoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ForzaturaNelPerimetro -->
+
+    <owl:Class rdf:about="#ForzaturaNelPerimetro">
+        <rdfs:subClassOf rdf:resource="#EventoPerimetrazione"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#attribuitoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inEventoPerimetrazione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#GCCRelativo"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#ForzaturaNelPerimetroConEsclusioneRischio -->
+
+    <owl:Class rdf:about="#ForzaturaNelPerimetroConEsclusioneRischio">
+        <rdfs:subClassOf rdf:resource="#ForzaturaNelPerimetro"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GCC -->
+
+    <owl:Class rdf:about="#GCC">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inGCC"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#GCCRelativo"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#IGCC"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haConnessioneCalcolata"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GCCAttuale -->
+
+    <owl:Class rdf:about="#GCCAttuale">
+        <rdfs:subClassOf rdf:resource="#GCC"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GCCEconomico -->
+
+    <owl:Class rdf:about="#GCCEconomico">
+        <rdfs:subClassOf rdf:resource="#GCC"/>
+        <owl:disjointWith rdf:resource="#GCCGiuridico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GCCGiuridico -->
+
+    <owl:Class rdf:about="#GCCGiuridico">
+        <rdfs:subClassOf rdf:resource="#GCC"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GaranziaConsolidata -->
+
+    <owl:Class rdf:about="#GaranziaConsolidata">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoGaranziaConsolidata"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haGaranziaConsolidata"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GaranziaFGProposta -->
+
+    <owl:Class rdf:about="#GaranziaFGProposta">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoGaranziaFG"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haFGProposto"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GaranziaPEFProposta -->
+
+    <owl:Class rdf:about="#GaranziaPEFProposta">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoGaranziaPEF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haPEFProposto"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GruppoAziendale -->
+
+    <owl:Class rdf:about="#GruppoAziendale">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#IGA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haDenominazione"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haAppartenenza"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#LaboratorioFidiCoordinatore"/>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#GruppoAziendaleAttuale -->
+
+    <owl:Class rdf:about="#GruppoAziendaleAttuale">
+        <rdfs:subClassOf rdf:resource="#GruppoAziendale"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Holding -->
+
+    <owl:Class rdf:about="#Holding">
+        <rdfs:subClassOf rdf:resource="#Appartenenza"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#InAreaConsolidamento -->
+
+    <owl:Class rdf:about="#InAreaConsolidamento">
+        <rdfs:subClassOf rdf:resource="#Appartenenza"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#InformazioniFatturato -->
+
+    <owl:Class rdf:about="#InformazioniFatturato">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haInformazioniFatturato"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#acquisti"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#vendite"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#InformazioniFinanziamento -->
+
+    <owl:Class rdf:about="#InformazioniFinanziamento">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#debito"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#credito"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haInformazioniFinanziamento"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Isolamento -->
+
+    <owl:Class rdf:about="#Isolamento">
+        <rdfs:subClassOf rdf:resource="#EventoPerimetrazione"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#inEventoPerimetrazione"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#attribuitoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LaboratorioFidiCoordinatore -->
+
+    <owl:Class rdf:about="#LaboratorioFidiCoordinatore">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haCoordinamento"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#codiceLaboratorioFidi"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#associatoA"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Legame"/>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Legame -->
+
+    <owl:Class rdf:about="#Legame">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#eCollegante"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#eCollegato"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#tipoLegame"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Operatore"/>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameAmministratore -->
+
+    <owl:Class rdf:about="#LegameAmministratore">
+        <rdfs:subClassOf rdf:resource="#LegameTpSocioSocieta"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameAttuale -->
+
+    <owl:Class rdf:about="#LegameAttuale">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameCashPooling -->
+
+    <owl:Class rdf:about="#LegameCashPooling">
+        <rdfs:subClassOf rdf:resource="#LegameTpEconomico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameDirezioneCoordinamento -->
+
+    <owl:Class rdf:about="#LegameDirezioneCoordinamento">
+        <rdfs:subClassOf rdf:resource="#LegameTpGiuridico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameFatturato -->
+
+    <owl:Class rdf:about="#LegameFatturato">
+        <rdfs:subClassOf rdf:resource="#LegameTpEconomico"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haInformazioniFatturato"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameFidiPlurimi -->
+
+    <owl:Class rdf:about="#LegameFidiPlurimi">
+        <rdfs:subClassOf rdf:resource="#LegameTpEconomico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameFinanziamento -->
+
+    <owl:Class rdf:about="#LegameFinanziamento">
+        <rdfs:subClassOf rdf:resource="#LegameTpEconomico"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haInformazioniFinanziamento"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameFittizio -->
+
+    <owl:Class rdf:about="#LegameFittizio">
+        <rdfs:subClassOf rdf:resource="#LegameTpGiuridico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameGCOL -->
+
+    <owl:Class rdf:about="#LegameGCOL">
+        <rdfs:subClassOf rdf:resource="#LegameTpEconomico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameGaranziaConsolidato -->
+
+    <owl:Class rdf:about="#LegameGaranziaConsolidato">
+        <rdfs:subClassOf rdf:resource="#LegameTpGaranzia"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haGaranziaConsolidata"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameGaranziaProposto -->
+
+    <owl:Class rdf:about="#LegameGaranziaProposto">
+        <rdfs:subClassOf rdf:resource="#LegameTpGaranzia"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameGiuridico -->
+
+    <owl:Class rdf:about="#LegameGiuridico">
+        <rdfs:subClassOf rdf:resource="#LegameTpGiuridico"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haPartecipazioneALegame"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegamePatrimonialeAutomatico -->
+
+    <owl:Class rdf:about="#LegamePatrimonialeAutomatico">
+        <rdfs:subClassOf rdf:resource="#LegameTpPatrimoniale"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegamePatrimonialeManuale -->
+
+    <owl:Class rdf:about="#LegamePatrimonialeManuale">
+        <rdfs:subClassOf rdf:resource="#LegameTpPatrimoniale"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameRilevanteCalcolato -->
+
+    <owl:Class rdf:about="#LegameRilevanteCalcolato">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameRilevanteEffettivo -->
+
+    <owl:Class rdf:about="#LegameRilevanteEffettivo">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameSIR -->
+
+    <owl:Class rdf:about="#LegameSIR">
+        <rdfs:subClassOf rdf:resource="#LegameTpSocioSocieta"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haPartecipazioneALegame"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameSLR -->
+
+    <owl:Class rdf:about="#LegameSLR">
+        <rdfs:subClassOf rdf:resource="#LegameTpSocioSocieta"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haPartecipazioneALegame"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameTpEconomico -->
+
+    <owl:Class rdf:about="#LegameTpEconomico">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameTpGaranzia -->
+
+    <owl:Class rdf:about="#LegameTpGaranzia">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameTpGiuridico -->
+
+    <owl:Class rdf:about="#LegameTpGiuridico">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameTpPatrimoniale -->
+
+    <owl:Class rdf:about="#LegameTpPatrimoniale">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#LegameTpSocioSocieta -->
+
+    <owl:Class rdf:about="#LegameTpSocioSocieta">
+        <rdfs:subClassOf rdf:resource="#Legame"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#MaggioranzaRelativa -->
+
+    <owl:Class rdf:about="#MaggioranzaRelativa">
+        <rdfs:subClassOf rdf:resource="#LegameGiuridico"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Operatore -->
+
+    <owl:Class rdf:about="#Operatore">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#attribuitoA"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#idOperatore"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#PatrimonioResponsabile"/>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PartecipazioneALegame -->
+
+    <owl:Class rdf:about="#PartecipazioneALegame">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haPartecipazioneALegame"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#quota"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PatrimonioResponsabile -->
+
+    <owl:Class rdf:about="#PatrimonioResponsabile">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haPatrimonioResponsabile"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#importoPatrimonioResponsabile"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#dataPatrimonioResponsabile"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#ottenutoDa"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#Perimetrazione -->
+
+    <owl:Class rdf:about="#Perimetrazione">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#haCliente"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#inGCC"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="#PeriodoValidita"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PerimetrazioneAttuale -->
+
+    <owl:Class rdf:about="#PerimetrazioneAttuale">
+        <rdfs:subClassOf rdf:resource="#Perimetrazione"/>
+        <owl:disjointWith>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampF"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </owl:disjointWith>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PerimetrazioneCalcolata -->
+
+    <owl:Class rdf:about="#PerimetrazioneCalcolata">
+        <rdfs:subClassOf rdf:resource="#Perimetrazione"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PerimetrazioneEffettiva -->
+
+    <owl:Class rdf:about="#PerimetrazioneEffettiva">
+        <rdfs:subClassOf rdf:resource="#Perimetrazione"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PerimetrazioneEffettivaConEsclusioneRischio -->
+
+    <owl:Class rdf:about="#PerimetrazioneEffettivaConEsclusioneRischio">
+        <rdfs:subClassOf rdf:resource="#PerimetrazioneEffettiva"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PeriodoValidita -->
+
+    <owl:Class rdf:about="#PeriodoValidita">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#timestampI"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/10/Ontology1226933337593.owl#PeriodoValiditaBilancioCons -->
+
+    <owl:Class rdf:about="#PeriodoValiditaBilancioCons">
+        <rdfs:subClassOf rdf:resource="#PeriodoValidita"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="#haBilancioConsolidato"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#dataBilancioConsolidato"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing">
+        <rdfs:comment></rdfs:comment>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+
