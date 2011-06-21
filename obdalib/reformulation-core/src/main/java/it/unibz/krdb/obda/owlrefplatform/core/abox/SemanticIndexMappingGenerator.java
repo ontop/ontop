@@ -4,6 +4,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
@@ -245,11 +246,6 @@ public class SemanticIndexMappingGenerator {
             MappingKey map1 = mappings.get(i);
             MappingKey map2 = mappings.get(i + 1);
 
-            // DEBUG
-            if (i == 225) {
-                int j = 42;
-            }
-
             if (map1.uri.startsWith("ER.A-AUX")) {
                 continue;
             }
@@ -274,16 +270,18 @@ public class SemanticIndexMappingGenerator {
         } else if (lastKey instanceof UnaryMappingKey) {
             rv.add(get_unary_mapping(lastKey.uri, lastKey.projection, lastKey.table, lastKey.range));
         }
-
+        if (GraphGenerator.debugInfoDump) {
+            GraphGenerator.dumpMappings(mappings);
+        }
         return rv;
     }
 
-    static class MappingKey implements Comparable<MappingKey> {
+    public static class MappingKey implements Comparable<MappingKey> {
 
-        private final SemanticIndexRange range;
-        private final String projection;
-        private final String table;
-        private final String uri;
+        public final SemanticIndexRange range;
+        public final String projection;
+        public final String table;
+        public final String uri;
 
         MappingKey(SemanticIndexRange range, String projection, String table, String uri) {
             this.range = range;
@@ -326,14 +324,14 @@ public class SemanticIndexMappingGenerator {
         }
     }
 
-    static class UnaryMappingKey extends MappingKey {
+    public static class UnaryMappingKey extends MappingKey {
 
         UnaryMappingKey(SemanticIndexRange range, String projection, String table, String uri) {
             super(range, projection, table, uri);
         }
     }
 
-    static class BinaryMappingKey extends MappingKey {
+    public static class BinaryMappingKey extends MappingKey {
 
         BinaryMappingKey(SemanticIndexRange range, String projection, String table, String uri) {
             super(range, projection, table, uri);

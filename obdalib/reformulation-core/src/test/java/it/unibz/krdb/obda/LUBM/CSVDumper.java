@@ -87,27 +87,36 @@ public class CSVDumper {
                 OWLIndividual o = objAxiom.getObject();
                 DAGNode node = dag.getRoleNode(p.asOWLObjectProperty().getURI().toString());
 
+                if (node == null) {
+                    continue;
+                }
                 int idx = node.getIndex();
 
                 dumpRole(s.getURI().toString(), o.getURI().toString(), idx);
                 roleCount++;
 
             } else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
-                OWLDataPropertyAssertionAxiom dataAxiom = (OWLDataPropertyAssertionAxiom) axiom;
-
-                OWLIndividual s = dataAxiom.getSubject();
-                OWLDataPropertyExpression p = dataAxiom.getProperty();
-                OWLConstant o = dataAxiom.getObject();
-                int idx = dag.getRoleNode(p.asOWLDataProperty().getURI().toString()).getIndex();
-
-                dumpRole(s.getURI().toString(), o.getLiteral(), idx);
-                roleCount++;
+//                OWLDataPropertyAssertionAxiom dataAxiom = (OWLDataPropertyAssertionAxiom) axiom;
+//
+//                OWLIndividual s = dataAxiom.getSubject();
+//                OWLDataPropertyExpression p = dataAxiom.getProperty();
+//                OWLConstant o = dataAxiom.getObject();
+//                log.info(p.asOWLDataProperty().getURI().toString());
+//                int idx = dag.getRoleNode(p.asOWLDataProperty().getURI().toString()).getIndex();
+//
+//                dumpRole(s.getURI().toString(), o.getLiteral(), idx);
+//                roleCount++;
 
             } else if (axiom instanceof OWLClassAssertionAxiom) {
                 OWLClassAssertionAxiom clsAxiom = (OWLClassAssertionAxiom) axiom;
 
                 OWLIndividual ind = clsAxiom.getIndividual();
                 OWLDescription cls = clsAxiom.getDescription();
+                DAGNode clsNode = dag.getClassNode(cls.asOWLClass().getURI().toString());
+
+                if (clsNode == null) {
+                    continue;
+                }
                 int idx = dag.getClassNode(cls.asOWLClass().getURI().toString()).getIndex();
 
                 dumpClass(ind.getURI().toString(), idx);
@@ -123,11 +132,16 @@ public class CSVDumper {
     private void dumpClass(String s, int idx) throws IOException {
         clsWriter.write(String.format("%s\t%d\n", s, idx));
     }
-    
-    public static void main(String args[]) {
-    	String path = args[0];
-    	int universities = Integer.valueOf(args[1]);
-//    	CSVDumper dumper = new CS
+
+    public static void main(String args[]) throws Exception {
+        String path = args[0];
+        int universities = Integer.valueOf(args[1]);
+
+        TBoxLoader helper = new TBoxLoader(path);
+        DAG isa = new DAG(helper.loadOnto());
+        isa.index();
+        CSVDumper dumper = new CSVDumper(isa, path);
+        dumper.dump(universities);
     }
 
 

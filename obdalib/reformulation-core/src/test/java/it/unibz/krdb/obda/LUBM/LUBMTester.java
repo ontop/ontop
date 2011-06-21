@@ -49,13 +49,13 @@ public class LUBMTester {
             starttime = System.nanoTime();
             Set<String> res = execute(query, reasoner);
             endtime = System.nanoTime();
-            log.info("Result size {}", res.size());
+            log.info("Result size {}, res: {}", res.size(), res);
             log.info("Executing query {} took: {}", query, (endtime - starttime) * 1.0e-9);
         }
 
     }
 
-    private static void dumpData() throws Exception {
+    private static void loadData() throws Exception {
 
         int universityCount = 1;
 

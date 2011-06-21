@@ -47,7 +47,6 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
     private String name;
     private OWLOntologyManager owlOntologyManager;
 
-
     private final Logger log = LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
 
     /**
@@ -121,8 +120,15 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 
             DAG isa = DAGConstructor.getISADAG(ontology);
             isa.index();
+            if (GraphGenerator.debugInfoDump) {
+                GraphGenerator.dumpISA(isa);
+            }
+
             SemanticReduction reducer = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
             List<Assertion> reducedOnto = reducer.reduce();
+            if (GraphGenerator.debugInfoDump) {
+                GraphGenerator.dumpReducedOnto(reducedOnto);
+            }
 
             // Mappings
             DataSource ds = apic.getDatasourcesController().getAllSources().get(0);
