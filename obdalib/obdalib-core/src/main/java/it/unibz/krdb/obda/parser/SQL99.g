@@ -32,16 +32,45 @@ select_list
   
 select_sublist
   : qualified_asterisk
-  | column_reference
+  | derived_column
   ;
   
 qualified_asterisk
   : table_identifier DOT ASTERISK
   ;
   
-column_reference
-  : (table_identifier DOT)? column_name (AS alias_name)?
+derived_column
+  : value_expression (AS alias_name)?
+  ;  
+ 
+value_expression
+  : column_reference
+  | set_function_specification
   ;
+  
+column_reference
+  : (table_identifier DOT)? column_name
+  ;
+
+set_function_specification
+  : COUNT LPAREN ASTERISK RPAREN
+  | general_set_function
+  ;
+  
+general_set_function
+  : set_function_op LPAREN (set_quantifier)? value_expression RPAREN
+  ;
+  
+set_function_op
+  : AVG
+  | MAX
+  | MIN
+  | SUM
+  | EVERY
+  | ANY
+  | SOME
+  | COUNT
+  ;  
     
 table_expression
   : from_clause (where_clause)?
@@ -79,6 +108,7 @@ boolean_term
 predicate
   : comparison_predicate
   | null_predicate
+  | in_predicate
   ;
   
 comparison_predicate
@@ -97,6 +127,23 @@ comp_op
 
 null_predicate
   : column_reference IS (NOT)? NULL
+  ;
+
+in_predicate
+  : column_reference (NOT)? IN in_predicate_value
+  ;
+  
+in_predicate_value
+  : table_subquery
+  | LPAREN value_list RPAREN
+  ;
+
+table_subquery
+  : LPAREN query RPAREN
+  ;
+  
+value_list
+  : value (COMMA value)*
   ;
 
 joined_table
@@ -173,6 +220,22 @@ DISTINCT:	('D'|'d')('I'|'i')('S'|'s')('T'|'t')('I'|'i')('N'|'n')('C'|'c')('T'|'t
 
 ALL: ('A'|'a')('L'|'l')('L'|'l');
 
+AVG: ('A'|'a')('V'|'v')('G'|'g');
+
+MAX: ('M'|'m')('A'|'a')('X'|'x');
+
+MIN: ('M'|'m')('I'|'i')('N'|'n');
+
+SUM: ('S'|'s')('U'|'u')('M'|'m');
+
+EVERY: ('E'|'e')('V'|'v')('E'|'e')('R'|'r')('Y'|'y');
+
+ANY: ('A'|'a')('N'|'n')('Y'|'y');
+
+SOME: ('S'|'s')('O'|'o')('M'|'m')('E'|'e');
+
+COUNT: ('C'|'c')('O'|'o')('U'|'u')('N'|'n')('T'|'t');
+
 FROM:	('F'|'f')('R'|'r')('O'|'o')('M'|'m');
 
 WHERE: ('W'|'w')('H'|'h')('E'|'e')('R'|'r')('E'|'e');
@@ -192,6 +255,8 @@ AS:	('A'|'a')('S'|'s');
 JOIN: ('J'|'j')('O'|'o')('I'|'i')('N'|'n');
 
 ON:	('O'|'o')('N'|'n');
+
+IN: ('I'|'i')('N'|'n');
 
 LEFT:	('L'|'l')('E'|'e')('F'|'f')('T'|'t');
 
