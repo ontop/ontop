@@ -42,7 +42,7 @@ public class CSVLoader {
     final String url = "jdbc:postgresql://localhost/test:";
     final String username = "test";
     final String password = "test";
-    Connection connection;
+    public Connection connection;
 
     private String dataDir;
 
@@ -106,6 +106,28 @@ public class CSVLoader {
         final long duration = endTime - startTime;
 
         log.info("Loading ABox took: {}", duration * 1.0e-9);
+    }
+
+    public void makeIndexes() throws SQLException {
+        String idxCls1 = "CREATE INDEX cls_idx on class(idx) ;";
+        String idxCls2 = "CREATE INDEX cls_idx_uri on class(idx,uri); ";
+
+        String idxRole1 = "CREATE INDEX role_idx on role(idx);";
+        String idxRole2 = "CREATE INDEX role_idx_uri1_uri2 on role(idx, uri1, uri2);";
+        String idxRole3 = "CREATE INDEX role_idx_uri2_uri1 on role(idx, uri2, uri1);";
+
+        Statement st = connection.createStatement();
+        long startTime = System.nanoTime();
+        st.execute(idxCls1);
+        st.execute(idxCls2);
+
+        st.execute(idxRole1);
+        st.execute(idxRole2);
+        st.execute(idxRole3);
+        st.close();
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        log.info("Building Indexes took: {}", duration);
     }
 
 
