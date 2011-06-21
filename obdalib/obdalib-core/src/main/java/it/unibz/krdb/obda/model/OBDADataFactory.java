@@ -101,6 +101,10 @@ public interface OBDADataFactory {
 	public Function getORFunction(Term term1, Term term2, Term term3);
 
 	public Function getORFunction(List<Term> terms);
+	
+	public DataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass);
+	
+	public DataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass);
 
 	/**
 	 * Construct a {@link URIConstant} object. This type of term is written as a

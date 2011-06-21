@@ -21,6 +21,7 @@ import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
@@ -170,25 +171,25 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public PredicateAtom getEQAtom(Term firstTerm, Term secondTerm) {
-		
+
 		return getAtom(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public PredicateAtom getGTEAtom(Term firstTerm, Term secondTerm) {
-		
+
 		return getAtom(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
 	public PredicateAtom getGTAtom(Term firstTerm, Term secondTerm) {
-		
+
 		return getAtom(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
 	public PredicateAtom getLTEAtom(Term firstTerm, Term secondTerm) {
-		
+
 		return getAtom(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
@@ -225,12 +226,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public PredicateAtom getANDAtom(List<Term> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("AND requires at least 2 terms");
-		
+
 		LinkedList<Term> auxTerms = new LinkedList<Term>();
-		
+
 		if (terms.size() == 2)
 			return getAtom(OBDAVocabulary.AND, terms.get(0), terms.get(1));
-		
+
 		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
@@ -259,12 +260,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public PredicateAtom getORAtom(List<Term> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("OR requires at least 2 terms");
-		
+
 		LinkedList<Term> auxTerms = new LinkedList<Term>();
-		
+
 		if (terms.size() == 2)
 			return getAtom(OBDAVocabulary.OR, terms.get(0), terms.get(1));
-		
+
 		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
@@ -309,8 +310,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getNOTFunction(Term term) {
 		return getFunctionalTerm(OBDAVocabulary.NOT, term);
 	}
-	
-	
+
 	@Override
 	public Function getANDFunction(Term term1, Term term2) {
 		return getFunctionalTerm(OBDAVocabulary.AND, term1, term2);
@@ -329,12 +329,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getANDFunction(List<Term> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("AND requires at least 2 terms");
-		
+
 		LinkedList<Term> auxTerms = new LinkedList<Term>();
-		
+
 		if (terms.size() == 2)
 			return getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
-		
+
 		Term nested = getFunctionalTerm(OBDAVocabulary.AND, terms.get(0), terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
@@ -363,12 +363,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getORFunction(List<Term> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("OR requires at least 2 terms");
-		
+
 		LinkedList<Term> auxTerms = new LinkedList<Term>();
-		
+
 		if (terms.size() == 2)
 			return getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
-		
+
 		Term nested = getFunctionalTerm(OBDAVocabulary.OR, terms.get(0), terms.get(1));
 		terms.remove(0);
 		terms.remove(0);
@@ -379,6 +379,21 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunctionalTerm(OBDAVocabulary.OR, nested, terms.get(0));
 	}
 
-	
+	@Override
+	public DataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass) {
+		URI id = URI.create(UUID.randomUUID().toString());
+		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
+	}
+
+	@Override
+	public DataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass) {
+		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driverclass);
+		return source;
+
+	}
 
 }

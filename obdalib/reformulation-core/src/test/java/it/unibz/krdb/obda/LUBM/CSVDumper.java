@@ -123,6 +123,12 @@ public class CSVDumper {
     private void dumpClass(String s, int idx) throws IOException {
         clsWriter.write(String.format("%s\t%d\n", s, idx));
     }
+    
+    public static void main(String args[]) {
+    	String path = args[0];
+    	int universities = Integer.valueOf(args[1]);
+//    	CSVDumper dumper = new CS
+    }
 
 
 }

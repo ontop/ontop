@@ -18,7 +18,7 @@ public class LUBMTester {
 
     static long starttime;
     static long endtime;
-    static String dataDirectory = "./";
+    static String dataDirectory = "/Users/mariano/Documents/Archive/Work/projects/semantic-index/uba1.7/";
 
 
     static String[] queries = {
