@@ -120,8 +120,11 @@ predicate
   ;
   
 comparison_predicate
-  : column_reference comp_op value
-  | column_reference comp_op column_reference
+options {
+  backtrack=true;
+}
+  : value_expression comp_op value
+  | value_expression comp_op value_expression
   ;
 
 comp_op
@@ -176,7 +179,26 @@ grouping_column_reference_list
   ;  
 
 joined_table
-  : JOIN
+  : qualified_join
+  ;
+
+qualified_join
+  : table_primary (join_type)? JOIN table_primary join_condition
+  ;
+
+join_type
+  : INNER
+  | outer_join_type (OUTER)?
+  ;
+  
+outer_join_type
+  : LEFT 
+  | RIGHT 
+  | FULL
+  ;
+
+join_condition
+  : ON search_condition
   ;
 
 table_primary
@@ -293,13 +315,19 @@ AS:	('A'|'a')('S'|'s');
 
 JOIN: ('J'|'j')('O'|'o')('I'|'i')('N'|'n');
 
+INNER: ('I'|'i')('N'|'n')('N'|'n')('E'|'e')('R'|'r');
+
+OUTER: ('O'|'o')('U'|'u')('T'|'t')('E'|'e')('R'|'r');
+
+LEFT: ('L'|'l')('E'|'e')('F'|'f')('T'|'t');
+
+RIGHT: ('R'|'r')('I'|'i')('G'|'g')('H'|'h')('T'|'t');
+
+FULL: ('F'|'f')('U'|'u')('L'|'l')('L'|'l');
+
 ON:	('O'|'o')('N'|'n');
 
 IN: ('I'|'i')('N'|'n');
-
-LEFT:	('L'|'l')('E'|'e')('F'|'f')('T'|'t');
-
-RIGHT: ('R'|'r')('I'|'i')('G'|'g')('H'|'h')('T'|'t');
 
 IS: ('I'|'i')('S'|'s');
 
