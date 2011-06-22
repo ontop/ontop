@@ -27,7 +27,8 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
 
     public static void main(String[] args) {
         String owlfile = "src/test/resources/test/ontologies/scenarios/lubm/univ-bench-dllitea.owl";
-        String obdafile = "src/test/resources/test/ontologies/scenarios/lubm/univ-bench-dllitea.obda";
+        String obdafileBase = "src/test/resources/test/ontologies/scenarios/lubm/univ-bench-dllitea.obda";
+        String obdafileReduced = "src/test/resources/test/ontologies/scenarios/lubm/univ-bench-dllitea-semindex-optimal.obda";
 
         // Loading the OWL file
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -42,7 +43,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
 
 
             DataManager ioManager = new DataManager(obdamodel);
-            ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
+            ioManager.loadOBDADataFromURI(new File(obdafileBase).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
             DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
             obdamodel.getDatasourcesController().addDataSource(ds);
@@ -74,8 +75,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
                 QueryControllerQuery query = (QueryControllerQuery) entity;
                 String sparqlquery = query.getQuery();
                 String id = query.getID();
-                log.info("##################  Executing query: {}", id);
-
+                log.info("##################  Rewriting query: {}", id);
 
                 Statement st = reasoner.getStatement();
 
@@ -84,11 +84,23 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
                 long end = System.currentTimeMillis();
                 log.info("Total time for rewriting: {}", end - start);
 
-                start = System.currentTimeMillis();
-                String unfolding = st.getUnfolding(sparqlquery, false);
-                end = System.currentTimeMillis();
-                log.info("Total time for unfolding: {}", end - start);
+            }
+            ioManager.loadOBDADataFromURI(new File(obdafileReduced).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
+            for (QueryControllerEntity entity : obdamodel.getQueryController().getElements()) {
+                if (!(entity instanceof QueryControllerQuery)) {
+                    continue;
+                }
+                QueryControllerQuery query = (QueryControllerQuery) entity;
+                String sparqlquery = query.getQuery();
+                String id = query.getID();
+                log.info("##################  Unfolding query: {}", id);
 
+                Statement st = reasoner.getStatement();
+
+                long start = System.currentTimeMillis();
+                String rewriting = st.getUnfolding(sparqlquery);
+                long end = System.currentTimeMillis();
+                log.info("Total time for unfolding: {}", end - start);
 
             }
 
