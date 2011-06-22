@@ -29,6 +29,7 @@ public class SemanticIndexMappingGenerator {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final boolean mergeUniions = false;
 
 
     /**
@@ -39,7 +40,6 @@ public class SemanticIndexMappingGenerator {
     public static List<OBDAMappingAxiom> build(DAG dag) throws DuplicateMappingException {
         log.debug("Generating mappings for DAG {}", dag);
 
-//        List<OBDAMappingAxiom> rv = new ArrayList<OBDAMappingAxiom>(dag.getClasses().size() + dag.getRoles().size());
         List<MappingKey> mappings = new ArrayList<MappingKey>();
 
         for (DAGNode node : dag.getClasses()) {
@@ -65,10 +65,7 @@ public class SemanticIndexMappingGenerator {
                 AtomicConceptDescription equiDesc = (AtomicConceptDescription) equiNode.getDescription();
                 String equiUri = equiDesc.getPredicate().getName().toString();
 
-//                rv.add(get_unary_mapping(equiUri, projection, tablename, range));
                 mappings.add(new UnaryMappingKey(range, projection, tablename, equiUri));
-
-
             }
 
 
@@ -105,7 +102,6 @@ public class SemanticIndexMappingGenerator {
                             mappings.add(new UnaryMappingKey(descRange, projection, ABoxSerializer.role_table, equiUri));
                         }
                     }
-
                 }
             }
         }
@@ -123,11 +119,6 @@ public class SemanticIndexMappingGenerator {
                     continue;
                 }
 
-//                rv.add(get_binary_mapping(
-//                        equiNodeDesc.getPredicate().getName().toString(),
-//                        " URI1 as X, URI2 as Y ",
-//                        ABoxSerializer.role_table,
-//                        node.getRange()));
                 mappings.add(new BinaryMappingKey(
                         node.getRange(),
                         "URI1 as X, URI2 as Y",
@@ -150,11 +141,6 @@ public class SemanticIndexMappingGenerator {
                         continue;
                     }
 
-//                    rv.add(get_binary_mapping(
-//                            equiNodeDesc.getPredicate().getName().toString(),
-//                            " URI1 AS Y, URI2 AS X ",
-//                            ABoxSerializer.role_table,
-//                            child.getRange()));
                     mappings.add(new BinaryMappingKey(
                             child.getRange(),
                             "URI1 AS Y, URI2 AS X",
@@ -165,14 +151,20 @@ public class SemanticIndexMappingGenerator {
             }
         }
 
-        return fillterRedundancy(mappings);
+        return filterRedundancy(mappings);
     }
 
 
-    private static OBDAMappingAxiom get_unary_mapping(String uri, String projection, String table, SemanticIndexRange range) throws DuplicateMappingException {
+    private static String genQuerySQL(MappingKey map) {
         // Generate the WHERE clause
-        StringBuilder where_clause = new StringBuilder();
-        for (SemanticIndexRange.Interval it : range.getIntervals()) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append(map.projection);
+        sql.append(" FROM ");
+        sql.append(map.table);
+        sql.append(" WHERE ");
+
+        for (SemanticIndexRange.Interval it : map.range.getIntervals()) {
             int st = it.getStart();
             int end = it.getEnd();
             String interval;
@@ -181,67 +173,20 @@ public class SemanticIndexMappingGenerator {
             } else {
                 interval = String.format("((IDX >= %d) AND ( IDX <= %d)) OR ", st, end);
             }
-            where_clause.append(interval);
+            sql.append(interval);
         }
-        if (where_clause.length() != 0) {
-            // remove the last OR
-            where_clause.delete(where_clause.length() - 3, where_clause.length());
-        }
-
-        Term qt = predicateFactory.getVariable("x");
-        Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 1);
-        PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qt);
-        predicate = predicateFactory.getPredicate(URI.create("q"), 1);
-        PredicateAtom head = predicateFactory.getAtom(predicate, qt);
-        Query cq = predicateFactory.getCQIE(head, bodyAtom);
-
-        String sql = "SELECT " + projection + " FROM " + table;
-        if (where_clause.length() != 0) {
-            sql += " WHERE " + where_clause.toString();
-        }
-
-        return predicateFactory.getRDBMSMappingAxiom(sql, cq);
-    }
-
-    private static OBDAMappingAxiom get_binary_mapping(String uri, String projection, String table, SemanticIndexRange range) throws DuplicateMappingException {
-
-        // Generate the WHERE clause
-        StringBuilder where_clause = new StringBuilder();
-        for (SemanticIndexRange.Interval it : range.getIntervals()) {
-            int st = it.getStart();
-            int end = it.getEnd();
-            String interval;
-            if (st == end) {
-                interval = String.format("(IDX = %d) OR ", st);
-            } else {
-                interval = String.format("((IDX >= %d) AND ( IDX <= %d)) OR ", st, end);
-            }
-            where_clause.append(interval);
-        }
-        if (where_clause.length() != 0) {
+        if (map.range.getIntervals().size() != 0) {
             // remove the last AND
-            where_clause.delete(where_clause.length() - 4, where_clause.length());
+            sql.delete(sql.length() - 4, sql.length());
         }
 
-        Term qtx = predicateFactory.getVariable("X");
-        Term qty = predicateFactory.getVariable("Y");
-        Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 2);
-        PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
-        predicate = predicateFactory.getPredicate(URI.create("q"), 2);
-        PredicateAtom head = predicateFactory.getAtom(predicate, qtx, qty);
-        Query cq = predicateFactory.getCQIE(head, bodyAtom);
-
-        String sql = "SELECT " + projection + " FROM " + table;
-        if (where_clause.length() != 0) {
-            sql += " WHERE " + where_clause.toString();
-        }
-
-        return predicateFactory.getRDBMSMappingAxiom(sql, cq);
+        return sql.toString();
     }
 
-    private static List<OBDAMappingAxiom> fillterRedundancy(List<MappingKey> mappings) throws DuplicateMappingException {
+    private static List<OBDAMappingAxiom> filterRedundancy(List<MappingKey> mappings) throws DuplicateMappingException {
 
         List<OBDAMappingAxiom> rv = new ArrayList<OBDAMappingAxiom>(128);
+        List<MappingKey> merged = new ArrayList<MappingKey>(128);
         Collections.sort(mappings);
 
         MappingKey cur = mappings.get(0);
@@ -265,9 +210,17 @@ public class SemanticIndexMappingGenerator {
                 }
             }
             if (cur instanceof UnaryMappingKey) {
-                rv.add(get_unary_mapping(cur.uri, cur.projection, cur.table, curRange));
+                if (mergeUniions) {
+                    merged.add(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
+                } else {
+                    rv.add(makeUnaryMapp(cur.uri, genQuerySQL(cur)));
+                }
             } else if (cur instanceof BinaryMappingKey) {
-                rv.add(get_binary_mapping(cur.uri, cur.projection, cur.table, curRange));
+                if (mergeUniions) {
+                    merged.add(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
+                } else {
+                    rv.add(makeBinaryMapp(cur.uri, genQuerySQL(cur)));
+                }
             }
             cur = next;
         }
@@ -275,7 +228,71 @@ public class SemanticIndexMappingGenerator {
         if (GraphGenerator.debugInfoDump) {
             GraphGenerator.dumpMappings(mappings);
         }
+
+        if (mergeUniions) {
+            Collections.sort(merged);
+            int k = 1;
+            MappingKey curMap = merged.get(0);
+            StringBuffer sql = new StringBuffer();
+            while (k < merged.size()) {
+                sql = new StringBuffer();
+                sql.append(genQuerySQL(curMap));
+                MappingKey nextMap = merged.get(k);
+                while (curMap.uri.equals(nextMap.uri) &&
+                        ((curMap instanceof UnaryMappingKey && nextMap instanceof UnaryMappingKey) ||
+                                (curMap instanceof BinaryMappingKey && nextMap instanceof BinaryMappingKey &&
+                                        curMap.projection.equals(nextMap.projection))
+                        )) {
+                    sql.append(" UNION ALL ");
+                    sql.append(genQuerySQL(nextMap));
+                    ++k;
+                    if (k < merged.size()) {
+                        nextMap = merged.get(k);
+                    } else {
+                        break;
+                    }
+                }
+                if (curMap instanceof UnaryMappingKey) {
+                    rv.add(makeUnaryMapp(curMap.uri, sql.toString()));
+                } else if (curMap instanceof BinaryMappingKey) {
+                    rv.add(makeBinaryMapp(curMap.uri, sql.toString()));
+                }
+                curMap = nextMap;
+                ++k;
+            }
+            // last mapping
+            if (curMap instanceof UnaryMappingKey) {
+                rv.add(makeUnaryMapp(curMap.uri, genQuerySQL(curMap)));
+            } else if (curMap instanceof BinaryMappingKey) {
+                rv.add(makeBinaryMapp(curMap.uri, genQuerySQL(curMap)));
+            }
+        }
         return rv;
+    }
+
+    private static OBDAMappingAxiom makeBinaryMapp(String uri, String sql) {
+        Term qtx = predicateFactory.getVariable("X");
+        Term qty = predicateFactory.getVariable("Y");
+        Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 2);
+        PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
+        predicate = predicateFactory.getPredicate(URI.create("q"), 2);
+        PredicateAtom head = predicateFactory.getAtom(predicate, qtx, qty);
+        Query cq = predicateFactory.getCQIE(head, bodyAtom);
+
+        return predicateFactory.getRDBMSMappingAxiom(sql, cq);
+
+    }
+
+    private static OBDAMappingAxiom makeUnaryMapp(String uri, String sql) {
+        Term qt = predicateFactory.getVariable("x");
+        Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 1);
+        PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qt);
+        predicate = predicateFactory.getPredicate(URI.create("q"), 1);
+        PredicateAtom head = predicateFactory.getAtom(predicate, qt);
+        Query cq = predicateFactory.getCQIE(head, bodyAtom);
+
+        return predicateFactory.getRDBMSMappingAxiom(sql, cq);
+
     }
 
     public static class MappingKey implements Comparable<MappingKey> {
