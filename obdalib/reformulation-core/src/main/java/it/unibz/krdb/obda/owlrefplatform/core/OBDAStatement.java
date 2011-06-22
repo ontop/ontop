@@ -48,7 +48,7 @@ public class OBDAStatement implements Statement {
 	private SourceQueryGenerator	querygenerator		= null;
 	private EvaluationEngine		engine				= null;
 	// private DatalogProgram query = null;
-	private OBDAModel			apic				= null;
+	private OBDAModel				apic				= null;
 	private boolean					canceled			= false;
 
 	// private DatalogProgram rewriting = null;
@@ -121,7 +121,7 @@ public class OBDAStatement implements Statement {
 			 */
 			if (program.getRules().size() < 1)
 				throw new Exception("Error, empty query");
-			
+
 			result = new EmptyQueryResultSet(signature);
 		} else {
 			ResultSet set = engine.execute(sql);
@@ -150,7 +150,7 @@ public class OBDAStatement implements Statement {
 		List<String> signature = new LinkedList<String>();
 		for (Term term : program.getRules().get(0).getHead().getTerms()) {
 			if (term instanceof Variable) {
-				signature.add(((Variable)term).getName());
+				signature.add(((Variable) term).getName());
 			} else {
 				throw new Exception("Only variables are allowed in the head of queries");
 			}
@@ -247,9 +247,22 @@ public class OBDAStatement implements Statement {
 	 */
 	@Override
 	public String getUnfolding(String strquery) throws Exception {
+		return getUnfolding(strquery, false);
+	}
+
+	/**
+	 * Returns the final rewriting of the given query
+	 */
+	@Override
+	public String getUnfolding(String strquery, boolean noreformulation) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
-		Query rewriting = rewriter.rewrite(program);
-		Query unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
+		Query unfolding = null;
+		if (!noreformulation) {
+			unfolding = unfoldingmechanism.unfold(program);
+		} else {
+			Query rewriting = rewriter.rewrite(program);
+			unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
+		}
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, getSignature(program));
 		return sql;
 	}

@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -96,6 +97,11 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 			} else if (t instanceof ValueConstant){
 				atomvar.append("'");
 				atomvar.append(((ValueConstant)t).getValue());
+				atomvar.append("'");
+			}else if (t instanceof URIConstant){
+				atomvar.append("<");
+				atomvar.append(((URIConstant)t).getURI().toString());
+				atomvar.append(">");
 			} else {
 				throw new RuntimeException("invalid term found in atom.");
 			}
