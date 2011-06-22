@@ -15,8 +15,12 @@ package it.unibz.krdb.obda.parser;
 parse
   : query EOF
   ;
-
-query 	
+  
+query
+  : query_expression (UNION (set_quantifier)? query_expression)*
+  ;
+  
+query_expression
   : SELECT set_quantifier? select_list table_expression
   ;
   
@@ -93,8 +97,10 @@ table_reference_list
   ;
   
 table_reference
-  : table_primary 
-  | joined_table
+options {
+  backtrack=true;
+}
+  : table_primary (joined_table)?
   ;
 
 where_clause
@@ -120,11 +126,7 @@ predicate
   ;
   
 comparison_predicate
-options {
-  backtrack=true;
-}
-  : value_expression comp_op value
-  | value_expression comp_op value_expression
+  : value_expression comp_op (value|value_expression)
   ;
 
 comp_op
@@ -150,6 +152,10 @@ in_predicate_value
   ;
 
 table_subquery
+  : subquery
+  ;
+
+subquery
   : LPAREN query RPAREN
   ;
   
@@ -183,7 +189,7 @@ joined_table
   ;
 
 qualified_join
-  : table_primary (join_type)? JOIN table_primary join_condition
+  : (join_type)? JOIN table_primary join_condition
   ;
 
 join_type
@@ -203,6 +209,7 @@ join_condition
 
 table_primary
   : table_name (AS? alias_name)?
+  | derived_table AS? alias_name
   ; 
  
 table_name
@@ -211,6 +218,10 @@ table_name
 
 alias_name
   : identifier
+  ;
+
+derived_table
+  : table_subquery
   ;
     
 table_identifier
@@ -324,6 +335,8 @@ LEFT: ('L'|'l')('E'|'e')('F'|'f')('T'|'t');
 RIGHT: ('R'|'r')('I'|'i')('G'|'g')('H'|'h')('T'|'t');
 
 FULL: ('F'|'f')('U'|'u')('L'|'l')('L'|'l');
+
+UNION: ('U'|'u')('N'|'n')('I'|'i')('O'|'o')('N'|'n');
 
 ON:	('O'|'o')('N'|'n');
 
