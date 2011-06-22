@@ -1,17 +1,21 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import org.semanticweb.owl.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Set;
-
-import org.semanticweb.owl.model.OWLClassAssertionAxiom;
-import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLIndividualAxiom;
-import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
-import org.semanticweb.owl.model.OWLOntology;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Store ABox assertions in the DB
@@ -58,6 +62,9 @@ public class ABoxSerializer {
 
     }
 
+    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+
     public static void ABOX2DB(Set<OWLOntology> ontologies, DAG dag, Connection conn) throws SQLException {
         PreparedStatement cls_stm = conn.prepareStatement(class_insert);
         PreparedStatement role_stm = conn.prepareStatement(role_insert);
@@ -72,7 +79,9 @@ public class ABoxSerializer {
                     String uri = triple.getSubject().asOWLIndividual().getURI().toString();
                     String lit = triple.getObject().getLiteral();
 
-                    DAGNode node = dag.getRoleNode(prop);
+                    Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
+                    RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+                    DAGNode node = dag.getRoleNode(propDesc);
                     int idx = node.getIndex();
 
                     role_stm.setString(1, uri);
@@ -87,7 +96,9 @@ public class ABoxSerializer {
                     String uri2 = triple.getObject().asOWLIndividual().getURI().toString();
 
 
-                    DAGNode node = dag.getRoleNode(prop);
+                    Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
+                    RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+                    DAGNode node = dag.getRoleNode(propDesc);
                     int idx = node.getIndex();
 
                     role_stm.setString(1, uri1);
@@ -102,7 +113,9 @@ public class ABoxSerializer {
                     if (!cls.equals(DAG.thingStr)) {
                         String uri = triple.getIndividual().getURI().toString();
 
-                        DAGNode node = dag.getClassNode(cls);
+                        Predicate clsPred = predicateFactory.getPredicate(URI.create(cls), 1);
+                        ConceptDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+                        DAGNode node = dag.getClassNode(clsDesc);
                         int idx = node.getIndex();
 
                         cls_stm.setString(1, uri);

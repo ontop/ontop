@@ -281,35 +281,10 @@ public class DAG {
         return roles.values();
     }
 
-    public DAGNode getClassNode(String uri) {
-        Predicate p = predicateFactory.getPredicate(URI.create(uri), 1);
-        AtomicConceptDescription desc = descFactory.getAtomicConceptDescription(p);
-
-        DAGNode rv = classes.get(desc);
-        if (rv == null) {
-            Description equi = equi_mappings.get(desc);
-            rv = classes.get(equi);
-        }
-        return rv;
-
-    }
-
     public DAGNode getClassNode(ConceptDescription conceptDescription) {
         DAGNode rv = classes.get(conceptDescription);
         if (rv == null) {
             rv = classes.get(equi_mappings.get(conceptDescription));
-        }
-        return rv;
-    }
-
-    public DAGNode getRoleNode(String uri) {
-        Predicate p = predicateFactory.getPredicate(URI.create(uri), 2);
-        RoleDescription desc = descFactory.getRoleDescription(p);
-
-        DAGNode rv = roles.get(desc);
-        if (rv == null) {
-            Description equi = equi_mappings.get(desc);
-            rv = roles.get(equi);
         }
         return rv;
     }

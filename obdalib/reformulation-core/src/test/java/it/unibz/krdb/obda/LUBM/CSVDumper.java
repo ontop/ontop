@@ -1,8 +1,15 @@
 package it.unibz.krdb.obda.LUBM;
 
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.*;
 import org.slf4j.Logger;
@@ -11,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 
 public class CSVDumper {
     private final Logger log = LoggerFactory.getLogger(CSVDumper.class);
@@ -26,6 +34,9 @@ public class CSVDumper {
     private long clsCount = 0;
     private long roleCount = 0;
     private String dataDir;
+
+    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
 
     public CSVDumper(DAG dag, String dataDir) throws IOException {
         classFile = dataDir + "classes.csv";
@@ -85,7 +96,10 @@ public class CSVDumper {
                 OWLIndividual s = objAxiom.getSubject();
                 OWLObjectPropertyExpression p = objAxiom.getProperty();
                 OWLIndividual o = objAxiom.getObject();
-                DAGNode node = dag.getRoleNode(p.asOWLObjectProperty().getURI().toString());
+
+                Predicate propPred = predicateFactory.getPredicate(URI.create(p.asOWLObjectProperty().getURI().toString()), 2);
+                RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+                DAGNode node = dag.getRoleNode(propDesc);
 
                 if (node == null) {
                     continue;
@@ -112,12 +126,15 @@ public class CSVDumper {
 
                 OWLIndividual ind = clsAxiom.getIndividual();
                 OWLDescription cls = clsAxiom.getDescription();
-                DAGNode clsNode = dag.getClassNode(cls.asOWLClass().getURI().toString());
+
+                Predicate clsPred = predicateFactory.getPredicate(URI.create(cls.asOWLClass().getURI().toString()), 1);
+                ConceptDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+                DAGNode clsNode = dag.getClassNode(clsDesc);
 
                 if (clsNode == null) {
                     continue;
                 }
-                int idx = dag.getClassNode(cls.asOWLClass().getURI().toString()).getIndex();
+                int idx = clsNode.getIndex();
 
                 dumpClass(ind.getURI().toString(), idx);
                 clsCount++;
