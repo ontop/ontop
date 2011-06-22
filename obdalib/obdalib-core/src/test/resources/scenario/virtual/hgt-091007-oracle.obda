@@ -163,7 +163,7 @@
         </mapping>
         <mapping id="strict-GeneClusterConstainsGene">
             <CQ string="GeneClusterContainsGene(stricthgtcluster($idorganisme,$fstart,$fend),getGene($gene))"/>
-            <SQLQuery string="SELECT &#xa;  hgtcluster.idorganisme as idorganisme,&#xa;  hgtcluster.start_gene as fstart,&#xa;  hgtcluster.end_gene as fend,&#xa;  genemeta.id as gene&#xa;FROM hgtdb.hgtcluster, hgtdb.genemeta WHERE&#xa;  hgtcluster.idorganisme = genemeta.idorganisme and&#xa;  genemeta.position >= hgtcluster.start_gene and&#xa;  genemeta.position &lt;= hgtcluster.end_gene and&#xa;  hgtcluster.cluster_length > 1;"/>
+            <SQLQuery string="SELECT &#xa;  hgtcluster.idorganisme as idorganisme,&#xa;  hgtcluster.start_gene as fstart,&#xa;  hgtcluster.end_gene as fend,&#xa;  genemeta.id as gene&#xa;FROM hgtdb.hgtcluster, hgtdb.genemeta WHERE&#xa;  hgtcluster.idorganisme = genemeta.idorganisme and&#xa;  genemeta.position >= hgtcluster.start_gene and&#xa;  genemeta.position &lt;= hgtcluster.end_gene and&#xa;  hgtcluster.cluster_length > 1"/>
         </mapping>
     </mappings>
     <dataSource URI="HGT" databaseDriver="oracle.jdbc.driver.OracleDriver"
