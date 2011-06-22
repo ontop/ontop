@@ -14,6 +14,10 @@ public class SemanticIndexRange {
     public SemanticIndexRange() {
     }
 
+    public SemanticIndexRange(SemanticIndexRange range) {
+        intervals = new LinkedList<Interval>(range.getIntervals());
+    }
+
     public SemanticIndexRange(int start, int end) {
         intervals.add(new Interval(start, end));
     }
@@ -31,7 +35,7 @@ public class SemanticIndexRange {
             return this;
 
         for (Interval it : other.intervals) {
-            intervals.add(it);
+            this.intervals.add(it);
         }
         merge();
         return this;
@@ -90,7 +94,7 @@ public class SemanticIndexRange {
      */
     class Interval implements Comparable<Interval> {
 
-        private int start, end;
+        private final int start, end;
 
         public Interval(int start, int end) {
             this.start = start;

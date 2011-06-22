@@ -53,11 +53,8 @@ public class SemanticIndexMappingGenerator {
             equiNodes.add(node);
             equiNodes.addAll(node.getEquivalents());
 
-            AtomicConceptDescription nodeDescription = (AtomicConceptDescription) node.getDescription();
-
-//            String uri = nodeDescription.getPredicate().getName().toString();
             String tablename = ABoxSerializer.class_table;
-            String projection = " URI as X ";
+            String projection = "URI as X";
             SemanticIndexRange range = node.getRange();
 
             for (DAGNode equiNode : equiNodes) {
@@ -79,26 +76,20 @@ public class SemanticIndexMappingGenerator {
             for (DAGNode descendant : node.descendans) {
 
                 if (descendant.getDescription() instanceof ExistentialConceptDescription) {
-                    String projection_inverse;
                     SemanticIndexRange descRange;
-                    SemanticIndexRange descRangeInv;
 
                     Predicate p = ((ExistentialConceptDescription) descendant.getDescription()).getPredicate();
                     boolean isInverse = ((ExistentialConceptDescription) descendant.getDescription()).isInverse();
 
                     RoleDescription role = descFactory.getRoleDescription(p, false);
-                    RoleDescription roleInv = descFactory.getRoleDescription(p, true);
 
                     if (isInverse) {
-                        projection = " URI2 as X ";
-                        projection_inverse = " URI1 as X ";
+                        projection = "URI2 as X";
                     } else {
-                        projection = " URI1 as X ";
-                        projection_inverse = " URI2 as X ";
+                        projection = "URI1 as X";
                     }
 
                     descRange = dag.getRoleNode(role).getRange();
-                    descRangeInv = dag.getRoleNode(roleInv).getRange();
 
                     for (DAGNode equiNode : equiNodes) {
                         if (!(equiNode.getDescription() instanceof AtomicConceptDescription) ||
@@ -108,12 +99,11 @@ public class SemanticIndexMappingGenerator {
                         AtomicConceptDescription equiDesc = (AtomicConceptDescription) equiNode.getDescription();
                         String equiUri = equiDesc.getPredicate().getName().toString();
 
-//                        rv.add(get_unary_mapping(equiUri, projection, ABoxSerializer.role_table, descRange));
-//                        rv.add(get_unary_mapping(equiUri, projection_inverse, ABoxSerializer.role_table, descRangeInv));
-
-                        mappings.add(new UnaryMappingKey(descRange, projection, ABoxSerializer.role_table, equiUri));
-                        mappings.add(new UnaryMappingKey(descRangeInv, projection_inverse, ABoxSerializer.role_table, equiUri));
-
+                        if (isInverse) {
+                            mappings.add(new UnaryMappingKey(descRange, projection, ABoxSerializer.role_table, equiUri));
+                        } else {
+                            mappings.add(new UnaryMappingKey(descRange, projection, ABoxSerializer.role_table, equiUri));
+                        }
                     }
 
                 }
@@ -140,7 +130,7 @@ public class SemanticIndexMappingGenerator {
 //                        node.getRange()));
                 mappings.add(new BinaryMappingKey(
                         node.getRange(),
-                        " URI1 as X, URI2 as Y ",
+                        "URI1 as X, URI2 as Y",
                         ABoxSerializer.role_table,
                         equiNodeDesc.getPredicate().getName().toString()
                 ));
@@ -167,7 +157,7 @@ public class SemanticIndexMappingGenerator {
 //                            child.getRange()));
                     mappings.add(new BinaryMappingKey(
                             child.getRange(),
-                            " URI1 AS Y, URI2 AS X ",
+                            "URI1 AS Y, URI2 AS X",
                             ABoxSerializer.role_table,
                             equiNodeDesc.getPredicate().getName().toString()
                     ));
@@ -185,7 +175,13 @@ public class SemanticIndexMappingGenerator {
         for (SemanticIndexRange.Interval it : range.getIntervals()) {
             int st = it.getStart();
             int end = it.getEnd();
-            where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) OR ", st, end));
+            String interval;
+            if (st == end) {
+                interval = String.format("(IDX = %d) OR ", st);
+            } else {
+                interval = String.format("((IDX >= %d) AND ( IDX <= %d)) OR ", st, end);
+            }
+            where_clause.append(interval);
         }
         if (where_clause.length() != 0) {
             // remove the last OR
@@ -214,7 +210,13 @@ public class SemanticIndexMappingGenerator {
         for (SemanticIndexRange.Interval it : range.getIntervals()) {
             int st = it.getStart();
             int end = it.getEnd();
-            where_clause.append(String.format(" (IDX >= %d) AND ( IDX <= %d) OR ", st, end));
+            String interval;
+            if (st == end) {
+                interval = String.format("(IDX = %d) OR ", st);
+            } else {
+                interval = String.format("((IDX >= %d) AND ( IDX <= %d)) OR ", st, end);
+            }
+            where_clause.append(interval);
         }
         if (where_clause.length() != 0) {
             // remove the last AND
@@ -241,35 +243,35 @@ public class SemanticIndexMappingGenerator {
 
         List<OBDAMappingAxiom> rv = new ArrayList<OBDAMappingAxiom>(128);
         Collections.sort(mappings);
-        for (int i = 0; i < mappings.size() - 1; ++i) {
 
-            MappingKey map1 = mappings.get(i);
-            MappingKey map2 = mappings.get(i + 1);
+        MappingKey cur = mappings.get(0);
+        int i = 0;
+        while (i < mappings.size()) {
 
-            if (map1.uri.startsWith("ER.A-AUX")) {
-                continue;
-            }
+            SemanticIndexRange curRange = new SemanticIndexRange(cur.range);
+            MappingKey next = mappings.get(i);
+            while (cur.uri.equals(next.uri) &&
+                    cur.projection.equals(next.projection)) {
 
-            if (map1.uri.equals(map2.uri) && map1.projection.equals(map2.projection)) {
-                map2.range.addRange(map1.range);
-            } else {
+                if (!mappings.get(i).uri.startsWith("ER.A-AUX")) {
+                    curRange.addRange(next.range);
+                }
+                ++i;
 
-                if (map1 instanceof BinaryMappingKey) {
-                    rv.add(get_binary_mapping(map1.uri, map1.projection, map1.table, map1.range));
-
-                } else if (map1 instanceof UnaryMappingKey) {
-                    rv.add(get_unary_mapping(map1.uri, map1.projection, map1.table, map1.range));
+                if (i < mappings.size()) {
+                    next = mappings.get(i);
+                } else {
+                    break;
                 }
             }
+            if (cur instanceof UnaryMappingKey) {
+                rv.add(get_unary_mapping(cur.uri, cur.projection, cur.table, curRange));
+            } else if (cur instanceof BinaryMappingKey) {
+                rv.add(get_binary_mapping(cur.uri, cur.projection, cur.table, curRange));
+            }
+            cur = next;
         }
 
-        MappingKey lastKey = mappings.get(mappings.size() - 1);
-        if (lastKey instanceof BinaryMappingKey) {
-            rv.add(get_binary_mapping(lastKey.uri, lastKey.projection, lastKey.table, lastKey.range));
-
-        } else if (lastKey instanceof UnaryMappingKey) {
-            rv.add(get_unary_mapping(lastKey.uri, lastKey.projection, lastKey.table, lastKey.range));
-        }
         if (GraphGenerator.debugInfoDump) {
             GraphGenerator.dumpMappings(mappings);
         }
