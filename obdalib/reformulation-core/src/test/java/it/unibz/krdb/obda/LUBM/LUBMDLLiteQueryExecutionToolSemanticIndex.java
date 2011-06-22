@@ -84,6 +84,11 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
                 long end = System.currentTimeMillis();
                 log.info("Total time for rewriting: {}", end - start);
 
+                start = System.currentTimeMillis();
+                String unfolding = st.getUnfolding(sparqlquery, false);
+                end = System.currentTimeMillis();
+                log.info("Total time for unfolding: {}", end - start);
+
 
             }
 
