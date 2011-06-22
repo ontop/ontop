@@ -40,8 +40,8 @@ public class CSVLoader {
 
     public static final String driver = "org.postgresql.Driver";
     public static final String url = "jdbc:postgresql://localhost/test:";
-    public static final String username = "test";
-    public static final String password = "test";
+    public static final String username = "obda";
+    public static final String password = "obda09";
     public Connection connection;
 
     private String dataDir;
