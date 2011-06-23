@@ -14,8 +14,14 @@ public class SQL99ParserTest extends TestCase
   final static Logger log = LoggerFactory.getLogger(SQL99ParserTest.class);
 
   @Test
-  public void test_1_1() {
+  public void test_1_1_1() {
     final boolean result = parse("SELECT * FROM student");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_1_1_2() {
+    final boolean result = parse("SELECT student.* FROM student");
     assertTrue(result);
   }
 
@@ -44,7 +50,13 @@ public class SQL99ParserTest extends TestCase
   }
 
   @Test
-  public void test_1_6() {
+  public void test_1_6_1() {
+    final boolean result = parse("SELECT undergraduate.* FROM student as undergraduate");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_1_6_2() {
     final boolean result = parse("SELECT undergraduate.id FROM student as undergraduate");
     assertTrue(result);
   }
@@ -80,8 +92,14 @@ public class SQL99ParserTest extends TestCase
   }
 
   @Test
-  public void test_2_2() {
+  public void test_2_2_1() {
     final boolean result = parse("SELECT id, name FROM student WHERE id=1 AND name=\"John\"");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_2_2_2() {
+    final boolean result = parse("SELECT id, name FROM student WHERE id=1 AND name='John'");
     assertTrue(result);
   }
 
@@ -97,8 +115,7 @@ public class SQL99ParserTest extends TestCase
 
   @Test
   public void test_2_4() {
-    final boolean result = parse("SELECT undergraduate.id, undergraduate.name " +
-    		"FROM student as undergraduate WHERE undergraduate.name<>\"John\"");
+    final boolean result = parse("SELECT graduate.id, graduate.name FROM student as graduate WHERE graduate.name<>\"John\"");
     assertTrue(result);
   }
 
@@ -141,110 +158,146 @@ public class SQL99ParserTest extends TestCase
   }
 
   @Test
-  public void test_stockexchange_1() {
-    final boolean result = parse("select id, street, number, city, state, country from address");
+  public void test_2_11() {
+    final boolean result = parse("SELECT id, name FROM student WHERE class IN (7, 8, 9)");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_2() {
-    final boolean result = parse("select id, name, lastname, dateofbirth, ssn from broker");
+  public void test_2_12() {
+    final boolean result = parse("SELECT id, name, grade FROM student WHERE name IN ('John', 'Jack', 'Clara')");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_3() {
-    final boolean result = parse("select id, addressid from broker");
+  public void test_3_1() {
+    final boolean result = parse("SELECT MAX(birth_year) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_4() {
-    final boolean result = parse("select id, name, lastname, dateofbirth, ssn from client");
+  public void test_3_2() {
+    final boolean result = parse("SELECT MIN(birth_year) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_5() {
-    final boolean result = parse("select id, name, lastname, addressid from client");
+  public void test_3_3() {
+    final boolean result = parse("SELECT AVG(birth_year) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_6() {
-    final boolean result = parse("select id, name, marketshares, networth from company");
+  public void test_3_4() {
+    final boolean result = parse("SELECT SUM(total_attendance) FROM class_attendance");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_7() {
-    final boolean result = parse("select id, addressid from company");
+  public void test_3_5() {
+    final boolean result = parse("SELECT COUNT(*) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_8() {
-    final boolean result = parse("select id, numberofshares, sharetype from stockinformation");
+  public void test_3_6() {
+    final boolean result = parse("SELECT COUNT(id) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_9() {
-    final boolean result = parse("select distinct date from stockbooklist");
+  public void test_3_7() {
+    final boolean result = parse("SELECT EVERY(id) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_10() {
-    final boolean result = parse("select brokerid, clientid from brokerworksfor where clientid IS NOT NULL");
+  public void test_3_8() {
+    final boolean result = parse("SELECT ANY(id) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_11() {
-    final boolean result = parse("select brokerid, companyid from brokerworksfor where companyid IS NOT NULL");
+  public void test_3_9() {
+    final boolean result = parse("SELECT SOME(id) FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_12() {
-    final boolean result = parse("select id, date from transaction");
+  public void test_4_1() {
+    final boolean result = parse("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_13() {
-    final boolean result = parse("select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL");
+  public void test_4_2() {
+    final boolean result = parse("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_14() {
-    final boolean result = parse("select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL");
+  public void test_5_1() {
+    final boolean result = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 JOIN grade t2 ON t1.id=t2.st_id");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_15() {
-    final boolean result = parse("select id, companyid from stockinformation");
+  public void test_5_2() {
+    final boolean result = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 INNER JOIN grade t2 ON t1.id=t2.st_id");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_16() {
-    final boolean result = parse("select date, stockid from stockbooklist");
+  public void test_5_3() {
+    final boolean result = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 LEFT JOIN grade t2 ON t1.id=t2.st_id");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_17() {
-    final boolean result = parse("select clientid from broker,client,brokerworksfor where client.id = broker.id and brokerid=broker.id and client.id=clientid");
+  public void test_5_4() {
+    final boolean result = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 RIGHT JOIN grade t2 ON t1.id=t2.st_id");
     assertTrue(result);
   }
 
   @Test
-  public void test_stockexchange_18() {
-    final boolean result = parse("SELECT id FROM transaction WHERE type=true");
+  public void test_5_5() {
+    final boolean result = parse("SELECT id, name, class_id, grade FROM student t1 FULL JOIN grade t2 ON t1.id=t2.st_id");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_5_6() {
+    final boolean result = parse("SELECT id, name, class_id, grade FROM student t1 LEFT OUTER JOIN grade t2 ON t1.id=t2.st_id");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_5_7() {
+    final boolean result = parse("SELECT id, name, class_id, grade FROM student t1 RIGHT OUTER JOIN grade t2 ON t1.id=t2.st_id");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_5_8() {
+    final boolean result = parse("SELECT id, name, class_id, grade FROM student t1 FULL OUTER JOIN grade t2 ON t1.id=t2.st_id");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_6_1() {
+    final boolean result = parse("SELECT t1.id, t1.name, t2.grade FROM (SELECT id, name FROM student) t1, (SELECT st_id, grade FROM grade) t2 WHERE t1.id=t2.sid");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_6_2() {
+    final boolean result = parse("SELECT * FROM (SELECT id, name, class_name FROM student JOIN class ON student.id=class.st_id) t1");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_6_3() {
+    final boolean result = parse("SELECT t1.* FROM (SELECT id, name, class_name FROM student JOIN class ON student.id=class.st_id) t1 WHERE t1.class_name='Economy'");
     assertTrue(result);
   }
 
