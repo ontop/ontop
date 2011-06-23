@@ -1,23 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.MappingController;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxSerializer;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxDumpException;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxFromDBLoader;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DirectMappingGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.MappingValidator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.*;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -38,28 +25,20 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DirectMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
+
 /**
  * The implementation of the factory for creating reformulation's platform reasoner
- *
  */
 
 public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
@@ -143,7 +122,6 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
 
 
-
         QueryRewriter rewriter;
         TechniqueWrapper techniqueWrapper;
         UnfoldingMechanism unfMech = null;
@@ -151,6 +129,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         DataSource ds;
         EvaluationEngine eval_engine;
         DAG dag = null;
+        DAG pureIsa = null;
 
         try {
             Set<OWLOntology> ontologies = manager.getOntologies();
@@ -171,7 +150,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 ontology.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
             }
 
-            if (useInMemoryDB && ("material".equals(unfoldingMode)||createMappings)) {
+            if (useInMemoryDB && ("material".equals(unfoldingMode) || createMappings)) {
                 log.debug("Using in an memory database");
                 String driver = "org.h2.Driver";
                 String url = "jdbc:h2:mem:aboxdump";
@@ -195,9 +174,11 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 if (dbType.equals("semantic")) {
                     //perform semantic import
                     dag = DAGConstructor.getISADAG(ontology);
-                    dag.index();
+                    pureIsa = DAGConstructor.filterPureISA(dag);
+                    pureIsa.index();
+//                    dag.index();
                     ABoxSerializer.recreate_tables(connection);
-                    ABoxSerializer.ABOX2DB(ontologies, dag, connection);
+                    ABoxSerializer.ABOX2DB(ontologies, dag, pureIsa, connection);
                 } else if (dbType.equals("direct")) {
                     //perform direct import
                     String[] types = {"TABLE"};
@@ -268,10 +249,10 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 
             if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
                 if (dbType.equals("semantic")) {
-                  for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(dag)) {
-                    log.debug(map.toString());
-                    apic.getMappingController().insertMapping(ds.getSourceID(), map);
-                  }
+                    for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(dag, pureIsa)) {
+                        log.debug(map.toString());
+                        apic.getMappingController().insertMapping(ds.getSourceID(), map);
+                    }
                 }
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
 

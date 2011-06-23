@@ -112,9 +112,10 @@ public class DAG {
         }
     }
 
-    public DAG(Map<Description, DAGNode> classes, Map<Description, DAGNode> roles) {
+    public DAG(Map<Description, DAGNode> classes, Map<Description, DAGNode> roles, Map<Description, Description> equiMap) {
         this.classes = classes;
         this.roles = roles;
+        this.equi_mappings = equiMap;
     }
 
 

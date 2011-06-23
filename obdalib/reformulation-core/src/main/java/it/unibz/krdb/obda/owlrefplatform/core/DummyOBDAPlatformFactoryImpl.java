@@ -119,7 +119,8 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
             }
 
             DAG isa = DAGConstructor.getISADAG(ontology);
-            isa.index();
+            DAG pureIsa = DAGConstructor.filterPureISA(isa);
+            pureIsa.index();
             if (GraphGenerator.debugInfoDump) {
                 GraphGenerator.dumpISA(isa);
             }
@@ -136,7 +137,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 
             EvaluationEngine eval_engine = eval_engine = new JDBCEngine(connection);
             List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
-            for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(isa)) {
+            for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(isa, pureIsa)) {
                 mappings.add(map);
                 apic.getMappingController().insertMapping(ds.getSourceID(), map);
             }

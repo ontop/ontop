@@ -5,10 +5,7 @@ import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +34,12 @@ public class SemanticIndexMappingGenerator {
      *
      * @throws DuplicateMappingException error creating mappings
      */
-    public static List<OBDAMappingAxiom> build(DAG dag) throws DuplicateMappingException {
+    public static List<OBDAMappingAxiom> build(DAG dag, DAG pureIsa) throws DuplicateMappingException {
         log.debug("Generating mappings for DAG {}", dag);
 
         List<MappingKey> mappings = new ArrayList<MappingKey>();
 
-        for (DAGNode node : dag.getClasses()) {
+        for (DAGNode node : pureIsa.getClasses()) {
 
             if (!(node.getDescription() instanceof AtomicConceptDescription) ||
                     node.getDescription().equals(DAG.thingConcept)) {
@@ -69,8 +66,9 @@ public class SemanticIndexMappingGenerator {
             }
 
 
-            // check if has child exists(R)
-            for (DAGNode descendant : node.descendans) {
+            // check if has child exists(R) in the general ISA DAG
+            DAGNode genNode = dag.getClassNode((ConceptDescription) node.getDescription());
+            for (DAGNode descendant : genNode.descendans) {
 
                 if (descendant.getDescription() instanceof ExistentialConceptDescription) {
                     SemanticIndexRange descRange;
@@ -86,7 +84,7 @@ public class SemanticIndexMappingGenerator {
                         projection = "URI1 as X";
                     }
 
-                    descRange = dag.getRoleNode(role).getRange();
+                    descRange = pureIsa.getRoleNode(role).getRange();
 
                     for (DAGNode equiNode : equiNodes) {
                         if (!(equiNode.getDescription() instanceof AtomicConceptDescription) ||
@@ -105,7 +103,7 @@ public class SemanticIndexMappingGenerator {
                 }
             }
         }
-        for (DAGNode node : dag.getRoles()) {
+        for (DAGNode node : pureIsa.getRoles()) {
 
             List<DAGNode> equiNodes = new ArrayList<DAGNode>(node.getEquivalents().size() + 1);
             equiNodes.add(node);

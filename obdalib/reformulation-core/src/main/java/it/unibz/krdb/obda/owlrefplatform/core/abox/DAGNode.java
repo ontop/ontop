@@ -22,7 +22,7 @@ public class DAGNode {
 
     public Set<DAGNode> descendans = new HashSet<DAGNode>();
 
-    public final LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
+    public LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 
 
     public DAGNode(Description description) {

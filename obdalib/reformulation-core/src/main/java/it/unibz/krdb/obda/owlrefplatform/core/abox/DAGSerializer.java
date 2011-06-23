@@ -9,18 +9,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Store DAG in DB
@@ -198,7 +193,7 @@ public final class DAGSerializer {
             // FIXME: add proper error handling
             e.printStackTrace();
         }
-        return new DAG(res_classes, res_roles);
+        return new DAG(res_classes, res_roles, new HashMap<Description, Description>());
     }
 }
 

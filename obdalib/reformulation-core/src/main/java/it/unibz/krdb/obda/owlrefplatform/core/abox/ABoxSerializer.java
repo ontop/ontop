@@ -65,9 +65,10 @@ public class ABoxSerializer {
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
 
-    public static void ABOX2DB(Set<OWLOntology> ontologies, DAG dag, Connection conn) throws SQLException {
+    public static void ABOX2DB(Set<OWLOntology> ontologies, DAG dag, DAG pureIsa, Connection conn) throws SQLException {
         PreparedStatement cls_stm = conn.prepareStatement(class_insert);
         PreparedStatement role_stm = conn.prepareStatement(role_insert);
+//        DAG pureIsa  = DAGConstructor.filterPureISA(dag);
 
         for (OWLOntology onto : ontologies) {
             onto.getIndividualAxioms();
@@ -81,7 +82,7 @@ public class ABoxSerializer {
 
                     Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
                     RoleDescription propDesc = descFactory.getRoleDescription(propPred);
-                    DAGNode node = dag.getRoleNode(propDesc);
+                    DAGNode node = pureIsa.getRoleNode(propDesc);
                     int idx = node.getIndex();
 
                     role_stm.setString(1, uri);
@@ -98,7 +99,7 @@ public class ABoxSerializer {
 
                     Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
                     RoleDescription propDesc = descFactory.getRoleDescription(propPred);
-                    DAGNode node = dag.getRoleNode(propDesc);
+                    DAGNode node = pureIsa.getRoleNode(propDesc);
                     int idx = node.getIndex();
 
                     role_stm.setString(1, uri1);
@@ -115,7 +116,7 @@ public class ABoxSerializer {
 
                         Predicate clsPred = predicateFactory.getPredicate(URI.create(cls), 1);
                         ConceptDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
-                        DAGNode node = dag.getClassNode(clsDesc);
+                        DAGNode node = pureIsa.getClassNode(clsDesc);
                         int idx = node.getIndex();
 
                         cls_stm.setString(1, uri);
