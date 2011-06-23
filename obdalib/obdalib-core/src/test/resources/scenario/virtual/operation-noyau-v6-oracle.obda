@@ -11,17 +11,17 @@
   <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="CORIOLIS-CRAQ">
     <mapping id="Mandat">
       <CQ string="Mandat(mandat($payeid)),aPourId(mandat($payeid),$payeid),Montant(montantMandat($montantid)),aPourMontantDecimal(montantMandat($montantid),$montantdecimal),aPourMontant(mandat($payeid),montantMandat($montantid)),aPourType(montantMandat($montantid),type($TypeMontant)),aPourMode(montantMandat($montantid),mode($ModeMontant)),UniteTemporelle(utMandat($montantid)),aPourUniteTemporelle(montantMandat($montantid),utMandat($montantid)),aPourDepart(utMandat($montantid),$anneedepart),aPourArrivee(utMandat($montantid),$anneeArrivee),aPourDuree(utMandat($montantid),$Duree)"/>
-      <SQLQuery string="select distinct ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ) payeid,&#xd;&#xa;( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG )||'-TypeDepense-ModeTotal' montantid, &#xd;&#xa;C.CNDGMONTTC  montantdecimal,&#xd;&#xa;'TypeDepense' typemontant, 'ModeTotal' modemontant, C.CNDGDATREC datemontant&#xd;&#xa;from cndg C "/>
+      <SQLQuery string="select distinct ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ) payeid, ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ||'-TypeDepense-ModeTotal') montantid,  C.CNDGMONTTC  montantdecimal, &quot;TypeDepense&quot; typemontant, &quot;ModeTotal&quot; modemontant, C.CNDGDATREC datemontant from cndg C "/>
     </mapping>
     <mapping id="Mandat solde OperationPhysique">
       <CQ string="solde(mandat($payeid),ope($opeid))"/>
-      <SQLQuery string="select distinct ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ) payeid, O.OPEGCODIF opeid&#xd;&#xa;from cndg C, OPEG O &#xd;&#xa;where C.COLLCOD=O.COLLCOD and C.OPEGANN=O.OPEGANN and C.OPEGCOD=O.OPEGCOD and C.OPEGNUM=O.OPEGNUM"/>
+      <SQLQuery string="select distinct ( C.BUDGEXE || '_-_' || C.CNEGNUM || '_-_' || C.CNDGLIG ) payeid, O.OPEGCODIF opeid from cndg C, OPEG O  where C.COLLCOD=O.COLLCOD and C.OPEGANN=O.OPEGANN and C.OPEGCOD=O.OPEGCOD and C.OPEGNUM=O.OPEGNUM"/>
     </mapping>
   </mappings>
   <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="PROGOS-CRAQ">
     <mapping id="OperationPhysique">
       <CQ string="OperationPhysique(ope($opeid)),aPourID(ope($opeid),$opeid),aPourLibelle(ope($opeid),$libelle),aPourMontant(ope($opeid),montantOpe($montantid)),Montant(montantOpe($montantid)),aPourMontantDecimal(montantOpe($montantid),$montantdecimal),aPourMontant(ope($opeid),montantOpe($montantid)),aPourType(montantOpe($montantid),type($TypeMontant)),aPourMode(montantOpe($montantid),mode($ModeMontant)),UniteTemporelle(utOpe($montantid)),aPourUniteTemporelle(montantOpe($montantid),utOpe($montantid)),aPourDepart(utOpe($montantid),$anneedepart),aPourArrivee(utOpe($montantid),$anneeArrivee),aPourDuree(utOpe($montantid),$Duree)"/>
-      <SQLQuery string="select iddoss opeid, LBDOSS libelle, iddoss ||'-Typedepense-ModePrevision' montantid, mtprevttc  montantdecimal, 'Typedepense' typemontant, 'ModePrevision' ModeMontant, ANCREAT anneedepart, '' anneearrive, '0' duree  from domope "/>
+      <SQLQuery string="select iddoss opeid, LBDOSS libelle, (iddoss ||'-Typedepense-ModePrevision') montantid, mtprevttc  montantdecimal, &quot;Typedepense&quot; typemontant, &quot;ModePrevision&quot; ModeMontant, ANCREAT anneedepart, &quot;&quot; anneearrive, &quot;0&quot; duree  from domope "/>
     </mapping>
   </mappings>
   <dataSource URI="PROGOS-CRAQ" databaseDriver="oracle.jdbc.driver.OracleDriver" databasePassword="CRAQ_SUV_T0" databaseURL="jdbc:oracle:thin:@craqenvt:1521:CRAQ" databaseUsername="CRAQ_SUV_T0" isAboxDump="" ontouri="http://www.mgdis.fr/ontologies/2011/4/Ontology1305807661637.owl#"/>
