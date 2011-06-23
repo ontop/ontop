@@ -82,6 +82,11 @@ public class SemanticIndexMappingGenerator {
 
                     RoleDescription role = descFactory.getRoleDescription(p, false);
 
+                    if (pureIsa.equi_mappings.containsKey(role)) {
+                        //  XXX: Very dirty hack, needs to be redone
+                        continue;
+                    }
+
                     if (isInverse) {
                         projection = "URI2 as X";
                     } else {
@@ -223,9 +228,7 @@ public class SemanticIndexMappingGenerator {
         int i = 0;
         while (i < mappings.size()) {
 
-            if (cur.uri.endsWith("hasAlumnus")) {
-                int qwe = 123;
-            }
+
             SemanticIndexRange curRange = new SemanticIndexRange(cur.range);
             MappingKey next = mappings.get(i);
             while (cur.uri.equals(next.uri) &&
