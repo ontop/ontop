@@ -2,8 +2,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
@@ -12,6 +15,9 @@ import java.net.URI;
 import java.util.*;
 
 public class DAGConstructor {
+
+    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
 
 
     public static DAG getISADAG(DLLiterOntology ontology) {
@@ -98,6 +104,16 @@ public class DAGConstructor {
                 continue;
             }
 
+            if (nodeDesc.isInverse()) {
+                RoleDescription posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
+                DAGNode newNode = rolles.get(posNode);
+                if (newNode == null) {
+                    newNode = new DAGNode(posNode);
+                    rolles.put(posNode, newNode);
+                }
+                continue;
+            }
+
             DAGNode newNode = rolles.get(nodeDesc);
 
             if (newNode == null) {
@@ -108,6 +124,15 @@ public class DAGConstructor {
             for (DAGNode child : node.getChildren()) {
                 RoleDescription childDesc = (RoleDescription) child.getDescription();
                 if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                    continue;
+                }
+                if (childDesc.isInverse()) {
+                    RoleDescription posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+                    DAGNode newChild = rolles.get(posChild);
+                    if (newChild == null) {
+                        newChild = new DAGNode(posChild);
+                        rolles.put(posChild, newChild);
+                    }
                     continue;
                 }
 
@@ -123,9 +148,31 @@ public class DAGConstructor {
                 }
             }
         }
-        DAG newDag = new DAG(classes, rolles, dag.equi_mappings);
+        Map<Description, Description> newEquivalentMappings = new HashMap<Description, Description>();
+        for (Description desc : dag.equi_mappings.keySet()) {
+            Description key = makePositive(desc);
+            Description val = makePositive(dag.equi_mappings.get(desc));
+            newEquivalentMappings.put(key, val);
+
+        }
+        DAG newDag = new DAG(classes, rolles, newEquivalentMappings);
 
         return newDag;
+    }
+
+    private static Description makePositive(Description desc) {
+
+        if (desc instanceof RoleDescription) {
+            RoleDescription roleKey = (RoleDescription) desc;
+            return descFactory.getRoleDescription(roleKey.getPredicate(), false);
+
+        } else if (desc instanceof ExistentialConceptDescription) {
+            ExistentialConceptDescription conceptKey = (ExistentialConceptDescription) desc;
+            return descFactory.getExistentialConceptDescription(conceptKey.getPredicate(), false);
+
+        } else {
+            return desc;
+        }
     }
 
 }

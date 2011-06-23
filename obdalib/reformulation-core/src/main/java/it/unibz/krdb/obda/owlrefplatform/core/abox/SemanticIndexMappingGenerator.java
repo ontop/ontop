@@ -107,11 +107,12 @@ public class SemanticIndexMappingGenerator {
                 }
             }
         }
-        for (DAGNode node : pureIsa.getRoles()) {
+        for (DAGNode node : dag.getRoles()) {
 
             List<DAGNode> equiNodes = new ArrayList<DAGNode>(node.getEquivalents().size() + 1);
             equiNodes.add(node);
             equiNodes.addAll(node.getEquivalents());
+            RoleDescription nodeDesc = (RoleDescription) node.getDescription();
 
             for (DAGNode equiNode : equiNodes) {
 
@@ -120,9 +121,14 @@ public class SemanticIndexMappingGenerator {
                 if (equiNodeDesc.isInverse()) {
                     continue;
                 }
+                if (equiNodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                    continue;
+                }
+
+                SemanticIndexRange range = pureIsa.getRoleNode(descFactory.getRoleDescription(nodeDesc.getPredicate(), false)).getRange();
 
                 mappings.add(new BinaryMappingKey(
-                        node.getRange(),
+                        range,
                         "URI1 as X, URI2 as Y",
                         ABoxSerializer.role_table,
                         equiNodeDesc.getPredicate().getName().toString()
@@ -132,19 +138,28 @@ public class SemanticIndexMappingGenerator {
             for (DAGNode child : node.getChildren()) {
                 RoleDescription childDesc = (RoleDescription) child.getDescription();
 
-                if (childDesc.isInverse()) {
+                if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
                     continue;
                 }
+
+                if (!childDesc.isInverse()) {
+                    continue;
+                }
+                RoleDescription posChildDesc = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+
+                SemanticIndexRange childRange = pureIsa.getRoleNode(posChildDesc).getRange();
 
                 for (DAGNode equiNode : equiNodes) {
 
                     RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
-                    if (!equiNodeDesc.isInverse()) {
+                    if (!equiNodeDesc.isInverse() && !childDesc.isInverse()) {
+                        continue;
+                    } else if (equiNodeDesc.isInverse() && childDesc.isInverse()) {
                         continue;
                     }
 
                     mappings.add(new BinaryMappingKey(
-                            child.getRange(),
+                            childRange,
                             "URI1 AS Y, URI2 AS X",
                             ABoxSerializer.role_table,
                             equiNodeDesc.getPredicate().getName().toString()
