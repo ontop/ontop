@@ -119,6 +119,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			CQIE mappingrule = getRule(mapping);
 			compilationOfM.appendRule(mappingrule);
 			log.debug("Rule generated: {}", mappingrule);
+			log.debug("SQL for this aux: {}", mapping.getSourceQuery().toString());
 
 			/* Collecting functional terms */
 			List<Term> headTerms = mappingrule.getHead().getTerms();
