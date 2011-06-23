@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 
 import java.net.URI;
 import java.util.*;
@@ -91,18 +92,30 @@ public class DAGConstructor {
         }
 
         for (DAGNode node : dag.getRoles()) {
-            DAGNode newNode = rolles.get(node.getDescription());
+            RoleDescription nodeDesc = (RoleDescription) node.getDescription();
+
+            if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                continue;
+            }
+
+            DAGNode newNode = rolles.get(nodeDesc);
+
             if (newNode == null) {
-                newNode = new DAGNode(node.getDescription());
+                newNode = new DAGNode(nodeDesc);
                 newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
-                rolles.put(node.getDescription(), newNode);
+                rolles.put(nodeDesc, newNode);
             }
             for (DAGNode child : node.getChildren()) {
-                DAGNode newChild = rolles.get(child.getDescription());
+                RoleDescription childDesc = (RoleDescription) child.getDescription();
+                if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                    continue;
+                }
+
+                DAGNode newChild = rolles.get(childDesc);
                 if (newChild == null) {
-                    newChild = new DAGNode(child.getDescription());
+                    newChild = new DAGNode(childDesc);
                     newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
-                    rolles.put(child.getDescription(), newChild);
+                    rolles.put(childDesc, newChild);
                 }
                 if (!newChild.getDescription().equals(newNode.getDescription())) {
                     newChild.getParents().add(newNode);

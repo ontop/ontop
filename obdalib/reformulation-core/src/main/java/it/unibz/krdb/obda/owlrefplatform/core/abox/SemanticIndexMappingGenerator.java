@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class SemanticIndexMappingGenerator {
      * @throws DuplicateMappingException error creating mappings
      */
     public static List<OBDAMappingAxiom> build(DAG dag, DAG pureIsa) throws DuplicateMappingException {
-        log.debug("Generating mappings for DAG {}", dag);
+        log.debug("Generating mappings for DAG {}", pureIsa);
 
         List<MappingKey> mappings = new ArrayList<MappingKey>();
 
@@ -74,6 +75,9 @@ public class SemanticIndexMappingGenerator {
                     SemanticIndexRange descRange;
 
                     Predicate p = ((ExistentialConceptDescription) descendant.getDescription()).getPredicate();
+                    if (p.getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                        continue;
+                    }
                     boolean isInverse = ((ExistentialConceptDescription) descendant.getDescription()).isInverse();
 
                     RoleDescription role = descFactory.getRoleDescription(p, false);
