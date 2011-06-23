@@ -91,11 +91,12 @@ public class SQL99ParserFileTest extends TestCase
     execute(model, new URI("PgmOpe"));
   }
 
-//  @Test
-//  public void testOperationNoyauV6_Oracle() throws URISyntaxException {
-//    OBDAModel model = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
-//    execute(model, new URI("PROGOS-CRAQ"));
-//  }
+  @Test
+  public void testOperationNoyauV6_Oracle() throws URISyntaxException {
+    OBDAModel model = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
+    execute(model, new URI("CORIOLIS-CRAQ"));
+    execute(model, new URI("PROGOS-CRAQ"));
+  }
 
   //------- Utility methods
 

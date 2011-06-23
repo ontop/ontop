@@ -26,14 +26,26 @@ public class SQL99ParserTest extends TestCase
   }
 
   @Test
-  public void test_1_2() {
+  public void test_1_2_1() {
     final boolean result = parse("SELECT id FROM student");
     assertTrue(result);
   }
 
   @Test
-  public void test_1_3() {
+  public void test_1_2_2() {
     final boolean result = parse("SELECT id, name FROM student");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_1_3_1() {
+    final boolean result = parse("SELECT DISTINCT name FROM student");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_1_3_2() {
+    final boolean result = parse("SELECT ALL name FROM student");
     assertTrue(result);
   }
 
@@ -298,6 +310,12 @@ public class SQL99ParserTest extends TestCase
   @Test
   public void test_6_3() {
     final boolean result = parse("SELECT t1.* FROM (SELECT id, name, class_name FROM student JOIN class ON student.id=class.st_id) t1 WHERE t1.class_name='Economy'");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_7_1() {
+    final boolean result = parse("SELECT ('ID-' || student.id) as sid FROM student");
     assertTrue(result);
   }
 
