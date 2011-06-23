@@ -122,7 +122,8 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
             DAG pureIsa = DAGConstructor.filterPureISA(isa);
             pureIsa.index();
             if (GraphGenerator.debugInfoDump) {
-                GraphGenerator.dumpISA(isa);
+                GraphGenerator.dumpISA(isa, "general");
+                GraphGenerator.dumpISA(pureIsa, "simple");
             }
 
             SemanticReduction reducer = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
