@@ -48,8 +48,22 @@ derived_column
   ;  
  
 value_expression
-  : reference_value_expression
+  : string_value_expression
+  | reference_value_expression
   | collection_value_expression
+  ;
+
+string_value_expression
+  : LPAREN concatenation RPAREN
+  ;
+  
+concatenation
+  : concatenation_value (concatenation_operator concatenation_value)+
+  ;
+
+concatenation_value
+  : column_reference
+  | value
   ;
 
 reference_value_expression
@@ -256,6 +270,10 @@ value
   | STRING_WITH_QUOTE
   ;
 
+concatenation_operator
+  : CONCATENATION
+  ;
+
 equals_operator
   : EQUALS
   ;
@@ -380,6 +398,7 @@ DOUBLE_SLASH:  '//';
 BACKSLASH:     '\\';
 TILDE:         '~';
 CARET:         '^';
+CONCATENATION: '||';
 
 fragment ALPHA: ('a'..'z'|'A'..'Z');
 
