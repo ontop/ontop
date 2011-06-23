@@ -65,6 +65,44 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
 
             // One time classification call.
             reasoner.classify();
+//
+//            // Now we are ready for querying
+//
+//            for (QueryControllerEntity entity : obdamodel.getQueryController().getElements()) {
+//                if (!(entity instanceof QueryControllerQuery)) {
+//                    continue;
+//                }
+//                QueryControllerQuery query = (QueryControllerQuery) entity;
+//                String sparqlquery = query.getQuery();
+//                String id = query.getID();
+//                log.info("##################  Rewriting query: {}", id);
+//
+//                Statement st = reasoner.getStatement();
+//
+//                long start = System.currentTimeMillis();
+//                String rewriting = st.getRewriting(sparqlquery);
+//                long end = System.currentTimeMillis();
+//                log.info("Total time for rewriting: {}", end - start);
+//
+//            }
+//            ioManager.loadOBDADataFromURI(new File(obdafileReduced).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
+//            for (QueryControllerEntity entity : obdamodel.getQueryController().getElements()) {
+//                if (!(entity instanceof QueryControllerQuery)) {
+//                    continue;
+//                }
+//                QueryControllerQuery query = (QueryControllerQuery) entity;
+//                String sparqlquery = query.getQuery();
+//                String id = query.getID();
+//                log.info("##################  Unfolding query: {}", id);
+//
+//                Statement st = reasoner.getStatement();
+//
+//                long start = System.currentTimeMillis();
+//                String rewriting = st.getUnfolding(sparqlquery);
+//                long end = System.currentTimeMillis();
+//                log.info("Total time for unfolding: {}", end - start);
+//
+//            }
 
             // Now we are ready for querying
 

@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -17,10 +17,10 @@ public class DAGNode {
     private SemanticIndexRange range = DAG.NULL_RANGE;
     private int index = DAG.NULL_INDEX;
 
-    private Set<DAGNode> parents = new HashSet<DAGNode>();
-    private Set<DAGNode> children = new HashSet<DAGNode>();
+    private Set<DAGNode> parents = new LinkedHashSet<DAGNode>();
+    private Set<DAGNode> children = new LinkedHashSet<DAGNode>();
 
-    public Set<DAGNode> descendans = new HashSet<DAGNode>();
+    public Set<DAGNode> descendans = new LinkedHashSet<DAGNode>();
 
     public LinkedList<DAGNode> equivalents = new LinkedList<DAGNode>();
 

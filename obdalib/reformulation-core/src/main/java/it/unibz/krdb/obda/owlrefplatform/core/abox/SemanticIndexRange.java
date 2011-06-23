@@ -128,8 +128,6 @@ public class SemanticIndexRange {
             return this.start - o.start;
         }
 
-        ;
-
         @Override
         public String toString() {
             return String.format("[%s:%s]", start, end);
@@ -143,6 +141,31 @@ public class SemanticIndexRange {
             return end;
         }
 
+    }
+
+    public boolean contained(SemanticIndexRange other) {
+        boolean[] otherContained = new boolean[other.intervals.size()];
+        for (int i = 0; i < otherContained.length; ++i) {
+            otherContained[i] = false;
+        }
+
+        for (Interval it1 : this.intervals) {
+
+            for (int i = 0; i < other.intervals.size(); ++i) {
+                Interval it2 = other.intervals.get(i);
+                if ((it1.start <= it2.start) && (it1.end >= it2.end)) {
+                    otherContained[i] = true;
+                }
+            }
+
+        }
+
+        for (boolean it : otherContained) {
+            if (!it) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

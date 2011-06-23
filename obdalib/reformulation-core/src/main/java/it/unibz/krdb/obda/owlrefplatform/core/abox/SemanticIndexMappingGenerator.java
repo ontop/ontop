@@ -27,7 +27,7 @@ public class SemanticIndexMappingGenerator {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
-    private static final boolean mergeUniions = false;
+    private static final boolean mergeUniions = true;
 
 
     /**
@@ -35,7 +35,7 @@ public class SemanticIndexMappingGenerator {
      *
      * @throws DuplicateMappingException error creating mappings
      */
-    public static List<OBDAMappingAxiom> build(DAG dag, DAG pureIsa) throws DuplicateMappingException {
+    public static List<MappingKey> build(DAG dag, DAG pureIsa) throws DuplicateMappingException {
         log.debug("Generating mappings for DAG {}", pureIsa);
 
         List<MappingKey> mappings = new ArrayList<MappingKey>();
@@ -109,27 +109,33 @@ public class SemanticIndexMappingGenerator {
         }
         for (DAGNode node : dag.getRoles()) {
 
-            List<DAGNode> equiNodes = new ArrayList<DAGNode>(node.getEquivalents().size() + 1);
-            equiNodes.add(node);
-            equiNodes.addAll(node.getEquivalents());
             RoleDescription nodeDesc = (RoleDescription) node.getDescription();
+            if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                continue;
+            }
+            if (nodeDesc.isInverse()) {
+                continue;
+            }
 
-            for (DAGNode equiNode : equiNodes) {
+            SemanticIndexRange range = pureIsa.getRoleNode(descFactory.getRoleDescription(nodeDesc.getPredicate(), false)).getRange();
+            String projection = "URI1 as X, URI2 as Y";
+            mappings.add(new BinaryMappingKey(
+                    range,
+                    projection,
+                    ABoxSerializer.role_table,
+                    nodeDesc.getPredicate().getName().toString()
+            ));
+
+            for (DAGNode equiNode : node.getEquivalents()) {
 
                 RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
 
                 if (equiNodeDesc.isInverse()) {
-                    continue;
+                    projection = "URI1 as Y, URI2 as X";
                 }
-                if (equiNodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
-                    continue;
-                }
-
-                SemanticIndexRange range = pureIsa.getRoleNode(descFactory.getRoleDescription(nodeDesc.getPredicate(), false)).getRange();
-
                 mappings.add(new BinaryMappingKey(
                         range,
-                        "URI1 as X, URI2 as Y",
+                        projection,
                         ABoxSerializer.role_table,
                         equiNodeDesc.getPredicate().getName().toString()
                 ));
@@ -149,18 +155,24 @@ public class SemanticIndexMappingGenerator {
 
                 SemanticIndexRange childRange = pureIsa.getRoleNode(posChildDesc).getRange();
 
-                for (DAGNode equiNode : equiNodes) {
+                mappings.add(new BinaryMappingKey(
+                        childRange,
+                        "URI1 as Y, URI2 as X",
+                        ABoxSerializer.role_table,
+                        nodeDesc.getPredicate().getName().toString()
+                ));
+
+                for (DAGNode equiNode : node.getEquivalents()) {
 
                     RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
-                    if (!equiNodeDesc.isInverse() && !childDesc.isInverse()) {
-                        continue;
-                    } else if (equiNodeDesc.isInverse() && childDesc.isInverse()) {
-                        continue;
+                    String equiProj = "URI1 as Y, URI2 as X";
+                    if (equiNodeDesc.isInverse()) {
+                        equiProj = "URI1 as X, URI2 as Y";
                     }
 
                     mappings.add(new BinaryMappingKey(
                             childRange,
-                            "URI1 AS Y, URI2 AS X",
+                            equiProj,
                             ABoxSerializer.role_table,
                             equiNodeDesc.getPredicate().getName().toString()
                     ));
@@ -168,7 +180,8 @@ public class SemanticIndexMappingGenerator {
             }
         }
 
-        return filterRedundancy(mappings);
+        return mappings;
+//        return compile(mappings);
     }
 
 
@@ -200,7 +213,7 @@ public class SemanticIndexMappingGenerator {
         return sql.toString();
     }
 
-    private static List<OBDAMappingAxiom> filterRedundancy(List<MappingKey> mappings) throws DuplicateMappingException {
+    public static List<OBDAMappingAxiom> compile(List<MappingKey> mappings) throws DuplicateMappingException {
 
         List<OBDAMappingAxiom> rv = new ArrayList<OBDAMappingAxiom>(128);
         List<MappingKey> merged = new ArrayList<MappingKey>(128);
@@ -210,6 +223,9 @@ public class SemanticIndexMappingGenerator {
         int i = 0;
         while (i < mappings.size()) {
 
+            if (cur.uri.endsWith("hasAlumnus")) {
+                int qwe = 123;
+            }
             SemanticIndexRange curRange = new SemanticIndexRange(cur.range);
             MappingKey next = mappings.get(i);
             while (cur.uri.equals(next.uri) &&
@@ -240,11 +256,25 @@ public class SemanticIndexMappingGenerator {
                 }
             }
             cur = next;
+            ++i;
         }
-
+        if (cur instanceof UnaryMappingKey) {
+            if (mergeUniions) {
+                merged.add(new UnaryMappingKey(cur.range, cur.projection, cur.table, cur.uri));
+            } else {
+                rv.add(makeUnaryMapp(cur.uri, genQuerySQL(new UnaryMappingKey(cur.range, cur.projection, cur.table, cur.uri))));
+            }
+        } else if (cur instanceof BinaryMappingKey) {
+            if (mergeUniions) {
+                merged.add(new BinaryMappingKey(cur.range, cur.projection, cur.table, cur.uri));
+            } else {
+                rv.add(makeBinaryMapp(cur.uri, genQuerySQL(new BinaryMappingKey(cur.range, cur.projection, cur.table, cur.uri))));
+            }
+        }
         if (GraphGenerator.debugInfoDump) {
             GraphGenerator.dumpMappings(mappings);
         }
+
 
         if (mergeUniions) {
             Collections.sort(merged);
@@ -254,6 +284,12 @@ public class SemanticIndexMappingGenerator {
             while (k < merged.size()) {
                 sql = new StringBuffer();
                 sql.append(genQuerySQL(curMap));
+
+                if (curMap.uri.endsWith("hasAlumnus")) {
+                    int qwe = 123;
+                }
+
+
                 MappingKey nextMap = merged.get(k);
                 while (curMap.uri.equals(nextMap.uri) &&
                         ((curMap instanceof UnaryMappingKey && nextMap instanceof UnaryMappingKey) ||
@@ -319,7 +355,7 @@ public class SemanticIndexMappingGenerator {
         public final String table;
         public final String uri;
 
-        MappingKey(SemanticIndexRange range, String projection, String table, String uri) {
+        public MappingKey(SemanticIndexRange range, String projection, String table, String uri) {
             this.range = range;
             this.projection = projection;
             this.table = table;

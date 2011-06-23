@@ -11,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 
 public class DAG {
@@ -49,8 +46,8 @@ public class DAG {
      */
     public DAG(DLLiterOntology ontology) {
 
-        classes = new HashMap<Description, DAGNode>(ontology.getConcepts().size());
-        roles = new HashMap<Description, DAGNode>(ontology.getRoles().size());
+        classes = new LinkedHashMap<Description, DAGNode>(ontology.getConcepts().size());
+        roles = new LinkedHashMap<Description, DAGNode>(ontology.getRoles().size());
 
 
         classes.put(thingConcept, thing);

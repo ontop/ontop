@@ -63,14 +63,16 @@ public class DAGConstructor {
 
     public static DAG filterPureISA(DAG dag) {
 
-        Map<Description, DAGNode> classes = new HashMap<Description, DAGNode>();
-        Map<Description, DAGNode> rolles = new HashMap<Description, DAGNode>();
+        Map<Description, DAGNode> classes = new LinkedHashMap<Description, DAGNode>();
+        Map<Description, DAGNode> roles = new LinkedHashMap<Description, DAGNode>();
 
         for (DAGNode node : dag.getClasses()) {
 
-            if (node.getDescription() instanceof ExistentialConceptDescription) {
+            if (node.getDescription() instanceof ExistentialConceptDescription ||
+                    node.getDescription().equals(DAG.thingConcept)) {
                 continue;
             }
+
             DAGNode newNode = classes.get(node.getDescription());
             if (newNode == null) {
                 newNode = new DAGNode(node.getDescription());
@@ -106,20 +108,20 @@ public class DAGConstructor {
 
             if (nodeDesc.isInverse()) {
                 RoleDescription posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
-                DAGNode newNode = rolles.get(posNode);
+                DAGNode newNode = roles.get(posNode);
                 if (newNode == null) {
                     newNode = new DAGNode(posNode);
-                    rolles.put(posNode, newNode);
+                    roles.put(posNode, newNode);
                 }
                 continue;
             }
 
-            DAGNode newNode = rolles.get(nodeDesc);
+            DAGNode newNode = roles.get(nodeDesc);
 
             if (newNode == null) {
                 newNode = new DAGNode(nodeDesc);
                 newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
-                rolles.put(nodeDesc, newNode);
+                roles.put(nodeDesc, newNode);
             }
             for (DAGNode child : node.getChildren()) {
                 RoleDescription childDesc = (RoleDescription) child.getDescription();
@@ -128,19 +130,19 @@ public class DAGConstructor {
                 }
                 if (childDesc.isInverse()) {
                     RoleDescription posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
-                    DAGNode newChild = rolles.get(posChild);
+                    DAGNode newChild = roles.get(posChild);
                     if (newChild == null) {
                         newChild = new DAGNode(posChild);
-                        rolles.put(posChild, newChild);
+                        roles.put(posChild, newChild);
                     }
                     continue;
                 }
 
-                DAGNode newChild = rolles.get(childDesc);
+                DAGNode newChild = roles.get(childDesc);
                 if (newChild == null) {
                     newChild = new DAGNode(childDesc);
                     newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
-                    rolles.put(childDesc, newChild);
+                    roles.put(childDesc, newChild);
                 }
                 if (!newChild.getDescription().equals(newNode.getDescription())) {
                     newChild.getParents().add(newNode);
@@ -152,10 +154,12 @@ public class DAGConstructor {
         for (Description desc : dag.equi_mappings.keySet()) {
             Description key = makePositive(desc);
             Description val = makePositive(dag.equi_mappings.get(desc));
-            newEquivalentMappings.put(key, val);
+
+            if (key != null && val != null)
+                newEquivalentMappings.put(key, val);
 
         }
-        DAG newDag = new DAG(classes, rolles, newEquivalentMappings);
+        DAG newDag = new DAG(classes, roles, newEquivalentMappings);
 
         return newDag;
     }
@@ -166,13 +170,14 @@ public class DAGConstructor {
             RoleDescription roleKey = (RoleDescription) desc;
             return descFactory.getRoleDescription(roleKey.getPredicate(), false);
 
-        } else if (desc instanceof ExistentialConceptDescription) {
-            ExistentialConceptDescription conceptKey = (ExistentialConceptDescription) desc;
-            return descFactory.getExistentialConceptDescription(conceptKey.getPredicate(), false);
-
-        } else {
+        } else if (desc instanceof AtomicConceptDescription) {
             return desc;
         }
+
+        // Simple DAG should not contain ER nodes
+        return null;
+
+
     }
 
 }

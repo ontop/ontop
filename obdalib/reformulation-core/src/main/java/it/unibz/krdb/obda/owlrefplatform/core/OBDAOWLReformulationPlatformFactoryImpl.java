@@ -249,7 +249,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 
             if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
                 if (dbType.equals("semantic")) {
-                    for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.build(dag, pureIsa)) {
+                    List<SemanticIndexMappingGenerator.MappingKey> simple_maps = SemanticIndexMappingGenerator.build(dag, pureIsa);
+                    for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_maps)) {
                         log.debug(map.toString());
                         apic.getMappingController().insertMapping(ds.getSourceID(), map);
                     }
