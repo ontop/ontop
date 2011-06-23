@@ -215,13 +215,13 @@ public class SemanticIndexMappingGenerator {
                 if (mergeUniions) {
                     merged.add(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
                 } else {
-                    rv.add(makeUnaryMapp(cur.uri, genQuerySQL(cur)));
+                    rv.add(makeUnaryMapp(cur.uri, genQuerySQL(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
                 }
             } else if (cur instanceof BinaryMappingKey) {
                 if (mergeUniions) {
                     merged.add(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
                 } else {
-                    rv.add(makeBinaryMapp(cur.uri, genQuerySQL(cur)));
+                    rv.add(makeBinaryMapp(cur.uri, genQuerySQL(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
                 }
             }
             cur = next;
