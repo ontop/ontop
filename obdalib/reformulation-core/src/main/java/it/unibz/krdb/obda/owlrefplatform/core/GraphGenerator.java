@@ -137,34 +137,24 @@ public class GraphGenerator {
     }
 
     public static void dumpMappings(List<SemanticIndexMappingGenerator.MappingKey> mappings) {
-        String mappingFile = "mappings.data";
+        String mappingFile = "mappings";
         try {
             FileWriter out = new FileWriter(new File(mappingFile));
-            for (int i = 0; i < mappings.size() - 1; ++i) {
+            for (SemanticIndexMappingGenerator.MappingKey map : mappings) {
 
-                SemanticIndexMappingGenerator.MappingKey map1 = mappings.get(i);
-                SemanticIndexMappingGenerator.MappingKey map2 = mappings.get(i + 1);
 
-                if (map1.uri.startsWith("ER.A-AUX")) {
-                    continue;
+                String uri = map.uri.split("#")[1];
+                String project = map.projection;
+                SemanticIndexRange range = map.range;
+
+                try {
+                    out.write(String.format("%s %s %s \n", uri, project, range));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
-                if (map1.uri.equals(map2.uri) && map1.projection.equals(map2.projection)) {
-                    map2.range.addRange(map1.range);
-                } else {
-                    String uri = map1.uri.split("#")[1];
-                    String project = map1.projection;
-                    SemanticIndexRange range = map1.range;
-
-                    try {
-                        out.write(String.format("%s %s %s \n", uri, project, range));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-
-                }
             }
+            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

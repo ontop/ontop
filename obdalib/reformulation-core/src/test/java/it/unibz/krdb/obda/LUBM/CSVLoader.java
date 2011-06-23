@@ -39,7 +39,7 @@ public class CSVLoader {
     public String role_load_sql;
 
     public static final String driver = "org.postgresql.Driver";
-    public static final String url = "jdbc:postgresql://localhost/test:";
+    public static final String url = "jdbc:postgresql://obdalin.inf.unibz.it/lubm_semantic_index:";
     public static final String username = "obda";
     public static final String password = "obda09";
     public Connection connection;
@@ -151,6 +151,13 @@ public class CSVLoader {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException, InterruptedException {
+        String path = args[0];
+        CSVLoader loader = new CSVLoader(path);
+        loader.recreateDB();
+        loader.loadData();
     }
 
 }

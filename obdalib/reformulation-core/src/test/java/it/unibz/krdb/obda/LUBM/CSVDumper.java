@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
@@ -156,8 +157,10 @@ public class CSVDumper {
 
         TBoxLoader helper = new TBoxLoader(path);
         DAG isa = new DAG(helper.loadOnto());
-        isa.index();
-        CSVDumper dumper = new CSVDumper(isa, path);
+//        isa.index();
+        DAG pureIsa = DAGConstructor.filterPureISA(isa);
+        pureIsa.index();
+        CSVDumper dumper = new CSVDumper(pureIsa, path);
         dumper.dump(universities);
     }
 
