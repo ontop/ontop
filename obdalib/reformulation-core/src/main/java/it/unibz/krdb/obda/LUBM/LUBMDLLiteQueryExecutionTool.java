@@ -43,7 +43,7 @@ public class LUBMDLLiteQueryExecutionTool {
 			DataManager ioManager = new DataManager(obdamodel);
 			ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
-			// Creating a new instance of a quonto reasoner
+			// Creating a new instance of a Quest reasoner
 			OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
 
 			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();

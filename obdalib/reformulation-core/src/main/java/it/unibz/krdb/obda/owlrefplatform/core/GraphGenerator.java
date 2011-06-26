@@ -23,7 +23,7 @@ public class GraphGenerator {
     static String isaClsFile = "isaClasses";
     static String isaRoleFile = "isaRolles";
 
-    public static final boolean debugInfoDump = false;
+    public static boolean debugInfoDump = false;
 
     public static void dumpISA(DAG isa) throws IOException {
         dumpISA(isa, "base");
