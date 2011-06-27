@@ -1,10 +1,23 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.MappingController;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.*;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxSerializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxDumpException;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxFromDBLoader;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DirectMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.MappingValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -16,6 +29,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SimpleDirectQueryGenrator;
@@ -25,17 +39,24 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DirectMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.sql.JDBCConnectionManager;
-import org.semanticweb.owl.inference.OWLReasoner;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+
+import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The implementation of the factory for creating reformulation's platform reasoner
@@ -130,6 +151,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
         EvaluationEngine eval_engine;
         DAG dag = null;
         DAG pureIsa = null;
+        QueryVocabularyValidator validator = null;
 
         try {
             Set<OWLOntology> ontologies = manager.getOntologies();
@@ -137,7 +159,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
             if (ontologies.size() > 0) {  // XXX Always take the first URI in the list?
                 uri = ontologies.iterator().next().getURI();
             }
-            DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
+            DLLiterOntologyImpl ontology = new DLLiterOntologyImpl(uri);
+            OWLOntology owlOntology = manager.getOntology(uri);
 
             log.debug("Translating ontologies");
             OWLAPITranslator translator = new OWLAPITranslator();
@@ -149,6 +172,9 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 ontology.addConcepts(new ArrayList<ConceptDescription>(aux.getConcepts()));
                 ontology.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
             }
+
+            /** Setup the validator */
+            validator = new QueryVocabularyValidator(owlOntology);
 
             if (useInMemoryDB && ("material".equals(unfoldingMode) || createMappings)) {
                 log.debug("Using in an memory database");
@@ -258,9 +284,8 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
                 List<OBDAMappingAxiom> mappings = apic.getMappingController().getMappings(ds.getSourceID());
 
                 // Validate the mappings against the ontology
-                OWLOntology owlOntology = manager.getOntology(uri);
-                MappingValidator validator = new MappingValidator(owlOntology);
-                validator.validate(mappings);
+                MappingValidator mappingValidator = new MappingValidator(owlOntology);
+                mappingValidator.validate(mappings);
 
                 MappingViewManager viewMan = new MappingViewManager(mappings);
                 unfMech = new ComplexMappingUnfolder(mappings, viewMan);
@@ -278,7 +303,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
              * Done, sending a new reasoner with the modules we just configured
              */
 
-            techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
+            techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, validator, eval_engine, apic);
             log.debug("... Quest has been setup and is ready for querying");
 
             return new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);

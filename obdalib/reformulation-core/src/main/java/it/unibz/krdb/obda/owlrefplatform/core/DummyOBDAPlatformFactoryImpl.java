@@ -154,7 +154,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
             util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
             gen = new ComplexMappingSQLGenerator(viewMan, util);
 
-            techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, eval_engine, apic);
+            techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, null, eval_engine, apic);
             return new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
 
         } catch (Exception e) {

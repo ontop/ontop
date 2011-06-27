@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
@@ -25,6 +26,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
@@ -47,6 +49,7 @@ public class OBDAStatement implements Statement {
 	private UnfoldingMechanism		unfoldingmechanism	= null;
 	private SourceQueryGenerator	querygenerator		= null;
 	private EvaluationEngine		engine				= null;
+	private QueryVocabularyValidator validator = null;
 	// private DatalogProgram query = null;
 	private OBDAModel				apic				= null;
 	private boolean					canceled			= false;
@@ -57,12 +60,13 @@ public class OBDAStatement implements Statement {
 
 	Logger							log					= LoggerFactory.getLogger(OBDAStatement.class);
 
-	public OBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, EvaluationEngine eng, OBDAModel apic) {
+	public OBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val, EvaluationEngine eng, OBDAModel apic) {
 
 		this.rewriter = rew;
 		this.unfoldingmechanism = unf;
 		this.querygenerator = gen;
 		this.engine = eng;
+		this.validator = val;
 		// this.query = query;
 		this.apic = apic;
 		// if (query.getRules().size() > 0) {
@@ -105,8 +109,25 @@ public class OBDAStatement implements Statement {
 	}
 
 	private QueryResultSet executeConjunctiveQuery(String strquery) throws Exception {
-		DatalogProgram program = getDatalogQuery(strquery);
+		// Contruct the datalog program object from the query string
+	  DatalogProgram program = getDatalogQuery(strquery);
 
+	  // Check the datalog object
+		if (validator != null) {
+		  boolean isValid = validator.validate(program);
+
+		  if (!isValid) {
+		    Vector<String> invalidList = validator.getInvalidPredicates();
+
+		    String msg = "";
+		    for (String predicate : invalidList) {
+		      msg += "- " + predicate + "\n";
+		    }
+	      throw new Exception("These predicates are missing from the ontology's vocabulary: \n" + msg);
+		  }
+		}
+
+		// If the datalog is valid, proceed to the next process.
 		List<String> signature = getSignature(program);
 
 		Query rewriting = rewriter.rewrite(program);
@@ -119,9 +140,9 @@ public class OBDAStatement implements Statement {
 			/***
 			 * Empty unfolding, constructing an empty resultset
 			 */
-			if (program.getRules().size() < 1)
+			if (program.getRules().size() < 1) {
 				throw new Exception("Error, empty query");
-
+			}
 			result = new EmptyQueryResultSet(signature);
 		} else {
 			ResultSet set = engine.execute(sql);

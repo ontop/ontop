@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 
@@ -22,18 +23,20 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 
 	private QueryRewriter			queryRewriter		= null;
 	private UnfoldingMechanism		unfoldingMechanism	= null;
-	private SourceQueryGenerator	querygenerator		= null;
+	private SourceQueryGenerator	queryGenerator		= null;
 	private EvaluationEngine		evaluationEngine	= null;
+	private QueryVocabularyValidator queryValidator = null;
 	private OBDAModel			apic				= null;
 	private final Logger			log					= LoggerFactory.getLogger(this.getClass());
 
-	public BolzanoTechniqueWrapper(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, EvaluationEngine eng,
-			OBDAModel apic) {
+	public BolzanoTechniqueWrapper(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val,
+	    EvaluationEngine eng, OBDAModel apic) {
 
 		this.queryRewriter = rew;
 		this.unfoldingMechanism = unf;
-		this.querygenerator = gen;
+		this.queryGenerator = gen;
 		this.evaluationEngine = eng;
+		this.queryValidator = val;
 		this.apic = apic;
 	}
 
@@ -43,9 +46,9 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	 */
 	@Override
 	public Statement getStatement() throws Exception {
-		return new OBDAStatement(unfoldingMechanism, queryRewriter, querygenerator, evaluationEngine, apic);
+		return new OBDAStatement(unfoldingMechanism, queryRewriter, queryGenerator, queryValidator, evaluationEngine, apic);
 	}
-	
+
 	@Override
 	public void dispose() {
 		evaluationEngine.dispose();
