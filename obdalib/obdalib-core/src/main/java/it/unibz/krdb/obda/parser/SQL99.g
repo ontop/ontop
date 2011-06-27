@@ -126,13 +126,30 @@ search_condition
   ;
   
 boolean_value_expression
-  : boolean_term ((OR|AND) boolean_term)*
-  ;
-
-boolean_term
-  : predicate
+  : boolean_term (OR boolean_term)*
   ;
   
+boolean_term
+  : boolean_factor (AND boolean_factor)*
+  ;
+  
+boolean_factor
+  : (NOT)? boolean_test
+  ;
+
+boolean_test
+  : boolean_primary (IS (NOT)? truth_value)?
+  ;
+
+boolean_primary
+  : predicate
+  | parenthesized_boolean_value_expression
+  ;
+
+parenthesized_boolean_value_expression
+  : LPAREN boolean_value_expression RPAREN
+  ;
+ 
 predicate
   : comparison_predicate
   | null_predicate
@@ -268,6 +285,11 @@ value
   | FALSE
   | NUMERIC 
   | STRING_WITH_QUOTE
+  ;
+
+truth_value
+  : TRUE
+  | FALSE
   ;
 
 concatenation_operator

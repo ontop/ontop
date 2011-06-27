@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:50:56 SQL99.g 2011-06-23 14:20:21
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 SQL99.g 2011-06-27 10:58:54
 
 package it.unibz.krdb.obda.parser;
 
@@ -32,8 +32,8 @@ public class SQL99Lexer extends Lexer {
     public static final int WHERE=23;
     public static final int OR=24;
     public static final int AND=25;
-    public static final int IS=26;
-    public static final int NOT=27;
+    public static final int NOT=26;
+    public static final int IS=27;
     public static final int NULL=28;
     public static final int IN=29;
     public static final int GROUP=30;
@@ -102,8 +102,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SELECT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:305:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // SQL99.g:305:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // SQL99.g:327:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // SQL99.g:327:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -175,8 +175,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DISTINCT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:307:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // SQL99.g:307:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // SQL99.g:329:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // SQL99.g:329:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
@@ -266,8 +266,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ALL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:309:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:309:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // SQL99.g:331:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // SQL99.g:331:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -312,8 +312,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AVG;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:311:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
-            // SQL99.g:311:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
+            // SQL99.g:333:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
+            // SQL99.g:333:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -358,8 +358,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MAX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:313:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
-            // SQL99.g:313:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
+            // SQL99.g:335:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
+            // SQL99.g:335:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
@@ -404,8 +404,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:315:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:315:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // SQL99.g:337:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // SQL99.g:337:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
@@ -450,8 +450,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SUM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:317:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
-            // SQL99.g:317:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
+            // SQL99.g:339:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
+            // SQL99.g:339:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -496,8 +496,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EVERY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:319:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
-            // SQL99.g:319:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
+            // SQL99.g:341:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
+            // SQL99.g:341:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
@@ -560,8 +560,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ANY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:321:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
-            // SQL99.g:321:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
+            // SQL99.g:343:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
+            // SQL99.g:343:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -606,8 +606,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SOME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:323:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
-            // SQL99.g:323:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
+            // SQL99.g:345:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
+            // SQL99.g:345:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -661,8 +661,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COUNT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:325:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
-            // SQL99.g:325:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
+            // SQL99.g:347:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
+            // SQL99.g:347:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
                 input.consume();
@@ -725,8 +725,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FROM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:327:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
-            // SQL99.g:327:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
+            // SQL99.g:349:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
+            // SQL99.g:349:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -780,8 +780,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WHERE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:329:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
-            // SQL99.g:329:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
+            // SQL99.g:351:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
+            // SQL99.g:351:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='W'||input.LA(1)=='w' ) {
                 input.consume();
@@ -844,8 +844,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:331:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
-            // SQL99.g:331:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
+            // SQL99.g:353:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
+            // SQL99.g:353:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -890,8 +890,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:333:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
-            // SQL99.g:333:5: ( 'O' | 'o' ) ( 'R' | 'r' )
+            // SQL99.g:355:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
+            // SQL99.g:355:5: ( 'O' | 'o' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -927,8 +927,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:335:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
-            // SQL99.g:335:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
+            // SQL99.g:357:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
+            // SQL99.g:357:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -973,8 +973,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ORDER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:337:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:337:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // SQL99.g:359:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // SQL99.g:359:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1037,8 +1037,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GROUP;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:339:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
-            // SQL99.g:339:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
+            // SQL99.g:361:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
+            // SQL99.g:361:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
             {
             if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
                 input.consume();
@@ -1101,8 +1101,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:341:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
-            // SQL99.g:341:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
+            // SQL99.g:363:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
+            // SQL99.g:363:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
@@ -1138,8 +1138,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:343:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
-            // SQL99.g:343:5: ( 'A' | 'a' ) ( 'S' | 's' )
+            // SQL99.g:365:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
+            // SQL99.g:365:5: ( 'A' | 'a' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -1175,8 +1175,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = JOIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:345:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:345:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // SQL99.g:367:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // SQL99.g:367:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='J'||input.LA(1)=='j' ) {
                 input.consume();
@@ -1230,8 +1230,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = INNER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:347:6: ( ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:347:8: ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // SQL99.g:369:6: ( ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // SQL99.g:369:8: ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1294,8 +1294,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OUTER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:349:6: ( ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:349:8: ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // SQL99.g:371:6: ( ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // SQL99.g:371:8: ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1358,8 +1358,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LEFT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:351:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
-            // SQL99.g:351:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
+            // SQL99.g:373:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
+            // SQL99.g:373:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
@@ -1413,8 +1413,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RIGHT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:353:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
-            // SQL99.g:353:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
+            // SQL99.g:375:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
+            // SQL99.g:375:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
@@ -1477,8 +1477,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:355:5: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:355:7: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // SQL99.g:377:5: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // SQL99.g:377:7: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -1532,8 +1532,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:357:6: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // SQL99.g:357:8: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' )
+            // SQL99.g:379:6: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // SQL99.g:379:8: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
@@ -1596,8 +1596,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:359:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // SQL99.g:359:5: ( 'O' | 'o' ) ( 'N' | 'n' )
+            // SQL99.g:381:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // SQL99.g:381:5: ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1633,8 +1633,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:361:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:361:5: ( 'I' | 'i' ) ( 'N' | 'n' )
+            // SQL99.g:383:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // SQL99.g:383:5: ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1670,8 +1670,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:363:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
-            // SQL99.g:363:5: ( 'I' | 'i' ) ( 'S' | 's' )
+            // SQL99.g:385:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
+            // SQL99.g:385:5: ( 'I' | 'i' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1707,8 +1707,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:365:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:365:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // SQL99.g:387:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // SQL99.g:387:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -1762,8 +1762,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FALSE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:367:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // SQL99.g:367:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // SQL99.g:389:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // SQL99.g:389:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -1826,8 +1826,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TRUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:369:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-            // SQL99.g:369:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            // SQL99.g:391:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // SQL99.g:391:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
@@ -1881,8 +1881,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:371:5: ( ';' )
-            // SQL99.g:371:16: ';'
+            // SQL99.g:393:5: ( ';' )
+            // SQL99.g:393:16: ';'
             {
             match(';'); 
 
@@ -1901,8 +1901,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:372:4: ( '.' )
-            // SQL99.g:372:16: '.'
+            // SQL99.g:394:4: ( '.' )
+            // SQL99.g:394:16: '.'
             {
             match('.'); 
 
@@ -1921,8 +1921,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:373:6: ( ',' )
-            // SQL99.g:373:16: ','
+            // SQL99.g:395:6: ( ',' )
+            // SQL99.g:395:16: ','
             {
             match(','); 
 
@@ -1941,8 +1941,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:374:12: ( '[' )
-            // SQL99.g:374:16: '['
+            // SQL99.g:396:12: ( '[' )
+            // SQL99.g:396:16: '['
             {
             match('['); 
 
@@ -1961,8 +1961,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:375:12: ( ']' )
-            // SQL99.g:375:16: ']'
+            // SQL99.g:397:12: ( ']' )
+            // SQL99.g:397:16: ']'
             {
             match(']'); 
 
@@ -1981,8 +1981,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:376:7: ( '(' )
-            // SQL99.g:376:16: '('
+            // SQL99.g:398:7: ( '(' )
+            // SQL99.g:398:16: '('
             {
             match('('); 
 
@@ -2001,8 +2001,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:377:7: ( ')' )
-            // SQL99.g:377:16: ')'
+            // SQL99.g:399:7: ( ')' )
+            // SQL99.g:399:16: ')'
             {
             match(')'); 
 
@@ -2021,8 +2021,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:378:9: ( '?' )
-            // SQL99.g:378:16: '?'
+            // SQL99.g:400:9: ( '?' )
+            // SQL99.g:400:16: '?'
             {
             match('?'); 
 
@@ -2041,8 +2041,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:379:7: ( '$' )
-            // SQL99.g:379:16: '$'
+            // SQL99.g:401:7: ( '$' )
+            // SQL99.g:401:16: '$'
             {
             match('$'); 
 
@@ -2061,8 +2061,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:380:13: ( '\"' )
-            // SQL99.g:380:16: '\"'
+            // SQL99.g:402:13: ( '\"' )
+            // SQL99.g:402:16: '\"'
             {
             match('\"'); 
 
@@ -2081,8 +2081,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:381:13: ( '\\'' )
-            // SQL99.g:381:16: '\\''
+            // SQL99.g:403:13: ( '\\'' )
+            // SQL99.g:403:16: '\\''
             {
             match('\''); 
 
@@ -2101,8 +2101,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:382:11: ( '`' )
-            // SQL99.g:382:16: '`'
+            // SQL99.g:404:11: ( '`' )
+            // SQL99.g:404:16: '`'
             {
             match('`'); 
 
@@ -2121,8 +2121,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:383:11: ( '_' )
-            // SQL99.g:383:16: '_'
+            // SQL99.g:405:11: ( '_' )
+            // SQL99.g:405:16: '_'
             {
             match('_'); 
 
@@ -2141,8 +2141,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:384:5: ( '-' )
-            // SQL99.g:384:16: '-'
+            // SQL99.g:406:5: ( '-' )
+            // SQL99.g:406:16: '-'
             {
             match('-'); 
 
@@ -2161,8 +2161,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:385:9: ( '*' )
-            // SQL99.g:385:16: '*'
+            // SQL99.g:407:9: ( '*' )
+            // SQL99.g:407:16: '*'
             {
             match('*'); 
 
@@ -2181,8 +2181,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:386:10: ( '&' )
-            // SQL99.g:386:16: '&'
+            // SQL99.g:408:10: ( '&' )
+            // SQL99.g:408:16: '&'
             {
             match('&'); 
 
@@ -2201,8 +2201,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:387:3: ( '@' )
-            // SQL99.g:387:16: '@'
+            // SQL99.g:409:3: ( '@' )
+            // SQL99.g:409:16: '@'
             {
             match('@'); 
 
@@ -2221,8 +2221,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:388:12: ( '!' )
-            // SQL99.g:388:16: '!'
+            // SQL99.g:410:12: ( '!' )
+            // SQL99.g:410:16: '!'
             {
             match('!'); 
 
@@ -2241,8 +2241,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:389:5: ( '#' )
-            // SQL99.g:389:16: '#'
+            // SQL99.g:411:5: ( '#' )
+            // SQL99.g:411:16: '#'
             {
             match('#'); 
 
@@ -2261,8 +2261,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:390:8: ( '%' )
-            // SQL99.g:390:16: '%'
+            // SQL99.g:412:8: ( '%' )
+            // SQL99.g:412:16: '%'
             {
             match('%'); 
 
@@ -2281,8 +2281,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:391:5: ( '+' )
-            // SQL99.g:391:16: '+'
+            // SQL99.g:413:5: ( '+' )
+            // SQL99.g:413:16: '+'
             {
             match('+'); 
 
@@ -2301,8 +2301,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:392:7: ( '=' )
-            // SQL99.g:392:16: '='
+            // SQL99.g:414:7: ( '=' )
+            // SQL99.g:414:16: '='
             {
             match('='); 
 
@@ -2321,8 +2321,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:393:6: ( ':' )
-            // SQL99.g:393:16: ':'
+            // SQL99.g:415:6: ( ':' )
+            // SQL99.g:415:16: ':'
             {
             match(':'); 
 
@@ -2341,8 +2341,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:394:5: ( '<' )
-            // SQL99.g:394:16: '<'
+            // SQL99.g:416:5: ( '<' )
+            // SQL99.g:416:16: '<'
             {
             match('<'); 
 
@@ -2361,8 +2361,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:395:8: ( '>' )
-            // SQL99.g:395:16: '>'
+            // SQL99.g:417:8: ( '>' )
+            // SQL99.g:417:16: '>'
             {
             match('>'); 
 
@@ -2381,8 +2381,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:396:6: ( '/' )
-            // SQL99.g:396:16: '/'
+            // SQL99.g:418:6: ( '/' )
+            // SQL99.g:418:16: '/'
             {
             match('/'); 
 
@@ -2401,8 +2401,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:397:13: ( '//' )
-            // SQL99.g:397:16: '//'
+            // SQL99.g:419:13: ( '//' )
+            // SQL99.g:419:16: '//'
             {
             match("//"); 
 
@@ -2422,8 +2422,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:398:10: ( '\\\\' )
-            // SQL99.g:398:16: '\\\\'
+            // SQL99.g:420:10: ( '\\\\' )
+            // SQL99.g:420:16: '\\\\'
             {
             match('\\'); 
 
@@ -2442,8 +2442,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:399:6: ( '~' )
-            // SQL99.g:399:16: '~'
+            // SQL99.g:421:6: ( '~' )
+            // SQL99.g:421:16: '~'
             {
             match('~'); 
 
@@ -2462,8 +2462,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:400:6: ( '^' )
-            // SQL99.g:400:16: '^'
+            // SQL99.g:422:6: ( '^' )
+            // SQL99.g:422:16: '^'
             {
             match('^'); 
 
@@ -2482,8 +2482,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CONCATENATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:401:14: ( '||' )
-            // SQL99.g:401:16: '||'
+            // SQL99.g:423:14: ( '||' )
+            // SQL99.g:423:16: '||'
             {
             match("||"); 
 
@@ -2501,8 +2501,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // SQL99.g:403:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
-            // SQL99.g:403:17: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // SQL99.g:425:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // SQL99.g:425:17: ( 'a' .. 'z' | 'A' .. 'Z' )
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2525,8 +2525,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // SQL99.g:405:15: ( '0' .. '9' )
-            // SQL99.g:405:17: '0' .. '9'
+            // SQL99.g:427:15: ( '0' .. '9' )
+            // SQL99.g:427:17: '0' .. '9'
             {
             matchRange('0','9'); 
 
@@ -2541,8 +2541,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // SQL99.g:407:18: ( ( ALPHA | DIGIT ) )
-            // SQL99.g:407:20: ( ALPHA | DIGIT )
+            // SQL99.g:429:18: ( ( ALPHA | DIGIT ) )
+            // SQL99.g:429:20: ( ALPHA | DIGIT )
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2565,8 +2565,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "CHAR"
     public final void mCHAR() throws RecognitionException {
         try {
-            // SQL99.g:409:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
-            // SQL99.g:409:16: ( ALPHANUM | UNDERSCORE | DASH )
+            // SQL99.g:431:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
+            // SQL99.g:431:16: ( ALPHANUM | UNDERSCORE | DASH )
             {
             if ( input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2591,10 +2591,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NUMERIC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:411:8: ( ( DIGIT )+ )
-            // SQL99.g:411:10: ( DIGIT )+
+            // SQL99.g:433:8: ( ( DIGIT )+ )
+            // SQL99.g:433:10: ( DIGIT )+
             {
-            // SQL99.g:411:10: ( DIGIT )+
+            // SQL99.g:433:10: ( DIGIT )+
             int cnt1=0;
             loop1:
             do {
@@ -2608,7 +2608,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt1) {
             	case 1 :
-            	    // SQL99.g:411:10: DIGIT
+            	    // SQL99.g:433:10: DIGIT
             	    {
             	    mDIGIT(); 
 
@@ -2640,10 +2640,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = STRING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:413:7: ( ( CHAR )* )
-            // SQL99.g:413:9: ( CHAR )*
+            // SQL99.g:435:7: ( ( CHAR )* )
+            // SQL99.g:435:9: ( CHAR )*
             {
-            // SQL99.g:413:9: ( CHAR )*
+            // SQL99.g:435:9: ( CHAR )*
             loop2:
             do {
                 int alt2=2;
@@ -2656,7 +2656,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt2) {
             	case 1 :
-            	    // SQL99.g:413:9: CHAR
+            	    // SQL99.g:435:9: CHAR
             	    {
             	    mCHAR(); 
 
@@ -2684,11 +2684,11 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:415:25: ( QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE )
-            // SQL99.g:415:27: QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE
+            // SQL99.g:437:25: ( QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE )
+            // SQL99.g:437:27: QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE
             {
             mQUOTE_DOUBLE(); 
-            // SQL99.g:415:40: ( CHAR )*
+            // SQL99.g:437:40: ( CHAR )*
             loop3:
             do {
                 int alt3=2;
@@ -2701,7 +2701,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt3) {
             	case 1 :
-            	    // SQL99.g:415:40: CHAR
+            	    // SQL99.g:437:40: CHAR
             	    {
             	    mCHAR(); 
 
@@ -2730,8 +2730,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:417:18: ( ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE ) )
-            // SQL99.g:417:20: ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE )
+            // SQL99.g:439:18: ( ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE ) )
+            // SQL99.g:439:20: ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE )
             {
             if ( input.LA(1)=='\"'||input.LA(1)=='\'' ) {
                 input.consume();
@@ -2742,7 +2742,7 @@ public class SQL99Lexer extends Lexer {
                 recover(mse);
                 throw mse;}
 
-            // SQL99.g:417:48: ( CHAR )*
+            // SQL99.g:439:48: ( CHAR )*
             loop4:
             do {
                 int alt4=2;
@@ -2755,7 +2755,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt4) {
             	case 1 :
-            	    // SQL99.g:417:48: CHAR
+            	    // SQL99.g:439:48: CHAR
             	    {
             	    mCHAR(); 
 
@@ -2792,10 +2792,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:419:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // SQL99.g:419:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // SQL99.g:441:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // SQL99.g:441:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // SQL99.g:419:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // SQL99.g:441:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt6=0;
             loop6:
             do {
@@ -2822,23 +2822,23 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // SQL99.g:419:6: ' '
+            	    // SQL99.g:441:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // SQL99.g:419:10: '\\t'
+            	    // SQL99.g:441:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // SQL99.g:419:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // SQL99.g:441:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // SQL99.g:419:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // SQL99.g:441:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt5=2;
             	    int LA5_0 = input.LA(1);
 
@@ -2856,18 +2856,18 @@ public class SQL99Lexer extends Lexer {
             	    }
             	    switch (alt5) {
             	        case 1 :
-            	            // SQL99.g:419:16: '\\n'
+            	            // SQL99.g:441:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // SQL99.g:419:21: '\\r' ( '\\n' )
+            	            // SQL99.g:441:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
-            	            // SQL99.g:419:25: ( '\\n' )
-            	            // SQL99.g:419:26: '\\n'
+            	            // SQL99.g:441:25: ( '\\n' )
+            	            // SQL99.g:441:26: '\\n'
             	            {
             	            match('\n'); 
 

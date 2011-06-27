@@ -319,6 +319,48 @@ public class SQL99ParserTest extends TestCase
     assertTrue(result);
   }
 
+  @Test
+  public void test_8_1() {
+    final boolean result = parse("SELECT URI as X FROM class WHERE (IDX = 35) UNION ALL SELECT URI1 as X FROM role WHERE (IDX = 49) OR (IDX = 58)");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_8_2() {
+    final boolean result = parse("SELECT URI as X FROM class WHERE (IDX = 15) UNION ALL SELECT URI1 as X FROM role WHERE (IDX = 59)");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_8_3() {
+    final boolean result = parse("SELECT URI as X FROM class WHERE ((IDX >= 9) AND ( IDX <= 12)) UNION ALL SELECT URI2 as X FROM role WHERE (IDX = 51) OR (IDX = 59) OR (IDX = 64) OR (IDX = 70) OR (IDX = 73)");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_8_4() {
+    final boolean result = parse("SELECT URI as X FROM class WHERE ((IDX >= 17) AND ( IDX <= 19))");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_8_5() {
+    final boolean result = parse("SELECT URI1 as Y, URI2 as X FROM role WHERE ((IDX >= 66) AND ( IDX <= 69))");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_8_6() {
+    final boolean result = parse("SELECT URI as x from universal WHERE p = 33");
+    assertTrue(result);
+  }
+
+  @Test
+  public void test_8_7() {
+    final boolean result = parse("SELECT URI as x from universal WHERE p = 'xxx'");
+    assertTrue(result);
+  }
+
   private boolean parse(String input) {
     ANTLRStringStream inputStream = new ANTLRStringStream(input);
     SQL99Lexer lexer = new SQL99Lexer(inputStream);
