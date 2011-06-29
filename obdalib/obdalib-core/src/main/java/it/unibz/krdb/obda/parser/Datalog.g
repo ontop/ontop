@@ -20,39 +20,43 @@
 grammar Datalog;
 
 @header {
-package org.obda.query.tools.parser;
+package it.unibz.krdb.obda.parser;
 
 import java.net.URI;
-import java.util.Vector;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 import org.antlr.runtime.BitSet;
+import org.antlr.runtime.EarlyExitException;
 import org.antlr.runtime.MismatchedSetException;
 import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.Parser;
+import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
 
-import org.obda.query.domain.Atom;
-import org.obda.query.domain.CQIE;
-import org.obda.query.domain.Predicate;
-import org.obda.query.domain.Term;
-import org.obda.query.domain.URIConstant;
-import org.obda.query.domain.ValueConstant;
-import org.obda.query.domain.Variable;
-import org.obda.query.domain.Function;
-import org.obda.query.domain.imp.AtomImpl;
-import org.obda.query.domain.imp.BasicPredicateFactoryImpl;
-import org.obda.query.domain.imp.CQIEImpl;
-import org.obda.query.domain.imp.DatalogProgramImpl;
-import org.obda.query.domain.imp.TermFactoryImpl;
-import org.obda.query.domain.imp.VariableImpl;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 }
 
 @lexer::header {
-package org.obda.query.tools.parser;
+package it.unibz.krdb.obda.parser;
 
+import java.util.List;
 import java.util.Vector;
 }
 
@@ -82,11 +86,8 @@ private HashMap<String, String> directives = new HashMap<String, String>();
 /** Set of variable terms */
 private HashSet<Variable> variables = new HashSet<Variable>();
 
-/** A factory to construct the subject and object terms */
-private TermFactoryImpl termFactory = TermFactoryImpl.getInstance();
-
-/** A factory to construct the predicates */
-private BasicPredicateFactoryImpl predicateFactory = BasicPredicateFactoryImpl.getInstance();
+/** A factory to construct the predicates and terms */
+private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 /** Select all flag */
 private boolean isSelectAll = false;
@@ -100,7 +101,7 @@ public HashMap<String, String> getDirectives() {
  * PARSER RULES
  *------------------------------------------------------------------*/
  
-parse returns [DatalogProgramImpl value]
+parse returns [DatalogProgram value]
   : prog EOF {
       $value = $prog.value;
     }
@@ -108,9 +109,9 @@ parse returns [DatalogProgramImpl value]
       throw e;
     }
   
-prog returns [DatalogProgramImpl value]
+prog returns [DatalogProgram value]
 @init {
-  $value = new DatalogProgramImpl();
+  $value = dataFactory.getDatalogProgram();
   CQIE rule = null;
 }
   : base?
@@ -119,13 +120,18 @@ prog returns [DatalogProgramImpl value]
       rule = $rule.value;
       if (isSelectAll) {
         List<Term> variableList = new Vector<Term>();
-        variableList.addAll(variables); // we need a List because of the
-                                        // API specification. Therefore,
-                                        // we are going to import all the
-                                        // data from the Set to a Vector.        
-        Atom head = rule.getHead();
-        head.updateTerms(variableList);
-        rule.updateHead(head);
+        variableList.addAll(variables); // Import all the data from the Set to a Vector.
+         
+        // Get the head atom
+        PredicateAtom head = rule.getHead();
+        URI name = head.getPredicate().getName();
+        int size = variableList.size(); 
+        
+        // Get the predicate atom
+        Predicate predicate = dataFactory.getPredicate(name, size);
+        PredicateAtom newhead = dataFactory.getAtom(predicate, variableList);
+        rule.updateHead(newhead);
+        
         isSelectAll = false;  
       }
         
@@ -172,7 +178,7 @@ rule returns [CQIE value]
 
 datalog_syntax_rule returns [CQIE value]
   : INV_IMPLIES body {
-      $value = new CQIEImpl(null, $body.value, true);
+      $value = dataFactory.getCQIE(null, $body.value);
     }
   | datalog_syntax_alt {
       $value = $datalog_syntax_alt.value;
@@ -181,16 +187,16 @@ datalog_syntax_rule returns [CQIE value]
 
 datalog_syntax_alt returns [CQIE value]
   : (head INV_IMPLIES body)=> head INV_IMPLIES body {
-      $value = new CQIEImpl($head.value, $body.value, true);
+      $value = dataFactory.getCQIE($head.value, $body.value);
     }
   | head INV_IMPLIES {
-      $value = new CQIEImpl($head.value, null, true);
+      $value = dataFactory.getCQIE($head.value, new LinkedList<Atom>());
     }
   ;
 
 swirl_syntax_rule returns [CQIE value]
   : IMPLIES head {
-      $value = new CQIEImpl($head.value, null, true);
+      $value = dataFactory.getCQIE($head.value, new LinkedList<Atom>());
     }
   | swirl_syntax_alt {
       $value = $swirl_syntax_alt.value;
@@ -199,14 +205,14 @@ swirl_syntax_rule returns [CQIE value]
 
 swirl_syntax_alt returns [CQIE value]
   : (body IMPLIES head)=> body IMPLIES head {
-      $value = new CQIEImpl($head.value, $body.value, true);
+      $value = dataFactory.getCQIE($head.value, $body.value);
     }
   | body IMPLIES {
-      $value = new CQIEImpl(null, $body.value, true);
+      $value = dataFactory.getCQIE(null, $body.value);
     }
   ;
 
-head returns [Atom value]
+head returns [PredicateAtom value]
 @init {
   $value = null;
 }
@@ -215,27 +221,27 @@ head returns [Atom value]
     }
   ;
 
-body returns [Vector<Atom> value]
+body returns [List<Atom> value]
 @init {
-  $value = new Vector<Atom>();
+  $value = new LinkedList<Atom>();
 }
   : a1=atom { $value.add($a1.value); } ((COMMA|CARET) a2=atom { $value.add($a2.value); })*
   ;
 
-atom returns [Atom value]
+atom returns [PredicateAtom value]
   : predicate LPAREN terms? RPAREN  {
       URI uri = URI.create($predicate.value);
       
       Vector<Term> elements = $terms.elements;
       if (elements == null)
         elements = new Vector<Term>();
-      Predicate predicate = predicateFactory.createPredicate(uri, elements.size());
+      Predicate predicate = dataFactory.getPredicate(uri, elements.size());
       
       Vector<Term> terms = $terms.elements;
       if (terms == null)
         terms = new Vector<Term>();
         
-      $value = new AtomImpl(predicate, terms);
+      $value = dataFactory.getAtom(predicate, terms);
     }
   ;
 
@@ -261,11 +267,11 @@ term returns [Term value]
 
 variable_term returns [Variable value] 
   : (DOLLAR|QUESTION) id { 
-      $value = termFactory.createVariable($id.text);
+      $value = dataFactory.getVariable($id.text);
       variables.add($value); // collect the variable terms.
     }
   | ASTERISK {
-      $value = termFactory.createVariable(OBDA_SELECT_ALL);
+      $value = dataFactory.getVariable(OBDA_SELECT_ALL);
       isSelectAll = true;
     }
   ;
@@ -277,15 +283,15 @@ literal_term returns [ValueConstant value]
   : string {
       literal = $string.text;
       literal = literal.substring(1, literal.length()-1); // removes the quote signs.
-      $value = termFactory.createValueConstant(literal);
+      $value = dataFactory.getValueConstant(literal);
     }
   ; 
   
 object_term returns [Function value]
   : function LPAREN terms RPAREN {
       URI uri = URI.create($function.value);
-      Predicate fs = predicateFactory.createPredicate(uri, $terms.elements.size());
-      $value = termFactory.createFunctionalTerm(fs, $terms.elements);
+      Predicate fs = dataFactory.getPredicate(uri, $terms.elements.size());
+      $value = dataFactory.getFunctionalTerm(fs, $terms.elements);
     }
   ;
   
@@ -296,7 +302,7 @@ uri_term returns [URIConstant value]
   : uri { 
       uriText = $uri.text;      
       URI uri = URI.create(uriText);
-      $value = termFactory.createURIConstant(uri);
+      $value = dataFactory.getURIConstant(uri);
     }
   ;
   
