@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.protege4.gui.view.query;
+package it.unibz.krdb.obda.protege4.views;
 
 import it.unibz.krdb.obda.gui.swing.OBDADataQueryAction;
 import it.unibz.krdb.obda.gui.swing.OBDASaveQueryResultToFileAction;
@@ -13,7 +13,8 @@ import it.unibz.krdb.obda.model.DataQueryReasoner;
 import it.unibz.krdb.obda.model.QueryResultSet;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.protege4.core.OBDAPluginController;
+import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
+import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.obda.utils.ResultSetToFileWriter;
 
@@ -37,19 +38,19 @@ import org.semanticweb.owl.model.OWLOntologyChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implements SavedQueriesPanelListener {
+public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener, OBDAModelManagerListener {
 	/**
 	 *
 	 */
 	private static final long			serialVersionUID		= 1L;
-	private static final Logger			log						= LoggerFactory.getLogger(QueryInterfaceViewComponent.class);
+	private static final Logger			log						= LoggerFactory.getLogger(QueryInterfaceView.class);
 
 	QueryInterfacePanel					panel_query_interface	= null;
 
 	ResultViewTablePanel				panel_view_results		= null;
 
 	private OWLOntologyChangeListener	ontochange_listener		= null;
-	OBDAPluginController				obdaController			= null;
+	OBDAModelManager				obdaController			= null;
 
 	@Override
 	protected void disposeOWLView() {
@@ -63,16 +64,18 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
-			for (QueryManagerViewComponent queryInterfaceView : queryManagerViews) {
+			for (QueryManagerView queryInterfaceView : queryManagerViews) {
 				queryInterfaceView.removeListener(this);
 			}
 		}
+		
+		obdaController.removeListener(this);
 	}
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAPluginController) getOWLEditorKit().get(OBDAModelImpl.class.getName());
-
+		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		obdaController.addListener(this);
 		/***
 		 * Setting up the layout.
 		 * 
@@ -82,7 +85,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		JPanel panel_right_main = new JPanel();
 		JSplitPane split_right_horizontal = new javax.swing.JSplitPane();
 		OBDAPreferences preference = (OBDAPreferences) getOWLEditorKit().get(OBDAPreferences.class.getName());
-		panel_query_interface = new QueryInterfacePanel(obdaController.getOBDAManager(), this.getOWLModelManager().getActiveOntology()
+		panel_query_interface = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), this.getOWLModelManager().getActiveOntology()
 				.getURI(), preference);
 
 		panel_view_results = new ResultViewTablePanel(panel_query_interface);
@@ -172,7 +175,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 					monitor.stop();
 					QueryResultSet result = action.getResult();
 					if (result != null) {
-						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result, obdaController.getOBDAManager().getPrefixManager(), panel_query_interface.isShortURISelect());
+						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result, obdaController.getActiveOBDAModel().getPrefixManager(), panel_query_interface.isShortURISelect());
 						model.addTableModelListener(panel);
 						rows = model.getRowCount();
 						panel_view_results.setTableModel(model);
@@ -364,7 +367,7 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 		 */
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
-			for (QueryManagerViewComponent queryInterfaceView : queryManagerViews) {
+			for (QueryManagerView queryInterfaceView : queryManagerViews) {
 				queryInterfaceView.addListener(this);
 			}
 		}
@@ -616,5 +619,12 @@ public class QueryInterfaceViewComponent extends AbstractOWLViewComponent implem
 				log.error("Error while counting.", e);
 			}
 		}
+	}
+
+	@Override
+	public void activeOntologyChanged() {
+		panel_query_interface.setOBDAModel(this.obdaController.getActiveOBDAModel());
+		panel_query_interface.setBaseURI(this.getOWLModelManager().getActiveOntology().getURI());
+		
 	}
 }

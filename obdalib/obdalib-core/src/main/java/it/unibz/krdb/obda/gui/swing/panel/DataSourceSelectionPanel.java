@@ -6,15 +6,12 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.DatasourcesController;
-import it.unibz.krdb.obda.model.impl.DataSourceImpl;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
@@ -37,6 +34,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		this.dscontroller = dscontroller;
 		initComponents();
 		init();
+		setDatasourcesController(dscontroller);
 	}
 
 	/***
@@ -49,11 +47,8 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		/* removing listeners and references to the old */
 		dscontroller.removeDatasourceControllerListener(selector);
 		dscontroller = dsc;
-
-		/* updating content */
-		List<DataSource> sources = new Vector<DataSource>();
-		sources.addAll(dscontroller.getAllSources());
-		selector.initSources(sources);
+		
+		selector.setDatasourceController(dsc);
 
 		/* setup the new listener */
 		dscontroller.addDatasourceControllerListener(selector);
@@ -64,10 +59,8 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 	}
 
 	private void init() {
-
-		List<DataSource> sources = new Vector<DataSource>();
-		sources.addAll(dscontroller.getAllSources());
-		selector = new DatasourceSelector(sources);
+		
+		selector = new DatasourceSelector(dscontroller);
 
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.protege4.gui.view.query;
+package it.unibz.krdb.obda.protege4.views;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,7 @@ import org.protege.editor.core.Disposable;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class QueryManagerViewsList extends ArrayList<QueryManagerViewComponent> implements Disposable {
+public class QueryManagerViewsList extends ArrayList<QueryManagerView> implements Disposable {
 
 	/**
 	 * 

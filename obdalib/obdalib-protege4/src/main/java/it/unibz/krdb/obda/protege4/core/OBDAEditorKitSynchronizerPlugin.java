@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.protege4.ProtegeReformulationPlatformPreferences;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
@@ -21,9 +20,9 @@ import org.protege.editor.owl.model.OWLModelManager;
  */
 public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
-	OBDAPluginController instance = null;
+	OBDAModelManager instance = null;
 	OWLEditorKit kit = null;
-	OWLModelManager mmgr = null;
+//	OWLModelManager mmgr = null;
 	
 	public void initialise() throws Exception {
 
@@ -32,11 +31,11 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		 * Note, the OBDA model is inside this object (do
 		 * .getOBDAModelManager())
 		 */
-		instance = new OBDAPluginController(this.getEditorKit());
+		instance = new OBDAModelManager(this.getEditorKit());
 		getEditorKit().put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
 		kit = (OWLEditorKit)getEditorKit();
-		mmgr = (OWLModelManager)kit.getModelManager();
-		mmgr.addListener(instance.getModelManagerListener());
+//		mmgr = (OWLModelManager)kit.getModelManager();
+//		mmgr.addListener(instance.getModelManagerListener());
 		getEditorKit().put(OBDAModelImpl.class.getName(), instance);
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
@@ -56,6 +55,6 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 	@Override
 	public void dispose() throws Exception {
-		mmgr.removeListener(instance.getModelManagerListener());
+//		mmgr.removeListener(instance.getModelManagerListener());
 	}
 }

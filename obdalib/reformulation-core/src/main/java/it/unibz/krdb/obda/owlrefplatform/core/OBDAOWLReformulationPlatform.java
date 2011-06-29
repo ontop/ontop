@@ -33,6 +33,8 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.util.NullProgressMonitor;
 import org.semanticweb.owl.util.ProgressMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
@@ -50,6 +52,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	private TechniqueWrapper		techwrapper			= null;
 	private HashSet<OWLOntology>	loadedOntologies	= null;
 	private ProgressMonitor			progressMonitor		= new NullProgressMonitor();
+	
+	private Logger log = LoggerFactory.getLogger(OBDAOWLReformulationPlatform.class);
 
 	private boolean					isClassified		= false;
 
@@ -150,6 +154,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	}
 
 	public void loadOntologies(Set<OWLOntology> ontologies) throws OWLReasonerException {
+		log.debug("OBDAOWLReformulationPlatform is loading ontologies...");
 
 		OWLAPITranslator translator = new OWLAPITranslator();
 		URI uri = null;

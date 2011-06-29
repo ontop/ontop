@@ -31,6 +31,7 @@ import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
+import org.semanticweb.owl.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owl.model.OWLDataRange;
 import org.semanticweb.owl.model.OWLDataSomeRestriction;
 import org.semanticweb.owl.model.OWLDataSubPropertyAxiom;
@@ -162,6 +163,19 @@ public class OWLAPITranslator {
 					List<ConceptDescription> superDescriptions = getSuperclassExpressions(((OWLDataPropertyDomainAxiom) axiom).getDomain());
 
 					addSubclassAxioms(dl_onto, subclass, superDescriptions);
+
+				} else if (axiom instanceof OWLDataPropertyRangeAxiom) {
+
+					OWLDataPropertyRangeAxiom aux = (OWLDataPropertyRangeAxiom) axiom;
+					RoleDescription role = getRoleExpression(aux.getProperty());
+					OWLDataRange range = aux.getRange();
+					if (!range.isDataType()) {
+						throw new TranslationException("Unsupported data range: " + range.toString());
+					}
+					if (!range.isTopDataType()) {
+						log.warn("WARNING: At the moment Quest only rdfs:Literal. Offending axiom: {}", axiom.toString());
+						
+					}
 
 				} else if (axiom instanceof OWLDataSubPropertyAxiom) {
 
@@ -581,6 +595,14 @@ public class OWLAPITranslator {
 		 * 
 		 */
 		private static final long	serialVersionUID	= 7917688953760608030L;
+		
+		public TranslationException() {
+			super();
+		}
+		
+		public TranslationException(String msg) {
+			super(msg);
+		}
 
 	}
 }

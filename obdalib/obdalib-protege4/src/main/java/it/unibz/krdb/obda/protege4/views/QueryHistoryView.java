@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.protege4.gui.view.query;
+package it.unibz.krdb.obda.protege4.views;
 
 import it.unibz.krdb.obda.gui.swing.model.QueryhistoryController;
 
@@ -9,7 +9,7 @@ import javax.swing.JTree;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
-public class QueryHistoryViewComponent extends AbstractOWLViewComponent {
+public class QueryHistoryView extends AbstractOWLViewComponent {
 
 	/**
 	 * 

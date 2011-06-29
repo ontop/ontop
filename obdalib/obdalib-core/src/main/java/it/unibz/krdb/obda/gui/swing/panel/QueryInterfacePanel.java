@@ -43,29 +43,29 @@ import javax.swing.text.StyleContext;
  * 
  * @author mariano
  */
-public class QueryInterfacePanel extends javax.swing.JPanel implements
-		SavedQueriesPanelListener, TableModelListener, MappingManagerPreferenceChangeListener {
+public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQueriesPanelListener, TableModelListener,
+		MappingManagerPreferenceChangeListener {
 
 	/**
-	 * Variable currentGroup is the group's id to which belongs the selected query
-	 * Variable currentId  is the query's id that is selected
+	 * Variable currentGroup is the group's id to which belongs the selected
+	 * query Variable currentId is the query's id that is selected
 	 */
-	private static final long serialVersionUID = -5902798157183352944L;
-	private ResultViewTablePanel viewpanel;
-	private SPARQLQueryStyledDocument _styled_doc = null;
-	private it.unibz.krdb.obda.gui.swing.OBDADataQueryAction executeUCQAction = null;
-	private OBDADataQueryAction executeEQLAction = null;
-	private OBDADataQueryAction retrieveUCQExpansionAction = null;
-	private OBDADataQueryAction retrieveUCQUnfoldingAction = null;
-	private OBDADataQueryAction retrieveEQLUnfoldingAction = null;
-//	private GetDefaultSPARQLPrefixAction prefixAction = null; 
-	private QueryController qc = null;
-	private QueryInterfacePanel instance = null;
-	private double execTime = 0;
-	private String currentGroup = null;
-	private String currentId = null;
-	private OBDAModel apic = null;
-	private URI baseuri = null;
+	private static final long									serialVersionUID			= -5902798157183352944L;
+	private ResultViewTablePanel								viewpanel;
+	private SPARQLQueryStyledDocument							_styled_doc					= null;
+	private it.unibz.krdb.obda.gui.swing.OBDADataQueryAction	executeUCQAction			= null;
+	private OBDADataQueryAction									executeEQLAction			= null;
+	private OBDADataQueryAction									retrieveUCQExpansionAction	= null;
+	private OBDADataQueryAction									retrieveUCQUnfoldingAction	= null;
+	private OBDADataQueryAction									retrieveEQLUnfoldingAction	= null;
+	// private GetDefaultSPARQLPrefixAction prefixAction = null;
+	private QueryController										qc							= null;
+	private QueryInterfacePanel									instance					= null;
+	private double												execTime					= 0;
+	private String												currentGroup				= null;
+	private String												currentId					= null;
+	private OBDAModel											apic						= null;
+	private URI													baseuri						= null;
 
 	/** Creates new form QueryInterfacePanel */
 	public QueryInterfacePanel(OBDAModel apic, URI baseuri, OBDAPreferences prefs) {
@@ -85,15 +85,23 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 		queryTextPane.setCaretColor(Color.BLACK);
 	}
 
+	public void setOBDAModel(OBDAModel api) {
+		this.apic = api;
+	}
+	
+	public void setBaseURI(URI baseuri) {
+		this.baseuri = baseuri;
+	}
+
 	public void setResultsPanel(ResultViewTablePanel viewpanel) {
 		this.viewpanel = viewpanel;
 	}
 
-//	public void setGetSPARQLDefaultPrefixAction(
-//			GetDefaultSPARQLPrefixAction action) {
-//		prefixAction = action;
-//		_styled_doc.setGetDefaultSPARQLPrefixAction(action);
-//	}
+	// public void setGetSPARQLDefaultPrefixAction(
+	// GetDefaultSPARQLPrefixAction action) {
+	// prefixAction = action;
+	// _styled_doc.setGetDefaultSPARQLPrefixAction(action);
+	// }
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -105,162 +113,160 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements
 	// <editor-fold defaultstate="collapsed" desc="Generated
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
+	// <editor-fold defaultstate="collapsed"
+	// desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents() {
+		java.awt.GridBagConstraints gridBagConstraints;
 
-        eqlPopupMenu = new javax.swing.JPopupMenu();
-        getEQLSQLExpansion = new javax.swing.JMenuItem();
-        sparqlPopupMenu = new javax.swing.JPopupMenu();
-        getSPARQLExpansion = new javax.swing.JMenuItem();
-        getSPARQLSQLExpansion = new javax.swing.JMenuItem();
-        panel_query_buttons = new javax.swing.JPanel();
-        jPanelStatusContainer = new javax.swing.JPanel();
-        jLabelStatus = new javax.swing.JLabel();
-        jCheckBoxShort = new javax.swing.JCheckBox();
-        buttonAttachPrefix = new javax.swing.JButton();
-        buttonExecute = new javax.swing.JButton();
-        buttonSaveQuery = new javax.swing.JButton();
-        jPanelQueryPaneContainer = new javax.swing.JPanel();
-        jLabelHeader = new javax.swing.JLabel();
-        jScrollQueryPane = new javax.swing.JScrollPane();
-        queryTextPane = new javax.swing.JTextPane();
+		eqlPopupMenu = new javax.swing.JPopupMenu();
+		getEQLSQLExpansion = new javax.swing.JMenuItem();
+		sparqlPopupMenu = new javax.swing.JPopupMenu();
+		getSPARQLExpansion = new javax.swing.JMenuItem();
+		getSPARQLSQLExpansion = new javax.swing.JMenuItem();
+		panel_query_buttons = new javax.swing.JPanel();
+		jPanelStatusContainer = new javax.swing.JPanel();
+		jLabelStatus = new javax.swing.JLabel();
+		jCheckBoxShort = new javax.swing.JCheckBox();
+		buttonAttachPrefix = new javax.swing.JButton();
+		buttonExecute = new javax.swing.JButton();
+		buttonSaveQuery = new javax.swing.JButton();
+		jPanelQueryPaneContainer = new javax.swing.JPanel();
+		jLabelHeader = new javax.swing.JLabel();
+		jScrollQueryPane = new javax.swing.JScrollPane();
+		queryTextPane = new javax.swing.JTextPane();
 
-        getEQLSQLExpansion.setText("Get SQL for EQL query...");
-        getEQLSQLExpansion.setEnabled(false);
-        getEQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getEQLSQLExpansionActionPerformed(evt);
-            }
-        });
-        eqlPopupMenu.add(getEQLSQLExpansion);
+		getEQLSQLExpansion.setText("Get SQL for EQL query...");
+		getEQLSQLExpansion.setEnabled(false);
+		getEQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				getEQLSQLExpansionActionPerformed(evt);
+			}
+		});
+		eqlPopupMenu.add(getEQLSQLExpansion);
 
-        sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
+		sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
 
-        getSPARQLExpansion.setText("Get expansion this UCQ...");
-        getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getSPARQLExpansionActionPerformed(evt);
-            }
-        });
-        sparqlPopupMenu.add(getSPARQLExpansion);
+		getSPARQLExpansion.setText("Get expansion this UCQ...");
+		getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				getSPARQLExpansionActionPerformed(evt);
+			}
+		});
+		sparqlPopupMenu.add(getSPARQLExpansion);
 
-        getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
-        getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                getSPARQLSQLExpansionActionPerformed(evt);
-            }
-        });
-        sparqlPopupMenu.add(getSPARQLSQLExpansion);
+		getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
+		getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				getSPARQLSQLExpansionActionPerformed(evt);
+			}
+		});
+		sparqlPopupMenu.add(getSPARQLSQLExpansion);
 
-        setLayout(new java.awt.GridBagLayout());
+		setLayout(new java.awt.GridBagLayout());
 
-        panel_query_buttons.setLayout(new java.awt.GridBagLayout());
+		panel_query_buttons.setLayout(new java.awt.GridBagLayout());
 
-        jPanelStatusContainer.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-        jPanelStatusContainer.add(jLabelStatus, gridBagConstraints);
+		jPanelStatusContainer.setLayout(new java.awt.GridBagLayout());
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.weighty = 1.0;
+		gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+		jPanelStatusContainer.add(jLabelStatus, gridBagConstraints);
 
-        jCheckBoxShort.setText("show short URIs");
-        jCheckBoxShort.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBoxShortActionPerformed(evt);
-            }
-        });
-        jPanelStatusContainer.add(jCheckBoxShort, new java.awt.GridBagConstraints());
+		jCheckBoxShort.setText("show short URIs");
+		jCheckBoxShort.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				jCheckBoxShortActionPerformed(evt);
+			}
+		});
+		jPanelStatusContainer.add(jCheckBoxShort, new java.awt.GridBagConstraints());
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        panel_query_buttons.add(jPanelStatusContainer, gridBagConstraints);
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridwidth = 2;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.weightx = 1.0;
+		panel_query_buttons.add(jPanelStatusContainer, gridBagConstraints);
 
-        buttonAttachPrefix.setText("Attach Prefixes");
-        buttonAttachPrefix.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonAttachPrefixActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        panel_query_buttons.add(buttonAttachPrefix, gridBagConstraints);
+		buttonAttachPrefix.setText("Attach Prefixes");
+		buttonAttachPrefix.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				buttonAttachPrefixActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		panel_query_buttons.add(buttonAttachPrefix, gridBagConstraints);
 
-        buttonExecute.setMnemonic('x');
-        buttonExecute.setText("Execute");
-        buttonExecute.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonExecuteActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        panel_query_buttons.add(buttonExecute, gridBagConstraints);
+		buttonExecute.setMnemonic('x');
+		buttonExecute.setText("Execute");
+		buttonExecute.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				buttonExecuteActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		panel_query_buttons.add(buttonExecute, gridBagConstraints);
 
-        buttonSaveQuery.setText("Save");
-        buttonSaveQuery.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonSaveActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
-        panel_query_buttons.add(buttonSaveQuery, gridBagConstraints);
+		buttonSaveQuery.setText("Save");
+		buttonSaveQuery.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				buttonSaveActionPerformed(evt);
+			}
+		});
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
+		panel_query_buttons.add(buttonSaveQuery, gridBagConstraints);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        add(panel_query_buttons, gridBagConstraints);
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 1;
+		gridBagConstraints.gridwidth = 3;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+		add(panel_query_buttons, gridBagConstraints);
 
-        jPanelQueryPaneContainer.setLayout(new java.awt.BorderLayout());
+		jPanelQueryPaneContainer.setLayout(new java.awt.BorderLayout());
 
-        jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11));
-        jLabelHeader.setForeground(new java.awt.Color(153, 153, 153));
-        jLabelHeader.setText("Insert your ABox Query:");
-        jPanelQueryPaneContainer.add(jLabelHeader, java.awt.BorderLayout.NORTH);
+		jLabelHeader.setFont(new java.awt.Font("Arial", 1, 11));
+		jLabelHeader.setForeground(new java.awt.Color(153, 153, 153));
+		jLabelHeader.setText("Insert your ABox Query:");
+		jPanelQueryPaneContainer.add(jLabelHeader, java.awt.BorderLayout.NORTH);
 
-        queryTextPane.setFont(new java.awt.Font("Lucida Grande", 0, 14));
-        queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
-        jScrollQueryPane.setViewportView(queryTextPane);
+		queryTextPane.setFont(new java.awt.Font("Lucida Grande", 0, 14));
+		queryTextPane.setComponentPopupMenu(sparqlPopupMenu);
+		jScrollQueryPane.setViewportView(queryTextPane);
 
-        jPanelQueryPaneContainer.add(jScrollQueryPane, java.awt.BorderLayout.CENTER);
+		jPanelQueryPaneContainer.add(jScrollQueryPane, java.awt.BorderLayout.CENTER);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(jPanelQueryPaneContainer, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+		gridBagConstraints = new java.awt.GridBagConstraints();
+		gridBagConstraints.gridwidth = 3;
+		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+		gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.weighty = 1.0;
+		add(jPanelQueryPaneContainer, gridBagConstraints);
+	}// </editor-fold>//GEN-END:initComponents
 
-private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxShortActionPerformed
-// TODO add your handling code here:
-}//GEN-LAST:event_jCheckBoxShortActionPerformed
+	private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jCheckBoxShortActionPerformed
+	// TODO add your handling code here:
+	}// GEN-LAST:event_jCheckBoxShortActionPerformed
 
-	private void getEQLSQLExpansionActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getEQLSQLExpansionActionPerformed
-//		OBDADataQueryAction action = this.getRetrieveEQLUnfoldingAction();
-//		action.run(eqlTextPane.getText(), null);
+	private void getEQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getEQLSQLExpansionActionPerformed
+	// OBDADataQueryAction action = this.getRetrieveEQLUnfoldingAction();
+	// action.run(eqlTextPane.getText(), null);
 	}// GEN-LAST:event_getEQLSQLExpansionActionPerformed
 
-	private void getSPARQLExpansionActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
+	private void getSPARQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
 		Thread queryRunnerThread = new Thread(new Runnable() {
 			public void run() {
 
-				OBDADataQueryAction action = QueryInterfacePanel.this
-						.getRetrieveUCQExpansionAction();
+				OBDADataQueryAction action = QueryInterfacePanel.this.getRetrieveUCQExpansionAction();
 				action.run(queryTextPane.getText(), null);
 			}
 		});
@@ -268,28 +274,25 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
 	}// GEN-LAST:event_getSPARQLExpansionActionPerformed
 
-	private void getSPARQLSQLExpansionActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
+	private void getSPARQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
 		Thread queryRunnerThread = new Thread(new Runnable() {
 			public void run() {
-				OBDADataQueryAction action = QueryInterfacePanel.this
-						.getRetrieveUCQUnfoldingAction();
+				OBDADataQueryAction action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
 				action.run(queryTextPane.getText(), null);
 			}
 		});
 		queryRunnerThread.start();
 	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
 
-	private void buttonAttachPrefixActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAdvancedPropertiesActionPerformed
-		
-//		prefixAction.run();
-//		String prefix = (String) prefixAction.getResult();
-//		String currentcontent = queryTextPane.getText();
-//		String newcontent = prefix + "\n" + currentcontent;
-//		queryTextPane.setText(newcontent);
-		
-		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getPrefixManager().getPrefixMap(), queryTextPane,baseuri.toString());
+	private void buttonAttachPrefixActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAdvancedPropertiesActionPerformed
+
+		// prefixAction.run();
+		// String prefix = (String) prefixAction.getResult();
+		// String currentcontent = queryTextPane.getText();
+		// String newcontent = prefix + "\n" + currentcontent;
+		// queryTextPane.setText(newcontent);
+
+		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getPrefixManager().getPrefixMap(), queryTextPane, baseuri.toString());
 		dialog.show();
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 
@@ -301,8 +304,7 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 			Thread queryRunnerThread = new Thread(new Runnable() {
 
 				public void run() {
-					OBDADataQueryAction action = QueryInterfacePanel.this
-								.getExecuteUCQAction();
+					OBDADataQueryAction action = QueryInterfacePanel.this.getExecuteUCQAction();
 					action.run(queryTextPane.getText(), instance);
 
 					execTime = action.getExecutionTime();
@@ -321,7 +323,6 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
 	private void buttonSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
 
-		
 		JDialog saveDialog = new JDialog();
 		saveDialog.setModal(true);
 		String query = "";
@@ -329,32 +330,25 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
 		query = this.queryTextPane.getText();
 
-
-		if ((currentGroup != null && currentGroup != "")
-				&& (currentId != null && currentId != ""))
-			savePanel = new SaveQueryPanel(query, saveDialog, qc, currentGroup,
-					currentId);
-		else if ((currentGroup != null && currentGroup != "")
-				&& (currentId == null || currentId == ""))
-			savePanel = new SaveQueryPanel(query, saveDialog, qc, currentGroup,
-					currentId);
+		if ((currentGroup != null && currentGroup != "") && (currentId != null && currentId != ""))
+			savePanel = new SaveQueryPanel(query, saveDialog, qc, currentGroup, currentId);
+		else if ((currentGroup != null && currentGroup != "") && (currentId == null || currentId == ""))
+			savePanel = new SaveQueryPanel(query, saveDialog, qc, currentGroup, currentId);
 		else
 			savePanel = new SaveQueryPanel(query, saveDialog, qc, currentId);// ?????
 
-		saveDialog.getContentPane()
-				.add(savePanel, java.awt.BorderLayout.CENTER);
+		saveDialog.getContentPane().add(savePanel, java.awt.BorderLayout.CENTER);
 		saveDialog.pack();
 		DialogUtils.centerDialogWRTParent(this, saveDialog);
 		saveDialog.setVisible(true);
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
-	public void selectedQuerychanged(String new_group, String new_query,
-			String new_id) {
+	public void selectedQuerychanged(String new_group, String new_query, String new_id) {
 		queryTextPane.setText(new_query);
 		currentGroup = new_group;
 		currentId = new_id;
 	}
-	
+
 	public void setExecuteUCQAction(OBDADataQueryAction executeUCQAction) {
 		this.executeUCQAction = executeUCQAction;
 	}
@@ -371,8 +365,7 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 		return executeEQLAction;
 	}
 
-	public void setRetrieveUCQExpansionAction(
-			OBDADataQueryAction retrieveUCQExpansionAction) {
+	public void setRetrieveUCQExpansionAction(OBDADataQueryAction retrieveUCQExpansionAction) {
 		this.retrieveUCQExpansionAction = retrieveUCQExpansionAction;
 	}
 
@@ -380,8 +373,7 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 		return retrieveUCQExpansionAction;
 	}
 
-	public void setRetrieveUCQUnfoldingAction(
-			OBDADataQueryAction retrieveUCQUnfoldingAction) {
+	public void setRetrieveUCQUnfoldingAction(OBDADataQueryAction retrieveUCQUnfoldingAction) {
 		this.retrieveUCQUnfoldingAction = retrieveUCQUnfoldingAction;
 	}
 
@@ -389,8 +381,7 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 		return retrieveUCQUnfoldingAction;
 	}
 
-	public void setRetrieveEQLUnfoldingAction(
-			OBDADataQueryAction retrieveEQLUnfoldingAction) {
+	public void setRetrieveEQLUnfoldingAction(OBDADataQueryAction retrieveEQLUnfoldingAction) {
 		this.retrieveEQLUnfoldingAction = retrieveEQLUnfoldingAction;
 	}
 
@@ -401,46 +392,44 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 	public void updateStatus(int rows) {
 
 		Double d = Double.valueOf(execTime / 1000);
-		String s = "Execution time: " + d
-				+ " sec     Number of tuples retrieved: " + rows;
+		String s = "Execution time: " + d + " sec     Number of tuples retrieved: " + rows;
 		jLabelStatus.setText(s);
 	}
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton buttonAttachPrefix;
-    private javax.swing.JButton buttonExecute;
-    private javax.swing.JButton buttonSaveQuery;
-    private javax.swing.JPopupMenu eqlPopupMenu;
-    private javax.swing.JMenuItem getEQLSQLExpansion;
-    private javax.swing.JMenuItem getSPARQLExpansion;
-    private javax.swing.JMenuItem getSPARQLSQLExpansion;
-    private javax.swing.JCheckBox jCheckBoxShort;
-    private javax.swing.JLabel jLabelHeader;
-    private javax.swing.JLabel jLabelStatus;
-    private javax.swing.JPanel jPanelQueryPaneContainer;
-    private javax.swing.JPanel jPanelStatusContainer;
-    private javax.swing.JScrollPane jScrollQueryPane;
-    private javax.swing.JPanel panel_query_buttons;
-    private javax.swing.JTextPane queryTextPane;
-    private javax.swing.JPopupMenu sparqlPopupMenu;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JButton		buttonAttachPrefix;
+	private javax.swing.JButton		buttonExecute;
+	private javax.swing.JButton		buttonSaveQuery;
+	private javax.swing.JPopupMenu	eqlPopupMenu;
+	private javax.swing.JMenuItem	getEQLSQLExpansion;
+	private javax.swing.JMenuItem	getSPARQLExpansion;
+	private javax.swing.JMenuItem	getSPARQLSQLExpansion;
+	private javax.swing.JCheckBox	jCheckBoxShort;
+	private javax.swing.JLabel		jLabelHeader;
+	private javax.swing.JLabel		jLabelStatus;
+	private javax.swing.JPanel		jPanelQueryPaneContainer;
+	private javax.swing.JPanel		jPanelStatusContainer;
+	private javax.swing.JScrollPane	jScrollQueryPane;
+	private javax.swing.JPanel		panel_query_buttons;
+	private javax.swing.JTextPane	queryTextPane;
+	private javax.swing.JPopupMenu	sparqlPopupMenu;
+
+	// End of variables declaration//GEN-END:variables
 
 	// @Override
 	public void tableChanged(TableModelEvent e) {
 		Double d = Double.valueOf(execTime / 1000);
-		int rows = ((TableModel) e.getSource())
-				.getRowCount();
-		String s = "Execution time: " + d
-				+ " sec     Number of tuples retrieved: " + rows;
+		int rows = ((TableModel) e.getSource()).getRowCount();
+		String s = "Execution time: " + d + " sec     Number of tuples retrieved: " + rows;
 		jLabelStatus.setText(s);
 
 	}
-	
+
 	public boolean isShortURISelect() {
 		return jCheckBoxShort.isSelected();
 	}
 
-	public String getQuery(){	
+	public String getQuery() {
 		return queryTextPane.getText();
 	}
 
@@ -477,6 +466,6 @@ private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {//GE
 	@Override
 	public void useDefaultPreferencesChanged(String key, String value) {
 		String query = queryTextPane.getText();
-		queryTextPane.setText(query);		
+		queryTextPane.setText(query);
 	}
 }

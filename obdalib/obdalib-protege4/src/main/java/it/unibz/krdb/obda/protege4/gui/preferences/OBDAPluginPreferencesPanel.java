@@ -16,6 +16,10 @@ import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel 
 		implements MappingManagerPreferenceChangeListener {
 		
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= -238263730527609043L;
 	private Preferences preference = null;
 	private OBDAPreferences obdaPreference = null;
 	

@@ -8,7 +8,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Datasource editor"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.DatasourcesManagerViewComponent">
+			value="it.unibz.krdb.obda.protege4.views.DatasourcesManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
@@ -18,7 +18,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mappings editor"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.MappingsManagerView">
+			value="it.unibz.krdb.obda.protege4.views.MappingsManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
@@ -28,7 +28,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="RDBMS inspector"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.RDBMSInspectorView">
+			value="it.unibz.krdb.obda.protege4.views.RDBMSInspectorView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
@@ -38,7 +38,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="SQL query interface"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.SQLQueryInterfaceView">
+			value="it.unibz.krdb.obda.protege4.views.SQLQueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
@@ -52,7 +52,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Query manager"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.query.QueryManagerViewComponent">
+			value="it.unibz.krdb.obda.protege4.views.QueryManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
@@ -62,7 +62,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="OBDA query interface"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.query.QueryInterfaceViewComponent">
+			value="it.unibz.krdb.obda.protege4.views.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="Data query"></category>
@@ -74,7 +74,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Query history"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.view.query.QueryHistoryViewComponent">
+			value="it.unibz.krdb.obda.protege4.views.QueryHistoryView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
@@ -86,7 +86,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="OBDA model"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.tab.OBDAWorkspaceTab">
+			value="it.unibz.krdb.obda.protege4.gui.tab.OBDATab">
 		</class>
 		<index value="X"></index>
 		<editorKitId value="OWLEditorKit"></editorKitId>
@@ -98,7 +98,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="OBDA query"></label>
 		<class
-			value="it.unibz.krdb.obda.protege4.gui.tab.IndividualsQueriesWorkspaceTab">
+			value="it.unibz.krdb.obda.protege4.gui.tab.OBDAQueriesTab">
 		</class>
 		<index value="X"></index>
 		<editorKitId value="OWLEditorKit"></editorKitId>
@@ -166,7 +166,7 @@
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference.reasonerfactory">
     <name value="Quest 1.0"/>
-    <class value="it.unibz.krdb.obda.protege4.ProtegeOBDAOWLReformulationPlatformFactory"/>
+    <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
 
 	

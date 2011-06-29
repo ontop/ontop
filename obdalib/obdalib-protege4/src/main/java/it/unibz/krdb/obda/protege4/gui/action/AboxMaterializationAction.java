@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi.util.OBDA2OWLDataMaterializer;
-import it.unibz.krdb.obda.protege4.core.OBDAPluginController;
+import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -66,7 +66,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		OWLEditorKit kit = (OWLEditorKit) this.getEditorKit();
 		OWLModelManager mm = kit.getOWLModelManager();
 		Container cont = this.getWorkspace().getRootPane().getParent();
-		OBDAModel obdaapi = ((OBDAPluginController) kit.get(OBDAModelImpl.class.getName())).getOBDAManager();
+		OBDAModel obdaapi = ((OBDAModelManager) kit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
 
 		try {
 			OWLOntologyManager owlOntManager = mm.getOWLOntologyManager();

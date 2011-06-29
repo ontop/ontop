@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.protege4.gui.tab;
 
 import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 
-public class OBDAWorkspaceTab extends OWLWorkspaceViewsTab {
+public class OBDATab extends OWLWorkspaceViewsTab {
 	private static final long	serialVersionUID	= -4896884982262745722L;
 
 	@Override

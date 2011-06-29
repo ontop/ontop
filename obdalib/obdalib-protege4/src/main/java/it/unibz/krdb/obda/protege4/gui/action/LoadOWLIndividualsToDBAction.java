@@ -4,8 +4,8 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
-import it.unibz.krdb.obda.protege4.core.OBDAPluginController;
-import it.unibz.krdb.obda.protege4.gui.preferences.SelectDB;
+import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
+import it.unibz.krdb.obda.protege4.dialogs.SelectDB;
 
 import java.awt.event.ActionEvent;
 import java.net.URI;
@@ -23,7 +23,6 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 
 	/**
@@ -31,8 +30,8 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 	 */
 	private static final long	serialVersionUID	= -8210706765886897292L;
 	private SelectDB			selectDialog		= null;
-	
-	Logger log = LoggerFactory.getLogger(LoadOWLIndividualsToDBAction.class);
+
+	Logger						log					= LoggerFactory.getLogger(LoadOWLIndividualsToDBAction.class);
 
 	public void initialise() throws Exception {
 
@@ -59,12 +58,13 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 
 		Runnable showdialog = new Runnable() {
 			public void run() {
-				OBDAPluginController controller = getEditorKit().get(OBDAModelImpl.class.getName());
-				selectDialog = new SelectDB(new JFrame(), true, controller.getOBDAManager());
+				OBDAModelManager controller = getEditorKit().get(OBDAModelImpl.class.getName());
+				selectDialog = new SelectDB(new JFrame(), true, controller.getActiveOBDAModel());
 				selectDialog.setLocationRelativeTo(getEditorKit().getWorkspace().getParent());
 				selectDialog.setVisible(true);
 				String selectedsource = selectDialog.getSelectedSource();
-				final DataSource source = controller.getOBDAManager().getDatasourcesController().getDataSource(URI.create(selectedsource));
+				final DataSource source = controller.getActiveOBDAModel().getDatasourcesController()
+						.getDataSource(URI.create(selectedsource));
 				Thread th = new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -76,7 +76,7 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 							dump.materialize(ontologies, selectDialog.isOverrideSelected());
 							monitor.stop();
 							if (!monitor.isCanceled()) {
-								JOptionPane.showMessageDialog(null, "Dump successful!", "", JOptionPane.PLAIN_MESSAGE);
+								JOptionPane.showMessageDialog(null, "Dump successful.", "", JOptionPane.PLAIN_MESSAGE);
 							}
 						} catch (Exception e) {
 							monitor.stop();

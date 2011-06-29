@@ -24,14 +24,13 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.DatasourcesController;
 import it.unibz.krdb.obda.model.DatasourcesControllerListener;
-import it.unibz.krdb.obda.model.impl.DataSourceImpl;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -59,21 +58,40 @@ public class DatasourceSelector extends javax.swing.JPanel implements Datasource
 
 	private Vector<DatasourceSelectorListener>	listeners;
 
+	DatasourcesController						dsController		= null;
+
 	/** Creates new form DatasourceListSelector */
-	public DatasourceSelector(List<DataSource> datasources) {
+	public DatasourceSelector(DatasourcesController dsController) {
+		this.dsController = dsController;
+		this.setDatasourceController(dsController);
+
 		listeners = new Vector<DatasourceSelectorListener>();
-
-		cboModelDatasource = new DefaultComboBoxModel(datasources.toArray());
-		cboRendererDatasource = new DatasourceCellRenderer();
-
 		initComponents();
+
 	}
 
-	public void initSources(List<DataSource> datsources) {
+	public void setDatasourceController(DatasourcesController dsController) {
+		this.dsController.removeDatasourceControllerListener(this);
+		this.dsController = dsController;
+		this.dsController.addDatasourceControllerListener(this);
+		initSources();
+
+	}
+
+	public void initSources() {
+
+		Vector<DataSource> vecDatasource = new Vector<DataSource>(dsController.getAllSources());
+		if (cboModelDatasource == null) {
+			cboModelDatasource = new DefaultComboBoxModel(vecDatasource.toArray());
+			cboRendererDatasource = new DatasourceCellRenderer();
+		}
+
 		cboModelDatasource.removeAllElements();
-		for (DataSource ds : datsources) {
+		for (DataSource ds : vecDatasource) {
 			cboModelDatasource.addElement(ds);
 		}
+//		cboModelDatasource.setSelectedItem(-1);
+//		this.cboDatasource.setSelectedIndex(-1);
 	}
 
 	public DataSource getSelectedDataSource() {

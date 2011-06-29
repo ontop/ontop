@@ -9,7 +9,7 @@
  * Created on 9-set-2010, 14.16.20
  */
 
-package it.unibz.krdb.obda.protege4.gui.preferences;
+package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 

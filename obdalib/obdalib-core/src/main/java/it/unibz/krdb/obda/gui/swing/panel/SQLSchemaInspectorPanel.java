@@ -92,6 +92,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		tblRelations.getSelectionModel().setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
 		tblRelations.getSelectionModel().addListSelectionListener(new RowListener());
 	}
+	
+	public void setDatasourceController(DatasourcesController dsController) {
+		this.dscontroller = dsController;
+	}
 
 	/**
 	 * This method is called from within the constructor to initialize the form.

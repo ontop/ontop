@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package it.unibz.krdb.obda.protege4.gui.preferences;
+package it.unibz.krdb.obda.protege4.dialogs;
 
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
