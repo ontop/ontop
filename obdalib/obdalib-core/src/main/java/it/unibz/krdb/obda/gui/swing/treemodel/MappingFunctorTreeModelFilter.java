@@ -31,11 +31,11 @@ public class MappingFunctorTreeModelFilter extends TreeModelFilter<OBDAMappingAx
 
     boolean isMatch = false;
 
-	  String[] vecKeyword = strFilter.split(" ");
+	  String[] vecKeyword = strFilter.split(KEYWORD_DELIM);
     for (String keyword : vecKeyword) {
   		for (int i = 0; i < atoms.size(); i++) {
   			PredicateAtom predicate = (PredicateAtom) atoms.get(i);
-  			isMatch = match(keyword, predicate);
+  			isMatch = isMatch || match(keyword.trim(), predicate);
   		}
   		if (isMatch) {
   		  break;  // end loop if a match is found!

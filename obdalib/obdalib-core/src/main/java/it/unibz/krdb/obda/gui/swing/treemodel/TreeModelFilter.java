@@ -10,6 +10,8 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
  */
 public abstract class TreeModelFilter<T extends Object> {
 
+  protected final static String KEYWORD_DELIM = ",";
+
   protected boolean bNegation;
   protected String strFilter;
 

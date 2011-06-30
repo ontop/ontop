@@ -21,9 +21,9 @@ public class MappingSQLStringTreeModelFilter extends TreeModelFilter<OBDAMapping
 
     boolean isMatch = false;
 
-	  String[] vecKeyword = strFilter.split(" ");
+	  String[] vecKeyword = strFilter.split(KEYWORD_DELIM);
     for (String keyword : vecKeyword) {
-      isMatch = match(keyword, bodyquery.toString());
+      isMatch = match(keyword.trim(), bodyquery.toString());
       if(isMatch) {
         break;  // end loop if a match is found!
       }

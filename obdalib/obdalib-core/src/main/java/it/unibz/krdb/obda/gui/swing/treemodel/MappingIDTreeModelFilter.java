@@ -13,9 +13,9 @@ public class MappingIDTreeModelFilter extends TreeModelFilter<OBDAMappingAxiom> 
 
 	  boolean isMatch = false;
 
-		String[] vecKeyword = strFilter.split(" ");
+		String[] vecKeyword = strFilter.split(KEYWORD_DELIM);
 		for (String keyword : vecKeyword) {
-		  isMatch = match(keyword, object.getId());
+		  isMatch = match(keyword.trim(), object.getId());
 		  if(isMatch) {
 		    break;  // end loop if a match is found!
 		  }

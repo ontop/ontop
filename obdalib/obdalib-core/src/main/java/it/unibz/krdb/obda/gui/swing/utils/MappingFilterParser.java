@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:50:56 MappingFilter.g 2011-06-15 16:54:43
+// $ANTLR 3.3 Nov 30, 2010 12:50:56 MappingFilter.g 2011-06-30 14:09:08
 
 package it.unibz.krdb.obda.gui.swing.utils;
 
@@ -19,10 +19,10 @@ import java.util.ArrayList;
 
 public class MappingFilterParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "COMMA", "NOT", "COLON", "ID", "TEXT", "TARGET", "SOURCE", "FUNCT", "PRED", "STRING_LITERAL", "QUOTE_DOUBLE", "WS"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "SEMI", "NOT", "COLON", "ID", "TEXT", "TARGET", "SOURCE", "FUNCT", "PRED", "STRING", "COMMA", "UNDERSCORE", "DASH", "ALPHA", "DIGIT", "ALPHANUM", "CHAR", "WS"
     };
     public static final int EOF=-1;
-    public static final int COMMA=4;
+    public static final int SEMI=4;
     public static final int NOT=5;
     public static final int COLON=6;
     public static final int ID=7;
@@ -31,9 +31,15 @@ public class MappingFilterParser extends Parser {
     public static final int SOURCE=10;
     public static final int FUNCT=11;
     public static final int PRED=12;
-    public static final int STRING_LITERAL=13;
-    public static final int QUOTE_DOUBLE=14;
-    public static final int WS=15;
+    public static final int STRING=13;
+    public static final int COMMA=14;
+    public static final int UNDERSCORE=15;
+    public static final int DASH=16;
+    public static final int ALPHA=17;
+    public static final int DIGIT=18;
+    public static final int ALPHANUM=19;
+    public static final int CHAR=20;
+    public static final int WS=21;
 
     // delegates
     // delegators
@@ -66,7 +72,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "parse"
-    // MappingFilter.g:52:1: parse returns [ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList] : f1= filter ( COMMA f2= filter )* EOF ;
+    // MappingFilter.g:52:1: parse returns [ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList] : f1= filter ( SEMI f2= filter )* EOF ;
     public final ArrayList<TreeModelFilter<OBDAMappingAxiom>> parse() throws RecognitionException {
         ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList = null;
 
@@ -79,8 +85,8 @@ public class MappingFilterParser extends Parser {
           filterList = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 
         try {
-            // MappingFilter.g:56:3: (f1= filter ( COMMA f2= filter )* EOF )
-            // MappingFilter.g:56:5: f1= filter ( COMMA f2= filter )* EOF
+            // MappingFilter.g:56:3: (f1= filter ( SEMI f2= filter )* EOF )
+            // MappingFilter.g:56:5: f1= filter ( SEMI f2= filter )* EOF
             {
             pushFollow(FOLLOW_filter_in_parse55);
             f1=filter();
@@ -88,22 +94,22 @@ public class MappingFilterParser extends Parser {
             state._fsp--;
 
              filterList.add(f1); 
-            // MappingFilter.g:56:47: ( COMMA f2= filter )*
+            // MappingFilter.g:56:47: ( SEMI f2= filter )*
             loop1:
             do {
                 int alt1=2;
                 int LA1_0 = input.LA(1);
 
-                if ( (LA1_0==COMMA) ) {
+                if ( (LA1_0==SEMI) ) {
                     alt1=1;
                 }
 
 
                 switch (alt1) {
             	case 1 :
-            	    // MappingFilter.g:56:48: COMMA f2= filter
+            	    // MappingFilter.g:56:48: SEMI f2= filter
             	    {
-            	    match(input,COMMA,FOLLOW_COMMA_in_parse60); 
+            	    match(input,SEMI,FOLLOW_SEMI_in_parse60); 
             	    pushFollow(FOLLOW_filter_in_parse64);
             	    f2=filter();
 
@@ -137,7 +143,7 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "filter"
-    // MappingFilter.g:61:1: filter returns [TreeModelFilter<OBDAMappingAxiom> value] : ( (not= NOT )? type COLON keyword ) ;
+    // MappingFilter.g:61:1: filter returns [TreeModelFilter<OBDAMappingAxiom> value] : ( (not= NOT )? ( type COLON )? keyword ) ;
     public final TreeModelFilter<OBDAMappingAxiom> filter() throws RecognitionException {
         TreeModelFilter<OBDAMappingAxiom> value = null;
 
@@ -148,11 +154,11 @@ public class MappingFilterParser extends Parser {
 
 
         try {
-            // MappingFilter.g:62:3: ( ( (not= NOT )? type COLON keyword ) )
-            // MappingFilter.g:62:5: ( (not= NOT )? type COLON keyword )
+            // MappingFilter.g:62:3: ( ( (not= NOT )? ( type COLON )? keyword ) )
+            // MappingFilter.g:62:5: ( (not= NOT )? ( type COLON )? keyword )
             {
-            // MappingFilter.g:62:5: ( (not= NOT )? type COLON keyword )
-            // MappingFilter.g:62:6: (not= NOT )? type COLON keyword
+            // MappingFilter.g:62:5: ( (not= NOT )? ( type COLON )? keyword )
+            // MappingFilter.g:62:6: (not= NOT )? ( type COLON )? keyword
             {
             // MappingFilter.g:62:9: (not= NOT )?
             int alt2=2;
@@ -172,13 +178,30 @@ public class MappingFilterParser extends Parser {
 
             }
 
-            pushFollow(FOLLOW_type_in_filter99);
-            type1=type();
+            // MappingFilter.g:62:15: ( type COLON )?
+            int alt3=2;
+            int LA3_0 = input.LA(1);
 
-            state._fsp--;
+            if ( ((LA3_0>=ID && LA3_0<=PRED)) ) {
+                alt3=1;
+            }
+            switch (alt3) {
+                case 1 :
+                    // MappingFilter.g:62:16: type COLON
+                    {
+                    pushFollow(FOLLOW_type_in_filter100);
+                    type1=type();
 
-            match(input,COLON,FOLLOW_COLON_in_filter101); 
-            pushFollow(FOLLOW_keyword_in_filter103);
+                    state._fsp--;
+
+                    match(input,COLON,FOLLOW_COLON_in_filter102); 
+
+                    }
+                    break;
+
+            }
+
+            pushFollow(FOLLOW_keyword_in_filter106);
             keyword2=keyword();
 
             state._fsp--;
@@ -188,11 +211,17 @@ public class MappingFilterParser extends Parser {
 
 
                   value = type1;
-                  String keyword = stripLeadingAndTrailingQuotes((keyword2!=null?input.toString(keyword2.start,keyword2.stop):null));    
+                  if (value == null) {
+                    value = new MappingStringTreeModelFilter();
+                  }
+                  
+                  // Register the keyword.
+                  value.addStringFilter((keyword2!=null?input.toString(keyword2.start,keyword2.stop):null));
+                  
+                  // Register the negation.
                   if (not != null) {
                     value.putNegation();
                   }
-                  value.addStringFilter(keyword);
                 
 
             }
@@ -210,96 +239,96 @@ public class MappingFilterParser extends Parser {
 
 
     // $ANTLR start "type"
-    // MappingFilter.g:72:1: type returns [TreeModelFilter<OBDAMappingAxiom> value] : ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED );
+    // MappingFilter.g:78:1: type returns [TreeModelFilter<OBDAMappingAxiom> value] : ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED );
     public final TreeModelFilter<OBDAMappingAxiom> type() throws RecognitionException {
         TreeModelFilter<OBDAMappingAxiom> value = null;
 
         try {
-            // MappingFilter.g:73:3: ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED )
-            int alt3=6;
+            // MappingFilter.g:79:3: ( ID | TEXT | TARGET | SOURCE | FUNCT | PRED )
+            int alt4=6;
             switch ( input.LA(1) ) {
             case ID:
                 {
-                alt3=1;
+                alt4=1;
                 }
                 break;
             case TEXT:
                 {
-                alt3=2;
+                alt4=2;
                 }
                 break;
             case TARGET:
                 {
-                alt3=3;
+                alt4=3;
                 }
                 break;
             case SOURCE:
                 {
-                alt3=4;
+                alt4=4;
                 }
                 break;
             case FUNCT:
                 {
-                alt3=5;
+                alt4=5;
                 }
                 break;
             case PRED:
                 {
-                alt3=6;
+                alt4=6;
                 }
                 break;
             default:
                 NoViableAltException nvae =
-                    new NoViableAltException("", 3, 0, input);
+                    new NoViableAltException("", 4, 0, input);
 
                 throw nvae;
             }
 
-            switch (alt3) {
+            switch (alt4) {
                 case 1 :
-                    // MappingFilter.g:73:5: ID
+                    // MappingFilter.g:79:5: ID
                     {
-                    match(input,ID,FOLLOW_ID_in_type123); 
+                    match(input,ID,FOLLOW_ID_in_type126); 
                      value = new MappingIDTreeModelFilter(); 
 
                     }
                     break;
                 case 2 :
-                    // MappingFilter.g:74:5: TEXT
+                    // MappingFilter.g:80:5: TEXT
                     {
-                    match(input,TEXT,FOLLOW_TEXT_in_type136); 
+                    match(input,TEXT,FOLLOW_TEXT_in_type139); 
                      value = new MappingStringTreeModelFilter(); 
 
                     }
                     break;
                 case 3 :
-                    // MappingFilter.g:75:5: TARGET
+                    // MappingFilter.g:81:5: TARGET
                     {
-                    match(input,TARGET,FOLLOW_TARGET_in_type147); 
+                    match(input,TARGET,FOLLOW_TARGET_in_type150); 
                      value = new MappingHeadVariableTreeModelFilter(); 
 
                     }
                     break;
                 case 4 :
-                    // MappingFilter.g:76:5: SOURCE
+                    // MappingFilter.g:82:5: SOURCE
                     {
-                    match(input,SOURCE,FOLLOW_SOURCE_in_type156); 
+                    match(input,SOURCE,FOLLOW_SOURCE_in_type159); 
                      value = new MappingSQLStringTreeModelFilter(); 
 
                     }
                     break;
                 case 5 :
-                    // MappingFilter.g:77:5: FUNCT
+                    // MappingFilter.g:83:5: FUNCT
                     {
-                    match(input,FUNCT,FOLLOW_FUNCT_in_type165); 
+                    match(input,FUNCT,FOLLOW_FUNCT_in_type168); 
                      value = new MappingFunctorTreeModelFilter(); 
 
                     }
                     break;
                 case 6 :
-                    // MappingFilter.g:78:5: PRED
+                    // MappingFilter.g:84:5: PRED
                     {
-                    match(input,PRED,FOLLOW_PRED_in_type175); 
+                    match(input,PRED,FOLLOW_PRED_in_type178); 
                      value = new MappingPredicateTreeModelFilter(); 
 
                     }
@@ -321,16 +350,42 @@ public class MappingFilterParser extends Parser {
     };
 
     // $ANTLR start "keyword"
-    // MappingFilter.g:81:1: keyword : STRING_LITERAL ;
+    // MappingFilter.g:87:1: keyword : STRING ( COMMA STRING )* ;
     public final MappingFilterParser.keyword_return keyword() throws RecognitionException {
         MappingFilterParser.keyword_return retval = new MappingFilterParser.keyword_return();
         retval.start = input.LT(1);
 
         try {
-            // MappingFilter.g:82:3: ( STRING_LITERAL )
-            // MappingFilter.g:82:5: STRING_LITERAL
+            // MappingFilter.g:88:3: ( STRING ( COMMA STRING )* )
+            // MappingFilter.g:88:5: STRING ( COMMA STRING )*
             {
-            match(input,STRING_LITERAL,FOLLOW_STRING_LITERAL_in_keyword195); 
+            match(input,STRING,FOLLOW_STRING_in_keyword198); 
+            // MappingFilter.g:88:12: ( COMMA STRING )*
+            loop5:
+            do {
+                int alt5=2;
+                int LA5_0 = input.LA(1);
+
+                if ( (LA5_0==COMMA) ) {
+                    alt5=1;
+                }
+
+
+                switch (alt5) {
+            	case 1 :
+            	    // MappingFilter.g:88:13: COMMA STRING
+            	    {
+            	    match(input,COMMA,FOLLOW_COMMA_in_keyword201); 
+            	    match(input,STRING,FOLLOW_STRING_in_keyword203); 
+
+            	    }
+            	    break;
+
+            	default :
+            	    break loop5;
+                }
+            } while (true);
+
 
             }
 
@@ -353,19 +408,21 @@ public class MappingFilterParser extends Parser {
  
 
     public static final BitSet FOLLOW_filter_in_parse55 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_COMMA_in_parse60 = new BitSet(new long[]{0x0000000000001FA0L});
+    public static final BitSet FOLLOW_SEMI_in_parse60 = new BitSet(new long[]{0x0000000000003FA0L});
     public static final BitSet FOLLOW_filter_in_parse64 = new BitSet(new long[]{0x0000000000000010L});
     public static final BitSet FOLLOW_EOF_in_parse70 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NOT_in_filter96 = new BitSet(new long[]{0x0000000000001FA0L});
-    public static final BitSet FOLLOW_type_in_filter99 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_COLON_in_filter101 = new BitSet(new long[]{0x0000000000002000L});
-    public static final BitSet FOLLOW_keyword_in_filter103 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_type123 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TEXT_in_type136 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TARGET_in_type147 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_SOURCE_in_type156 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_FUNCT_in_type165 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PRED_in_type175 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_STRING_LITERAL_in_keyword195 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NOT_in_filter96 = new BitSet(new long[]{0x0000000000003FA0L});
+    public static final BitSet FOLLOW_type_in_filter100 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_COLON_in_filter102 = new BitSet(new long[]{0x0000000000003FA0L});
+    public static final BitSet FOLLOW_keyword_in_filter106 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_type126 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TEXT_in_type139 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TARGET_in_type150 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_SOURCE_in_type159 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_FUNCT_in_type168 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_PRED_in_type178 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STRING_in_keyword198 = new BitSet(new long[]{0x0000000000004002L});
+    public static final BitSet FOLLOW_COMMA_in_keyword201 = new BitSet(new long[]{0x0000000000002000L});
+    public static final BitSet FOLLOW_STRING_in_keyword203 = new BitSet(new long[]{0x0000000000004002L});
 
 }

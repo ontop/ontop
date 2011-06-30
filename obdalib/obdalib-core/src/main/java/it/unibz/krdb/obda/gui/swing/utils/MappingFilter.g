@@ -33,19 +33,6 @@ public List<String> getErrors() {
 }   
 }
 
-@members {
-private static String stripLeadingAndTrailingQuotes(String str)
-{
-  if (str.startsWith("\"")) {
-    str = str.substring(1, str.length());
-  }
-  if (str.endsWith("\"")) {
-    str = str.substring(0, str.length() - 1);
-  }
-  return str;
-}
-}
-
 /*------------------------------------------------------------------
  * PARSER RULES
  *------------------------------------------------------------------*/
@@ -53,19 +40,25 @@ parse returns [ArrayList<TreeModelFilter<OBDAMappingAxiom>> filterList]
 @init {
   $filterList = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
 }
-  : f1=filter { $filterList.add($f1.value); } (COMMA f2=filter { $filterList.add($f2.value); })* EOF
+  : f1=filter { $filterList.add($f1.value); } (SEMI f2=filter { $filterList.add($f2.value); })* EOF
   ; catch [RecognitionException e] { 
       throw e;
     }
 
 filter returns [TreeModelFilter<OBDAMappingAxiom> value]
-  : (not=NOT? type COLON keyword) {
+  : (not=NOT? (type COLON)? keyword) {
       $value = $type.value;
-      String keyword = stripLeadingAndTrailingQuotes($keyword.text);    
+      if ($value == null) {
+        $value = new MappingStringTreeModelFilter();
+      }
+      
+      // Register the keyword.
+      $value.addStringFilter($keyword.text);
+      
+      // Register the negation.
       if (not != null) {
         $value.putNegation();
       }
-      $value.addStringFilter(keyword);
     }
   ;
 
@@ -79,7 +72,7 @@ type returns [TreeModelFilter<OBDAMappingAxiom> value]
   ;
   
 keyword
-  : STRING_LITERAL
+  : STRING (COMMA STRING)*
   ; 
  
 /*------------------------------------------------------------------
@@ -102,10 +95,18 @@ PRED: ('P'|'p')('R'|'r')('E'|'e')('D'|'d');
 
 COMMA:         ',';
 COLON:         ':';
-QUOTE_DOUBLE:  '"';
+SEMI:          ';';
+UNDERSCORE:    '_';
+DASH:          '-';
 
-STRING_LITERAL
-  : QUOTE_DOUBLE (options {greedy=false;} : .)* QUOTE_DOUBLE
-  ;
+fragment ALPHA: ('a'..'z'|'A'..'Z');
+
+fragment DIGIT: '0'..'9'; 
+
+fragment ALPHANUM: (ALPHA|DIGIT);
+
+fragment CHAR: (ALPHANUM|UNDERSCORE|DASH);
+
+STRING: CHAR*;
 
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};

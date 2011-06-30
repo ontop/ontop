@@ -27,11 +27,11 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 
 	  boolean isMatch = false;
 
-		String[] vecKeyword = strFilter.split(" ");
+		String[] vecKeyword = strFilter.split(KEYWORD_DELIM);
     for (String keyword : vecKeyword) {
   		// Check in the Mapping ID
       final String mappingId = object.getId();
-      isMatch = MappingIDTreeModelFilter.match(keyword, mappingId);
+      isMatch = MappingIDTreeModelFilter.match(keyword.trim(), mappingId);
       if (isMatch) {
         break; // end loop if a match is found!
       }
@@ -41,7 +41,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
   		final List<Atom> atoms = headquery.getBody();
       for (int i = 0; i < atoms.size(); i++) {
         PredicateAtom predicate = (PredicateAtom) atoms.get(i);
-        isMatch = MappingHeadVariableTreeModelFilter.match(keyword, predicate);
+        isMatch = isMatch || MappingHeadVariableTreeModelFilter.match(keyword.trim(), predicate);
       }
       if (isMatch) {
         break; // end loop if a match is found!
@@ -49,7 +49,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 
   		// Check in the Mapping Source Query
   		final SQLQuery query = (SQLQuery) object.getSourceQuery();
-  		isMatch = MappingSQLStringTreeModelFilter.match(keyword, query.toString());
+  		isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
   		if (isMatch) {
         break; // end loop if a match is found!
       }
