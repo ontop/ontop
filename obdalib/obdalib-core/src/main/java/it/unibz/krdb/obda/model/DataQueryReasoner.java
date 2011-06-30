@@ -8,5 +8,7 @@ public interface DataQueryReasoner {
 	public void startProgressMonitor(String msg);
 	
 	public void finishProgressMonitor();
+	
+	public void loadOBDAModel(OBDAModel model);
 
 }

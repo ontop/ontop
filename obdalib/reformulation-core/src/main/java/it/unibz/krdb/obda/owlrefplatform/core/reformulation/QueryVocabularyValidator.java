@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.PredicateAtom;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -17,15 +18,15 @@ import org.slf4j.LoggerFactory;
 public class QueryVocabularyValidator
 {
   /** The source ontology for validating the target query */
-  private OWLOntology ontology;
+  private Collection<OWLOntology> ontologies;
 
   /** List of invalid predicates */
   private Vector<String> invalidPredicates = new Vector<String>();
 
   Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
 
-  public QueryVocabularyValidator(OWLOntology ontology) {
-    this.ontology = ontology;
+  public QueryVocabularyValidator(Collection<OWLOntology> ontologies) {
+    this.ontologies = ontologies;
   }
 
   public boolean validate(DatalogProgram input) {
@@ -57,9 +58,17 @@ public class QueryVocabularyValidator
       URI predicate = atom.getPredicate().getName();
 
       // TODO Add a predicate type for better identification.
-      boolean isClass = ontology.containsClassReference(predicate);
-      boolean isObjectProp = ontology.containsObjectPropertyReference(predicate);
-      boolean isDataProp = ontology.containsDataPropertyReference(predicate);
+      
+      boolean isClass = false;
+      boolean isObjectProp = false;
+      boolean isDataProp = false;
+      
+      for (OWLOntology ontology: ontologies) {
+    	  isClass = isClass || ontology.containsClassReference(predicate);
+          isObjectProp = isObjectProp || ontology.containsObjectPropertyReference(predicate);
+          isDataProp = isDataProp || ontology.containsDataPropertyReference(predicate);
+      }
+      
 
       // Check if the predicate contains in the ontology vocabulary as one
       // of these components (i.e., class, object property, data property).

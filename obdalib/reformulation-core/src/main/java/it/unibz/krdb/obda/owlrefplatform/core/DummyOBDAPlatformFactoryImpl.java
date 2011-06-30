@@ -155,7 +155,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
             gen = new ComplexMappingSQLGenerator(viewMan, util);
 
             techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, null, eval_engine, apic);
-            return new OBDAOWLReformulationPlatform(apic, manager, techniqueWrapper);
+            return new OBDAOWLReformulationPlatform(manager);
 
         } catch (Exception e) {
             throw new RuntimeException(e);

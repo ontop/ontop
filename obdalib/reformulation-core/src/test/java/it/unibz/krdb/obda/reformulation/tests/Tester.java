@@ -2,13 +2,13 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.DataQueryReasoner;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.QueryResultSet;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
@@ -45,7 +45,7 @@ public class Tester {
     private OWLOntologyManager manager = null;
     private OWLOntology ontology = null;
     private OBDAModel apic = null;
-    private DataQueryReasoner reasoner = null;
+    private OBDAOWLReformulationPlatform reasoner = null;
     private String owlloc = null;
     private String xmlLoc = null;
     private Map<String, String> queryMap = null;
@@ -119,10 +119,16 @@ public class Tester {
         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
 
         OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
+        
         fac.setOBDAController(apic);
         fac.setPreferenceHolder(pref);
 
-        reasoner = (DataQueryReasoner) fac.createReasoner(manager);
+        reasoner = (OBDAOWLReformulationPlatform) fac.createReasoner(manager);
+        
+        reasoner.loadOBDAModel(apic);
+        reasoner.loadOntologies(manager.getOntologies());
+        reasoner.setPreferences(pref);
+        reasoner.classify();
 
         queryMap = new HashMap<String, String>();
         Vector<QueryControllerEntity> vec = apic.getQueryController().getElements();

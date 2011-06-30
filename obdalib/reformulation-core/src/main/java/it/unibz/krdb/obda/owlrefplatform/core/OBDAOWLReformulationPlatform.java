@@ -1,20 +1,59 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.DataQueryReasoner;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.MappingController;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxSerializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxDumpException;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.AboxFromDBLoader;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DirectMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.MappingValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SimpleDirectQueryGenrator;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DirectMappingUnfolder;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
+import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.JOptionPane;
+import java.util.Vector;
 
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasoner;
@@ -45,23 +84,35 @@ import org.slf4j.LoggerFactory;
 
 public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReasoner, MonitorableOWLReasoner {
 
-	private static final String		NOT_IMPLEMENTED_STR	= "Service not available.";
+	private static final String					NOT_IMPLEMENTED_STR		= "Service not available.";
 
-	private OWLOntologyManager		ontoManager			= null;
-	private DLLiterOntology			ontology			= null;
-	private TechniqueWrapper		techwrapper			= null;
-	private HashSet<OWLOntology>	loadedOntologies	= null;
-	private ProgressMonitor			progressMonitor		= new NullProgressMonitor();
-	
-	private Logger log = LoggerFactory.getLogger(OBDAOWLReformulationPlatform.class);
+	private OWLOntologyManager					ontoManager				= null;
 
-	private boolean					isClassified		= false;
+	/* The merge and tranlsation of all loaded ontologies */
+	private DLLiterOntology						translatedOntologyMerge	= null;
 
-	protected OBDAOWLReformulationPlatform(OBDAModel apic, OWLOntologyManager manager, TechniqueWrapper wrapper) throws Exception {
+	private TechniqueWrapper					techwrapper				= null;
+	private HashSet<OWLOntology>				loadedOntologies		= null;
+	private ProgressMonitor						progressMonitor			= new NullProgressMonitor();
 
-		this.ontoManager = manager;
-		this.techwrapper = wrapper;
-		loadOntologies(ontoManager.getOntologies());
+	private OBDAModel							obdaModel				= null;
+
+	private Logger								log						= LoggerFactory.getLogger(OBDAOWLReformulationPlatform.class);
+
+	private boolean								isClassified			= false;
+
+	private ReformulationPlatformPreferences	preferences				= null;
+
+	private QueryVocabularyValidator			validator				= null;
+
+	protected OBDAOWLReformulationPlatform(OWLOntologyManager manager) {
+		ontoManager = manager;
+	}
+
+	@Override
+	public void loadOBDAModel(OBDAModel model) {
+		isClassified = false;
+		obdaModel = model;
 	}
 
 	/**
@@ -75,26 +126,21 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		techwrapper = newTechnique;
 	}
 
-	@Override
-	public Statement getStatement() throws Exception {
-		return techwrapper.getStatement();
+	public void setPreferences(ReformulationPlatformPreferences preferences) {
+		this.preferences = preferences;
 	}
 
-	/**
-	 * translate the a owl ontology into a dlliter ontology
-	 * 
-	 * @return a dlliter ontology
-	 */
-	public DLLiterOntology getTranslatedOntology() {
-
-		if (ontology == null) {
-			throw new NullPointerException("No ontology has been loaded.");
+	@Override
+	public Statement getStatement() throws Exception {
+		if (techwrapper != null && isClassified == true) {
+			return techwrapper.getStatement();
+		} else {
+			throw new Exception(
+					"Error, the technique wrapper has not been setup up yet. Make sure you have loaded the OWL Ontologies and the OBDA model, and classified before calling this method.");
 		}
-		return ontology;
 	}
 
 	public boolean isConsistent(OWLOntology ontology) throws OWLReasonerException {
-		// TODO implement OWL
 		return true;
 	}
 
@@ -104,16 +150,185 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		getProgressMonitor().setMessage("Classifying...");
 		getProgressMonitor().setStarted();
 
-		clearOntologies();
-		loadOntologies(ontoManager.getOntologies());
+		if (obdaModel == null) {
+			throw new NullPointerException("APIController not set");
+		}
+		if (preferences == null) {
+			throw new NullPointerException("ReformulationPlatformPreferences not set");
+		}
 
-		isClassified = true;
-		getProgressMonitor().setFinished();
+		// String useMem = (String)
+		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals("inmemory");
+		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
+		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
+		boolean createMappings = preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
+		log.debug("Initializing Quest query answering engine...");
+		log.debug("Active preferences:");
+		log.debug("{} = {}", ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, reformulationTechnique);
+		log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION, useInMemoryDB);
+		log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE, unfoldingMode);
+		log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE, dbType);
+		log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
+
+		QueryRewriter rewriter;
+		UnfoldingMechanism unfMech = null;
+		SourceQueryGenerator gen = null;
+		DataSource ds;
+		EvaluationEngine eval_engine;
+		DAG dag = null;
+		DAG pureIsa = null;
+		QueryVocabularyValidator validator = null;
+
+		try {
+			/** Setup the validator */
+			validator = new QueryVocabularyValidator(loadedOntologies);
+
+			if (useInMemoryDB && ("material".equals(unfoldingMode) || createMappings)) {
+				log.debug("Using in an memory database");
+				String driver = "org.h2.Driver";
+				String url = "jdbc:h2:mem:aboxdump";
+				String username = "sa";
+				String password = "";
+				Connection connection;
+
+				OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+				DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+				source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+				source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+				source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+				source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+				source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+				source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+				// apic.getDatasourcesController().addDataSource(source);
+				// apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
+				ds = source;
+				connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
+				if (dbType.equals("semantic")) {
+					// perform semantic import
+					dag = DAGConstructor.getISADAG(this.translatedOntologyMerge);
+					pureIsa = DAGConstructor.filterPureISA(dag);
+					pureIsa.index();
+					// dag.index();
+					ABoxSerializer.recreate_tables(connection);
+					ABoxSerializer.ABOX2DB(loadedOntologies, dag, pureIsa, connection);
+				} else if (dbType.equals("direct")) {
+					// perform direct import
+					String[] types = { "TABLE" };
+
+					ResultSet set = connection.getMetaData().getTables(null, null, "%", types);
+					Vector<String> drops = new Vector<String>();
+					while (set.next()) {
+						String table = set.getString(3);
+						drops.add("DROP TABLE " + table);
+					}
+					set.close();
+
+					java.sql.Statement st = connection.createStatement();
+					for (String drop_table : drops) {
+						st.executeUpdate(drop_table);
+					}
+					ABoxToDBDumper dumper;
+					try {
+						dumper = new ABoxToDBDumper(source);
+						dumper.materialize(loadedOntologies, false);
+					} catch (AboxDumpException e) {
+						throw new Exception(e);
+					}
+					if (createMappings) {
+						DirectMappingGenerator mapGen = new DirectMappingGenerator();
+						Set<OBDAMappingAxiom> mappings = mapGen.getMappings(loadedOntologies, dumper.getMapper());
+						Iterator<OBDAMappingAxiom> it = mappings.iterator();
+						MappingController mapCon = obdaModel.getMappingController();
+						while (it.hasNext()) {
+							mapCon.insertMapping(ds.getSourceID(), it.next());
+						}
+					}
+				} else {
+					throw new Exception(dbType
+							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
+				}
+				eval_engine = new JDBCEngine(connection);
+
+			} else {
+				log.debug("Using a persistent database");
+
+				Collection<DataSource> sources = obdaModel.getDatasourcesController().getAllSources();
+				if (sources == null || sources.size() == 0) {
+					throw new Exception("No datasource has been defined");
+				} else if (sources.size() > 1) {
+					throw new Exception("Currently the reasoner can only handle one datasource");
+				} else {
+					ds = sources.iterator().next();
+				}
+				eval_engine = new JDBCEngine(ds);
+			}
+			List<Assertion> onto;
+			if (dbType.equals("semantic")) {
+
+				// Reachability DAGs
+				SemanticReduction reducer = new SemanticReduction(dag, DAGConstructor.getSigma(this.translatedOntologyMerge));
+				onto = reducer.reduce();
+			} else {
+				onto = this.translatedOntologyMerge.getAssertions();
+			}
+
+			if ("dlr".equals(reformulationTechnique)) {
+				rewriter = new DLRPerfectReformulator(onto);
+			} else if ("improved".equals(reformulationTechnique)) {
+				rewriter = new TreeRedReformulator(onto);
+			} else {
+				throw new IllegalArgumentException("Invalid value for argument: "
+						+ ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+			}
+
+			if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
+				if (dbType.equals("semantic")) {
+					List<SemanticIndexMappingGenerator.MappingKey> simple_maps = SemanticIndexMappingGenerator.build(dag, pureIsa);
+					for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_maps)) {
+						log.debug(map.toString());
+						obdaModel.getMappingController().insertMapping(ds.getSourceID(), map);
+					}
+				}
+				List<OBDAMappingAxiom> mappings = obdaModel.getMappingController().getMappings(ds.getSourceID());
+
+				// Validate the mappings against the ontology
+				MappingValidator mappingValidator = new MappingValidator(loadedOntologies);
+				mappingValidator.validate(mappings);
+
+				MappingViewManager viewMan = new MappingViewManager(mappings);
+				unfMech = new ComplexMappingUnfolder(mappings, viewMan);
+				JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+				gen = new ComplexMappingSQLGenerator(viewMan, util);
+			} else if ("material".equals(unfoldingMode)) {
+				unfMech = new DirectMappingUnfolder();
+				AboxFromDBLoader loader = new AboxFromDBLoader();
+				gen = new SimpleDirectQueryGenrator(loader.getMapper(ds));
+			} else {
+				log.error("Invalid parameter for {}", ReformulationPlatformPreferences.ABOX_MODE);
+			}
+
+			/***
+			 * Done, sending a new reasoner with the modules we just configured
+			 */
+
+			this.techwrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, validator, eval_engine, obdaModel);
+			log.debug("... Quest has been setup and is ready for querying");
+			isClassified = true;
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new OWLReasonerException(e.getMessage(), e) {
+			};
+		} finally {
+			getProgressMonitor().setFinished();
+		}
 	}
 
 	public void clearOntologies() throws OWLReasonerException {
-		loadedOntologies = new HashSet<OWLOntology>();
-		ontology = null;
+		loadedOntologies.clear();
+		translatedOntologyMerge = null;
 		isClassified = false;
 	}
 
@@ -145,7 +360,6 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	}
 
 	public boolean isDefined(OWLIndividual ind) throws OWLReasonerException {
-		// TODO implement
 		return true;
 	}
 
@@ -153,35 +367,60 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		return isClassified;
 	}
 
+	/***
+	 * This method loads the given ontologies in the system. This will merge
+	 * these new ontologies with the existing ones in a set. Then it will
+	 * translate the assertions in all the ontologies into a single one, in our
+	 * internal representation.
+	 * 
+	 * The translation is done using our OWLAPITranslator that gets the TBox
+	 * part of the ontologies and filters all the DL-Lite axioms (RDFS/OWL2QL
+	 * and DL-Lite).
+	 * 
+	 * The original ontologies and the merged/translated ontology are kept and
+	 * are used later when classify() is called.
+	 * 
+	 */
 	public void loadOntologies(Set<OWLOntology> ontologies) throws OWLReasonerException {
-		log.debug("OBDAOWLReformulationPlatform is loading ontologies...");
-
-		OWLAPITranslator translator = new OWLAPITranslator();
-		URI uri = null;
-		if (ontologies.size() > 0) {
-			uri = ontologies.iterator().next().getURI();
+		/*
+		 * We will keep track of the loaded ontologies and tranlsate the TBox
+		 * part of them into our internal represntation
+		 */
+		URI uri = URI.create("http://it.unibz.krdb.obda/Quest/auxiliaryontology");
+		if (translatedOntologyMerge == null) {
+			translatedOntologyMerge = new DLLiterOntologyImpl(uri);
 		}
-		ontology = new DLLiterOntologyImpl(uri);
+		if (loadedOntologies == null) {
+			loadedOntologies = new HashSet<OWLOntology>();
+		}
 
+		log.debug("Load ontologies called. Translating ontologies.");
+		OWLAPITranslator translator = new OWLAPITranslator();
 		Set<URI> uris = new HashSet<URI>();
-		Iterator<OWLOntology> it = ontologies.iterator();
-		while (it.hasNext()) {
-			OWLOntology o = it.next();
-			uris.add(o.getURI());
+
+		DLLiterOntology translation = new DLLiterOntologyImpl(uri);
+		for (OWLOntology onto : ontologies) {
+			uris.add(onto.getURI());
 			DLLiterOntology aux;
 			try {
-				aux = translator.translate(o);
-				ontology.addAssertions(aux.getAssertions());
-
+				aux = translator.translate(onto);
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage(), "FAILURE", JOptionPane.ERROR_MESSAGE);
-				e.printStackTrace();
+				throw new OWLReasonerException("Error translating ontology: " + onto.toString(), e) {
+				};
 			}
+			translation.addAssertions(aux.getAssertions());
+			translation.addConcepts(new ArrayList<ConceptDescription>(aux.getConcepts()));
+			translation.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
 		}
+		/* we translated successfully, now we append the new assertions */
+
+		this.loadedOntologies.addAll(ontologies);
+		translatedOntologyMerge.addAssertions(translation.getAssertions());
+		isClassified = false;
 	}
 
 	public void realise() throws OWLReasonerException {
-
+		classify();
 	}
 
 	public void unloadOntologies(Set<OWLOntology> ontologies) throws OWLReasonerException {
@@ -191,7 +430,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			return;
 
 		// otherwise clear everything and update
-		HashSet<OWLOntology> resultSet = loadedOntologies;
+		Set<OWLOntology> resultSet = new HashSet<OWLOntology>();
+		resultSet.addAll(loadedOntologies);
 		clearOntologies();
 		loadOntologies(resultSet);
 	}
@@ -275,18 +515,18 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 	public boolean hasDataPropertyRelationship(OWLIndividual subject, OWLDataPropertyExpression property, OWLConstant object)
 			throws OWLReasonerException {
-		//TODO implement
+		// TODO implement
 		return false;
 	}
 
 	public boolean hasObjectPropertyRelationship(OWLIndividual subject, OWLObjectPropertyExpression property, OWLIndividual object)
 			throws OWLReasonerException {
-		//TODO implement
+		// TODO implement
 		return false;
 	}
 
 	public boolean hasType(OWLIndividual individual, OWLDescription type, boolean direct) throws OWLReasonerException {
-		//TODO implement
+		// TODO implement
 		return false;
 	}
 
@@ -405,8 +645,11 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	}
 
 	public OWLEntity getCurrentEntity() {
-		return ontoManager.getOWLDataFactory().getOWLThing();
+		return null;
+		// return ontoManager.getOWLDataFactory().getOWLThing();
 	}
+
+	/* The following methods need revision */
 
 	public void setProgressMonitor(ProgressMonitor progressMonitor) {
 

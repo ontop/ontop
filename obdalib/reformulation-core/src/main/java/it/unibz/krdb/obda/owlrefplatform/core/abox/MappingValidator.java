@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class MappingValidator
 {
   /** The source ontology for validating the target query */
-  private OWLOntology ontology;
+	  private Collection<OWLOntology> ontologies;
 
   /** List of invalid predicates */
   private Vector<String> invalidPredicates;
@@ -28,8 +29,8 @@ public class MappingValidator
   /** Logger */
   private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-  public MappingValidator(OWLOntology ontology) {
-    this.ontology = ontology;
+  public MappingValidator(Collection<OWLOntology> ontologies) {
+    this.ontologies = ontologies;
   }
 
   public boolean validate(List<OBDAMappingAxiom> mappings) {
@@ -62,10 +63,16 @@ public class MappingValidator
 
       URI predicate = atom.getPredicate().getName();
 
-      // TODO Add a predicate type for better identification.
-      boolean isClass = ontology.containsClassReference(predicate);
-      boolean isObjectProp = ontology.containsObjectPropertyReference(predicate);
-      boolean isDataProp = ontology.containsDataPropertyReference(predicate);
+      
+      boolean isClass = false;
+      boolean isObjectProp = false;
+      boolean isDataProp = false;
+      
+      for (OWLOntology ontology: ontologies) {
+    	  isClass = isClass || ontology.containsClassReference(predicate);
+          isObjectProp = isObjectProp || ontology.containsObjectPropertyReference(predicate);
+          isDataProp = isDataProp || ontology.containsDataPropertyReference(predicate);
+      }
 
       // Check if the predicate contains in the ontology vocabulary as one
       // of these components (i.e., class, object property, data property).
