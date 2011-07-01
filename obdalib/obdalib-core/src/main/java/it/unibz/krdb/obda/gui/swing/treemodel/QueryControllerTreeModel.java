@@ -50,9 +50,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 					for (QueryControllerQuery query : queries) {
 						QueryTreeElement queryTreeEle = new QueryTreeElement(
 								query.getID(), query.getQuery());
-						insertNodeInto(queryTreeEle,
-								(DefaultMutableTreeNode) queryGroupEle,
-								queryGroupEle.getChildCount());
+						insertNodeInto(queryTreeEle, queryGroupEle, queryGroupEle.getChildCount());
 					}
 					insertNodeInto(queryGroupEle,
 							(DefaultMutableTreeNode) root, root.getChildCount());
@@ -156,8 +154,7 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 				continue;
 			groupTElement = (QueryGroupTreeElement) temporal;
 			if (groupTElement.getID().equals(group.getID())) {
-				insertNodeInto(elemQ, (DefaultMutableTreeNode) groupTElement,
-						groupTElement.getChildCount());
+				insertNodeInto(elemQ, groupTElement, groupTElement.getChildCount());
 				nodeStructureChanged(root);
 				break;
 			}
@@ -195,13 +192,45 @@ public class QueryControllerTreeModel extends DefaultTreeModel implements
 
 	@Override
 	public void elementChanged(QueryControllerQuery query) {
+	  QueryTreeElement node = getTreeNode(root, query);
+	  node.setQuery(query.getQuery());
+	  nodeChanged(node);
 	}
 
 	@Override
-	public void elementChanged(QueryControllerQuery query,
-			QueryControllerGroup group) {
-		// TODO Auto-generated method stub
+	public void elementChanged(QueryControllerQuery query, QueryControllerGroup group) {
+	  QueryTreeElement node = getTreeNode(root, group, query);
+    node.setQuery(query.getQuery());
+    nodeChanged(node);
 	}
+
+	private QueryTreeElement getTreeNode(TreeNode root, QueryControllerQuery query) {
+	  Enumeration<TreeNode> parent = root.children();
+    while (parent.hasMoreElements()) {
+      TreeNode node = parent.nextElement();
+      if (node instanceof QueryTreeElement) {
+        QueryTreeElement queryNode = (QueryTreeElement)node;
+        if (queryNode.getID().equals(query.getID())) {
+          return queryNode;
+        }
+      }
+    }
+    return null;
+	}
+
+	private QueryTreeElement getTreeNode(TreeNode root, QueryControllerGroup group, QueryControllerQuery query) {
+    Enumeration<TreeNode> parent = root.children();
+    while (parent.hasMoreElements()) {
+      TreeNode node = parent.nextElement();
+      if (node instanceof QueryGroupTreeElement) {
+        QueryGroupTreeElement groupNode = (QueryGroupTreeElement)node;
+        if (groupNode.getID().equals(group.getID())) {
+          return getTreeNode(groupNode, query);
+        }
+      }
+    }
+    return null;
+  }
 
 	/**
 	 * Search a TreeElement node group or query and returns the object else

@@ -81,19 +81,29 @@ public class QueryController {
 	}
 
 	/**
-	 * Creates a new query and adds it to the vector QueryControllerEntity
+	 * Creates a new query and adds it to the vector QueryControllerEntity.
+	 *
+	 * @param querystr
+	 *         The new query string, replacing any existing string.
+	 * @param id
+	 *         The query id associated to the string.
+	 * @return The query object.
 	 */
 	public QueryControllerQuery addQuery(String querystr, String id) {
-		QueryControllerQuery query = null;
-		if (getElementPosition(id) == -1) {
-			query = new QueryControllerQuery(id);
-			query.setQuery(querystr);
-			collection.add(query);
-			fireElementAdded(query);
-		}
+	  int position = getElementPosition(id);
+
+	  QueryControllerQuery query = new QueryControllerQuery(id);
+    query.setQuery(querystr);
+
+		if (position == -1) {  // add to the collection for a new query.
+		  collection.add(query);
+		  fireElementAdded(query);
+    }
 		else {
-			log.warn("Query controler: Query already exists. ID: {}", id);
+		  collection.set(position, query);
+		  fireElementChanged(query);
 		}
+
 		return query;
 	}
 
@@ -113,17 +123,21 @@ public class QueryController {
 	 * QueryControllerEntity
 	 */
 	public QueryControllerQuery addQuery(String querystr, String id, String groupid) {
-		QueryControllerQuery query = null;
-		if (getElementPosition(id) == -1) {
-			query = new QueryControllerQuery(id);
-			query.setQuery(querystr);
-			QueryControllerGroup group = getGroup(groupid);
-			group.addQuery(query);
-			fireElementAdded(query, group);
-		}
-		else {
-			log.info("Query already exists!");
-		}
+	  int position = getElementPosition(id);
+
+    QueryControllerQuery query = new QueryControllerQuery(id);
+    query.setQuery(querystr);
+    QueryControllerGroup group = getGroup(groupid);
+
+    if (position == -1) {
+      group.addQuery(query);
+      fireElementAdded(query, group);
+    }
+    else {
+      group.updateQuery(query);
+      fireElementChanged(query, group);
+    }
+
 		return query;
 	}
 
