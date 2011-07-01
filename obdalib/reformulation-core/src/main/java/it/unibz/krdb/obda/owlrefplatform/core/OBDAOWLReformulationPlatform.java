@@ -184,7 +184,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			/** Setup the validator */
 			validator = new QueryVocabularyValidator(loadedOntologies);
 
-			if (useInMemoryDB && ("material".equals(unfoldingMode) || createMappings)) {
+			if (useInMemoryDB && (OBDAConstants.CLASSIC.equals(unfoldingMode) || createMappings)) {
 				log.debug("Using in an memory database");
 				String driver = "org.h2.Driver";
 				String url = "jdbc:h2:mem:aboxdump";
@@ -205,7 +205,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				// apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
 				ds = source;
 				connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
-				if (dbType.equals("semantic")) {
+				if (dbType.equals(OBDAConstants.SEMANTIC)) {
 					// perform semantic import
 					dag = DAGConstructor.getISADAG(this.translatedOntologyMerge);
 					pureIsa = DAGConstructor.filterPureISA(dag);
@@ -213,7 +213,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 					// dag.index();
 					ABoxSerializer.recreate_tables(connection);
 					ABoxSerializer.ABOX2DB(loadedOntologies, dag, pureIsa, connection);
-				} else if (dbType.equals("direct")) {
+				} else if (dbType.equals(OBDAConstants.DIRECT)) {
 					// perform direct import
 					String[] types = { "TABLE" };
 
@@ -265,7 +265,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				eval_engine = new JDBCEngine(ds);
 			}
 			List<Assertion> onto;
-			if (dbType.equals("semantic")) {
+			if (dbType.equals(OBDAConstants.SEMANTIC)) {
 
 				// Reachability DAGs
 				SemanticReduction reducer = new SemanticReduction(dag, DAGConstructor.getSigma(this.translatedOntologyMerge));
@@ -274,17 +274,17 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				onto = this.translatedOntologyMerge.getAssertions();
 			}
 
-			if ("dlr".equals(reformulationTechnique)) {
+			if (OBDAConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator(onto);
-			} else if ("improved".equals(reformulationTechnique)) {
+			} else if (OBDAConstants.UCQBASED.equals(reformulationTechnique)) {
 				rewriter = new TreeRedReformulator(onto);
 			} else {
 				throw new IllegalArgumentException("Invalid value for argument: "
 						+ ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
 			}
 
-			if ("virtual".equals(unfoldingMode) || dbType.equals("semantic")) {
-				if (dbType.equals("semantic")) {
+			if (OBDAConstants.VIRTUAL.equals(unfoldingMode) || dbType.equals(OBDAConstants.SEMANTIC)) {
+				if (dbType.equals(OBDAConstants.SEMANTIC)) {
 					List<SemanticIndexMappingGenerator.MappingKey> simple_maps = SemanticIndexMappingGenerator.build(dag, pureIsa);
 					for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_maps)) {
 						log.debug(map.toString());
@@ -301,7 +301,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				unfMech = new ComplexMappingUnfolder(mappings, viewMan);
 				JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 				gen = new ComplexMappingSQLGenerator(viewMan, util);
-			} else if ("material".equals(unfoldingMode)) {
+			} else if (OBDAConstants.CLASSIC.equals(unfoldingMode)) {
 				unfMech = new DirectMappingUnfolder();
 				AboxFromDBLoader loader = new AboxFromDBLoader();
 				gen = new SimpleDirectQueryGenrator(loader.getMapper(ds));
