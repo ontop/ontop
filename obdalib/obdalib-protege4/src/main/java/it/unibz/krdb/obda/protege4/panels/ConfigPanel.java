@@ -12,6 +12,7 @@
 package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,12 +53,12 @@ public class ConfigPanel extends javax.swing.JPanel {
 				jRadioButtonDirect.setEnabled(true);
 //		        jRadioButtonSemanticIndex.setEnabled(true);
 //		        jRadioButtonUniversal.setEnabled(true);
-		        jRadioButtonUserProvidedDB.setEnabled(true);
+//		        jRadioButtonUserProvidedDB.setEnabled(true);
 				jRadioButtonInMemoryDB.setEnabled(true);
 				jLabelDataLoc.setEnabled(true);
 				jLabeldbtype.setEnabled(true);
 				
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
 			}
 		});
     	jRadioButtonVirualABox.addActionListener(new ActionListener() {
@@ -72,15 +73,15 @@ public class ConfigPanel extends javax.swing.JPanel {
 				jLabelDataLoc.setEnabled(false);
 				jLabeldbtype.setEnabled(false);
 				
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "virtual");
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "provided");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.VIRTUAL);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.PROVIDED);
 			}
 		});
         jRadioButtonDirect.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "direct");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.DIRECT);
 
 			}
 		});
@@ -88,7 +89,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
 				
 			}
 		});
@@ -96,7 +97,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "semantic");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
 				
 			}
 		});
@@ -104,7 +105,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "universal");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.UNIVERSAL);
 				
 			}
 		});
@@ -112,7 +113,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "provided");
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.PROVIDED);
 				
 			}
 		});
@@ -132,7 +133,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         
     	
 		String value = (String)p.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
-		if (value.equals("virtual")) {
+		if (value.equals(OBDAConstants.VIRTUAL)) {
 			jRadioButtonVirualABox.setSelected(true);
 			jRadioButtonMaterialAbox.setSelected(false);
 			jRadioButtonDirect.setEnabled(false);
@@ -142,13 +143,13 @@ public class ConfigPanel extends javax.swing.JPanel {
 			jRadioButtonInMemoryDB.setEnabled(false);
 			jLabelDataLoc.setEnabled(false);
 			jLabeldbtype.setEnabled(false);
-		} else if (value.equals("material")) {
+		} else if (value.equals(OBDAConstants.CLASSIC)) {
 			jRadioButtonVirualABox.setSelected(false);
 			jRadioButtonMaterialAbox.setSelected(true);
 			jRadioButtonDirect.setEnabled(true);
 //			jRadioButtonSemanticIndex.setEnabled(true);
 //			jRadioButtonUniversal.setEnabled(true);
-			jRadioButtonUserProvidedDB.setEnabled(true);
+//			jRadioButtonUserProvidedDB.setEnabled(true);
 			jRadioButtonInMemoryDB.setEnabled(true);
 			jLabelDataLoc.setEnabled(true);
 			jLabeldbtype.setEnabled(true);
@@ -158,10 +159,10 @@ public class ConfigPanel extends javax.swing.JPanel {
 		}
 		
 		value = (String)p.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION);
-		if (value.equals("provided")) {
-			jRadioButtonUserProvidedDB.setSelected(true);
+		if (value.equals(OBDAConstants.PROVIDED)) {
+			jRadioButtonUserProvidedDB.setSelected(false);
 			jRadioButtonInMemoryDB.setSelected(false);
-		} else if (value.equals("inmemory")) {
+		} else if (value.equals(OBDAConstants.INMEMORY)) {
 			jRadioButtonUserProvidedDB.setSelected(false);
 			jRadioButtonInMemoryDB.setSelected(true);
 		} else {
@@ -169,15 +170,15 @@ public class ConfigPanel extends javax.swing.JPanel {
 		}
 		
 		value = (String)p.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
-		if (value.equals("direct")) {
+		if (value.equals(OBDAConstants.DIRECT)) {
 			jRadioButtonDirect.setSelected(true);
 			jRadioButtonUniversal.setSelected(false);
 			jRadioButtonSemanticIndex.setSelected(false);
-		} else if (value.equals("universal")) {
+		} else if (value.equals(OBDAConstants.UNIVERSAL)) {
 			jRadioButtonDirect.setSelected(false);
 			jRadioButtonUniversal.setSelected(true);
 			jRadioButtonSemanticIndex.setSelected(false);
-		} else if (value.equals("semantic")) {
+		} else if (value.equals(OBDAConstants.SEMANTIC)) {
 			jRadioButtonDirect.setSelected(false);
 			jRadioButtonUniversal.setSelected(false);
 			jRadioButtonSemanticIndex.setSelected(true);
@@ -191,7 +192,7 @@ public class ConfigPanel extends javax.swing.JPanel {
      * always regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
@@ -218,15 +219,15 @@ public class ConfigPanel extends javax.swing.JPanel {
         jLabelDataLoc = new javax.swing.JLabel();
         jLabeldbtype = new javax.swing.JLabel();
 
-        setLayout(new java.awt.BorderLayout(0, 15));
-
         setMinimumSize(new java.awt.Dimension(500, 490));
         setPreferredSize(new java.awt.Dimension(500, 493));
-        pnlTWOption.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 25));
+        setLayout(new java.awt.BorderLayout(0, 15));
 
         pnlTWOption.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Technique Wrapper Options"));
         pnlTWOption.setMinimumSize(new java.awt.Dimension(590, 80));
         pnlTWOption.setPreferredSize(new java.awt.Dimension(590, 100));
+        pnlTWOption.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 25));
+
         lblTechniqueWrapper.setText("Technique Wrapper:");
         lblTechniqueWrapper.setMinimumSize(new java.awt.Dimension(170, 30));
         lblTechniqueWrapper.setPreferredSize(new java.awt.Dimension(140, 20));
@@ -241,36 +242,33 @@ public class ConfigPanel extends javax.swing.JPanel {
                 cmbTechniqueWrapperActionPerformed(evt);
             }
         });
-
         pnlTWOption.add(cmbTechniqueWrapper);
 
         add(pnlTWOption, java.awt.BorderLayout.NORTH);
         pnlTWOption.getAccessibleContext().setAccessibleName("Bolzano Reformulation Technique");
 
-        pnlTWConfiguration.setLayout(new java.awt.GridBagLayout());
-
         pnlTWConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Technique Wrapper Configuration"));
         pnlTWConfiguration.setMinimumSize(new java.awt.Dimension(500, 350));
         pnlTWConfiguration.setPreferredSize(new java.awt.Dimension(600, 350));
-        pnlReformulationMethods.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 25));
+        pnlTWConfiguration.setLayout(new java.awt.GridBagLayout());
 
         pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Reformulation Methods\n"));
         pnlReformulationMethods.setMinimumSize(new java.awt.Dimension(590, 100));
         pnlReformulationMethods.setPreferredSize(new java.awt.Dimension(590, 100));
+        pnlReformulationMethods.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 25));
+
         lblReformulationTechnique.setText("Reformulation Technique: ");
         lblReformulationTechnique.setMinimumSize(new java.awt.Dimension(150, 30));
         lblReformulationTechnique.setPreferredSize(new java.awt.Dimension(180, 20));
         pnlReformulationMethods.add(lblReformulationTechnique);
 
-        cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "dlr", "improved" }));
-        cmbReformulationMethods.setSelectedIndex(1);
+        cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PerfectRef", "Quest's UCQ-based reformulation" }));
         cmbReformulationMethods.setPreferredSize(new java.awt.Dimension(220, 20));
         cmbReformulationMethods.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbReformulationMethodsActionPerformed(evt);
             }
         });
-
         pnlReformulationMethods.add(cmbReformulationMethods);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -283,16 +281,16 @@ public class ConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(10, 6, 0, 6);
         pnlTWConfiguration.add(pnlReformulationMethods, gridBagConstraints);
 
-        pnlABoxConfiguration.setLayout(new java.awt.BorderLayout());
-
         pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "ABox Configuration"));
         pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(590, 200));
         pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(590, 180));
-        pnlMappingOptions.setLayout(new java.awt.GridBagLayout());
+        pnlABoxConfiguration.setLayout(new java.awt.BorderLayout());
 
         pnlMappingOptions.setMaximumSize(new java.awt.Dimension(2147483647, 2147483647));
         pnlMappingOptions.setMinimumSize(new java.awt.Dimension(215, 50));
         pnlMappingOptions.setPreferredSize(new java.awt.Dimension(470, 50));
+        pnlMappingOptions.setLayout(new java.awt.GridBagLayout());
+
         mapper.add(jRadioButtonUniversal);
         jRadioButtonUniversal.setText("Universal");
         jRadioButtonUniversal.setEnabled(false);
@@ -363,7 +361,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         pnlMappingOptions.add(jRadioButtonVirualABox, gridBagConstraints);
 
         AboxMode.add(jRadioButtonMaterialAbox);
-        jRadioButtonMaterialAbox.setText("Material ABox");
+        jRadioButtonMaterialAbox.setText("Classic ABox");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -405,7 +403,6 @@ public class ConfigPanel extends javax.swing.JPanel {
         pnlTWConfiguration.add(pnlABoxConfiguration, gridBagConstraints);
 
         add(pnlTWConfiguration, java.awt.BorderLayout.CENTER);
-
     }// </editor-fold>//GEN-END:initComponents
 
 //    private void applyPreferences() {
@@ -434,8 +431,13 @@ public class ConfigPanel extends javax.swing.JPanel {
     private void cmbReformulationMethodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbReformulationMethodsActionPerformed
         javax.swing.JComboBox cb = (javax.swing.JComboBox) evt.getSource();
         String optValue = (String) cb.getSelectedItem();
-        preference.setCurrentValueOf(
-        		ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, optValue);
+        if(optValue.equals(OBDAConstants.PERFECTREFORMULATION)){
+        	 preference.setCurrentValueOf(
+             		ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, OBDAConstants.PERFECTREFORMULATION);
+        }else{
+        	 preference.setCurrentValueOf(
+        			 ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, OBDAConstants.UCQBASED);
+        }
     }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
                
     // Variables declaration - do not modify//GEN-BEGIN:variables

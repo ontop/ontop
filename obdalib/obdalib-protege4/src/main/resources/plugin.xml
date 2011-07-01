@@ -153,13 +153,13 @@
 		<editorKitId value="OWLEditorKit"/>
 	</extension> -
 	
-  <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
+  <!-- <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
     <name value="Load OWL individuals (ABox) to a DB..."/> 
     <toolTip value="Stores all ABox data in a database"/>
     <class value="it.unibz.krdb.obda.protege4.gui.action.LoadOWLIndividualsToDBAction"/>
     <path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-C"></path>
     <editorKitId value="OWLEditorKit"/>
-  </extension> 
+  </extension> -->
 
 	<!-- Reasoner plugins -->
 
