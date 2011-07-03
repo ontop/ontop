@@ -416,6 +416,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 		this.loadedOntologies.addAll(ontologies);
 		translatedOntologyMerge.addAssertions(translation.getAssertions());
+        translatedOntologyMerge.addConcepts(new ArrayList<ConceptDescription>(translation.getConcepts()));
+        translatedOntologyMerge.addRoles(new ArrayList<RoleDescription>(translation.getRoles()));
 		isClassified = false;
 	}
 
