@@ -14,7 +14,7 @@
 package it.unibz.krdb.obda.gui.swing.utils;
 
 
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -57,12 +57,12 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 	SPARQLQueryStyledDocument				myself				= this;
 	public Style							default_style		= null;
 
-	private MappingManagerPreferences pref = null;
+	private OBDAPreferences pref = null;
 //	private GetDefaultSPARQLPrefixAction	_getPrefixAction	= null;
 
 	// SPARQLParser parser = null;
 
-	public SPARQLQueryStyledDocument(StyleContext context, MappingManagerPreferences pref) {
+	public SPARQLQueryStyledDocument(StyleContext context, OBDAPreferences pref) {
 		super(context);
 		
 		this.pref = pref;
@@ -146,7 +146,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 				public void run() {
 					try {
 						int size = 14;
-						boolean useDefault = pref.getUseDefault();
+						boolean useDefault = new Boolean(pref.getOBDAPreference(OBDAPreferences.USE_DEAFAULT));
 						removeDocumentListener(myself);
 						String input = getText(0, getLength());
 						
@@ -164,7 +164,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 //						}
 
 						SimpleAttributeSet functor = new SimpleAttributeSet();
-						functor.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.FUCNTOR_COLOR));
+						functor.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.FUCNTOR_COLOR));
 //						if(!useDefault){
 //							functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 //							functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY) );
@@ -172,7 +172,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 //						}
 
 						SimpleAttributeSet parameters = new SimpleAttributeSet();
-						parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.PARAMETER_COLOR));
+						parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.PARAMETER_COLOR));
 //						if(!useDefault){
 //							parameters.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
 //							parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
@@ -181,7 +181,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 
 						
 						SimpleAttributeSet predicates_styles = new SimpleAttributeSet();
-						predicates_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR));
+						predicates_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.OBJECTPROPTERTY_COLOR));
 //						if(!useDefault){
 //							predicates_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 //							predicates_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
@@ -189,7 +189,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 //						}
 
 						SimpleAttributeSet classes_styles = new SimpleAttributeSet();
-						classes_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.CLASS_COLOR));
+						classes_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.CLASS_COLOR));
 //						if(!useDefault){
 //							classes_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 //							classes_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
@@ -197,7 +197,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 //						}
 
 						SimpleAttributeSet variables_styles = new SimpleAttributeSet();
-						variables_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.VARIABLE_COLOR));
+						variables_styles.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.VARIABLE_COLOR));
 //						if(!useDefault){
 //							variables_styles.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 //							variables_styles.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));

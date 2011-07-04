@@ -19,7 +19,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 import it.unibz.krdb.obda.utils.TargetQueryValidator;
 
 import java.awt.GridBagConstraints;
@@ -62,7 +61,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	
 	/** Fields */
 	private OBDAModel	controller = null;
-	private MappingManagerPreferences	preferences = null;
+	private OBDAPreferences	preferences = null;
 	private DataSource dataSource	= null;
 	private JDialog	parent = null;
 	private TargetQueryValidator validator = null;
@@ -84,7 +83,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 */
 	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, DataSource dataSource, OWLOntology ontology) {
 		this.controller = controller;
-		this.preferences = preference.getMappingsPreference();
+		this.preferences = preference;
 		this.parent = parent;
 		this.dataSource = dataSource;
 		
