@@ -1,8 +1,11 @@
 package it.unibz.krdb.obda.owlapi;
 
+import it.unibz.krdb.obda.utils.OBDAPreferencePersistanceManager;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class ReformulationPlatformPreferences extends Properties {
+public class ReformulationPlatformPreferences{
 	// TODO create a configuration listener to handle changes in these values
 
 	/**
@@ -31,20 +34,56 @@ public class ReformulationPlatformPreferences extends Properties {
 
 	private Logger				log						= LoggerFactory.getLogger(ReformulationPlatformPreferences.class);
 
-	public ReformulationPlatformPreferences() {
+	private Properties preferences = null;
+	
+	private OBDAPreferencePersistanceManager persistanceManager = null;
+	
+	public ReformulationPlatformPreferences(OBDAPreferencePersistanceManager man) {
+		preferences = new Properties();
+		persistanceManager = man;
 		try {
 			readDefaultPropertiesFile();
+			loadProperties();
 		} catch (IOException e1) {
 			log.error("Error reading default properties for resoner.");
 			log.debug(e1.getMessage(), e1);
 		}
 	}
 
-	public ReformulationPlatformPreferences(Properties values) {
-		this();
-		this.putAll(values);
+	public ReformulationPlatformPreferences(Properties values, OBDAPreferencePersistanceManager man) {
+		persistanceManager = man;
+		preferences = new Properties();
+		preferences.putAll(values);
 	}
-
+	
+	private void loadProperties(){
+		
+		String value = persistanceManager.loadPreference(CREATE_TEST_MAPPINGS);
+		if(value != null){
+			preferences.setProperty(CREATE_TEST_MAPPINGS, value);
+		}
+		
+		value = persistanceManager.loadPreference(REFORMULATION_TECHNIQUE);
+		if(value != null){
+			preferences.setProperty(REFORMULATION_TECHNIQUE, value);
+		}
+		
+		value = persistanceManager.loadPreference(ABOX_MODE);
+		if(value != null){
+			preferences.setProperty(ABOX_MODE, value);
+		}
+		
+		value = persistanceManager.loadPreference(DBTYPE);
+		if(value != null){
+			preferences.setProperty(DBTYPE, value);
+		}
+		
+		value = persistanceManager.loadPreference(DATA_LOCATION);
+		if(value != null){
+			preferences.setProperty(DATA_LOCATION, value);
+		}
+	}
+	
 	public void readDefaultPropertiesFile() throws IOException {
 		InputStream in = ReformulationPlatformPreferences.class.getResourceAsStream(DEFAULT_PROPERTIESFILE);
 		readDefaultPropertiesFile(in);
@@ -59,7 +98,7 @@ public class ReformulationPlatformPreferences extends Properties {
 	 * @throws IOException
 	 */
 	public void readDefaultPropertiesFile(InputStream in) throws IOException {
-		this.load(in);
+		preferences.load(in);
 	}
 
 
@@ -70,8 +109,8 @@ public class ReformulationPlatformPreferences extends Properties {
 	 *            the parameter value
 	 * @return the current value
 	 */
-	public Object getCurrentValue(String var) {
-		return get(var);
+	public String getCurrentValue(String var) {
+		return preferences.getProperty(var);
 	}
 
 	/**
@@ -106,7 +145,8 @@ public class ReformulationPlatformPreferences extends Properties {
 	 * @param obj
 	 *            the new current value
 	 */
-	public void setCurrentValueOf(String var, Object obj) {
-		put(var, obj);
+	public void setCurrentValueOf(String var, String obj) {
+		preferences.setProperty(var, obj);
+		persistanceManager.storePreference(var, obj);
 	}
 }
