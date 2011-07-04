@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactor
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.utils.NoPreferencePersistanceManager;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
@@ -107,7 +108,7 @@ public class LUBMExecutionHelper {
 
 			
 
-			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences(new NoPreferencePersistanceManager());
 			
 			if (aboxmode.equals("semindex")) {
 				p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);

@@ -11,6 +11,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactor
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.utils.NoPreferencePersistanceManager;
+import it.unibz.krdb.obda.utils.NoPreferencePersistanceManager;
 
 import java.io.File;
 
@@ -46,7 +48,7 @@ public class LUBMDLLiteQueryExecutionTool {
 			// Creating a new instance of a Quest reasoner
 			OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
 
-			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences(new NoPreferencePersistanceManager());
 			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
 			p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
 
