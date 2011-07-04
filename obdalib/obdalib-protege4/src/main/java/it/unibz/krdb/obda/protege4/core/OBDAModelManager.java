@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
 import it.unibz.krdb.obda.queryanswering.QueryControllerListener;
@@ -34,6 +35,7 @@ import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactory;
 import org.protege.editor.owl.ui.prefix.PrefixMapper;
 import org.protege.editor.owl.ui.prefix.PrefixMapperManager;
+import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.AddAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
@@ -143,6 +145,8 @@ public class OBDAModelManager implements Disposable {
 	 */
 	private class OBDAPLuginOWLModelManagerListener implements OWLModelManagerListener {
 
+		public boolean	inititializing	= false;
+
 		public void handleChange(OWLModelManagerChangeEvent event) {
 			EventType type = event.getType();
 			OWLModelManager source = event.getSource();
@@ -150,6 +154,18 @@ public class OBDAModelManager implements Disposable {
 			switch (type) {
 				case ABOUT_TO_CLASSIFY:
 					log.debug("ABOUT TO CLASSIFY");
+
+					if (!inititializing) {
+						OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
+						if (reasoner instanceof OBDAOWLReformulationPlatform) {
+							OBDAOWLReformulationPlatform quest = (OBDAOWLReformulationPlatform) reasoner;
+							ProtegeReformulationPlatformPreferences reasonerPreference = owlEditorKit
+									.get(ReformulationPlatformPreferences.class.getName());
+							quest.setPreferences(reasonerPreference);
+							quest.loadOBDAModel(getActiveOBDAModel());
+						}
+					}
+
 					break;
 				case ENTITY_RENDERER_CHANGED:
 					log.debug("RENDERER CHANGED");
@@ -157,24 +173,30 @@ public class OBDAModelManager implements Disposable {
 				case ONTOLOGY_CLASSIFIED:
 					break;
 				case ACTIVE_ONTOLOGY_CHANGED:
-
 					log.debug("ACTIVE ONTOLOGY CHANGED");
+					inititializing = true;
 					setupNewOBDAModel();
 
-					Set<ProtegeOWLReasonerFactory> factories = owlEditorKit.getOWLWorkspace().getOWLModelManager().getOWLReasonerManager()
-							.getInstalledReasonerFactories();
-					for (ProtegeOWLReasonerFactory protegeOWLReasonerFactory : factories) {
-						if (protegeOWLReasonerFactory instanceof OBDAOWLReasonerFactory) {
-							OBDAOWLReasonerFactory obdaFactory = (OBDAOWLReasonerFactory) protegeOWLReasonerFactory;
-							obdaFactory.setOBDAController(getActiveOBDAModel());
-
-							ProtegeReformulationPlatformPreferences reasonerPreference = owlEditorKit
-									.get(ReformulationPlatformPreferences.class.getName());
-							obdaFactory.setPreferenceHolder(reasonerPreference);
-						}
-					}
+					// Set<ProtegeOWLReasonerFactory> factories =
+					// owlEditorKit.getOWLWorkspace().getOWLModelManager().getOWLReasonerManager()
+					// .getInstalledReasonerFactories();
+					// for (ProtegeOWLReasonerFactory protegeOWLReasonerFactory
+					// : factories) {
+					// if (protegeOWLReasonerFactory instanceof
+					// OBDAOWLReasonerFactory) {
+					// OBDAOWLReasonerFactory obdaFactory =
+					// (OBDAOWLReasonerFactory) protegeOWLReasonerFactory;
+					// obdaFactory.setOBDAController(getActiveOBDAModel());
+					//
+					// ProtegeReformulationPlatformPreferences
+					// reasonerPreference = owlEditorKit
+					// .get(ReformulationPlatformPreferences.class.getName());
+					// obdaFactory.setPreferenceHolder(reasonerPreference);
+					// }
+					// }
 					getActiveOBDAModel().getPrefixManager().setDefaultNamespace(source.getActiveOntology().getURI().toString());
 					fireActiveOBDAModelChange();
+					inititializing = false;
 					break;
 				case ENTITY_RENDERING_CHANGED:
 					break;
@@ -257,6 +279,17 @@ public class OBDAModelManager implements Disposable {
 					break;
 				case REASONER_CHANGED:
 					log.debug("REASONER CHANGED");
+					// OWLReasoner reasoner =
+					// owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
+					// if (reasoner instanceof OBDAOWLReformulationPlatform) {
+					// OBDAOWLReformulationPlatform quest =
+					// (OBDAOWLReformulationPlatform) reasoner;
+					// ProtegeReformulationPlatformPreferences
+					// reasonerPreference = owlEditorKit
+					// .get(ReformulationPlatformPreferences.class.getName());
+					// quest.setPreferences(reasonerPreference);
+					// quest.loadOBDAModel(getActiveOBDAModel());
+					// }
 					break;
 			}
 		}

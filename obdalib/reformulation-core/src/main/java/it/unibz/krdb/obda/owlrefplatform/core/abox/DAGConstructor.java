@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -16,168 +15,186 @@ import java.util.*;
 
 public class DAGConstructor {
 
-    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
+	private static final DescriptionFactory	descFactory			= new BasicDescriptionFactory();
 
+	public static DAG getISADAG(DLLiterOntology ontology) {
+		return new DAG(ontology);
+	}
 
-    public static DAG getISADAG(DLLiterOntology ontology) {
-        return new DAG(ontology);
-    }
+	public static DAG getSigma(DLLiterOntology ontology) {
 
+		DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create(""));
 
-    public static DAG getSigma(DLLiterOntology ontology) {
+		for (Assertion assertion : ontology.getAssertions()) {
+			if (assertion instanceof DLLiterConceptInclusionImpl) {
+				DLLiterConceptInclusionImpl inclusion = (DLLiterConceptInclusionImpl) assertion;
+				Description parent = inclusion.getIncluding();
+				Description child = inclusion.getIncluded();
+				if (parent instanceof ExistentialConceptDescription) {
+					continue;
+				}
+			}
+			sigma.addAssertion(assertion);
+		}
 
-        DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create(""));
+		sigma.addConcepts(new ArrayList<ConceptDescription>(ontology.getConcepts()));
+		sigma.addRoles(new ArrayList<RoleDescription>(ontology.getRoles()));
+		sigma.saturate();
+		return getISADAG(sigma);
+	}
 
-        for (Assertion assertion : ontology.getAssertions()) {
-            if (assertion instanceof DLLiterConceptInclusionImpl) {
-                DLLiterConceptInclusionImpl inclusion = (DLLiterConceptInclusionImpl) assertion;
-                Description parent = inclusion.getIncluding();
-                Description child = inclusion.getIncluded();
-                if (parent instanceof ExistentialConceptDescription) {
-                    continue;
-                }
-            }
-            sigma.addAssertion(assertion);
-        }
+	public static DLLiterOntology getSigmaOntology(DLLiterOntology ontology) {
 
-        sigma.addConcepts(new ArrayList<ConceptDescription>(ontology.getConcepts()));
-        sigma.addRoles(new ArrayList<RoleDescription>(ontology.getRoles()));
+		DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create("sigma"));
 
-        return getISADAG(sigma);
-    }
+		for (Assertion assertion : ontology.getAssertions()) {
+			if (assertion instanceof DLLiterConceptInclusionImpl) {
+				DLLiterConceptInclusionImpl inclusion = (DLLiterConceptInclusionImpl) assertion;
+				Description parent = inclusion.getIncluding();
+				Description child = inclusion.getIncluded();
+				if (parent instanceof ExistentialConceptDescription) {
+					continue;
+				}
+			}
+			sigma.addAssertion(assertion);
+		}
 
-    public List<OBDAMappingAxiom> getMappings(DAG dag) throws DuplicateMappingException {
-        return null;
-//        return SemanticIndexMappingGenerator.build(dag);
-    }
+		sigma.addConcepts(new ArrayList<ConceptDescription>(ontology.getConcepts()));
+		sigma.addRoles(new ArrayList<RoleDescription>(ontology.getRoles()));
 
-    public DAGChain getTChainDAG(DAG dag) {
+		return sigma;
+	}
 
-        return new DAGChain(dag);
-    }
+	public List<OBDAMappingAxiom> getMappings(DAG dag) throws DuplicateMappingException {
+		return null;
+		// return SemanticIndexMappingGenerator.build(dag);
+	}
 
-    public Set<Assertion> getSigmaChainDAG(Set<Assertion> assertions) {
-        return null;
-    }
+	public DAGChain getTChainDAG(DAG dag) {
 
-    public static DAG filterPureISA(DAG dag) {
+		return new DAGChain(dag);
+	}
 
-        Map<Description, DAGNode> classes = new LinkedHashMap<Description, DAGNode>();
-        Map<Description, DAGNode> roles = new LinkedHashMap<Description, DAGNode>();
+	public Set<Assertion> getSigmaChainDAG(Set<Assertion> assertions) {
+		return null;
+	}
 
-        for (DAGNode node : dag.getClasses()) {
+	public static DAG filterPureISA(DAG dag) {
 
-            if (node.getDescription() instanceof ExistentialConceptDescription ||
-                    node.getDescription().equals(DAG.thingConcept)) {
-                continue;
-            }
+		Map<Description, DAGNode> classes = new LinkedHashMap<Description, DAGNode>();
+		Map<Description, DAGNode> roles = new LinkedHashMap<Description, DAGNode>();
 
-            DAGNode newNode = classes.get(node.getDescription());
-            if (newNode == null) {
-                newNode = new DAGNode(node.getDescription());
-                newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
-                classes.put(node.getDescription(), newNode);
-            }
+		for (DAGNode node : dag.getClasses()) {
 
-            for (DAGNode child : node.getChildren()) {
-                if (child.getDescription() instanceof ExistentialConceptDescription) {
-                    continue;
-                }
-                DAGNode newChild = classes.get(child.getDescription());
-                if (newChild == null) {
-                    newChild = new DAGNode(child.getDescription());
-                    newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
-                    classes.put(child.getDescription(), newChild);
-                }
+			if (node.getDescription() instanceof ExistentialConceptDescription || node.getDescription().equals(DAG.thingConcept)) {
+				continue;
+			}
 
-                if (!newChild.getDescription().equals(newNode.getDescription())) {
-                    newChild.getParents().add(newNode);
-                    newNode.getChildren().add(newChild);
-                }
+			DAGNode newNode = classes.get(node.getDescription());
+			if (newNode == null) {
+				newNode = new DAGNode(node.getDescription());
+				newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
+				classes.put(node.getDescription(), newNode);
+			}
 
-            }
-        }
+			for (DAGNode child : node.getChildren()) {
+				if (child.getDescription() instanceof ExistentialConceptDescription) {
+					continue;
+				}
+				DAGNode newChild = classes.get(child.getDescription());
+				if (newChild == null) {
+					newChild = new DAGNode(child.getDescription());
+					newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
+					classes.put(child.getDescription(), newChild);
+				}
 
-        for (DAGNode node : dag.getRoles()) {
-            RoleDescription nodeDesc = (RoleDescription) node.getDescription();
+				if (!newChild.getDescription().equals(newNode.getDescription())) {
+					newChild.getParents().add(newNode);
+					newNode.getChildren().add(newChild);
+				}
 
-            if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
-                continue;
-            }
+			}
+		}
 
-            if (nodeDesc.isInverse()) {
-                RoleDescription posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
-                DAGNode newNode = roles.get(posNode);
-                if (newNode == null) {
-                    newNode = new DAGNode(posNode);
-                    roles.put(posNode, newNode);
-                }
-                continue;
-            }
+		for (DAGNode node : dag.getRoles()) {
+			RoleDescription nodeDesc = (RoleDescription) node.getDescription();
 
-            DAGNode newNode = roles.get(nodeDesc);
+			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+				continue;
+			}
 
-            if (newNode == null) {
-                newNode = new DAGNode(nodeDesc);
-                newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
-                roles.put(nodeDesc, newNode);
-            }
-            for (DAGNode child : node.getChildren()) {
-                RoleDescription childDesc = (RoleDescription) child.getDescription();
-                if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
-                    continue;
-                }
-                if (childDesc.isInverse()) {
-                    RoleDescription posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
-                    DAGNode newChild = roles.get(posChild);
-                    if (newChild == null) {
-                        newChild = new DAGNode(posChild);
-                        roles.put(posChild, newChild);
-                    }
-                    continue;
-                }
+			if (nodeDesc.isInverse()) {
+				RoleDescription posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
+				DAGNode newNode = roles.get(posNode);
+				if (newNode == null) {
+					newNode = new DAGNode(posNode);
+					roles.put(posNode, newNode);
+				}
+				continue;
+			}
 
-                DAGNode newChild = roles.get(childDesc);
-                if (newChild == null) {
-                    newChild = new DAGNode(childDesc);
-                    newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
-                    roles.put(childDesc, newChild);
-                }
-                if (!newChild.getDescription().equals(newNode.getDescription())) {
-                    newChild.getParents().add(newNode);
-                    newNode.getChildren().add(newChild);
-                }
-            }
-        }
-        Map<Description, Description> newEquivalentMappings = new HashMap<Description, Description>();
-        for (Description desc : dag.equi_mappings.keySet()) {
-            Description key = makePositive(desc);
-            Description val = makePositive(dag.equi_mappings.get(desc));
+			DAGNode newNode = roles.get(nodeDesc);
 
-            if (key != null && val != null)
-                newEquivalentMappings.put(key, val);
+			if (newNode == null) {
+				newNode = new DAGNode(nodeDesc);
+				newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
+				roles.put(nodeDesc, newNode);
+			}
+			for (DAGNode child : node.getChildren()) {
+				RoleDescription childDesc = (RoleDescription) child.getDescription();
+				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+					continue;
+				}
+				if (childDesc.isInverse()) {
+					RoleDescription posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+					DAGNode newChild = roles.get(posChild);
+					if (newChild == null) {
+						newChild = new DAGNode(posChild);
+						roles.put(posChild, newChild);
+					}
+					continue;
+				}
 
-        }
-        DAG newDag = new DAG(classes, roles, newEquivalentMappings);
+				DAGNode newChild = roles.get(childDesc);
+				if (newChild == null) {
+					newChild = new DAGNode(childDesc);
+					newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
+					roles.put(childDesc, newChild);
+				}
+				if (!newChild.getDescription().equals(newNode.getDescription())) {
+					newChild.getParents().add(newNode);
+					newNode.getChildren().add(newChild);
+				}
+			}
+		}
+		Map<Description, Description> newEquivalentMappings = new HashMap<Description, Description>();
+		for (Description desc : dag.equi_mappings.keySet()) {
+			Description key = makePositive(desc);
+			Description val = makePositive(dag.equi_mappings.get(desc));
 
-        return newDag;
-    }
+			if (key != null && val != null)
+				newEquivalentMappings.put(key, val);
 
-    private static Description makePositive(Description desc) {
+		}
+		DAG newDag = new DAG(classes, roles, newEquivalentMappings);
 
-        if (desc instanceof RoleDescription) {
-            RoleDescription roleKey = (RoleDescription) desc;
-            return descFactory.getRoleDescription(roleKey.getPredicate(), false);
+		return newDag;
+	}
 
-        } else if (desc instanceof AtomicConceptDescription) {
-            return desc;
-        }
+	private static Description makePositive(Description desc) {
 
-        // Simple DAG should not contain ER nodes
-        return null;
+		if (desc instanceof RoleDescription) {
+			RoleDescription roleKey = (RoleDescription) desc;
+			return descFactory.getRoleDescription(roleKey.getPredicate(), false);
 
+		} else if (desc instanceof AtomicConceptDescription) {
+			return desc;
+		}
 
-    }
+		// Simple DAG should not contain ER nodes
+		return null;
+
+	}
 
 }

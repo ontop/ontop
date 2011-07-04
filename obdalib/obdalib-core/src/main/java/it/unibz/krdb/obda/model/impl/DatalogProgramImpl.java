@@ -12,14 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-
 public class DatalogProgramImpl implements DatalogProgram {
 
 	private List<CQIE>					rules			= null;
 
 	private Map<Predicate, List<CQIE>>	predicateIndex	= null;
-	
-	private QueryModifiers modifiers;
+
+	private QueryModifiers				modifiers;
 
 	protected DatalogProgramImpl() {
 		modifiers = new QueryModifiers();
@@ -108,10 +107,15 @@ public class DatalogProgramImpl implements DatalogProgram {
 		}
 		return rules;
 	}
-	
+
 	@Override
 	public QueryModifiers getQueryModifiers() {
 		return modifiers;
+	}
+
+	@Override
+	public void setQueryModifiers(QueryModifiers modifiers) {
+		this.modifiers = modifiers;
 	}
 
 }

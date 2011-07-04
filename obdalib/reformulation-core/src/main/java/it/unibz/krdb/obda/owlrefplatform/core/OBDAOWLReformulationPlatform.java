@@ -23,6 +23,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
@@ -55,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.antlr.runtime.tree.RewriteRuleElementStream;
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.inference.OWLReasonerException;
@@ -113,6 +115,10 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
 		obdaModel = model;
+	}
+
+	public void loadDependencies(DLLiterOntology sigma) {
+		techwrapper.loadDependencies(sigma);
 	}
 
 	/**
@@ -180,6 +186,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		DAG pureIsa = null;
 		QueryVocabularyValidator validator = null;
 
+		DLLiterOntology sigma = null;
+
 		try {
 			/** Setup the validator */
 			validator = new QueryVocabularyValidator(loadedOntologies);
@@ -205,6 +213,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				// apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
 				ds = source;
 				connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
+
+				this.translatedOntologyMerge.saturate();
+
 				if (dbType.equals(OBDAConstants.SEMANTIC)) {
 					// perform semantic import
 					dag = DAGConstructor.getISADAG(this.translatedOntologyMerge);
@@ -213,6 +224,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 					// dag.index();
 					ABoxSerializer.recreate_tables(connection);
 					ABoxSerializer.ABOX2DB(loadedOntologies, dag, pureIsa, connection);
+					sigma = DAGConstructor.getSigmaOntology(this.translatedOntologyMerge);
+
 				} else if (dbType.equals(OBDAConstants.DIRECT)) {
 					// perform direct import
 					String[] types = { "TABLE" };
@@ -264,7 +277,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				}
 				eval_engine = new JDBCEngine(ds);
 			}
-			List<Assertion> onto;
+			Collection<Assertion> onto;
 			if (dbType.equals(OBDAConstants.SEMANTIC)) {
 
 				// Reachability DAGs
@@ -277,7 +290,10 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			if (OBDAConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator(onto);
 			} else if (OBDAConstants.UCQBASED.equals(reformulationTechnique)) {
-				rewriter = new TreeRedReformulator(onto);
+				Ontology dlliteontology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+				dlliteontology.addAssertions(onto);
+				rewriter = new TreeRedReformulator(dlliteontology);
+				rewriter.setABoxDependencies(sigma);
 			} else {
 				throw new IllegalArgumentException("Invalid value for argument: "
 						+ ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
@@ -327,7 +343,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	}
 
 	public void clearOntologies() throws OWLReasonerException {
-		loadedOntologies.clear();
+		if (loadedOntologies != null) {
+			loadedOntologies.clear();
+		}
 		translatedOntologyMerge = null;
 		isClassified = false;
 	}
@@ -416,8 +434,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 		this.loadedOntologies.addAll(ontologies);
 		translatedOntologyMerge.addAssertions(translation.getAssertions());
-        translatedOntologyMerge.addConcepts(new ArrayList<ConceptDescription>(translation.getConcepts()));
-        translatedOntologyMerge.addRoles(new ArrayList<RoleDescription>(translation.getRoles()));
+		translatedOntologyMerge.addConcepts(new ArrayList<ConceptDescription>(translation.getConcepts()));
+		translatedOntologyMerge.addRoles(new ArrayList<RoleDescription>(translation.getRoles()));
+		translatedOntologyMerge.saturate();
 		isClassified = false;
 	}
 

@@ -55,4 +55,10 @@ public class SQLQueryImpl implements Query, SQLQuery {
 		return new QueryModifiers();
 	}
 
+	@Override
+	public void setQueryModifiers(QueryModifiers modifiers) {
+		
+		
+	}
+
 }

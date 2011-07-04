@@ -10,6 +10,10 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -83,7 +87,8 @@ public class CQCUtilitiesTest extends TestCase {
 	}
 
 	public void testGrounding() {
-		CQIE groundedcq = CQCUtilities.getCanonicalQuery(initialquery1);
+		CQCUtilities cqcutil = new CQCUtilities(initialquery1);
+		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
 
 		List<Term> head = groundedcq.getHead().getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
@@ -200,7 +205,7 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(pfac.getAtom(pfac.getPredicate(URI.create("S"), 2), pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
 
 		CQIE q6 = pfac.getCQIE(head, body);
-		
+
 		// Query 7 - q(x,y) :- R(x,y), P(x,_)
 
 		head = pfac.getAtom(pfac.getPredicate(URI.create("q"), 2), pfac.getVariable("x"), pfac.getVariable("y"));
@@ -217,31 +222,24 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(pfac.getAtom(pfac.getPredicate(URI.create("R"), 2), pfac.getVariable("x"), pfac.getVariable("y")));
 		body.add(pfac.getAtom(pfac.getPredicate(URI.create("P"), 2), pfac.getNondistinguishedVariable(), pfac.getNondistinguishedVariable()));
 
-
 		CQIE q8 = pfac.getCQIE(head, body);
-		
-		
-		
+
 		// Checking containment 5 in 6 and viceversa
-		
+
 		CQCUtilities cqcu = new CQCUtilities(q6);
 		assertTrue(cqcu.isContainedIn(q5));
-		
+
 		cqcu = new CQCUtilities(q5);
 		assertTrue(cqcu.isContainedIn(q6));
-		
 
 		// checking containment of 7 in 8
 		cqcu = new CQCUtilities(q7);
 		assertTrue(cqcu.isContainedIn(q8));
-		
+
 		// checking non-containment of 8 in 7
 		cqcu = new CQCUtilities(q8);
 		assertFalse(cqcu.isContainedIn(q7));
-		
 
-		
-		
 		// Checking contaiment q2 <= q1
 
 		cqcu = new CQCUtilities(q2);
@@ -439,5 +437,144 @@ public class CQCUtilitiesTest extends TestCase {
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
 		assertTrue(queries.contains(q3));
+	}
+
+	public void testSemanticContainment() {
+		BasicDescriptionFactory dfac = new BasicDescriptionFactory();
+
+		/* we allways assert true = isContainedIn(q1, q2) */
+
+		{
+			// q(x) :- A(x), q(y) :- C(y), with A ISA C
+			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
+			ConceptDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ConceptDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("C"), 1));
+			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			sigma.addAssertion(inclusion);
+
+			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
+			CQIE query1 = tfac.getCQIE(head1, body1);
+
+			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("C"), 1), tfac.getVariable("y"));
+			CQIE query2 = tfac.getCQIE(head2, body2);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
+			assertTrue(cqcutil1.isContainedIn(query2));
+
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
+			assertFalse(cqcutil2.isContainedIn(query1));
+		}
+
+		{
+			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
+			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
+			ConceptDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ConceptDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
+			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			sigma.addAssertion(inclusion);
+
+			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
+			CQIE query1 = tfac.getCQIE(head1, body1);
+
+			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("y"), tfac.getVariable("z"));
+			CQIE query2 = tfac.getCQIE(head2, body2);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
+			assertTrue(cqcutil1.isContainedIn(query2));
+
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
+			assertFalse(cqcutil2.isContainedIn(query1));
+		}
+
+		{
+			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
+			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
+			ConceptDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ConceptDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
+			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			sigma.addAssertion(inclusion);
+
+			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
+			CQIE query1 = tfac.getCQIE(head1, body1);
+
+			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("z"), tfac.getVariable("y"));
+			CQIE query2 = tfac.getCQIE(head2, body2);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
+			assertTrue(cqcutil1.isContainedIn(query2));
+
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
+			assertFalse(cqcutil2.isContainedIn(query1));
+		}
+
+		{
+			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
+			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
+			ConceptDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
+			ConceptDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+
+			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			sigma.addAssertion(inclusion);
+
+			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("x"), tfac.getVariable("y"));
+			CQIE query1 = tfac.getCQIE(head1, body1);
+
+			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("z"));
+			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("z"));
+			CQIE query2 = tfac.getCQIE(head2, body2);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
+			assertTrue(cqcutil1.isContainedIn(query2));
+
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
+			assertFalse(cqcutil2.isContainedIn(query1));
+		}
+
+		{
+			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
+			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
+			ConceptDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
+			ConceptDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+
+			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			sigma.addAssertion(inclusion);
+
+			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("x"), tfac.getVariable("y"));
+			CQIE query1 = tfac.getCQIE(head1, body1);
+
+			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("z"));
+			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("z"));
+			CQIE query2 = tfac.getCQIE(head2, body2);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
+			assertTrue(cqcutil1.isContainedIn(query2));
+
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
+			assertFalse(cqcutil2.isContainedIn(query1));
+		}
+
+		// q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
+
+		// q(x) :- A(x), q(y) :- C(y), with A ISA exists R, exists R ISA C
+
+		// q(x) :- A(x), q(y) :- C(y), with A ISA exists inv(R), exists inv(R)
+		// ISA C
+
+		// q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA S
+
+		// q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA M, M ISA S
+
+		// q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA inv(M), inv(M) ISA S
+
+		// q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA M, M ISA inv(S)
+
 	}
 }

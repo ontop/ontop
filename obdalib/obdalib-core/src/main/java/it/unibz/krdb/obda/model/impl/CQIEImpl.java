@@ -34,6 +34,8 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String	SPACE		= " ";
 	private static final String	COMMA		= ",";
 	private static final String	INV_IMPLIES	= ":-";
+	
+	private QueryModifiers modifiers = null;
 
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(PredicateAtom head, List<Atom> body) {
@@ -148,6 +150,11 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public QueryModifiers getQueryModifiers() {
-		return new QueryModifiers();
+		return modifiers;
+	}
+	
+	@Override
+	public void setQueryModifiers(QueryModifiers modifiers) {
+		this.modifiers = modifiers;
 	}
 }

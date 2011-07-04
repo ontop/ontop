@@ -10,7 +10,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDes
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -44,10 +45,11 @@ public class TranslatorTests extends TestCase {
 		OWLAPITranslator translator = new OWLAPITranslator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		List<Assertion> ass = dlliteonto.getAssertions();
+		Set<Assertion> ass = dlliteonto.getAssertions();
+		Iterator<Assertion> assit = ass.iterator();
 		
 		assertEquals(1, ass.size());
-		DLLiterConceptInclusionImpl a = (DLLiterConceptInclusionImpl) ass.get(0);
+		DLLiterConceptInclusionImpl a = (DLLiterConceptInclusionImpl) assit.next();
 		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) a.getIncluded();
 		assertEquals(true, ex.isInverse());
 		AtomicConceptDescriptionImpl con = (AtomicConceptDescriptionImpl) a.getIncluding();
@@ -71,10 +73,12 @@ public class TranslatorTests extends TestCase {
 		OWLAPITranslator translator = new OWLAPITranslator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		List<Assertion> ass = dlliteonto.getAssertions();
+		Set<Assertion> ass = dlliteonto.getAssertions();
+		Iterator<Assertion> assit = ass.iterator();
+
 		
 		assertEquals(1, ass.size());
-		DLLiterConceptInclusionImpl a = (DLLiterConceptInclusionImpl) ass.get(0);
+		DLLiterConceptInclusionImpl a = (DLLiterConceptInclusionImpl) assit.next();
 		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) a.getIncluded();
 		assertEquals(false, ex.isInverse());
 		AtomicConceptDescriptionImpl con = (AtomicConceptDescriptionImpl) a.getIncluding();
@@ -98,11 +102,13 @@ public class TranslatorTests extends TestCase {
 		OWLAPITranslator translator = new OWLAPITranslator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		List<Assertion> ass = dlliteonto.getAssertions();
+		Set<Assertion> ass = dlliteonto.getAssertions();
+		Iterator<Assertion> assit = ass.iterator();
+
 		
 		assertEquals(2, ass.size());
-		DLLiterRoleInclusionImpl a = (DLLiterRoleInclusionImpl) ass.get(0);
-		DLLiterRoleInclusionImpl b = (DLLiterRoleInclusionImpl) ass.get(1);
+		DLLiterRoleInclusionImpl a = (DLLiterRoleInclusionImpl) assit.next();
+		DLLiterRoleInclusionImpl b = (DLLiterRoleInclusionImpl) assit.next();
 		
 		
 		RoleDescription included = (RoleDescription) a.getIncluded();
@@ -137,11 +143,13 @@ public class TranslatorTests extends TestCase {
 		OWLAPITranslator translator = new OWLAPITranslator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		List<Assertion> ass = dlliteonto.getAssertions();
+		Set<Assertion> ass = dlliteonto.getAssertions();
+		Iterator<Assertion> assit = ass.iterator();
+
 		
 		assertEquals(2, ass.size());
-		DLLiterConceptInclusionImpl c1 = (DLLiterConceptInclusionImpl) ass.get(0);
-		DLLiterConceptInclusionImpl c2 = (DLLiterConceptInclusionImpl) ass.get(1);
+		DLLiterConceptInclusionImpl c1 = (DLLiterConceptInclusionImpl) assit.next();
+		DLLiterConceptInclusionImpl c2 = (DLLiterConceptInclusionImpl) assit.next();
 		
 		AtomicConceptDescription included = (AtomicConceptDescription) c1.getIncluded();
 		assertEquals("A", included.getPredicate().getName().toString());

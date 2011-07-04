@@ -18,5 +18,7 @@ package it.unibz.krdb.obda.model;
 public interface Query {
 	
 	public QueryModifiers getQueryModifiers();
+	
+	public void setQueryModifiers(QueryModifiers modifiers);
 
 }

@@ -12,24 +12,17 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicRoleDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -37,46 +30,34 @@ import org.slf4j.LoggerFactory;
 
 public class TreeRedReformulator implements QueryRewriter {
 
-	private QueryAnonymizer							anonymizer					= null;
-	private AtomUnifier								unifier						= null;
-	private PositiveInclusionApplicator				piApplicator				= null;
-	private Set<PositiveInclusion>					assertions					= null;
+	private QueryAnonymizer				anonymizer		= null;
+	private AtomUnifier					unifier			= null;
+	private PositiveInclusionApplicator	piApplicator	= null;
 
-	private List<Assertion>							originalassertions			= null;
-	/* Assertions indexed by left side predicate */
-	// private Map<Predicate, Set<PositiveInclusion>> leftAssertionIndex = null;
+	Logger								log				= LoggerFactory.getLogger(TreeRedReformulator.class);
 
-	/* Assertions indexed by left side predicate */
-	private Map<Predicate, Set<PositiveInclusion>>	rightAssertionIndex			= null;
+	OBDADataFactory						fac				= OBDADataFactoryImpl.getInstance();
 
-	private Map<Predicate, Set<PositiveInclusion>>	rightNonExistentialIndex	= null;
+	SemanticQueryOptimizer				sqoOptimizer	= null;
 
-	private Map<Predicate, Set<PositiveInclusion>>	rightExistentialIndex		= null;
+	/***
+	 * The TBox used for reformulating.
+	 */
+	private Ontology					ontology		= null;
 
-	Logger											log							= LoggerFactory.getLogger(TreeRedReformulator.class);
+	/***
+	 * The set of ABox dependencies that will be used to optimize the
+	 * reformulation.
+	 */
+	private DLLiterOntology				sigma			= null;
 
-	OBDADataFactory									fac							= OBDADataFactoryImpl.getInstance();
+	public TreeRedReformulator(Ontology ontology) {
+		this(ontology, null);
+	}
 
-	SemanticQueryOptimizer							sqoOptimizer				= null;
-
-	public TreeRedReformulator(List<Assertion> assertions) {
-		this.originalassertions = assertions;
-		log.debug("Given assertions: {}", assertions);
-
-		/*
-		 * Our strategy requires that for every aciom R ISA S, we also have the
-		 * axioms \exists R ISA \exist S and \exists R- ISA \exists S- this
-		 * allows us to keep the cycles to a minimum
-		 */
-		originalassertions.addAll(computeExistentials());
-
-		/*
-		 * Our strategy requires saturation to minimize the number of cycles
-		 * that will be necessary to compute reformulation.
-		 */
-		saturateAssertions();
-
-		log.debug("Computed assertions: {}", this.assertions);
+	public TreeRedReformulator(Ontology ontology, DLLiterOntology sigma) {
+		setTBox(ontology);
+		setABoxDependencies(sigma);
 
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
@@ -85,37 +66,6 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
 
-	}
-
-	/***
-	 * This method adds to the TBox a pair of axioms ER ISA ES and ER- ISA ES-
-	 * for each role inclusion R ISA S found in the ontology.
-	 * 
-	 * @return The set of extra existential assertions that need to be added to
-	 *         the ontology to account for the semantics of role inclusions
-	 *         w.r.t. their domains and ranges.
-	 */
-	private Set<Assertion> computeExistentials() {
-		HashSet<Assertion> newassertion = new HashSet<Assertion>(1000);
-		for (Assertion assertion : originalassertions) {
-			if (assertion instanceof DLLiterRoleInclusionImpl) {
-				DLLiterRoleInclusionImpl rinclusion = (DLLiterRoleInclusionImpl) assertion;
-				RoleDescription r1 = rinclusion.getIncluded();
-				RoleDescription r2 = rinclusion.getIncluding();
-
-				ExistentialConceptDescriptionImpl e11 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), r1.isInverse());
-				;
-				ExistentialConceptDescriptionImpl e12 = new ExistentialConceptDescriptionImpl(r2.getPredicate(), r2.isInverse());
-				ExistentialConceptDescriptionImpl e21 = new ExistentialConceptDescriptionImpl(r1.getPredicate(), !r1.isInverse());
-				ExistentialConceptDescriptionImpl e22 = new ExistentialConceptDescriptionImpl(r2.getPredicate(), !r2.isInverse());
-
-				DLLiterConceptInclusionImpl inc1 = new DLLiterConceptInclusionImpl(e11, e12);
-				DLLiterConceptInclusionImpl inc2 = new DLLiterConceptInclusionImpl(e21, e22);
-				newassertion.add(inc1);
-				newassertion.add(inc2);
-			}
-		}
-		return newassertion;
 	}
 
 	public Query rewrite(Query input) throws Exception {
@@ -168,7 +118,9 @@ public class TreeRedReformulator implements QueryRewriter {
 
 				HashSet<PositiveInclusion> relevantInclusions = new HashSet<PositiveInclusion>(1000);
 				for (Atom atom : oldquery.getBody()) {
-					relevantInclusions.addAll(getRightNotExistential(((PredicateAtom) atom).getPredicate()));
+					Set<PositiveInclusion> inclusions = ontology.getByIncludingNoExist(((PredicateAtom) atom).getPredicate());
+					if (inclusions != null)
+						relevantInclusions.addAll(ontology.getByIncludingNoExist(((PredicateAtom) atom).getPredicate()));
 				}
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
@@ -210,7 +162,9 @@ public class TreeRedReformulator implements QueryRewriter {
 
 			// Collecting relevant inclusion
 			for (Predicate predicate : predicates) {
-				Set<PositiveInclusion> relevantInclusion = getRightExistential(predicate);
+				Set<PositiveInclusion> relevantInclusion = ontology.getByIncludingExistOnly(predicate);
+				if (relevantInclusion == null)
+					continue;
 				// sorting inverse and not inverse
 				Set<PositiveInclusion> relevantinverse = new HashSet<PositiveInclusion>(1000);
 				Set<PositiveInclusion> relevantnotinverse = new HashSet<PositiveInclusion>(1000);
@@ -245,9 +199,9 @@ public class TreeRedReformulator implements QueryRewriter {
 				 */
 
 				newqueriesbyunificationandPI.addAll(CQCUtilities.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
-						relevantQueries, relevantinverse, rightAssertionIndex)));
+						relevantQueries, relevantinverse)));
 				newqueriesbyunificationandPI.addAll(CQCUtilities.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
-						relevantQueries, relevantnotinverse, rightAssertionIndex)));
+						relevantQueries, relevantnotinverse)));
 			}
 
 			/*
@@ -299,7 +253,10 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		// if (resultlist.size() < 300) {
 		log.debug("Removing CQC contained queries");
-		CQCUtilities.removeContainedQueriesSorted(resultlist, true);
+		if (sigma != null) {
+			log.debug("Using {} ABox dependencies.", sigma.getAssertions().size());
+		}
+		CQCUtilities.removeContainedQueriesSorted(resultlist, true, sigma);
 		// }
 
 		DatalogProgram resultprogram = fac.getDatalogProgram();
@@ -323,205 +280,6 @@ public class TreeRedReformulator implements QueryRewriter {
 				return true;
 		}
 		return q.getHead().getPredicate().equals(predicate);
-	}
-
-	/***
-	 * Saturates the set of assertions and creates the indexes for these based
-	 * on their predicates. It only takes into account positive inclusions. PIs
-	 * with qualififed existntital concepts are ignored.
-	 * 
-	 * To saturate, we do
-	 * 
-	 * For each pair of assertions C1 ISA C2, C2 ISA C3, we compute C1 ISA C3.
-	 */
-	private void saturateAssertions() {
-		assertions = new HashSet<PositiveInclusion>();
-		// leftAssertionIndex = new HashMap<Predicate,
-		// Set<PositiveInclusion>>();
-		rightAssertionIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
-		rightNonExistentialIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
-		rightExistentialIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
-
-		/*
-		 * Loading the initial assertions, filtering postive inlusions and
-		 * indexing
-		 */
-		for (Assertion assertion : originalassertions) {
-			if (assertion instanceof PositiveInclusion) {
-				PositiveInclusion pi = (PositiveInclusion) assertion;
-				assertions.add(pi);
-				index(pi);
-			}
-		}
-
-		/* Saturating is-a hierachy loop */
-		boolean loop = true;
-		while (loop) {
-			loop = false;
-			HashSet<PositiveInclusion> newInclusions = new HashSet<PositiveInclusion>();
-			for (PositiveInclusion pi1 : assertions) {
-				for (PositiveInclusion pi2 : assertions) {
-					if ((pi1 instanceof DLLiterConceptInclusionImpl) && (pi2 instanceof DLLiterConceptInclusionImpl)) {
-						DLLiterConceptInclusionImpl ci1 = (DLLiterConceptInclusionImpl) pi1;
-						DLLiterConceptInclusionImpl ci2 = (DLLiterConceptInclusionImpl) pi2;
-						if (ci1.getIncluding().equals(ci2.getIncluded())) {
-							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci1.getIncluded(),
-									ci2.getIncluding());
-							newInclusions.add(newinclusion);
-						} else if (ci1.getIncluded().equals(ci2.getIncluding())) {
-							DLLiterConceptInclusionImpl newinclusion = new DLLiterConceptInclusionImpl(ci2.getIncluded(),
-									ci1.getIncluding());
-							newInclusions.add(newinclusion);
-						}
-					} else if ((pi1 instanceof DLLiterRoleInclusionImpl) && (pi2 instanceof DLLiterRoleInclusionImpl)) {
-						DLLiterRoleInclusionImpl ci1 = (DLLiterRoleInclusionImpl) pi1;
-						DLLiterRoleInclusionImpl ci2 = (DLLiterRoleInclusionImpl) pi2;
-						if (ci1.getIncluding().equals(ci2.getIncluded())) {
-							DLLiterRoleInclusionImpl newinclusion = new DLLiterRoleInclusionImpl(ci1.getIncluded(), ci2.getIncluding());
-							newInclusions.add(newinclusion);
-						} else if (ci1.getIncluded().equals(ci2.getIncluding())) {
-							DLLiterRoleInclusionImpl newinclusion = new DLLiterRoleInclusionImpl(ci2.getIncluded(), ci1.getIncluding());
-							newInclusions.add(newinclusion);
-						}
-					}
-				}
-			}
-
-			loop = loop || assertions.addAll(newInclusions);
-			if (loop)
-				indexAll(newInclusions);
-		}
-
-		// /* saturating A ISA ER (if A ISA ER and R ISA S -> A ISA ES) */
-		// /* This will be used for SQO and for optimizing the applicaiton of
-		// existential restrictions */
-		// HashSet<PositiveInclusion> newExistentials = new
-		// HashSet<PositiveInclusion>();
-		// for (PositiveInclusion pi: assertions) {
-		// if (!(pi instanceof DLLiterConceptInclusionImpl))
-		// continue;
-		// DLLiterConceptInclusionImpl ci = (DLLiterConceptInclusionImpl)pi;
-		// if (!(ci.getIncluding() instanceof
-		// ExistentialConceptDescriptionImpl)) {
-		// continue;
-		// }
-		// ExistentialConceptDescriptionImpl ex =
-		// (ExistentialConceptDescriptionImpl)ci.getIncluding();
-		//
-		//
-		//
-		// }
-
-	}
-
-	private void indexAll(Collection<PositiveInclusion> pis) {
-		for (PositiveInclusion pi : pis) {
-			index(pi);
-		}
-	}
-
-	private void index(PositiveInclusion pi) {
-		if (pi instanceof DLLiterConceptInclusionImpl) {
-			DLLiterConceptInclusionImpl cpi = (DLLiterConceptInclusionImpl) pi;
-			// ConceptDescription description1 = cpi.getIncluded();
-			ConceptDescription description2 = cpi.getIncluding();
-
-			// /* Processing left side */
-			// if (description1 instanceof AtomicConceptDescriptionImpl) {
-			// AtomicConceptDescriptionImpl acd = (AtomicConceptDescriptionImpl)
-			// description1;
-			// Set<PositiveInclusion> leftAssertion =
-			// getLeft(acd.getPredicate());
-			// leftAssertion.add(pi);
-			// } else if (description1 instanceof
-			// ExistentialConceptDescriptionImpl) {
-			// ExistentialConceptDescriptionImpl ecd =
-			// (ExistentialConceptDescriptionImpl) description1;
-			// Set<PositiveInclusion> leftAssertion =
-			// getLeft(ecd.getPredicate());
-			// leftAssertion.add(pi);
-			// }
-
-			/* Processing right side */
-			if (description2 instanceof AtomicConceptDescriptionImpl) {
-				AtomicConceptDescriptionImpl acd = (AtomicConceptDescriptionImpl) description2;
-				Set<PositiveInclusion> rightAssertion = getRight(acd.getPredicate());
-				rightAssertion.add(pi);
-
-				Set<PositiveInclusion> rightNonExistential = getRightNotExistential(acd.getPredicate());
-				rightNonExistential.add(pi);
-
-			} else if (description2 instanceof ExistentialConceptDescriptionImpl) {
-				ExistentialConceptDescriptionImpl ecd = (ExistentialConceptDescriptionImpl) description2;
-				Set<PositiveInclusion> rightAssertion = getRight(ecd.getPredicate());
-				rightAssertion.add(pi);
-
-				Set<PositiveInclusion> rightExistential = getRightExistential(ecd.getPredicate());
-				rightExistential.add(pi);
-			}
-
-		} else if (pi instanceof DLLiterRoleInclusionImpl) {
-			DLLiterRoleInclusionImpl cpi = (DLLiterRoleInclusionImpl) pi;
-
-			// RoleDescription description1 = cpi.getIncluded();
-			RoleDescription description2 = cpi.getIncluding();
-
-			// /* Processing left side */
-			// if (description1 instanceof AtomicRoleDescriptionImpl) {
-			// AtomicRoleDescriptionImpl acd = (AtomicRoleDescriptionImpl)
-			// description1;
-			// Set<PositiveInclusion> leftAssertion =
-			// getLeft(acd.getPredicate());
-			// leftAssertion.add(pi);
-			// }
-			/* Processing right side */
-			if (description2 instanceof AtomicRoleDescriptionImpl) {
-				AtomicRoleDescriptionImpl acd = (AtomicRoleDescriptionImpl) description2;
-				Set<PositiveInclusion> rightAssertion = getRight(acd.getPredicate());
-				rightAssertion.add(pi);
-
-				Set<PositiveInclusion> rightNonExistential = getRightNotExistential(acd.getPredicate());
-				rightNonExistential.add(pi);
-
-			}
-
-		}
-	}
-
-	// private Set<PositiveInclusion> getLeft(Predicate pred) {
-	// Set<PositiveInclusion> assertions = leftAssertionIndex.get(pred);
-	// if (assertions == null) {
-	// assertions = new HashSet<PositiveInclusion>();
-	// leftAssertionIndex.put(pred, assertions);
-	// }
-	// return assertions;
-	// }
-
-	private Set<PositiveInclusion> getRight(Predicate pred) {
-		Set<PositiveInclusion> assertions = rightAssertionIndex.get(pred);
-		if (assertions == null) {
-			assertions = new HashSet<PositiveInclusion>();
-			rightAssertionIndex.put(pred, assertions);
-		}
-		return assertions;
-	}
-
-	private Set<PositiveInclusion> getRightNotExistential(Predicate pred) {
-		Set<PositiveInclusion> assertions = rightNonExistentialIndex.get(pred);
-		if (assertions == null) {
-			assertions = new HashSet<PositiveInclusion>();
-			rightNonExistentialIndex.put(pred, assertions);
-		}
-		return assertions;
-	}
-
-	private Set<PositiveInclusion> getRightExistential(Predicate pred) {
-		Set<PositiveInclusion> assertions = rightExistentialIndex.get(pred);
-		if (assertions == null) {
-			assertions = new HashSet<PositiveInclusion>();
-			rightExistentialIndex.put(pred, assertions);
-		}
-		return assertions;
 	}
 
 	/***
@@ -553,8 +311,26 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void updateAssertions(List<Assertion> ass) {
-		this.originalassertions = ass;
+	public void setTBox(Ontology ontology) {
+		this.ontology = ontology;
+
+		/*
+		 * Our strategy requires saturation to minimize the number of cycles
+		 * that will be necessary to compute reformulation.
+		 */
+		ontology.saturate();
+
+	}
+
+	@Override
+	public void setABoxDependencies(Ontology sigma) {
+
+		this.sigma = (DLLiterOntology) sigma;
+		if (this.sigma != null) {
+			log.debug("Using {} dependencies.", sigma.getAssertions().size());
+			this.sigma.saturate();
+		}
+
 	}
 
 }

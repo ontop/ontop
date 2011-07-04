@@ -10,9 +10,11 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.DummyOBDAPlatformFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -101,28 +103,34 @@ public class LUBMExecutionHelper {
 
 			// Creating a new instance of a Quest reasoner
 
-			OBDAOWLReformulationPlatformFactory factory = null;
+			OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
 
-			if (aboxmode.equals("classic")) {
-				factory = new OBDAOWLReformulationPlatformFactoryImpl();
-			} else if (aboxmode.equals("semindex")) {
-				factory = new DummyOBDAPlatformFactoryImpl();
+			
+
+			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+			
+			if (aboxmode.equals("semindex")) {
+				p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
+			} else if (aboxmode.equals("classic")) {
+				p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.DIRECT);
 
 			} else {
 				System.err.println("Unsupported ABox mode. specify either \"classic\" or \"semindex\"");
 				throw new Exception("Unsupported ABox mode. specify either \"classic\" or \"semindex\"");
 			}
-
-			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
-			p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
+			
+			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
+			p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+			
 
 			factory.setOBDAController(obdamodel);
 			factory.setPreferenceHolder(p);
 
 			OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
-
+			reasoner.setPreferences(p);
 			reasoner.loadOntologies(manager.getOntologies());
+			reasoner.loadOBDAModel(obdamodel);
+
 
 			// One time classification call.
 			reasoner.classify();

@@ -11,11 +11,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -26,14 +29,14 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	private QueryAnonymizer				anonymizer		= null;
 	private AtomUnifier					unifier			= null;
 	private PositiveInclusionApplicator	piApplicator	= null;
-	private List<Assertion>				assertions		= null;
+	private List<Assertion>				assertions		= new LinkedList<Assertion>();
 
 	private OBDADataFactory				fac				= OBDADataFactoryImpl.getInstance();
 
 	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
-	public DLRPerfectReformulator(List<Assertion> ass) {
-		this.assertions = ass;
+	public DLRPerfectReformulator(Collection<Assertion> ass) {
+		this.assertions.addAll(ass);
 		piApplicator = new PositiveInclusionApplicator();
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
@@ -149,9 +152,16 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void updateAssertions(List<Assertion> ass) {
-
-		this.assertions = ass;
+	public void setTBox(Ontology ontology) {
+		// TODO Auto-generated method stub
+		
 	}
+
+	@Override
+	public void setABoxDependencies(Ontology sigma) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

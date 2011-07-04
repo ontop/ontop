@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.QueryResultSet;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
@@ -103,10 +104,10 @@ public class Tester {
         loadResults(resultfile);
 
         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
-        if (unfold_type.equals("virtual"))
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, OBDAConstants.UCQBASED);
+        if (unfold_type.equals(OBDAConstants.VIRTUAL))
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        else if (unfold_type.equals("material")) {
+        else if (unfold_type.equals(OBDAConstants.CLASSIC)) {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
         } else {
             throw new Exception("The unfolding mechanism can only be either material or virtual");
@@ -115,7 +116,7 @@ public class Tester {
             // changes
         }
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, dbType);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
 
         OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
@@ -153,7 +154,7 @@ public class Tester {
 
     // TODO workaround for old syntax for calling tester.load
     public void load(String onto, String unfold_type) throws Exception {
-        load(onto, unfold_type, "direct");
+        load(onto, unfold_type, OBDAConstants.DIRECT);
     }
 
     public Set<String> getQueryIds() {

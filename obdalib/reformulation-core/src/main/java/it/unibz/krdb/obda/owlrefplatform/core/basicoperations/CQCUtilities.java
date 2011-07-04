@@ -12,13 +12,21 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.BasicRoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +34,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.ontology.Ontology;
 
 /***
  * A class that allows you to perform different operations related to query
@@ -46,20 +56,196 @@ public class CQCUtilities {
 
 	List<Atom>						canonicalbody		= null;
 
-	PredicateAtom							canonicalhead		= null;
+	PredicateAtom					canonicalhead		= null;
 
 	Set<Predicate>					canonicalpredicates	= new HashSet<Predicate>(50);
 
 	static Logger					log					= LoggerFactory.getLogger(CQCUtilities.class);
 
+	private DLLiterOntology			sigma				= null;
+
+	final private OBDADataFactory	fac					= OBDADataFactoryImpl.getInstance();
+
+	/***
+	 * Constructs a CQC utility using the given query.
+	 * 
+	 * @param query
+	 *            A conjunctive query
+	 */
 	public CQCUtilities(CQIE query) {
+		this(query, null);
+	}
+
+	/***
+	 * Constructs a CQC utility using the given query. If Sigma is not null and
+	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
+	 * 
+	 * @param query
+	 *            A conjunctive query
+	 * @param sigma
+	 *            A set of ABox dependencies
+	 */
+	public CQCUtilities(CQIE query, DLLiterOntology sigma) {
+		this.sigma = sigma;
+		if (sigma != null) {
+//			log.debug("Using dependencies to chase the query");
+			query = chaseQuery(query, sigma);
+		}
 		this.canonicalQuery = getCanonicalQuery(query);
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
-		for (Atom atom : canonicalbody)  {
-			PredicateAtom patom = (PredicateAtom)atom;
+		for (Atom atom : canonicalbody) {
+			PredicateAtom patom = (PredicateAtom) atom;
 			canonicalpredicates.add(patom.getPredicate());
 		}
+	}
+
+	/***
+	 * This method will "chase" a query with respect to a set of ABox
+	 * dependencies. This will introduce atoms that are implied by the presence
+	 * of other atoms. This operation may introduce an infinite number of new
+	 * atoms, since there might be A ISA exists R and exists inv(R) ISA A
+	 * dependencies. To avoid infinite cyles we will chase up to a certain depth
+	 * only.
+	 * 
+	 * To improve performance, sigma should already be saturated.
+	 * 
+	 * @param query
+	 * @param sigma
+	 * @return
+	 */
+	public CQIE chaseQuery(CQIE query, DLLiterOntology sigma) {
+		sigma.saturate();
+		PredicateAtom head = (PredicateAtom) query.getHead().clone();
+
+		LinkedHashSet<Atom> body = new LinkedHashSet<Atom>();
+		body.addAll(query.getBody());
+
+		LinkedHashSet<Atom> newbody = new LinkedHashSet<Atom>();
+		newbody.addAll(query.getBody());
+
+		boolean loop = true;
+		while (loop) {
+			loop = false;
+			for (Atom atom : body) {
+				PredicateAtom patom = (PredicateAtom) atom;
+				Predicate predicate = atom.getPredicate();
+
+				Term oldTerm1 = null;
+				Term oldTerm2 = null;
+
+				Set<PositiveInclusion> pis = sigma.getByIncluded(predicate);
+				if (pis == null) {
+					continue;
+				}
+				for (PositiveInclusion pi : pis) {
+
+					Description left = pi.getIncluded();
+					if (left instanceof BasicRoleDescription) {
+
+						if (patom.getArity() != 2)
+							continue;
+
+						BasicRoleDescription lefttRoleDescription = (BasicRoleDescription) left;
+
+						if (lefttRoleDescription.isInverse()) {
+							oldTerm1 = patom.getTerm(1);
+							oldTerm2 = patom.getTerm(0);
+						} else {
+							oldTerm1 = patom.getTerm(0);
+							oldTerm2 = patom.getTerm(1);
+						}
+					} else if (left instanceof AtomicConceptDescription) {
+
+						if (patom.getArity() != 1)
+							continue;
+
+						oldTerm1 = patom.getTerm(0);
+
+					} else if (left instanceof ExistentialConceptDescription) {
+						if (patom.getArity() != 2)
+							continue;
+
+						ExistentialConceptDescription lefttAtomicRole = (ExistentialConceptDescription) left;
+						if (lefttAtomicRole.isInverse()) {
+							oldTerm1 = patom.getTerm(1);
+						} else {
+							oldTerm1 = patom.getTerm(0);
+						}
+
+					} else {
+						throw new RuntimeException("ERROR: Unsupported dependnecy: " + pi.toString());
+					}
+
+					Description right = pi.getIncluding();
+
+					Term newTerm1 = null;
+					Term newTerm2 = null;
+					Predicate newPredicate = null;
+					Atom newAtom = null;
+
+					if (right instanceof BasicRoleDescription) {
+						BasicRoleDescription rightRoleDescription = (BasicRoleDescription) right;
+						newPredicate = rightRoleDescription.getPredicate();
+						if (rightRoleDescription.isInverse()) {
+							newTerm1 = oldTerm2;
+							newTerm2 = oldTerm1;
+						} else {
+							newTerm1 = oldTerm1;
+							newTerm2 = oldTerm2;
+						}
+						newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+					} else if (right instanceof AtomicConceptDescription) {
+						AtomicConceptDescription rightAtomicConcept = (AtomicConceptDescription) right;
+						newTerm1 = oldTerm1;
+						newPredicate = rightAtomicConcept.getPredicate();
+						newAtom = fac.getAtom(newPredicate, newTerm1);
+
+					} else if (right instanceof ExistentialConceptDescription) {
+						// Here we need to introduce new variables, for the
+						// moment
+						// we only do it w.r.t.\ non-anonymous variables.
+						// hence we are incomplete in containment detection.
+
+						ExistentialConceptDescription rightExistential = (ExistentialConceptDescription) right;
+						newPredicate = rightExistential.getPredicate();
+						if (rightExistential.isInverse()) {
+							if (newTerm2 instanceof UndistinguishedVariable)
+								continue;
+							newTerm1 = fac.getNondistinguishedVariable();
+							newTerm2 = oldTerm1;
+							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+						} else {
+							if (newTerm1 instanceof UndistinguishedVariable)
+								continue;
+							newTerm1 = oldTerm1;
+							newTerm2 = fac.getNondistinguishedVariable();
+							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+						}
+					} else {
+						throw new RuntimeException("ERROR: Unsupported dependnecy: " + pi.toString());
+					}
+
+					if (!newbody.contains(newAtom)) {
+						newbody.add(newAtom);
+					}
+
+				}
+			}
+			if (body.size() != newbody.size()) {
+				loop = true;
+				body = newbody;
+				newbody = new LinkedHashSet<Atom>();
+				newbody.addAll(body);
+			}
+		}
+
+		LinkedList<Atom> bodylist = new LinkedList<Atom>();
+		bodylist.addAll(body);
+		CQIE newquery = fac.getCQIE(head, bodylist);
+		newquery.setQueryModifiers(query.getQueryModifiers());
+
+		return newquery;
 	}
 
 	/***
@@ -71,7 +257,7 @@ public class CQCUtilities {
 	 * 
 	 * @param q
 	 */
-	public static CQIE getCanonicalQuery(CQIE q) {
+	public CQIE getCanonicalQuery(CQIE q) {
 		CQIE canonicalquery = q.clone();
 
 		int constantcounter = 1;
@@ -382,6 +568,11 @@ public class CQCUtilities {
 		return true;
 	}
 
+	
+	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
+		removeContainedQueriesSorted(queries, twopasses, null);
+		
+	}
 	/***
 	 * Removes queries that are contained syntactically, using the method
 	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
@@ -393,7 +584,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
+	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, DLLiterOntology sigma) {
 
 		int initialsize = queries.size();
 		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
@@ -411,7 +602,7 @@ public class CQCUtilities {
 		Collections.sort(queries, lenghtComparator);
 
 		for (int i = 0; i < queries.size(); i++) {
-			CQCUtilities cqc = new CQCUtilities(queries.get(i));
+			CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
 			for (int j = queries.size() - 1; j > i; j--) {
 				if (cqc.isContainedIn(queries.get(j))) {
 					queries.remove(i);
@@ -423,7 +614,7 @@ public class CQCUtilities {
 
 		if (twopasses) {
 			for (int i = (queries.size() - 1); i >= 0; i--) {
-				CQCUtilities cqc = new CQCUtilities(queries.get(i));
+				CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
 				for (int j = 0; j < i; j++) {
 					if (cqc.isContainedIn(queries.get(j))) {
 						queries.remove(i);
@@ -442,31 +633,5 @@ public class CQCUtilities {
 		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
 	}
-
-	//
-	// private HashSet<CQIE> removeContainedQueries(Collection<CQIE> queries) {
-	// HashSet<CQIE> result = new HashSet<CQIE>(queries.size());
-	//
-	// LinkedList<CQIE> workingcopy = new LinkedList<CQIE>();
-	// workingcopy.addAll(queries);
-	//
-	// for (int i = 0; i < workingcopy.size(); i++) {
-	// CQCUtilities cqcutil = new CQCUtilities(workingcopy.get(i));
-	// for (int j = i + 1; j < workingcopy.size(); j++) {
-	// if (cqcutil.isContainedIn(workingcopy.get(j))) {
-	// workingcopy.remove(i);
-	// i = -1;
-	// break;
-	// }
-	//
-	// CQCUtilities cqcutil2 = new CQCUtilities(workingcopy.get(j));
-	// if (cqcutil2.isContainedIn(workingcopy.get(i)))
-	// workingcopy.remove(j);
-	//
-	// }
-	// }
-	// result.addAll(workingcopy);
-	// return result;
-	// }
 
 }

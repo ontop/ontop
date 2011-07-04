@@ -168,8 +168,7 @@ public class PositiveInclusionApplicator {
 	 * @throws Exception
 	 * @throws Exception
 	 */
-	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<PositiveInclusion> pis,
-			Map<Predicate, Set<PositiveInclusion>> rightIndex) throws Exception {
+	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) throws Exception {
 
 		// HashSet<CQIE> result = new HashSet<CQIE>(6000);
 		if (pis == null || pis.isEmpty())

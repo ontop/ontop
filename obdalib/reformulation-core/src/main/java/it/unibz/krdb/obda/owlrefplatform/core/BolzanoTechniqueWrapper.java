@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
@@ -52,6 +53,12 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	@Override
 	public void dispose() {
 		evaluationEngine.dispose();
+	}
+
+	@Override
+	public void loadDependencies(DLLiterOntology onto) {
+		queryRewriter.setABoxDependencies(onto);
+		
 	}
 
 }

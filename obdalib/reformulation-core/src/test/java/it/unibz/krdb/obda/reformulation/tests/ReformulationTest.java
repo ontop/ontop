@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class ReformulationTest extends TestCase {
     private void test_function(String ontoname) throws Exception {
         log.debug("Test case: {}", ontoname);
         log.debug("Testing in-memory db/material abox");
-        tester.load(ontoname, "material");
+        tester.load(ontoname, OBDAConstants.CLASSIC);
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
             Set<String> exp = tester.getExpectedResult(id);
@@ -36,7 +38,7 @@ public class ReformulationTest extends TestCase {
         }
 
         log.debug("Testing in-memory db/vitual abox");
-        tester.load(ontoname, "virtual");
+        tester.load(ontoname, OBDAConstants.VIRTUAL);
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
             Set<String> exp = tester.getExpectedResult(id);
@@ -47,7 +49,7 @@ public class ReformulationTest extends TestCase {
             }
         }
         log.debug("Testing in-memory db/SemanticIndex");
-        tester.load(ontoname, "virtual", "semantic");
+        tester.load(ontoname, OBDAConstants.VIRTUAL, OBDAConstants.SEMANTIC);
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
             Set<String> exp = tester.getExpectedResult(id);

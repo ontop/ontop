@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 
 /**
  * The technique wrapper interface can be used to implement different 
@@ -23,5 +24,8 @@ public interface TechniqueWrapper {
 //	public void updateDataSource(DataSource ds);
 	
 	public void dispose();
+	
+	public void loadDependencies(DLLiterOntology onto);
+	
 
 }
