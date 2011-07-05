@@ -47,6 +47,8 @@ public class StockExchangeTest extends TestCase {
 		OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
 		
 		reasoner.loadOntologies(manager.getOntologies());
+		reasoner.loadOBDAModel(controller);
+		reasoner.setPreferences(p);
 		
 		// Loading a set of configurations for the reasoner and giving them to quonto
 //		Properties properties = new Properties();
