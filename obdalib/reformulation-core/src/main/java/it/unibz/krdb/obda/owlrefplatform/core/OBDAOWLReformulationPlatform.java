@@ -107,7 +107,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 	private QueryVocabularyValidator			validator				= null;
 
-	protected OBDAOWLReformulationPlatform(OWLOntologyManager manager) {
+	public OBDAOWLReformulationPlatform(OWLOntologyManager manager) {
 		ontoManager = manager;
 	}
 
