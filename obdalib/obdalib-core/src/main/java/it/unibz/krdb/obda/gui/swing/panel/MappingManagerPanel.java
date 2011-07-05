@@ -1,5 +1,5 @@
 /***
- * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
+
  * 
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
@@ -36,9 +36,8 @@ import it.unibz.krdb.obda.model.SQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
+import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 import it.unibz.krdb.obda.utils.RDBMSMappingValidator;
 import it.unibz.krdb.obda.utils.SourceQueryValidator;
 
@@ -75,7 +74,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author mariano
  */
-public class MappingManagerPanel extends JPanel implements MappingManagerPreferenceChangeListener, DatasourceSelectorListener {
+public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeListener, DatasourceSelectorListener {
 
 	/**
 	 *
@@ -148,7 +147,7 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		cmdAddMapping.setToolTipText("Add a new mapping");
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
-		preference.getMappingsPreference().registerPreferenceChangedListener(this);
+		preference.registerPreferenceChangedListener(this);
 		
 		setOBDAModel(apic, ontology);
 	}
@@ -196,13 +195,13 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 		cmdDuplicateMapping.setPreferredSize(new Dimension(60, 21));
 		cmdDuplicateMapping.setMinimumSize(new Dimension(60, 21));
 
-		String add = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.ADD_MAPPING);
+		String add = preference.get(OBDAPreferences.ADD_MAPPING).toString();
 		addMapping = KeyStroke.getKeyStroke(add);
-		String body = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_BODY);
+		String body = preference.get(OBDAPreferences.EDIT_BODY).toString();
 		editBody = KeyStroke.getKeyStroke(body);
-		String head = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_HEAD);
+		String head = preference.get(OBDAPreferences.EDIT_HEAD).toString();
 		editHead = KeyStroke.getKeyStroke(head);
-		String id = preference.getMappingsPreference().getShortCut(MappingManagerPreferences.EDIT_ID);
+		String id = preference.get(OBDAPreferences.EDIT_ID).toString();
 		editID = KeyStroke.getKeyStroke(id);
 
 		AbstractAction addAction = new AbstractAction() {
@@ -211,8 +210,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				addMapping();
 			}
 		};
-		inputmap.put(addMapping, MappingManagerPreferences.ADD_MAPPING);
-		actionmap.put(MappingManagerPreferences.ADD_MAPPING, addAction);
+		inputmap.put(addMapping, OBDAPreferences.ADD_MAPPING);
+		actionmap.put(OBDAPreferences.ADD_MAPPING, addAction);
 
 		AbstractAction editBodyAction = new AbstractAction() {
 			@Override
@@ -224,8 +223,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				startEditBodyOfMapping(path);
 			}
 		};
-		inputmap.put(editBody, MappingManagerPreferences.EDIT_BODY);
-		actionmap.put(MappingManagerPreferences.EDIT_BODY, editBodyAction);
+		inputmap.put(editBody, OBDAPreferences.EDIT_BODY);
+		actionmap.put(OBDAPreferences.EDIT_BODY, editBodyAction);
 
 		AbstractAction editHeadAction = new AbstractAction() {
 			@Override
@@ -237,8 +236,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				startEditHeadOfMapping(path);
 			}
 		};
-		inputmap.put(editHead, MappingManagerPreferences.EDIT_HEAD);
-		actionmap.put(MappingManagerPreferences.EDIT_HEAD, editHeadAction);
+		inputmap.put(editHead, OBDAPreferences.EDIT_HEAD);
+		actionmap.put(OBDAPreferences.EDIT_HEAD, editHeadAction);
 
 		AbstractAction editIDAction = new AbstractAction() {
 			@Override
@@ -252,8 +251,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 				mappingsTree.startEditingAtPath(path);
 			}
 		};
-		inputmap.put(editID, MappingManagerPreferences.EDIT_ID);
-		actionmap.put(MappingManagerPreferences.EDIT_ID, editIDAction);
+		inputmap.put(editID, OBDAPreferences.EDIT_ID);
+		actionmap.put(OBDAPreferences.EDIT_ID, editIDAction);
 	}
 
 	private void addMenu() {
@@ -929,29 +928,6 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 
 	// End of variables declaration//GEN-END:variables
 
-	@Override
-	public void colorPeferenceChanged(String preference, Color col) {
-		DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
-		model.reload();
-	}
-
-	@Override
-	public void fontFamilyPreferenceChanged(String preference, String font) {
-		DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
-		model.reload();
-	}
-
-	@Override
-	public void fontSizePreferenceChanged(String preference, int size) {
-		DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
-		model.reload();
-	}
-
-	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
-		DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
-		model.reload();
-	}
-
 	private void updateNode(String str) {
 		MappingController con = mapc;
 		URI sourceName = selectedSource.getSourceID();
@@ -1085,9 +1061,8 @@ public class MappingManagerPanel extends JPanel implements MappingManagerPrefere
 	}
 
 	@Override
-	public void useDefaultPreferencesChanged(String key, String value) {
+	public void preferenceChanged() {
 		DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
 		model.reload();
-
 	}
 }

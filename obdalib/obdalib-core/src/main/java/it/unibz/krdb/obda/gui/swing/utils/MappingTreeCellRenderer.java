@@ -21,7 +21,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -67,7 +66,7 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 	private JLabel						label							= null;
 	private JTextPane					area							= null;
 	private JPanel						panel							= null;
-	private MappingManagerPreferences	pref							= null;
+	private OBDAPreferences	pref							= null;
 	private final OBDAModel	apic;
 
 	DatalogProgramParser datalogParser = new DatalogProgramParser();
@@ -81,7 +80,7 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
 		invalidmappingheadIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPINGHEAD_ICON);
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
-		pref =  preference.getMappingsPreference();
+		pref =  preference;
 	}
 
 	@Override
@@ -111,10 +110,12 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 		StyleContext context = new StyleContext();
 		Style style = context.getStyle(StyleContext.DEFAULT_STYLE);
 
+		Boolean useDefault = new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString());
+		
 		if (node instanceof MappingNode) {
-			if(!pref.getUseDefault()){
-				StyleConstants.setFontFamily(style, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-				StyleConstants.setFontSize(style, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+			if(!useDefault){
+				StyleConstants.setFontFamily(style, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
+				StyleConstants.setFontSize(style, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
 			}
 			label.setIcon(mappingIcon);
 			String txt = ((String) node.getUserObject());
@@ -128,9 +129,9 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 			area.setDocument(doc);
 
 		} else if (node instanceof MappingBodyNode) {
-			if(!pref.getUseDefault()){
-				StyleConstants.setFontFamily(style, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
-				StyleConstants.setFontSize(style, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
+			if(!useDefault){
+				StyleConstants.setFontFamily(style, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
+				StyleConstants.setFontSize(style, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
 			}
 			label.setIcon(mappingbodyIcon);
 			String txt = ((String) node.getUserObject());

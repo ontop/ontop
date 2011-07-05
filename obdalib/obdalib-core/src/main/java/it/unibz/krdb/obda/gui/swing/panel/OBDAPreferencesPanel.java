@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -35,20 +34,18 @@ import javax.swing.KeyStroke;
  */
 public class OBDAPreferencesPanel extends javax.swing.JPanel {
 	
-	private static final String add = "add.Mapping";
-	private static final String delete = "delete.Mapping";
-	private static final String editHead = "edit.Mapping.Head";
-	private static final String editBody = "edit.Mapping.Body";
-	private static final String editId = "edit.Mapping.id";
-	
-	private MappingManagerPreferences pref = null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private OBDAPreferences pref = null;
 	private HashMap<String, KeyStroke> shortCuts = new HashMap<String, KeyStroke>();
 	
 	/**
 	 * The constructor 
 	 */
     public OBDAPreferencesPanel(OBDAPreferences preference) {
-    	pref = preference.getMappingsPreference();
+    	pref = preference;
         initComponents();
         addListener();
         applyPreferences();
@@ -72,7 +69,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdClassColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdClassColor, MappingManagerPreferences.CLASS_COLOR);
+				ColorChooser cc = new ColorChooser(cmdClassColor, OBDAPreferences.CLASS_COLOR);
 				cc.setVisible(true);
 			}
     		
@@ -81,7 +78,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdDataPropertyColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, MappingManagerPreferences.DATAPROPERTY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, OBDAPreferences.DATAPROPERTY_COLOR);
 				cc.setVisible(true);
 			}
     		
@@ -90,7 +87,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdFunctorColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdFunctorColor, MappingManagerPreferences.FUCNTOR_COLOR);
+				ColorChooser cc = new ColorChooser(cmdFunctorColor, OBDAPreferences.FUCNTOR_COLOR);
 				cc.setVisible(true);
 			}
     		
@@ -108,7 +105,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdObjectPropertyColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, MappingManagerPreferences.OBJECTPROPTERTY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, OBDAPreferences.OBJECTPROPTERTY_COLOR);
 				cc.setVisible(true);
 			}
     		
@@ -117,7 +114,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdParameterColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdParameterColor, MappingManagerPreferences.PARAMETER_COLOR);
+				ColorChooser cc = new ColorChooser(cmdParameterColor, OBDAPreferences.PARAMETER_COLOR);
 				cc.setVisible(true);
 			}
     		
@@ -126,13 +123,13 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdVariableColor.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdVariableColor, MappingManagerPreferences.VARIABLE_COLOR);
+				ColorChooser cc = new ColorChooser(cmdVariableColor, OBDAPreferences.VARIABLE_COLOR);
 				cc.setVisible(true);
 			}
     		
     	});
     	
-    	String aux = pref.getShortCut(add);
+    	String aux = pref.get(OBDAPreferences.ADD_MAPPING).toString();
     	KeyStroke ks = KeyStroke.getKeyStroke(aux);
     	lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(ks.getModifiers()) + " + "+ KeyEvent.getKeyText(ks.getKeyCode()));
     	lblAddMappingKey.addMouseListener(new MouseListener(){
@@ -161,12 +158,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(add, stroke);
+					shortCuts.put(OBDAPreferences.ADD_MAPPING, stroke);
 				    lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblAddMappingKey.setToolTipText(stroke.toString());
-					pref.setShortcut(add, stroke.toString());
+					pref.put(OBDAPreferences.ADD_MAPPING, stroke.toString());
 				}else{
-					KeyStroke oldValue = shortCuts.get(add);
+					KeyStroke oldValue = shortCuts.get(OBDAPreferences.ADD_MAPPING);
 					if(oldValue != null){
 						lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -223,7 +220,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 //			public void keyTyped(KeyEvent e) {}
 //    	});
     	
-    	String aux2 = pref.getShortCut(editBody);
+    	String aux2 = pref.get(OBDAPreferences.EDIT_BODY).toString();
     	KeyStroke ks2 = KeyStroke.getKeyStroke(aux2);
     	lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(ks2.getModifiers()) + " + "+ KeyEvent.getKeyText(ks2.getKeyCode()));
     	lblEditMappingBodyKey.addMouseListener(new MouseListener(){
@@ -251,12 +248,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(editBody, stroke);
+					shortCuts.put(OBDAPreferences.EDIT_BODY, stroke);
 					lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblEditMappingBodyKey.setToolTipText(stroke.toString());
-					pref.setShortcut(editBody, stroke.toString());
+					pref.put(OBDAPreferences.EDIT_BODY, stroke.toString());
 				}else{
-					KeyStroke oldValue = shortCuts.get(editBody);
+					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_BODY);
 					if(oldValue != null){
 						lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -268,7 +265,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			public void keyTyped(KeyEvent e) {}
     	});
     	
-    	String aux3 = pref.getShortCut(editHead);
+    	String aux3 = pref.get(OBDAPreferences.EDIT_HEAD).toString();
     	KeyStroke ks3 = KeyStroke.getKeyStroke(aux3);
     	lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(ks3.getModifiers()) + " + "+ KeyEvent.getKeyText(ks3.getKeyCode()));
     	lblEditMappingHeadKey.addMouseListener(new MouseListener(){
@@ -296,12 +293,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(editHead, stroke);
+					shortCuts.put(OBDAPreferences.EDIT_HEAD, stroke);
 					lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblEditMappingHeadKey.setToolTipText(stroke.toString());
-					pref.setShortcut(editHead, stroke.toString());
+					pref.put(OBDAPreferences.EDIT_HEAD, stroke.toString());
 				}else{
-					KeyStroke oldValue = shortCuts.get(editHead);
+					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_HEAD);
 					if(oldValue != null){
 						lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -313,7 +310,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			public void keyTyped(KeyEvent e) {}
     	});
     	
-    	String aux4 = pref.getShortCut(editId);
+    	String aux4 = pref.get(OBDAPreferences.EDIT_ID).toString();
     	KeyStroke ks4 = KeyStroke.getKeyStroke(aux4);
     	lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(ks4.getModifiers()) + " + "+ KeyEvent.getKeyText(ks4.getKeyCode()));
     	lblMappingIdKey.addMouseListener(new MouseListener(){
@@ -341,12 +338,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(editHead, stroke);
+					shortCuts.put(OBDAPreferences.EDIT_ID, stroke);
 					lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblMappingIdKey.setToolTipText(stroke.toString());
-					pref.setShortcut(editId, stroke.toString());
+					pref.put(OBDAPreferences.EDIT_ID, stroke.toString());
 				}else{
-					KeyStroke oldValue = shortCuts.get(editId);
+					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_ID);
 					if(oldValue != null){
 						lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -361,27 +358,27 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     
     private void applyPreferences(){
  
-    	Color clazz = pref.getColor(MappingManagerPreferences.CLASS_COLOR);
+    	Color clazz = new Color(Integer.parseInt(pref.get(OBDAPreferences.CLASS_COLOR).toString()));
     	cmdClassColor.setBackground(clazz);
     	cmdClassColor.setOpaque(true);
     	cmdClassColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-    	Color dp = pref.getColor(MappingManagerPreferences.DATAPROPERTY_COLOR);
+    	Color dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
     	cmdDataPropertyColor.setBackground(dp);
     	cmdDataPropertyColor.setOpaque(true);
     	cmdDataPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-    	Color op = pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR);
+    	Color op =new Color(Integer.parseInt(pref.get(OBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
     	cmdObjectPropertyColor.setBackground(op);
     	cmdObjectPropertyColor.setOpaque(true);
     	cmdObjectPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-    	Color var = pref.getColor(MappingManagerPreferences.VARIABLE_COLOR);
+    	Color var = new Color(Integer.parseInt(pref.get(OBDAPreferences.VARIABLE_COLOR).toString()));
     	cmdVariableColor.setBackground(var);
     	cmdVariableColor.setOpaque(true);
     	cmdVariableColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-    	Color par = pref.getColor(MappingManagerPreferences.PARAMETER_COLOR);
+    	Color par = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
     	cmdParameterColor.setBackground(par);
     	cmdParameterColor.setOpaque(true);
     	cmdParameterColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
-    	Color fun = pref.getColor(MappingManagerPreferences.FUCNTOR_COLOR);
+    	Color fun = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
     	cmdFunctorColor.setBackground(fun);
     	cmdFunctorColor.setOpaque(true);
     	cmdFunctorColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
@@ -392,12 +389,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 //    	jButtonIDColour2.setBackground(id);
 //    	jButtonIDColour2.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	String fontBody = pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY);
-    	int bodySize = pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE);
+    	String fontBody = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
+    	int bodySize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
     	cmdFontFamily.setText(fontBody + ", " + bodySize);
     	cmdFontFamily.setToolTipText(fontBody + ", " + bodySize);
     	
-    	jCheckBoxUseDefault.setSelected(pref.getUseDefault());
+    	jCheckBoxUseDefault.setSelected(new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString()));
     	if(jCheckBoxUseDefault.isSelected()){
     		cmdFontFamily.setEnabled(false);
     	}else{
@@ -854,17 +851,17 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdFontFamilyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFontFamilyActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdFontFamily, MappingManagerPreferences.OBDAPREFS_FONTFAMILY, MappingManagerPreferences.OBDAPREFS_FONTSIZE, MappingManagerPreferences.OBDAPREFS_ISBOLD);
+    	FontChooser2 fe = new FontChooser2(cmdFontFamily, OBDAPreferences.OBDAPREFS_FONTFAMILY, OBDAPreferences.OBDAPREFS_FONTSIZE, OBDAPreferences.OBDAPREFS_ISBOLD);
     	
     }//GEN-LAST:event_cmdFontFamilyActionPerformed
 
     private void jCheckBoxUseDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxUseDefaultActionPerformed
         
     	if(jCheckBoxUseDefault.isSelected()){
-    		pref.setUseDefault(true);
+    		pref.put(OBDAPreferences.USE_DEAFAULT, "true");
     		cmdFontFamily.setEnabled(false);
     	}else{
-    		pref.setUseDefault(false);
+    		pref.put(OBDAPreferences.USE_DEAFAULT, "false");
     		cmdFontFamily.setEnabled(true);
     	}
     	
@@ -971,7 +968,8 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 
         private void applyPreferences() {
         	Color aux = jColorChooser1.getSelectionModel().getSelectedColor();
-        	pref.setColor(key, aux);
+        	Integer rgb = aux.getRGB();
+        	pref.put(key, rgb.toString());
         	button.setBackground(aux);
         	button.setOpaque(true);
         }
@@ -1143,12 +1141,14 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 
     	        pnlDisplayPreferencesTab.setLayout(new java.awt.GridBagLayout());
     		  
-    	        String currentFont = pref.getFontFamily(fontfamily);
-    	        int currentSize = pref.getFontSize(fontsize);
+    	        String currentFont = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
+    	        int currentSize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+    	        Boolean isBold = new Boolean( pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
 	      	    int i = getIndexOfFont(currentFont);
 	      	    int j = getIndexOfSize(String.valueOf(currentSize));
 	      	    fontNameChoice.setSelectedIndex(i);
 	      	    fontSizeChoice.setSelectedIndex(j);
+	      	    bold.setSelected(isBold);
 
     	  }
     	  
@@ -1180,13 +1180,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     		  
     		resultName = (String) fontNameChoice.getSelectedValue();
       	    String resultSizeName = (String) fontSizeChoice.getSelectedValue();
-      	    int resultSize = Integer.parseInt(resultSizeName);
       	    isBold = bold.isSelected();
-      	    pref.setFontFamily(fontfamily, resultName);
-      	    pref.setFontSize(fontsize, resultSize);
-      	    pref.setIsBold(isbold, new Boolean(isBold));
-      	    button.setText(resultName + ", " + resultSize);
-      	    button.setToolTipText(resultName + ", " + resultSize);
+      	    pref.put(OBDAPreferences.OBDAPREFS_FONTFAMILY, resultName);
+      	    pref.put(OBDAPreferences.OBDAPREFS_FONTSIZE, resultSizeName);
+      	    pref.put(OBDAPreferences.OBDAPREFS_ISBOLD, new Boolean(isBold).toString());
+      	    button.setText(resultName + ", " + resultSizeName);
+      	    button.setToolTipText(resultName + ", " + resultSizeName);
     	  }
     	  
     	  /**
