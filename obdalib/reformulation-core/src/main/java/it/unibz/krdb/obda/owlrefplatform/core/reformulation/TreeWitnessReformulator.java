@@ -13,7 +13,13 @@ import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
@@ -21,8 +27,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -30,14 +38,19 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessReformulator implements QueryRewriter {
 
-	private Set<Assertion>				assertions		= null;
+	private Set<Assertion>				assertions;
 	private DAG  conceptDAG = null;
+	private Map<ConceptDescription, Predicate> views;
 	
 	private OBDADataFactory				fac				= OBDADataFactoryImpl.getInstance();
-	Logger								log				= LoggerFactory.getLogger(TreeWitnessReformulator.class);
+
+	private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+
+	private static final Logger log = LoggerFactory.getLogger(TreeWitnessReformulator.class);
 	
 	public TreeWitnessReformulator(Set<Assertion> set) {
 		this.assertions = set;
+		this.views = new HashMap<ConceptDescription, Predicate>();
 	}
 	
 	public void setConceptDAG(DAG conceptDAG) {
@@ -61,6 +74,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		HashSet<Term> evars = new HashSet<Term>(); // all variables
 		
 		Set<Predicate> predicates = new HashSet<Predicate>(); // binary predicates
+		
 		if (q.getRules().size() != 1)
 			log.debug("ONLY CQ ARE ALLOWED\n");		
 		CQIE cqie = q.getRules().get(0);
@@ -144,8 +158,28 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		for (Atom a0 : cqie.getBody()) {
 			PredicateAtom a = (PredicateAtom)a0;
 			if (a.getArity() == 1) {
-				Predicate np = fac.getPredicate(URI.create("A" + n1), 1);
-				body.add(fac.getAtom(np, a.getTerm(0)));
+				Predicate np = fac.getPredicate(URI.create("A" + n1), variables.size());
+				body.add(fac.getAtom(np, variables));
+				
+				out.appendRule(fac.getCQIE(fac.getAtom(np, variables), 
+							Collections.singletonList((Atom)fac.getAtom(a.getPredicate(), 
+									a.getTerm(0)))));
+				
+				for (TreeWitness tw: tws) {
+					log.debug("atom " + a + " on tree witness " + tw + " with term " + a.getTerm(0));
+					if (!tw.isInDomain(a.getTerm(0)) || (tw.getNonRoots().size() == 0)) // CHECK
+						continue;
+					log.debug("in the domain");
+					
+					if (!nonRootsAreExistential(tw, evars))
+						continue;
+
+					List<Atom> wb = getRuleBodyForTreeWitness(tw, cqie);								
+ 
+					if (wb != null)
+						out.appendRule(fac.getCQIE(fac.getAtom(np, variables), wb));
+				}
+
 				n1++;
 			}
 			if (a.getArity() == 2) {
@@ -158,56 +192,50 @@ public class TreeWitnessReformulator implements QueryRewriter {
 									a.getTerm(0), a.getTerm(1)))));
 					
 				for (TreeWitness tw: tws) {
-					// check whether both terms are in the tree witness domain
 					if (!tw.isInDomain(a.getTerm(0)) || !tw.isInDomain(a.getTerm(1)))
 						continue;
 					
-					// check whether all non-roots are existentially quantified
-					boolean nonrootsOK = true;
-					for (Term t: tw.getNonRoots()) 
-						if (!evars.contains(t)) {
-							nonrootsOK = false;
-							log.debug("non roots are not all existentially quantified: " + t);
-							break;
-						}
-					if (!nonrootsOK)
+					if (!nonRootsAreExistential(tw, evars))
 						continue;
 
-					List<Term> roots = tw.getRoots();
-					Term x = roots.get(0);
-							
-					List<Atom> wb = new ArrayList<Atom>();
-							
-					// Extension Atom ext_{\exists R} 
-					wb.add(fac.getAtom(fac.getPredicate(URI.create("EXT" + 
-								tw.getDirection().getPosition() + "E" +
-								tw.getDirection().getPredicate().getName().getFragment()), 1), x)); // ext
-							
-					// Negated Atom \neg \exists z R(x,z)
-					List<Term> naterms = new ArrayList<Term>();
-					naterms.add(null); naterms.add(null);
-					naterms.set(2 - tw.getDirection().getPosition(), x);
-					naterms.set(tw.getDirection().getPosition() - 1, fac.getVariable("z"));
-					wb.add(fac.getAtom(tw.getDirection().getPredicate(),naterms));
-					//wb.add(fac.getNOTAtom((Term)negatedatom)); // IMPORTANT: type conversion fails 
-						
-					// Tree-structure atom
-					// TBD
-							
-					// Equality Atoms for all terms that are equivalent to the root
-					for (Term v : roots) 
-						if (!v.equals(x))
-							wb.add(fac.getEQAtom(x, v));
-													
+					List<Atom> wb = getRuleBodyForTreeWitness(tw, cqie);								
  
-					out.appendRule(fac.getCQIE(fac.getAtom(np, variables), wb));
+					if (wb != null)
+						out.appendRule(fac.getCQIE(fac.getAtom(np, variables), wb));
 				}
 						
 				n2++;				
 			}
 		}
 		out.appendRule(fac.getCQIE(cqie.getHead(), body));
+
+		for (ConceptDescription C: views.keySet()) {
+			Term z = fac.getVariable("z");
+			PredicateAtom head = fac.getAtom(views.get(C), z);
+			log.debug("CREATING VIEWS FOR " + C);
+			Set<DAGNode> subclasses = conceptDAG.getClassNode(C).descendans;  // CAREFUL here
+			subclasses.add(conceptDAG.getClassNode(C));
+			for (DAGNode node: subclasses) {
+				Description D = node.getDescription();
+				log.debug("subclass " + D + " of " + C);
+				Atom p = null;
+				if (D instanceof AtomicConceptDescription) {
+					p = fac.getAtom(((AtomicConceptDescription)D).getPredicate(), z);
+				}
+				else if (D instanceof ExistentialConceptDescription) {
+					Term w = fac.getVariable("w");
+					ExistentialConceptDescription DD = (ExistentialConceptDescription)D;
+					if (!DD.isInverse())
+						p = fac.getAtom(DD.getPredicate(), z, w);
+					else
+						p = fac.getAtom(DD.getPredicate(), w, z);						
+				}	
+				out.appendRule(fac.getCQIE(head, Collections.singletonList(p)));
+			}
 				
+			//  {
+		}
+		
 		log.debug("CONCEPT DAG"); // descendants = subclasses
 		for (DAGNode node: conceptDAG.getClasses()) {
 			log.debug(node.toString());
@@ -215,6 +243,89 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		}
 		
 		return out;	
+	}
+	// check whether all non-roots are existentially quantified
+	
+	private static boolean nonRootsAreExistential(TreeWitness tw, Set<Term> evars) {
+		boolean nonrootsOK = true;
+		for (Term t: tw.getNonRoots()) 
+			if (!evars.contains(t)) {
+				nonrootsOK = false;
+				log.debug("non roots are not all existentially quantified: " + t);
+				break;
+			}
+		return nonrootsOK;
+	}
+	
+	private boolean checkTree(TreeWitness tw, Term t, ConceptDescription C) {
+		if (tw.isInDomain(t) && !tw.isRoot(t)) {
+			PredicatePosition pp = tw.getLabelTail(t);
+			log.debug("checking tree for predicate position: " + pp + " for " + t);
+			ConceptDescription ETi = descFactory.getExistentialConceptDescription(pp.getPredicate(), pp.getPosition() == 2);
+			if (!ETi.equals(C) && !conceptDAG.getClassNode(C).descendans.contains(conceptDAG.getClassNode(ETi))) {
+				log.debug("falsum in " + C + " " + ETi);								
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	// returns null if no rule should be produced for the tree witness
+	
+	private List<Atom> getRuleBodyForTreeWitness(TreeWitness tw, CQIE cqie) {
+		List<Term> roots = tw.getRoots();
+		Term x = roots.get(0);
+				
+		List<Atom> wb = new ArrayList<Atom>();
+				
+		// Extension Atom ext_{\exists R}
+		Predicate p = fac.getPredicate(URI.create("EXT" + 
+				tw.getDirection().getPosition() + "E" +
+				tw.getDirection().getPredicate().getName().getFragment()), 1);
+		wb.add(fac.getAtom(p, x)); 
+		views.put(descFactory.getExistentialConceptDescription(
+				tw.getDirection().getPredicate(), tw.getDirection().getPosition() == 1), p);
+		
+		//DAGNode node = conceptDAG.getClassNode(C);
+		// Negated Atom \neg \exists z R(x,z)
+		//List<Term> naterms = new ArrayList<Term>();
+		//naterms.add(null); naterms.add(null);
+		//naterms.set(2 - tw.getDirection().getPosition(), x);
+		//naterms.set(tw.getDirection().getPosition() - 1, fac.getVariable("z"));
+		//wb.add(fac.getAtom(tw.getDirection().getPredicate(),naterms));
+		//wb.add(fac.getNOTAtom((Term)negatedatom)); // IMPORTANT: type conversion fails 
+			
+		// Tree-structure atoms
+		for (Atom ca0: cqie.getBody()) {
+			PredicateAtom ca = (PredicateAtom)ca0;
+			if ((ca.getArity() == 1) && tw.isInDomain(ca.getTerm(0))) {
+				if (tw.isRoot(ca.getTerm(0))) {
+					Predicate pa = fac.getPredicate(URI.create("EXT" + 
+							ca.getPredicate().getName().getFragment()), 1);
+					wb.add(fac.getAtom(pa, x)); 
+					views.put(descFactory.getAtomicConceptDescription(ca.getPredicate()), pa);
+				}
+				else if (!checkTree(tw, ca.getTerm(0), descFactory.getAtomicConceptDescription(
+						ca.getPredicate()))) 
+					return null;
+			}
+			else if (ca.getArity() == 2) {
+				if (!checkTree(tw, ca.getTerm(0), descFactory.getExistentialConceptDescription(
+						ca.getPredicate(), false))) 
+					return null;
+				
+				if (!checkTree(tw, ca.getTerm(1), descFactory.getExistentialConceptDescription(
+						ca.getPredicate(), true))) 
+					return null;								
+			}
+		}
+				
+		// Equality Atoms for all terms that are equivalent to the root
+		for (Term v : roots) 
+			if (!v.equals(x))
+				wb.add(fac.getEQAtom(x, v));
+		
+		return wb;		
 	}
 	
 	

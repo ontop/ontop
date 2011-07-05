@@ -156,4 +156,24 @@ public class TreeWitness {
 		}
 		return exists;			
 	}
+	
+	// returns null if t is a root
+	//     and the tail of the label otherwise
+	
+	public PredicatePosition getLabelTail(Term t)
+	{
+		Vector<PredicatePosition> label = func.get(t);
+		if (label.isEmpty())
+			return null;
+		else
+			return label.lastElement();
+	}
+
+	// returns true if the term is a root
+	
+	public boolean isRoot(Term t)
+	{
+		return (getLabelTail(t) == null);
+	}
+	
 }

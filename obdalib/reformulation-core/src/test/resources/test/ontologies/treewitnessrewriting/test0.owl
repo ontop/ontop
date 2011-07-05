@@ -32,25 +32,19 @@
 
     <!-- http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#R -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#R">
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#A"/>
-    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#R"/>
     
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#S -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#S">
-        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#B"/>
-    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#S"/>
     
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#T -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#T">
-        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#C"/>
-    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#T"/>
     
 
 
@@ -73,17 +67,38 @@
 
     <!-- http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#B -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#B">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#A"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#B"/>
     
 
 
     <!-- http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#C -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#C">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#B"/>
-    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#C"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Restriction>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#S"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#R"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
 </rdf:RDF>
 
 
