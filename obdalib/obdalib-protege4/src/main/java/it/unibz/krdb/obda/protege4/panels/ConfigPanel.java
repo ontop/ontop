@@ -40,7 +40,7 @@ public class ConfigPanel extends javax.swing.JPanel {
     	this.preference = preference;
         initComponents();
         addActionListener();
-        setSeletions(preference);
+        setSelections(preference);
     }
 
     private void addActionListener(){
@@ -119,7 +119,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 		});
     }
     
-    private void setSeletions(ReformulationPlatformPreferences p){
+    private void setSelections(ReformulationPlatformPreferences p){
 		
     	
 //        String refvalue = (String) cb.getSelectedItem();
@@ -129,8 +129,11 @@ public class ConfigPanel extends javax.swing.JPanel {
         
         
         String refvalue = (String)p.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-        cmbReformulationMethods.setSelectedItem(refvalue);
-        
+        if(refvalue.equals(OBDAConstants.PERFECTREFORMULATION)){
+        	 cmbReformulationMethods.setSelectedIndex(0);
+        }else if(refvalue.equals(OBDAConstants.UCQBASED)){
+        	 cmbReformulationMethods.setSelectedIndex(1);
+        }      
     	
 		String value = (String)p.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		if (value.equals(OBDAConstants.VIRTUAL)) {
@@ -149,8 +152,9 @@ public class ConfigPanel extends javax.swing.JPanel {
 			jRadioButtonDirect.setEnabled(true);
 //			jRadioButtonSemanticIndex.setEnabled(true);
 //			jRadioButtonUniversal.setEnabled(true);
-//			jRadioButtonUserProvidedDB.setEnabled(true);
+			jRadioButtonUserProvidedDB.setEnabled(false);
 			jRadioButtonInMemoryDB.setEnabled(true);
+			jRadioButtonInMemoryDB.setSelected(true);
 			jLabelDataLoc.setEnabled(true);
 			jLabeldbtype.setEnabled(true);
 

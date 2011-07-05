@@ -2,25 +2,20 @@ package it.unibz.krdb.obda.protege4.gui.preferences;
 
 import it.unibz.krdb.obda.gui.swing.panel.OBDAPreferencesPanel;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 
 import javax.swing.JLabel;
 
-import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 
-public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel 
-		implements MappingManagerPreferenceChangeListener {
+public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel {
 		
 	/**
 	 * 
 	 */
 	private static final long	serialVersionUID	= -238263730527609043L;
-	private Preferences preference = null;
 	private OBDAPreferences obdaPreference = null;
 	
 	@Override
@@ -32,7 +27,6 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel
 	public void initialise() throws Exception {		
 		// Global preference settings using the Protege framework.
 		PreferencesManager man = PreferencesManager.getInstance();
-		preference = man.getApplicationPreferences("OBDA Plugin");
 		
 		// Preference settings using the OBDA API framework
 		obdaPreference = (OBDAPreferences)
@@ -59,35 +53,6 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel
 	}
 
 	public void dispose() throws Exception {
-		obdaPreference.getMappingsPreference().removePreferenceChangedListener(this);
 	}
 
-	public void colorPeferenceChanged(String key, Color col) {
-		preference.putInt(key, col.getRGB());
-	}
-
-	public void fontFamilyPreferenceChanged(String key, String font) {
-		preference.putString(key, font);
-	}
-
-	public void fontSizePreferenceChanged(String key, int size) {
-		preference.putInt(key, size);
-	}
-
-	public void isBoldPreferenceChanged(String key, Boolean isBold) {
-		preference.putBoolean(key, isBold.booleanValue());
-	}
-
-	public void shortCutChanged(String key, String shortcut) {
-		preference.putString(key, shortcut);
-	}
-
-	public void preferenceChanged(String key, String value) {
-		preference.putString(key, value);
-	}
-
-	@Override
-	public void useDefaultPreferencesChanged(String key, String value) {
-		preference.putString(key, value);
-	}
 }
