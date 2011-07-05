@@ -66,8 +66,8 @@ public class OWLAPIDataManagerTest extends TestCase {
 		 	"http://www.owl-ontologies.com/ontology.owl#hasAddress(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
 		 	"http://www.owl-ontologies.com/ontology.owl#getAddressObj(addressid))",
 		 "http://obda.org/mapping/predicates/q(id, city) :- " +
-		 	"http://www.owl-ontologies.com/ontology-base.owl#hasBase(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
-		 	"http://www.owl-ontologies.com/ontology-base.owl#baseCity(city))"
+		 	"http://www.owl-ontologies.com/ontology.owl#hasBase(http://www.owl-ontologies.com/ontology.owl#getCompanyObj(id), " +
+		 	"http://www.owl-ontologies.com/ontology.owl#baseCity(city))"
 		},
 		// The answer for the source queries.
 		{"select id, name, lastname, dateofbirth, ssn from client",
@@ -176,7 +176,7 @@ public class OWLAPIDataManagerTest extends TestCase {
         String obdafilestr = owlfile.substring(0, owlfile.length() -3) + "obda";
         URI obdafileuri = new File(obdafilestr).toURI();
         // Load the OBDA data.
-        
+
         OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
         controller = obdafac.getOBDAModel();
         DataManager ioManager = new DataManager(controller);
