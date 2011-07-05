@@ -21,7 +21,7 @@ import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 
 import java.awt.Color;
 import java.util.Iterator;
@@ -36,12 +36,12 @@ public class QueryPainter {
 
 	private Vector<ColorTask>			tasks			= null;
 	private boolean						alreadyColoring	= false;
-	private OBDAPreferences	pref			= null;
+	private MappingManagerPreferences	pref			= null;
 	private final OBDAModel			apic;
 
 	private boolean						isValidQuery	= false;
 
-	public QueryPainter(OBDAModel apic, OBDAPreferences pref) {
+	public QueryPainter(OBDAModel apic, MappingManagerPreferences pref) {
 		this.apic = apic;
 		this.pref = pref;
 
@@ -77,7 +77,7 @@ public class QueryPainter {
 		PrefixManager man = apic.getPrefixManager();
 		// EntityNameRenderer erenderer = new EntityNameRenderer();
 
-		boolean useDefault = new Boolean(pref.getOBDAPreference(OBDAPreferences.USE_DEAFAULT));
+		boolean useDefault = pref.getUseDefault();
 
 		SimpleAttributeSet black = new SimpleAttributeSet();
 		black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
@@ -93,54 +93,54 @@ public class QueryPainter {
 		}
 
 		SimpleAttributeSet functor = new SimpleAttributeSet();
-		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.FUCNTOR_COLOR));
+		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.FUCNTOR_COLOR));
 		if (!useDefault) {
-			functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(OBDAPreferences.OBDAPREFS_ISBOLD));
-			functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(OBDAPreferences.OBDAPREFS_FONTFAMILY));
-			functor.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(OBDAPreferences.OBDAPREFS_FONTSIZE));
+			functor.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			functor.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			functor.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
 		}
 
 		SimpleAttributeSet parameters = new SimpleAttributeSet();
-		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.PARAMETER_COLOR));
+		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.PARAMETER_COLOR));
 		if (!useDefault) {
 			parameters
-					.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(OBDAPreferences.OBDAPREFS_FONTFAMILY));
-			parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(OBDAPreferences.OBDAPREFS_ISBOLD));
-			parameters.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(OBDAPreferences.OBDAPREFS_FONTSIZE));
+					.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			parameters.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			parameters.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
 		}
 
 		SimpleAttributeSet dataProp = new SimpleAttributeSet();
-		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.DATAPROPERTY_COLOR));
+		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.DATAPROPERTY_COLOR));
 		if (!useDefault) {
-			dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(OBDAPreferences.OBDAPREFS_ISBOLD));
-			dataProp.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(OBDAPreferences.OBDAPREFS_FONTFAMILY));
-			dataProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(OBDAPreferences.OBDAPREFS_FONTSIZE));
+			dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			dataProp.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			dataProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
 		}
 
 		SimpleAttributeSet objectProp = new SimpleAttributeSet();
 		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground,
-				pref.getColor(OBDAPreferences.OBJECTPROPTERTY_COLOR));
+				pref.getColor(MappingManagerPreferences.OBJECTPROPTERTY_COLOR));
 		if (!useDefault) {
-			objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(OBDAPreferences.OBDAPREFS_ISBOLD));
+			objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 			objectProp
-					.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(OBDAPreferences.OBDAPREFS_FONTFAMILY));
-			objectProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(OBDAPreferences.OBDAPREFS_FONTSIZE));
+					.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			objectProp.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
 		}
 
 		SimpleAttributeSet clazz = new SimpleAttributeSet();
-		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.CLASS_COLOR));
+		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.CLASS_COLOR));
 		if (!useDefault) {
-			clazz.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(OBDAPreferences.OBDAPREFS_ISBOLD));
-			clazz.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(OBDAPreferences.OBDAPREFS_FONTFAMILY));
-			clazz.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(OBDAPreferences.OBDAPREFS_FONTSIZE));
+			clazz.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			clazz.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			clazz.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
 		}
 
 		SimpleAttributeSet variable = new SimpleAttributeSet();
-		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(OBDAPreferences.VARIABLE_COLOR));
+		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, pref.getColor(MappingManagerPreferences.VARIABLE_COLOR));
 		if (!useDefault) {
-			variable.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(OBDAPreferences.OBDAPREFS_ISBOLD));
-			variable.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(OBDAPreferences.OBDAPREFS_FONTFAMILY));
-			variable.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(OBDAPreferences.OBDAPREFS_FONTSIZE));
+			variable.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
+			variable.addAttribute(StyleConstants.FontConstants.Family, pref.getFontFamily(MappingManagerPreferences.OBDAPREFS_FONTFAMILY));
+			variable.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));
 		}
 
 		try {

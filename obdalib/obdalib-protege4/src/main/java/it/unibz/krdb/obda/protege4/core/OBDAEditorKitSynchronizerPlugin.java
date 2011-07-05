@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.protege4.gui.preferences.ProtegeOBDAPerferencesPersistanceManager;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
@@ -42,17 +41,15 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);
 
-		ProtegeOBDAPerferencesPersistanceManager man = new ProtegeOBDAPerferencesPersistanceManager();
-		
 		/***
 		 * Preferences for the OBDA plugin (gui, etc)
 		 */
-		getEditorKit().put(OBDAPreferences.class.getName(), new ProtegeOBDAPreferences(man));
+		getEditorKit().put(OBDAPreferences.class.getName(), new ProtegeOBDAPreferences());
 
 		/***
 		 * Preferences for Quest
 		 */
-		getEditorKit().put(ReformulationPlatformPreferences.class.getName(), new ProtegeReformulationPlatformPreferences(man));
+		getEditorKit().put(ReformulationPlatformPreferences.class.getName(), new ProtegeReformulationPlatformPreferences());
 
 	}
 

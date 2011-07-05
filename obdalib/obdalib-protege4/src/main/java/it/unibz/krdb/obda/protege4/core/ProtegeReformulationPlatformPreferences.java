@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.utils.OBDAPreferencePersistanceManager;
 
 import org.protege.editor.core.Disposable;
 
@@ -12,10 +11,6 @@ public class ProtegeReformulationPlatformPreferences extends ReformulationPlatfo
 	 */
 	private static final long	serialVersionUID	= -1699795366967423089L;
 
-	public ProtegeReformulationPlatformPreferences(OBDAPreferencePersistanceManager pm){
-		super(pm);
-	}
-	
 	public void dispose() {
 		// Do nothing.
 	}

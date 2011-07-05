@@ -14,7 +14,7 @@
 package it.unibz.krdb.obda.gui.swing.utils;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferences;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -39,7 +39,7 @@ public class MappingStyledDocument extends DefaultStyledDocument implements
 	private QueryPainter painter = null;
 	
 	public MappingStyledDocument(StyleContext context, OBDAModel apic,
-			OBDAPreferences pref) {
+			MappingManagerPreferences pref) {
 		super(context);
 		
 		

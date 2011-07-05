@@ -18,8 +18,8 @@ import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.SPARQLQueryStyledDocument;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.queryanswering.QueryController;
-import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
+import it.unibz.krdb.obda.utils.OBDAPreferences.MappingManagerPreferenceChangeListener;
 
 import java.awt.Color;
 import java.net.URI;
@@ -44,7 +44,7 @@ import javax.swing.text.StyleContext;
  * @author mariano
  */
 public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQueriesPanelListener, TableModelListener,
-		OBDAPreferenceChangeListener {
+		MappingManagerPreferenceChangeListener {
 
 	/**
 	 * Variable currentGroup is the group's id to which belongs the selected
@@ -73,11 +73,11 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		instance = this;
 		this.apic = apic;
 		this.baseuri = baseuri;
-		prefs.registerPreferenceChangedListener(this);
+		prefs.getMappingsPreference().registerPreferenceChangedListener(this);
 		initComponents();
 
 		StyleContext style = new StyleContext();
-		_styled_doc = new SPARQLQueryStyledDocument(style, prefs);
+		_styled_doc = new SPARQLQueryStyledDocument(style, prefs.getMappingsPreference());
 
 		// UIUtils.setAntializaing(this, true);
 		queryTextPane.setDocument(_styled_doc);
@@ -434,9 +434,38 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	}
 
 	@Override
-	public void preferenceChanged(String pref, Object value) {
+	public void colorPeferenceChanged(String preference, Color col) {
 		String query = queryTextPane.getText();
 		queryTextPane.setText(query);
-		
+	}
+
+	@Override
+	public void fontFamilyPreferenceChanged(String preference, String font) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void fontSizePreferenceChanged(String preference, int size) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void isBoldPreferenceChanged(String preference, Boolean isBold) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void shortCutChanged(String preference, String shortcut) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
+	}
+
+	@Override
+	public void useDefaultPreferencesChanged(String key, String value) {
+		String query = queryTextPane.getText();
+		queryTextPane.setText(query);
 	}
 }

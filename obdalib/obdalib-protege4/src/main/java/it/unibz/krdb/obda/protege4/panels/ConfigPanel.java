@@ -129,11 +129,8 @@ public class ConfigPanel extends javax.swing.JPanel {
         
         
         String refvalue = (String)p.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-        if(refvalue.equals(OBDAConstants.PERFECTREFORMULATION)){
-        	cmbReformulationMethods.setSelectedIndex(0);
-        }else if(refvalue.equals(OBDAConstants.UCQBASED)){
-        	cmbReformulationMethods.setSelectedIndex(1);
-        }        
+        cmbReformulationMethods.setSelectedItem(refvalue);
+        
     	
 		String value = (String)p.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		if (value.equals(OBDAConstants.VIRTUAL)) {
@@ -152,9 +149,8 @@ public class ConfigPanel extends javax.swing.JPanel {
 			jRadioButtonDirect.setEnabled(true);
 //			jRadioButtonSemanticIndex.setEnabled(true);
 //			jRadioButtonUniversal.setEnabled(true);
-			jRadioButtonUserProvidedDB.setEnabled(false);
+//			jRadioButtonUserProvidedDB.setEnabled(true);
 			jRadioButtonInMemoryDB.setEnabled(true);
-			jRadioButtonInMemoryDB.setSelected(true);
 			jLabelDataLoc.setEnabled(true);
 			jLabeldbtype.setEnabled(true);
 
