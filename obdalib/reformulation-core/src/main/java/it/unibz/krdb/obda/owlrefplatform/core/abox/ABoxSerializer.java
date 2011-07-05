@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -99,6 +100,16 @@ public class ABoxSerializer {
 
                     Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
                     RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+
+                    if (dag.equi_mappings.containsKey(propDesc)) {
+                        RoleDescription desc = (RoleDescription) dag.equi_mappings.get(propDesc);
+                        if (desc.isInverse()) {
+                            String tmp = uri1;
+                            uri1 = uri2;
+                            uri2 = tmp;
+                        }
+                    }
+
                     DAGNode node = pureIsa.getRoleNode(propDesc);
                     int idx = node.getIndex();
 
