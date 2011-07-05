@@ -131,6 +131,10 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	public void setTechniqueWrapper(TechniqueWrapper newTechnique) {
 		techwrapper = newTechnique;
 	}
+	
+	public TechniqueWrapper getTechniqueWrapper() {
+		return techwrapper;
+	}
 
 	public void setPreferences(ReformulationPlatformPreferences preferences) {
 		this.preferences = preferences;
@@ -148,6 +152,10 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 	public boolean isConsistent(OWLOntology ontology) throws OWLReasonerException {
 		return true;
+	}
+	
+	public Ontology getOntology() {
+		return this.translatedOntologyMerge;
 	}
 
 	public void classify() throws OWLReasonerException {

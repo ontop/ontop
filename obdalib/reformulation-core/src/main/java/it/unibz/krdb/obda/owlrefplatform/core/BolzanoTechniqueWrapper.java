@@ -40,6 +40,14 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 		this.queryValidator = val;
 		this.apic = apic;
 	}
+	
+	public QueryRewriter getRewriter() {
+		return queryRewriter;
+	}
+	
+	public void setRewriter(QueryRewriter rew) {
+		this.queryRewriter = rew;
+	}
 
 	/**
 	 * Returns the answer statement for the given query or throws an Exception

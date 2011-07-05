@@ -132,6 +132,7 @@ public class TWOBDAPlatformFactoryImpl implements
             techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, null, eval_engine, apic);
                
             OBDAOWLReformulationPlatform reasoner = new OBDAOWLReformulationPlatform(manager);
+           
             
             reasoner.setTechniqueWrapper(techniqueWrapper);
             reasoner.loadOBDAModel(apic);

@@ -8,8 +8,12 @@ import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.BolzanoTechniqueWrapper;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -87,6 +91,7 @@ public class TWrewritingExecutionTool {
 			reasoner.setPreferences(p);
 
 			reasoner.loadOntologies(manager.getOntologies());
+			reasoner.loadOBDAModel(obdamodel);
 
 			// Loading a set of configurations for the reasoner and giving them
 			// to quonto
@@ -97,6 +102,10 @@ public class TWrewritingExecutionTool {
 
 			// One time classification call.
 			reasoner.classify();
+			
+			TreeWitnessReformulator ref = new TreeWitnessReformulator(reasoner.getOntology().getAssertions());
+			ref.setConceptDAG(DAGConstructor.getISADAG((DLLiterOntology)reasoner.getOntology()));
+			((BolzanoTechniqueWrapper)reasoner.getTechniqueWrapper()).setRewriter(ref);
 
 			// Now we are ready for querying
 
