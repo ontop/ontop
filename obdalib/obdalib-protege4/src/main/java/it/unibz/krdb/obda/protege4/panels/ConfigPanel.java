@@ -266,7 +266,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         lblReformulationTechnique.setPreferredSize(new java.awt.Dimension(180, 20));
         pnlReformulationMethods.add(lblReformulationTechnique);
 
-        cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PerfectRef", "Quest's UCQ-based reformulation" }));
+        cmbReformulationMethods.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PerfectRef", "Quest's reformulation" }));
         cmbReformulationMethods.setPreferredSize(new java.awt.Dimension(220, 20));
         cmbReformulationMethods.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
