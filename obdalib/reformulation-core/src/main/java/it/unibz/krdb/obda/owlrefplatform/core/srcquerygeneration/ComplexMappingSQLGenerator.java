@@ -185,7 +185,8 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 				sb.append(where);
 			}
 			if (isDPBoolean(query)) {
-				sb.append(" LIMIT 1");
+				sb.append(" ");
+				sb.append(util.getLimitFunction(1));
 			}
 			sqlqueries.add(sb.toString());
 			if (finalquery.length() > 0) {

@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.URIIdentyfier;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.URIType;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.SimpleDirectViewManager;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.ViewManager;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 
 	private Map<URIIdentyfier, String>		mapper		= null;
+	private JDBCUtility util = null;
 	private HashMap<String, List<Object[]>>	termMap		= null;
 	private HashMap<String, List<Object[]>>	constMap	= null;
 	private Map<PredicateAtom, String>				aliasMapper	= null;
@@ -45,9 +47,10 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 
 	Logger									log			= LoggerFactory.getLogger(SimpleDirectQueryGenrator.class);
 
-	public SimpleDirectQueryGenrator(Map<URIIdentyfier, String> mapper) {
+	public SimpleDirectQueryGenrator(Map<URIIdentyfier, String> mapper, JDBCUtility util) {
 
 		this.mapper = mapper;
+		this.util = util;
 		aliasMapper = new HashMap<PredicateAtom, String>();
 		viewManager = new SimpleDirectViewManager();
 	}
@@ -117,7 +120,8 @@ public class SimpleDirectQueryGenrator implements SourceQueryGenerator {
 		}
 
 		if (QueryUtils.isBoolean(query)) {
-			sb.append(" LIMIT 1");
+			sb.append(" ");
+			sb.append(util.getLimitFunction(1));
 		}
 		return sb.toString();
 

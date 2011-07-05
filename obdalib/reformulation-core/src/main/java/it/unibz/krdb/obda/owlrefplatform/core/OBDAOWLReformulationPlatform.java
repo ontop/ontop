@@ -328,7 +328,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			} else if (OBDAConstants.CLASSIC.equals(unfoldingMode)) {
 				unfMech = new DirectMappingUnfolder();
 				AboxFromDBLoader loader = new AboxFromDBLoader();
-				gen = new SimpleDirectQueryGenrator(loader.getMapper(ds));
+        JDBCUtility util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+				gen = new SimpleDirectQueryGenrator(loader.getMapper(ds), util);
 			} else {
 				log.error("Invalid parameter for {}", ReformulationPlatformPreferences.ABOX_MODE);
 			}
