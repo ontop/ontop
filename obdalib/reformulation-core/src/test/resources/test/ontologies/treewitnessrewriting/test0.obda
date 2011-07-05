@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA version="1.0" xml:base="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#" xmlns="http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#"  xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"  xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <SavedQueries>
+    <Query id="query-1" text="PREFIX : &lt;http://www.semanticweb.org/ontologies/2011/6/Ontology1309528770848.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?y0 WHERE { ?y0 :T ?y1. ?y1 :S ?y0. ?y1 :R ?y2. ?y2 :S ?y3. ?y4 :S ?y3. }"/>
+  </SavedQueries>
+</OBDA>
