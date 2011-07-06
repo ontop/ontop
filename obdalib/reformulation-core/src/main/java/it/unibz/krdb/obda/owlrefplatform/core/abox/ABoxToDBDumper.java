@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.text.DefaultEditorKit.InsertContentAction;
+
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLClassAssertionAxiom;
 import org.semanticweb.owl.model.OWLConstant;
@@ -36,9 +38,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class dumps the abox of a given ontology into a data base.
- *
+ * 
  * @author Manfred Gerstgrasser
- *
+ * 
  */
 
 // TODO ABoxDumper document in the class description the schemas created by this
@@ -48,37 +50,37 @@ import org.slf4j.LoggerFactory;
 // TODO ABoxDumper document in the schema when and how the data is inserted into
 // the schema
 
-public class ABoxToDBDumper implements OBDAProgressListener{
+public class ABoxToDBDumper implements OBDAProgressListener {
 
-	private Connection							conn					= null;
-//	private APIController						apic					= null;
-	private List<ABoxDumpListener>				listener				= null;
-	private DataSource							ds						= null;
-	private int									indexcounter			= 1;
-	
-	private boolean								isCanceled = false;					
-	private Statement 							statement = null;
+	private Connection					conn			= null;
+	// private APIController apic = null;
+	private List<ABoxDumpListener>		listener		= null;
+	private DataSource					ds				= null;
+	private int							indexcounter	= 1;
 
-//	private static ABoxToDBDumper				instance				= null;
-	
-	private Map<URIIdentyfier,String> 	mapper 		= null;
-	
-	private final Logger								log						= LoggerFactory.getLogger(ABoxToDBDumper.class);
+	private boolean						isCanceled		= false;
+	private Statement					statement		= null;
+
+	// private static ABoxToDBDumper instance = null;
+
+	private Map<URIIdentyfier, String>	mapper			= null;
+
+	private final Logger				log				= LoggerFactory.getLogger(ABoxToDBDumper.class);
 
 	public ABoxToDBDumper(DataSource ds) {
 		this.ds = ds;
 		listener = new Vector<ABoxDumpListener>();
-//		instance = this;
+		// instance = this;
 	}
 
-//	public void setAPIController(APIController apic) {
-//		this.apic = apic;
-//	}
+	// public void setAPIController(APIController apic) {
+	// this.apic = apic;
+	// }
 
 	/**
 	 * Materializes the Abox of the given ontologies using the given sql
 	 * connection.
-	 *
+	 * 
 	 * @param ontologies
 	 *            the ontolgies
 	 * @param c
@@ -94,57 +96,71 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		try {
 			log.debug("Materializing ABoxes into DB");
 			isCanceled = false;
-			
-			Set<String>	createTableSQLs			=  new HashSet<String>();;
-			HashMap<String, List<List<String>>>	inserts	= new HashMap<String, List<List<String>>>();
-			Set<String>	createIndexSQL			= new HashSet<String>();
-			
-			mapper = new HashMap<URIIdentyfier,String>();
-			
+
+			Set<String> createTableSQLs = new HashSet<String>();
+			;
+			HashMap<String, List<List<String>>> inserts = new HashMap<String, List<List<String>>>();
+			Set<String> createIndexSQL = new HashSet<String>();
+
+			mapper = new HashMap<URIIdentyfier, String>();
+
 			int conceptCounter = 1;
 			int datapropCounter = 1;
 			int objectpropCounter = 1;
-	
+			int tupleCounter = 0;
+
+
 			conn = c;
-	
+
 			Iterator<OWLOntology> it = ontologies.iterator();
-			while(it.hasNext()){	
+			while (it.hasNext()) {
 				OWLOntology ontology = it.next();
 				log.debug("Materializing ABox for ontology: {}", ontology.getURI().toString());
 				Set<OWLEntity> entities = ontology.getSignature();
 				Iterator<OWLEntity> entityIterator = entities.iterator();
-					
+
 				while (entityIterator.hasNext()) {
-						/* For each entity */
+					/* For each entity */
 					OWLEntity entity = entityIterator.next();
-		
+
 					if (entity instanceof OWLClass) {
 						OWLClass clazz = (OWLClass) entity;
 						if (!clazz.isOWLThing()) {
 							URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.CONCEPT);
-							String tablename = "table_concept_" + conceptCounter++;
-							mapper.put(id,tablename);
-							/* Creating the table */
-							createTable(tablename, 1, createIndexSQL,createTableSQLs);
+
+							String tablename = null;
+							if (mapper.get(id) == null) {
+								tablename = "table_concept_" + conceptCounter++;
+								mapper.put(id, tablename);
+
+								/* Creating the table */
+								createTable(tablename, 1, createIndexSQL, createTableSQLs);
+							}
+
 						}
 					} else if (entity instanceof OWLObjectProperty) {
 						URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.OBJECTPROPERTY);
-						String tablename = "table_objectProperty_" + objectpropCounter++;
-						mapper.put(id,tablename);
-						/* Creating the table */
-						createTable(tablename, 2,createIndexSQL, createTableSQLs);
+
+						if (mapper.get(id) == null) {
+							String tablename = "table_objectProperty_" + objectpropCounter++;
+							mapper.put(id, tablename);
+							/* Creating the table */
+							createTable(tablename, 2, createIndexSQL, createTableSQLs);
+						}
+
 					} else if (entity instanceof OWLDataProperty) {
 						URIIdentyfier id = new URIIdentyfier(entity.getURI(), URIType.DATAPROPERTY);
-						String tablename = "table_dataProperty_" + datapropCounter++;
-						mapper.put(id,tablename);
-						/* Creating the table */
-						createTable(tablename, 2,createIndexSQL,createTableSQLs);
+						if (mapper.get(id) == null) {
+							String tablename = "table_dataProperty_" + datapropCounter++;
+							mapper.put(id, tablename);
+							/* Creating the table */
+							createTable(tablename, 2, createIndexSQL, createTableSQLs);
+						}
 					}
 				}
-		
+
 				/* Inserting individuals */
 				log.debug("Preparing indivituals to insert");
-				int tupleCounter = 0;
 				Set<OWLIndividualAxiom> ind = ontology.getIndividualAxioms();
 				Iterator<OWLIndividualAxiom> ind_it = ind.iterator();
 				while (ind_it.hasNext()) {
@@ -156,57 +172,58 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 						if (!des.isOWLThing()) {
 							OWLIndividual i = caa.getIndividual();
 							OWLClass clazz = (OWLClass) des;
-							URIIdentyfier id = new URIIdentyfier(clazz.getURI(),URIType.CONCEPT);
+							URIIdentyfier id = new URIIdentyfier(clazz.getURI(), URIType.CONCEPT);
 							String tablename = mapper.get(id);
-							if(tablename == null){
-								throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+							if (tablename == null) {
+								throw new AboxDumpException("No table found for " + id.getUri().toString() + " and uri type "
+										+ id.getType());
 							}
 							String in = i.getURI().toString();
 							add(tablename, in, inserts);
 						}
 					} else if (ax instanceof OWLDataPropertyAssertionAxiom) {
-		
+
 						OWLDataPropertyAssertionAxiom paa = (OWLDataPropertyAssertionAxiom) ax;
 						OWLConstant obj = paa.getObject();
 						OWLIndividual sub = paa.getSubject();
 						OWLDataPropertyExpression prop = paa.getProperty();
 						OWLDataProperty dp = (OWLDataProperty) prop;
-						URIIdentyfier id = new URIIdentyfier(dp.getURI(),URIType.DATAPROPERTY);
+						URIIdentyfier id = new URIIdentyfier(dp.getURI(), URIType.DATAPROPERTY);
 						String tablename = mapper.get(id);
-						if(tablename == null){
-							throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+						if (tablename == null) {
+							throw new AboxDumpException("No table found for " + id.getUri().toString() + " and uri type " + id.getType());
 						}
-						add(tablename, sub.getURI().toString(),	obj.getLiteral(),inserts);
-		
+						add(tablename, sub.getURI().toString(), obj.getLiteral(), inserts);
+
 					} else if (ax instanceof OWLObjectPropertyAssertionAxiom) {
 						OWLObjectPropertyAssertionAxiom ppa = (OWLObjectPropertyAssertionAxiom) ax;
 						OWLIndividual sub = ppa.getSubject();
 						OWLIndividual obj = ppa.getObject();
 						OWLObjectPropertyExpression prop = ppa.getProperty();
 						OWLObjectProperty op = (OWLObjectProperty) prop;
-						URIIdentyfier id = new URIIdentyfier(op.getURI(),URIType.OBJECTPROPERTY);
+						URIIdentyfier id = new URIIdentyfier(op.getURI(), URIType.OBJECTPROPERTY);
 						String tablename = mapper.get(id);
-						if(tablename == null){
-							throw new AboxDumpException("No table found for " +id.getUri().toString() + " and uri type " + id.getType());
+						if (tablename == null) {
+							throw new AboxDumpException("No table found for " + id.getUri().toString() + " and uri type " + id.getType());
 						}
-						add(tablename, sub.getURI().toString(), obj.getURI().toString(),inserts);
+						add(tablename, sub.getURI().toString(), obj.getURI().toString(), inserts);
 					}
 				}
 				log.debug("Tuples to be inserted: {}", tupleCounter);
-			}
+			} /* end ontology loop */
 			materializeMapper();
 			insertData(inserts);
 			createIndexes(createIndexSQL);
 		} catch (SQLException e) {
-			if(isCanceled){
+			if (isCanceled) {
 				log.debug(e.getMessage());
-			}else{
+			} else {
 				throw new AboxDumpException("Error while dumping Abox to data base. " + e.getMessage(), e);
 			}
 		} catch (Exception e) {
-			if(isCanceled){
+			if (isCanceled) {
 				log.debug(e.getMessage());
-			}else{
+			} else {
 				throw new AboxDumpException("Error while dumping Abox to data base. " + e.getMessage(), e);
 			}
 		}
@@ -214,7 +231,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 
 	/**
 	 * Dumps the abox into the data source with the given identifier.
-	 *
+	 * 
 	 * @param ontologies
 	 *            the ontologies
 	 * @param dsname
@@ -225,13 +242,14 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 	 */
 	public void materialize(Set<OWLOntology> ontologies, boolean override) throws AboxDumpException {
 		isCanceled = false;
-//		if (apic == null) {
-//			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
-//		}
-//
-//		ds = apic.getDatasourcesController().getDataSource(dsname);
+		// if (apic == null) {
+		// throw new
+		// NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
+		// }
+		//
+		// ds = apic.getDatasourcesController().getDataSource(dsname);
 
-		if(override){
+		if (override) {
 			AboxFromDBLoader loader = new AboxFromDBLoader();
 			try {
 				loader.destroyDump(ds);
@@ -251,15 +269,15 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		materialize(ontologies, conn);
 	}
 
-	private void materializeMapper() throws Exception{
-		
+	private void materializeMapper() throws Exception {
+
 		String createTable = "CREATE TABLE mapper (uri VARCHAR NOT NULL, type VARCHAR NOT NULL, tablename VARCHAR NOT NULL)";
-		
+
 		StringBuffer values = new StringBuffer();
 		Iterator<URIIdentyfier> it = mapper.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			URIIdentyfier id = it.next();
-			if(values.length() >0){
+			if (values.length() > 0) {
 				values.append(",");
 			}
 			values.append("(");
@@ -276,25 +294,25 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			values.append("'");
 			values.append(")");
 		}
-		
-		String insertStatement = "INSERT INTO mapper VALUES "+ values.toString();
-		
+
+		String insertStatement = "INSERT INTO mapper VALUES " + values.toString();
+
 		conn.commit();
 		statement = conn.createStatement();
 		statement.execute(createTable);
 		statement.execute(insertStatement);
 		statement.close();
 	}
-	
+
 	/**
 	 * Inserts the data into the abox. Note: its creates one SQL statement per
 	 * table
-	 *
+	 * 
 	 * @throws SQLException
 	 */
-	private void insertData(HashMap<String, List<List<String>>>	inserts) throws SQLException {
+	private void insertData(HashMap<String, List<List<String>>> inserts) throws SQLException {
 		log.debug("Inserting data into DB. ");
-		
+		int insertscount = 0;
 		conn.commit();
 		statement = conn.createStatement();
 		Set<String> keys = inserts.keySet();// keys are table names
@@ -332,24 +350,25 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			sqlquery.append(" VALUES ");
 			sqlquery.append(sqlbody);
 
-			log.debug("{}", sqlquery.toString());
+			// log.debug("{}", sqlquery.toString());
 			// System.out.println(sb.toString());
 			statement.execute(sqlquery.toString());
+			insertscount+=1;
 
 		}
-		log.debug("Done inserting data");
+		
 		statement.close();
 	}
 
 	/**
 	 * adds a new value for a table with one column to the insert map
-	 *
+	 * 
 	 * @param tablename
 	 *            the table name where the values should go
 	 * @param value
 	 *            the value as String
 	 */
-	private void add(String tablename, String value, HashMap<String, List<List<String>>>	inserts) {
+	private void add(String tablename, String value, HashMap<String, List<List<String>>> inserts) {
 
 		List<List<String>> list = inserts.get(tablename);
 		if (list == null) {
@@ -363,9 +382,9 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 	}
 
 	/**
-	 *
+	 * 
 	 * adds a new value for a table with two columns to the insert map
-	 *
+	 * 
 	 * @param tablename
 	 *            the table name where the values should go
 	 * @param sub
@@ -373,7 +392,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 	 * @param obj
 	 *            the object as string
 	 */
-	private void add(String tablename, String sub, String obj,HashMap<String, List<List<String>>>	inserts) {
+	private void add(String tablename, String sub, String obj, HashMap<String, List<List<String>>> inserts) {
 
 		List<List<String>> list = inserts.get(tablename);
 		if (list == null) {
@@ -388,14 +407,15 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 
 	/**
 	 * Creates a table with the given name an the given number of columns
-	 *
+	 * 
 	 * @param tablename
 	 *            the table name
 	 * @param columns
 	 *            number of columns
-	 * @throws AboxDumpException 
+	 * @throws AboxDumpException
 	 */
-	private void createTable(String tablename, int columns, Set<String>	createIndexSQL, Set<String>	createTableSQLs	) throws AboxDumpException {
+	private void createTable(String tablename, int columns, Set<String> createIndexSQL, Set<String> createTableSQLs)
+			throws AboxDumpException {
 
 		// TODO Move create table to an independent method that creates the DDL
 		// for the full database. Creation of the schema should be done in one
@@ -411,9 +431,19 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			col.append(i);
 			col.append(" VARCHAR");
 
-			String index = "CREATE INDEX index" + indexcounter++ + " ON " + tablename + "( term" + i + ")";
-			createIndexSQL.add(index);
 		}
+
+		if (columns == 1) {
+			String index = "CREATE INDEX index" + indexcounter++ + " ON " + tablename + "( term0)";
+			createIndexSQL.add(index);
+		} else {
+			String index = "CREATE INDEX index" + indexcounter++ + " ON " + tablename + "( term0, term1)";
+			createIndexSQL.add(index);
+			index = "CREATE INDEX index" + indexcounter++ + " ON " + tablename + "( term1, term0)";
+			createIndexSQL.add(index);
+
+		}
+
 		StringBuffer sql = new StringBuffer();
 		sql.append("CREATE TABLE ");
 		sql.append(tablename);
@@ -434,13 +464,12 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		}
 	}
 
-
 	/**
 	 * creates SQL statements to create indexes over the created tables
-	 *
+	 * 
 	 * @throws Exception
 	 */
-	private void createIndexes(Set<String>	createIndexSQL) throws Exception {
+	private void createIndexes(Set<String> createIndexSQL) throws Exception {
 		log.debug("Creating indexes");
 		Iterator<String> it = createIndexSQL.iterator();
 		conn.commit();
@@ -450,13 +479,15 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			log.debug("Executing update: {}", sql);
 			statement.executeUpdate(sql);
 		}
+		statement.executeUpdate("ANALYZE SAMPLE_SIZE 0");
 		statement.close();
+		conn.commit();
 		log.debug("Indexes created successfully");
 	}
 
 	/**
 	 * Adds the given the listener
-	 *
+	 * 
 	 * @param l
 	 *            the listener
 	 */
@@ -466,7 +497,7 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 
 	/**
 	 * Removes the given the listener
-	 *
+	 * 
 	 * @param l
 	 *            the listener
 	 */
@@ -474,40 +505,41 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		listener.remove(l);
 	}
 
-//	/**
-//	 * Returns the given api controller
-//	 *
-//	 * @return the api controller
-//	 */
-//	public APIController getController() {
-//		// TODO this shouldn't return a null pointer, the calling method should
-//		// be prepared to recreive a null object
-//		if (apic == null) {
-//			throw new NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
-//		}
-//		return apic;
-//	}
+	// /**
+	// * Returns the given api controller
+	// *
+	// * @return the api controller
+	// */
+	// public APIController getController() {
+	// // TODO this shouldn't return a null pointer, the calling method should
+	// // be prepared to recreive a null object
+	// if (apic == null) {
+	// throw new
+	// NullPointerException("the api controller has not been set.Use ABoxToDBDumper.setAPIController to set the controller");
+	// }
+	// return apic;
+	// }
 
-//	/**
-//	 * Returns the current instance of the class
-//	 *
-//	 * @return
-//	 */
-//
-//	public static ABoxToDBDumper getInstance() {
-//		if (instance == null) {
-//			instance = new ABoxToDBDumper();
-//		}
-//		return instance;
-//	}	
-	
-	public Map<URIIdentyfier, String> getMapper(){
+	// /**
+	// * Returns the current instance of the class
+	// *
+	// * @return
+	// */
+	//
+	// public static ABoxToDBDumper getInstance() {
+	// if (instance == null) {
+	// instance = new ABoxToDBDumper();
+	// }
+	// return instance;
+	// }
+
+	public Map<URIIdentyfier, String> getMapper() {
 		return mapper;
 	}
 
 	@Override
 	public void actionCanceled() {
-		
+
 		try {
 			isCanceled = true;
 			statement.cancel();
@@ -517,14 +549,14 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 			log.warn(e.getMessage());
 		}
 	}
-	
-	private void removeTables() throws SQLException{
+
+	private void removeTables() throws SQLException {
 		Collection<String> col = mapper.values();
 		Iterator<String> it = col.iterator();
 		statement = conn.createStatement();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			try {
-				statement.executeUpdate("DROP TABLE " + it.next() );
+				statement.executeUpdate("DROP TABLE " + it.next());
 			} catch (SQLException e) {
 				log.debug(e.getMessage());
 			}
@@ -534,5 +566,5 @@ public class ABoxToDBDumper implements OBDAProgressListener{
 		} catch (SQLException e) {
 			log.debug(e.getMessage());
 		}
-	}	
+	}
 }

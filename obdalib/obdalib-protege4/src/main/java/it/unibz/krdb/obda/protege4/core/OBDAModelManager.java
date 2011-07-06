@@ -100,7 +100,14 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	public OBDAModel getActiveOBDAModel() {
-		return obdamodels.get(owlEditorKit.getOWLModelManager().getActiveOntology().getURI());
+		OWLOntology ontology = owlEditorKit.getOWLModelManager().getActiveOntology();
+		if (ontology != null) {
+		URI uri = ontology.getURI();
+			return obdamodels.get(uri);
+			}
+		
+
+		return null;
 	}
 
 	/***
@@ -155,7 +162,7 @@ public class OBDAModelManager implements Disposable {
 				case ABOUT_TO_CLASSIFY:
 					log.debug("ABOUT TO CLASSIFY");
 
-					if (!inititializing) {
+					if ((!inititializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
 						OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
 						if (reasoner instanceof OBDAOWLReformulationPlatform) {
 							OBDAOWLReformulationPlatform quest = (OBDAOWLReformulationPlatform) reasoner;

@@ -84,6 +84,8 @@ public class OBDAStatement implements Statement {
 
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			return executeEpistemicQuery(strquery);
+		} if (strquery.contains("/*direct*/")) {
+			return executeDirectQuery(strquery);
 		} else {
 			return executeConjunctiveQuery(strquery);
 		}
@@ -105,6 +107,13 @@ public class OBDAStatement implements Statement {
 		ResultSet set = engine.execute(epistemicUnfolding);
 		result = new OWLOBDARefResultSet(set);
 
+		return result;
+	}
+	
+	private QueryResultSet executeDirectQuery(String query) throws Exception {
+		QueryResultSet result;
+		ResultSet set = engine.execute(query);
+		result = new OWLOBDARefResultSet(set);
 		return result;
 	}
 

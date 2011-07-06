@@ -11,16 +11,11 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLEntity;
-import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,92 +34,81 @@ public class DirectMappingGenerator {
 
 	public Set<OBDAMappingAxiom> getMappings(Set<OWLOntology> ontologies, Map<URIIdentyfier, String> tableMap) {
 
-		Iterator<OWLOntology> ontologyIterator = ontologies.iterator();
+		// Iterator<OWLOntology> ontologyIterator = ontologies.iterator();
 		Set<OBDAMappingAxiom> mappings = new HashSet<OBDAMappingAxiom>();
+		mappingcounter = 0;
 
-		while (ontologyIterator.hasNext()) {
+		for (URIIdentyfier uriid : tableMap.keySet()) {
+			mappingcounter = mappingcounter + 1;
 
-			/*
-			 * For each ontology
-			 */
-			OWLOntology onto = ontologyIterator.next();
-			log.debug("Materializing ABox for ontology: {}", onto.getURI().toString());
+			if (uriid.getType() == URIType.CONCEPT) {
+				/* Creating the mapping */
+				URI name = uriid.getUri();
+				// URIIdentyfier id = new URIIdentyfier(name, URIType.CONCEPT);
+				String tablename = tableMap.get(uriid);
+				Term qt = termFactory.getVariable("x");
+				List<Term> terms = new Vector<Term>();
+				terms.add(qt);
+				Predicate predicate = predicateFactory.getPredicate(name, terms.size());
+				PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
+				// List<Atom> body = new Vector<Atom>();
+				// body.add(bodyAtom); // the body
+				predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
+				PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the
+																					// head
+				Query cq = predicateFactory.getCQIE(head, bodyAtom);
+				String sql = "SELECT term0 as x FROM " + tablename;
+				OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter, predicateFactory.getSQLQuery(sql), cq);
+				mappings.add(ax);
 
-			Set<OWLEntity> entities = onto.getSignature();
-			Iterator<OWLEntity> entityIterator = entities.iterator();
+				log.debug("Mapping {} created: {}", ax.getId(), ax.toString());
 
-			while (entityIterator.hasNext()) {
-				mappingcounter+=1;
-				/* For each entity */
-				OWLEntity entity = entityIterator.next();
+			} else if (uriid.getType() == URIType.OBJECTPROPERTY) {
 
-				if (entity instanceof OWLClass) {
-					OWLClass clazz = (OWLClass) entity;
-					if (!clazz.isOWLThing()) {// if class equal to owl thing
-												// just skip it
-						/* Creating the mapping */
-						URI name = clazz.getURI();
-						URIIdentyfier id = new URIIdentyfier(name, URIType.CONCEPT);
-						String tablename = tableMap.get(id);
-						Term qt = termFactory.getVariable("x");
-						List<Term> terms = new Vector<Term>();
-						terms.add(qt);
-						Predicate predicate = predicateFactory.getPredicate(name, terms.size());
-						PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
-//						List<Atom> body = new Vector<Atom>();
-//						body.add(bodyAtom); // the body
-						predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
-						PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the head
-						Query cq = predicateFactory.getCQIE(head, bodyAtom);
-						String sql = "SELECT term0 as x FROM " + tablename;
-						OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
-						mappings.add(ax);
+				String tablename = tableMap.get(uriid);
+				Term qt1 = termFactory.getVariable("x");
+				Term qt2 = termFactory.getVariable("y");
+				List<Term> terms = new Vector<Term>();
+				terms.add(qt1);
+				terms.add(qt2);
+				Predicate predicate = predicateFactory.getPredicate(uriid.getUri(), terms.size());
+				PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
+				// List<Atom> body = new Vector<Atom>();
+				// body.add(bodyAtom); // the body
+				predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
+				PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the
+																					// head
+				Query cq = predicateFactory.getCQIE(head, bodyAtom);
+				String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
+				OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter, predicateFactory.getSQLQuery(sql), cq);
 
-						log.debug("Mapping created: {}", ax.toString());
-					}
-				} else if (entity instanceof OWLObjectProperty) {
-					OWLObjectProperty objprop = (OWLObjectProperty) entity;
-					URIIdentyfier id = new URIIdentyfier(objprop.getURI(), URIType.OBJECTPROPERTY);
-					String tablename = tableMap.get(id);
-					Term qt1 = termFactory.getVariable("x");
-					Term qt2 = termFactory.getVariable("y");
-					List<Term> terms = new Vector<Term>();
-					terms.add(qt1);
-					terms.add(qt2);
-					Predicate predicate = predicateFactory.getPredicate(objprop.getURI(), terms.size());
-					PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
-//					List<Atom> body = new Vector<Atom>();
-//					body.add(bodyAtom); // the body
-					predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
-					PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the head
-					Query cq = predicateFactory.getCQIE(head, bodyAtom);
-					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
-					log.debug("Mapping created: {}", ax.toString());
-					mappings.add(ax);
+				mappings.add(ax);
 
-				} else if (entity instanceof OWLDataProperty) {
+				log.debug("Mapping {} created: {}", ax.getId(), ax.toString());
 
-					OWLDataProperty dataProp = (OWLDataProperty) entity;
-					URIIdentyfier id = new URIIdentyfier(dataProp.getURI(), URIType.DATAPROPERTY);
-					Term qt1 = termFactory.getVariable("x");
-					String tablename = tableMap.get(id);
-					Term qt2 = termFactory.getVariable("y");
-					List<Term> terms = new Vector<Term>();
-					terms.add(qt1);
-					terms.add(qt2);
-					Predicate predicate = predicateFactory.getPredicate(dataProp.getURI(), terms.size());
-					PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
-//					List<Atom> body = new Vector<Atom>();
-//					body.add(bodyAtom); // the body
-					predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
-					PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the head
-					Query cq = predicateFactory.getCQIE(head, bodyAtom);
-					String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
-					OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter++,predicateFactory.getSQLQuery(sql),cq);
-					mappings.add(ax);
-				}
+			} else if (uriid.getType() == URIType.DATAPROPERTY) {
+
+				Term qt1 = termFactory.getVariable("x");
+				String tablename = tableMap.get(uriid);
+				Term qt2 = termFactory.getVariable("y");
+				List<Term> terms = new Vector<Term>();
+				terms.add(qt1);
+				terms.add(qt2);
+				Predicate predicate = predicateFactory.getPredicate(uriid.getUri(), terms.size());
+				PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, terms);
+				// List<Atom> body = new Vector<Atom>();
+				// body.add(bodyAtom); // the body
+				predicate = predicateFactory.getPredicate(URI.create("q"), terms.size());
+				PredicateAtom head = predicateFactory.getAtom(predicate, terms); // the
+																					// head
+				Query cq = predicateFactory.getCQIE(head, bodyAtom);
+				String sql = "SELECT term0 as x, term1 as y FROM " + tablename;
+				OBDAMappingAxiom ax = predicateFactory.getRDBMSMappingAxiom("id" + mappingcounter, predicateFactory.getSQLQuery(sql), cq);
+				mappings.add(ax);
+
+				log.debug("Mapping {} created: {}", ax.getId(), ax.toString());
 			}
+
 		}
 		return mappings;
 	}

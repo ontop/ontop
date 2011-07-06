@@ -88,6 +88,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.DIRECT);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
 
 			}
 		});
