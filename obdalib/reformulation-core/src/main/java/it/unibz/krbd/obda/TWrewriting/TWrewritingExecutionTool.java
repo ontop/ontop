@@ -36,8 +36,8 @@ public class TWrewritingExecutionTool {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String owlfile = "src/test/resources/test/ontologies/treewitnessrewriting/test0.owl";
-		String obdafile = "src/test/resources/test/ontologies/treewitnessrewriting/test0.obda";
+		String owlfile = "src/test/resources/test/ontologies/treewitnessrewriting/BBK-new.owl";
+		String obdafile = "src/test/resources/test/ontologies/treewitnessrewriting/BBK-new.obda";
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();

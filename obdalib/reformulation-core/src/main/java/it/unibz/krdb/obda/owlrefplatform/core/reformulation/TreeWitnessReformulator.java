@@ -81,12 +81,12 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 		for (Atom a0: cqie.getBody()) {
 			PredicateAtom a = (PredicateAtom) a0;
-			log.debug("atom: \n{}", a);
+			log.debug("atom: " + a);
 			boolean addToComponent = terms.isEmpty();
 
 			for (Term t: a.getTerms()) {
 				// handle "undistinguished" variables, i.e., underscores?
-				log.debug("term: {}\n", t + " of " + t.getClass().getName());
+				log.debug("term: " + t + " of " + t.getClass().getName());
 				if (terms.contains(t)) {
 					addToComponent = true;
 					break;
@@ -112,12 +112,12 @@ public class TreeWitnessReformulator implements QueryRewriter {
 				}
 			}
 			else { 
-				log.debug("THE QUERY IS NOT CONNECTED\n");
+				log.debug("THE QUERY IS NOT CONNECTED\n"); // WRONG!
 			}
 		}
-		log.debug("component terms: {}\n", terms);			
-		log.debug("existentially quntified: {}\n", variables);
-		log.debug("binary predicates: {}\n", predicates);					
+		log.debug("component terms: " + terms);			
+		log.debug("existentially quantified: " + variables);
+		log.debug("binary predicates: " + predicates);					
 		
 		
 		// compute witness functions
@@ -127,7 +127,12 @@ public class TreeWitnessReformulator implements QueryRewriter {
 				for (int d = 1; d <= 2; d++) {
 					TreeWitness tw = new TreeWitness(t, new PredicatePosition(p, d));
 					if (tw.extendWithAtoms(q.getRules().get(0).getBody())) 	{
-						log.debug("TREE WITNESS {}\n", tw);
+						log.debug("TREE WITNESS " + tw);
+						if (tw.getNonRoots().isEmpty()) {
+							log.debug("TRIVIAL, IGNORING");
+							continue;
+						}
+							
 						boolean found = false;
 						for (TreeWitness twc: tws) 
 							if (twc.getRoots().contains(t) && twc.getDirection().equals(tw.getDirection())) {						
@@ -160,14 +165,17 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			if (a.getArity() == 1) {
 				Predicate np = fac.getPredicate(URI.create("A" + n1), variables.size());
 				body.add(fac.getAtom(np, variables));
-				
+
+				Predicate pa = fac.getPredicate(URI.create("EXT" + 
+						a.getPredicate().getName().getFragment()), 1);
 				out.appendRule(fac.getCQIE(fac.getAtom(np, variables), 
-							Collections.singletonList((Atom)fac.getAtom(a.getPredicate(), 
-									a.getTerm(0)))));
+						Collections.singletonList((Atom)fac.getAtom(pa, a.getTerm(0)))));
+				views.put(descFactory.getAtomicConceptDescription(a.getPredicate()), pa);
+
 				
 				for (TreeWitness tw: tws) {
 					log.debug("atom " + a + " on tree witness " + tw + " with term " + a.getTerm(0));
-					if (!tw.isInDomain(a.getTerm(0)) || (tw.getNonRoots().size() == 0)) // CHECK
+					if (!tw.isInDomain(a.getTerm(0))) 
 						continue;
 					log.debug("in the domain");
 					
@@ -217,7 +225,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			subclasses.add(conceptDAG.getClassNode(C));
 			for (DAGNode node: subclasses) {
 				Description D = node.getDescription();
-				log.debug("subclass " + D + " of " + C);
+				//log.debug("subclass " + D + " of " + C);
 				Atom p = null;
 				if (D instanceof AtomicConceptDescription) {
 					p = fac.getAtom(((AtomicConceptDescription)D).getPredicate(), z);
@@ -234,12 +242,6 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			}
 				
 			//  {
-		}
-		
-		log.debug("CONCEPT DAG"); // descendants = subclasses
-		for (DAGNode node: conceptDAG.getClasses()) {
-			log.debug(node.toString());
-			log.debug(node.descendans.toString());
 		}
 		
 		return out;	
@@ -277,24 +279,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		Term x = roots.get(0);
 				
 		List<Atom> wb = new ArrayList<Atom>();
-				
-		// Extension Atom ext_{\exists R}
-		Predicate p = fac.getPredicate(URI.create("EXT" + 
-				tw.getDirection().getPosition() + "E" +
-				tw.getDirection().getPredicate().getName().getFragment()), 1);
-		wb.add(fac.getAtom(p, x)); 
-		views.put(descFactory.getExistentialConceptDescription(
-				tw.getDirection().getPredicate(), tw.getDirection().getPosition() == 1), p);
-		
-		//DAGNode node = conceptDAG.getClassNode(C);
-		// Negated Atom \neg \exists z R(x,z)
-		//List<Term> naterms = new ArrayList<Term>();
-		//naterms.add(null); naterms.add(null);
-		//naterms.set(2 - tw.getDirection().getPosition(), x);
-		//naterms.set(tw.getDirection().getPosition() - 1, fac.getVariable("z"));
-		//wb.add(fac.getAtom(tw.getDirection().getPredicate(),naterms));
-		//wb.add(fac.getNOTAtom((Term)negatedatom)); // IMPORTANT: type conversion fails 
-			
+
 		// Tree-structure atoms
 		for (Atom ca0: cqie.getBody()) {
 			PredicateAtom ca = (PredicateAtom)ca0;
@@ -319,7 +304,24 @@ public class TreeWitnessReformulator implements QueryRewriter {
 					return null;								
 			}
 		}
-				
+						
+		// Extension Atom ext_{\exists R}
+		Predicate p = fac.getPredicate(URI.create("EXT" + 
+				tw.getDirection().getPosition() + "E" +
+				tw.getDirection().getPredicate().getName().getFragment()), 1);
+		wb.add(fac.getAtom(p, x)); 
+		views.put(descFactory.getExistentialConceptDescription(
+				tw.getDirection().getPredicate(), tw.getDirection().getPosition() == 1), p);
+		
+		//DAGNode node = conceptDAG.getClassNode(C);
+		// Negated Atom \neg \exists z R(x,z)
+		//List<Term> naterms = new ArrayList<Term>();
+		//naterms.add(null); naterms.add(null);
+		//naterms.set(2 - tw.getDirection().getPosition(), x);
+		//naterms.set(tw.getDirection().getPosition() - 1, fac.getVariable("z"));
+		//wb.add(fac.getAtom(tw.getDirection().getPredicate(),naterms));
+		//wb.add(fac.getNOTAtom((Term)negatedatom)); // IMPORTANT: type conversion fails 
+			
 		// Equality Atoms for all terms that are equivalent to the root
 		for (Term v : roots) 
 			if (!v.equals(x))
@@ -337,16 +339,16 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
-		log.debug("Starting query rewrting. Received query: \n{}", prog);
+		log.debug("Starting query rewriting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
 		/* Query preprocessing */
-		log.debug("Reformulating");
+		//log.debug("Reformulating");
 		DatalogProgram reformulation = reformulate(prog);
-		log.debug("Done reformulating. Output: \n{}", reformulation);
+		//log.debug("Done reformulating. Output: \n{}", reformulation);
 
 		return reformulation;	
 	}

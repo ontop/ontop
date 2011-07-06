@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA version="1.0" xml:base="http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#" xmlns="http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#"  xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"  xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <SavedQueries>
+    <Query id="q1" text="PREFIX : &lt;http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y WHERE { ?x rdf:type :Staff. ?y rdf:type :Staff. ?x :supervises ?y. ?x :teaches ?u. ?y :teaches ?v.  }"/>
+    <Query id="q2" text="PREFIX : &lt;http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x rdf:type :Staff. ?y rdf:type :Staff. ?x :supervises ?y. ?x :teaches ?u. ?y :teaches ?v. ?z rdf:type :Staff. ?z :administers ?u. ?z :administers ?v. }"/>
+    <Query id="q3" text="PREFIX : &lt;http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x rdf:type :Staff. ?y :assists ?u. ?x :teaches ?u. ?z rdf:type :Staff. ?z :administers ?u. }"/>
+    <Query id="q4" text="PREFIX : &lt;http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x rdf:type :Staff. ?x :assists ?u. ?y rdf:type :Staff. ?y :worksOn ?u. ?z rdf:type :Staff. ?z :supports ?u. }"/>
+    <Query id="q5" text="PREFIX : &lt;http://www.dcs.bbk.ac.uk/michael/BBK-new.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x :teaches ?u. ?y :teaches ?u. ?y :supervises ?v. ?z :supervises ?v. }"/>
+  </SavedQueries>
+</OBDA>
