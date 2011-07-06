@@ -52,16 +52,18 @@ public class ConfigPanel extends javax.swing.JPanel {
 				
 				jRadioButtonDirect.setEnabled(true);
 				jRadioButtonDirect.setSelected(true);
-//		        jRadioButtonSemanticIndex.setEnabled(true);
+		        jRadioButtonSemanticIndex.setEnabled(true);
+		        jRadioButtonSemanticIndex.setSelected(true);
 //		        jRadioButtonUniversal.setEnabled(true);
 //		        jRadioButtonUserProvidedDB.setEnabled(true);
 				jRadioButtonInMemoryDB.setEnabled(true);
-				jRadioButtonDirect.setSelected(true);
+				jRadioButtonDirect.setSelected(false);
 				jLabelDataLoc.setEnabled(true);
 				jLabeldbtype.setEnabled(true);
 				
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
 
 			}
 		});
@@ -155,7 +157,8 @@ public class ConfigPanel extends javax.swing.JPanel {
 			jRadioButtonVirualABox.setSelected(false);
 			jRadioButtonMaterialAbox.setSelected(true);
 			jRadioButtonDirect.setEnabled(true);
-//			jRadioButtonSemanticIndex.setEnabled(true);
+			jRadioButtonSemanticIndex.setEnabled(true);
+//			jRadioButtonSemanticIndex.setSelected(true);
 //			jRadioButtonUniversal.setEnabled(true);
 			jRadioButtonUserProvidedDB.setEnabled(false);
 			jRadioButtonInMemoryDB.setEnabled(true);

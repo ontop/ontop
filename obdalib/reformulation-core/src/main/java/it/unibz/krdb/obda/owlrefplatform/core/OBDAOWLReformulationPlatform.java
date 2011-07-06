@@ -232,6 +232,10 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 					// dag.index();
 					ABoxSerializer.recreate_tables(connection);
 					ABoxSerializer.ABOX2DB(loadedOntologies, dag, pureIsa, connection);
+					ABoxSerializer.create_indexes(connection);
+					connection.commit();
+					
+					
 					sigma = DAGConstructor.getSigmaOntology(this.translatedOntologyMerge);
 
 				} else if (dbType.equals(OBDAConstants.DIRECT)) {
