@@ -2,6 +2,8 @@ package it.unibz.krdb.obda.owlapi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -108,5 +110,16 @@ public class ReformulationPlatformPreferences extends Properties {
 	 */
 	public void setCurrentValueOf(String var, Object obj) {
 		put(var, obj);
+	}
+	
+	public List<String> getReformulationPlatformPreferencesKeys(){
+		ArrayList<String> keys = new ArrayList<String>();
+		keys.add(CREATE_TEST_MAPPINGS);
+		keys.add(REFORMULATION_TECHNIQUE);
+		keys.add(ABOX_MODE);
+		keys.add(DBTYPE);
+		keys.add(DATA_LOCATION);
+
+		return keys;
 	}
 }

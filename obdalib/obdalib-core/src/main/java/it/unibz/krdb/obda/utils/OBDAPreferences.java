@@ -133,4 +133,26 @@ public class OBDAPreferences extends Properties{
 		}
 	}
 	
+	public List<String> getOBDAPreferenceKeys(){
+		ArrayList<String> keys = new ArrayList<String>();
+		keys.add(JODS_RESULTSET_FETCHSIZE);
+		keys.add(CLASS_COLOR);
+		keys.add(DATAPROPERTY_COLOR);
+		keys.add(VARIABLE_COLOR);
+		keys.add(PARAMETER_COLOR);
+		keys.add(FUCNTOR_COLOR);
+		keys.add(MAPPING_BODY_COLOR);
+		keys.add(MAPPING_ID_COLOR);
+		keys.add(OBJECTPROPTERTY_COLOR);
+		keys.add(OBDAPREFS_FONTFAMILY);
+		keys.add(OBDAPREFS_FONTSIZE);
+		keys.add(OBDAPREFS_ISBOLD);
+		keys.add(ADD_MAPPING);
+		keys.add(DELETE_MAPPING);
+		keys.add(EDIT_BODY);
+		keys.add(EDIT_HEAD);
+		keys.add(EDIT_ID);
+		keys.add(USE_DEAFAULT);
+		return keys;
+	}
 }

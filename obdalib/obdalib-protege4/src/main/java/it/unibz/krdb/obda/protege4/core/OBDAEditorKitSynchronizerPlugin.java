@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
@@ -71,108 +72,36 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	private void loadPreferences(){
 		PreferencesManager man = PreferencesManager.getInstance();
 		Preferences pref = man.getApplicationPreferences("OBDA Plugin");
-		String  value = pref.getString(OBDAPreferences.ADD_MAPPING, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.ADD_MAPPING, value);
-		}
-		value = pref.getString(OBDAPreferences.DELETE_MAPPING, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.DELETE_MAPPING, value);
-		}
-		value = pref.getString(OBDAPreferences.EDIT_BODY, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.EDIT_BODY, value);
-		}
-		value = pref.getString(OBDAPreferences.EDIT_HEAD, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.EDIT_HEAD, value);
-		}
-		value = pref.getString(OBDAPreferences.EDIT_ID, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.EDIT_ID, value);
-		}
 		
-		value = pref.getString(OBDAPreferences.USE_DEAFAULT, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.USE_DEAFAULT, value);
-		}
-		
-		value = pref.getString(OBDAPreferences.JODS_RESULTSET_FETCHSIZE, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.JODS_RESULTSET_FETCHSIZE, value);
-		}
-		
-		value = pref.getString(OBDAPreferences.OBDAPREFS_FONTFAMILY, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.OBDAPREFS_FONTFAMILY, value);
-		}
-		value = pref.getString(OBDAPreferences.OBDAPREFS_FONTSIZE, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.OBDAPREFS_FONTSIZE, value);
-		}
-		value = pref.getString(OBDAPreferences.OBDAPREFS_ISBOLD, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.OBDAPREFS_ISBOLD, value);
-		}
-		
-		value = pref.getString(OBDAPreferences.CLASS_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.CLASS_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.VARIABLE_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.VARIABLE_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.OBJECTPROPTERTY_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.OBJECTPROPTERTY_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.DATAPROPERTY_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.DATAPROPERTY_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.PARAMETER_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.PARAMETER_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.FUCNTOR_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.FUCNTOR_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.MAPPING_BODY_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.MAPPING_BODY_COLOR, value);
-		}
-		value = pref.getString(OBDAPreferences.MAPPING_ID_COLOR, null);
-		if(value != null){
-			obdaPref.put(OBDAPreferences.MAPPING_ID_COLOR, value);
-		}
-		
-		value = pref.getString(ReformulationPlatformPreferences.ABOX_MODE, null);
-		if(value != null){
-			refplatPref.put(ReformulationPlatformPreferences.ABOX_MODE, value);
-			
-			if (ReformulationPlatformPreferences.ABOX_MODE.equals(OBDAConstants.CLASSIC)) {
-				refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+		List<String> keys = obdaPref.getOBDAPreferenceKeys();
+		Iterator<String> it = keys.iterator();
+		while(it.hasNext()){
+			String key = it.next();
+			String  value = pref.getString(key, null);
+			if(value != null){
+				obdaPref.put(key, value);
 			}
 		}
-		value = pref.getString(ReformulationPlatformPreferences.DATA_LOCATION, null);
-		if(value != null){
-			refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, value);
-		}
-		value = pref.getString(ReformulationPlatformPreferences.DBTYPE, null);
-		if(value != null){
-			refplatPref.put(ReformulationPlatformPreferences.DBTYPE, value);
-		}
-		value = pref.getString(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, null);
-		if(value != null){
-			refplatPref.put(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, value);
-		}
-		value = pref.getString(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, null);
-		if(value != null){
-			refplatPref.put(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, value);
-		}
 		
+		keys = refplatPref.getReformulationPlatformPreferencesKeys();
+		it = keys.iterator();
+		boolean isCalssic = false;
+		while(it.hasNext()){
+			String key = it.next();
+			String value = pref.getString(key, null);
+			if(value != null){
+				// here we ensure that if the abox mode is classic the the data location can only be in memory
+				if (key.equals(ReformulationPlatformPreferences.ABOX_MODE) && value.equals(OBDAConstants.CLASSIC)) { 
+					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+					refplatPref.put(key, value);
+					isCalssic = true;
+				}else if(key.equals(ReformulationPlatformPreferences.DATA_LOCATION) && !isCalssic){//if it is classic the data location is already set
+					refplatPref.put(key, value);
+				}else{
+					refplatPref.put(key, value);
+				}
+			}
+		}
 	}
 	
 	private void storePreferences(){
