@@ -51,14 +51,18 @@ public class ConfigPanel extends javax.swing.JPanel {
 			public void actionPerformed(ActionEvent e) {
 				
 				jRadioButtonDirect.setEnabled(true);
+				jRadioButtonDirect.setSelected(true);
 //		        jRadioButtonSemanticIndex.setEnabled(true);
 //		        jRadioButtonUniversal.setEnabled(true);
 //		        jRadioButtonUserProvidedDB.setEnabled(true);
 				jRadioButtonInMemoryDB.setEnabled(true);
+				jRadioButtonDirect.setSelected(true);
 				jLabelDataLoc.setEnabled(true);
 				jLabeldbtype.setEnabled(true);
 				
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+
 			}
 		});
     	jRadioButtonVirualABox.addActionListener(new ActionListener() {
@@ -126,6 +130,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 //        preference.setCurrentValueOf(
 //        		ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, optValue);
 
+    	jRadioButtonInMemoryDB.setSelected(true);
         
         
         String refvalue = (String)p.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);

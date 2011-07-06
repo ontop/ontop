@@ -1,11 +1,12 @@
 package it.unibz.krdb.obda.protege4.core;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
+
+import java.util.Iterator;
+import java.util.Set;
 
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
@@ -150,6 +151,10 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		value = pref.getString(ReformulationPlatformPreferences.ABOX_MODE, null);
 		if(value != null){
 			refplatPref.put(ReformulationPlatformPreferences.ABOX_MODE, value);
+			
+			if (ReformulationPlatformPreferences.ABOX_MODE.equals(OBDAConstants.CLASSIC)) {
+				refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+			}
 		}
 		value = pref.getString(ReformulationPlatformPreferences.DATA_LOCATION, null);
 		if(value != null){

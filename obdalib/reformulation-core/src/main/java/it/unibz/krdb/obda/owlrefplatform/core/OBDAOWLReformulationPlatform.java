@@ -173,7 +173,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 		// String useMem = (String)
 		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals("inmemory");
+		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals(OBDAConstants.INMEMORY);
 		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
 		boolean createMappings = preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
