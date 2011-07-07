@@ -89,7 +89,8 @@ public class ConfigPanel extends javax.swing.JPanel {
 			public void actionPerformed(ActionEvent e) {
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.DIRECT);
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-
+//				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+				//shouldn't this be added in order to ensure that in the direct mode inmemory has to be set
 			}
 		});
         jRadioButtonInMemoryDB.addActionListener(new ActionListener() {

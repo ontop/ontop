@@ -95,8 +95,10 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;
-				}else if(key.equals(ReformulationPlatformPreferences.DATA_LOCATION) && !isCalssic){//if it is classic the data location is already set
-					refplatPref.put(key, value);
+				}else if(key.equals(ReformulationPlatformPreferences.DATA_LOCATION)){//if it is classic the data location is already set
+					if(!isCalssic){
+						refplatPref.put(key, value);
+					}
 				}else{
 					refplatPref.put(key, value);
 				}
