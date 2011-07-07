@@ -22,8 +22,7 @@ public class TreeWitness {
 	
 	Logger	log = LoggerFactory.getLogger(TreeWitness.class);
 	
-	public TreeWitness(Term term, PredicatePosition direction)
-	{
+	public TreeWitness(Term term, PredicatePosition direction) 	{
 		this.term = term;
 		this.direction = direction;
 		this.exists = true;
@@ -31,8 +30,8 @@ public class TreeWitness {
 		func.put(term, new Vector<PredicatePosition>());
 	}
 
-	public String toString()
-	{
+	public String toString() {
+		
 		String description = "tree witness for (" + term + ", " + direction + ") ";
 		String representation = "";
 		if (!exists)
@@ -45,10 +44,21 @@ public class TreeWitness {
 		return description + representation;
 	}
 	
+	public boolean equals(Object obj) {
+		if ((obj == null) || !(obj instanceof TreeWitness))
+			return false;
+		
+		TreeWitness tw = (TreeWitness)obj;
+		return (tw.getRoots().contains(getTerm()) && tw.getDirection().equals(getDirection()));								
+	}
+	
+	public int hashCode() {
+		return getDirection().getPredicate().getName().hashCode();
+	}
+	
 	// returns true if the tree witness has been updated (and false otherwise)
 	
-	private boolean updateTermLabel(Term t, Vector<PredicatePosition> label)
-	{
+	private boolean updateTermLabel(Term t, Vector<PredicatePosition> label) {
 		if (func.containsKey(t)) {
 			if (func.get(t).equals(label))
 				return false;
@@ -57,16 +67,15 @@ public class TreeWitness {
 				exists  = false;
 			}
 		}
-		else {
+		else 
 			func.put(t, label);
-		}
+		
 		return true;
 	}
 	
 	// returns true if the tree witness has been updated (and false otherwise)
 	
-	private boolean extendWithAtom(PredicatePosition pos, Term t1, Term t2)
-	{
+	private boolean extendWithAtom(PredicatePosition pos, Term t1, Term t2) {
 		//log.debug("extend with atom {}", pos + " (" + t1 + ", " + t2 + ")");
 		Vector<PredicatePosition> l2 = func.get(t1);
 		if (l2.isEmpty())
@@ -96,23 +105,19 @@ public class TreeWitness {
 		return false;
 	}
 	
-	public boolean isInDomain(Term t)
-	{
+	public boolean isInDomain(Term t) {
 		return func.containsKey(t);
 	}
 	
-	public Term getTerm()
-	{
+	public Term getTerm() {
 		return term;
 	}
 	
-	public PredicatePosition getDirection()
-	{
+	public PredicatePosition getDirection() {
 		return direction;
 	}
 	
-	public List<Term> getRoots()
-	{
+	public List<Term> getRoots() {
 		Vector<Term> roots = new Vector<Term>();
 		for (Term t: func.keySet()) {
 			if (func.get(t).size() == 0)
@@ -121,8 +126,7 @@ public class TreeWitness {
 		return roots;
 	}
 
-	public List<Term> getNonRoots()
-	{
+	public List<Term> getNonRoots() {
 		Vector<Term> nonroots = new Vector<Term>();
 		for (Term t: func.keySet()) {
 			if (func.get(t).size() > 0)
@@ -131,8 +135,7 @@ public class TreeWitness {
 		return nonroots;
 	}
 
-	public boolean extendWithAtoms(List<Atom> atoms)
-	{
+	public boolean extendWithAtoms(List<Atom> atoms) {
 		boolean changed = true;
 		while (changed && exists) {
 			changed = false;
@@ -159,9 +162,7 @@ public class TreeWitness {
 	
 	// returns null if t is a root
 	//     and the tail of the label otherwise
-	
-	public PredicatePosition getLabelTail(Term t)
-	{
+	public PredicatePosition getLabelTail(Term t) {
 		Vector<PredicatePosition> label = func.get(t);
 		if (label.isEmpty())
 			return null;
@@ -170,9 +171,7 @@ public class TreeWitness {
 	}
 
 	// returns true if the term is a root
-	
-	public boolean isRoot(Term t)
-	{
+	public boolean isRoot(Term t) 	{
 		return (getLabelTail(t) == null);
 	}
 	

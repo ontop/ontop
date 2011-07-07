@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessReformulator implements QueryRewriter {
 
-	private Set<Assertion>				assertions;
+	//private Set<Assertion>				assertions;
 	private DAG  conceptDAG = null;
-	private Map<ConceptDescription, Predicate> views;
+	private Map<ConceptDescription, Predicate> views = new HashMap<ConceptDescription, Predicate>();
 	
 	private OBDADataFactory				fac				= OBDADataFactoryImpl.getInstance();
 
@@ -49,8 +49,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessReformulator.class);
 	
 	public TreeWitnessReformulator(Set<Assertion> set) {
-		this.assertions = set;
-		this.views = new HashMap<ConceptDescription, Predicate>();
+		//this.assertions = set;
 	}
 	
 	public void setConceptDAG(DAG conceptDAG) {
@@ -66,95 +65,84 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	 * @throws Exception
 	 */
 	
-	private DatalogProgram reformulate(DatalogProgram q) throws Exception {
+	private DatalogProgram reformulate(CQIE cqie) throws Exception {
 		
-		// collect terms and binary predicate names for computing the tree witnesses
-		Set<Term> terms = new HashSet<Term>(); // terms of the current connected component
-		List<Term> variables = new ArrayList<Term>(); // all variables
-		HashSet<Term> evars = new HashSet<Term>(); // all variables
-		
+		// compute the list of binary predicates, terms, variables and existential variables
+		Set<Term> terms = new HashSet<Term>(); // terms 
 		Set<Predicate> predicates = new HashSet<Predicate>(); // binary predicates
-		
-		if (q.getRules().size() != 1)
-			log.debug("ONLY CQ ARE ALLOWED\n");		
-		CQIE cqie = q.getRules().get(0);
+		List<Term> variables = new ArrayList<Term>(); // all variables (needed as a List)
+		Set<Term> evars = new HashSet<Term>(); // all existential variables
 
 		for (Atom a0: cqie.getBody()) {
 			PredicateAtom a = (PredicateAtom) a0;
 			log.debug("atom: " + a);
-			boolean addToComponent = terms.isEmpty();
 
-			for (Term t: a.getTerms()) {
-				// handle "undistinguished" variables, i.e., underscores?
-				log.debug("term: " + t + " of " + t.getClass().getName());
-				if (terms.contains(t)) {
-					addToComponent = true;
-					break;
-				}
-			}
-
-			log.debug("in the same component: {}\n", addToComponent);
-			if (addToComponent) {
-				if (a.getPredicate().getArity() >= 2) 
-					predicates.add(a.getPredicate());
+			if (a.getPredicate().getArity() >= 2) 	{
+				predicates.add(a.getPredicate());
 				
 				for (Term t: a.getTerms()) {
+					// handle "undistinguished" variables, i.e., underscores?
+					log.debug("term: " + t + " of " + t.getClass().getName());
 					terms.add(t);
 					
-					if ((t instanceof VariableImpl) && !variables.contains(t)) 
+					if ((t instanceof VariableImpl) && !variables.contains(t)) {
 						variables.add(t);
-					
-					
-					if ((t instanceof VariableImpl) && !cqie.getHead().getTerms().contains(t)) {
-						log.debug("existentially quantified " + t);
-						evars.add(t);
+						
+						if (!cqie.getHead().getTerms().contains(t)) {
+							log.debug("existentially quantified " + t);
+							evars.add(t);							
+						}
 					}
 				}
 			}
-			else { 
-				log.debug("THE QUERY IS NOT CONNECTED\n"); // WRONG!
-			}
 		}
-		log.debug("component terms: " + terms);			
-		log.debug("existentially quantified: " + variables);
+		log.debug("terms: " + terms);			
+		log.debug("variables: " + variables);
+		log.debug("existentially quantified variables: " + evars);
 		log.debug("binary predicates: " + predicates);					
 		
-		
-		// compute witness functions
-		List<TreeWitness> tws = new ArrayList<TreeWitness>(); 
+		// compute tree witness functions
+		Set<TreeWitness> tws = new HashSet<TreeWitness>(); 
 		for (Term t: terms) {
 			for (Predicate p: predicates) {
 				for (int d = 1; d <= 2; d++) {
 					TreeWitness tw = new TreeWitness(t, new PredicatePosition(p, d));
-					if (tw.extendWithAtoms(q.getRules().get(0).getBody())) 	{
-						log.debug("TREE WITNESS " + tw);
-						if (tw.getNonRoots().isEmpty()) {
-							log.debug("TRIVIAL, IGNORING");
+					if (tw.extendWithAtoms(cqie.getBody())) 	{
+						log.debug(tw.toString());
+						List<Term> nonroots = tw.getNonRoots();
+						// check whether the tree witness contains at least one non-root
+						if (nonroots.isEmpty()) {
+							log.debug("trivial, ignoring");
 							continue;
 						}
-							
-						boolean found = false;
-						for (TreeWitness twc: tws) 
-							if (twc.getRoots().contains(t) && twc.getDirection().equals(tw.getDirection())) {						
-								found = true;
+
+						// check whether all non-roots are existentially quantified
+						boolean nonrootsOK = true;
+						for (Term tt: nonroots) 
+							if (!evars.contains(tt)) {
+								nonrootsOK = false;
+								log.debug("non-root " + tt + " is not existentially quantified");
 								break;
 							}
+						if (!nonrootsOK)
+							continue;
 						
-						if (!found)
-							tws.add(tw);
-						else
-							log.debug("DUPLICATING");
+						tws.add(tw);
 					}
 					else
-						log.debug("NO TREE WITNESS {}\n", tw);
+						log.debug(tw.toString());
 				}
 			}
 		}
+		log.debug("TREE WITNESSES");
+		for (TreeWitness tw: tws) {
+			log.debug(tw.toString());
+		}
+		
 		
 		
 		// generate the output datalog programme
 		DatalogProgram out = fac.getDatalogProgram();
-		QueryUtils.copyQueryModifiers(q, out);
 		int n1 = 1;
 		int n2 = 1;
 			
@@ -174,14 +162,16 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 				
 				for (TreeWitness tw: tws) {
-					log.debug("atom " + a + " on tree witness " + tw + " with term " + a.getTerm(0));
+					log.debug("atom " + a + " on " + tw + " with term " + a.getTerm(0));
 					if (!tw.isInDomain(a.getTerm(0))) 
 						continue;
 					log.debug("in the domain");
 					
-					if (!nonRootsAreExistential(tw, evars))
+					if (tw.getRoots().contains(a.getTerm(0))) {
+						log.debug("absorbed by the default rule");
 						continue;
-
+					}
+					
 					List<Atom> wb = getRuleBodyForTreeWitness(tw, cqie);								
  
 					if (wb != null)
@@ -203,9 +193,6 @@ public class TreeWitnessReformulator implements QueryRewriter {
 					if (!tw.isInDomain(a.getTerm(0)) || !tw.isInDomain(a.getTerm(1)))
 						continue;
 					
-					if (!nonRootsAreExistential(tw, evars))
-						continue;
-
 					List<Atom> wb = getRuleBodyForTreeWitness(tw, cqie);								
  
 					if (wb != null)
@@ -246,18 +233,8 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		
 		return out;	
 	}
-	// check whether all non-roots are existentially quantified
-	
-	private static boolean nonRootsAreExistential(TreeWitness tw, Set<Term> evars) {
-		boolean nonrootsOK = true;
-		for (Term t: tw.getNonRoots()) 
-			if (!evars.contains(t)) {
-				nonrootsOK = false;
-				log.debug("non roots are not all existentially quantified: " + t);
-				break;
-			}
-		return nonrootsOK;
-	}
+
+	// check whether the term t of the tree witness tw can be an instance of C in the anonymous part 
 	
 	private boolean checkTree(TreeWitness tw, Term t, ConceptDescription C) {
 		if (tw.isInDomain(t) && !tw.isRoot(t)) {
@@ -345,9 +322,12 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
+		// TBD: CHECK WHETHER THE QUERY IS CONNECTED
+				
 		/* Query preprocessing */
 		//log.debug("Reformulating");
-		DatalogProgram reformulation = reformulate(prog);
+		DatalogProgram reformulation = reformulate(prog.getRules().get(0));
+		QueryUtils.copyQueryModifiers(prog, reformulation);
 		//log.debug("Done reformulating. Output: \n{}", reformulation);
 
 		return reformulation;	
