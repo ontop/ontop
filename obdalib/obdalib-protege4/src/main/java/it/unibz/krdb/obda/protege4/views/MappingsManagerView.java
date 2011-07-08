@@ -24,13 +24,8 @@ import org.semanticweb.owl.model.OWLOntology;
 
 public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 1790921396564256165L;
-	/**
-	 * 
-	 */
+
 	private final Logger		log					= Logger.getLogger(MappingsManagerView.class);
 
 	OBDAModelManager			controller			= null;
@@ -54,11 +49,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 		OBDAPreferences preference = (OBDAPreferences) editor.get(OBDAPreferences.class.getName());
 
-		// Retrieve the components for initializing the Mapping Manager panel.
-		// OBDAModel obdaModel = controller.getOBDAManager();
-		// MappingController mapController = obdaModel.getMappingController();
-		// DatasourcesController dsController =
-		// obdaModel.getDatasourcesController();
 		OWLOntology ontology = editor.getModelManager().getActiveOntology();
 
 		// Init the Mapping Manager panel.
@@ -104,9 +94,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	public void activeOntologyChanged() {
-		mappingPanel.setOBDAModel(controller.getActiveOBDAModel(), getOWLModelManager().getActiveOntology());
+		mappingPanel.setOBDAModel(controller.getActiveOBDAModel());
+		mappingPanel.setOntology(getOWLModelManager().getActiveOntology());
 		datasourceSelector.setDatasourceController(controller.getActiveOBDAModel().getDatasourcesController());
-		
-
 	}
 }

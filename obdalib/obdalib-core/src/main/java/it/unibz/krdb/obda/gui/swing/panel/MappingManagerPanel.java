@@ -94,8 +94,6 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private MappingController		mapc;
 
-	// private DatasourcesController dsc;
-
 	protected OBDAModel				apic;
 
 	private OWLOntology				ontology;
@@ -120,11 +118,10 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	 */
 	public MappingManagerPanel(OBDAModel apic, OBDAPreferences preference, OWLOntology ontology) {
 
-		// this.dsc = dsc;
 		this.preference = preference;
-
-
 		datalogParser = new DatalogProgramParser();
+
+    setOntology(ontology);
 
 		initComponents();
 		registerAction();
@@ -148,21 +145,24 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
 		preference.registerPreferenceChangedListener(this);
-		
-		setOBDAModel(apic, ontology);
+
+    setOBDAModel(apic); // TODO Bad code! Change this later!
 	}
-	
-	
-	public void setOBDAModel(OBDAModel omodel, OWLOntology ontology) {
+
+
+	public void setOBDAModel(OBDAModel omodel) {
 		this.apic = omodel;
 		this.mapc = apic.getMappingController();
-		this.ontology = ontology;
 		MappingTreeModel maptreemodel = new MappingTreeModel(apic, mapc);
 		mapc.addMappingControllerListener(maptreemodel);
 		mappingsTree.setModel(maptreemodel);
 	}
 
-	public OWLOntology getSourceOntology() {
+	public void setOntology(OWLOntology ontology) {
+	  this.ontology = ontology;
+	}
+
+	public OWLOntology getOntology() {
 		return ontology;
 	}
 

@@ -82,7 +82,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
 		me = new MappingEditorPanel(tree);
 
-    OWLOntology ontology = mappingmanagerpanel.getSourceOntology();
+    OWLOntology ontology = mappingmanagerpanel.getOntology();
     validator = new TargetQueryValidator(ontology);
 	}
 //
