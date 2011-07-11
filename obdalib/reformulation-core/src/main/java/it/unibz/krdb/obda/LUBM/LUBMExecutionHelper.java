@@ -144,6 +144,10 @@ public class LUBMExecutionHelper {
 		// Now we are ready for querying
 
 		for (QueryControllerEntity entity : obdamodel.getQueryController().getElements()) {
+			System.gc();
+			System.runFinalization();
+			Thread.currentThread().yield();
+			
 			if (!(entity instanceof QueryControllerQuery)) {
 				continue;
 			}
@@ -200,7 +204,7 @@ public class LUBMExecutionHelper {
 						log.error(e.getMessage(), e);
 					}
 					Thread.currentThread().sleep(1000);
-					System.gc();
+					
 				} else {
 					/*
 					 * The rewriting finished normally nothing to do anymore

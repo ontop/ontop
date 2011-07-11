@@ -71,7 +71,11 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	public Query rewrite(Query input) throws Exception {
-
+//		
+//		Runtime.getRuntime().runFinalization ();
+//		Runtime.getRuntime().gc ();
+//        Thread.currentThread ().yield ();
+		
 		long starttime = System.currentTimeMillis();
 
 		if (!(input instanceof DatalogProgram)) {

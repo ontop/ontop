@@ -1,0 +1,174 @@
+\documentclass{article}
+
+\usepackage{a4wide}
+\usepackage{latexsym,amssymb,amsthm,amsmath}
+
+\allowdisplaybreaks
+
+\begin{document}
+
+\begin{align*}
+\mathcal{T}_1 =\{ %
+%
+AcademicStaff &\sqsubseteq Staff,\\
+ResearchStaff &\sqsubseteq Staff,\\
+NonAcademicStaff &\sqsubseteq Staff,\\
+%
+Senior &\sqsubseteq AcademicStaff,\\
+Junior &\sqsubseteq AcademicStaff,\\
+%
+Professor &\sqsubseteq Senior,\\
+Reader &\sqsubseteq Senior,\\
+%
+ProbationStaff &\sqsubseteq Junior,\\
+Lecturer &\sqsubseteq Junior,\\
+%
+Junior &\sqsubseteq \exists mentor^-,\\
+\exists mentor &\sqsubseteq Senior,\\
+RA &\sqsubseteq ResearchStaff,\\
+RF &\sqsubseteq ResearchStaff,\\
+VisitingStaff &\sqsubseteq ResearchStaff,\\
+%
+Admin &\sqsubseteq NonAcademicStaff,\\
+Systems &\sqsubseteq NonAcademicStaff,\\
+Others &\sqsubseteq NonAcademicStaff,\\
+%
+UG &\sqsubseteq Course,\\
+PG &\sqsubseteq Course,\\
+%
+UGTaught &\sqsubseteq UG,\\
+UGProject &\sqsubseteq UG,\\
+%
+PGTaught &\sqsubseteq PG,\\
+PGProject &\sqsubseteq PG,\\
+%
+ExternalProject &\sqsubseteq Project,\\
+InternalProject &\sqsubseteq Project,\\
+%
+EUProject &\sqsubseteq ExternalProject,\\
+UKProject &\sqsubseteq ExternalProject,\\
+%
+CollaborationProject &\sqsubseteq InternalProject,\\
+ImpactProject &\sqsubseteq InternalProject,\\
+%
+AcademicStaff &\sqsubseteq \exists teaches,\\
+\exists teaches^- &\sqsubseteq Course,\\
+%
+UGTaught &\sqsubseteq \exists assists^-,\\
+PGTaught &\sqsubseteq \exists assists^-,\\
+\exists assists &\sqsubseteq ResearchStaff,\\
+% 
+\exists supervises &\sqsubseteq AcademicStaff,\\
+RA &\sqsubseteq \exists supervises^-,\\
+RF &\sqsubseteq \exists supervises^-,\\
+%
+RA &\sqsubseteq \exists worksOn,\\
+RF &\sqsubseteq \exists worksOn,\\
+\exists worksOn^- &\sqsubseteq Project,\\
+\exists worksOn &\sqsubseteq ResearchStaff,\\
+%
+RA &\sqsubseteq \exists isPaidBy,\\
+\exists isPaidBy^- &\sqsubseteq ExternalProject,\\
+%
+Project &\sqsubseteq \exists manages^-,\\
+\exists manages &\sqsubseteq AcademicStaff,\\
+Senior &\sqsubseteq \exists manages,\\
+%
+\exists supports &\sqsubseteq Systems,\\
+\exists supports^- &\sqsubseteq Project,\\
+%
+\exists administers &\sqsubseteq Admin,\\
+Course &\sqsubseteq \exists administers^-,\\
+Project &\sqsubseteq \exists administers^-,\\
+%
+teaches &\sqsubseteq teachingWork,\\
+assists &\sqsubseteq teachingWork,\\
+administers &\sqsubseteq supportWork,\\
+supports &\sqsubseteq supportWork,\\
+isPaidBy &\sqsubseteq worksOn,\\
+manages &\sqsubseteq researchWork,\\
+supervises &\sqsubseteq researchWork,\\
+mentor &\sqsubseteq works,\\
+researchWork &\sqsubseteq works,\\
+supportWork &\sqsubseteq works,\\
+teachingWork &\sqsubseteq works,\\
+\}
+\end{align*}
+
+Queries:
+%
+\begin{enumerate}
+\item $q_1(x,y) = \exists u,v (Staff(x) \land Staff(y) \land supervises(x,y) \land teaches(x,u) \land teaches(y,v))$
+
+\item $q'_1(x,y,z) = \exists u,v (Staff(x) \land Staff(y) \land supervises(x,y) \land teaches(x,u) \land teaches(y,u) \land Staff(z) \land manages(z,v) \land manages(y,v))$
+
+
+\item $q_2(x,y,z) = q_1 \land Staff(z) \land administers(z,u) \land administers(z,v)$
+
+\item $q'_2(x,y) = q_1 \land \exists z (Staff(z) \land administers(z,u) \land administers(z,v))$
+
+\item $q_3(x,y,z) = \exists u (Staff(x) \land assists(y,u) \land teaches(x,u) \land Staff(z) \land administers(z,u))$
+
+\item $q'_3(x,y) = \exists u,z (Staff(x) \land assists(y,u) \land teaches(x,u) \land Staff(z) \land administers(z,u))$
+
+\item $q_4(x,y,z) = \exists u( Staff(x) \land assists(x,u) \land Staff(y) \land worksOn(y,u) \land Staff(z) \land supports(z,u)
+)$
+
+\item $q'_4(x,y) = \exists u,z( Staff(x) \land assists(x,u) \land Staff(y) \land worksOn(y,u) \land Staff(z) \land supports(z,u)
+)$
+
+\item $q_5(x,y,z) = \exists u,v(teaches (x,u) \land teaches(y,u) \land supervises(y,v) \land supervises(z,v))$
+
+\item $q_6(x) = \exists u (Staff(x) \land works (x,u))$
+
+\item $q_7(x,y) = \exists u,v (Staff(x) \land works (x,u) \land works (y,v) \land works (v,u))$
+
+\item $q_8(x) = \exists u,v (Staff(x) \land works (x,u) \land works (x,v) \land works (v,u))$
+\end{enumerate}
+
+%**************
+
+\section{Crown query}
+
+\begin{align*}
+q_n(x_1, \ldots, x_n) &= \exists y_1 \ldots \exists y_{n-1} \bigwedge_{i=1}^{n-1} (x_i R_i y_i \land x_{i+1} R_i y_i),\\
+%
+\mathcal{T}_n &= \{A_i \sqsubseteq \exists R_i \mid 1 \le i \le n-1 \},\\
+%
+q'_n &= \bigwedge_{i = 1}^{n-1} \Big(\big( (x_i = x_{i+1}) \land A_i(x_i) \big)\lor 
+\exists y_i (x_i R_i y_i \land x_{i+1} R_i y_i) \Big).
+\end{align*}
+
+
+
+%\begin{verbatim}
+%PREFIX : <http://www.dcs.bbk.ac.uk/~michael/bbk.owl#>
+%PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+%select ?x ?y where {?x rdf:type :AcademicStaff. 
+%?x :supervises ?y.
+%?y rdf:type :Staff.
+%?x :teaches ?a.
+%?y :teaches ?b.} \end{verbatim}
+
+
+%*******************
+
+\section{Complete ABox}
+
+An ABox $\mathcal{A}$ is \emph{complete} for a TBox $\mathcal{T}$ if, for all individuals $a,b \in \mathsf{Ind}(\mathcal{A})$, all concepts $B$, $C$, and all roles $R$,
+%
+\begin{description}
+\item[(1)] if $R(a,b) \in \mathcal{A}$ then $\exists R (a) \in \mathcal{A}$ and $\exists R^-(b) \in \mathcal{A}$;
+
+\item[(2)] if $\mathcal{T} \models B \sqsubseteq C$ and $B(a) \in \mathcal{A}$, then $C(a) \in \mathcal{A}$.
+\end{description}
+
+
+
+
+
+
+
+
+
+\end{document}
