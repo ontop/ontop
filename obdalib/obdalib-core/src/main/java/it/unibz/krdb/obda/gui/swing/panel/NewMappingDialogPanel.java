@@ -103,7 +103,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				insertMapping();
+			  final String targetQueryString = jTextPaneHead.getText().trim();
+        final String sourceQueryString = jTextPaneBody.getText().trim();
+
+        if (!targetQueryString.isEmpty() && !sourceQueryString.isEmpty()) {
+          insertMapping(targetQueryString, sourceQueryString);
+        }
+        else {
+          JOptionPane.showMessageDialog(null, "The query string can't be empty!",
+              "Error", JOptionPane.ERROR_MESSAGE);
+        }
 			}
 		});
 
@@ -118,7 +127,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		ActionListener actionListenerAccept = new ActionListener() {
 			public void actionPerformed(ActionEvent actionEvent) {
-				insertMapping();
+			  final String targetQueryString = jTextPaneHead.getText().trim();
+			  final String sourceQueryString = jTextPaneBody.getText().trim();
+
+		    if (!targetQueryString.isEmpty() && !sourceQueryString.isEmpty()) {
+		      insertMapping(targetQueryString, sourceQueryString);
+		    }
+		    else {
+		      JOptionPane.showMessageDialog(null, "The query string can't be empty!",
+		          "Error", JOptionPane.ERROR_MESSAGE);
+		    }
 			}
 		};
 		KeyStroke ks_enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK);
@@ -162,19 +180,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		jButtonInsert.setMnemonic('i');
 	}
 
-	private void insertMapping() {
-		final String targetQueryString = jTextPaneHead.getText();
-		final String sourceQueryString = jTextPaneBody.getText();
-		
-		CQIE targetQuery = parse(targetQueryString);
-		if (targetQuery != null) {		  
+	private void insertMapping(String target, String source) {
+		CQIE targetQuery = parse(target);
+		if (targetQuery != null) {
 		  final boolean isValid = validator.validate(targetQuery);
 		  if(isValid) {  			
   			try {
   			  MappingController mapcon = controller.getMappingController();
   	      URI sourceID = dataSource.getSourceID();
   	      String id = mapcon.getNextAvailableMappingID(sourceID);
-  	      SQLQuery body = dataFactory.getSQLQuery(sourceQueryString);
+  	      SQLQuery body = dataFactory.getSQLQuery(source);
   	      RDBMSMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(id, body, targetQuery);
   				mapcon.insertMapping(sourceID, mapping);
   			} 
