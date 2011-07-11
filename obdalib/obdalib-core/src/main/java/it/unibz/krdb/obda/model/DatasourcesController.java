@@ -99,11 +99,15 @@ public class DatasourcesController {
 
 
 	public synchronized DataSource getDataSource(URI name) {
-
 		return datasources.get(name);
 	}
 
-
+	public boolean isExisted(URI name) {
+	  if (getDataSource(name) != null) {
+	    return true;
+	  }
+	  return false;
+	}
 
 	public synchronized void removeDataSource(URI id) {
 
@@ -124,5 +128,5 @@ public class DatasourcesController {
 		fireDataSourceNameUpdated(id, dsd);
 	}
 
-	
+
 }

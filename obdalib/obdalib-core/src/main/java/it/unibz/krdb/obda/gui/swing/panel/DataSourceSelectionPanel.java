@@ -12,6 +12,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 
 import javax.swing.JOptionPane;
 
@@ -80,17 +81,9 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		jButtonAdd.setMinimumSize(new java.awt.Dimension(50, 15));
 		jButtonAdd.setPreferredSize(new java.awt.Dimension(50, 20));
 		jButtonAdd.addActionListener(new ActionListener() {
-
 			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				String name = (String) JOptionPane
-						.showInputDialog(
-								"Insert the URI of the new data source.\nThe URI should be a unique idenfier for the data souce\nnot the connection url or the actual data source name.",
-								null);
-				if ((name != null) && (!name.trim().equals(""))) {
-					dscontroller.addDataSource(name.trim());
-				}
-
+			public void actionPerformed(ActionEvent evt) {
+				addButtonActionPerformed(evt);
 			}
 		});
 
@@ -119,6 +112,24 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		jLabeltitle.setForeground(new java.awt.Color(153, 153, 153));
 		jLabeltitle.setPreferredSize(new Dimension(119, 14));
 	}
+
+  private void addButtonActionPerformed(ActionEvent evt) {
+    String name = JOptionPane.showInputDialog(
+        "Insert the URI of the new data source.\n"
+            + "The URI should be a unique idenfier for the data souce\n"
+            + "not the connection url or the actual data source name.", null).trim();
+    if (!name.isEmpty()) {
+      URI uri = URI.create(name);
+      if (!dscontroller.isExisted(uri)) {
+        dscontroller.addDataSource(name);
+      }
+      else {
+        JOptionPane.showMessageDialog(this,
+            "The data source ID is already existed!", "Error",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
