@@ -959,15 +959,6 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 					String txt = editor.getCellEditorValue().toString();
 					updateNode(txt);
 				}
-			} else {
-				// List of invalid predicates that are found by the validator.
-				Vector<String> invalidPredicates = editor.getInvalidPredicates();
-				String invalidList = "";
-				for (String predicate : invalidPredicates) {
-					invalidList += "- " + predicate + "\n";
-				}
-				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping",
-						JOptionPane.WARNING_MESSAGE);
 			}
 		}
 	}

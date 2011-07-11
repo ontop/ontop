@@ -35,6 +35,7 @@ import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
@@ -125,23 +126,28 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	}
 
 	public boolean isInputValid() {
+    final String text = me.getText().trim();
+    if (text.isEmpty()) {
+      JOptionPane.showMessageDialog(me, "The tree node can't be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
 
-		if(me.getEditingObject() instanceof MappingHeadNode){
-			String txt = me.getText();
-			try {
-				CQIE query = parse(txt);
-				return validator.validate(query);
-			} catch (Exception e) {
-				return false;
-			}
-		} else {
-			return true;
+    boolean isValid = true;
+		if (me.getEditingObject() instanceof MappingHeadNode) {
+  		final CQIE query = parse(text);
+  		isValid = validator.validate(query);
+  		if (!isValid) {
+  		  Vector<String> invalidPredicates = validator.getInvalidPredicates();
+  		  String invalidList = "";
+        for (String predicate : invalidPredicates) {
+          invalidList += "- " + predicate + "\n";
+        }
+        JOptionPane.showMessageDialog(me, "This list of predicates is unknown by the ontology: \n" + invalidList,
+            "New Mapping", JOptionPane.WARNING_MESSAGE);
+  		}
 		}
+		return isValid;
 	}
-
-	public Vector<String> getInvalidPredicates() {
-    return validator.getInvalidPredicates();
-  }
 
 	private CQIE parse(String query) {
 		CQIE cq = null;
@@ -216,7 +222,8 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		public void cancelCellEditing() {
 
 			if(!editingCanceled){
-				mappingmanagerpanel.applyChangedToNode(getCellEditorValue().toString());
+			  final String text = getCellEditorValue().toString().trim();
+			  mappingmanagerpanel.applyChangedToNode(text);
 			}
 		}
 
