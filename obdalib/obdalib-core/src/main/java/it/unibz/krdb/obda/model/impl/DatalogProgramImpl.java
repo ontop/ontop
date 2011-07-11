@@ -22,7 +22,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	protected DatalogProgramImpl() {
 		modifiers = new QueryModifiers();
-		rules = new Vector<CQIE>();
+		rules = new LinkedList<CQIE>();
 		predicateIndex = new HashMap<Predicate, List<CQIE>>();
 	}
 

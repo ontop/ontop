@@ -106,9 +106,23 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	private ReformulationPlatformPreferences	preferences				= null;
 
 	private QueryVocabularyValidator			validator				= null;
+	
+	private Ontology aboxDependencies = null;
+	
+	private Ontology reducedOntology = null;
 
+	
+	
 	public OBDAOWLReformulationPlatform(OWLOntologyManager manager) {
 		ontoManager = manager;
+	}
+	
+	public Ontology getReducedOntology() {
+		return reducedOntology;
+	}
+	
+	public Ontology getABoxDependencies() {
+		return aboxDependencies;
 	}
 
 	@Override
@@ -237,6 +251,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 					
 					
 					sigma = DAGConstructor.getSigmaOntology(this.translatedOntologyMerge);
+					this.aboxDependencies = sigma;
 
 				} else if (dbType.equals(OBDAConstants.DIRECT)) {
 					// perform direct import
@@ -302,9 +317,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			if (OBDAConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator(onto);
 			} else if (OBDAConstants.UCQBASED.equals(reformulationTechnique)) {
-				Ontology dlliteontology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
-				dlliteontology.addAssertions(onto);
-				rewriter = new TreeRedReformulator(dlliteontology);
+				this.reducedOntology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+				reducedOntology.addAssertions(onto);
+				rewriter = new TreeRedReformulator(reducedOntology);
 				rewriter.setABoxDependencies(sigma);
 			} else {
 				throw new IllegalArgumentException("Invalid value for argument: "

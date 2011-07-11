@@ -96,10 +96,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<forkMode>pertest</forkMode>
 					<excludes>
 						<exclude>**/MappingToRuleTester.java</exclude>
 						<exclude>**/PartialEvaluationTest.java</exclude>
 					</excludes>
+					<argLine>-Xms256m -Xmx512m</argLine>
 				</configuration>
 			</plugin>
 

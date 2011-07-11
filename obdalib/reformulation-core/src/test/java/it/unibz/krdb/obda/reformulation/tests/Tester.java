@@ -97,6 +97,7 @@ public class Tester {
     }
 
     public void load(String onto, String unfold_type, String dbType) throws Exception {
+        Runtime.getRuntime().gc();
 
         String owlfile = owlloc + onto + ".owl";
         String resultfile = xmlLoc + onto + ".xml";

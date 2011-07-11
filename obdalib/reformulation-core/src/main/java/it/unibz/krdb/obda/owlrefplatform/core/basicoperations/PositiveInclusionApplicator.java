@@ -119,20 +119,26 @@ public class PositiveInclusionApplicator {
 		}
 	}
 
-	public List<CQIE> apply(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) {
+	public List<CQIE> apply(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) throws Exception {
 		List<CQIE> newqueries = new LinkedList<CQIE>();
 		for (CQIE cq : cqs) {
+			
+			MemoryUtils.checkAvailableMemory();
+			
 			newqueries.addAll(apply(cq, pis));
 		}
 		return newqueries;
 	}
 
-	public List<CQIE> apply(CQIE query, Collection<PositiveInclusion> pis) {
+	public List<CQIE> apply(CQIE query, Collection<PositiveInclusion> pis) throws Exception {
 		int bodysize = query.getBody().size();
 		HashSet<CQIE> newqueries = new HashSet<CQIE>(bodysize * pis.size() * 2);
 		newqueries.add(query);
 
 		for (int atomindex = 0; atomindex < bodysize; atomindex++) {
+			
+			MemoryUtils.checkAvailableMemory();
+			
 			HashSet<CQIE> currentatomresults = new HashSet<CQIE>(bodysize * pis.size() * 2);
 			for (CQIE cq : newqueries) {
 				List<Atom> body = cq.getBody();
@@ -145,6 +151,8 @@ public class PositiveInclusionApplicator {
 				}
 			}
 			newqueries.addAll(currentatomresults);
+			
+			
 		}
 		LinkedList<CQIE> result = new LinkedList<CQIE>();
 		if (sqoOptimizer != null) {
@@ -191,6 +199,9 @@ public class PositiveInclusionApplicator {
 		/* Now we try to apoly the inclusions and collect only the results */
 
 		for (PositiveInclusion pi : pis) {
+			
+			MemoryUtils.checkAvailableMemory();
+			
 			for (CQIE query : saturatedset) {
 				List<Atom> body = query.getBody();
 				for (int i = 0; i < body.size(); i++) {
@@ -244,6 +255,9 @@ public class PositiveInclusionApplicator {
 		 */
 		boolean loop = true;
 		while (loop) {
+			
+			MemoryUtils.checkAvailableMemory();
+			
 			loop = false;
 			newset = new HashSet<CQIE>();
 			for (CQIE currentcq : saturatedset) {

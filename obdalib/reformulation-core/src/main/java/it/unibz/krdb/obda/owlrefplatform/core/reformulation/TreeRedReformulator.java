@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.MemoryUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -18,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.exception.MemoryLowException;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashSet;
@@ -107,6 +109,13 @@ public class TreeRedReformulator implements QueryRewriter {
 		log.debug("Starting maing rewriting loop");
 		boolean loop = true;
 		while (loop) {
+
+			/*
+			 * This is a safety check to avoid running out of memory during a
+			 * reformulation.
+			 */
+			MemoryUtils.checkAvailableMemory();
+
 			loop = false;
 			HashSet<CQIE> newqueriesbyPI = new HashSet<CQIE>(1000);
 
@@ -332,5 +341,6 @@ public class TreeRedReformulator implements QueryRewriter {
 		}
 
 	}
+
 
 }

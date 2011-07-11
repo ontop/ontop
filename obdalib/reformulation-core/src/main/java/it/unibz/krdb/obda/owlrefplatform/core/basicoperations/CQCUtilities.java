@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -88,7 +89,7 @@ public class CQCUtilities {
 	public CQCUtilities(CQIE query, DLLiterOntology sigma) {
 		this.sigma = sigma;
 		if (sigma != null) {
-//			log.debug("Using dependencies to chase the query");
+			// log.debug("Using dependencies to chase the query");
 			query = chaseQuery(query, sigma);
 		}
 		this.canonicalQuery = getCanonicalQuery(query);
@@ -568,11 +569,19 @@ public class CQCUtilities {
 		return true;
 	}
 
-	
 	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses) {
 		removeContainedQueriesSorted(queries, twopasses, null);
-		
+
 	}
+
+	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses) {
+		removeContainedQueriesSorted(program.getRules(), twopasses, null);
+	}
+
+	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, DLLiterOntology sigma) {
+		removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
+	}
+
 	/***
 	 * Removes queries that are contained syntactically, using the method
 	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
@@ -585,11 +594,26 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, DLLiterOntology sigma) {
+		removeContainedQueries(queries, twopasses, sigma, true);
+	}
+
+	/***
+	 * Removes queries that are contained syntactically, using the method
+	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
+	 * efficient, we first sort the list of queries as to have longer queries
+	 * first and shorter queries last.
+	 * 
+	 * Removal of queries is done in two main double scans. The first scan goes
+	 * top-down/down-top, the second scan goes down-top/top-down
+	 * 
+	 * @param queries
+	 */
+	public static void removeContainedQueries(List<CQIE> queries, boolean twopasses, DLLiterOntology sigma, boolean sort) {
 
 		int initialsize = queries.size();
-		log.debug("Removing CQC redundant queries. Initial set size: {}:", initialsize);
+		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 
-		long startime = System.currentTimeMillis();
+		double startime = System.currentTimeMillis();
 
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
@@ -599,7 +623,11 @@ public class CQCUtilities {
 			}
 		};
 
-		Collections.sort(queries, lenghtComparator);
+		if (sort)
+		{
+			log.debug("Sorting...");
+			Collections.sort(queries, lenghtComparator);
+		}
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
@@ -627,11 +655,11 @@ public class CQCUtilities {
 		int newsize = queries.size();
 		int queriesremoved = initialsize - newsize;
 
-		long endtime = System.currentTimeMillis();
-		long time = (endtime - startime) / 1000;
-		log.debug("Done. Time elapse: {}s", time);
-		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
-
+		double endtime = System.currentTimeMillis();
+		double time = (endtime - startime) / 1000;
+		
+		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved) ;
+		log.debug("Time for CQC optimization: {}s", time);		
 	}
 
 }
