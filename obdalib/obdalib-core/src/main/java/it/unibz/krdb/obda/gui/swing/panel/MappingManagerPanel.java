@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.obda.utils.RDBMSMappingValidator;
 import it.unibz.krdb.obda.utils.SourceQueryValidator;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,7 +49,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -666,15 +664,6 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	}// GEN-LAST:event_sendFilters
 
-	private void menuExecuteQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteQueryActionPerformed
-		// TODO add your handling code here:
-		TreePath path = mappingsTree.getSelectionPath();
-		if (path == null) {
-			return;
-		}
-		startExecuteQueryOfMapping(path);
-	}// GEN-LAST:event_menuExecuteQueryActionPerformed
-
 	private void menuValidateAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateAllActionPerformed
 		MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
 		TreePath path[] = mappingsTree.getSelectionPaths();
@@ -889,20 +878,6 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		MappingBodyNode body = mapping.getBodyNode();
 		editedNode = body;
 		mappingsTree.startEditingAtPath(new TreePath(body.getPath()));
-	}
-
-	private void startExecuteQueryOfMapping(TreePath path) {
-		final JDialog resultquery = new JDialog();
-		resultquery.setModal(true);
-		MappingNode mapping = (MappingNode) path.getLastPathComponent();
-		MappingBodyNode body = mapping.getBodyNode();
-		SQLQueryPanel query_panel = new SQLQueryPanel(selectedSource, body.toString());
-
-		resultquery.setSize(pnlMappingManager.getWidth(), pnlMappingManager.getHeight());
-		resultquery.setLocationRelativeTo(null);
-		resultquery.add(query_panel);
-		resultquery.setVisible(true);
-		resultquery.setTitle("Query Results");
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
