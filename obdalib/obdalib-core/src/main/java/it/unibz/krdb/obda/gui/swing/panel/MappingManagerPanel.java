@@ -294,7 +294,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		menuMappings.add(editID);
 
 		JMenuItem editHead = new JMenuItem();
-		editHead.setText("Edit Mapping Head");
+		editHead.setText("Edit Mapping Target Query");
 		editHead.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -310,7 +310,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		menuMappings.add(editHead);
 
 		JMenuItem editBody = new JMenuItem();
-		editBody.setText("Edit Mapping Body");
+		editBody.setText("Edit Mapping Source Query");
 		editBody.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
