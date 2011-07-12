@@ -78,7 +78,8 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		jButtonAdd.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		jButtonAdd.setContentAreaFilled(false);
 		jButtonAdd.setIconTextGap(0);
-		jButtonAdd.setMinimumSize(new java.awt.Dimension(50, 15));
+		jButtonAdd.setMaximumSize(new java.awt.Dimension(60, 30));
+		jButtonAdd.setMinimumSize(new java.awt.Dimension(50, 20));
 		jButtonAdd.setPreferredSize(new java.awt.Dimension(50, 20));
 		jButtonAdd.addActionListener(new ActionListener() {
 			@Override
@@ -94,7 +95,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		jButtonRemove.setContentAreaFilled(false);
 		jButtonRemove.setIconTextGap(0);
 		jButtonRemove.setMaximumSize(new java.awt.Dimension(60, 30));
-		jButtonRemove.setMinimumSize(new java.awt.Dimension(50, 18));
+		jButtonRemove.setMinimumSize(new java.awt.Dimension(50, 20));
 		jButtonRemove.setPreferredSize(new java.awt.Dimension(50, 20));
 		jButtonRemove.addActionListener(new ActionListener() {
 
