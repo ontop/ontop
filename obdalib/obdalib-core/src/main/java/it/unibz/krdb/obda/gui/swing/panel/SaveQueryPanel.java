@@ -337,39 +337,28 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 
 	private void cmdCreateNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAcceptActionPerformed
 		String id = txtQueryID.getText();
-		if (id.isEmpty()) {
-		  JOptionPane.showMessageDialog(this, "The query ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
-		  return;
-		}
-
 		String group = (String)cmbQueryGroup.getSelectedItem();
 
-		boolean newgroup = false;
-		if (group.equals(NOGROUP)) {
-			group = null;
-		}
-		else if (group.equals(NEWGROUP)) {
-			newgroup = true;
-			group = txtGroupName.getText();
-		}
+		if (id.isEmpty()) {
+      JOptionPane.showMessageDialog(this, "The query ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
 
-		int index = queryController.getElementPosition(id);
+    final int index = queryController.getElementPosition(id);
+    if (index != -1) {
+      JOptionPane.showMessageDialog(null, "The query or group ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+      return;
+    }
 
-		if (index != -1) {
-			JOptionPane.showMessageDialog(null, "Query/Group with the same ID already exists.\nIDs must be unique. Please modify and try again.", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		if (group == null) {
+		if (group.equals(NOGROUP)) {  // no group selected
 		  queryController.addQuery(this.query, id);
 		}
-
-		if (newgroup) {
-		  queryController.createGroup(group);
-			if (id != null) {
-			  queryController.addQuery(this.query, id, group);
-			}
+		else if (group.equals(NEWGROUP)) {  // create a new group
+			group = txtGroupName.getText();
+			queryController.createGroup(group);
+			queryController.addQuery(this.query, id, group);
 		}
-		else {
+		else {  // a group selected
 		  queryController.addQuery(this.query, id, group);
 		}
 
