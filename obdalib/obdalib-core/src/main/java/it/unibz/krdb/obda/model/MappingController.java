@@ -354,13 +354,22 @@ fireMappingDeleted(datasource_uri, mapping_id);
 	 * Updates the indicated mapping and fires the appropiate event.
 	 *
 	 * @param datasource_uri
+	 *           The datasource URI.
 	 * @param mapping_id
+	 *           The old mapping id.
 	 * @param new_mappingid
+	 *           The new mapping id to replace the old id.
+	 * @return Returns -1 if the update fails.
 	 */
-	public void updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
-		mapping.setId(new_mappingid);
-		fireMappigUpdated(datasource_uri, mapping_id, mapping);
+
+		if (!isMappingIdExisted(datasource_uri, new_mappingid)) {
+		  mapping.setId(new_mappingid);
+		  fireMappigUpdated(datasource_uri, mapping_id, mapping);
+		  return 0;
+		}
+		return -1;
 	}
 
 	/***************************************************************************
@@ -377,6 +386,13 @@ fireMappingDeleted(datasource_uri, mapping_id);
 		}
 		mapping.setTargetQuery(targetQuery);
 		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+	}
+
+	public boolean isMappingIdExisted(URI datasourceUri, String mappingId) {
+	  if (getMapping(datasourceUri, mappingId) != null) {
+	    return true;
+	  }
+	  return false;
 	}
 
 //	public void activeOntologyChanged(){

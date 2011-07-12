@@ -286,9 +286,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				if (path == null) {
 					return;
 				}
-				mappingsTree.setEditable(true);
-				editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-				mappingsTree.startEditingAtPath(path);
+				startEditIdOfMapping(path);
 			}
 		});
 		editID.setMnemonic(this.editID.getKeyCode());
@@ -864,6 +862,12 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		dialog.setVisible(true);
 	}
 
+	private void startEditIdOfMapping(TreePath path) {
+	  mappingsTree.setEditable(true);
+    editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+    mappingsTree.startEditingAtPath(path);
+	}
+
 	private void startEditHeadOfMapping(TreePath path) {
 		mappingsTree.setEditable(true);
 		MappingNode mapping = (MappingNode) path.getLastPathComponent();
@@ -903,12 +907,13 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	// End of variables declaration//GEN-END:variables
 
+	// TODO NOTE: This method duplicates the valueForPathChanged(..) method in the MappingTreeModel class.
 	private void updateNode(String str) {
 		MappingController con = mapc;
 		URI sourceName = selectedSource.getSourceID();
 		String nodeContent = (String) editedNode.getUserObject();
 		if (editedNode instanceof MappingNode) {
-			con.updateMapping(sourceName, nodeContent, str);
+//			con.updateMapping(sourceName, nodeContent, str);
 		} else if (editedNode instanceof MappingBodyNode) {
 			MappingBodyNode node = (MappingBodyNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();

@@ -37,6 +37,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -102,7 +103,11 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		
 		if (oldmappingnode instanceof MappingNode) {
 			String query = (String) newValue;
-			controller.updateMapping(sourceName, (String) oldmappingvalue, query);
+			int flag = controller.updateMapping(sourceName, (String) oldmappingvalue, query);
+			if (flag == -1) {
+	      JOptionPane.showMessageDialog(null, "The new id is already existed!", "Error", JOptionPane.ERROR_MESSAGE);
+			  oldmappingnode.setUserObject(oldmappingvalue);
+			}
 		} else if (oldmappingnode instanceof MappingHeadNode) {
 			String query = (String) newValue;
 			CQIE newquery = parse(query);
