@@ -17,13 +17,13 @@ import java.net.URI;
 import javax.swing.JOptionPane;
 
 /**
- * 
+ *
  * @author obda
  */
 public class DataSourceSelectionPanel extends javax.swing.JPanel {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long		serialVersionUID	= -8124338850871507250L;
 	private DatasourcesController	dscontroller		= null;
@@ -41,14 +41,14 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 	/***
 	 * Changes the datasource controller associated to this selector. This will
 	 * remove and update listeners and reset the content of the combo box.
-	 * 
+	 *
 	 * @param dsc
 	 */
 	public void setDatasourcesController(DatasourcesController dsc) {
 		/* removing listeners and references to the old */
 		dscontroller.removeDatasourceControllerListener(selector);
 		dscontroller = dsc;
-		
+
 		selector.setDatasourceController(dsc);
 
 		/* setup the new listener */
@@ -60,7 +60,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 	}
 
 	private void init() {
-		
+
 		selector = new DatasourceSelector(dscontroller);
 
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
@@ -126,7 +126,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
       }
       else {
         JOptionPane.showMessageDialog(this,
-            "The data source ID is already existed!", "Error",
+            "The data source ID already exists!", "Error",
             JOptionPane.ERROR_MESSAGE);
       }
     }

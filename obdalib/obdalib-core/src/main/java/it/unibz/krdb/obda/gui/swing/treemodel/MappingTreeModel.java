@@ -71,7 +71,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		root = (DefaultMutableTreeNode) getRoot();
 		this.controller = controller;
 	}
-	
+
 	// TODO Remove this ds?
 //	 public MappingTreeModel(APIController apic, DatasourcesController dsc,
 //	      MappingController controller) {
@@ -100,12 +100,12 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		// TODO Remove this ds?
 //		URI sourceName = dsc.getCurrentDataSource().getSourceID();
 		URI sourceName = currentDataSourceUri;
-		
+
 		if (oldmappingnode instanceof MappingNode) {
 			String query = (String) newValue;
 			int flag = controller.updateMapping(sourceName, (String) oldmappingvalue, query);
 			if (flag == -1) {
-	      JOptionPane.showMessageDialog(null, "The new id is already existed!", "Error", JOptionPane.ERROR_MESSAGE);
+	      JOptionPane.showMessageDialog(null, "The mapping ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
 			  oldmappingnode.setUserObject(oldmappingvalue);
 			}
 		} else if (oldmappingnode instanceof MappingHeadNode) {
@@ -211,7 +211,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		// SYNCWITH EVERYBODY EXCEPT WITH THE CONTROLLER SINCE IT WAS THE SOURCE
 		// OF THIS EVENT
 	  this.currentDataSourceUri = newsrcuri;
-	  
+
 		try {
 			if (newsrcuri != null) {
 				root.setUserObject("Mappings for: " + newsrcuri);
@@ -233,11 +233,11 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	        root.insert(newnode, root.getChildCount());
 	      }
 	      nodeStructureChanged(root);
-			} 
+			}
 			else {
 				root.setUserObject("No src uri");
 			}
-		} 
+		}
 		catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -288,7 +288,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 		return mappingnode;
 	}
-	
+
 	public MappingNode getLastMappingNode() {
 	  return mappingnode;
 	}
