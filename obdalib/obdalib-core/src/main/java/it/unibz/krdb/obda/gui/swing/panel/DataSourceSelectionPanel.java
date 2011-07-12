@@ -35,7 +35,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		this.dscontroller = dscontroller;
 		initComponents();
 		init();
-		setDatasourcesController(dscontroller);
+//		setDatasourcesController(dscontroller);
 	}
 
 	/***
