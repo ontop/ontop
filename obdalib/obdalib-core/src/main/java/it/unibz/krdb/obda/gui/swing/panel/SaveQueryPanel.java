@@ -337,10 +337,14 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 
 	private void cmdCreateNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonAcceptActionPerformed
 		String id = txtQueryID.getText();
+		if (id.isEmpty()) {
+		  JOptionPane.showMessageDialog(this, "The query ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
+		  return;
+		}
+
 		String group = (String)cmbQueryGroup.getSelectedItem();
 
 		boolean newgroup = false;
-
 		if (group.equals(NOGROUP)) {
 			group = null;
 		}
@@ -352,7 +356,7 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 		int index = queryController.getElementPosition(id);
 
 		if (index != -1) {
-			JOptionPane.showMessageDialog(null, "Error: Query/Group with the same ID already exists.\nIDs must be unique. Please modify and try again.");
+			JOptionPane.showMessageDialog(null, "Query/Group with the same ID already exists.\nIDs must be unique. Please modify and try again.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		if (group == null) {
