@@ -40,6 +40,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	public DatasourceParameterEditorPanel(DatasourcesController ds) {
 		this.dscontroller = ds;
 		initComponents();
+		init();
 	}
 
 	public void setDatasourcesController(DatasourcesController dscontroller) {
@@ -51,6 +52,16 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		//TODO here we are missing some fields.
 	}
 
+	private void init(){
+		
+		labelDSType.setText("");
+		labelMapType.setText("");
+		fieldURL.setEnabled(false);
+		fieldDBUser.setEnabled(false);
+		fieldDBPassword.setEnabled(false);
+		fieldDBDriver.setEnabled(false);
+	}
+	
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
