@@ -354,7 +354,11 @@ public class SaveQueryPanel extends javax.swing.JPanel {
 		  queryController.addQuery(this.query, id);
 		}
 		else if (group.equals(NEWGROUP)) {  // create a new group
-			group = txtGroupName.getText();
+			group = txtGroupName.getText().trim();
+			if (group.isEmpty()) {
+			  JOptionPane.showMessageDialog(this, "The group ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
+	      return;
+			}
 			queryController.createGroup(group);
 			queryController.addQuery(this.query, id, group);
 		}
