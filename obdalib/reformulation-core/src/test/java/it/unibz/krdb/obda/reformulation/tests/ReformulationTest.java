@@ -49,7 +49,7 @@ public class ReformulationTest extends TestCase {
             }
         }
         log.debug("Testing in-memory db/SemanticIndex");
-        tester.load(ontoname, OBDAConstants.VIRTUAL, OBDAConstants.SEMANTIC);
+        tester.load(ontoname, OBDAConstants.CLASSIC, OBDAConstants.SEMANTIC);
         for (String id : tester.getQueryIds()) {
             log.debug("Testing query: {}", id);
             Set<String> exp = tester.getExpectedResult(id);

@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.DataQueryReasoner;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.MappingController;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +175,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 	}
 
 	public void classify() throws OWLReasonerException {
-
+		
 		getProgressMonitor().setIndeterminate(true);
 		getProgressMonitor().setMessage("Classifying...");
 		getProgressMonitor().setStarted();
@@ -184,6 +186,30 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		if (preferences == null) {
 			throw new NullPointerException("ReformulationPlatformPreferences not set");
 		}
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		
+		/***
+		 * Duplicating the OBDA model to avoid strange behaivors
+		 */
+		OBDAModel obdaModel = fac.getOBDAModel();
+		for (DataSource source: this.obdaModel.getDatasourcesController().getAllSources()) {
+			obdaModel.getDatasourcesController().addDataSource(source);
+		}
+		Hashtable<URI, ArrayList<OBDAMappingAxiom>> temporalMappings = this.obdaModel.getMappingController().getMappings();
+		for (URI source: temporalMappings.keySet()) {
+			List<OBDAMappingAxiom> maps = temporalMappings.get(source);
+			for (OBDAMappingAxiom mapping: maps) {
+				try {
+					obdaModel.getMappingController().insertMapping(source, mapping);
+				} catch (DuplicateMappingException e) {
+					log.debug("Error cloning the OBDAModel", e.getMessage());
+					throw new OWLReasonerException(e) {
+					};
+				}
+			}
+		}
+			
+		
 
 		// String useMem = (String)
 		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
@@ -222,7 +248,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				String password = "";
 				Connection connection;
 
-				OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+				
 				DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
 				source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 				source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
@@ -244,6 +270,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 					pureIsa = DAGConstructor.filterPureISA(dag);
 					pureIsa.index();
 					// dag.index();
+					
+					getProgressMonitor().setMessage("Creating database...");
+					
 					ABoxSerializer.recreate_tables(connection);
 					ABoxSerializer.ABOX2DB(loadedOntologies, dag, pureIsa, connection);
 					ABoxSerializer.create_indexes(connection);
@@ -255,6 +284,9 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 				} else if (dbType.equals(OBDAConstants.DIRECT)) {
 					// perform direct import
+					
+					getProgressMonitor().setMessage("Creating database...");
+					
 					String[] types = { "TABLE" };
 
 					ResultSet set = connection.getMetaData().getTables(null, null, "%", types);
@@ -304,8 +336,11 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				}
 				eval_engine = new JDBCEngine(ds);
 			}
+			
+			getProgressMonitor().setMessage("Finishing classifcation...");
+			
 			Collection<Assertion> onto;
-			if (dbType.equals(OBDAConstants.SEMANTIC)) {
+			if (OBDAConstants.CLASSIC.equals(unfoldingMode) && dbType.equals(OBDAConstants.SEMANTIC)) {
 
 				// Reachability DAGs
 				SemanticReduction reducer = new SemanticReduction(dag, DAGConstructor.getSigma(this.translatedOntologyMerge));
@@ -326,8 +361,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 						+ ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
 			}
 
-			if (OBDAConstants.VIRTUAL.equals(unfoldingMode) || dbType.equals(OBDAConstants.SEMANTIC)) {
-				if (dbType.equals(OBDAConstants.SEMANTIC)) {
+			if (OBDAConstants.VIRTUAL.equals(unfoldingMode) || (OBDAConstants.CLASSIC.equals(unfoldingMode) && dbType.equals(OBDAConstants.SEMANTIC))) {
+				if (dbType.equals(OBDAConstants.SEMANTIC) && OBDAConstants.CLASSIC.equals(unfoldingMode) ) {
 					List<SemanticIndexMappingGenerator.MappingKey> simple_maps = SemanticIndexMappingGenerator.build(dag, pureIsa);
 					for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_maps)) {
 						log.debug(map.toString());
@@ -700,11 +735,12 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 
 	/* The following methods need revision */
 
+	@Override
 	public void setProgressMonitor(ProgressMonitor progressMonitor) {
-
-		// this.progressMonitor = progressMonitor;
+		 this.progressMonitor = progressMonitor;
 	}
 
+	
 	private ProgressMonitor getProgressMonitor() {
 		if (progressMonitor == null) {
 			progressMonitor = new NullProgressMonitor();
@@ -712,15 +748,15 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		return progressMonitor;
 	}
 
+	@Override
 	public void finishProgressMonitor() {
-
 		getProgressMonitor().setFinished();
 	}
 
+	@Override
 	public void startProgressMonitor(String msg) {
-		// getProgressMonitor().setMessage(msg);
-		// getProgressMonitor().setIndeterminate(true);
-		// getProgressMonitor().setStarted();
-
+		 getProgressMonitor().setMessage(msg);
+		 getProgressMonitor().setIndeterminate(true);
+		 getProgressMonitor().setStarted();
 	}
 }

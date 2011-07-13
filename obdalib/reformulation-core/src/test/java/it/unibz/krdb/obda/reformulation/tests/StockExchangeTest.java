@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.QueryResultSet;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
@@ -40,15 +41,19 @@ public class StockExchangeTest extends TestCase {
 		OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
 		
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.VIRTUAL);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.PROVIDED);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
 		
 		factory.setOBDAController(controller);
 		factory.setPreferenceHolder(p);
 		
 		OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
-		
+		reasoner.setPreferences(p);
 		reasoner.loadOntologies(manager.getOntologies());
 		reasoner.loadOBDAModel(controller);
-		reasoner.setPreferences(p);
+		
 		
 		// Loading a set of configurations for the reasoner and giving them to quonto
 //		Properties properties = new Properties();
