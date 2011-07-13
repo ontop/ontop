@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,6 +144,22 @@ public class DAGOperations {
         for (ArrayList<DAGNode> component : scc(dagnodes)) {
 
             DAGNode cyclehead = component.get(0);
+
+            //Leave an atomic node when removing equivalent nodes from isa-dag
+            if (component.size() > 1 &&
+                    cyclehead.getDescription() instanceof ExistentialConceptDescription) {
+
+                for (int i = 1; i < component.size(); i++) {
+                    if (component.get(i).getDescription() instanceof AtomicConceptDescription) {
+                        DAGNode tmp = component.get(i);
+                        component.set(i, cyclehead);
+                        component.set(0, tmp);
+                        cyclehead = tmp;
+                        break;
+                    }
+                }
+            }
+
 
             for (int i = 1; i < component.size(); i++) {
                 DAGNode equivnode = component.get(i);
