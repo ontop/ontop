@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
+import com.hp.hpl.jena.reasoner.rulesys.builtins.NotEqual;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -221,106 +222,82 @@ public class SemanticIndexMappingGenerator {
     public static List<OBDAMappingAxiom> compile(List<MappingKey> mappings) throws DuplicateMappingException {
 
         List<OBDAMappingAxiom> rv = new ArrayList<OBDAMappingAxiom>(128);
-        List<MappingKey> merged = new ArrayList<MappingKey>(128);
+        List<MappingKey> mergedElements = new ArrayList<MappingKey>(128);
         Collections.sort(mappings);
 
-        MappingKey cur = mappings.get(0);
-        int i = 0;
-        while (i < mappings.size()) {
+        List<List<MappingKey>> mergedGroup = new ArrayList<List<MappingKey>>();
+        List<MappingKey> firstGroup = new ArrayList<MappingKey>();
+        firstGroup.add(mappings.get(0));
+        mergedGroup.add(firstGroup);
 
-
-            SemanticIndexRange curRange = new SemanticIndexRange(cur.range);
-            MappingKey next = mappings.get(i);
-            while (cur.uri.equals(next.uri) &&
-                    cur.projection.equals(next.projection)) {
-
-                if (!mappings.get(i).uri.startsWith("ER.A-AUX")) {
-                    curRange.addRange(next.range);
-                }
-                ++i;
-
-                if (i < mappings.size()) {
-                    next = mappings.get(i);
-                } else {
-                    break;
-                }
+        for (MappingKey map : mappings) {
+            List<MappingKey> uriTabel = mergedGroup.get(mergedGroup.size() - 1);
+            MappingKey lastElem = uriTabel.get(uriTabel.size() - 1);
+            if (lastElem.uri.equals(map.uri) && lastElem.projection.equals(map.projection)) {
+                uriTabel.add(map);
+            } else {
+                List<MappingKey> group = new ArrayList<MappingKey>();
+                group.add(map);
+                mergedGroup.add(group);
             }
-            if (cur instanceof UnaryMappingKey) {
-                if (mergeUniions) {
-                    merged.add(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
-                } else {
-                    rv.add(makeUnaryMapp(cur.uri, genQuerySQL(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
+        }
+        for (List<MappingKey> group : mergedGroup) {
+            MappingKey cur = group.get(0);
+            SemanticIndexRange curRange = new SemanticIndexRange(cur.range);
+            for (MappingKey map : group) {
+                curRange.addRange(map.range);
+            }
+            if (mergeUniions) {
+                if (cur instanceof UnaryMappingKey) {
+                    mergedElements.add(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
+                } else if (cur instanceof BinaryMappingKey) {
+                    mergedElements.add(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
                 }
-            } else if (cur instanceof BinaryMappingKey) {
-                if (mergeUniions) {
-                    merged.add(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
-                } else {
+            } else {
+                if (cur instanceof UnaryMappingKey) {
+                    rv.add(makeUnaryMapp(cur.uri, genQuerySQL(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
+                } else if (cur instanceof BinaryMappingKey) {
                     rv.add(makeBinaryMapp(cur.uri, genQuerySQL(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
                 }
             }
-            cur = next;
-            ++i;
         }
-        if (cur instanceof UnaryMappingKey) {
-            if (mergeUniions) {
-                merged.add(new UnaryMappingKey(cur.range, cur.projection, cur.table, cur.uri));
-            } else {
-                rv.add(makeUnaryMapp(cur.uri, genQuerySQL(new UnaryMappingKey(cur.range, cur.projection, cur.table, cur.uri))));
-            }
-        } else if (cur instanceof BinaryMappingKey) {
-            if (mergeUniions) {
-                merged.add(new BinaryMappingKey(cur.range, cur.projection, cur.table, cur.uri));
-            } else {
-                rv.add(makeBinaryMapp(cur.uri, genQuerySQL(new BinaryMappingKey(cur.range, cur.projection, cur.table, cur.uri))));
-            }
-        }
-        if (GraphGenerator.debugInfoDump) {
-            GraphGenerator.dumpMappings(mappings);
-        }
-
-
         if (mergeUniions) {
-            Collections.sort(merged);
-            int k = 1;
-            MappingKey curMap = merged.get(0);
-            StringBuffer sql = new StringBuffer();
-            while (k < merged.size()) {
-                sql = new StringBuffer();
-                sql.append(genQuerySQL(curMap));
 
-                if (curMap.uri.endsWith("hasAlumnus")) {
-                    int qwe = 123;
-                }
+            mergedGroup = new ArrayList<List<MappingKey>>();
+            firstGroup = new ArrayList<MappingKey>();
+            firstGroup.add(mergedElements.get(0));
+            mergedGroup.add(firstGroup);
 
-
-                MappingKey nextMap = merged.get(k);
-                while (curMap.uri.equals(nextMap.uri) &&
-                        ((curMap instanceof UnaryMappingKey && nextMap instanceof UnaryMappingKey) ||
-                                (curMap instanceof BinaryMappingKey && nextMap instanceof BinaryMappingKey &&
-                                        curMap.projection.equals(nextMap.projection))
-                        )) {
-                    sql.append(" UNION ALL ");
-                    sql.append(genQuerySQL(nextMap));
-                    ++k;
-                    if (k < merged.size()) {
-                        nextMap = merged.get(k);
-                    } else {
-                        break;
-                    }
+            for (int i = 1; i < mappings.size(); ++i) {
+                MappingKey map = mappings.get(i);
+                List<MappingKey> uriTabel = mergedGroup.get(mergedGroup.size() - 1);
+                MappingKey lastElem = uriTabel.get(uriTabel.size() - 1);
+                if (lastElem.uri.equals(map.uri) &&
+                        ((lastElem instanceof UnaryMappingKey && map instanceof UnaryMappingKey) ||
+                                (lastElem instanceof BinaryMappingKey && map instanceof BinaryMappingKey &&
+                                        lastElem.projection.equals(map.projection)))) {
+                    uriTabel.add(map);
+                } else {
+                    List<MappingKey> group = new ArrayList<MappingKey>();
+                    group.add(map);
+                    mergedGroup.add(group);
                 }
-                if (curMap instanceof UnaryMappingKey) {
-                    rv.add(makeUnaryMapp(curMap.uri, sql.toString()));
-                } else if (curMap instanceof BinaryMappingKey) {
-                    rv.add(makeBinaryMapp(curMap.uri, sql.toString()));
-                }
-                curMap = nextMap;
-                ++k;
             }
-            // last mapping
-            if (curMap instanceof UnaryMappingKey) {
-                rv.add(makeUnaryMapp(curMap.uri, genQuerySQL(curMap)));
-            } else if (curMap instanceof BinaryMappingKey) {
-                rv.add(makeBinaryMapp(curMap.uri, genQuerySQL(curMap)));
+            for (List<MappingKey> group : mergedGroup) {
+                MappingKey cur = group.get(0);
+                StringBuilder sql = new StringBuilder();
+                sql.append(genQuerySQL(cur));
+
+                for (int j = 1; j < group.size(); ++j) {
+                    MappingKey map = group.get(j);
+                    sql.append(" UNION ALL ");
+                    sql.append(genQuerySQL(map));
+                }
+                if (cur instanceof UnaryMappingKey) {
+                    rv.add(makeUnaryMapp(cur.uri, sql.toString()));
+                } else if (cur instanceof BinaryMappingKey) {
+                    rv.add(makeBinaryMapp(cur.uri, sql.toString()));
+                }
             }
         }
         return rv;
