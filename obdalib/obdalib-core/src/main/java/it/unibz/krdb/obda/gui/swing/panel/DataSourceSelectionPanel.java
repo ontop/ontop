@@ -119,17 +119,32 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
         "Insert the URI of the new data source.\n"
             + "The URI should be a unique idenfier for the data souce\n"
             + "not the connection url or the actual data source name.", null).trim();
+
     if (!name.isEmpty()) {
-      URI uri = URI.create(name);
-      if (!dscontroller.isExisted(uri)) {
-        dscontroller.addDataSource(name);
-      }
-      else {
-        JOptionPane.showMessageDialog(this,
-            "The data source ID already exists!", "Error",
-            JOptionPane.ERROR_MESSAGE);
+      URI uri = createUri(name);
+      if (uri != null) {
+        if (!dscontroller.isExisted(uri)) {
+          dscontroller.addDataSource(name);
+        }
+        else {
+          JOptionPane.showMessageDialog(this,
+              "The data source ID already exists!", "Error",
+              JOptionPane.ERROR_MESSAGE);
+        }
       }
     }
+  }
+
+  private URI createUri(String name) {
+    URI uri = null;
+    try {
+      uri = URI.create(name);
+    }
+    catch (IllegalArgumentException e) {
+      JOptionPane.showMessageDialog(this,
+          "Invalid name string!", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    return uri;
   }
 
 	/**
