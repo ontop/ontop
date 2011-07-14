@@ -40,7 +40,6 @@ public class MappingValidationDialog extends JDialog {
 	private static final long		serialVersionUID	= -3099215805478663834L;
 	private JDialog					myself				= null;
 	private DefaultStyledDocument	doc					= null;
-//	private JTree					parent				= null;
 	private int						index				= 0;
 
 	public Style					VALID				= null;
@@ -55,14 +54,10 @@ public class MappingValidationDialog extends JDialog {
 		super();
 		myself = this;
 		doc = new DefaultStyledDocument();
-//		parent = tree;
 		createStyles();
 		createContent();
 		this.setModal(true);
 		DialogUtils.centerDialogWRTParent(tree.getParent(), this);
-
-		// this.setVisible(true);
-
 	}
 
 	private void createStyles() {
@@ -93,7 +88,6 @@ public class MappingValidationDialog extends JDialog {
 	}
 
 	private void createContent() {
-
 		this.setTitle("Validate Mapping...");
 		this.setSize(new Dimension(500, 360));
 		Container panel = this.getContentPane();
@@ -112,63 +106,48 @@ public class MappingValidationDialog extends JDialog {
 		button.setText("OK");
 		button.setBounds(120, 290, 60, 25);
 		button.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent arg0) {
 				closed = true;
 				myself.dispose();
 			}
-
 		});
 		button.requestFocus();
 
 		panel.add(areaScrollPane, BorderLayout.CENTER);
 		panel.add(button, BorderLayout.SOUTH);
-		// this.setLocationRelativeTo(parent);
 		this.setResizable(true);
 	}
 
 	/***
-	 * Adds the text synchorniously. Do not call from the Event thread. Use a
+	 * Adds the text synchronously. Do not call from the Event thread. Use a
 	 * working thread.
-	 * 
+	 *
 	 * @param text
 	 * @param style
 	 * @throws InvocationTargetException
 	 * @throws InterruptedException
 	 */
 	public void addText(final String text, final Style style) {
-
-		// Runnable swingr = new Runnable() {
-		//
-		// public void run() {
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-
-				public void run() {
-					try {
-						doc.insertString(index, text, style);
-						index = index + text.length();
-						invalidate();
-						repaint();
-
-					} catch (BadLocationException e) {
-						e.printStackTrace();
-					}
-				}
-
-			});
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		// }
-
-		// };
-		// ?t.start();
-
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        public void run() {
+          try {
+            doc.insertString(index, text, style);
+            index = index + text.length();
+            invalidate();
+            repaint();
+          }
+          catch (BadLocationException e) {
+            e.printStackTrace();
+          }
+        }
+      });
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    catch (InvocationTargetException e) {
+      e.printStackTrace();
+    }
 	}
 }

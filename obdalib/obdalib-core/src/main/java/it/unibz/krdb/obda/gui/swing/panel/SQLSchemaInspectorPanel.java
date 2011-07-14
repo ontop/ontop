@@ -147,11 +147,13 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			Class[]		types	= new Class[] { String.class, String.class };
 			boolean[]	canEdit	= new boolean[] { false, false };
 
-			public Class getColumnClass(int columnIndex) {
+			@Override
+      public Class getColumnClass(int columnIndex) {
 				return types[columnIndex];
 			}
 
-			public boolean isCellEditable(int rowIndex, int columnIndex) {
+			@Override
+      public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return canEdit[columnIndex];
 			}
 		});
@@ -171,7 +173,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}, new String[] { "Field", "Type", "Null", "Key", "Default", "Extra" }) {
 			boolean[]	canEdit	= new boolean[] { false, false, false, false, false, false };
 
-			public boolean isCellEditable(int rowIndex, int columnIndex) {
+			@Override
+      public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return canEdit[columnIndex];
 			}
 		});
@@ -277,16 +280,21 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 					if (set != null) {
 						RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
 						tblRelations.setModel(model);
-						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
-								* TABLE_ROW_HEIGHT));
+						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount() * TABLE_ROW_HEIGHT));
 					}
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(SQLSchemaInspectorPanel.this, "Error while updating table.\n Please refer to the log file for more information.");
 					log.error("Error while updating table model.", e);
-				}			}
+				}
+			}
 		};
-		SwingUtilities.invokeLater(run);
 
+		if (selectedSource == null) {
+      JOptionPane.showMessageDialog(this, "Select a datasource first!", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+		else {
+		  SwingUtilities.invokeLater(run);
+		}
 	}// GEN-LAST:event_cmdRefreshActionPerformed
 
 	@Override
@@ -348,8 +356,9 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private ResultSet getResultSetForRelations() throws Exception {
 		if (selectedSource == null) {
-			JOptionPane.showMessageDialog(this, "Select a datasource first");
+			return null;
 		}
+
 		Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
 		if (con == null)
 			throw new SQLException("Couldnt establish a connectino for the datsource: {}" + selectedSource.getSourceID());
@@ -417,7 +426,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 		public void run() {
 			thread = new Thread() {
-				public void run() {
+				@Override
+        public void run() {
 					try {
 						Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
 						statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -477,7 +487,8 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 		public void run() {
 			thread = new Thread() {
-				public void run() {
+				@Override
+        public void run() {
 					try {
 						int rows = tblRelations.getRowCount();
 						result = new String[rows];
@@ -551,19 +562,15 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}
 
 		public void run() {
-			
-					try {
-						result = getResultSetForRelations();
-						latch.countDown();
-					} catch (Exception e) {
-						latch.countDown();
-						log.error("Error while retriving information from the data source.", e);
-						JOptionPane.showMessageDialog(null,
-								"Error while updating table.\n Please refer to the log file for more information.");
-					}
-			
-			
+			try {
+				result = getResultSetForRelations();
+				latch.countDown();
+			} catch (Exception e) {
+				latch.countDown();
+				log.error("Error while retriving information from the data source.", e);
+				JOptionPane.showMessageDialog(null,
+						"Error while updating table.\n Please refer to the log file for more information.");
+			}
 		}
 	}
-
 }
