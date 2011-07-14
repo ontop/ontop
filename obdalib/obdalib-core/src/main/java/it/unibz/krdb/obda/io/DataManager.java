@@ -234,7 +234,8 @@ public class DataManager {
 			doc = db.parse(obdaFile);
 			doc.getDocumentElement().normalize();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("OBDA info file could not be read.");
+			log.error(e.getMessage(),e);
 			return;
 		}
 

@@ -268,17 +268,20 @@ public class OBDAModelManager implements Disposable {
 					URI owlfile = source.getOWLOntologyManager().getPhysicalURIForOntology(activeonto);
 					URI obdafile = URI.create(owlfile.toString().substring(0, owlfile.toString().length() - 3) + "obda");
 					File file = new File(obdafile);
-					if (file.canWrite()) {
-						try {
+					try {
+						if(!file.exists()){
+							file.createNewFile();
+						}
+						if (file.canWrite()) {
 							DataManager ioManager = new DataManager(getActiveOBDAModel());
 							ioManager.saveOBDAData(obdafile, true, getActiveOBDAModel().getPrefixManager());
-						} catch (IOException e) {
-							log.error("ERROR saving OBDA data to file: {}", obdafile.toString());
-							log.error("ERROR message: {}", e.getMessage());
-							log.error(e.getMessage(), e);
+						} else {
+							log.warn("WARNING: The location of the .obda file for this ontology doesnt allow write operations");
 						}
-					} else {
-						log.warn("WARNING: The location of the .obda file for this ontology doesnt allow write operations");
+					} catch (IOException e) {
+						log.error("ERROR saving OBDA data to file: {}", obdafile.toString());
+						log.error("ERROR message: {}", e.getMessage());
+						log.error(e.getMessage(), e);
 					}
 					break;
 				case ONTOLOGY_VISIBILITY_CHANGED:
