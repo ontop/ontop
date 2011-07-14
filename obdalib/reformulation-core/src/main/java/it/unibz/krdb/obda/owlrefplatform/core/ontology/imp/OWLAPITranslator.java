@@ -42,6 +42,7 @@ import org.semanticweb.owl.model.OWLEquivalentDataPropertiesAxiom;
 import org.semanticweb.owl.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owl.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owl.model.OWLFunctionalObjectPropertyAxiom;
+import org.semanticweb.owl.model.OWLImportsDeclaration;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLInverseObjectPropertiesAxiom;
@@ -304,6 +305,10 @@ public class OWLAPITranslator {
 					/*
 					 * Annotations axioms are intentionally ignored by the
 					 * translator
+					 */
+				}else if (axiom instanceof OWLImportsDeclaration) {
+					/*
+					 * Imports 
 					 */
 				} else {
 					log.warn("WARNING ignoring axiom: {}", axiom.toString());
