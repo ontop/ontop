@@ -6,15 +6,25 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.0.3-SNAPSHOT</version>
+		<version>1.5.1-RC1</version>
 	</parent>
 
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>reformulation-core</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.5.1-RC1</version>
 	<name>reformulation-core</name>
 
 	<dependencies>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-core</artifactId>
+			<version>1.5.1-RC1</version>
+		</dependency>
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>obdalib-owlapi</artifactId>
+			<version>1.5.1-RC1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -32,16 +42,6 @@
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi</artifactId>
 			<version>2.2.0-r1317</version>
-		</dependency>
-		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-core</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
