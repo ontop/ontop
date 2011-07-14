@@ -625,7 +625,7 @@ public class CQCUtilities {
 
 		if (sort)
 		{
-			log.debug("Sorting...");
+//			log.debug("Sorting...");
 			Collections.sort(queries, lenghtComparator);
 		}
 
@@ -653,13 +653,12 @@ public class CQCUtilities {
 		}
 
 		int newsize = queries.size();
-		int queriesremoved = initialsize - newsize;
+//		int queriesremoved = initialsize - newsize;
 
 		double endtime = System.currentTimeMillis();
 		double time = (endtime - startime) / 1000;
 		
-		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved) ;
-		log.debug("Time for CQC optimization: {}s", time);		
+		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time) ;		
 	}
 
 }

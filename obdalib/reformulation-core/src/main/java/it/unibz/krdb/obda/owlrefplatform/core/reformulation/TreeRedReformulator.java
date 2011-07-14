@@ -72,11 +72,14 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	public Query rewrite(Query input) throws Exception {
 //		
+		
+		log.debug("Query reformulation started...");
+		
 //		Runtime.getRuntime().runFinalization ();
 //		Runtime.getRuntime().gc ();
 //        Thread.currentThread ().yield ();
 		
-		long starttime = System.currentTimeMillis();
+		double starttime = System.currentTimeMillis();
 
 		if (!(input instanceof DatalogProgram)) {
 			throw new Exception("Rewriting exception: The input must be a DatalogProgram instance");
@@ -84,18 +87,18 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
-		log.debug("Starting query rewrting. Received query: \n{}", prog);
+//		log.debug("Starting query rewrting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
 		/* Query preprocessing */
-		log.debug("Anonymizing the query");
+		
 
 		DatalogProgram anonymizedProgram = anonymizer.anonymize(prog);
 
-		log.debug("Removing redundant atoms by query containment");
+//		log.debug("Removing redundant atoms by query containment");
 		/* Simpliying the query by removing redundant atoms w.r.t. to CQC */
 		HashSet<CQIE> oldqueries = new HashSet<CQIE>(5000);
 		for (CQIE q : anonymizedProgram.getRules()) {
@@ -110,7 +113,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		 * Main loop of the rewriter
 		 */
 
-		log.debug("Starting maing rewriting loop");
+//		log.debug("Starting maing rewriting loop");
 		boolean loop = true;
 		while (loop) {
 
@@ -255,19 +258,21 @@ public class TreeRedReformulator implements QueryRewriter {
 		resultlist.addAll(result);
 		log.debug("Main loop ended. Queries produced: {}", resultlist.size());
 
-		log.debug("Removing auxiliary queries...");
+//		log.debug("Removing auxiliary queries...");
 		resultlist = cleanAuxiliaryQueries(resultlist);
-		log.debug("Done. New size: {}", resultlist.size());
+		log.debug("Removed auxiliary queries. New size: {}", resultlist.size());
 
 		/* One last pass of the syntactic containment checker */
 
-		log.debug("Removing trivially contained queries");
+//		log.debug("Removing trivially contained queries");
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
 
 		// if (resultlist.size() < 300) {
-		log.debug("Removing CQC contained queries");
+		
 		if (sigma != null) {
-			log.debug("Using {} ABox dependencies.", sigma.getAssertions().size());
+			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.getAssertions().size());
+		} else {
+			log.debug("Removing redundatnt queries by CQC.");
 		}
 		CQCUtilities.removeContainedQueriesSorted(resultlist, true, sigma);
 		// }
@@ -275,14 +280,15 @@ public class TreeRedReformulator implements QueryRewriter {
 		DatalogProgram resultprogram = fac.getDatalogProgram();
 		resultprogram.appendRule(resultlist);
 
-		long endtime = System.currentTimeMillis();
-
+		double endtime = System.currentTimeMillis();
+		double seconds = (endtime - starttime) / 1000;
+		
 		QueryUtils.copyQueryModifiers(input, resultprogram);
 
 		log.debug("Computed reformulation: \n{}", resultprogram);
-		log.debug("Final size of the reformulation: {}", resultlist.size());
-		double seconds = (endtime - starttime) / 1000;
-		log.info("Time elapsed for reformulation: {}s", seconds);
+		log.debug("Fina size of reformulation: {}, Time elapse: {}s", resultlist.size(), seconds);
+		
+//		log.info("Time elapsed for reformulation: {}s", seconds);
 
 		return resultprogram;
 	}
