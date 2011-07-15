@@ -1,9 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +9,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,6 +148,21 @@ public class DAGOperations {
 
                 for (int i = 1; i < component.size(); i++) {
                     if (component.get(i).getDescription() instanceof AtomicConceptDescription) {
+                        DAGNode tmp = component.get(i);
+                        component.set(i, cyclehead);
+                        component.set(0, tmp);
+                        cyclehead = tmp;
+                        break;
+                    }
+                }
+            }
+
+            if (component.size() > 0 &&
+                    cyclehead.getDescription() instanceof RoleDescription &&
+                    ((RoleDescription) cyclehead.getDescription()).isInverse()) {
+                for (int i = 1; i < component.size(); i++) {
+                    if (component.get(i).getDescription() instanceof RoleDescription &&
+                            !((RoleDescription) component.get(i).getDescription()).isInverse()) {
                         DAGNode tmp = component.get(i);
                         component.set(i, cyclehead);
                         component.set(0, tmp);
