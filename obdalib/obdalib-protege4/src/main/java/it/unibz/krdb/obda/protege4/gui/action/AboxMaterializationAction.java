@@ -37,6 +37,8 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 	private Logger				log					= LoggerFactory.getLogger(AboxMaterializationAction.class);
 
+	private MaterializeAction action = null;
+	
 	@Override
 	public void initialise() throws Exception {
 		// TODO Auto-generated method stub
@@ -72,18 +74,27 @@ public class AboxMaterializationAction extends ProtegeAction {
 			OWLOntologyManager owlOntManager = mm.getOWLOntologyManager();
 			OWLOntology owl_ont = mm.getActiveOntology();
 			OBDA2OWLDataMaterializer mat = new OBDA2OWLDataMaterializer();
-
-			OBDAProgessMonitor monitor = new OBDAProgessMonitor();
-			CountDownLatch latch = new CountDownLatch(1);
-			MaterializeAction action = new MaterializeAction(mat, obdaapi, owl_ont, owlOntManager, latch);
-			monitor.addProgressListener(action);
-			monitor.start();
-			action.run();
-			latch.await();
-			monitor.stop();
+			action = new MaterializeAction(mat, obdaapi, owl_ont, owlOntManager);
 			
-			
-
+			Thread th = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+						CountDownLatch latch = new CountDownLatch(1);
+						action.setCountdownLatch(latch);
+						monitor.addProgressListener(action);
+						monitor.start();
+						action.run();
+						latch.await();
+						monitor.stop();
+					} catch (InterruptedException e) {
+						log.error(e.getMessage(), e);
+						JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+					}
+				}
+			});
+			th.start();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			JOptionPane.showMessageDialog(cont, "ERROR: could not create individuals. See the log for more informaiton.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -103,16 +114,27 @@ public class AboxMaterializationAction extends ProtegeAction {
 		private OWLOntologyManager	man		= null;
 		OBDAModel				obdapi	= null;
 
-		public MaterializeAction(OBDA2OWLDataMaterializer mat, OBDAModel obdaapi, OWLOntology owl_ont, OWLOntologyManager man,
-				CountDownLatch latch) {
+		public MaterializeAction(OBDA2OWLDataMaterializer mat, OBDAModel obdaapi, OWLOntology owl_ont, OWLOntologyManager man) {
 			this.obdapi = obdaapi;
 			this.mat = mat;
 			this.owl_ont = owl_ont;
 			this.man = man;
-			this.latch = latch;
 		}
 
+		public void setCountdownLatch(CountDownLatch cdl){
+			latch = cdl;
+		}
+		
 		public void run() {
+			if(latch == null){
+				try {
+					throw new Exception("No CountDownLatch set");
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+					return;
+				}
+			}
 			thread = new Thread() {
 				public void run() {
 					try {
