@@ -123,7 +123,7 @@ public class OBDA2OWLDataMaterializer {
 							
 							OWLIndividual ind = factory.getOWLIndividual(URI.create(sb.toString()));
 							OWLDataProperty prop = factory.getOWLDataProperty(new URI(uri));
-							String value = res.getString(valueVar);
+							String value = res.getString(valueVar).trim();
 							OWLDataPropertyAssertionAxiom axiom = factory.getOWLDataPropertyAssertionAxiom(ind, prop,
 									factory.getOWLUntypedConstant(value));
 							// manager.addAxiom(currentOntology, axiom);
@@ -178,11 +178,11 @@ public class OBDA2OWLDataMaterializer {
 			}
 
 			if (qt instanceof Variable) {
-				String s = res.getString(((Variable) qt).getName());
+				String s = res.getString(((Variable) qt).getName()).trim();
 				aux.append(s);
 			} else if (qt instanceof ValueConstant) {
 
-				aux.append(((ValueConstant) qt).getValue());
+				aux.append(((ValueConstant) qt).getValue().trim());
 			} else {
 				throw new RuntimeException("Invalid term type in function symbol");
 			}
