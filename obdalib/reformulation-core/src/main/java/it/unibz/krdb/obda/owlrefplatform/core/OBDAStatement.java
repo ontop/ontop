@@ -277,17 +277,17 @@ public class OBDAStatement implements Statement {
 	 */
 	@Override
 	public String getUnfolding(String strquery) throws Exception {
-		return getUnfolding(strquery, false);
+		return getUnfolding(strquery, true);
 	}
 
 	/**
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getUnfolding(String strquery, boolean noreformulation) throws Exception {
+	public String getUnfolding(String strquery, boolean reformulate) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
 		Query unfolding = null;
-		if (!noreformulation) {
+		if (!reformulate) {
 			unfolding = unfoldingmechanism.unfold(program);
 		} else {
 			Query rewriting = rewriter.rewrite(program);
