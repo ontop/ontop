@@ -21,7 +21,6 @@ import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
-import it.unibz.krdb.obda.model.impl.DataSourceImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
@@ -31,9 +30,12 @@ import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
 import it.unibz.krdb.obda.utils.XMLUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -123,40 +125,43 @@ public class DataManager {
 	public void saveOBDAData(URI obdaFileURI, boolean useTempFile, PrefixManager prefixManager) throws IOException
 			 {
 		File tempFile = null;
+		URI tempFileURI = null;
+		
 		File obdaFile = new File(obdaFileURI);
 
 		if (useTempFile) {
-			tempFile = File.createTempFile(System.currentTimeMillis()+"OBDA", null);
-			if (tempFile.exists()) {
-				boolean result = tempFile.delete();
-				if (!result) {
-					throw new IOException("Error deleting temporary file: " + tempFile.toString());
-				}
-			}
+			tempFile = File.createTempFile("obda-", null);
+			tempFileURI = tempFile.toURI();
 		}
 
 		if (useTempFile) {
-			saveOBDAData(tempFile.toURI(), prefixManager);
+			saveOBDAData(tempFileURI, prefixManager);
+			copyFile(tempFile, obdaFile);
 		} else {
 			saveOBDAData(obdaFileURI, prefixManager);
-			return;
+		}
+	}
+	
+	private void copyFile(File sourceFile, File destFile) throws IOException {
+		
+		if(!destFile.exists()) {
+			destFile.createNewFile();
 		}
 
-		if (useTempFile) {
-			if (obdaFile.exists()) {
-				boolean result = obdaFile.delete();
-				if (!result) {
-					throw new IOException("Error deleting default file: " + obdaFileURI.toString());
-				}
+		FileChannel source = null;
+		FileChannel destination = null;
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
+			destination.transferFrom(source, 0, source.size());
+		}
+		finally {
+			if(source != null) {
+				source.close();
 			}
-			tempFile.renameTo(obdaFile);
-//			tempFile.
-//			try {
-//				FileUtils.copy(tempFile.getAbsolutePath(), new File(obdaFileURI).getAbsolutePath());
-//			} catch (IOException e) {
-//				log.error("Error while copying the temporary file: {}", e.getMessage());
-//			}
-//			tempFile.delete();
+			if(destination != null) {
+			   destination.close();
+			}
 		}
 	}
 
