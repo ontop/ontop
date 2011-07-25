@@ -42,6 +42,8 @@ import org.semanticweb.owl.model.OWLOntologyManager;
  */
 public class OBDA2OWLDataMaterializer {
 
+	private boolean isCanceled = false;
+	
 	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology) throws Exception {
 		List<DataSource> sources = controller.getDatasourcesController().getAllSources();
 		Iterator<DataSource> sit = sources.iterator();
@@ -151,11 +153,20 @@ public class OBDA2OWLDataMaterializer {
 				res.close();
 			}
 		}
-
-		manager.addAxioms(currentOntology, individuals);
+		if(!isCanceled){
+			manager.addAxioms(currentOntology, individuals);
+		}
 
 	}
 
+	public void cancelAction(){
+		isCanceled = true;
+	}
+	
+	public boolean isCanceled(){
+		return isCanceled;
+	}
+	
 	/**
 	 * Transforms a functional term into an Object URI by grounding any variable
 	 * that appears in the term with the value of the column in the current row

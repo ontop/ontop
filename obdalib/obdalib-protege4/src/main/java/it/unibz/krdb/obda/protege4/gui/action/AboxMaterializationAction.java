@@ -84,7 +84,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						CountDownLatch latch = new CountDownLatch(1);
 						action.setCountdownLatch(latch);
 						monitor.addProgressListener(action);
-						monitor.start();
+						monitor.start("Materializing Abox ....");
 						action.run();
 						latch.await();
 						monitor.stop();
@@ -141,11 +141,12 @@ public class AboxMaterializationAction extends ProtegeAction {
 						mat.materializeAbox(obdapi, man, owl_ont);						
 						latch.countDown();
 						Container cont = AboxMaterializationAction.this.getWorkspace().getRootPane().getParent();
-
-						JOptionPane.showMessageDialog(cont, "Task completed", "Done", JOptionPane.INFORMATION_MESSAGE);
+						if(!mat.isCanceled()){
+							JOptionPane.showMessageDialog(cont, "Task completed", "Done", JOptionPane.INFORMATION_MESSAGE);
+						}
 					} catch (Exception e) {
 						latch.countDown();
-						JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+						log.error("Materialization of Abox failed", e);
 					}
 				}
 			};
@@ -155,6 +156,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		@Override
 		public void actionCanceled() {
 			if (thread != null) {
+				mat.cancelAction();
 				latch.countDown();
 				thread.interrupt();
 			}

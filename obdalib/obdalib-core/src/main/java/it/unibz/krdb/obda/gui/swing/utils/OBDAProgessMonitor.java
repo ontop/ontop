@@ -13,19 +13,26 @@ public class OBDAProgessMonitor {
 	private boolean							canceled	= false;
 	
 	private boolean finished = false;
+	
+	private String text = null;
 
 	public OBDAProgessMonitor() {
 		listeners = new Vector<OBDAProgressListener>();
 	}
-
-	public void start() {
+	
+	public void start(){
+		start(null);
+	}
+	
+	public void start(String msg) {
+		text = msg;
 		Runnable action = new Runnable() {
 
 			@Override
 			public void run() {
 				if (finished)
 					return;
-				final ProgressPanel panel = new ProgressPanel(OBDAProgessMonitor.this);
+				final ProgressPanel panel = new ProgressPanel(OBDAProgessMonitor.this, text);
 				
 				parent.setModal(true);
 				parent.setContentPane(panel);
