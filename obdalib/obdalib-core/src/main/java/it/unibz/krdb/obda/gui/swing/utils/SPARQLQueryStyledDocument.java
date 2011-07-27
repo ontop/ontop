@@ -124,7 +124,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					try {
-					removeDocumentListener(myself);
+						removeDocumentListener(myself);
 						SimpleAttributeSet black = new SimpleAttributeSet();
 						black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
 //						if(!pref.getUseDefault()){
@@ -132,6 +132,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 //							black.addAttribute(StyleConstants.CharacterConstants.Bold, pref.isBold(MappingManagerPreferences.OBDAPREFS_ISBOLD));
 //							black.addAttribute(StyleConstants.FontConstants.FontSize, pref.getFontSize(MappingManagerPreferences.OBDAPREFS_FONTSIZE));						setCharacterAttributes(0, getLength(), black, true);
 //						}	
+						setCharacterAttributes(0, getLength(), black, true);
 						addDocumentListener(myself);
 
 					} catch (Exception e) {

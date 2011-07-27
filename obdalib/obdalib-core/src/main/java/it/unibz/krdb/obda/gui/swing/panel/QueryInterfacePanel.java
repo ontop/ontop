@@ -21,6 +21,7 @@ import it.unibz.krdb.obda.queryanswering.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.net.URI;
 
@@ -52,7 +53,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	 */
 	private static final long									serialVersionUID			= -5902798157183352944L;
 	private ResultViewTablePanel								viewpanel;
-//	private SPARQLQueryStyledDocument							_styled_doc					= null;
+	private SPARQLQueryStyledDocument							_styled_doc					= null;
 	private it.unibz.krdb.obda.gui.swing.OBDADataQueryAction	executeUCQAction			= null;
 	private OBDADataQueryAction									executeEQLAction			= null;
 	private OBDADataQueryAction									retrieveUCQExpansionAction	= null;
@@ -79,15 +80,15 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
         
 
 
-		Font font = new Font("Dialog", Font.PLAIN, 14);
-		queryTextPane.setFont(font);
-//		StyleContext style = new StyleContext();
-//		_styled_doc = new SPARQLQueryStyledDocument(style, prefs);
+//		Font font = new Font("Dialog", Font.PLAIN, 14);
+//		queryTextPane.setFont(font);
+		StyleContext style = new StyleContext();
+		_styled_doc = new SPARQLQueryStyledDocument(style, prefs);
 
 		
-//		queryTextPane.setDocument(_styled_doc);
-//		queryTextPane.setBackground(Color.WHITE);
-//		queryTextPane.setCaretColor(Color.BLACK);
+		queryTextPane.setDocument(_styled_doc);
+		queryTextPane.setBackground(Color.WHITE);
+		queryTextPane.setCaretColor(Color.BLACK);
 	}
 
 	public void setOBDAModel(OBDAModel api) {
@@ -102,11 +103,10 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		this.viewpanel = viewpanel;
 	}
 
-	// public void setGetSPARQLDefaultPrefixAction(
-	// GetDefaultSPARQLPrefixAction action) {
-	// prefixAction = action;
-	// _styled_doc.setGetDefaultSPARQLPrefixAction(action);
-	// }
+//	 public void setGetSPARQLDefaultPrefixAction(GetDefaultSPARQLPrefixAction action) {
+//		 prefixAction = action;
+//		 _styled_doc.setGetDefaultSPARQLPrefixAction(action);
+//	 }
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
