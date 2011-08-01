@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class JDBCUtility
 {
   private enum Driver {
-    PGSQL, MYSQL, H2, DB2, ORACLE
+    PGSQL, MYSQL, H2, DB2, ORACLE, TEIID
   }
 
   private Driver driver = null;
@@ -50,6 +50,9 @@ public class JDBCUtility
     }
     else if (className.equals("oracle.jdbc.driver.OracleDriver")) {
       driver = Driver.ORACLE;
+    }
+    else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
+      driver = Driver.TEIID;
     }
     else {
       log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
@@ -85,6 +88,7 @@ public class JDBCUtility
       case PGSQL:
       case ORACLE:
       case H2:
+      case TEIID:
         sql = String.format("('%s'", uribase);
         for (int i = 0; i < list.size(); i++) {
           sql += String.format("|| '-' || %s", list.get(i));
@@ -102,6 +106,7 @@ public class JDBCUtility
       case MYSQL:
       case PGSQL:
       case H2:
+      case TEIID:
         sql = String.format("LIMIT %s", limit);
         break;
       case DB2:
