@@ -192,8 +192,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		 * Duplicating the OBDA model to avoid strange behaivors
 		 */
 		OBDAModel obdaModel = fac.getOBDAModel();
-		for (DataSource source: this.obdaModel.getDatasourcesController().getAllSources()) {
-			obdaModel.getDatasourcesController().addDataSource(source);
+		for (DataSource source: this.obdaModel.getAllSources()) {
+			obdaModel.addDataSource(source);
 		}
 		Hashtable<URI, ArrayList<OBDAMappingAxiom>> temporalMappings = this.obdaModel.getMappingController().getMappings();
 		for (URI source: temporalMappings.keySet()) {
@@ -257,8 +257,8 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 				source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 				source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-				// apic.getDatasourcesController().addDataSource(source);
-				// apic.getDatasourcesController().setCurrentDataSource(source.getSourceID());
+				// apic.addDataSource(source);
+				// apic.setCurrentDataSource(source.getSourceID());
 				ds = source;
 				connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 
@@ -326,7 +326,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			} else {
 				log.debug("Using a persistent database");
 
-				Collection<DataSource> sources = obdaModel.getDatasourcesController().getAllSources();
+				Collection<DataSource> sources = obdaModel.getAllSources();
 				if (sources == null || sources.size() == 0) {
 					throw new Exception("No datasource has been defined");
 				} else if (sources.size() > 1) {

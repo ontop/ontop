@@ -9,7 +9,6 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.PredicateAtom;
 
 import java.util.List;
 

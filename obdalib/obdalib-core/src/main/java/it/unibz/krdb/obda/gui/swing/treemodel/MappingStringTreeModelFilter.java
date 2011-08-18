@@ -5,7 +5,6 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.SQLQuery;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
 import java.util.List;

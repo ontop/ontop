@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.model.impl;
 
 
 
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 
 import java.net.URI;

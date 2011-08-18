@@ -33,14 +33,14 @@ public class MappingController {
 
 	private final MappingTreeModel								treemodel				= null;
 
-	private DatasourcesController							dscontroller			= null;
+//	private DatasourcesController							dscontroller			= null;
 
 	private MappingXMLCodec									codec = null;
 
 	Logger													log						= LoggerFactory.getLogger(MappingController.class);
 
-	public MappingController(DatasourcesController dscontroller, OBDAModel apic) {
-		this.dscontroller = dscontroller;
+	public MappingController(OBDAModel apic) {
+//		this.dscontroller = dscontroller;
 		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
 		listeners = new ArrayList<MappingControllerListener>();
 		codec = new MappingXMLCodec(apic);

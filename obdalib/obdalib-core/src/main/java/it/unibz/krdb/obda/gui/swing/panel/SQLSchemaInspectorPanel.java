@@ -20,7 +20,7 @@ import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -75,12 +75,12 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private DataSource				selectedSource;
 
-	private DatasourcesController	dscontroller		= null;
+	private OBDAModel	dscontroller		= null;
 
 	Logger							log					= LoggerFactory.getLogger(SQLSchemaInspectorPanel.class);
 
 	/** Creates new form SQLSchemaInspectorPanel */
-	public SQLSchemaInspectorPanel(DatasourcesController dsController) {
+	public SQLSchemaInspectorPanel(OBDAModel dsController) {
 		this.dscontroller = dsController;
 
 		initComponents();
@@ -93,7 +93,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		tblRelations.getSelectionModel().addListSelectionListener(new RowListener());
 	}
 	
-	public void setDatasourceController(DatasourcesController dsController) {
+	public void setDatasourceController(OBDAModel dsController) {
 		this.dscontroller = dsController;
 	}
 

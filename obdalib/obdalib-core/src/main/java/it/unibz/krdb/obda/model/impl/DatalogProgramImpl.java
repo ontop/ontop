@@ -1,16 +1,15 @@
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.QueryModifiers;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 public class DatalogProgramImpl implements DatalogProgram {
 

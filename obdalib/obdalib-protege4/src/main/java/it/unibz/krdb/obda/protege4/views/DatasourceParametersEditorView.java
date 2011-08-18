@@ -32,7 +32,7 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent imp
 		apic = getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		panel = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel().getDatasourcesController());
+		panel = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel());
 
 		add(panel, BorderLayout.CENTER);
 		log.debug("Datasource parameter view Component initialized");
@@ -41,7 +41,7 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent imp
 
 	@Override
 	public void activeOntologyChanged() {
-		panel.setDatasourcesController(apic.getActiveOBDAModel().getDatasourcesController());
+		panel.setDatasourcesController(apic.getActiveOBDAModel());
 
 	}
 

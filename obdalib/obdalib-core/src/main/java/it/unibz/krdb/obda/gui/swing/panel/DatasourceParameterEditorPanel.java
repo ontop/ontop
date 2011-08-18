@@ -15,7 +15,7 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
 import javax.swing.JOptionPane;
@@ -34,16 +34,16 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	 */
 	private static final long		serialVersionUID	= 1L;
 
-	private DatasourcesController	dscontroller		= null;
+	private OBDAModel	dscontroller		= null;
 
 	/** Creates new form DatasourceParameterEditorPanel */
-	public DatasourceParameterEditorPanel(DatasourcesController ds) {
+	public DatasourceParameterEditorPanel(OBDAModel ds) {
 		this.dscontroller = ds;
 		initComponents();
 		init();
 	}
 
-	public void setDatasourcesController(DatasourcesController dscontroller) {
+	public void setDatasourcesController(OBDAModel dscontroller) {
 		this.dscontroller = dscontroller;
 		fieldDBDriver.setText("");
 		fieldDBPassword.setText("");

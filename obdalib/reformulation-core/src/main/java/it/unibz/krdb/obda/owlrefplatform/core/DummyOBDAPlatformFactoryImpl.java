@@ -136,7 +136,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			}
 
 			// Mappings
-			DataSource ds = apic.getDatasourcesController().getAllSources().get(0);
+			DataSource ds = apic.getAllSources().get(0);
 			Connection connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 
 			EvaluationEngine eval_engine = eval_engine = new JDBCEngine(connection);

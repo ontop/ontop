@@ -15,7 +15,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.obda.gui.swing.IconLoader;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -35,10 +35,10 @@ public class DatasourceTreeCellRenderer extends DefaultTreeCellRenderer {
 		Icon root_node_icon = null;
 		final String PATH_RDBMS_ICON = "images/rdbms.png";
 		
-		DatasourcesController dsc = null;
+		OBDAModel dsc = null;
 		
 		
-    public DatasourceTreeCellRenderer(DatasourcesController dsc) {
+    public DatasourceTreeCellRenderer(OBDAModel dsc) {
     	this.dsc = dsc;
     	dbms_source_icon = IconLoader.getImageIcon(PATH_RDBMS_ICON);
     }

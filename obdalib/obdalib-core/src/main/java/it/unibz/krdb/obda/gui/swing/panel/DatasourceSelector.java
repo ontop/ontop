@@ -24,8 +24,8 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesController;
-import it.unibz.krdb.obda.model.DatasourcesControllerListener;
+import it.unibz.krdb.obda.model.OBDAModelListener;
+import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -44,7 +44,7 @@ import javax.swing.ListCellRenderer;
  * 
  * @author Josef Hardi <josef.hardi@gmail.com>
  */
-public class DatasourceSelector extends javax.swing.JPanel implements DatasourcesControllerListener {
+public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelListener {
 
 	/**
 	 * 
@@ -58,10 +58,10 @@ public class DatasourceSelector extends javax.swing.JPanel implements Datasource
 
 	private Vector<DatasourceSelectorListener>	listeners;
 
-	DatasourcesController						dsController		= null;
+	OBDAModel						dsController		= null;
 
 	/** Creates new form DatasourceListSelector */
-	public DatasourceSelector(DatasourcesController dsController) {
+	public DatasourceSelector(OBDAModel dsController) {
 		this.dsController = dsController;
 		this.setDatasourceController(dsController);
 
@@ -70,7 +70,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements Datasource
 
 	}
 
-	public void setDatasourceController(DatasourcesController dsController) {
+	public void setDatasourceController(OBDAModel dsController) {
 		this.dsController.removeDatasourceControllerListener(this);
 		this.dsController = dsController;
 		this.dsController.addDatasourceControllerListener(this);

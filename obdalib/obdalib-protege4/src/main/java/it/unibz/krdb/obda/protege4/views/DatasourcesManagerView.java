@@ -33,13 +33,13 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 		setLayout(new BorderLayout());
 
-		selectionpanel = new DataSourceSelectionPanel(apic.getActiveOBDAModel().getDatasourcesController());
+		selectionpanel = new DataSourceSelectionPanel(apic.getActiveOBDAModel());
 		add(selectionpanel, BorderLayout.NORTH);
 
-		editor = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel().getDatasourcesController());
+		editor = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel());
 		add(editor, BorderLayout.CENTER);
 		selectionpanel.getDataSourceSelector().addDatasourceListListener(editor);
-//		apic.getActiveOBDAModel().getDatasourcesController().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
+//		apic.getActiveOBDAModel().addDatasourceControllerListener(selectionpanel.getDataSourceSelector());
 
 		// apic.addListener(this);
 
@@ -49,8 +49,8 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	@Override
 	public void activeOntologyChanged() {
-		editor.setDatasourcesController(apic.getActiveOBDAModel().getDatasourcesController());
-		selectionpanel.setDatasourcesController(apic.getActiveOBDAModel().getDatasourcesController());
+		editor.setDatasourcesController(apic.getActiveOBDAModel());
+		selectionpanel.setDatasourcesController(apic.getActiveOBDAModel());
 		
 	}
 

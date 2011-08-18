@@ -45,7 +45,7 @@ public class SelectDB extends javax.swing.JDialog {
 		// this.ontologies = ontologies;
 		initComponents();
 		addListener();
-		// apic.getDatasourcesController().addDatasourceControllerListener(this);
+		// apic.addDatasourceControllerListener(this);
 		addExistingDataSourcesToCombo();
 	}
 
@@ -61,7 +61,7 @@ public class SelectDB extends javax.swing.JDialog {
 
 	private void addExistingDataSourcesToCombo() {
 
-		Iterator<DataSource> it = apic.getDatasourcesController().getAllSources().iterator();
+		Iterator<DataSource> it = apic.getAllSources().iterator();
 		while (it.hasNext()) {
 			jComboBox1.addItem(it.next().getSourceID());
 		}
@@ -257,7 +257,7 @@ public class SelectDB extends javax.swing.JDialog {
 	// }
 
 	public void dispose() {
-		// apic.getDatasourcesController().removeDatasourceControllerListener(this);
+		// apic.removeDatasourceControllerListener(this);
 		super.dispose();
 	}
 }

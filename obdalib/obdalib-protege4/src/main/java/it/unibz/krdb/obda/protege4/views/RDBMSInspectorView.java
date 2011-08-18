@@ -2,8 +2,7 @@ package it.unibz.krdb.obda.protege4.views;
 
 import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
 import it.unibz.krdb.obda.gui.swing.panel.SQLSchemaInspectorPanel;
-import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
@@ -13,7 +12,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -47,7 +45,7 @@ public class RDBMSInspectorView extends AbstractOWLViewComponent implements OBDA
 		apic = getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		DatasourcesController dsController = apic.getActiveOBDAModel().getDatasourcesController();
+		OBDAModel dsController = apic.getActiveOBDAModel();
 
 		inspectorPanel = new SQLSchemaInspectorPanel(dsController);
 		datasourceSelector = new DatasourceSelector(dsController);
@@ -94,7 +92,7 @@ public class RDBMSInspectorView extends AbstractOWLViewComponent implements OBDA
 
 	@Override
 	public void activeOntologyChanged() {
-		inspectorPanel.setDatasourceController(apic.getActiveOBDAModel().getDatasourcesController());
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel().getDatasourcesController());
+		inspectorPanel.setDatasourceController(apic.getActiveOBDAModel());
+		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel());
 	}
 }

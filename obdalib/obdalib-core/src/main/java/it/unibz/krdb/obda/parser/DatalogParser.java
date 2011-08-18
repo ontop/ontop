@@ -2,6 +2,19 @@
 
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,27 +31,6 @@ import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.PredicateAtom;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 public class DatalogParser extends Parser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "PREFIX", "LESS", "GREATER", "BASE", "INV_IMPLIES", "IMPLIES", "COMMA", "CARET", "LPAREN", "RPAREN", "DOLLAR", "QUESTION", "ASTERISK", "STRING_URI", "ID_PLAIN", "STRING_PREFIX", "COLON", "STRING_LITERAL", "STRING_LITERAL2", "REFERENCE", "SEMI", "DOT", "LSQ_BRACKET", "RSQ_BRACKET", "QUOTE_DOUBLE", "QUOTE_SINGLE", "APOSTROPHE", "UNDERSCORE", "DASH", "AMPERSAND", "AT", "EXCLAMATION", "HASH", "PERCENT", "PLUS", "EQUALS", "SLASH", "DOUBLE_SLASH", "BACKSLASH", "TILDE", "ALPHA", "DIGIT", "ALPHANUM", "ID_START", "ID_CORE", "SCHEMA", "URI_PATH", "ID", "WS"

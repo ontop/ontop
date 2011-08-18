@@ -13,8 +13,7 @@
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesControllerListener;
-import it.unibz.krdb.obda.model.impl.DataSourceImpl;
+import it.unibz.krdb.obda.model.OBDAModelListener;
 
 import java.net.URI;
 import java.util.Enumeration;
@@ -23,7 +22,7 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-public class DatasourceTreeModel extends DefaultTreeModel implements DatasourcesControllerListener {
+public class DatasourceTreeModel extends DefaultTreeModel implements OBDAModelListener {
 
 	private static final long	serialVersionUID	= 6283495101253307672L;
 

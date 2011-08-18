@@ -41,7 +41,7 @@ public class LUBMTester {
         // Prepare reasoner
         tboxHelper = new TBoxLoader(dataDirectory);
         DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
-        apic.getDatasourcesController().addDataSource(ds);
+        apic.addDataSource(ds);
 
         DataQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
 

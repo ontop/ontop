@@ -46,7 +46,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
             ioManager.loadOBDADataFromURI(new File(obdafileBase).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
             DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
-            obdamodel.getDatasourcesController().addDataSource(ds);
+            obdamodel.addDataSource(ds);
 
             OBDAOWLReformulationPlatformFactory factory = new DummyOBDAPlatformFactoryImpl();
 

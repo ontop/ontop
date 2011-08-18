@@ -5,7 +5,8 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -26,11 +27,11 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 	 *
 	 */
 	private static final long		serialVersionUID	= -8124338850871507250L;
-	private DatasourcesController	dscontroller		= null;
+	private OBDAModel	dscontroller		= null;
 	private DatasourceSelector		selector			= null;
 
 	/** Creates new form DataSourceSelectionPanel */
-	public DataSourceSelectionPanel(DatasourcesController dscontroller) {
+	public DataSourceSelectionPanel(OBDAModel dscontroller) {
 
 		this.dscontroller = dscontroller;
 		initComponents();
@@ -44,7 +45,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 	 *
 	 * @param dsc
 	 */
-	public void setDatasourcesController(DatasourcesController dsc) {
+	public void setDatasourcesController(OBDAModel dsc) {
 		/* removing listeners and references to the old */
 		dscontroller.removeDatasourceControllerListener(selector);
 		dscontroller = dsc;
@@ -123,7 +124,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
     if (!name.isEmpty()) {
       URI uri = createUri(name);
       if (uri != null) {
-        if (!dscontroller.isExisted(uri)) {
+        if (!dscontroller.containsDatasource(uri)) {
           dscontroller.addDataSource(name);
         }
         else {

@@ -22,7 +22,6 @@ import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.net.URI;
 
 import javax.swing.JDialog;

@@ -2,20 +2,25 @@
 
 package it.unibz.krdb.obda.gui.swing.utils;
 
-import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingIDTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingStringTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadVariableTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingSQLStringTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingFunctorTreeModelFilter;
+import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadVariableTreeModelFilter;
+import it.unibz.krdb.obda.gui.swing.treemodel.MappingIDTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingPredicateTreeModelFilter;
+import it.unibz.krdb.obda.gui.swing.treemodel.MappingSQLStringTreeModelFilter;
+import it.unibz.krdb.obda.gui.swing.treemodel.MappingStringTreeModelFilter;
+import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
 import java.util.ArrayList;
+
+import org.antlr.runtime.BitSet;
+import org.antlr.runtime.NoViableAltException;
+import org.antlr.runtime.Parser;
+import org.antlr.runtime.ParserRuleReturnScope;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.Token;
+import org.antlr.runtime.TokenStream;
 
 public class MappingFilterParser extends Parser {
     public static final String[] tokenNames = new String[] {

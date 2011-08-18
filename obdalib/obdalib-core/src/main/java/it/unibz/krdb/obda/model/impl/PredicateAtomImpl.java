@@ -6,7 +6,6 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
-import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 

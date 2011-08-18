@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.DatasourcesControllerListener;
+import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.MappingControllerListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -131,7 +131,7 @@ public class OBDAModelManager implements Disposable {
 		OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 		activeOBDAModel = obdafac.getOBDAModel();
 
-		activeOBDAModel.getDatasourcesController().addDatasourceControllerListener(dlistener);
+		activeOBDAModel.addDatasourceControllerListener(dlistener);
 		activeOBDAModel.getMappingController().addMappingControllerListener(mlistener);
 		activeOBDAModel.getQueryController().addListener(qlistener);
 
@@ -372,7 +372,7 @@ public class OBDAModelManager implements Disposable {
 	 * the OWL ontology model when OBDA model changes.
 	 */
 
-	private class ProtegeDatasourcesControllerListener implements DatasourcesControllerListener {
+	private class ProtegeDatasourcesControllerListener implements OBDAModelListener {
 		public void datasourceUpdated(String oldname, DataSource currendata) {
 			triggerOntologyChanged();
 		}

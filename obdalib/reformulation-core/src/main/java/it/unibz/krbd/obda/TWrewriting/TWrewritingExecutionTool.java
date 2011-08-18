@@ -69,7 +69,7 @@ public class TWrewritingExecutionTool {
 
             connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
             
-            obdamodel.getDatasourcesController().addDataSource(source);
+            obdamodel.addDataSource(source);
             
             
 			

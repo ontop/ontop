@@ -206,7 +206,7 @@ public class DataManager {
 		dumpMappingsToXML(mappings);
 
 		// Create the Data Source element
-		List<DataSource> datasources = apic.getDatasourcesController().getAllSources();
+		List<DataSource> datasources = apic.getAllSources();
 		dumpDatasourcesToXML(datasources);
 
 		// Create the Query element
@@ -310,7 +310,7 @@ public class DataManager {
 					System.err.println("WARNING: Loading a datasource using the old "
 							+ "deprecated method. Update your .obda file by saving " + "it again.");
 					DataSource source = dsCodec.decode(node);
-					apic.getDatasourcesController().addDataSource(source);
+					apic.addDataSource(source);
 				}
 				String newDatasourceTag = dsCodec.getElementTag();
 				if ((major > 0) && (node.getNodeName().equals(newDatasourceTag))) {
@@ -320,7 +320,7 @@ public class DataManager {
 					if (uri != null) {
 						source.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uri.toString());
 					}
-					apic.getDatasourcesController().addDataSource(source);
+					apic.addDataSource(source);
 				}
 				if (node.getNodeName().equals("SavedQueries")) {
 					// Found queries block

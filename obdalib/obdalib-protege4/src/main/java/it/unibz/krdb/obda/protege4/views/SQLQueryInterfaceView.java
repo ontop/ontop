@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.protege4.views;
 
 import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
 import it.unibz.krdb.obda.gui.swing.panel.SQLQueryPanel;
-import it.unibz.krdb.obda.model.DatasourcesController;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
@@ -42,7 +42,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		apic = getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		DatasourcesController dsController = apic.getActiveOBDAModel().getDatasourcesController();
+		OBDAModel dsController = apic.getActiveOBDAModel();
 
 		// Vector<DataSource> vecDatasource =
 		// new Vector<DataSource>(dsController.getAllSources());
@@ -87,7 +87,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 
 	@Override
 	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel().getDatasourcesController());
+		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel());
 
 	}
 }

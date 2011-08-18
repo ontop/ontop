@@ -12,7 +12,7 @@
  */
 package it.unibz.krdb.obda.model;
 
-public interface DatasourcesControllerListener {
+public interface OBDAModelListener {
 
 	public void datasourceAdded(DataSource source);
 

@@ -54,7 +54,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(controller.getActiveOBDAModel(), preference, ontology);
 
-		datasourceSelector = new DatasourceSelector(controller.getActiveOBDAModel().getDatasourcesController());
+		datasourceSelector = new DatasourceSelector(controller.getActiveOBDAModel());
 		datasourceSelector.addDatasourceListListener(mappingPanel);
 
 		// Construt the layout of the panel.
@@ -96,6 +96,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 	public void activeOntologyChanged() {
 		mappingPanel.setOBDAModel(controller.getActiveOBDAModel());
 		mappingPanel.setOntology(getOWLModelManager().getActiveOntology());
-		datasourceSelector.setDatasourceController(controller.getActiveOBDAModel().getDatasourcesController());
+		datasourceSelector.setDatasourceController(controller.getActiveOBDAModel());
 	}
 }
