@@ -107,8 +107,8 @@ public class TWOBDAPlatformFactoryImpl implements
 			*/
 
             // Rewriter
-            rewriter = new TreeWitnessReformulator(ontology.getAssertions());
-            rewriter.setConceptDAG(isa);
+            rewriter = new TreeWitnessReformulator();
+            rewriter.setTBox(ontology);
 
             EvaluationEngine eval_engine  = null;
             // Source query generator and unfolder

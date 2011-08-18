@@ -76,8 +76,8 @@ public class UnificationTest2 extends TestCase {
 		DatalogProgram prog = tfac.getDatalogProgram();
 		prog.appendRule(query);
 
-		List<Assertion> list = new Vector<Assertion>();
-		QueryRewriter rew = new DLRPerfectReformulator(list);
+//		List<Assertion> list = new Vector<Assertion>();
+		QueryRewriter rew = new DLRPerfectReformulator();
 		DatalogProgram aux = (DatalogProgram) rew.rewrite(prog);
 
 		assertEquals(2, aux.getRules().size());

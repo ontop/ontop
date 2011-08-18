@@ -52,13 +52,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 */
 	private DLLiterOntology				sigma			= null;
 
-	public TreeRedReformulator(Ontology ontology) {
-		this(ontology, null);
-	}
-
-	public TreeRedReformulator(Ontology ontology, DLLiterOntology sigma) {
-		setTBox(ontology);
-		setABoxDependencies(sigma);
+	public TreeRedReformulator() {
 
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
@@ -70,14 +64,14 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	public Query rewrite(Query input) throws Exception {
-//		
-		
+		//		
+
 		log.debug("Query reformulation started...");
-		
-//		Runtime.getRuntime().runFinalization ();
-//		Runtime.getRuntime().gc ();
-//        Thread.currentThread ().yield ();
-		
+
+		// Runtime.getRuntime().runFinalization ();
+		// Runtime.getRuntime().gc ();
+		// Thread.currentThread ().yield ();
+
 		double starttime = System.currentTimeMillis();
 
 		if (!(input instanceof DatalogProgram)) {
@@ -86,18 +80,17 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		DatalogProgram prog = (DatalogProgram) input;
 
-//		log.debug("Starting query rewrting. Received query: \n{}", prog);
+		// log.debug("Starting query rewrting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
 			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
 		/* Query preprocessing */
-		
 
 		DatalogProgram anonymizedProgram = anonymizer.anonymize(prog);
 
-//		log.debug("Removing redundant atoms by query containment");
+		// log.debug("Removing redundant atoms by query containment");
 		/* Simpliying the query by removing redundant atoms w.r.t. to CQC */
 		HashSet<CQIE> oldqueries = new HashSet<CQIE>(5000);
 		for (CQIE q : anonymizedProgram.getRules()) {
@@ -112,7 +105,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		 * Main loop of the rewriter
 		 */
 
-//		log.debug("Starting maing rewriting loop");
+		// log.debug("Starting maing rewriting loop");
 		boolean loop = true;
 		while (loop) {
 
@@ -257,17 +250,17 @@ public class TreeRedReformulator implements QueryRewriter {
 		resultlist.addAll(result);
 		log.debug("Main loop ended. Queries produced: {}", resultlist.size());
 
-//		log.debug("Removing auxiliary queries...");
+		// log.debug("Removing auxiliary queries...");
 		resultlist = cleanAuxiliaryQueries(resultlist);
 		log.debug("Removed auxiliary queries. New size: {}", resultlist.size());
 
 		/* One last pass of the syntactic containment checker */
 
-//		log.debug("Removing trivially contained queries");
+		// log.debug("Removing trivially contained queries");
 		CQCUtilities.removeContainedQueriesSyntacticSorter(resultlist, false);
 
 		// if (resultlist.size() < 300) {
-		
+
 		if (sigma != null) {
 			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.getAssertions().size());
 		} else {
@@ -281,13 +274,13 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		double endtime = System.currentTimeMillis();
 		double seconds = (endtime - starttime) / 1000;
-		
+
 		QueryUtils.copyQueryModifiers(input, resultprogram);
 
 		log.debug("Computed reformulation: \n{}", resultprogram);
 		log.debug("Fina size of reformulation: {}, Time elapse: {}s", resultlist.size(), seconds);
-		
-//		log.info("Time elapsed for reformulation: {}s", seconds);
+
+		// log.info("Time elapsed for reformulation: {}s", seconds);
 
 		return resultprogram;
 	}
@@ -315,8 +308,8 @@ public class TreeRedReformulator implements QueryRewriter {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
 			for (Atom atom : body) {
-				if (atom.getPredicate().getName().toString().substring(0, OWLAPITranslator.AUXROLEURI.length())
-						.equals(OWLAPITranslator.AUXROLEURI)) {
+				if (atom.getPredicate().getName().toString().substring(0, OWLAPITranslator.AUXROLEURI.length()).equals(
+						OWLAPITranslator.AUXROLEURI)) {
 					auxiliary = true;
 					break;
 				}
@@ -329,19 +322,24 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
+	public void initialize() {
+		// nothing to do here
+	}
+
+	@Override
 	public void setTBox(Ontology ontology) {
-		this.ontology = ontology;
+		this.ontology = ontology.clone();
 
 		/*
 		 * Our strategy requires saturation to minimize the number of cycles
 		 * that will be necessary to compute reformulation.
 		 */
-		ontology.saturate();
+		this.ontology.saturate();
 
 	}
 
 	@Override
-	public void setABoxDependencies(Ontology sigma) {
+	public void setCBox(Ontology sigma) {
 
 		this.sigma = (DLLiterOntology) sigma;
 		if (this.sigma != null) {
@@ -350,6 +348,5 @@ public class TreeRedReformulator implements QueryRewriter {
 		}
 
 	}
-
 
 }

@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
-import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.inference.OWLReasonerException;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLConstant;
@@ -347,14 +346,18 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryR
 			} else {
 				onto = this.translatedOntologyMerge.getAssertions();
 			}
+			DLLiterOntologyImpl ontology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+			ontology.addAssertions(onto);
 
 			if (OBDAConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
-				rewriter = new DLRPerfectReformulator(onto);
+				rewriter = new DLRPerfectReformulator();
+				rewriter.setTBox(ontology);
 			} else if (OBDAConstants.UCQBASED.equals(reformulationTechnique)) {
 				this.reducedOntology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
 				reducedOntology.addAssertions(onto);
-				rewriter = new TreeRedReformulator(reducedOntology);
-				rewriter.setABoxDependencies(sigma);
+				rewriter = new TreeRedReformulator();
+				rewriter.setTBox(reducedOntology);
+				rewriter.setCBox(sigma);
 			} else {
 				throw new IllegalArgumentException("Invalid value for argument: "
 						+ ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);

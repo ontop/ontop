@@ -150,9 +150,10 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			// Rewriter
 			Ontology dlliteontology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
 			dlliteontology.addAssertions(reducedOnto);
-			rewriter = new TreeRedReformulator(dlliteontology);
+			rewriter = new TreeRedReformulator();
+			rewriter.setTBox(dlliteontology);
 
-			rewriter.setABoxDependencies(DAGConstructor.getSigmaOntology(ontology));
+			rewriter.setCBox(DAGConstructor.getSigmaOntology(ontology));
 
 			// Source query generator and unfolder
 			viewMan = new MappingViewManager(mappings);

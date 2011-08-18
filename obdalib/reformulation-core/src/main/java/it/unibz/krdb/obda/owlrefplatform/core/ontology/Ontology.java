@@ -6,7 +6,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 
-public interface Ontology {
+public interface Ontology extends Cloneable {
 
 	public void addAssertion(Assertion assertion);
 
@@ -61,4 +61,6 @@ public interface Ontology {
 	 * through the methods of the ontology.
 	 */
 	public void saturate();
+	
+	public Ontology clone();
 }

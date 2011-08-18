@@ -21,6 +21,13 @@ public interface QueryRewriter {
 	 * 
 	 * @param sigma
 	 */
-	public void setABoxDependencies(Ontology sigma);
+	public void setCBox(Ontology sigma);
+	
+	
+	/***
+	 * Initializes the rewriter. This method must be called before calling "rewrite"
+	 * and after the TBox and CBox have been updated.
+	 */
+	public void initialize();
 
 }

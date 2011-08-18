@@ -65,7 +65,7 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 
 	@Override
 	public void loadDependencies(DLLiterOntology onto) {
-		queryRewriter.setABoxDependencies(onto);
+		queryRewriter.setCBox(onto);
 		
 	}
 

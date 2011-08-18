@@ -131,12 +131,14 @@ public class LUBMExecutionHelper {
 
 			TreeWitnessReformulator ref = null;
 			if (aboxmode.equals("classic")) {
-				ref = new TreeWitnessReformulator(reasoner.getOntology().getAssertions());
-				ref.setConceptDAG(DAGConstructor.getISADAG((DLLiterOntology) reasoner.getOntology()));
+				ref = new TreeWitnessReformulator();
+				ref.setTBox(reasoner.getOntology());
+				
 			} else if (aboxmode.equals("semindex")) {
-				ref = new TreeWitnessReformulator(reasoner.getReducedOntology().getAssertions());
-				ref.setABoxDependencies(reasoner.getABoxDependencies());
-				ref.setConceptDAG(DAGConstructor.getISADAG((DLLiterOntology) reasoner.getReducedOntology()));
+				ref = new TreeWitnessReformulator();
+				ref.setTBox(reasoner.getReducedOntology());
+				ref.setCBox(reasoner.getABoxDependencies());
+				
 			}
 			((BolzanoTechniqueWrapper) reasoner.getTechniqueWrapper()).setRewriter(ref);
 		}

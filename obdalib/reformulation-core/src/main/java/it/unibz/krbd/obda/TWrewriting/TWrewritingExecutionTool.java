@@ -103,8 +103,9 @@ public class TWrewritingExecutionTool {
 			// One time classification call.
 			reasoner.classify();
 			
-			TreeWitnessReformulator ref = new TreeWitnessReformulator(reasoner.getOntology().getAssertions());
-			ref.setConceptDAG(DAGConstructor.getISADAG((DLLiterOntology)reasoner.getOntology()));
+			TreeWitnessReformulator ref = new TreeWitnessReformulator();
+			ref.setTBox(reasoner.getOntology());
+			
 			((BolzanoTechniqueWrapper)reasoner.getTechniqueWrapper()).setRewriter(ref);
 
 			// Now we are ready for querying

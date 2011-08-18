@@ -49,6 +49,47 @@ public class DLLiterOntologyImpl implements DLLiterOntology {
 		concepts = new HashSet<ConceptDescription>();
 		roles = new HashSet<RoleDescription>();
 	}
+	
+	@Override
+	public DLLiterOntologyImpl clone() {
+		DLLiterOntologyImpl clone = new DLLiterOntologyImpl(URI.create(ontouri.toString()));
+		clone.originalassertions.addAll(originalassertions);
+		clone.concepts.addAll(concepts);
+		clone.roles.addAll(roles);
+		clone.isSaturated = isSaturated;
+		
+		if (assertions != null) {
+			clone.assertions = new HashSet<PositiveInclusion>();
+			clone.assertions.addAll(assertions);
+		}
+		
+		if (rightAssertionIndex != null) {
+			clone.rightAssertionIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
+			clone.rightAssertionIndex.putAll(rightAssertionIndex);
+			
+		}
+		
+		if (rightNonExistentialIndex != null) {
+			clone.rightNonExistentialIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
+			clone.rightNonExistentialIndex.putAll(rightNonExistentialIndex);
+			
+		}
+		
+		if (rightExistentialIndex != null) {
+			clone.rightExistentialIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
+			clone.rightExistentialIndex.putAll(rightExistentialIndex);
+			
+		}
+		
+		if (leftAssertionIndex != null) {
+			clone.leftAssertionIndex = new HashMap<Predicate, Set<PositiveInclusion>>();
+			clone.leftAssertionIndex.putAll(leftAssertionIndex);
+			
+		}
+		
+		return clone;
+	}
+	
 
 	@Override
 	public void addAssertion(Assertion assertion) {

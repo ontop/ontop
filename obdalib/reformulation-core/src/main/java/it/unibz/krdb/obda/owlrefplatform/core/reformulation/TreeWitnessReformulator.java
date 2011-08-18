@@ -11,9 +11,9 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -49,13 +49,13 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	private DLLiterOntology						aboxDependencies	= null;
 
-	public TreeWitnessReformulator(Set<Assertion> set) {
-		// this.assertions = set;
+	public TreeWitnessReformulator() {
+
 	}
 
-	public void setConceptDAG(DAG conceptDAG) {
-		this.conceptDAG = conceptDAG;
-	}
+//	public void setConceptDAG(DAG conceptDAG) {
+//		
+//	}
 
 	/***
 	 * Reformulates the query.
@@ -351,14 +351,20 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	@Override
 	public void setTBox(Ontology ontology) {
-		// TODO Auto-generated method stub
+        DAG isa = DAGConstructor.getISADAG((DLLiterOntology)ontology);
+        this.conceptDAG = isa;
+	}
+
+	@Override
+	public void setCBox(Ontology sigma) {
+		aboxDependencies = (DLLiterOntology) sigma;
 
 	}
 
 	@Override
-	public void setABoxDependencies(Ontology sigma) {
-		aboxDependencies = (DLLiterOntology) sigma;
-
+	public void initialize() {
+		// do nothing
+		
 	}
 
 }

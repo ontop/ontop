@@ -15,7 +15,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -35,8 +34,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
-	public DLRPerfectReformulator(Collection<Assertion> ass) {
-		this.assertions.addAll(ass);
+	public DLRPerfectReformulator() {
 		piApplicator = new PositiveInclusionApplicator();
 		unifier = new AtomUnifier();
 		anonymizer = new QueryAnonymizer();
@@ -78,7 +76,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 							PositiveInclusion pi = (PositiveInclusion) ass;
 							if (piApplicator.isPIApplicable(pi, currentAtom)) {
 								CQIE newquery = piApplicator.applyPI(cqie, pi, atomidx);
-								if (!prog.contains(newquery)&&!newSet.contains(newquery)) {
+								if (!prog.contains(newquery) && !newSet.contains(newquery)) {
 									newSet.add(newquery);
 									loopagain = true;
 								}
@@ -93,7 +91,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 							CQIE newQuery = unifier.unify(cqie, i, j);
 							if (newQuery != null) {
 								anonymizer.anonymize(newQuery, i);
-								if (!prog.contains(newQuery)&&!newSet.contains(newQuery)) {
+								if (!prog.contains(newQuery) && !newSet.contains(newQuery)) {
 									newSet.add(newQuery);
 									loopagain = true;
 								}
@@ -104,16 +102,16 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 			}
 			// prog.appendRule(newSet);
-//			queries = newSet;
+			// queries = newSet;
 			prog.addAll(newSet);
 		}
 
 		DatalogProgram out = fac.getDatalogProgram();
 		QueryUtils.copyQueryModifiers(q, out);
-		for (CQIE rule: prog) {
+		for (CQIE rule : prog) {
 			out.appendRule(rule);
 		}
-		
+
 		return out;
 	}
 
@@ -153,15 +151,19 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 	@Override
 	public void setTBox(Ontology ontology) {
-		// TODO Auto-generated method stub
-		
+		assertions.clear();
+		this.assertions.addAll(ontology.getAssertions());
+
 	}
 
 	@Override
-	public void setABoxDependencies(Ontology sigma) {
-		// TODO Auto-generated method stub
-		
+	public void setCBox(Ontology sigma) {
+		// This reformulator is not able to handle ABox dependecies
+
 	}
 
+	@Override
+	public void initialize() {
+	}
 
 }
