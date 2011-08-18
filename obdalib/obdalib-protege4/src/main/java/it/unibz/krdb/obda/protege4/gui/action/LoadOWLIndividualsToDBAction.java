@@ -64,7 +64,7 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 				selectDialog.setVisible(true);
 				String selectedsource = selectDialog.getSelectedSource();
 				final DataSource source = controller.getActiveOBDAModel()
-						.getDataSource(URI.create(selectedsource));
+						.getSource(URI.create(selectedsource));
 				Thread th = new Thread(new Runnable() {
 					@Override
 					public void run() {

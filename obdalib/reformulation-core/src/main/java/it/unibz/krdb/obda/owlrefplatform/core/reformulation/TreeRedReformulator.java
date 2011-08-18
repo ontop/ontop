@@ -19,7 +19,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
-import it.unibz.krdb.obda.owlrefplatform.exception.MemoryLowException;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashSet;

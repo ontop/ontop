@@ -16,7 +16,6 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.codec.SourceQueryToTextCodec;
 import it.unibz.krdb.obda.codec.TargetQeryToTextCodec;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.MappingControllerListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -53,7 +52,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	private static final long serialVersionUID = -1151057670798439917L;
 
-	private MappingController controller = null;
+	private OBDAModel controller = null;
 	private DefaultMutableTreeNode root = null;
 //	private DatasourcesController dsc = null; TODO Remove this ds?
 	private MappingNode mappingnode = null;
@@ -65,11 +64,11 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingTreeModel(OBDAModel apic,	MappingController controller) {
+	public MappingTreeModel(OBDAModel apic) {
 		super(new DefaultMutableTreeNode("Mappings"));
 		this.apic = apic;
 		root = (DefaultMutableTreeNode) getRoot();
-		this.controller = controller;
+		this.controller = apic;
 	}
 
 	// TODO Remove this ds?
@@ -116,7 +115,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		} else if (oldmappingnode instanceof MappingBodyNode) {
 			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 			SQLQuery query = fac.getSQLQuery((String) newValue);
-			controller.updateSourceQueryMapping(sourceName, (String) parentnode
+			controller.updateMappingsSourceQuery(sourceName, (String) parentnode
 					.getUserObject(), query);
 		}
 	}

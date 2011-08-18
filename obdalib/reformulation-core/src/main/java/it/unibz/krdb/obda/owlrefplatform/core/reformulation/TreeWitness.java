@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Term;
+
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -7,11 +11,6 @@ import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
-import it.unibz.krdb.obda.model.Term;
 
 public class TreeWitness {
 

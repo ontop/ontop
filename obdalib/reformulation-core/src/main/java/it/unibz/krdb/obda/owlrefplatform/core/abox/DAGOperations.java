@@ -1,7 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.*;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 
 import java.util.ArrayList;
 import java.util.HashMap;

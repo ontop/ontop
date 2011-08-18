@@ -6,7 +6,6 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -47,13 +46,13 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 	 */
 	public void setDatasourcesController(OBDAModel dsc) {
 		/* removing listeners and references to the old */
-		dscontroller.removeDatasourceControllerListener(selector);
+		dscontroller.removeSourcesListener(selector);
 		dscontroller = dsc;
 
 		selector.setDatasourceController(dsc);
 
 		/* setup the new listener */
-		dscontroller.addDatasourceControllerListener(selector);
+		dscontroller.addSourcesListener(selector);
 	}
 
 	public DatasourceSelector getDataSourceSelector() {
@@ -71,7 +70,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
 		add(selector, gridBagConstraints);
-		dscontroller.addDatasourceControllerListener(selector);
+		dscontroller.addSourcesListener(selector);
 
 		jButtonAdd.setText("Insert");
 		jButtonAdd.setMnemonic('i');
@@ -104,7 +103,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				DataSource ds = selector.getSelectedDataSource();
 				if (ds != null) {
-					dscontroller.removeDataSource(ds.getSourceID());
+					dscontroller.removeSource(ds.getSourceID());
 				}
 			}
 		});
@@ -124,7 +123,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
     if (!name.isEmpty()) {
       URI uri = createUri(name);
       if (uri != null) {
-        if (!dscontroller.containsDatasource(uri)) {
+        if (!dscontroller.containsSource(uri)) {
           dscontroller.addDataSource(name);
         }
         else {

@@ -3,7 +3,6 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.DataQueryReasoner;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -58,7 +57,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.antlr.runtime.tree.RewriteRuleElementStream;
 import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.inference.OWLReasonerException;
@@ -192,15 +190,15 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 		 * Duplicating the OBDA model to avoid strange behaivors
 		 */
 		OBDAModel obdaModel = fac.getOBDAModel();
-		for (DataSource source: this.obdaModel.getAllSources()) {
-			obdaModel.addDataSource(source);
+		for (DataSource source: this.obdaModel.getSources()) {
+			obdaModel.addSource(source);
 		}
-		Hashtable<URI, ArrayList<OBDAMappingAxiom>> temporalMappings = this.obdaModel.getMappingController().getMappings();
+		Hashtable<URI, ArrayList<OBDAMappingAxiom>> temporalMappings = this.obdaModel.getMappings();
 		for (URI source: temporalMappings.keySet()) {
 			List<OBDAMappingAxiom> maps = temporalMappings.get(source);
 			for (OBDAMappingAxiom mapping: maps) {
 				try {
-					obdaModel.getMappingController().insertMapping(source, mapping);
+					obdaModel.insertMapping(source, mapping);
 				} catch (DuplicateMappingException e) {
 					log.debug("Error cloning the OBDAModel", e.getMessage());
 					throw new OWLReasonerException(e) {
@@ -312,7 +310,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 						DirectMappingGenerator mapGen = new DirectMappingGenerator();
 						Set<OBDAMappingAxiom> mappings = mapGen.getMappings(loadedOntologies, dumper.getMapper());
 						Iterator<OBDAMappingAxiom> it = mappings.iterator();
-						MappingController mapCon = obdaModel.getMappingController();
+						OBDAModel mapCon = obdaModel;
 						while (it.hasNext()) {
 							mapCon.insertMapping(ds.getSourceID(), it.next());
 						}
@@ -326,7 +324,7 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 			} else {
 				log.debug("Using a persistent database");
 
-				Collection<DataSource> sources = obdaModel.getAllSources();
+				Collection<DataSource> sources = obdaModel.getSources();
 				if (sources == null || sources.size() == 0) {
 					throw new Exception("No datasource has been defined");
 				} else if (sources.size() > 1) {
@@ -366,10 +364,10 @@ public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReaso
 					List<SemanticIndexMappingGenerator.MappingKey> simple_maps = SemanticIndexMappingGenerator.build(dag, pureIsa);
 					for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_maps)) {
 						log.debug(map.toString());
-						obdaModel.getMappingController().insertMapping(ds.getSourceID(), map);
+						obdaModel.insertMapping(ds.getSourceID(), map);
 					}
 				}
-				List<OBDAMappingAxiom> mappings = obdaModel.getMappingController().getMappings(ds.getSourceID());
+				List<OBDAMappingAxiom> mappings = obdaModel.getMappings(ds.getSourceID());
 
 				// Validate the mappings against the ontology
 				MappingValidator mappingValidator = new MappingValidator(loadedOntologies);

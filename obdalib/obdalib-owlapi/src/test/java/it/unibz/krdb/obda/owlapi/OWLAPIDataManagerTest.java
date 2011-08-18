@@ -1,13 +1,11 @@
 package it.unibz.krdb.obda.owlapi;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 
 import java.io.File;
 import java.net.URI;
@@ -84,7 +82,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 
 		loadObdaFile("input-v1.owl");
 
-		MappingController mapControl = controller.getMappingController();
+		OBDAModel mapControl = controller;
 		Set<URI> uris = mapControl.getMappings().keySet();
 		for (URI uri : uris) {
 			ArrayList<OBDAMappingAxiom> axioms = mapControl.getMappings().get(uri);
@@ -112,7 +110,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 
 		loadObdaFile("input-v2.owl");
 
-		MappingController mapControl = controller.getMappingController();
+		OBDAModel mapControl = controller;
 		Set<URI> uris = mapControl.getMappings().keySet();
 		for (URI uri : uris) {
 			ArrayList<OBDAMappingAxiom> axioms = mapControl.getMappings().get(uri);
@@ -140,7 +138,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 
 		loadObdaFile("input-v3.owl");
 
-		MappingController mapControl = controller.getMappingController();
+		OBDAModel mapControl = controller;
 		Set<URI> uris = mapControl.getMappings().keySet();
 		for (URI uri : uris) {
 			ArrayList<OBDAMappingAxiom> axioms = mapControl.getMappings().get(uri);

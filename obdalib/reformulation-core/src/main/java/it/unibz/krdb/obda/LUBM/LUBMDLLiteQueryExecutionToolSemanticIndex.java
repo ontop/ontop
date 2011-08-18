@@ -12,13 +12,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
 import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+
+import java.io.File;
+
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 public class LUBMDLLiteQueryExecutionToolSemanticIndex {
 
@@ -46,7 +47,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
             ioManager.loadOBDADataFromURI(new File(obdafileBase).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
             DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
-            obdamodel.addDataSource(ds);
+            obdamodel.addSource(ds);
 
             OBDAOWLReformulationPlatformFactory factory = new DummyOBDAPlatformFactoryImpl();
 

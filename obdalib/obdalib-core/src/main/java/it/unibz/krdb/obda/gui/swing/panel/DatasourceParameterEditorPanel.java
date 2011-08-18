@@ -397,7 +397,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		currentDS.setParameter(RDBMSourceParameterConstants.DATABASE_URL, fieldURL.getText());
 		// currentDS.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,
 		// apic.getCurrentOntologyURI().toString());
-		dscontroller.fireParametersUpdated();
+		dscontroller.fireSourceParametersUpdated();
 
 		return;
 	}// GEN-LAST:event_fieldChangeHandler

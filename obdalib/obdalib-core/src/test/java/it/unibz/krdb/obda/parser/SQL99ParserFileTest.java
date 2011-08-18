@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -102,7 +101,7 @@ public class SQL99ParserFileTest extends TestCase
 
   private void execute(OBDAModel model, URI identifier) {
 
-    MappingController controller = model.getMappingController();
+    OBDAModel controller = model;
     Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingList = controller.getMappings();
 
     ArrayList<OBDAMappingAxiom> mappings = mappingList.get(identifier);

@@ -10,7 +10,6 @@ import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
@@ -186,7 +185,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		  final boolean isValid = validator.validate(targetQuery);
 		  if(isValid) {  			
   			try {
-  			  MappingController mapcon = controller.getMappingController();
+  			  OBDAModel mapcon = controller;
   	      URI sourceID = dataSource.getSourceID();
   	      String id = mapcon.getNextAvailableMappingID(sourceID);
   	      SQLQuery body = dataFactory.getSQLQuery(source);

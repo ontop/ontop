@@ -13,13 +13,16 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.codec.DatasourceXMLCodec;
+import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.OBDAModelListener;
-import it.unibz.krdb.obda.model.MappingController;
+import it.unibz.krdb.obda.model.MappingControllerListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAModelListener;
+import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.queryanswering.QueryController;
 
 import java.io.IOException;
@@ -28,6 +31,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -42,7 +46,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 //	protected OBDAModelImpl	dscontroller		= null;
 
-	private MappingController		mapcontroller		= null;
+//	private MappingControllerInterface		mapcontroller		= null;
 
 	protected QueryController		queryController		= null;
 
@@ -59,15 +63,24 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private HashMap<URI, DataSource>					datasources			= null;
 
-	private ArrayList<OBDAModelListener>	listeners			= null;
+	private ArrayList<OBDAModelListener>	sourceslisteners			= null;
 	
 	OBDADataFactory fac = null;
+
+	
+	/***
+	 * Mappings
+	 */
+	
+	private ArrayList<MappingControllerListener>		mappinglisteners	= null;
+
+	private Hashtable<URI, ArrayList<OBDAMappingAxiom>>	mappings	= null;
 
 
 	protected OBDAModelImpl() {
 
 //		dscontroller = new OBDAModelImpl();
-		mapcontroller = new MappingController(this);
+//		mapcontroller = new OBDAModelImpl();
 		queryController = new QueryController();
 
 		setPrefixManager(new SimplePrefixManager());
@@ -75,7 +88,11 @@ public class OBDAModelImpl implements OBDAModel {
 		
 		fac = OBDADataFactoryImpl.getInstance();
 		datasources = new HashMap<URI, DataSource>();
-		listeners = new ArrayList<OBDAModelListener>();
+		sourceslisteners = new ArrayList<OBDAModelListener>();
+		
+		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
+		mappinglisteners = new ArrayList<MappingControllerListener>();
+
 
 
 	}
@@ -96,13 +113,16 @@ public class OBDAModelImpl implements OBDAModel {
 //		return this;
 //	}
 
-	/* (non-Javadoc)
-	 * @see inf.unibz.it.obda.model.OBDAModel#getMappingController()
-	 */
-	@Override
-	public MappingController getMappingController() {
-		return this.mapcontroller;
-	}
+//	/* (non-Javadoc)
+//	 * @see inf.unibz.it.obda.model.OBDAModel#getMappingController()
+//	 */
+//	/* (non-Javadoc)
+//	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#getMappingController()
+//	 */
+//	@Override
+//	public OBDAModelImpl getMappingController() {
+//		return this;
+//	}
 
 	/* (non-Javadoc)
 	 * @see inf.unibz.it.obda.model.OBDAModel#getVersion()
@@ -172,9 +192,9 @@ public class OBDAModelImpl implements OBDAModel {
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#addDataSource(it.unibz.krdb.obda.model.DataSource)
 	 */
 	
-	public void addDataSource(DataSource source) {
+	public void addSource(DataSource source) {
 		datasources.put(source.getSourceID(), source);
-		fireDatasourceAdded(source);
+		fireSourceAdded(source);
 	}
 
 	/* (non-Javadoc)
@@ -184,33 +204,33 @@ public class OBDAModelImpl implements OBDAModel {
 		URI dburi = URI.create(srcid);
 		DataSource newsource = fac.getDataSource(dburi);
 		datasources.put(dburi, newsource);
-		fireDatasourceAdded(newsource);
+		fireSourceAdded(newsource);
 	}
 
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#addDatasourceControllerListener(it.unibz.krdb.obda.model.DatasourcesControllerListener)
 	 */
-	public void addDatasourceControllerListener(OBDAModelListener listener) {
-		if (listeners.contains(listener))
+	public void addSourcesListener(OBDAModelListener listener) {
+		if (sourceslisteners.contains(listener))
 			return;
-		listeners.add(listener);
+		sourceslisteners.add(listener);
 	}
 
-	/* (non-Javadoc)
-	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#fireAllDatasourcesDeleted()
-	 */
-	public void fireAllDatasourcesDeleted() {
-		for (OBDAModelListener listener : listeners) {
-			listener.alldatasourcesDeleted();
-		}
-	}
+//	/* (non-Javadoc)
+//	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#fireAllDatasourcesDeleted()
+//	 */
+//	public void fireAllDatasourcesDeleted() {
+//		for (OBDAModelListener listener : sourceslisteners) {
+//			listener.alldatasourcesDeleted();
+//		}
+//	}
 
 
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#fireDatasourceAdded(it.unibz.krdb.obda.model.DataSource)
 	 */
-	public void fireDatasourceAdded(DataSource source) {
-		for (OBDAModelListener listener : listeners) {
+	public void fireSourceAdded(DataSource source) {
+		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceAdded(source);
 		}
 	}
@@ -218,8 +238,8 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#fireDatasourceDeleted(it.unibz.krdb.obda.model.DataSource)
 	 */
-	public void fireDatasourceDeleted(DataSource source) {
-		for (OBDAModelListener listener : listeners) {
+	public void fireSourceRemoved(DataSource source) {
+		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceDeleted(source);
 		}
 	}
@@ -227,8 +247,8 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#fireParametersUpdated()
 	 */
-	public void fireParametersUpdated(){
-		for (OBDAModelListener listener : listeners) {
+	public void fireSourceParametersUpdated(){
+		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourcParametersUpdated();
 		}
 	}
@@ -236,8 +256,8 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#fireDataSourceNameUpdated(java.net.URI, it.unibz.krdb.obda.model.DataSource)
 	 */
-	public void fireDataSourceNameUpdated(URI old, DataSource neu){
-		for (OBDAModelListener listener : listeners) {
+	public void fireSourceNameUpdated(URI old, DataSource neu){
+		for (OBDAModelListener listener : sourceslisteners) {
 			listener.datasourceUpdated(old.toString(), neu);
 		}
 	}
@@ -245,7 +265,7 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#getAllSources()
 	 */
-	public List<DataSource> getAllSources() {
+	public List<DataSource> getSources() {
 		List<DataSource> sources = new LinkedList<DataSource>(datasources.values());
 		return Collections.unmodifiableList(sources);
 	}
@@ -254,12 +274,12 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#getDataSource(java.net.URI)
 	 */
-	public DataSource getDataSource(URI name) {
+	public DataSource getSource(URI name) {
 		return datasources.get(name);
 	}
 
-	public boolean containsDatasource(URI name) {
-	  if (getDataSource(name) != null) {
+	public boolean containsSource(URI name) {
+	  if (getSource(name) != null) {
 	    return true;
 	  }
 	  return false;
@@ -268,18 +288,18 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#removeDataSource(java.net.URI)
 	 */
-	public void removeDataSource(URI id) {
+	public void removeSource(URI id) {
 
-		DataSource source = getDataSource(id);
+		DataSource source = getSource(id);
 		datasources.remove(id);
-		fireDatasourceDeleted(source);
+		fireSourceRemoved(source);
 	}
 
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#removeDatasourceControllerListener(it.unibz.krdb.obda.model.DatasourcesControllerListener)
 	 */
-	public void removeDatasourceControllerListener(OBDAModelListener listener) {
-		listeners.remove(listener);
+	public void removeSourcesListener(OBDAModelListener listener) {
+		sourceslisteners.remove(listener);
 	}
 
 
@@ -287,9 +307,259 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#updateDataSource(java.net.URI, it.unibz.krdb.obda.model.DataSource)
 	 */
-	public void updateDataSource(URI id, DataSource dsd) {
+	public void updateSource(URI id, DataSource dsd) {
 	  datasources.remove(id);
 		datasources.put(dsd.getSourceID(), dsd);
-		fireDataSourceNameUpdated(id, dsd);
+		fireSourceNameUpdated(id, dsd);
 	}
+	
+	
+	
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#addMappingControllerListener(it.unibz.krdb.obda.model.MappingControllerListener)
+	 */
+	
+	public void addMappingsListener(MappingControllerListener listener) {
+		mappinglisteners.add(listener);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#deleteMapping(java.net.URI, java.lang.String)
+	 */
+	public void removeMapping(URI datasource_uri, String mapping_id) {
+		int index = indexOfMapping(datasource_uri, mapping_id);
+		if (index == -1) {
+			return;
+		} else {
+			ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+			current_mappings.remove(index);
+		}
+		fireMappingDeleted(datasource_uri, mapping_id);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#deleteMappings(java.net.URI)
+	 */
+	public void removeMappings(URI datasource_uri) {
+		ArrayList<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
+		while (!mappings.isEmpty()) {
+			mappings.remove(0);
+		}
+		fireAllMappingsRemoved();
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#duplicateMapping(java.net.URI, java.lang.String, java.lang.String)
+	 */
+	public void duplicateMapping(URI srcuri, String id, String new_id) throws DuplicateMappingException {
+		OBDAMappingAxiom oldmapping = getMapping(srcuri, id);
+		OBDAMappingAxiom newmapping = null;
+		try {
+			newmapping = (OBDAMappingAxiom) oldmapping.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+		newmapping.setId(new_id);
+		insertMapping(srcuri, newmapping);
+	}
+
+	private void fireAllMappingsRemoved() {
+		for (MappingControllerListener listener : mappinglisteners) {
+			listener.allMappingsRemoved();
+		}
+	}
+
+	/***************************************************************************
+	 * Announces that a mapping has been updated.
+	 * 
+	 * @param srcuri
+	 * @param mapping_id
+	 * @param mapping
+	 */
+	private void fireMappigUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
+		for (MappingControllerListener listener : mappinglisteners) {
+			listener.mappingUpdated(srcuri, mapping_id, mapping);
+		}
+	}
+
+	/**
+	 * Announces to the listeners that a mapping was deleted.
+	 * 
+	 * @param mapping_id
+	 */
+	private void fireMappingDeleted(URI srcuri, String mapping_id) {
+		for (MappingControllerListener listener : mappinglisteners) {
+			listener.mappingDeleted(srcuri, mapping_id);
+		}
+	}
+
+	/**
+	 * Announces to the listeners that a mapping was inserted.
+	 * 
+	 * @param mapping_id
+	 */
+	private void fireMappingInserted(URI srcuri, String mapping_id) {
+		for (MappingControllerListener listener : mappinglisteners) {
+			listener.mappingInserted(srcuri, mapping_id);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#getMapping(java.net.URI, java.lang.String)
+	 */
+	public OBDAMappingAxiom getMapping(URI source_uri, String mapping_id) {
+		int pos = indexOfMapping(source_uri, mapping_id);
+		if (pos == -1) {
+			return null;
+		}
+		ArrayList<OBDAMappingAxiom> mappings = getMappings(source_uri);
+		return mappings.get(pos);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#getMappings()
+	 */
+	public Hashtable<URI, ArrayList<OBDAMappingAxiom>> getMappings() {
+		return mappings;
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#getMappings(java.net.URI)
+	 */
+	public ArrayList<OBDAMappingAxiom> getMappings(URI datasource_uri) {
+		if (datasource_uri == null)
+			return null;
+		ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+		if (current_mappings == null) {
+			initMappingsArray(datasource_uri);
+		}
+		return mappings.get(datasource_uri);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#getNextAvailableDuplicateIDforMapping(java.net.URI, java.lang.String)
+	 */
+	public String getNextAvailableDuplicateIDforMapping(URI source_uri, String originalid) {
+		int new_index = -1;
+		for (int index = 0; index < 999999999; index++) {
+			if (indexOfMapping(source_uri, originalid + "(" + index + ")") == -1) {
+				new_index = index;
+				break;
+			}
+		}
+		return originalid + "(" + new_index + ")";
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#getNextAvailableMappingID(java.net.URI)
+	 */
+	public String getNextAvailableMappingID(URI datasource_uri) {
+		int index = 0;
+		for (int i = 0; i < 99999999; i++) {
+			index = indexOfMapping(datasource_uri, "M:" + Integer.toHexString(i));
+			if (index == -1) {
+				index = i;
+				break;
+			}
+		}
+		return "M:" + Integer.toHexString(index);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#indexOfMapping(java.net.URI, java.lang.String)
+	 */
+	public int indexOfMapping(URI datasource_uri, String mapping_id) {
+		ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+		if (current_mappings == null) {
+			initMappingsArray(datasource_uri);
+			current_mappings = mappings.get(datasource_uri);
+		}
+		int position = -1;
+		for (int i = 0; i < current_mappings.size(); i++) {
+			if (current_mappings.get(i).getId().equals(mapping_id)) {
+				position = i;
+				break;
+			}
+		}
+		return position;
+	}
+
+	private void initMappingsArray(URI datasource_uri) {
+		mappings.put(datasource_uri, new ArrayList<OBDAMappingAxiom>());
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#insertMapping(java.net.URI, it.unibz.krdb.obda.model.OBDAMappingAxiom)
+	 */
+	public void insertMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException {
+		int index = indexOfMapping(datasource_uri, mapping.getId());
+		if (index != -1)
+			throw new DuplicateMappingException("ID " + mapping.getId());
+		mappings.get(datasource_uri).add(mapping);
+		fireMappingInserted(datasource_uri, mapping.getId());
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#removeAllMappings()
+	 */
+	public void clearMappings() {
+		mappings.clear();
+		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
+		fireAllMappingsRemoved();
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#removeMappingControllerListener(it.unibz.krdb.obda.model.MappingControllerListener)
+	 */
+	public void removeMappingsListener(MappingControllerListener listener) {
+		mappinglisteners.remove(listener);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#updateSourceQueryMapping(java.net.URI, java.lang.String, it.unibz.krdb.obda.model.Query)
+	 */
+	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, Query sourceQuery) {
+		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
+		mapping.setSourceQuery(sourceQuery);
+		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#updateMapping(java.net.URI, java.lang.String, java.lang.String)
+	 */
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
+		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
+
+		if (!containsMapping(datasource_uri, new_mappingid)) {
+			mapping.setId(new_mappingid);
+			fireMappigUpdated(datasource_uri, mapping_id, mapping);
+			return 0;
+		}
+		return -1;
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#updateTargetQueryMapping(java.net.URI, java.lang.String, it.unibz.krdb.obda.model.Query)
+	 */
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, Query targetQuery) {
+		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
+		if (mapping == null) {
+			return;
+		}
+		mapping.setTargetQuery(targetQuery);
+		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+	}
+
+	/* (non-Javadoc)
+	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#isMappingIdExisted(java.net.URI, java.lang.String)
+	 */
+	public boolean containsMapping(URI datasourceUri, String mappingId) {
+		if (getMapping(datasourceUri, mappingId) != null) {
+			return true;
+		}
+		return false;
+	}
+
+	
+	
 }

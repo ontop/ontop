@@ -2,13 +2,12 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.MappingControllerListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
@@ -32,7 +30,6 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
 import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
-import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactory;
 import org.protege.editor.owl.ui.prefix.PrefixMapper;
 import org.protege.editor.owl.ui.prefix.PrefixMapperManager;
 import org.semanticweb.owl.inference.OWLReasoner;
@@ -131,8 +128,8 @@ public class OBDAModelManager implements Disposable {
 		OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 		activeOBDAModel = obdafac.getOBDAModel();
 
-		activeOBDAModel.addDatasourceControllerListener(dlistener);
-		activeOBDAModel.getMappingController().addMappingControllerListener(mlistener);
+		activeOBDAModel.addSourcesListener(dlistener);
+		activeOBDAModel.addMappingsListener(mlistener);
 		activeOBDAModel.getQueryController().addListener(qlistener);
 
 		PrefixMapper mapper = PrefixMapperManager.getInstance().getMapper();

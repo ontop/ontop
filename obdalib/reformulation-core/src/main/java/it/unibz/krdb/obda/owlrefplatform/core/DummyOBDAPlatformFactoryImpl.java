@@ -136,7 +136,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			}
 
 			// Mappings
-			DataSource ds = apic.getAllSources().get(0);
+			DataSource ds = apic.getSources().get(0);
 			Connection connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 
 			EvaluationEngine eval_engine = eval_engine = new JDBCEngine(connection);
@@ -144,7 +144,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 			for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_mappings)) {
 				mappings.add(map);
-				apic.getMappingController().insertMapping(ds.getSourceID(), map);
+				apic.insertMapping(ds.getSourceID(), map);
 			}
 
 			// Rewriter

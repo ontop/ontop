@@ -61,7 +61,7 @@ public class SelectDB extends javax.swing.JDialog {
 
 	private void addExistingDataSourcesToCombo() {
 
-		Iterator<DataSource> it = apic.getAllSources().iterator();
+		Iterator<DataSource> it = apic.getSources().iterator();
 		while (it.hasNext()) {
 			jComboBox1.addItem(it.next().getSourceID());
 		}

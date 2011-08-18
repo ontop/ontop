@@ -59,7 +59,7 @@ public class DatasourceTreeCellRenderer extends DefaultTreeCellRenderer {
         if (leaf) {
             setIcon(dbms_source_icon);
             if(value !=null && ((DefaultMutableTreeNode)value).getUserObject() != null){
-	            DataSource ds = dsc.getDataSource(URI.create(value.toString()));
+	            DataSource ds = dsc.getSource(URI.create(value.toString()));
 	            if (ds != null) {
 	            	if (!ds.isRegistred()) {
 	            		setForeground(Color.RED);

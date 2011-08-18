@@ -110,7 +110,7 @@ public class DataManager {
 		Document doc = db.newDocument();
 		Element root = doc.createElement("OBDA");
 		doc.appendChild(root);
-		dumpMappingsToXML(apic.getMappingController().getMappings());
+		dumpMappingsToXML(apic.getMappings());
 	}
 
 	/***************************************************************************
@@ -202,11 +202,11 @@ public class DataManager {
 		doc.appendChild(root);
 
 		// Create the Mapping element
-		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = apic.getMappingController().getMappings();
+		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = apic.getMappings();
 		dumpMappingsToXML(mappings);
 
 		// Create the Data Source element
-		List<DataSource> datasources = apic.getAllSources();
+		List<DataSource> datasources = apic.getSources();
 		dumpDatasourcesToXML(datasources);
 
 		// Create the Query element
@@ -310,7 +310,7 @@ public class DataManager {
 					System.err.println("WARNING: Loading a datasource using the old "
 							+ "deprecated method. Update your .obda file by saving " + "it again.");
 					DataSource source = dsCodec.decode(node);
-					apic.addDataSource(source);
+					apic.addSource(source);
 				}
 				String newDatasourceTag = dsCodec.getElementTag();
 				if ((major > 0) && (node.getNodeName().equals(newDatasourceTag))) {
@@ -320,7 +320,7 @@ public class DataManager {
 					if (uri != null) {
 						source.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uri.toString());
 					}
-					apic.addDataSource(source);
+					apic.addSource(source);
 				}
 				if (node.getNodeName().equals("SavedQueries")) {
 					// Found queries block
@@ -467,7 +467,7 @@ public class DataManager {
 					throw new Exception("Error while parsing the conjunctive query of " + "the mapping " + mapping.getAttribute("id"));
 				}
 				try {
-					apic.getMappingController().insertMapping(datasource, mappingAxiom);
+					apic.insertMapping(datasource, mappingAxiom);
 				} catch (DuplicateMappingException e) {
 					log.warn("duplicate mapping detected while trying to load mappings " + "from file. Ignoring it. Datasource URI: "
 							+ datasource + " " + "Mapping ID: " + mappingAxiom.getId());

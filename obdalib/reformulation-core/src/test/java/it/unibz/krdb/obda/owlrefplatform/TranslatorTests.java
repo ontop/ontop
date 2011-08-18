@@ -11,7 +11,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 
 import java.net.URI;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;

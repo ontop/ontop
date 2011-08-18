@@ -45,7 +45,7 @@ public class OBDA2OWLDataMaterializer {
 	private boolean isCanceled = false;
 	
 	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology) throws Exception {
-		List<DataSource> sources = controller.getAllSources();
+		List<DataSource> sources = controller.getSources();
 		Iterator<DataSource> sit = sources.iterator();
 		while (sit.hasNext()) {
 			materializeAbox(controller, manager, currentOntology, sit.next());
@@ -58,7 +58,7 @@ public class OBDA2OWLDataMaterializer {
 		OWLDataFactory factory = manager.getOWLDataFactory();
 		Set<OWLIndividualAxiom> individuals = new HashSet<OWLIndividualAxiom>();
 		JDBCConnectionManager jdbcMan = JDBCConnectionManager.getJDBCConnectionManager();
-		List<OBDAMappingAxiom> maps = controller.getMappingController().getMappings(targetSource.getSourceID());
+		List<OBDAMappingAxiom> maps = controller.getMappings(targetSource.getSourceID());
 		// DataSource ds =
 		// controller.getCurrentDataSource();
 		Iterator<OBDAMappingAxiom> it = maps.iterator();

@@ -24,8 +24,8 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAModelListener;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -71,16 +71,16 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	}
 
 	public void setDatasourceController(OBDAModel dsController) {
-		this.dsController.removeDatasourceControllerListener(this);
+		this.dsController.removeSourcesListener(this);
 		this.dsController = dsController;
-		this.dsController.addDatasourceControllerListener(this);
+		this.dsController.addSourcesListener(this);
 		initSources();
 
 	}
 
 	public void initSources() {
 
-		Vector<DataSource> vecDatasource = new Vector<DataSource>(dsController.getAllSources());
+		Vector<DataSource> vecDatasource = new Vector<DataSource>(dsController.getSources());
 		if (cboModelDatasource == null) {
 			cboModelDatasource = new DefaultComboBoxModel(vecDatasource.toArray());
 			cboRendererDatasource = new DatasourceCellRenderer();

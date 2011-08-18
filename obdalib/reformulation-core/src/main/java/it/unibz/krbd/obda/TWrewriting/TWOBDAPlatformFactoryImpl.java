@@ -1,7 +1,27 @@
 package it.unibz.krbd.obda.TWrewriting;
 
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.BolzanoTechniqueWrapper;
+import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
+
 import java.net.URI;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -11,39 +31,6 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.BolzanoTechniqueWrapper;
-import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
-import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 public class TWOBDAPlatformFactoryImpl implements
 		OBDAOWLReformulationPlatformFactory {

@@ -1,16 +1,22 @@
 package it.unibz.krdb.obda.LUBM;
 
 
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.DataQueryReasoner;
+import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LUBMTester {
     private static final Logger log = LoggerFactory.getLogger(LUBMTester.class);
@@ -41,7 +47,7 @@ public class LUBMTester {
         // Prepare reasoner
         tboxHelper = new TBoxLoader(dataDirectory);
         DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
-        apic.addDataSource(ds);
+        apic.addSource(ds);
 
         DataQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
 

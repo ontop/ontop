@@ -36,8 +36,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.ontology.Ontology;
-
 /***
  * A class that allows you to perform different operations related to query
  * containment on conjunctive queries.

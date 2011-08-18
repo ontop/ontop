@@ -73,9 +73,9 @@ public class LUBMExecutionHelper {
 		/* Preparing a dummy datsource for this test */
 		DataManager ioManager = new DataManager(obdamodel);
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
-		List<DataSource> sources = obdamodel.getAllSources();
+		List<DataSource> sources = obdamodel.getSources();
 		for (DataSource source : sources) {
-			obdamodel.removeDataSource(source.getSourceID());
+			obdamodel.removeSource(source.getSourceID());
 		}
 
 		String driver = "org.h2.Driver";
@@ -95,7 +95,7 @@ public class LUBMExecutionHelper {
 
 		connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
 
-		obdamodel.addDataSource(source);
+		obdamodel.addSource(source);
 
 		// Creating a new instance of a Quest reasoner
 

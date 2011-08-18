@@ -27,7 +27,6 @@ import it.unibz.krdb.obda.gui.swing.utils.MappingFilterParser;
 import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.MappingController;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -90,7 +89,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private SourceQueryValidator	validator;
 
-	private MappingController		mapc;
+	private OBDAModel		mapc;
 
 	protected OBDAModel				apic;
 
@@ -150,9 +149,9 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	public void setOBDAModel(OBDAModel omodel) {
 		this.apic = omodel;
-		this.mapc = apic.getMappingController();
-		MappingTreeModel maptreemodel = new MappingTreeModel(apic, mapc);
-		mapc.addMappingControllerListener(maptreemodel);
+		this.mapc = apic;
+		MappingTreeModel maptreemodel = new MappingTreeModel(apic);
+		mapc.addMappingsListener(maptreemodel);
 		mappingsTree.setModel(maptreemodel);
 	}
 
@@ -795,7 +794,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 					JOptionPane.QUESTION_MESSAGE) == JOptionPane.NO_OPTION) {
 				return;
 			}
-			MappingController controller = mapc;
+			OBDAModel controller = mapc;
 			URI current_srcuri = selectedSource.getSourceID();
 
 			if (currentSelection != null) {
@@ -826,14 +825,14 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		}
 		// The manager panel can handle multiple deletions.
 		TreePath[] currentSelection = mappingsTree.getSelectionPaths();
-		MappingController controller = mapc;
+		OBDAModel controller = mapc;
 		URI srcuri = selectedSource.getSourceID();
 
 		if (currentSelection != null) {
 			for (int i = 0; i < currentSelection.length; i++) {
 				TreePath current_path = currentSelection[i];
 				MappingNode mappingnode = (MappingNode) current_path.getLastPathComponent();
-				controller.deleteMapping(srcuri, mappingnode.getMappingID());
+				controller.removeMapping(srcuri, mappingnode.getMappingID());
 			}
 		}
 	}
@@ -909,7 +908,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	// TODO NOTE: This method duplicates the valueForPathChanged(..) method in the MappingTreeModel class.
 	private void updateNode(String str) {
-		MappingController con = mapc;
+		OBDAModel con = mapc;
 		URI sourceName = selectedSource.getSourceID();
 		String nodeContent = (String) editedNode.getUserObject();
 		if (editedNode instanceof MappingNode) {
@@ -918,7 +917,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			MappingBodyNode node = (MappingBodyNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();
 			Query b = fac.getSQLQuery(str);
-			con.updateSourceQueryMapping(sourceName, parent.getMappingID(), b);
+			con.updateMappingsSourceQuery(sourceName, parent.getMappingID(), b);
 		} else if (editedNode instanceof MappingHeadNode) {
 			MappingHeadNode node = (MappingHeadNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();

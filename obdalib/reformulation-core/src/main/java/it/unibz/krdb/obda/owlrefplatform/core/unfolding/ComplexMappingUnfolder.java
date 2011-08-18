@@ -21,7 +21,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
-import it.unibz.krdb.obda.parser.SQL99Parser;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashMap;

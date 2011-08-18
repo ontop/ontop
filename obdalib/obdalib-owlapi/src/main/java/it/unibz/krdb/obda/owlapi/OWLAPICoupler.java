@@ -12,11 +12,7 @@ import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataProperty;
 import org.semanticweb.owl.model.OWLObjectProperty;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyChangeException;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
 import org.semanticweb.owl.model.OWLOntologyManager;
-import org.semanticweb.owl.util.OWLOntologyImportsClosureSetProvider;
-import org.semanticweb.owl.util.OWLOntologyMerger;
 
 /***
  * 

@@ -1,7 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.abox.*;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
