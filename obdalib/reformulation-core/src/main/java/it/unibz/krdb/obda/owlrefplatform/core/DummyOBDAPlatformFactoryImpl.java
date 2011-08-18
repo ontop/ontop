@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -84,10 +84,10 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 		return id;
 	}
 
-	@Override
-	public void setOBDAController(OBDAModel apic) {
-		this.apic = apic;
-	}
+//	@Override
+//	public void setOBDAController(OBDAModel apic) {
+//		this.apic = apic;
+//	}
 
 	@Override
 	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
@@ -100,7 +100,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 	}
 
 	@Override
-	public OWLReasoner createReasoner(OWLOntologyManager manager) {
+	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
 
 		QueryRewriter rewriter;
 		MappingViewManager viewMan;

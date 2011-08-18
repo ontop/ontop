@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
@@ -510,7 +510,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			LinkedList<Term> newTerms = new LinkedList<Term>();
 			while (hit.hasNext()) {
 				Term t = hit.next();
-				if (t instanceof UndistinguishedVariable) {
+				if (t instanceof AnonymousVariable) {
 					String newName = "_uv-" + coutner;
 					coutner++;
 					Term newT = factory.getVariable(newName);
@@ -530,7 +530,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				LinkedList<Term> vec = new LinkedList<Term>();
 				while (hit2.hasNext()) {
 					Term t = hit2.next();
-					if (t instanceof UndistinguishedVariable) {
+					if (t instanceof AnonymousVariable) {
 						String newName = "_uv-" + coutner;
 						coutner++;
 						Term newT = factory.getVariable(newName);

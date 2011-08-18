@@ -44,7 +44,7 @@ public class TBoxLoader {
     public DataQueryReasoner loadReasoner(OBDAModel apic, OWLOntologyManager manager) throws Exception {
 
         OBDAOWLReasonerFactory fac = new DummyOBDAPlatformFactoryImpl();
-        fac.setOBDAController(apic);
+//        fac.setOBDAController(apic);
         return (DataQueryReasoner) fac.createReasoner(manager);
 
 

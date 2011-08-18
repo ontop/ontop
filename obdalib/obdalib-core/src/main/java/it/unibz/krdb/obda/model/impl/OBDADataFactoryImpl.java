@@ -75,7 +75,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Variable getNondistinguishedVariable() {
-		return new UndistinguishedVariable();
+		return new AnonymousVariable();
 	}
 
 	@Override

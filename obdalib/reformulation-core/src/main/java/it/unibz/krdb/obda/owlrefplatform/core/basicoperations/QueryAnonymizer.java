@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.Collection;
@@ -162,7 +162,7 @@ public class QueryAnonymizer {
 	}
 
 	private boolean isVariableInHead(CQIE q, Term t) {
-		if (t instanceof UndistinguishedVariable)
+		if (t instanceof AnonymousVariable)
 			return false;
 
 		PredicateAtom head = q.getHead();

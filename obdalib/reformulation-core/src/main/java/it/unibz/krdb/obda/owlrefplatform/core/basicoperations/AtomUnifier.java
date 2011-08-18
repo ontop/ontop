@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
@@ -88,7 +88,7 @@ public class AtomUnifier {
 		for (int i = 0; i < atom1.getTerms().size(); i++) {
 			Term t1 = atom1.getTerms().get(i);
 			Term t2 = atom2.getTerms().get(i);
-			if (t1 instanceof UndistinguishedVariable) {
+			if (t1 instanceof AnonymousVariable) {
 				newatom.getTerms().set(i, t2);
 			}
 		}
@@ -380,7 +380,7 @@ public class AtomUnifier {
 		 * Undistinguished variables do not need a substitution, the unifier
 		 * knows about this
 		 */
-		if ((t1 instanceof UndistinguishedVariable || t2 instanceof UndistinguishedVariable)) {
+		if ((t1 instanceof AnonymousVariable || t2 instanceof AnonymousVariable)) {
 			return new NeutralSubstitution();
 		}
 
@@ -421,7 +421,7 @@ public class AtomUnifier {
 	private boolean isEqual(Term t1, Term t2) {
 		if (t1 == null || t2 == null)
 			return false;
-		if ((t1 instanceof UndistinguishedVariable) || (t2 instanceof UndistinguishedVariable))
+		if ((t1 instanceof AnonymousVariable) || (t2 instanceof AnonymousVariable))
 			return true;
 		if (t1.getClass() != t2.getClass())
 			return false;
@@ -429,7 +429,7 @@ public class AtomUnifier {
 			VariableImpl ct1 = (VariableImpl) t1;
 			VariableImpl ct2 = (VariableImpl) t2;
 			return ct1.equals(ct2);
-		} else if (t1 instanceof UndistinguishedVariable) {
+		} else if (t1 instanceof AnonymousVariable) {
 			return true;
 		} else if (t1 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl ct1 = (FunctionalTermImpl) t1;

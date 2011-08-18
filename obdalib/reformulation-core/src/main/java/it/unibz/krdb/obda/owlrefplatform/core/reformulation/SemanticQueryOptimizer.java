@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
@@ -75,7 +75,7 @@ public class SemanticQueryOptimizer {
 			/* redundancy of an atom without PIs */
 			if (focusAtom.getPredicate().getArity() == 1) {
 				/* removing anonymous atoms A(_) */
-				if (!(focusAtom.getTerms().get(0) instanceof UndistinguishedVariable))
+				if (!(focusAtom.getTerms().get(0) instanceof AnonymousVariable))
 					continue;
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
@@ -92,7 +92,7 @@ public class SemanticQueryOptimizer {
 			} else {
 				/* removing anonymous atoms R(_,x) and R(x,_) or R(_,_) */
 
-				if (!(focusAtom.getTerms().get(0) instanceof UndistinguishedVariable || focusAtom.getTerms().get(1) instanceof UndistinguishedVariable))
+				if (!(focusAtom.getTerms().get(0) instanceof AnonymousVariable || focusAtom.getTerms().get(1) instanceof AnonymousVariable))
 					continue;
 
 				Term t1 = focusAtom.getTerms().get(0);
@@ -106,7 +106,7 @@ public class SemanticQueryOptimizer {
 
 					/* case R(_,_) */
 
-					if (t1 instanceof UndistinguishedVariable && t2 instanceof UndistinguishedVariable
+					if (t1 instanceof AnonymousVariable && t2 instanceof AnonymousVariable
 							&& atom2.getPredicate().equals(focusAtom.getPredicate())) {
 						body.remove(i);
 						i -= 1;
@@ -114,7 +114,7 @@ public class SemanticQueryOptimizer {
 					}
 
 					/* case R(x,_) */
-					if (t2 instanceof UndistinguishedVariable && atom2.getPredicate().equals(focusAtom.getPredicate())
+					if (t2 instanceof AnonymousVariable && atom2.getPredicate().equals(focusAtom.getPredicate())
 							&& atom2.getTerms().get(0).equals(t1)) {
 						body.remove(i);
 						i -= 1;
@@ -122,7 +122,7 @@ public class SemanticQueryOptimizer {
 					}
 
 					/* case R(_,x) */
-					if (t1 instanceof UndistinguishedVariable && atom2.getPredicate().equals(focusAtom.getPredicate())
+					if (t1 instanceof AnonymousVariable && atom2.getPredicate().equals(focusAtom.getPredicate())
 							&& atom2.getTerms().get(1).equals(t2)) {
 						body.remove(i);
 						i -= 1;
@@ -193,9 +193,9 @@ public class SemanticQueryOptimizer {
 							 */
 							ExistentialConceptDescription right = (ExistentialConceptDescription) including;
 							AtomicConceptDescription left = (AtomicConceptDescription) included;
-							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof UndistinguishedVariable) {
+							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0));
-							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof UndistinguishedVariable) {
+							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {
 								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(1));
 							} else {
 								continue;
@@ -216,7 +216,7 @@ public class SemanticQueryOptimizer {
 
 							ExistentialConceptDescription right = (ExistentialConceptDescription) including;
 							ExistentialConceptDescription left = (ExistentialConceptDescription) included;
-							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof UndistinguishedVariable) {
+							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
 									checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0),
 											fac.getNondistinguishedVariable());
@@ -224,7 +224,7 @@ public class SemanticQueryOptimizer {
 									checkAtom = fac.getAtom(left.getPredicate(), fac.getNondistinguishedVariable(), focusAtom.getTerms()
 											.get(0));
 								}
-							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof UndistinguishedVariable) {
+							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
 									checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(1),
 											fac.getNondistinguishedVariable());

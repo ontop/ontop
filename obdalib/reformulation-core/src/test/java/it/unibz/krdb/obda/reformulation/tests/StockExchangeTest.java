@@ -46,7 +46,7 @@ public class StockExchangeTest extends TestCase {
 		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
 		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
 		
-		factory.setOBDAController(controller);
+//		factory.setOBDAController(controller);
 		factory.setPreferenceHolder(p);
 		
 		OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);

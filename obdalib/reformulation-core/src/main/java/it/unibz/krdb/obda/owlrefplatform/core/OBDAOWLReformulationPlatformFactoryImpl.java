@@ -1,9 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 
-import org.semanticweb.owl.inference.OWLReasoner;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,10 +57,10 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 		return id;
 	}
 
-	@Override
-	public void setOBDAController(OBDAModel apic) {
-		this.apic = apic;
-	}
+//	@Override
+//	public void setOBDAController(OBDAModel apic) {
+//		this.apic = apic;
+//	}
 
 	@Override
 	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
@@ -71,7 +71,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 	 * Creates a new reformulation platform reasoner.
 	 */
 	@Override
-	public OWLReasoner createReasoner(OWLOntologyManager manager) {
+	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
 		return new OBDAOWLReformulationPlatform(manager);
 	}
 

@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.BasicRoleDescription;
@@ -209,13 +209,13 @@ public class CQCUtilities {
 						ExistentialConceptDescription rightExistential = (ExistentialConceptDescription) right;
 						newPredicate = rightExistential.getPredicate();
 						if (rightExistential.isInverse()) {
-							if (newTerm2 instanceof UndistinguishedVariable)
+							if (newTerm2 instanceof AnonymousVariable)
 								continue;
 							newTerm1 = fac.getNondistinguishedVariable();
 							newTerm2 = oldTerm1;
 							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
 						} else {
-							if (newTerm1 instanceof UndistinguishedVariable)
+							if (newTerm1 instanceof AnonymousVariable)
 								continue;
 							newTerm1 = oldTerm1;
 							newTerm2 = fac.getNondistinguishedVariable();

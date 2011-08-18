@@ -42,7 +42,7 @@ public class StockExchangeTestSemIndex extends TestCase {
 		
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		
-		factory.setOBDAController(controller);
+//		factory.setOBDAController(controller);
 		factory.setPreferenceHolder(p);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);

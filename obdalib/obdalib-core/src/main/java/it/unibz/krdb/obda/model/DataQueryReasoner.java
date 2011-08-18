@@ -9,6 +9,4 @@ public interface DataQueryReasoner {
 	
 	public void finishProgressMonitor();
 	
-	public void loadOBDAModel(OBDAModel model);
-
 }

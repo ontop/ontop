@@ -84,7 +84,7 @@ public class TWrewritingExecutionTool {
 			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
 			p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
 
-			factory.setOBDAController(obdamodel);
+//			factory.setOBDAController(obdamodel);
 			factory.setPreferenceHolder(p);
 
 			OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);

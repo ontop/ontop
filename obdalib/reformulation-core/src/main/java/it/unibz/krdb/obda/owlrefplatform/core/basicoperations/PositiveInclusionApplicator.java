@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
@@ -91,14 +91,14 @@ public class PositiveInclusionApplicator {
 				ConceptDescription including = ((DLLiterConceptInclusionImpl) pi).getIncluding();
 				if (including instanceof ExistentialConceptDescriptionImpl) {
 					ExistentialConceptDescriptionImpl imp = (ExistentialConceptDescriptionImpl) including;
-					if (t2 instanceof UndistinguishedVariable && !imp.isInverse()) {
+					if (t2 instanceof AnonymousVariable && !imp.isInverse()) {
 						/*
 						 * I is applicable to an atom P(x1, x2) if (1) x2 = _
 						 * and the right-hand side of I is exist P
 						 */
 						return !imp.isInverse();
 
-					} else if (t1 instanceof UndistinguishedVariable && imp.isInverse()) {
+					} else if (t1 instanceof AnonymousVariable && imp.isInverse()) {
 						/*
 						 * I is applicable to an atom P(x1, x2) if (1) x1 = _
 						 * and the right-hand side of I is exist P-
@@ -301,7 +301,7 @@ public class PositiveInclusionApplicator {
 						 * P(z,x)
 						 */
 						if (!leftTermEqual) {
-							unify = ta11 instanceof UndistinguishedVariable || ta21 instanceof UndistinguishedVariable || ta11.equals(ta21);
+							unify = ta11 instanceof AnonymousVariable || ta21 instanceof AnonymousVariable || ta11.equals(ta21);
 
 							/*
 							 * New condition, if left=true, and a1 = P(x,y) and
@@ -315,7 +315,7 @@ public class PositiveInclusionApplicator {
 							// ta20);
 
 						} else {
-							unify = ta10 instanceof UndistinguishedVariable || ta20 instanceof UndistinguishedVariable || ta10.equals(ta20);
+							unify = ta10 instanceof AnonymousVariable || ta20 instanceof AnonymousVariable || ta10.equals(ta20);
 							// if (unify)
 							// unify = unify && matchingAtoms(currentcq, ta11,
 							// ta21);
@@ -553,7 +553,7 @@ public class PositiveInclusionApplicator {
 
 			PredicateAtom newatom = null;
 
-			if (t2 instanceof UndistinguishedVariable && !righthandside.isInverse()) {
+			if (t2 instanceof AnonymousVariable && !righthandside.isInverse()) {
 
 				/* These are the cases that go from a P(x,#) to a A(x) */
 
@@ -599,7 +599,7 @@ public class PositiveInclusionApplicator {
 					newatom = termFactory.getAtom(predicate, v);
 
 				}
-			} else if (t1 instanceof UndistinguishedVariable && righthandside.isInverse()) {
+			} else if (t1 instanceof AnonymousVariable && righthandside.isInverse()) {
 
 				/* These cases go from R(#,x) to A(x), S(x,#) or S(#,x) */
 

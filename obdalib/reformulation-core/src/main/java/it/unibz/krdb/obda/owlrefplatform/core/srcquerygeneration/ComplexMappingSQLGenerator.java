@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
@@ -92,7 +92,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			int i = 0;
 			while (tit.hasNext()) {
 				Term t = tit.next();
-				if (t instanceof UndistinguishedVariable) {
+				if (t instanceof AnonymousVariable) {
 					i++;
 				} else if (t instanceof VariableImpl) {
 					Object[] o = new Object[2];
@@ -421,7 +421,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 							}
 						}
 					}
-				} else if (term instanceof UndistinguishedVariable) {
+				} else if (term instanceof AnonymousVariable) {
 					/*
 					 * Ignore these during where generation
 					 */
@@ -461,7 +461,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 			int hpos = 0;
 			while (hit.hasNext()) {
 				Term ht = hit.next();
-				if (ht instanceof UndistinguishedVariable) {
+				if (ht instanceof AnonymousVariable) {
 					throw new RuntimeException("ComplexMappingSQLGenerator: Found an non-distinguished variable in the head: " + ht);
 				}
 

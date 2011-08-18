@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.PredicateAtom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.UndistinguishedVariable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
@@ -97,7 +97,7 @@ public class UnificationTest2 extends TestCase {
 		assertEquals("x", ((Variable) term1).getName());
 		assertEquals("y", ((Variable) term2).getName());
 		assertEquals("x", ((Variable) term3).getName());
-		assertTrue(term4 instanceof UndistinguishedVariable);
+		assertTrue(term4 instanceof AnonymousVariable);
 
 	}
 

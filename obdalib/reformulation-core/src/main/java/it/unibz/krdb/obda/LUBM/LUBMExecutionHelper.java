@@ -116,7 +116,7 @@ public class LUBMExecutionHelper {
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
 
-		factory.setOBDAController(obdamodel);
+//		factory.setOBDAController(obdamodel);
 		factory.setPreferenceHolder(p);
 
 		OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);

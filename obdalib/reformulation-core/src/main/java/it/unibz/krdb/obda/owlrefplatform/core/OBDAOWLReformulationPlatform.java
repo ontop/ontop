@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxSerializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
@@ -84,7 +85,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class OBDAOWLReformulationPlatform implements OWLReasoner, DataQueryReasoner, MonitorableOWLReasoner {
+public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryReasoner, MonitorableOWLReasoner {
 
 	private static final String					NOT_IMPLEMENTED_STR		= "Service not available.";
 

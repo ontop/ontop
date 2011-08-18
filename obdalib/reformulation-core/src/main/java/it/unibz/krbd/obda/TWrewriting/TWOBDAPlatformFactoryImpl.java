@@ -1,6 +1,7 @@
 package it.unibz.krbd.obda.TWrewriting;
 
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.BolzanoTechniqueWrapper;
 import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
@@ -26,14 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.owl.inference.OWLReasoner;
+import org.semanticweb.owl.inference.OWLReasonerFactory;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TWOBDAPlatformFactoryImpl implements
-		OBDAOWLReformulationPlatformFactory {
+		OBDAOWLReformulationPlatformFactory, OWLReasonerFactory{
 
     private OBDAModel apic;
     private ReformulationPlatformPreferences preferences = null;
@@ -43,11 +44,11 @@ public class TWOBDAPlatformFactoryImpl implements
 
     private final Logger log = LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
 
-	@Override
-	public void setOBDAController(OBDAModel controller) {
-		this.apic = controller;
-
-	}
+//	@Override
+//	public void setOBDAController(OBDAModel controller) {
+//		this.apic = controller;
+//
+//	}
 
 	@Override
 	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
@@ -56,7 +57,7 @@ public class TWOBDAPlatformFactoryImpl implements
 	}
 
 	@Override
-	public OWLReasoner createReasoner(OWLOntologyManager manager) {
+	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
 
 		TreeWitnessReformulator rewriter;
         //MappingViewManager viewMan;

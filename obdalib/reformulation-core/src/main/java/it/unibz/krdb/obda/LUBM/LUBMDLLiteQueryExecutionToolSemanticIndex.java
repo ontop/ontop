@@ -51,7 +51,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
 
             OBDAOWLReformulationPlatformFactory factory = new DummyOBDAPlatformFactoryImpl();
 
-            factory.setOBDAController(obdamodel);
+//            factory.setOBDAController(obdamodel);
 
             OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
 

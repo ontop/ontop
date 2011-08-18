@@ -55,7 +55,7 @@ public class OntologyLoader {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
 
             OBDAOWLReformulationPlatformFactoryImpl factory = new OBDAOWLReformulationPlatformFactoryImpl();
-            factory.setOBDAController(controller);
+//            factory.setOBDAController(controller);
             factory.setPreferenceHolder(pref);
 
             reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);

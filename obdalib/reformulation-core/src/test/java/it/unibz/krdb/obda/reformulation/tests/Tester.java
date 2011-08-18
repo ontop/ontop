@@ -122,7 +122,7 @@ public class Tester {
 
         OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
         
-        fac.setOBDAController(apic);
+//        fac.setOBDAController(apic);
         fac.setPreferenceHolder(pref);
 
         reasoner = (OBDAOWLReformulationPlatform) fac.createReasoner(manager);
