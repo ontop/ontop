@@ -268,7 +268,7 @@
 							Centre</Bundle-Vendor>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.0.0</Bundle-Version>
+						<Bundle-Version>1.5.1-RC1</Bundle-Version>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
