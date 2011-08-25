@@ -3,7 +3,9 @@ package it.unibz.krdb.obda.protege4.gui.action;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToDBDumper;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.dialogs.SelectDB;
 
@@ -63,17 +65,24 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 				selectDialog.setLocationRelativeTo(getEditorKit().getWorkspace().getParent());
 				selectDialog.setVisible(true);
 				String selectedsource = selectDialog.getSelectedSource();
-				final DataSource source = controller.getActiveOBDAModel()
-						.getSource(URI.create(selectedsource));
+				final DataSource source = controller.getActiveOBDAModel().getSource(URI.create(selectedsource));
 				Thread th = new Thread(new Runnable() {
 					@Override
 					public void run() {
 						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
 						monitor.start();
 						try {
-							ABoxToDBDumper dump = new ABoxToDBDumper(source);
-							monitor.addProgressListener(dump);
-							dump.materialize(ontologies, selectDialog.isOverrideSelected());
+
+							OWLAPI2VocabularyExtractor vext = new OWLAPI2VocabularyExtractor();
+							RDBMSDirectDataRepositoryManager dbmanager = new RDBMSDirectDataRepositoryManager(source,
+									vext.getVocabulary(ontologies));
+							monitor.addProgressListener(dbmanager);
+
+							dbmanager.createDBSchema(true);
+							dbmanager.insertMetadata();
+							OWLAPI2ABoxIterator aboxiterator = new OWLAPI2ABoxIterator(ontologies);
+							dbmanager.insertData(aboxiterator);
+
 							monitor.stop();
 							if (!monitor.isCanceled()) {
 								JOptionPane.showMessageDialog(null, "Dump successful.", "", JOptionPane.PLAIN_MESSAGE);

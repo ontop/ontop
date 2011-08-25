@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescript
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -42,7 +42,7 @@ public class TranslatorTests extends TestCase {
 		OWLOntology onto = manager.createOntology(URI.create("testonto"));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPITranslator translator = new OWLAPITranslator();
+		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
 		Set<Assertion> ass = dlliteonto.getAssertions();
@@ -70,7 +70,7 @@ public class TranslatorTests extends TestCase {
 		OWLOntology onto = manager.createOntology(URI.create("testonto"));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPITranslator translator = new OWLAPITranslator();
+		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
 		Set<Assertion> ass = dlliteonto.getAssertions();
@@ -97,7 +97,7 @@ public class TranslatorTests extends TestCase {
 		OWLOntology onto = manager.createOntology(URI.create("testonto"));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPITranslator translator = new OWLAPITranslator();
+		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
 		Set<Assertion> ass = dlliteonto.getAssertions();
@@ -137,7 +137,7 @@ public class TranslatorTests extends TestCase {
 		OWLOntology onto = manager.createOntology(URI.create("testonto"));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPITranslator translator = new OWLAPITranslator();
+		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
 		Set<Assertion> ass = dlliteonto.getAssertions();

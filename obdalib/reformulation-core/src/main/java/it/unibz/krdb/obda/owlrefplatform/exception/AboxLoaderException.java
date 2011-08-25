@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.exception;
 
 public class AboxLoaderException extends Exception {
 

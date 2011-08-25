@@ -1,8 +1,11 @@
-package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
+package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -13,6 +16,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.LanguageProfile;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.QualifiedExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterAttributeABoxAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptABoxAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleABoxAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.FunctionalRoleAssertionImpl;
 
 import java.net.URI;
 import java.util.Collection;
@@ -27,8 +38,11 @@ import java.util.Set;
 import org.semanticweb.owl.model.OWLAnnotationAxiom;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLClassAssertionAxiom;
+import org.semanticweb.owl.model.OWLConstant;
 import org.semanticweb.owl.model.OWLDataMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLDataProperty;
+import org.semanticweb.owl.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLDataPropertyExpression;
 import org.semanticweb.owl.model.OWLDataPropertyRangeAxiom;
@@ -43,12 +57,14 @@ import org.semanticweb.owl.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owl.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owl.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLImportsDeclaration;
+import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
 import org.semanticweb.owl.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owl.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owl.model.OWLObjectIntersectionOf;
 import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owl.model.OWLObjectPropertyExpression;
 import org.semanticweb.owl.model.OWLObjectPropertyInverse;
@@ -61,7 +77,7 @@ import org.semanticweb.owl.model.OWLSymmetricObjectPropertyAxiom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OWLAPITranslator {
+public class OWLAPI2Translator {
 
 	private OBDADataFactory									predicateFactory	= null;
 	private DescriptionFactory								descFactory			= null;
@@ -70,7 +86,7 @@ public class OWLAPITranslator {
 
 	private final LanguageProfile							profile				= LanguageProfile.DLLITEA;
 
-	Logger													log					= LoggerFactory.getLogger(OWLAPITranslator.class);
+	Logger													log					= LoggerFactory.getLogger(OWLAPI2Translator.class);
 
 	public static String									AUXROLEURI			= "ER.A-AUXROLE";
 
@@ -83,7 +99,7 @@ public class OWLAPITranslator {
 
 	int														auxRoleCounter		= 0;
 
-	public OWLAPITranslator() {
+	public OWLAPI2Translator() {
 		predicateFactory = OBDADataFactoryImpl.getInstance();
 		descFactory = new BasicDescriptionFactory();
 		objectproperties = new HashSet<String>();
@@ -175,7 +191,7 @@ public class OWLAPITranslator {
 					}
 					if (!range.isTopDataType()) {
 						log.warn("WARNING: At the moment Quest only rdfs:Literal. Offending axiom: {}", axiom.toString());
-						
+
 					}
 
 				} else if (axiom instanceof OWLDataSubPropertyAxiom) {
@@ -306,9 +322,9 @@ public class OWLAPITranslator {
 					 * Annotations axioms are intentionally ignored by the
 					 * translator
 					 */
-				}else if (axiom instanceof OWLImportsDeclaration) {
+				} else if (axiom instanceof OWLImportsDeclaration) {
 					/*
-					 * Imports 
+					 * Imports
 					 */
 				} else {
 					log.warn("WARNING ignoring axiom: {}", axiom.toString());
@@ -600,14 +616,96 @@ public class OWLAPITranslator {
 		 * 
 		 */
 		private static final long	serialVersionUID	= 7917688953760608030L;
-		
+
 		public TranslationException() {
 			super();
 		}
-		
+
 		public TranslationException(String msg) {
 			super(msg);
 		}
 
+	}
+
+	public ABoxAssertion translate(OWLIndividualAxiom axiom) {
+
+		if (axiom instanceof OWLClassAssertionAxiom) {
+
+			/*
+			 * Class assertions
+			 */
+
+			OWLClassAssertionAxiom assertion = (OWLClassAssertionAxiom) axiom;
+			OWLDescription classExpression = assertion.getDescription();
+			if (!(classExpression instanceof OWLClass) || classExpression.isOWLThing() || classExpression.isOWLNothing())
+				return null;
+			
+			OWLClass namedclass = (OWLClass) classExpression;
+			OWLIndividual indv = assertion.getIndividual();
+
+			Predicate p = predicateFactory.getPredicate(namedclass.getURI(), 1);
+			URIConstant c = predicateFactory.getURIConstant(indv.getURI());
+			return new DLLiterConceptABoxAssertionImpl(p, c);
+
+		} else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
+
+			/*
+			 * Role assertions
+			 */
+
+			OWLObjectPropertyAssertionAxiom assertion = (OWLObjectPropertyAssertionAxiom) axiom;
+			OWLObjectPropertyExpression propertyExperssion = assertion.getProperty();
+			if (!(propertyExperssion instanceof OWLObjectPropertyExpression))
+				return null;
+
+			URI property = null;
+			OWLIndividual subject = null;
+			OWLIndividual object = null;
+
+			if (propertyExperssion instanceof OWLObjectProperty) {
+				OWLObjectProperty namedclass = (OWLObjectProperty) propertyExperssion;
+				property = namedclass.getURI();
+				
+				
+				subject = assertion.getSubject();
+				object = assertion.getObject();
+
+			} else if (propertyExperssion instanceof OWLObjectPropertyInverse) {
+				OWLObjectProperty namedclass = ((OWLObjectPropertyInverse) propertyExperssion).getInverse().getNamedProperty();
+				property = namedclass.getURI();
+				subject = assertion.getObject();
+				object = assertion.getSubject();
+			}
+			Predicate p = predicateFactory.getPredicate(property, 2);
+			URIConstant c1 = predicateFactory.getURIConstant(subject.getURI());
+			URIConstant c2 = predicateFactory.getURIConstant(object.getURI());
+			return new DLLiterRoleABoxAssertionImpl(p, c1, c2);
+
+		} else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
+
+			/*
+			 * Attribute assertions
+			 */
+
+			OWLDataPropertyAssertionAxiom assertion = (OWLDataPropertyAssertionAxiom) axiom;
+			OWLDataProperty propertyExperssion = (OWLDataProperty) assertion.getProperty();
+
+			URI property = null;
+			OWLIndividual subject = null;
+			OWLConstant object = null;
+
+			
+			property = propertyExperssion.getURI();
+			subject = assertion.getSubject();
+			object = assertion.getObject();
+
+			Predicate p = predicateFactory.getPredicate(property, 2);
+			URIConstant c1 = predicateFactory.getURIConstant(subject.getURI());
+			ValueConstant c2 = predicateFactory.getValueConstant(object.getLiteral());
+			return new DLLiterAttributeABoxAssertionImpl(p, c1, c2);
+
+		} else {
+			return null;
+		}
 	}
 }

@@ -467,7 +467,7 @@ public class DataManager {
 					throw new Exception("Error while parsing the conjunctive query of " + "the mapping " + mapping.getAttribute("id"));
 				}
 				try {
-					apic.insertMapping(datasource, mappingAxiom);
+					apic.addMapping(datasource, mappingAxiom);
 				} catch (DuplicateMappingException e) {
 					log.warn("duplicate mapping detected while trying to load mappings " + "from file. Ignoring it. Datasource URI: "
 							+ datasource + " " + "Mapping ID: " + mappingAxiom.getId());

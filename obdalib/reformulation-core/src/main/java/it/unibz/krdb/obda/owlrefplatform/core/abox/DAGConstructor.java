@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -133,7 +133,7 @@ public class DAGConstructor {
 		for (DAGNode node : dag.getRoles()) {
 			RoleDescription nodeDesc = (RoleDescription) node.getDescription();
 
-			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 				continue;
 			}
 
@@ -156,7 +156,7 @@ public class DAGConstructor {
 			}
 			for (DAGNode child : node.getChildren()) {
 				RoleDescription childDesc = (RoleDescription) child.getDescription();
-				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 					continue;
 				}
 				if (childDesc.isInverse()) {

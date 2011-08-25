@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.DummyOBDAPlatformFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.io.File;
 
@@ -31,7 +31,7 @@ public class TBoxLoader {
         this.dataDir = dataDir;
         this.owlfile = dataDir + "univ-bench.owl";
         ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-        OWLAPITranslator translator = new OWLAPITranslator();
+        OWLAPI2Translator translator = new OWLAPI2Translator();
         dlLiterOntology = translator.translate(ontology);
     }
 

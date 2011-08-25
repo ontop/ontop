@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -198,16 +199,6 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	/* (non-Javadoc)
-	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#addDataSource(java.lang.String)
-	 */
-	public void addDataSource(String srcid) {
-		URI dburi = URI.create(srcid);
-		DataSource newsource = fac.getDataSource(dburi);
-		datasources.put(dburi, newsource);
-		fireSourceAdded(newsource);
-	}
-
-	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.DatasourcesController#addDatasourceControllerListener(it.unibz.krdb.obda.model.DatasourcesControllerListener)
 	 */
 	public void addSourcesListener(OBDAModelListener listener) {
@@ -360,7 +351,7 @@ public class OBDAModelImpl implements OBDAModel {
 			throw new RuntimeException(e);
 		}
 		newmapping.setId(new_id);
-		insertMapping(srcuri, newmapping);
+		addMapping(srcuri, newmapping);
 	}
 
 	private void fireAllMappingsRemoved() {
@@ -491,7 +482,7 @@ public class OBDAModelImpl implements OBDAModel {
 	/* (non-Javadoc)
 	 * @see it.unibz.krdb.obda.model.impl.MappingControllerInterface#insertMapping(java.net.URI, it.unibz.krdb.obda.model.OBDAMappingAxiom)
 	 */
-	public void insertMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException {
+	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException {
 		int index = indexOfMapping(datasource_uri, mapping.getId());
 		if (index != -1)
 			throw new DuplicateMappingException("ID " + mapping.getId());
@@ -558,6 +549,14 @@ public class OBDAModelImpl implements OBDAModel {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void addMappings(URI datasource_uri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException {
+		for (OBDAMappingAxiom map: mappings) {
+			addMapping(datasource_uri, map);
+		}
+		
 	}
 
 	

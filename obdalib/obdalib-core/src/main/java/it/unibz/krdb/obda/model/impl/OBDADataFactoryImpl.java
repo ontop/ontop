@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -45,7 +46,15 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	public PredicateImpl getPredicate(URI name, int arity) {
-		return new PredicateImpl(name, arity);
+		if (arity == 1) {
+			return new PredicateImpl(name, arity, new COL_TYPE[] {COL_TYPE.OBJECT});
+		} else {
+			return new PredicateImpl(name, arity, null);
+		}
+	}
+
+	public PredicateImpl getPredicate(URI name, int arity, COL_TYPE[] types) {
+		return new PredicateImpl(name, arity, types);
 	}
 
 	@Override

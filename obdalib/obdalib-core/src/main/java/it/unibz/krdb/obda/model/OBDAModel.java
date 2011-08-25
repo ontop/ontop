@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.queryanswering.QueryController;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -53,9 +54,6 @@ public interface OBDAModel {
 
 	public void addSource(DataSource source);
 
-	//TODO remove
-	public void addDataSource(String srcid);
-	
 	public void removeSource(URI id);
 	
 	public void updateSource(URI id, DataSource dsd);
@@ -148,7 +146,9 @@ public interface OBDAModel {
 	 * @param mapping
 	 * @throws DuplicateMappingException
 	 */
-	public void insertMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException;
+	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException;
+	
+	public void addMappings(URI datasource_uri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException;
 
 	
 	/***

@@ -6,6 +6,7 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -124,7 +125,8 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
       URI uri = createUri(name);
       if (uri != null) {
         if (!dscontroller.containsSource(uri)) {
-          dscontroller.addDataSource(name);
+        	DataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        	dscontroller.addSource(source);
         }
         else {
           JOptionPane.showMessageDialog(this,

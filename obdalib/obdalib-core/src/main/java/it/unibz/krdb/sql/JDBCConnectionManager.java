@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.management.RuntimeErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +51,12 @@ public class JDBCConnectionManager {
 		statementList = new Vector<Statement>();
 	}
 
-	public void createConnection(DataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
+	public void createConnection(DataSource ds) throws ClassNotFoundException, SQLException {
 
 		if (ds == null) {
-			throw new NoDatasourceSelectedException("No source selected");
+			RuntimeException ex = new RuntimeException("Invalid datasource: null");
+			ex.fillInStackTrace();
+			throw ex;
 		}
 		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 		currentDriver = driver;
@@ -115,15 +119,15 @@ public class JDBCConnectionManager {
 	}
 
 	public ResultSet executeQuery(URI connID, String query, DataSource ds) throws SQLException {
-	  ResultSet result = null;
+		ResultSet result = null;
 		Connection con = connectionPool.get(connID);
 		if (con == null || con.isClosed()) {
 			try {
 				createConnection(ds);
-			} catch (NoDatasourceSelectedException e) {
-				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				SQLException ex = new SQLException(e);
+				ex.fillInStackTrace();
+				throw ex;
 			}
 			con = connectionPool.get(ds.getSourceID());
 			throw new SQLException("No connection established for the given id: " + connID);
@@ -136,17 +140,17 @@ public class JDBCConnectionManager {
 			int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
 			int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
 			try {
-			  Statement st = con.createStatement(type, concur);
-			  st.setFetchSize(fetchsize);
-			  result = st.executeQuery(query);
-	      statementList.add(st);
-	      currentStatement = st;
+				Statement st = con.createStatement(type, concur);
+				st.setFetchSize(fetchsize);
+				result = st.executeQuery(query);
+				statementList.add(st);
+				currentStatement = st;
 			} catch (SQLException e) {
-        con.rollback();
-        throw e;
+				con.rollback();
+				throw e;
 			}
 		}
-    return result;
+		return result;
 	}
 
 	public ResultSet executeQuery(DataSource ds, String query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
@@ -167,7 +171,6 @@ public class JDBCConnectionManager {
 		statementList.add(st);
 		currentStatement = st;
 		return st.executeQuery(query);
-
 	}
 
 	public static JDBCConnectionManager getJDBCConnectionManager() {
@@ -250,12 +253,12 @@ public class JDBCConnectionManager {
 		return "Count error";
 	}
 
-	public Connection getConnection(DataSource source) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
+	public Connection getConnection(DataSource source) throws ClassNotFoundException, SQLException {
 		if (source == null) {
 			throw new SQLException("No data source selected.");
 		}
 		Connection con = connectionPool.get(source.getSourceID());
-		if ((con == null)||(con.isClosed())) {
+		if ((con == null) || (con.isClosed())) {
 			createConnection(source);
 		}
 		return connectionPool.get(source.getSourceID());

@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class SemanticIndexMappingGenerator {
                     SemanticIndexRange descRange;
 
                     Predicate p = ((ExistentialConceptDescription) descendant.getDescription()).getPredicate();
-                    if (p.getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                    if (p.getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
                         continue;
                     }
                     boolean isInverse = ((ExistentialConceptDescription) descendant.getDescription()).isInverse();
@@ -124,7 +124,7 @@ public class SemanticIndexMappingGenerator {
         for (DAGNode node : dag.getRoles()) {
 
             RoleDescription nodeDesc = (RoleDescription) node.getDescription();
-            if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+            if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
                 continue;
             }
             if (nodeDesc.isInverse()) {
@@ -158,7 +158,7 @@ public class SemanticIndexMappingGenerator {
             for (DAGNode child : node.getChildren()) {
                 RoleDescription childDesc = (RoleDescription) child.getDescription();
 
-                if (childDesc.getPredicate().getName().toString().startsWith(OWLAPITranslator.AUXROLEURI)) {
+                if (childDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
                     continue;
                 }
 

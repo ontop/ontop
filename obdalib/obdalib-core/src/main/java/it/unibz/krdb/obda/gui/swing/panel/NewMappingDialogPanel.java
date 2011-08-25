@@ -190,7 +190,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
   	      String id = mapcon.getNextAvailableMappingID(sourceID);
   	      SQLQuery body = dataFactory.getSQLQuery(source);
   	      RDBMSMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(id, body, targetQuery);
-  				mapcon.insertMapping(sourceID, mapping);
+  				mapcon.addMapping(sourceID, mapping);
   			} 
   			catch (DuplicateMappingException e) {
   				JOptionPane.showMessageDialog(null, "Error while inserting mapping.\n " + e.getMessage()

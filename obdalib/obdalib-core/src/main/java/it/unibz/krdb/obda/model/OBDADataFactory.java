@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.model;
 
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+
 import java.net.URI;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public interface OBDADataFactory {
 	 * @return a predicate object.
 	 */
 	public Predicate getPredicate(URI name, int arity);
+	
+	public Predicate getPredicate(URI name, int arity, COL_TYPE[] types);
 	
 	/*
 	 * Boolean atoms

@@ -14,38 +14,39 @@ import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-
 /**
  * The mapping view manager is the module which allows us to translate CQIEs
  * into sql queries using the provided mappings.
- *
+ * 
  * @author Manfred Gerstgrasser
- *
+ * 
  */
 
 public class MappingViewManager implements ViewManager {
 
 	private static final String						auxpreduri					= "http://obda.org/reformulation/auxPredicate#";
 
-	private List<OBDAMappingAxiom>					mappings					= null;
+	private List<OBDAMappingAxiom>					mappings					= new LinkedList<OBDAMappingAxiom>();
 	private Map<String, Vector<OBDAMappingAxiom>>	mappingswithsambodyIndex	= null;
 	private Map<String, Predicate>					mappingToNarysetMap			= null;
 	private Map<String, Integer>					globalAliases				= null;
 	private Map<URI, AuxSQLMapping>					predicateAuxMappingMap		= null;
-	private OBDADataFactory				predFactory					= null;
+	private OBDADataFactory							predFactory					= null;
 	private Map<URI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
-	private PredicateAtom									head						= null;
+	private PredicateAtom							head						= null;
 
-	public MappingViewManager(List<OBDAMappingAxiom> mappings) {
-		this.mappings = mappings;
+	public MappingViewManager(Collection<OBDAMappingAxiom> mappings) {
+		this.mappings.addAll(mappings);
 		predFactory = OBDADataFactoryImpl.getInstance();
 		mappingswithsambodyIndex = new HashMap<String, Vector<OBDAMappingAxiom>>();
 		mappingToNarysetMap = new HashMap<String, Predicate>();
@@ -70,7 +71,7 @@ public class MappingViewManager implements ViewManager {
 	 * obda mappings with their corresponding auxilary predicate, it creates the
 	 * Auxiliary Mappings, it produces the global aliases for the sql queries,
 	 * etc.
-	 *
+	 * 
 	 * @throws Exception
 	 */
 	private void prepareIndexes() throws Exception {
@@ -144,7 +145,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Return the Predicate associated the given SQL query.
-	 *
+	 * 
 	 * @param ax
 	 *            the obda mapping
 	 * @return the associated predicate
@@ -153,11 +154,9 @@ public class MappingViewManager implements ViewManager {
 		return mappingToNarysetMap.get(sqlquery);
 	}
 
-
-
 	/**
 	 * Returns the auxiliary mapping associated to the given predicate
-	 *
+	 * 
 	 * @param preduri
 	 *            the predicate identifier
 	 * @return the associated aux mapping
@@ -168,7 +167,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Returns the sql query associated the given predicate as String
-	 *
+	 * 
 	 * @param uri
 	 *            the predicate identifier
 	 * @return the associated sql
@@ -179,7 +178,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Returns the alias associated to the given sql query
-	 *
+	 * 
 	 * @param sql
 	 *            sql query
 	 * @return the associated alias
@@ -201,7 +200,7 @@ public class MappingViewManager implements ViewManager {
 
 	/**
 	 * Returns the original head variable for the given position
-	 *
+	 * 
 	 * @param pos
 	 *            the position
 	 * @return the original variable name at the given position
@@ -212,7 +211,7 @@ public class MappingViewManager implements ViewManager {
 			throw new Exception("Invalid position for HeadVariable");
 		} else {
 			return signature.get(pos);
-//			return head.getTerms().get(pos).getName();
+			// return head.getTerms().get(pos).getName();
 		}
 	}
 }

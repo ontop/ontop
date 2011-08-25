@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashSet;
@@ -308,8 +308,8 @@ public class TreeRedReformulator implements QueryRewriter {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
 			for (Atom atom : body) {
-				if (atom.getPredicate().getName().toString().substring(0, OWLAPITranslator.AUXROLEURI.length()).equals(
-						OWLAPITranslator.AUXROLEURI)) {
+				if (atom.getPredicate().getName().toString().substring(0, OWLAPI2Translator.AUXROLEURI.length()).equals(
+						OWLAPI2Translator.AUXROLEURI)) {
 					auxiliary = true;
 					break;
 				}

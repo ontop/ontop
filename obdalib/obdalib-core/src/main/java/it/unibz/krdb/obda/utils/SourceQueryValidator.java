@@ -69,9 +69,6 @@ public class SourceQueryValidator {
 			model = new IncrementalResultSetTableModel(set);
 			return true;
 
-		} catch (NoDatasourceSelectedException e) {
-			reason = e;
-			return false;
 		} catch (SQLException e) {
 			reason = e;
 			return false;

@@ -16,10 +16,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 
 import java.net.URI;
@@ -68,7 +68,7 @@ public class TWOBDAPlatformFactoryImpl implements
         try {
             Set<OWLOntology> ontologies = manager.getOntologies();
             URI uri = ontologies.iterator().next().getURI();
-            OWLAPITranslator translator = new OWLAPITranslator();
+            OWLAPI2Translator translator = new OWLAPI2Translator();
             DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
 
             for (OWLOntology onto : ontologies) {

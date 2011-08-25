@@ -7,7 +7,11 @@ import java.net.URI;
 public class BooleanOperationPredicateImpl extends PredicateImpl implements BooleanOperationPredicate {
 
 	protected BooleanOperationPredicateImpl(URI name, int arity) {
-		super(name, arity);
+		super(name, arity, null);
+	}
+	
+	protected BooleanOperationPredicateImpl(URI name, int arity, COL_TYPE[] types) {
+		super(name, arity, types);
 	}
 	
 	@Override

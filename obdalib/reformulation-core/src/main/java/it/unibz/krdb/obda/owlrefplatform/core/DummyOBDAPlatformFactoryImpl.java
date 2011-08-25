@@ -16,7 +16,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OWLAPITranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -24,6 +23,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
@@ -111,7 +111,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 		try {
 			Set<OWLOntology> ontologies = manager.getOntologies();
 			URI uri = uri = ontologies.iterator().next().getURI();
-			OWLAPITranslator translator = new OWLAPITranslator();
+			OWLAPI2Translator translator = new OWLAPI2Translator();
 			DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
 
 			for (OWLOntology onto : ontologies) {
@@ -144,7 +144,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 			for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_mappings)) {
 				mappings.add(map);
-				apic.insertMapping(ds.getSourceID(), map);
+				apic.addMapping(ds.getSourceID(), map);
 			}
 
 			// Rewriter

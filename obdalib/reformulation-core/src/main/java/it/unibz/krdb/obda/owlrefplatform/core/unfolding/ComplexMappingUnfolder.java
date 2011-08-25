@@ -12,10 +12,10 @@ import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
@@ -23,6 +23,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
-	List<OBDAMappingAxiom>			mappings			= null;
+	List<OBDAMappingAxiom>			mappings			= new LinkedList<OBDAMappingAxiom>();
 	Set<OBDAMappingAxiom>			splitMappings		= null;
 
 	// private Map<String, LinkedList<OBDAMappingAxiom>> mappingsIndex = null;
@@ -74,12 +75,12 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	 * @param mappings
 	 * @param man
 	 */
-	public ComplexMappingUnfolder(List<OBDAMappingAxiom> mappings, MappingViewManager man) throws Exception {
+	public ComplexMappingUnfolder(Collection<OBDAMappingAxiom> mappings, MappingViewManager man) throws Exception {
 
 		log.debug("Setting up ComplexMappingUnfolder");
 		log.debug("Mappings recreived: {}", mappings.size());
 
-		this.mappings = mappings;
+		this.mappings.addAll(mappings);
 		this.termFactory = OBDADataFactoryImpl.getInstance();
 		this.viewManager = man;
 		resolutionEngine = new ResolutionEngine();
@@ -240,8 +241,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 		String sql = mapping.getSourceQuery().toString();
 		String select = sql.substring("SELECT ".length(), sql.indexOf("FROM"));
-		
-		
+
 		Predicate viewPredicate = viewManager.getViewName(mapping.getSourceQuery().toString());
 		AuxSQLMapping auxmap = viewManager.getAuxSQLMapping(viewPredicate.getName());
 
@@ -265,7 +265,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		 */
 
 		return null;
-		
+
 	}
 
 	@Override
