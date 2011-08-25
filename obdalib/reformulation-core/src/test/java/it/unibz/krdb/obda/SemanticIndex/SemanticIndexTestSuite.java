@@ -13,7 +13,6 @@ public class SemanticIndexTestSuite {
         TestSuite suite = new TestSuite();
 
         suite.addTestSuite(DAGTest.class);
-        suite.addTestSuite(DAGSerializerTest.class);
         suite.addTestSuite(SigmaTest.class);
         suite.addTestSuite(DAGChainTest.class);
         suite.addTestSuite(SemanticReductionTest.class);

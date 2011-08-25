@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;

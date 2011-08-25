@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.SemanticIndex;
 
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 
 import java.util.List;
 

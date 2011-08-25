@@ -1,151 +1,153 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
 
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * Prune Ontology for redundant assertions based on dependencies
  */
 public class SemanticReduction {
 
-    private static final Logger log = LoggerFactory.getLogger(SemanticReduction.class);
-    private final DAG isa;
-    private final DAG sigma;
-    private final DAGChain isaChain;
-    private final DAGChain sigmaChain;
+	private static final Logger			log	= LoggerFactory.getLogger(SemanticReduction.class);
+	private final DAG					isa;
+	private final DAG					sigma;
+	private final DAGChain				isaChain;
+	private final DAGChain				sigmaChain;
 
-    private final OBDADataFactory predicateFactory;
-    private final DescriptionFactory descFactory;
+	private final OBDADataFactory		predicateFactory;
+	private final DescriptionFactory	descFactory;
 
-    public SemanticReduction(DAG isa, DAG sigma) {
-        this.isa = isa;
-        this.sigma = sigma;
+	public SemanticReduction(Ontology isat, Ontology sigmat) {
+		this.isa = DAGConstructor.getISADAG(isat);
+		this.sigma = DAGConstructor.getISADAG(sigmat);
 
-        this.isaChain = new DAGChain(isa);
-        this.sigmaChain = new DAGChain(sigma);
+		this.isaChain = new DAGChain(isa);
+		this.sigmaChain = new DAGChain(sigma);
 
-        predicateFactory = OBDADataFactoryImpl.getInstance();
-        descFactory = new BasicDescriptionFactory();
+		predicateFactory = OBDADataFactoryImpl.getInstance();
+		descFactory = new BasicDescriptionFactory();
 
-    }
+	}
+	
+	public Ontology getReducedOntology() {
+		Ontology reformulationOntology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+		reformulationOntology.addAssertions(reduce());
+		return reformulationOntology;
+	}
 
-    public List<Assertion> reduce() {
-        log.debug("Starting semantic-reduction");
-        List<Assertion> rv = new LinkedList<Assertion>();
+	public List<Assertion> reduce() {
+		log.debug("Starting semantic-reduction");
+		List<Assertion> rv = new LinkedList<Assertion>();
 
+		for (DAGNode node : isa.getClasses()) {
 
-        for (DAGNode node : isa.getClasses()) {
+			// Ignore all edges from T
+			if (node.getDescription().equals(DAG.thingConcept)) {
+				continue;
+			}
 
-            // Ignore all edges from T
-            if (node.getDescription().equals(DAG.thingConcept)) {
-                continue;
-            }
+			for (DAGNode child : node.descendans) {
 
-            for (DAGNode child : node.descendans) {
+				if (!check_redundant(node, child)) {
 
-                if (!check_redundant(node, child)) {
+					rv.add(new DLLiterConceptInclusionImpl((ConceptDescription) child.getDescription(), (ConceptDescription) node
+							.getDescription()));
+				}
+			}
+		}
+		for (DAGNode node : isa.getRoles()) {
 
-                    rv.add(new DLLiterConceptInclusionImpl(
-                            (ConceptDescription) child.getDescription(),
-                            (ConceptDescription) node.getDescription()));
-                }
-            }
-        }
-        for (DAGNode node : isa.getRoles()) {
+			for (DAGNode child : node.descendans) {
+				if (!check_redundant_role(node, child)) {
 
-            for (DAGNode child : node.descendans) {
-                if (!check_redundant_role(node, child)) {
+					rv.add(new DLLiterRoleInclusionImpl((RoleDescription) child.getDescription(), (RoleDescription) node.getDescription()));
+				}
+			}
+		}
 
-                    rv.add(new DLLiterRoleInclusionImpl(
-                            (RoleDescription) child.getDescription(),
-                            (RoleDescription) node.getDescription()));
-                }
-            }
-        }
+		log.debug("Finished semantic-reduction {}", rv);
+		return rv;
+	}
 
-        log.debug("Finished semantic-reduction {}", rv);
-        return rv;
-    }
+	private boolean check_redundant_role(DAGNode parent, DAGNode child) {
 
-    private boolean check_redundant_role(DAGNode parent, DAGNode child) {
+		if (check_directly_redundant_role(parent, child))
+			return true;
+		else {
+			log.debug("Not directly redundant role {} {}", parent, child);
+			for (DAGNode child_prime : parent.getChildren()) {
+				if (!child_prime.equals(child) && check_directly_redundant_role(child_prime, child)
+						&& !check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+		log.debug("Not redundant role {} {}", parent, child);
 
-        if (check_directly_redundant_role(parent, child))
-            return true;
-        else {
-            log.debug("Not directly redundant role {} {}", parent, child);
-            for (DAGNode child_prime : parent.getChildren()) {
-                if (!child_prime.equals(child) &&
-                        check_directly_redundant_role(child_prime, child) &&
-                        !check_redundant(child_prime, parent)) {
-                    return true;
-                }
-            }
-        }
-        log.debug("Not redundant role {} {}", parent, child);
+		return false;
+	}
 
-        return false;
-    }
+	private boolean check_directly_redundant_role(DAGNode parent, DAGNode child) {
+		RoleDescription parentDesc = (RoleDescription) parent.getDescription();
+		RoleDescription childDesc = (RoleDescription) child.getDescription();
 
-    private boolean check_directly_redundant_role(DAGNode parent, DAGNode child) {
-        RoleDescription parentDesc = (RoleDescription) parent.getDescription();
-        RoleDescription childDesc = (RoleDescription) child.getDescription();
+		ExistentialConceptDescription existParentDesc = descFactory.getExistentialConceptDescription(parentDesc.getPredicate(),
+				parentDesc.isInverse());
+		ExistentialConceptDescription existChildDesc = descFactory.getExistentialConceptDescription(childDesc.getPredicate(),
+				childDesc.isInverse());
 
-        ExistentialConceptDescription existParentDesc = descFactory.getExistentialConceptDescription(
-                parentDesc.getPredicate(),
-                parentDesc.isInverse()
-        );
-        ExistentialConceptDescription existChildDesc = descFactory.getExistentialConceptDescription(
-                childDesc.getPredicate(),
-                childDesc.isInverse()
-        );
+		DAGNode exists_parent = isa.getClassNode(existParentDesc);
+		DAGNode exists_child = isa.getClassNode(existChildDesc);
 
-        DAGNode exists_parent = isa.getClassNode(existParentDesc);
-        DAGNode exists_child = isa.getClassNode(existChildDesc);
+		return check_directly_redundant(parent, child) && check_directly_redundant(exists_parent, exists_child);
+	}
 
-        return check_directly_redundant(parent, child) && check_directly_redundant(exists_parent, exists_child);
-    }
+	private boolean check_redundant(DAGNode parent, DAGNode child) {
+		if (check_directly_redundant(parent, child))
+			return true;
+		else {
+			for (DAGNode child_prime : parent.getChildren()) {
+				if (!child_prime.equals(child) && check_directly_redundant(child_prime, child) && !check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-    private boolean check_redundant(DAGNode parent, DAGNode child) {
-        if (check_directly_redundant(parent, child))
-            return true;
-        else {
-            for (DAGNode child_prime : parent.getChildren()) {
-                if (!child_prime.equals(child) &&
-                        check_directly_redundant(child_prime, child) &&
-                        !check_redundant(child_prime, parent)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	private boolean check_directly_redundant(DAGNode parent, DAGNode child) {
+		DAGNode sp = sigmaChain.chain().get(parent.getDescription());
+		DAGNode sc = sigmaChain.chain().get(child.getDescription());
+		DAGNode tc = isaChain.chain().get(child.getDescription());
 
-    private boolean check_directly_redundant(DAGNode parent, DAGNode child) {
-        DAGNode sp = sigmaChain.chain().get(parent.getDescription());
-        DAGNode sc = sigmaChain.chain().get(child.getDescription());
-        DAGNode tc = isaChain.chain().get(child.getDescription());
+		if (sp == null || sc == null || tc == null) {
+			return false;
+		}
 
-        if (sp == null || sc == null || tc == null) {
-            return false;
-        }
+		return (sp.getChildren().contains(sc) && sc.descendans.containsAll(tc.descendans));
 
-        return (sp.getChildren().contains(sc) && sc.descendans.containsAll(tc.descendans));
-
-    }
+	}
 
 }

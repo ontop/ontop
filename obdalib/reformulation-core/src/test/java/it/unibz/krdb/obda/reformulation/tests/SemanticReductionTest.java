@@ -2,9 +2,9 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 
@@ -20,7 +20,7 @@ public class SemanticReductionTest extends TestCase {
         DLLiterOntology ontology = helper.load_onto("test_2_0_0");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
-        SemanticReduction reduction = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
+        SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
         List<Assertion> rv = reduction.reduce();
         assertEquals(0, rv.size());
     }
@@ -29,7 +29,7 @@ public class SemanticReductionTest extends TestCase {
         DLLiterOntology ontology = helper.load_onto("test_2_0_1");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
-        SemanticReduction reduction = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
+        SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
         List<Assertion> rv = reduction.reduce();
         assertEquals(0, rv.size());
     }
@@ -38,7 +38,7 @@ public class SemanticReductionTest extends TestCase {
         DLLiterOntology ontology = helper.load_onto("test_2_1_0");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
-        SemanticReduction reduction = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
+        SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
         List<Assertion> rv = reduction.reduce();
         assertEquals(1, rv.size());
     }
@@ -47,7 +47,7 @@ public class SemanticReductionTest extends TestCase {
         DLLiterOntology ontology = helper.load_onto("test_1_2_0");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
-        SemanticReduction reduction = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
+        SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
         List<Assertion> rv = reduction.reduce();
         assertEquals(0, rv.size());
     }

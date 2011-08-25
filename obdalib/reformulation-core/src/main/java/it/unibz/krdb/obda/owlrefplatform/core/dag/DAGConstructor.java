@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
@@ -31,11 +32,11 @@ public class DAGConstructor {
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
 	private static final DescriptionFactory	descFactory			= new BasicDescriptionFactory();
 
-	public static DAG getISADAG(DLLiterOntology ontology) {
+	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);
 	}
 
-	public static DAG getSigma(DLLiterOntology ontology) {
+	public static DAG getSigma(Ontology ontology) {
 
 		DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create(""));
 
@@ -57,7 +58,7 @@ public class DAGConstructor {
 		return getISADAG(sigma);
 	}
 
-	public static DLLiterOntology getSigmaOntology(DLLiterOntology ontology) {
+	public static Ontology getSigmaOntology(Ontology ontology) {
 
 		DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create("sigma"));
 
@@ -107,6 +108,8 @@ public class DAGConstructor {
 			DAGNode newNode = classes.get(node.getDescription());
 			if (newNode == null) {
 				newNode = new DAGNode(node.getDescription());
+				newNode.setIndex(node.getIndex());
+				newNode.getRange().addRange(node.getRange());
 				newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
 				classes.put(node.getDescription(), newNode);
 			}
@@ -126,7 +129,6 @@ public class DAGConstructor {
 					newChild.getParents().add(newNode);
 					newNode.getChildren().add(newChild);
 				}
-
 			}
 		}
 

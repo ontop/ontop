@@ -4,7 +4,7 @@ package it.unibz.krdb.obda.SemanticIndex;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;

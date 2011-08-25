@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 
@@ -73,7 +72,7 @@ public interface RDBMSDataRepositoryManager {
 
 	public void insertData(Iterator<ABoxAssertion> data) throws SQLException;
 
-	public Collection<Assertion> getCBox();
+	public Ontology getABoxDependencies();
 
 	/***
 	 * Attempts to load the metadata from the database. This will override the

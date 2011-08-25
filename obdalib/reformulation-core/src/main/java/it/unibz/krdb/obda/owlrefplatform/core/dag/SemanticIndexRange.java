@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -92,7 +92,7 @@ public class SemanticIndexRange {
      *
      * @author Sergejs Pugacs
      */
-    class Interval implements Comparable<Interval> {
+    public class Interval implements Comparable<Interval> {
 
         private final int start, end;
 

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 public class Edge {
     private final DAGNode left;

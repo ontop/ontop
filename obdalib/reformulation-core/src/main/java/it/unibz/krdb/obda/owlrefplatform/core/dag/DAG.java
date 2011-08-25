@@ -1,14 +1,14 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
@@ -55,7 +55,7 @@ public class DAG {
      *
      * @param ontology ontology that contain TBox assertions for the DAG
      */
-    public DAG(DLLiterOntology ontology) {
+    public DAG(Ontology ontology) {
 
         classes = new LinkedHashMap<Description, DAGNode>(ontology.getConcepts().size());
         roles = new LinkedHashMap<Description, DAGNode>(ontology.getRoles().size());

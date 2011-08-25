@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.QueryResultSet;
 import it.unibz.krdb.obda.model.Statement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 
 import java.net.URI;

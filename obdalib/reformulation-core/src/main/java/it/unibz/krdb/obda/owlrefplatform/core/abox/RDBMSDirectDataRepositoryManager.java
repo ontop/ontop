@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.AttributeABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -47,6 +48,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	private Connection				conn						= null;
 	// private APIController apic = null;
 	private List<ABoxDumpListener>	listener					= null;
+
 	private DataSource				db							= null;
 	// private int indexcounter = 1;
 	//
@@ -63,17 +65,19 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	private final OBDADataFactory	obdaFactory					= OBDADataFactoryImpl.getInstance();
 
-	final String					strtablemetada				= "QuestMetadataDirectMapping";
+	private final String			strtabledata				= "quest_%s";
 
-	final String					strcreate_table_class		= "CREATE TABLE %s (term0 VARCHAR)";
+	final String					strtablemetada				= "quest_metadata_direct_mapping";
 
-	final String					strcreate_table_property	= "CREATE TABLE %s (term0 VARCHAR, term1 VARCHAR)";
+	final String					strcreate_table_class		= "CREATE TABLE " + strtabledata + " (term0 VARCHAR)";
 
-	final String					strcreate_index_class		= "CREATE INDEX idx%s ON %s (term0)";
+	final String					strcreate_table_property	= "CREATE TABLE " + strtabledata + " (term0 VARCHAR, term1 VARCHAR)";
 
-	final String					strcreate_index_property_1	= "CREATE INDEX idx1%s ON %s (term0, term1)";
+	final String					strcreate_index_class		= "CREATE INDEX idx%s ON " + strtabledata + " (term0)";
 
-	final String					strcreate_index_property_2	= "CREATE INDEX idx2%s ON %s (term1, term0)";
+	final String					strcreate_index_property_1	= "CREATE INDEX idx1%s ON " + strtabledata + " (term0, term1)";
+
+	final String					strcreate_index_property_2	= "CREATE INDEX idx2%s ON " + strtabledata + " (term1, term0)";
 
 	final String					strcreate_meta_table		= "CREATE TABLE "
 																		+ strtablemetada
@@ -81,15 +85,15 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	final String					strinsert_meta_table		= "INSERT INTO " + strtablemetada + " VALUES (%s, %s, %s)";
 
-	final String					strinsert_table_class		= "INSERT INTO %s VALUES (%s)";
+	final String					strinsert_table_class		= "INSERT INTO " + strtabledata + " VALUES (%s)";
 
-	final String					strinsert_table_property	= "INSERT INTO %s VALUES (%s, %s)";
+	final String					strinsert_table_property	= "INSERT INTO " + strtabledata + " VALUES (%s, %s)";
 
-	final String					strselect_table_class		= "SELECT term0 FROM %s";
+	final String					strselect_table_class		= "SELECT term0 FROM " + strtabledata + "";
 
-	final String					strselect_table_property	= "SELECT term0, term1 FROM %s";
+	final String					strselect_table_property	= "SELECT term0, term1 FROM " + strtabledata + "";
 
-	final String					strdrop_table_class			= "DROP TABLE %s";
+	final String					strdrop_table_class			= "DROP TABLE " + strtabledata + "";
 
 	final String					strdrop_meta_table			= "DROP TABLE " + strtablemetada + "";
 
@@ -166,8 +170,6 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	@Override
 	public void setTBox(Ontology ontology) {
-		// Nothing to do here
-
 	}
 
 	@Override
@@ -195,7 +197,6 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		}
 
 		out.flush();
-
 	}
 
 	@Override
@@ -308,7 +309,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			try {
 				dropDBSchema();
 			} catch (SQLException e) {
-				log.debug(e.getMessage(), e);
+				log.debug(e.getMessage());
 			}
 		}
 
@@ -367,16 +368,16 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		this.loadMetadataFromDB(tempPredicatetableMap, tempUriPredicateMap);
 
 		Statement st = conn.createStatement();
-		
+
 		conn.setAutoCommit(false);
 
 		for (Predicate predicate : tempPredicatetableMap.keySet()) {
 			st.addBatch(String.format(strdrop_table_class, tempPredicatetableMap.get(predicate)));
 			log.debug("Droping: {}", tempPredicatetableMap.get(predicate));
-			
+
 		}
 		log.debug("Droping: {}", strdrop_meta_table);
-		
+
 		st.addBatch(strdrop_meta_table);
 
 		st.executeBatch();
@@ -452,8 +453,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public Collection<Assertion> getCBox() {
-		return new LinkedList<Assertion>();
+	public Ontology getABoxDependencies() {
+		return new DLLiterOntologyImpl(URI.create("fakeURI"));
 	}
 
 	@Override

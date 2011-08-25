@@ -6,10 +6,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -129,7 +129,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 				GraphGenerator.dumpISA(pureIsa, "simple");
 			}
 
-			SemanticReduction reducer = new SemanticReduction(isa, DAGConstructor.getSigma(ontology));
+			SemanticReduction reducer = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
 			List<Assertion> reducedOnto = reducer.reduce();
 			if (GraphGenerator.debugInfoDump) {
 				GraphGenerator.dumpReducedOnto(reducedOnto);
@@ -140,12 +140,9 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			Connection connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 
 			EvaluationEngine eval_engine = eval_engine = new JDBCEngine(connection);
-			List<SemanticIndexMappingGenerator.MappingKey> simple_mappings = SemanticIndexMappingGenerator.build(isa, pureIsa);
-			List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
-			for (OBDAMappingAxiom map : SemanticIndexMappingGenerator.compile(simple_mappings)) {
-				mappings.add(map);
-				apic.addMapping(ds.getSourceID(), map);
-			}
+			RDBMSSIRepositoryManager man = new RDBMSSIRepositoryManager(ds);
+			man.setTBox(ontology);
+			apic.addMappings(ds.getSourceID(), man.getMappings());
 
 			// Rewriter
 			Ontology dlliteontology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
@@ -156,8 +153,8 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			rewriter.setCBox(DAGConstructor.getSigmaOntology(ontology));
 
 			// Source query generator and unfolder
-			viewMan = new MappingViewManager(mappings);
-			unfMech = new ComplexMappingUnfolder(mappings, viewMan);
+			viewMan = new MappingViewManager(man.getMappings());
+			unfMech = new ComplexMappingUnfolder(man.getMappings(), viewMan);
 			util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			gen = new ComplexMappingSQLGenerator(viewMan, util);
 

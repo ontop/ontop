@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
 import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
