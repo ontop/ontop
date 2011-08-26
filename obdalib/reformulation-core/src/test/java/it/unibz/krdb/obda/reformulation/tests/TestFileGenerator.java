@@ -63,7 +63,7 @@ public class TestFileGenerator {
     public TestFileGenerator(String obdalocation, String xmllocation, String tl, String mode) {
         this.obdalocation = obdalocation;
         this.xmllocation = xmllocation;
-        this.testlocation = tl;
+        this.testlocation = tl + "it/unibz/krdb/obda/reformulation/tests/";
         this.mode = mode;
         tests = new Vector<String>();
         expressions = new Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>();
@@ -710,7 +710,7 @@ public class TestFileGenerator {
 
             BufferedWriter out = new BufferedWriter(fstream);
 
-            out.append("package org.obda.reformulation.tests;\n");
+            out.append("package it.unibz.krdb.obda.reformulation.tests;\n");
             out.append("import junit.framework.TestCase;\n");
             out.append("import java.util.Set;\n");
             out.append("import java.util.Iterator;\n");
