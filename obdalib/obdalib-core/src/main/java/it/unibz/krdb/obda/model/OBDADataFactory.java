@@ -11,15 +11,15 @@ public interface OBDADataFactory {
 
 	public OBDAModel getOBDAModel();
 
-	public PredicateAtom getAtom(Predicate predicate, List<Term> terms);
+	public Atom getAtom(Predicate predicate, List<Term> terms);
 
-	public PredicateAtom getAtom(Predicate predicate, Term term1);
+	public Atom getAtom(Predicate predicate, Term term1);
 
-	public PredicateAtom getAtom(Predicate predicate, Term term1, Term term2);
+	public Atom getAtom(Predicate predicate, Term term1, Term term2);
 
-	public CQIE getCQIE(PredicateAtom head, List<Atom> body);
+	public CQIE getCQIE(Atom head, List<Atom> body);
 
-	public CQIE getCQIE(PredicateAtom head, Atom body);
+	public CQIE getCQIE(Atom head, Atom body);
 
 	public DataSource getDataSource(URI id);
 
@@ -46,31 +46,31 @@ public interface OBDADataFactory {
 	 * Boolean atoms
 	 */
 
-	public PredicateAtom getEQAtom(Term firstTerm, Term secondTerm);
+	public Atom getEQAtom(Term firstTerm, Term secondTerm);
 
-	public PredicateAtom getGTEAtom(Term firstTerm, Term secondTerm);
+	public Atom getGTEAtom(Term firstTerm, Term secondTerm);
 
-	public PredicateAtom getGTAtom(Term firstTerm, Term secondTerm);
+	public Atom getGTAtom(Term firstTerm, Term secondTerm);
 
-	public PredicateAtom getLTEAtom(Term firstTerm, Term secondTerm);
+	public Atom getLTEAtom(Term firstTerm, Term secondTerm);
 
-	public PredicateAtom getLTAtom(Term firstTerm, Term secondTerm);
+	public Atom getLTAtom(Term firstTerm, Term secondTerm);
 
-	public PredicateAtom getNEQAtom(Term firstTerm, Term secondTerm);
+	public Atom getNEQAtom(Term firstTerm, Term secondTerm);
 
-	public PredicateAtom getNOTAtom(Term term);
+	public Atom getNOTAtom(Term term);
 
-	public PredicateAtom getANDAtom(Term term1, Term term2);
+	public Atom getANDAtom(Term term1, Term term2);
 
-	public PredicateAtom getANDAtom(Term term1, Term term2, Term term3);
+	public Atom getANDAtom(Term term1, Term term2, Term term3);
 
-	public PredicateAtom getANDAtom(List<Term> terms);
+	public Atom getANDAtom(List<Term> terms);
 
-	public PredicateAtom getORAtom(Term term1, Term term2);
+	public Atom getORAtom(Term term1, Term term2);
 
-	public PredicateAtom getORAtom(Term term1, Term term2, Term term3);
+	public Atom getORAtom(Term term1, Term term2, Term term3);
 
-	public PredicateAtom getORAtom(List<Term> terms);
+	public Atom getORAtom(List<Term> terms);
 
 	/*
 	 * Boolean fuctional terms

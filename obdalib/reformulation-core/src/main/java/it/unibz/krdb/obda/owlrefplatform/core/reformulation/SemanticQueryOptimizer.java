@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
@@ -70,7 +70,7 @@ public class SemanticQueryOptimizer {
 		for (int i = 0; i < body.size(); i++) {
 			int previoussize = body.size();
 			
-			PredicateAtom focusAtom = (PredicateAtom) body.get(i);
+			Atom focusAtom = (Atom) body.get(i);
 
 			/* redundancy of an atom without PIs */
 			if (focusAtom.getPredicate().getArity() == 1) {
@@ -80,7 +80,7 @@ public class SemanticQueryOptimizer {
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
 						continue;
-					PredicateAtom atom2 = (PredicateAtom) body.get(j);
+					Atom atom2 = (Atom) body.get(j);
 
 					if (atom2.getPredicate().equals(focusAtom.getPredicate())) {
 						body.remove(i);
@@ -102,7 +102,7 @@ public class SemanticQueryOptimizer {
 					if (j == i)
 						continue;
 
-					PredicateAtom atom2 = (PredicateAtom) body.get(j);
+					Atom atom2 = (Atom) body.get(j);
 
 					/* case R(_,_) */
 
@@ -144,7 +144,7 @@ public class SemanticQueryOptimizer {
 			}
 			for (PositiveInclusion pi : pis) {
 				boolean breakPICycle = false;
-				PredicateAtom checkAtom = null;
+				Atom checkAtom = null;
 				if (pi instanceof DLLiterConceptInclusionImpl) {
 					DLLiterConceptInclusionImpl ci = (DLLiterConceptInclusionImpl) pi;
 					ConceptDescription including = ci.getIncluding();
@@ -277,7 +277,7 @@ public class SemanticQueryOptimizer {
 				for (int j = 0; j < body.size(); j++) {
 					if (j == i)
 						continue;
-					PredicateAtom atom2 = (PredicateAtom) body.get(j);
+					Atom atom2 = (Atom) body.get(j);
 
 					if (atom2.equals(checkAtom)) {
 						body.remove(i);

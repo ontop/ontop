@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
@@ -97,11 +97,11 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		while (mappingsIterator.hasNext()) {
 			OBDAMappingAxiom map = mappingsIterator.next();
 			CQIE cq = (CQIEImpl) map.getTargetQuery();
-			PredicateAtom head = cq.getHead();
+			Atom head = cq.getHead();
 			List<Atom> body = cq.getBody();
 			Iterator<Atom> bit = body.iterator();
 			while (bit.hasNext()) {
-				PredicateAtom atom = (PredicateAtom) bit.next();
+				Atom atom = (Atom) bit.next();
 				List<Atom> newBody = new LinkedList<Atom>();
 				newBody.add(atom);
 				CQIE newCQ = termFactory.getCQIE(head, newBody);
@@ -184,7 +184,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			bodyTerms.add(termFactory.getVariable(name + i));
 		}
 
-		PredicateAtom ruleBodyAtom = termFactory.getAtom(viewPredicate, bodyTerms);
+		Atom ruleBodyAtom = termFactory.getAtom(viewPredicate, bodyTerms);
 		LinkedList<Atom> ruleBody = new LinkedList<Atom>();
 		ruleBody.add(ruleBodyAtom);
 
@@ -197,8 +197,8 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		 */
 
 		LinkedList<Term> headTerms = new LinkedList<Term>();
-		for (int i = 0; i < ((PredicateAtom) mappingsBodyAtom).getTerms().size(); i++) {
-			Term currentTerm = ((PredicateAtom) mappingsBodyAtom).getTerms().get(i);
+		for (int i = 0; i < ((Atom) mappingsBodyAtom).getTerms().size(); i++) {
+			Term currentTerm = ((Atom) mappingsBodyAtom).getTerms().get(i);
 			if (currentTerm instanceof FunctionalTermImpl) {
 				FunctionalTermImpl ft = (FunctionalTermImpl) currentTerm;
 				List<Term> innerTerms = ft.getTerms();
@@ -220,7 +220,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			}
 		}
 
-		PredicateAtom ruleHead = termFactory.getAtom(((PredicateAtom) mappingsBodyAtom).getPredicate(), headTerms);
+		Atom ruleHead = termFactory.getAtom(((Atom) mappingsBodyAtom).getPredicate(), headTerms);
 
 		CQIE mappingRule = termFactory.getCQIE(ruleHead, ruleBody);
 
@@ -252,7 +252,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			bodyTerms.add(termFactory.getVariable(name + i));
 		}
 
-		PredicateAtom ruleBodyAtom = termFactory.getAtom(viewPredicate, bodyTerms);
+		Atom ruleBodyAtom = termFactory.getAtom(viewPredicate, bodyTerms);
 		LinkedList<Atom> ruleBody = new LinkedList<Atom>();
 		ruleBody.add(ruleBodyAtom);
 
@@ -344,7 +344,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		if (pos >= currentQuery.getBody().size())
 			return partialEvaluations;
 
-		PredicateAtom atom = (PredicateAtom) currentQuery.getBody().get(pos);
+		Atom atom = (Atom) currentQuery.getBody().get(pos);
 
 		Predicate atomPredicate = atom.getPredicate();
 
@@ -384,7 +384,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	public CQIE getFreshRule(CQIE rule, int count) {
 		// This method doesn't support nested functional terms
 		CQIE freshRule = rule.clone();
-		PredicateAtom head = freshRule.getHead();
+		Atom head = freshRule.getHead();
 		List<Term> headTerms = head.getTerms();
 		for (int i = 0; i < headTerms.size(); i++) {
 			Term term = headTerms.get(i);
@@ -415,7 +415,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		List<Atom> body = freshRule.getBody();
 		for (Atom atom : body) {
 
-			List<Term> atomTerms = ((PredicateAtom) atom).getTerms();
+			List<Term> atomTerms = ((Atom) atom).getTerms();
 			for (int i = 0; i < atomTerms.size(); i++) {
 				Term term = atomTerms.get(i);
 				Term newTerm = null;
@@ -461,7 +461,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 			List<Atom> body = rule.getBody();
 			List<Atom> newbody = new LinkedList<Atom>();
 			for (int i = 0; i < body.size(); i++) {
-				PredicateAtom atom = (PredicateAtom) body.get(i);
+				Atom atom = (Atom) body.get(i);
 				List<Term> terms = atom.getTerms();
 				List<Term> newTerms = new LinkedList<Term>();
 				for (Term t : terms) {
@@ -476,7 +476,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 						newTerms.add(t);
 					}
 				}
-				PredicateAtom newatom = termFactory.getAtom(atom.getPredicate(), newTerms);
+				Atom newatom = termFactory.getAtom(atom.getPredicate(), newTerms);
 				newbody.add(newatom);
 			}
 			CQIE newrule = termFactory.getCQIE(rule.getHead(), newbody);
@@ -502,7 +502,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		Iterator<CQIE> it = dp.getRules().iterator();
 		while (it.hasNext()) {
 			CQIE query = it.next();
-			PredicateAtom head = query.getHead();
+			Atom head = query.getHead();
 			Iterator<Term> hit = head.getTerms().iterator();
 			OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 			int coutner = 1;
@@ -524,7 +524,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 			Iterator<Atom> bit = query.getBody().iterator();
 			while (bit.hasNext()) {
-				PredicateAtom a = (PredicateAtom) bit.next();
+				Atom a = (Atom) bit.next();
 				Iterator<Term> hit2 = a.getTerms().iterator();
 				i = 0;
 				LinkedList<Term> vec = new LinkedList<Term>();

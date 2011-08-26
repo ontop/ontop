@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
@@ -117,7 +117,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -149,12 +149,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -165,12 +165,12 @@ public class DatalogParserTest {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -198,7 +198,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -230,12 +230,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -246,12 +246,12 @@ public class DatalogParserTest {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -279,7 +279,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -311,12 +311,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -333,12 +333,12 @@ public class DatalogParserTest {
 				((ValueConstantImpl)term).getValue(), "Person");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -394,7 +394,7 @@ public class DatalogParserTest {
 		// Rule #1  //
 		//----------//
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -420,12 +420,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -471,12 +471,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/s");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -523,12 +523,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/u");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -581,7 +581,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -607,12 +607,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -704,7 +704,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNull("Head is not null!", head);
 
 		//-- The Body
@@ -715,12 +715,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -748,7 +748,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -789,7 +789,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -822,12 +822,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -838,12 +838,12 @@ public class DatalogParserTest {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -871,7 +871,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -903,12 +903,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -919,12 +919,12 @@ public class DatalogParserTest {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -952,7 +952,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -972,12 +972,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -988,12 +988,12 @@ public class DatalogParserTest {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -1021,7 +1021,7 @@ public class DatalogParserTest {
 
 		// Rule #1
 		//-- The Head
-		PredicateAtom head = rules.get(0).getHead();
+		Atom head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
 		uri = head.getPredicate().getName().toString();
@@ -1053,12 +1053,12 @@ public class DatalogParserTest {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((PredicateAtom)body.get(0)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(0)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
 		EXPECTED_BODY_TERM_SIZE = 1;
-		terms = ((PredicateAtom)body.get(0)).getTerms();
+		terms = ((Atom)body.get(0)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 
@@ -1069,12 +1069,12 @@ public class DatalogParserTest {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((PredicateAtom)body.get(1)).getPredicate().getName().toString();
+		uri = ((Atom)body.get(1)).getPredicate().getName().toString();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
 		EXPECTED_BODY_TERM_SIZE = 2;
-		terms = ((PredicateAtom)body.get(1)).getTerms();
+		terms = ((Atom)body.get(1)).getTerms();
 		assertEquals("Mismatch term size!",
 				terms.size(), EXPECTED_BODY_TERM_SIZE);
 

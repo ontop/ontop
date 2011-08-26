@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -49,7 +49,7 @@ public class QueryAnonymizer {
 	public void anonymize(CQIE q, int focusatomIndex) {
 
 		List<Atom> body = q.getBody();
-		PredicateAtom atom = (PredicateAtom) body.get(focusatomIndex);
+		Atom atom = (Atom) body.get(focusatomIndex);
 		int bodysize = body.size();
 		int arity = atom.getPredicate().getArity();
 
@@ -64,7 +64,7 @@ public class QueryAnonymizer {
 				 */
 				boolean isSharedTerm = false;
 				for (int atomindex = 0; atomindex < bodysize; atomindex++) {
-					PredicateAtom currentAtom = (PredicateAtom) body.get(atomindex);
+					Atom currentAtom = (Atom) body.get(atomindex);
 					int currentarity = currentAtom.getArity();
 					List<Term> currentTerms = currentAtom.getTerms();
 					for (int termidx = 0; termidx < currentarity; termidx++) {
@@ -115,7 +115,7 @@ public class QueryAnonymizer {
 		List<Atom> body = q.getBody();
 		Iterator<Atom> it = body.iterator();
 		while (it.hasNext()) {
-			PredicateAtom atom = (PredicateAtom) it.next();
+			Atom atom = (Atom) it.next();
 			List<Term> terms = atom.getTerms();
 			int pos = 0;
 			Iterator<Term> term_it = terms.iterator();
@@ -138,7 +138,7 @@ public class QueryAnonymizer {
 		Iterator<Atom> it2 = body.iterator();
 		LinkedList<Atom> newBody = new LinkedList<Atom>();
 		while (it2.hasNext()) {
-			PredicateAtom atom = (PredicateAtom) it2.next();
+			Atom atom = (Atom) it2.next();
 			List<Term> terms = atom.getTerms();
 			Iterator<Term> term_it = terms.iterator();
 			LinkedList<Term> vex = new LinkedList<Term>();
@@ -154,7 +154,7 @@ public class QueryAnonymizer {
 					vex.add(t);
 				}
 			}
-			PredicateAtom newatom = termFactory.getAtom(atom.getPredicate().clone(), vex);
+			Atom newatom = termFactory.getAtom(atom.getPredicate().clone(), vex);
 			newBody.add(newatom);
 		}
 		CQIE query = termFactory.getCQIE(q.getHead(), newBody);
@@ -165,7 +165,7 @@ public class QueryAnonymizer {
 		if (t instanceof AnonymousVariable)
 			return false;
 
-		PredicateAtom head = q.getHead();
+		Atom head = q.getHead();
 		List<Term> headterms = head.getTerms();
 		for (Term headterm : headterms) {
 			if (headterm instanceof FunctionalTermImpl) {

@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -55,7 +55,7 @@ public class CQCUtilities {
 
 	List<Atom>						canonicalbody		= null;
 
-	PredicateAtom					canonicalhead		= null;
+	Atom					canonicalhead		= null;
 
 	Set<Predicate>					canonicalpredicates	= new HashSet<Predicate>(50);
 
@@ -94,7 +94,7 @@ public class CQCUtilities {
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
 		for (Atom atom : canonicalbody) {
-			PredicateAtom patom = (PredicateAtom) atom;
+			Atom patom = (Atom) atom;
 			canonicalpredicates.add(patom.getPredicate());
 		}
 	}
@@ -115,7 +115,7 @@ public class CQCUtilities {
 	 */
 	public CQIE chaseQuery(CQIE query, DLLiterOntology sigma) {
 		sigma.saturate();
-		PredicateAtom head = (PredicateAtom) query.getHead().clone();
+		Atom head = (Atom) query.getHead().clone();
 
 		LinkedHashSet<Atom> body = new LinkedHashSet<Atom>();
 		body.addAll(query.getBody());
@@ -127,7 +127,7 @@ public class CQCUtilities {
 		while (loop) {
 			loop = false;
 			for (Atom atom : body) {
-				PredicateAtom patom = (PredicateAtom) atom;
+				Atom patom = (Atom) atom;
 				Predicate predicate = atom.getPredicate();
 
 				Term oldTerm1 = null;
@@ -262,7 +262,7 @@ public class CQCUtilities {
 		int constantcounter = 1;
 
 		Map<Variable, Term> substitution = new HashMap<Variable, Term>(50);
-		PredicateAtom head = canonicalquery.getHead();
+		Atom head = canonicalquery.getHead();
 		constantcounter = getCanonicalAtom(head, constantcounter, substitution);
 
 		for (Atom atom : canonicalquery.getBody()) {
@@ -283,7 +283,7 @@ public class CQCUtilities {
 	 * @return
 	 */
 	private static int getCanonicalAtom(Atom atom, int constantcounter, Map<Variable, Term> currentMap) {
-		List<Term> headterms = ((PredicateAtom) atom).getTerms();
+		List<Term> headterms = ((Atom) atom).getTerms();
 		for (int i = 0; i < headterms.size(); i++) {
 			Term term = headterms.get(i);
 			if (term instanceof Variable) {
@@ -351,7 +351,7 @@ public class CQCUtilities {
 			return false;
 
 		for (Atom queryatom : query.getBody()) {
-			if (!canonicalpredicates.contains(((PredicateAtom) queryatom).getPredicate())) {
+			if (!canonicalpredicates.contains(((Atom) queryatom).getPredicate())) {
 				return false;
 			}
 		}
@@ -370,10 +370,10 @@ public class CQCUtilities {
 
 		List<Atom> body = query.getBody();
 		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
-			PredicateAtom currentAtomTry = (PredicateAtom) body.get(atomidx);
+			Atom currentAtomTry = (Atom) body.get(atomidx);
 
 			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
-				PredicateAtom currentGroundAtom = (PredicateAtom) canonicalbody.get(groundatomidx);
+				Atom currentGroundAtom = (Atom) canonicalbody.get(groundatomidx);
 
 				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu == null)
@@ -415,7 +415,7 @@ public class CQCUtilities {
 			Atom currentAtomTry = body.get(atomidx);
 
 			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
-				PredicateAtom currentGroundAtom = (PredicateAtom) canonicalbody.get(groundatomidx);
+				Atom currentGroundAtom = (Atom) canonicalbody.get(groundatomidx);
 
 				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu != null) {
@@ -448,9 +448,9 @@ public class CQCUtilities {
 		for (CQIE cq : queries) {
 			List<Atom> body = cq.getBody();
 			for (int i = 0; i < body.size(); i++) {
-				PredicateAtom currentAtom = (PredicateAtom) body.get(i);
+				Atom currentAtom = (Atom) body.get(i);
 				for (int j = i + 1; j < body.size(); j++) {
-					PredicateAtom comparisonAtom = (PredicateAtom) body.get(j);
+					Atom comparisonAtom = (Atom) body.get(j);
 					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
 						if (currentAtom.equals(comparisonAtom)) {
 							body.remove(j);

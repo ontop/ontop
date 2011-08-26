@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
@@ -68,7 +68,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 				List<Atom> body = cqie.getBody();
 				// Part A
 				for (int atomidx = 0; atomidx < body.size(); atomidx++) {
-					PredicateAtom currentAtom = (PredicateAtom) body.get(atomidx);
+					Atom currentAtom = (Atom) body.get(atomidx);
 					Iterator<Assertion> ait = assertions.iterator();
 					while (ait.hasNext()) {
 						Assertion ass = ait.next();

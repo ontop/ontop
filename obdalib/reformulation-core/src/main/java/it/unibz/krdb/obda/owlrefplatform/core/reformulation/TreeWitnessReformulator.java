@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -78,7 +78,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		Set<Term> evars = new HashSet<Term>(); // all existential variables
 
 		for (Atom a0 : cqie.getBody()) {
-			PredicateAtom a = (PredicateAtom) a0;
+			Atom a = (Atom) a0;
 			log.debug("atom: " + a);
 
 			if (a.getPredicate().getArity() >= 2) {
@@ -152,7 +152,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		List<Atom> body = new ArrayList<Atom>();
 
 		for (Atom a0 : cqie.getBody()) {
-			PredicateAtom a = (PredicateAtom) a0;
+			Atom a = (Atom) a0;
 			if (a.getArity() == 1) {
 				Predicate pa = fac.getPredicate(URI.create("EXT" + a.getPredicate().getName().getFragment()), 1);
 				views.put(descFactory.getAtomicConceptDescription(a.getPredicate()), pa);
@@ -172,7 +172,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 		for (ConceptDescription C : views.keySet()) {
 			Term z = fac.getVariable("z");
-			PredicateAtom head = fac.getAtom(views.get(C), z);
+			Atom head = fac.getAtom(views.get(C), z);
 			log.debug("CREATING VIEWS FOR " + C);
 			log.debug("subclass " + C + " of " + C);
 			out.appendRule(fac.getCQIE(head, Collections.singletonList(getConceptAtom(C,z))));
@@ -227,7 +227,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	// return the atom that replaces a in the query (either head-atom or ext-atom)
 	
-	private PredicateAtom rewriteAtom(DatalogProgram out, Set<TreeWitness> tws, PredicateAtom a, CQIE cqie, PredicateAtom head, PredicateAtom ext, Map<ConceptDescription, Predicate> views) {
+	private Atom rewriteAtom(DatalogProgram out, Set<TreeWitness> tws, Atom a, CQIE cqie, Atom head, Atom ext, Map<ConceptDescription, Predicate> views) {
 		
 		boolean nontrivialRule = false;
 		for (TreeWitness tw : tws) {
@@ -273,7 +273,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 		// Tree-structure atoms
 		for (Atom ca0 : cqie.getBody()) {
-			PredicateAtom ca = (PredicateAtom) ca0;
+			Atom ca = (Atom) ca0;
 			if ((ca.getArity() == 1) && tw.isInDomain(ca.getTerm(0))) {
 				if (tw.isRoot(ca.getTerm(0))) {
 					Predicate pa = fac.getPredicate(URI.create("EXT" + ca.getPredicate().getName().getFragment()), 1);

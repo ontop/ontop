@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface CQIE extends Query {
 
-	public PredicateAtom getHead();
+	public Atom getHead();
 
 	public List<Atom> getBody();
 
-	public void updateHead(PredicateAtom head);
+	public void updateHead(Atom head);
 
 	public void updateBody(List<Atom> body);
 

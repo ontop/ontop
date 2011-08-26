@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 
 import java.net.URI;
 import java.util.Collection;
@@ -50,10 +50,10 @@ public class QueryVocabularyValidator
     Iterator<Atom> iterAtom = query.getBody().iterator();
     while(iterAtom.hasNext()) {
       Atom a1 = iterAtom.next();
-      if (!(a1 instanceof PredicateAtom)) {
+      if (!(a1 instanceof Atom)) {
         continue;
       }
-      PredicateAtom atom = (PredicateAtom)a1;
+      Atom atom = (Atom)a1;
 
       URI predicate = atom.getPredicate().getName();
 

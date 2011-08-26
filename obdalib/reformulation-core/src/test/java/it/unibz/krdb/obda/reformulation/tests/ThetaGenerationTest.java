@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -48,12 +48,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -75,12 +75,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -108,12 +108,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -173,12 +173,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -202,12 +202,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -257,12 +257,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -286,12 +286,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(ot);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -315,12 +315,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -340,12 +340,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -379,12 +379,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -408,12 +408,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -437,12 +437,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -475,12 +475,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -504,12 +504,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -542,12 +542,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -571,12 +571,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -603,12 +603,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -629,12 +629,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -654,12 +654,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -693,12 +693,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -722,12 +722,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -760,12 +760,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -789,12 +789,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -827,12 +827,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -856,12 +856,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -888,12 +888,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
-		PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+		Atom atom1 = tfac.getAtom(pred1, terms1);
 
 		Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
-		PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+		Atom atom2 = tfac.getAtom(pred2, terms2);
 
 		AtomUnifier unifier = new AtomUnifier();
 		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -911,12 +911,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
@@ -938,12 +938,12 @@ public class ThetaGenerationTest extends TestCase {
 			Predicate pred1 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
-			PredicateAtom atom1 = tfac.getAtom(pred1, terms1);
+			Atom atom1 = tfac.getAtom(pred1, terms1);
 
 			Predicate pred2 = predFactory.getPredicate(URI.create("A"), 1);
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
-			PredicateAtom atom2 = tfac.getAtom(pred2, terms2);
+			Atom atom2 = tfac.getAtom(pred2, terms2);
 
 			AtomUnifier unifier = new AtomUnifier();
 			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));

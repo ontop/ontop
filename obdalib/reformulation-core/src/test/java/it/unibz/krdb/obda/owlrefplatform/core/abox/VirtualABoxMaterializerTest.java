@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -100,7 +100,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		PredicateAtom head = fac.getAtom(q, headTerms);
+		Atom head = fac.getAtom(q, headTerms);
 
 		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -200,7 +200,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		PredicateAtom head = fac.getAtom(q, headTerms);
+		Atom head = fac.getAtom(q, headTerms);
 
 		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -308,7 +308,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		PredicateAtom head = fac.getAtom(q, headTerms);
+		Atom head = fac.getAtom(q, headTerms);
 
 		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -488,7 +488,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		PredicateAtom head = fac.getAtom(q, headTerms);
+		Atom head = fac.getAtom(q, headTerms);
 
 		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));
@@ -578,7 +578,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		headTerms.add(fac.getVariable("age"));
 		headTerms.add(fac.getVariable("schooluri"));
 
-		PredicateAtom head = fac.getAtom(q, headTerms);
+		Atom head = fac.getAtom(q, headTerms);
 
 		Term objectTerm = fac.getFunctionalTerm(fac.getPredicate(URI.create("http://schools.com/persons"), 2), fac.getVariable("fn"),
 				fac.getVariable("ln"));

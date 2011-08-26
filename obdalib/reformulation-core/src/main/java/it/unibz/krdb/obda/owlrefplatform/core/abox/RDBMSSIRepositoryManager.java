@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -1027,9 +1027,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Term qtx = predicateFactory.getVariable("X");
 		Term qty = predicateFactory.getVariable("Y");
 		Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 2);
-		PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
+		Atom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
 		predicate = predicateFactory.getPredicate(URI.create("q"), 2);
-		PredicateAtom head = predicateFactory.getAtom(predicate, qtx, qty);
+		Atom head = predicateFactory.getAtom(predicate, qtx, qty);
 		Query cq = predicateFactory.getCQIE(head, bodyAtom);
 
 		return predicateFactory.getRDBMSMappingAxiom(sql, cq);
@@ -1039,9 +1039,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private OBDAMappingAxiom makeUnaryMapp(String uri, String sql) {
 		Term qt = predicateFactory.getVariable("x");
 		Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 1);
-		PredicateAtom bodyAtom = predicateFactory.getAtom(predicate, qt);
+		Atom bodyAtom = predicateFactory.getAtom(predicate, qt);
 		predicate = predicateFactory.getPredicate(URI.create("q"), 1);
-		PredicateAtom head = predicateFactory.getAtom(predicate, qt);
+		Atom head = predicateFactory.getAtom(predicate, qt);
 		Query cq = predicateFactory.getCQIE(head, bodyAtom);
 
 		return predicateFactory.getRDBMSMappingAxiom(sql, cq);

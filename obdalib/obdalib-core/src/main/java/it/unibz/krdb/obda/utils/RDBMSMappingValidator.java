@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.SQLQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -101,7 +101,7 @@ public class RDBMSMappingValidator extends MappingValidator {
 		List<Atom> atoms = q.getBody();
 		Iterator it = atoms.iterator();
 		while (it.hasNext()){
-			PredicateAtom at = (PredicateAtom) it.next();
+			Atom at = (Atom) it.next();
 			int arity = at.getArity();
 
 			if (arity == 1) {  // it's a concept query atom

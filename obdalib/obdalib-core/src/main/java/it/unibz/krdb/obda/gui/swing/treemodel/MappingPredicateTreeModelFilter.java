@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class MappingPredicateTreeModelFilter extends TreeModelFilter<OBDAMapping
     String[] vecKeyword = strFilter.split(KEYWORD_DELIM);
     for (String keyword : vecKeyword) {
   		for (int i = 0; i < atoms.size(); i++) {
-  			PredicateAtom predicate = (PredicateAtom) atoms.get(i);
+  			Atom predicate = (Atom) atoms.get(i);
   			isMatch = isMatch || match(keyword.trim(), predicate);
   		}
   		if (isMatch) {
@@ -43,7 +43,7 @@ public class MappingPredicateTreeModelFilter extends TreeModelFilter<OBDAMapping
 	}
 
   /** A helper method to check a match */
-  private boolean match(String keyword, PredicateAtom predicate) {
+  private boolean match(String keyword, Atom predicate) {
 
     if (predicate.getPredicate().getName().toString().indexOf(keyword) != -1) {
       return true;

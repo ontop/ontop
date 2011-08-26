@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
@@ -111,17 +111,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public PredicateAtom getAtom(Predicate predicate, List<Term> terms) {
+	public Atom getAtom(Predicate predicate, List<Term> terms) {
 		return new PredicateAtomImpl(predicate, terms);
 	}
 
 	@Override
-	public PredicateAtom getAtom(Predicate predicate, Term term1) {
+	public Atom getAtom(Predicate predicate, Term term1) {
 		return new PredicateAtomImpl(predicate, Collections.singletonList(term1));
 	}
 
 	@Override
-	public PredicateAtom getAtom(Predicate predicate, Term term1, Term term2) {
+	public Atom getAtom(Predicate predicate, Term term1, Term term2) {
 		LinkedList<Term> terms = new LinkedList<Term>();
 		terms.add(term1);
 		terms.add(term2);
@@ -129,12 +129,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public CQIE getCQIE(PredicateAtom head, List<Atom> body) {
+	public CQIE getCQIE(Atom head, List<Atom> body) {
 		return new CQIEImpl(head, body);
 	}
 
 	@Override
-	public CQIE getCQIE(PredicateAtom head, Atom body) {
+	public CQIE getCQIE(Atom head, Atom body) {
 		return new CQIEImpl(head, Collections.singletonList(body));
 	}
 
@@ -179,51 +179,51 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public PredicateAtom getEQAtom(Term firstTerm, Term secondTerm) {
+	public Atom getEQAtom(Term firstTerm, Term secondTerm) {
 
 		return getAtom(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public PredicateAtom getGTEAtom(Term firstTerm, Term secondTerm) {
+	public Atom getGTEAtom(Term firstTerm, Term secondTerm) {
 
 		return getAtom(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public PredicateAtom getGTAtom(Term firstTerm, Term secondTerm) {
+	public Atom getGTAtom(Term firstTerm, Term secondTerm) {
 
 		return getAtom(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public PredicateAtom getLTEAtom(Term firstTerm, Term secondTerm) {
+	public Atom getLTEAtom(Term firstTerm, Term secondTerm) {
 
 		return getAtom(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public PredicateAtom getLTAtom(Term firstTerm, Term secondTerm) {
+	public Atom getLTAtom(Term firstTerm, Term secondTerm) {
 		return getAtom(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public PredicateAtom getNEQAtom(Term firstTerm, Term secondTerm) {
+	public Atom getNEQAtom(Term firstTerm, Term secondTerm) {
 		return getAtom(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public PredicateAtom getNOTAtom(Term term) {
+	public Atom getNOTAtom(Term term) {
 		return getAtom(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public PredicateAtom getANDAtom(Term term1, Term term2) {
+	public Atom getANDAtom(Term term1, Term term2) {
 		return getAtom(OBDAVocabulary.AND, term1, term2);
 	}
 
 	@Override
-	public PredicateAtom getANDAtom(Term term1, Term term2, Term term3) {
+	public Atom getANDAtom(Term term1, Term term2, Term term3) {
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(term1);
 		terms.add(term2);
@@ -232,7 +232,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public PredicateAtom getANDAtom(List<Term> terms) {
+	public Atom getANDAtom(List<Term> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("AND requires at least 2 terms");
 
@@ -252,12 +252,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public PredicateAtom getORAtom(Term term1, Term term2) {
+	public Atom getORAtom(Term term1, Term term2) {
 		return getAtom(OBDAVocabulary.OR, term1, term2);
 	}
 
 	@Override
-	public PredicateAtom getORAtom(Term term1, Term term2, Term term3) {
+	public Atom getORAtom(Term term1, Term term2, Term term3) {
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(term1);
 		terms.add(term2);
@@ -266,7 +266,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public PredicateAtom getORAtom(List<Term> terms) {
+	public Atom getORAtom(List<Term> terms) {
 		if (terms.size() < 2)
 			throw new InvalidParameterException("OR requires at least 2 terms");
 

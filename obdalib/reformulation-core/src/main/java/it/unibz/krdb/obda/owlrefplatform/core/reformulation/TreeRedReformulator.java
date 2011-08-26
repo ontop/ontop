@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
@@ -126,9 +126,9 @@ public class TreeRedReformulator implements QueryRewriter {
 
 				HashSet<PositiveInclusion> relevantInclusions = new HashSet<PositiveInclusion>(1000);
 				for (Atom atom : oldquery.getBody()) {
-					Set<PositiveInclusion> inclusions = ontology.getByIncludingNoExist(((PredicateAtom) atom).getPredicate());
+					Set<PositiveInclusion> inclusions = ontology.getByIncludingNoExist(((Atom) atom).getPredicate());
 					if (inclusions != null)
-						relevantInclusions.addAll(ontology.getByIncludingNoExist(((PredicateAtom) atom).getPredicate()));
+						relevantInclusions.addAll(ontology.getByIncludingNoExist(((Atom) atom).getPredicate()));
 				}
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
@@ -158,13 +158,13 @@ public class TreeRedReformulator implements QueryRewriter {
 			HashSet<Predicate> predicates = new HashSet<Predicate>(1000);
 			for (CQIE oldquery : oldqueries) {
 				for (Atom atom : oldquery.getBody()) {
-					predicates.add(((PredicateAtom) atom).getPredicate());
+					predicates.add(((Atom) atom).getPredicate());
 				}
 			}
 
 			for (CQIE oldquery : newqueriesbyPI) {
 				for (Atom atom : oldquery.getBody()) {
-					predicates.add(((PredicateAtom) atom).getPredicate());
+					predicates.add(((Atom) atom).getPredicate());
 				}
 			}
 
@@ -287,7 +287,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	private boolean containsPredicate(CQIE q, Predicate predicate) {
 		for (Atom atom : q.getBody()) {
-			if (((PredicateAtom) atom).getPredicate().equals(predicate))
+			if (((Atom) atom).getPredicate().equals(predicate))
 				return true;
 		}
 		return q.getHead().getPredicate().equals(predicate);

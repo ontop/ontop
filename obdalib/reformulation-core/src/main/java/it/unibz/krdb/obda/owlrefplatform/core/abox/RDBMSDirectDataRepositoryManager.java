@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Query;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
@@ -472,14 +472,14 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			OBDAMappingAxiom map = null;
 
 			if (pred.getArity() == 1) {
-				PredicateAtom head = obdaFactory.getAtom(unaryq, obdaFactory.getVariable("term0"));
-				PredicateAtom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"));
+				Atom head = obdaFactory.getAtom(unaryq, obdaFactory.getVariable("term0"));
+				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"));
 				Query target = obdaFactory.getCQIE(head, body);
 				String sqlquery = String.format(strselect_table_class, predicatetableMap.get(pred));
 				map = obdaFactory.getRDBMSMappingAxiom(sqlquery, target);
 			} else if (pred.getArity() == 2) {
-				PredicateAtom head = obdaFactory.getAtom(binaryq, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
-				PredicateAtom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
+				Atom head = obdaFactory.getAtom(binaryq, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
+				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
 				Query target = obdaFactory.getCQIE(head, body);
 				String sqlquery = String.format(strselect_table_property, predicatetableMap.get(pred));
 				map = obdaFactory.getRDBMSMappingAxiom(sqlquery, target);

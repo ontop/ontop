@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.DataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -89,7 +89,7 @@ public class OBDA2OWLDataMaterializer {
 			Iterator<Atom> a_it = atoms.iterator();
 			while (a_it.hasNext()) {
 				ResultSet res = jdbcMan.executeQuery(targetSource, sql);
-				PredicateAtom atom = (PredicateAtom) a_it.next();
+				Atom atom = (Atom) a_it.next();
 				// String name = atom.getPredicate().getName().getFragment();
 				// String uri = ontoUri+"#"+name;
 				String uri = atom.getPredicate().getName().toString();

@@ -4,7 +4,7 @@
  */
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
@@ -51,7 +51,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(it.unibz.krdb.obda.model.PredicateAtom, it.unibz.krdb.obda.model.PredicateAtom)}
+	 * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception
@@ -74,7 +74,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String input = testcase;
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
-			List<PredicateAtom> atoms = generator.getAtoms(atomsstr);
+			List<Atom> atoms = generator.getAtoms(atomsstr);
 			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
 			AtomUnifier unifier = new AtomUnifier();

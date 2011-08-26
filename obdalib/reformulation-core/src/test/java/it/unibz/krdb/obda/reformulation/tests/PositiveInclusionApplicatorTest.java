@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
@@ -57,26 +57,26 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		List<Term> terms1 = new LinkedList<Term>();
 		terms1.add(x);
 		terms1.add(y);
-		PredicateAtom a1 = tfac.getAtom(r, terms1);
+		Atom a1 = tfac.getAtom(r, terms1);
 
 		List<Term> terms2 = new LinkedList<Term>();
 		terms2.add(x);
 		terms2.add(z);
-		PredicateAtom a2 = tfac.getAtom(r, terms2);
+		Atom a2 = tfac.getAtom(r, terms2);
 
 		List<Term> terms3 = new LinkedList<Term>();
 		terms3.add(y);
 		terms3.add(m);
-		PredicateAtom a3 = tfac.getAtom(s, terms3);
+		Atom a3 = tfac.getAtom(s, terms3);
 
 		List<Term> terms4 = new LinkedList<Term>();
 		terms4.add(z);
 		terms4.add(m);
-		PredicateAtom a4 = tfac.getAtom(s, terms4);
+		Atom a4 = tfac.getAtom(s, terms4);
 
 		List<Term> termshead = new LinkedList<Term>();
 		termshead.add(x);
-		PredicateAtom head = tfac.getAtom(q, termshead);
+		Atom head = tfac.getAtom(q, termshead);
 
 		LinkedList<Atom> body = new LinkedList<Atom>();
 		body.add(a1);

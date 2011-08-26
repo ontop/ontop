@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
@@ -53,7 +53,7 @@ public class PositiveInclusionApplicator {
 	 * @return true if the positive inclusion is applicable to the atom, false
 	 *         otherwise
 	 */
-	public boolean isPIApplicable(PositiveInclusion pi, PredicateAtom atom) {
+	public boolean isPIApplicable(PositiveInclusion pi, Atom atom) {
 		/*
 		 * checks: (3) I is a role inclusion assertion and its right-hand side
 		 * is either P or P-
@@ -141,7 +141,7 @@ public class PositiveInclusionApplicator {
 			HashSet<CQIE> currentatomresults = new HashSet<CQIE>(bodysize * pis.size() * 2);
 			for (CQIE cq : newqueries) {
 				List<Atom> body = cq.getBody();
-				PredicateAtom atom = (PredicateAtom) body.get(atomindex);
+				Atom atom = (Atom) body.get(atomindex);
 
 				for (PositiveInclusion pi : pis) {
 					if (isPIApplicable(pi, atom)) {
@@ -204,7 +204,7 @@ public class PositiveInclusionApplicator {
 			for (CQIE query : saturatedset) {
 				List<Atom> body = query.getBody();
 				for (int i = 0; i < body.size(); i++) {
-					if (isPIApplicable(pi, (PredicateAtom) body.get(i))) {
+					if (isPIApplicable(pi, (Atom) body.get(i))) {
 						if (sqoOptimizer != null) {
 							results.add(anonymizer.anonymize(sqoOptimizer.optimizeBySQO(applyPI(query, pi, i))));
 						} else {
@@ -263,7 +263,7 @@ public class PositiveInclusionApplicator {
 				List<Atom> body = currentcq.getBody();
 				for (int i = 0; i < body.size(); i++) {
 					/* Predicates are diferent, dont even try to unify */
-					if (!((PredicateAtom) body.get(i)).getPredicate().equals(predicate))
+					if (!((Atom) body.get(i)).getPredicate().equals(predicate))
 						continue;
 					/*
 					 * We found an atom with the correct predicate, try to unify
@@ -271,11 +271,11 @@ public class PositiveInclusionApplicator {
 					 */
 					for (int j = i + 1; j < body.size(); j++) {
 
-						if (!((PredicateAtom) body.get(j)).getPredicate().equals(predicate))
+						if (!((Atom) body.get(j)).getPredicate().equals(predicate))
 							continue;
 
-						PredicateAtom a1 = (PredicateAtom) body.get(i);
-						PredicateAtom a2 = (PredicateAtom) body.get(j);
+						Atom a1 = (Atom) body.get(i);
+						Atom a2 = (Atom) body.get(j);
 
 						Term ta10 = a1.getTerms().get(0);
 						Term ta11 = a1.getTerms().get(1);
@@ -456,7 +456,7 @@ public class PositiveInclusionApplicator {
 		CQIE newquery = q.clone();
 
 		List<Atom> body = newquery.getBody();
-		PredicateAtom a = (PredicateAtom) body.get(atomindex);
+		Atom a = (Atom) body.get(atomindex);
 
 		if (a.getArity() == 1) {
 
@@ -488,7 +488,7 @@ public class PositiveInclusionApplicator {
 						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
 					}
 
-					PredicateAtom newatom = termFactory.getAtom(predicate.clone(), v);
+					Atom newatom = termFactory.getAtom(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
@@ -500,7 +500,7 @@ public class PositiveInclusionApplicator {
 					 */
 					Term t = a.getTerms().get(0);
 					Term anonym = termFactory.getNondistinguishedVariable();
-					PredicateAtom newatom = null;
+					Atom newatom = null;
 
 					if (((ExistentialConceptDescriptionImpl) lefthandside).isInverse()) {
 						LinkedList<Term> v = new LinkedList<Term>();
@@ -551,7 +551,7 @@ public class PositiveInclusionApplicator {
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);
 
-			PredicateAtom newatom = null;
+			Atom newatom = null;
 
 			if (t2 instanceof AnonymousVariable && !righthandside.isInverse()) {
 
@@ -660,7 +660,7 @@ public class PositiveInclusionApplicator {
 			RoleDescription lefthandside = inc.getIncluded();
 			RoleDescription righthandside = inc.getIncluding();
 
-			PredicateAtom newatom = null;
+			Atom newatom = null;
 
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);

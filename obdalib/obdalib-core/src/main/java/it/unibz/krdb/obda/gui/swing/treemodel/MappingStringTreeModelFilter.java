@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.SQLQuery;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
@@ -39,7 +39,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
   		final CQIE headquery = (CQIEImpl) object.getTargetQuery();
   		final List<Atom> atoms = headquery.getBody();
       for (int i = 0; i < atoms.size(); i++) {
-        PredicateAtom predicate = (PredicateAtom) atoms.get(i);
+        Atom predicate = (Atom) atoms.get(i);
         isMatch = isMatch || MappingHeadVariableTreeModelFilter.match(keyword.trim(), predicate);
       }
       if (isMatch) {

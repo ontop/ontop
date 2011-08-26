@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
@@ -21,7 +21,7 @@ import java.util.List;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class PredicateAtomImpl implements PredicateAtom, ListListener, Cloneable {
+public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 
 	private Predicate	predicate	= null;
 	private List<Term>	terms		= null;
@@ -100,7 +100,7 @@ public class PredicateAtomImpl implements PredicateAtom, ListListener, Cloneable
 		}
 	}
 
-	public PredicateAtom clone() {
+	public Atom clone() {
 		EventGeneratingLinkedList<Term> v = new EventGeneratingLinkedList<Term>();
 		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {

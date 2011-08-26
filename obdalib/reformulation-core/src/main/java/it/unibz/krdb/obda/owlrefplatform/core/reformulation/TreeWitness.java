@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 
 import java.util.Hashtable;
@@ -139,7 +139,7 @@ public class TreeWitness {
 		while (changed && exists) {
 			changed = false;
 			for(Atom a0: atoms) {
-				PredicateAtom a = (PredicateAtom)a0;
+				Atom a = (Atom)a0;
 				if (a.getArity() == 2) {
 					Term t1 = a.getTerms().get(0);
 					Term t2 = a.getTerms().get(1);

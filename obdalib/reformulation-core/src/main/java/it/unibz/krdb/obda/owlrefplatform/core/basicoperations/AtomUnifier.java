@@ -12,7 +12,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -60,7 +60,7 @@ public class AtomUnifier {
 
 		Atom atom1 = q.getBody().get(i);
 		Atom atom2 = q.getBody().get(j);
-		Atom newatom = unify((PredicateAtom)atom1, (PredicateAtom)atom2, mgu);
+		Atom newatom = unify((Atom)atom1, (Atom)atom2, mgu);
 		unifiedQ.getBody().add(i, newatom);
 
 		return unifiedQ;
@@ -83,8 +83,8 @@ public class AtomUnifier {
 	 * @param unifier
 	 * @return
 	 */
-	private PredicateAtom unify(PredicateAtom atom1, PredicateAtom atom2, Map<Variable, Term> unifier) {
-		PredicateAtom newatom = (PredicateAtom)atom1.clone();
+	private Atom unify(Atom atom1, Atom atom2, Map<Variable, Term> unifier) {
+		Atom newatom = (Atom)atom1.clone();
 		for (int i = 0; i < atom1.getTerms().size(); i++) {
 			Term t1 = atom1.getTerms().get(i);
 			Term t2 = atom2.getTerms().get(i);
@@ -110,7 +110,7 @@ public class AtomUnifier {
 		CQIE newq = q.clone();
 
 		/* applying the unifier to every term in the head */
-		PredicateAtom head = newq.getHead();
+		Atom head = newq.getHead();
 		applyUnifier(head, unifier);
 		for (Atom bodyatom : newq.getBody()) {
 			applyUnifier(bodyatom, unifier);
@@ -131,7 +131,7 @@ public class AtomUnifier {
 	 * @param unifier
 	 */
 	private void applyUnifier(Atom atom2, Map<Variable, Term> unifier) {
-		PredicateAtom atom = (PredicateAtom)atom2;
+		Atom atom = (Atom)atom2;
 		applyUnifier(atom.getTerms(), unifier);
 	}
 	
@@ -176,8 +176,8 @@ public class AtomUnifier {
 	 */
 	public Map<Variable, Term> getMGU(Atom first, Atom second) {
 
-		PredicateAtom firstAtom = (PredicateAtom)first;
-		PredicateAtom secondAtom = (PredicateAtom)second;
+		Atom firstAtom = (Atom)first;
+		Atom secondAtom = (Atom)second;
 		
 		/*
 		 * Basic case, predicates are different or their arity is different,

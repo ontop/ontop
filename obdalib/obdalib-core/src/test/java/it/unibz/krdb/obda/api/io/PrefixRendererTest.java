@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -47,7 +47,7 @@ public class PrefixRendererTest extends TestCase {
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("id"));
-		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
+		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("http://obda.org/predicates#q"), 1), terms);
 
 		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);
@@ -62,10 +62,10 @@ public class PrefixRendererTest extends TestCase {
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
-		name = pm.getShortForm(((PredicateAtom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
+		name = pm.getShortForm(((Atom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
 		assertTrue(name, name.equals("Person"));
 
-		PredicateAtom atom0 = (PredicateAtom) query.getRules().get(0).getBody().get(0);
+		Atom atom0 = (Atom) query.getRules().get(0).getBody().get(0);
 		name = pm.getShortForm(((FunctionalTermImpl)atom0.getTerms().get(0)).getFunctionSymbol()
 				.toString(), true);
 		assertTrue(name, name.equals("person-individual"));
@@ -74,10 +74,10 @@ public class PrefixRendererTest extends TestCase {
 		name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
 		assertTrue(name, name.equals("q"));
 
-		name = pm.getShortForm(((PredicateAtom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
+		name = pm.getShortForm(((Atom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/onto.owl#Person"));
 
-		 atom0 = (PredicateAtom) query.getRules().get(0).getBody().get(0);
+		 atom0 = (Atom) query.getRules().get(0).getBody().get(0);
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol()
 				.toString(), true);
 		assertTrue(name, name.equals("http://obda.org/onto.owl#person-individual"));
@@ -93,10 +93,10 @@ public class PrefixRendererTest extends TestCase {
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
 		assertTrue(name, name.equals("obdap:q"));
 
-		name = pm.getShortForm(((PredicateAtom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
+		name = pm.getShortForm(((Atom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
 		assertTrue(name, name.equals("Person"));
 
-		PredicateAtom atom0 = (PredicateAtom) query.getRules().get(0).getBody().get(0);
+		Atom atom0 = (Atom) query.getRules().get(0).getBody().get(0);
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol()
 				.toString(), true);
 		assertTrue(name, name.equals("person-individual"));
@@ -106,10 +106,10 @@ public class PrefixRendererTest extends TestCase {
 		name = pm.getShortForm(query.getRules().get(0).getHead().getPredicate().toString(), true);
 		assertTrue(name, name.equals("q"));
 
-		name = pm.getShortForm(((PredicateAtom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
+		name = pm.getShortForm(((Atom) query.getRules().get(0).getBody().get(0)).getPredicate().toString(), true);
 		assertTrue(name, name.equals("onto:Person"));
 
-		 atom0 = (PredicateAtom) query.getRules().get(0).getBody().get(0);
+		 atom0 = (Atom) query.getRules().get(0).getBody().get(0);
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol()
 				.toString(), true);
 		assertTrue(name, name.equals("onto:person-individual"));

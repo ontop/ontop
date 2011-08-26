@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -66,7 +66,7 @@ public class CQCUtilitiesTest extends TestCase {
 		fterms1.add(y);
 		headTerms.add(tfac.getFunctionalTerm(pfac.getPredicate(URI.create("f"), 2), fterms1));
 
-		PredicateAtom head = tfac.getAtom(q, headTerms);
+		Atom head = tfac.getAtom(q, headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -99,11 +99,11 @@ public class CQCUtilitiesTest extends TestCase {
 		assertTrue(f1.getTerms().get(0).equals(tfac.getValueConstant("CANx1")));
 		assertTrue(f1.getTerms().get(1).equals(tfac.getValueConstant("CANy2")));
 
-		head = ((PredicateAtom) groundedcq.getBody().get(0)).getTerms();
+		head = ((Atom) groundedcq.getBody().get(0)).getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("CANx1")));
 		assertTrue(head.get(1).equals(tfac.getValueConstant("CANy2")));
 
-		head = ((PredicateAtom) groundedcq.getBody().get(1)).getTerms();
+		head = ((Atom) groundedcq.getBody().get(1)).getTerms();
 		assertTrue(head.get(0).equals(tfac.getValueConstant("m")));
 		f1 = (FunctionalTermImpl) head.get(1);
 		assertTrue(f1.getTerms().get(0).equals(tfac.getValueConstant("CANx1")));
@@ -118,7 +118,7 @@ public class CQCUtilitiesTest extends TestCase {
 		headTerms.add(x);
 		headTerms.add(y);
 
-		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 2), headTerms);
+		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 2), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -279,7 +279,7 @@ public class CQCUtilitiesTest extends TestCase {
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(x);
 
-		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
+		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -352,7 +352,7 @@ public class CQCUtilitiesTest extends TestCase {
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(x);
 
-		PredicateAtom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
+		Atom head = tfac.getAtom(pfac.getPredicate(URI.create("q"), 1), headTerms);
 
 		List<Atom> body = new LinkedList<Atom>();
 
@@ -452,12 +452,12 @@ public class CQCUtilitiesTest extends TestCase {
 			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
 			sigma.addAssertion(inclusion);
 
-			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
-			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
+			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			Atom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
-			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("C"), 1), tfac.getVariable("y"));
+			Atom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			Atom body2 = tfac.getAtom(tfac.getPredicate(URI.create("C"), 1), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
@@ -475,12 +475,12 @@ public class CQCUtilitiesTest extends TestCase {
 			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
 			sigma.addAssertion(inclusion);
 
-			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
-			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
+			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			Atom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
-			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("y"), tfac.getVariable("z"));
+			Atom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			Atom body2 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("y"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
@@ -498,12 +498,12 @@ public class CQCUtilitiesTest extends TestCase {
 			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
 			sigma.addAssertion(inclusion);
 
-			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
-			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
+			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			Atom body1 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("x"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
-			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("z"), tfac.getVariable("y"));
+			Atom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			Atom body2 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("z"), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
@@ -522,12 +522,12 @@ public class CQCUtilitiesTest extends TestCase {
 			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
 			sigma.addAssertion(inclusion);
 
-			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
-			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("x"), tfac.getVariable("y"));
+			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
+			Atom body1 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("x"), tfac.getVariable("y"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("z"));
-			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("z"));
+			Atom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("z"));
+			Atom body2 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
@@ -546,12 +546,12 @@ public class CQCUtilitiesTest extends TestCase {
 			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
 			sigma.addAssertion(inclusion);
 
-			PredicateAtom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
-			PredicateAtom body1 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("x"), tfac.getVariable("y"));
+			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));
+			Atom body1 = tfac.getAtom(tfac.getPredicate(URI.create("R"), 2), tfac.getVariable("x"), tfac.getVariable("y"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			PredicateAtom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("z"));
-			PredicateAtom body2 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("z"));
+			Atom head2 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("z"));
+			Atom body2 = tfac.getAtom(tfac.getPredicate(URI.create("A"), 1), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);

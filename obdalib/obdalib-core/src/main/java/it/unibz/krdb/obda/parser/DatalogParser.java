@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -261,13 +261,13 @@ public class DatalogParser extends Parser {
             	              variableList.addAll(variables); // Import all the data from the Set to a Vector.
             	               
             	              // Get the head atom
-            	              PredicateAtom head = rule.getHead();
+            	              Atom head = rule.getHead();
             	              URI name = head.getPredicate().getName();
             	              int size = variableList.size(); 
             	              
             	              // Get the predicate atom
             	              Predicate predicate = dataFactory.getPredicate(name, size);
-            	              PredicateAtom newhead = dataFactory.getAtom(predicate, variableList);
+            	              Atom newhead = dataFactory.getAtom(predicate, variableList);
             	              rule.updateHead(newhead);
             	              
             	              isSelectAll = false;  
@@ -611,11 +611,11 @@ public class DatalogParser extends Parser {
     public final CQIE datalog_syntax_alt() throws RecognitionException {
         CQIE value = null;
 
-        PredicateAtom head10 = null;
+        Atom head10 = null;
 
         List<Atom> body11 = null;
 
-        PredicateAtom head12 = null;
+        Atom head12 = null;
 
 
         try {
@@ -747,7 +747,7 @@ public class DatalogParser extends Parser {
     public final CQIE swirl_syntax_rule() throws RecognitionException {
         CQIE value = null;
 
-        PredicateAtom head13 = null;
+        Atom head13 = null;
 
         CQIE swirl_syntax_alt14 = null;
 
@@ -823,7 +823,7 @@ public class DatalogParser extends Parser {
     public final CQIE swirl_syntax_alt() throws RecognitionException {
         CQIE value = null;
 
-        PredicateAtom head15 = null;
+        Atom head15 = null;
 
         List<Atom> body16 = null;
 
@@ -956,10 +956,10 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "head"
     // Datalog.g:215:1: head returns [PredicateAtom value] : atom ;
-    public final PredicateAtom head() throws RecognitionException {
-        PredicateAtom value = null;
+    public final Atom head() throws RecognitionException {
+        Atom value = null;
 
-        PredicateAtom atom18 = null;
+        Atom atom18 = null;
 
 
 
@@ -999,9 +999,9 @@ public class DatalogParser extends Parser {
     public final List<Atom> body() throws RecognitionException {
         List<Atom> value = null;
 
-        PredicateAtom a1 = null;
+        Atom a1 = null;
 
-        PredicateAtom a2 = null;
+        Atom a2 = null;
 
 
 
@@ -1078,8 +1078,8 @@ public class DatalogParser extends Parser {
 
     // $ANTLR start "atom"
     // Datalog.g:231:1: atom returns [PredicateAtom value] : predicate LPAREN ( terms )? RPAREN ;
-    public final PredicateAtom atom() throws RecognitionException {
-        PredicateAtom value = null;
+    public final Atom atom() throws RecognitionException {
+        Atom value = null;
 
         String predicate19 = null;
 

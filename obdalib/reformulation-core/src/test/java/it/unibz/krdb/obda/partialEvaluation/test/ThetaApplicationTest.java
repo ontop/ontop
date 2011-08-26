@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -61,7 +61,7 @@ public class ThetaApplicationTest extends TestCase {
 		terms1.add(t3);
 		terms1.add(ot);
 		terms1.add(ot2);
-		PredicateAtom atom1 = predFactory.getAtom(pred1, terms1);
+		Atom atom1 = predFactory.getAtom(pred1, terms1);
 		List<Atom> body = new Vector<Atom>();
 		body.add(atom1);
 
@@ -80,7 +80,7 @@ public class ThetaApplicationTest extends TestCase {
 		Predicate head = predFactory.getPredicate(URI.create("q"), 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t10);
-		PredicateAtom h = predFactory.getAtom(head, terms2);
+		Atom h = predFactory.getAtom(head, terms2);
 
 		CQIE query = predFactory.getCQIE(h, body);
 
@@ -99,7 +99,7 @@ public class ThetaApplicationTest extends TestCase {
 		List<Atom> newbody = newquery.getBody();
 		assertEquals(1, newbody.size());
 
-		PredicateAtom a = (PredicateAtom) newbody.get(0);
+		Atom a = (Atom) newbody.get(0);
 		List<Term> terms = a.getTerms();
 		assertEquals(5, terms.size());
 

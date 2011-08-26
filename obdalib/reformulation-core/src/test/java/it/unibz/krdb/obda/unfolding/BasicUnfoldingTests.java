@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
@@ -35,8 +35,8 @@ public class BasicUnfoldingTests extends TestCase {
 		 */
 		
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		PredicateAtom a = fac.getAtom(fac.getPredicate(URI.create("B"), 1), fac.getFunctionalTerm(fac.getPredicate(URI.create("b"),1), fac.getVariable("x")));
-		PredicateAtom q = fac.getAtom(fac.getPredicate(URI.create("q"), 1), fac.getVariable("x"));
+		Atom a = fac.getAtom(fac.getPredicate(URI.create("B"), 1), fac.getFunctionalTerm(fac.getPredicate(URI.create("b"),1), fac.getVariable("x")));
+		Atom q = fac.getAtom(fac.getPredicate(URI.create("q"), 1), fac.getVariable("x"));
 		mappings.add(fac.getRDBMSMappingAxiom("select x from t", fac.getCQIE(q, a)));
 		
 		/***

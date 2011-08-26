@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -304,8 +304,8 @@ public class VirtualABoxMaterializer {
 			/*
 			 * Generating the query that as for the content of this predicate
 			 */
-			PredicateAtom head = null;
-			PredicateAtom body = null;
+			Atom head = null;
+			Atom body = null;
 			signature = new LinkedList<String>();
 			if (p.getArity() == 1) {
 				head = obdafac.getAtom(obdafac.getPredicate(URI.create("q"), 1), obdafac.getVariable("col1"));
