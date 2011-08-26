@@ -4,14 +4,14 @@ import it.unibz.krdb.obda.model.Predicate;
 
 public interface OntologyFactory {
 
-	public PropertySomeDescription getExistentialConceptDescription(Predicate p, boolean inverse);
+	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
 	
-	public PropertySomeClassDescription getExistentialConceptDescription(Predicate p, boolean inverse, Class filler);
+	public PropertySomeClassRestriction getPropertySomeClassRestriction(Predicate p, boolean inverse, Class filler);
 
-	public Class getAtomicConceptDescription(Predicate p);
+	public Class getClass(Predicate p);
 
-	public Property getRoleDescription(Predicate p, boolean inverse);
+	public Property getProperty(Predicate p, boolean inverse);
 
-	public Property getRoleDescription(Predicate p);
+	public Property getProperty(Predicate p);
 
 }

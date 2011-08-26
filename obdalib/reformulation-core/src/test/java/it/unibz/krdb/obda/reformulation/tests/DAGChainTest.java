@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
@@ -36,9 +36,9 @@ public class DAGChainTest extends TestCase {
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
 
-        Class ac = descFactory.getAtomicConceptDescription(a);
-        Class bc = descFactory.getAtomicConceptDescription(b);
-        Class cc = descFactory.getAtomicConceptDescription(c);
+        Class ac = descFactory.getClass(a);
+        Class bc = descFactory.getClass(b);
+        Class cc = descFactory.getClass(c);
         ontology.addAssertion(new SubClassAxiomImpl(bc, ac));
         ontology.addAssertion(new SubClassAxiomImpl(cc, bc));
         ontology.addConcept(ac);
@@ -64,10 +64,10 @@ public class DAGChainTest extends TestCase {
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
-        Class ac = descFactory.getAtomicConceptDescription(a);
-        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
-        PropertySomeDescription ier = descFactory.getExistentialConceptDescription(r, true);
-        Class cc = descFactory.getAtomicConceptDescription(c);
+        Class ac = descFactory.getClass(a);
+        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
+        PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
+        Class cc = descFactory.getClass(c);
 
         ontology.addAssertion(new SubClassAxiomImpl(er, ac));
         ontology.addAssertion(new SubClassAxiomImpl(cc, ier));
@@ -104,12 +104,12 @@ public class DAGChainTest extends TestCase {
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
         Predicate d = predicateFactory.getPredicate(URI.create("d"), 1);
 
-        Class ac = descFactory.getAtomicConceptDescription(a);
-        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
-        PropertySomeDescription ier = descFactory.getExistentialConceptDescription(r, true);
-        Class cc = descFactory.getAtomicConceptDescription(c);
-        Class bc = descFactory.getAtomicConceptDescription(b);
-        Class dc = descFactory.getAtomicConceptDescription(d);
+        Class ac = descFactory.getClass(a);
+        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
+        PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
+        Class cc = descFactory.getClass(c);
+        Class bc = descFactory.getClass(b);
+        Class dc = descFactory.getClass(d);
 
         ontology.addAssertion(new SubClassAxiomImpl(er, ac));
         ontology.addAssertion(new SubClassAxiomImpl(cc, ier));
@@ -161,9 +161,9 @@ public class DAGChainTest extends TestCase {
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
 
 
-        Class ac = descFactory.getAtomicConceptDescription(a);
-        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
-        PropertySomeDescription ier = descFactory.getExistentialConceptDescription(r, true);
+        Class ac = descFactory.getClass(a);
+        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
+        PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
 
         ontology.addAssertion(new SubClassAxiomImpl(ier, ac));
         ontology.addAssertion(new SubClassAxiomImpl(ier, er));

@@ -10,12 +10,12 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -159,13 +159,13 @@ public class SemanticQueryOptimizer {
 							Class left = (Class) included;
 							checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms());
 
-						} else if (included instanceof PropertySomeDescription) {
+						} else if (included instanceof PropertySomeRestriction) {
 							/*
 							 * Case left side of inclusion is exists R or exists
 							 * R-
 							 */
 							/* Case left side of inclusion is B */
-							PropertySomeDescription left = (PropertySomeDescription) included;
+							PropertySomeRestriction left = (PropertySomeRestriction) included;
 							if (!left.isInverse()) {
 								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
 								terms.add(fac.getNondistinguishedVariable());
@@ -184,14 +184,14 @@ public class SemanticQueryOptimizer {
 						 * case we work with unary atom R(x,_), R(_,y)
 						 */
 
-						if (including instanceof PropertySomeDescription && included instanceof Class) {
+						if (including instanceof PropertySomeRestriction && included instanceof Class) {
 							/*
 							 * Case with left side of inclusion is A
 							 * 
 							 * R(x,_) is redundant if we have A ISA ER and A(x)
 							 * is in the body
 							 */
-							PropertySomeDescription right = (PropertySomeDescription) including;
+							PropertySomeRestriction right = (PropertySomeRestriction) including;
 							Class left = (Class) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0));
@@ -201,8 +201,8 @@ public class SemanticQueryOptimizer {
 								continue;
 							}
 
-						} else if (including instanceof PropertySomeDescription
-								&& included instanceof PropertySomeDescriptionImpl) {
+						} else if (including instanceof PropertySomeRestriction
+								&& included instanceof PropertySomeRestrictionImpl) {
 
 							/*
 							 * Case with left side of inclusion is exists R or
@@ -214,8 +214,8 @@ public class SemanticQueryOptimizer {
 							 * ES ISA ER- we get S(x,_)
 							 */
 
-							PropertySomeDescription right = (PropertySomeDescription) including;
-							PropertySomeDescription left = (PropertySomeDescription) included;
+							PropertySomeRestriction right = (PropertySomeRestriction) including;
+							PropertySomeRestriction left = (PropertySomeRestriction) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
 									checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0),

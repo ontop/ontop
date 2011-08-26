@@ -19,7 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -155,7 +155,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			Atom a = (Atom) a0;
 			if (a.getArity() == 1) {
 				Predicate pa = fac.getPredicate(URI.create("EXT" + a.getPredicate().getName().getFragment()), 1);
-				views.put(descFactory.getAtomicConceptDescription(a.getPredicate()), pa);
+				views.put(descFactory.getClass(a.getPredicate()), pa);
 				
 				body.add(rewriteAtom(out, tws, a, cqie, 
 						fac.getAtom(fac.getPredicate(URI.create("A" + n), variables.size()), variables), 
@@ -196,9 +196,9 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 		if (D instanceof Class) {
 			return fac.getAtom(((Class) D).getPredicate(), z);
-		} else if (D instanceof PropertySomeDescription) {
+		} else if (D instanceof PropertySomeRestriction) {
 			Term w = fac.getVariable("w");
-			PropertySomeDescription DD = (PropertySomeDescription) D;
+			PropertySomeRestriction DD = (PropertySomeRestriction) D;
 			if (!DD.isInverse())
 				return fac.getAtom(DD.getPredicate(), z, w);
 			else
@@ -216,7 +216,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		if (tw.isInDomain(t) && !tw.isRoot(t)) {
 			PredicatePosition pp = tw.getLabelTail(t);
 			log.debug("checking tree for predicate position: " + pp + " for " + t);
-			ClassDescription ETi = descFactory.getExistentialConceptDescription(pp.getPredicate(), pp.getPosition() == 2);
+			ClassDescription ETi = descFactory.getPropertySomeRestriction(pp.getPredicate(), pp.getPosition() == 2);
 			if (!ETi.equals(C) && !conceptDAG.getClassNode(C).descendans.contains(conceptDAG.getClassNode(ETi))) {
 				log.debug("falsum in " + C + " " + ETi);
 				return false;
@@ -282,14 +282,14 @@ public class TreeWitnessReformulator implements QueryRewriter {
 						wb.add(fac.getAtom(pa, x));
 					else 
 						log.debug("duplicating atom " + ua);
-					views.put(descFactory.getAtomicConceptDescription(ca.getPredicate()), pa);
-				} else if (!checkTree(tw, ca.getTerm(0), descFactory.getAtomicConceptDescription(ca.getPredicate())))
+					views.put(descFactory.getClass(ca.getPredicate()), pa);
+				} else if (!checkTree(tw, ca.getTerm(0), descFactory.getClass(ca.getPredicate())))
 					return null;
 			} else if (ca.getArity() == 2) {
-				if (!checkTree(tw, ca.getTerm(0), descFactory.getExistentialConceptDescription(ca.getPredicate(), false)))
+				if (!checkTree(tw, ca.getTerm(0), descFactory.getPropertySomeRestriction(ca.getPredicate(), false)))
 					return null;
 
-				if (!checkTree(tw, ca.getTerm(1), descFactory.getExistentialConceptDescription(ca.getPredicate(), true)))
+				if (!checkTree(tw, ca.getTerm(1), descFactory.getPropertySomeRestriction(ca.getPredicate(), true)))
 					return null;
 			}
 		}
@@ -298,7 +298,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		Predicate p = fac.getPredicate(
 				URI.create("EXT" + tw.getDirection().getPosition() + "E" + tw.getDirection().getPredicate().getName().getFragment()), 1);
 		wb.add(fac.getAtom(p, x));
-		views.put(descFactory.getExistentialConceptDescription(tw.getDirection().getPredicate(), tw.getDirection().getPosition() == 1), p);
+		views.put(descFactory.getPropertySomeRestriction(tw.getDirection().getPredicate(), tw.getDirection().getPosition() == 1), p);
 
 		// DAGNode node = conceptDAG.getClassNode(C);
 		// Negated Atom \neg \exists z R(x,z)

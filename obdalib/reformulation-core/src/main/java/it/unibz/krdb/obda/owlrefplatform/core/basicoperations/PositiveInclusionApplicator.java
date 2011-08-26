@@ -10,14 +10,14 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.SemanticQueryOptimizer;
 
 import java.util.Collection;
@@ -76,8 +76,8 @@ public class PositiveInclusionApplicator {
 			Predicate inc_predicate = null;
 			if (inc instanceof Class) {
 				inc_predicate = ((Class) inc).getPredicate();
-			} else if (inc instanceof PropertySomeDescription) {
-				inc_predicate = ((PropertySomeDescription) inc).getPredicate();
+			} else if (inc instanceof PropertySomeRestriction) {
+				inc_predicate = ((PropertySomeRestriction) inc).getPredicate();
 			}
 
 			if (!pred.equals(inc_predicate))
@@ -89,8 +89,8 @@ public class PositiveInclusionApplicator {
 				Term t2 = atom.getTerms().get(1);
 				Term t1 = atom.getTerms().get(0);
 				ClassDescription including = ((SubClassAxiomImpl) pi).getSuper();
-				if (including instanceof PropertySomeDescriptionImpl) {
-					PropertySomeDescriptionImpl imp = (PropertySomeDescriptionImpl) including;
+				if (including instanceof PropertySomeRestrictionImpl) {
+					PropertySomeRestrictionImpl imp = (PropertySomeRestrictionImpl) including;
 					if (t2 instanceof AnonymousVariable && !imp.isInverse()) {
 						/*
 						 * I is applicable to an atom P(x1, x2) if (1) x2 = _
@@ -183,7 +183,7 @@ public class PositiveInclusionApplicator {
 
 		SubClassAxiomImpl samplepi = (SubClassAxiomImpl) pis.iterator().next();
 
-		PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) samplepi.getSuper();
+		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) samplepi.getSuper();
 		Set<CQIE> saturatedset = new HashSet<CQIE>();
 		saturatedset.addAll(cqs);
 
@@ -484,15 +484,15 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 
 					Atom newatom = termFactory.getAtom(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
-				} else if (lefthandside instanceof PropertySomeDescriptionImpl) {
+				} else if (lefthandside instanceof PropertySomeRestrictionImpl) {
 
 					/*
 					 * Generating a role atom from a concept atom A(x) genrates
@@ -502,7 +502,7 @@ public class PositiveInclusionApplicator {
 					Term anonym = termFactory.getNondistinguishedVariable();
 					Atom newatom = null;
 
-					if (((PropertySomeDescriptionImpl) lefthandside).isInverse()) {
+					if (((PropertySomeRestrictionImpl) lefthandside).isInverse()) {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, anonym);
 						v.add(1, t);
@@ -511,8 +511,8 @@ public class PositiveInclusionApplicator {
 
 						if (lefthandside instanceof Class) {
 							predicate = ((Class) lefthandside).getPredicate();
-						} else if (lefthandside instanceof PropertySomeDescription) {
-							predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+						} else if (lefthandside instanceof PropertySomeRestriction) {
+							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
 						newatom = termFactory.getAtom(predicate.clone(), v);
 					} else {
@@ -524,8 +524,8 @@ public class PositiveInclusionApplicator {
 
 						if (lefthandside instanceof Class) {
 							predicate = ((Class) lefthandside).getPredicate();
-						} else if (lefthandside instanceof PropertySomeDescription) {
-							predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+						} else if (lefthandside instanceof PropertySomeRestriction) {
+							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
 						newatom = termFactory.getAtom(predicate.clone(), v);
 					}
@@ -546,7 +546,7 @@ public class PositiveInclusionApplicator {
 
 			SubClassAxiomImpl inc = (SubClassAxiomImpl) inclusion;
 			ClassDescription lefthandside = inc.getSub();
-			PropertySomeDescription righthandside = (PropertySomeDescription) inc.getSuper();
+			PropertySomeRestriction righthandside = (PropertySomeRestriction) inc.getSuper();
 
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);
@@ -565,12 +565,12 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (((PropertySomeDescription) lefthandside).isInverse()) {
+				} else if (((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
@@ -579,12 +579,12 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (!((PropertySomeDescription) lefthandside).isInverse()) {
+				} else if (!((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
@@ -593,8 +593,8 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
@@ -611,12 +611,12 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (((PropertySomeDescription) lefthandside).isInverse()) {
+				} else if (((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
@@ -625,12 +625,12 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (!((PropertySomeDescription) lefthandside).isInverse()) {
+				} else if (!((PropertySomeRestriction) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
@@ -639,8 +639,8 @@ public class PositiveInclusionApplicator {
 
 					if (lefthandside instanceof Class) {
 						predicate = ((Class) lefthandside).getPredicate();
-					} else if (lefthandside instanceof PropertySomeDescription) {
-						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeRestriction) {
+						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 

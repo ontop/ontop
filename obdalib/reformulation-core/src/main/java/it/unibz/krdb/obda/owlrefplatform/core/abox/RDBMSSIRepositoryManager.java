@@ -21,7 +21,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
@@ -293,7 +293,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String lit = attributeABoxAssertion.getValue().getValue();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getProperty(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
@@ -307,7 +307,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getProperty(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
 					Property desc = (Property) dag.equi_mappings.get(propDesc);
@@ -332,7 +332,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
 					Predicate clsPred = ((ClassAssertion) ax).getConcept();
-					ClassDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+					ClassDescription clsDesc = descFactory.getClass(clsPred);
 					DAGNode node = pureIsa.getClassNode(clsDesc);
 					int idx = node.getIndex();
 
@@ -455,7 +455,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String lit = attributeABoxAssertion.getValue().getValue();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getProperty(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
@@ -472,7 +472,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getProperty(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
 					Property desc = (Property) dag.equi_mappings.get(propDesc);
@@ -500,7 +500,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
 					Predicate clsPred = ((ClassAssertion) ax).getConcept();
-					ClassDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+					ClassDescription clsDesc = descFactory.getClass(clsPred);
 					DAGNode node = pureIsa.getClassNode(clsDesc);
 					int idx = node.getIndex();
 
@@ -573,10 +573,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				if (exists) {
 					p = predicateFactory.getPredicate(URI.create(uri), 2);
-					description = descFactory.getExistentialConceptDescription(p, inverse);
+					description = descFactory.getPropertySomeRestriction(p, inverse);
 				} else {
 					p = predicateFactory.getPredicate(URI.create(uri), 1);
-					description = descFactory.getAtomicConceptDescription(p);
+					description = descFactory.getClass(p);
 				}
 
 				if (res_classes.containsKey(description)) {
@@ -599,7 +599,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					inverse = true;
 				}
 				p = predicateFactory.getPredicate(URI.create(uri), 2);
-				description = descFactory.getRoleDescription(p, inverse);
+				description = descFactory.getProperty(p, inverse);
 
 				if (res_roles.containsKey(description)) {
 					res_roles.get(description).getRange().addInterval(start_idx, end_idx);
@@ -671,16 +671,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			DAGNode genNode = dag.getClassNode((ClassDescription) node.getDescription());
 			for (DAGNode descendant : genNode.descendans) {
 
-				if (descendant.getDescription() instanceof PropertySomeDescription) {
+				if (descendant.getDescription() instanceof PropertySomeRestriction) {
 					SemanticIndexRange descRange;
 
-					Predicate p = ((PropertySomeDescription) descendant.getDescription()).getPredicate();
+					Predicate p = ((PropertySomeRestriction) descendant.getDescription()).getPredicate();
 					if (p.getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 						continue;
 					}
-					boolean isInverse = ((PropertySomeDescription) descendant.getDescription()).isInverse();
+					boolean isInverse = ((PropertySomeRestriction) descendant.getDescription()).isInverse();
 
-					Property role = descFactory.getRoleDescription(p, false);
+					Property role = descFactory.getProperty(p, false);
 
 					if (pureIsa.equi_mappings.containsKey(role)) {
 						// XXX: Very dirty hack, needs to be redone
@@ -722,7 +722,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				continue;
 			}
 
-			SemanticIndexRange range = pureIsa.getRoleNode(descFactory.getRoleDescription(nodeDesc.getPredicate(), false)).getRange();
+			SemanticIndexRange range = pureIsa.getRoleNode(descFactory.getProperty(nodeDesc.getPredicate(), false)).getRange();
 			String projection = "URI1 as X, URI2 as Y";
 			mappings.add(new BinaryMappingKey(range, projection, RDBMSSIRepositoryManager.role_table, nodeDesc.getPredicate().getName()
 					.toString()));
@@ -748,7 +748,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				if (!childDesc.isInverse()) {
 					continue;
 				}
-				Property posChildDesc = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+				Property posChildDesc = descFactory.getProperty(childDesc.getPredicate(), false);
 
 				SemanticIndexRange childRange = pureIsa.getRoleNode(posChildDesc).getRange();
 

@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
@@ -178,7 +178,7 @@ public class TreeRedReformulator implements QueryRewriter {
 				Set<SubDescriptionAxiom> relevantnotinverse = new HashSet<SubDescriptionAxiom>(1000);
 				for (SubDescriptionAxiom inc : relevantInclusion) {
 					SubClassAxiomImpl samplepi = (SubClassAxiomImpl) inc;
-					PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) samplepi.getSuper();
+					PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) samplepi.getSuper();
 					if (ex.isInverse())
 						relevantinverse.add(inc);
 					else

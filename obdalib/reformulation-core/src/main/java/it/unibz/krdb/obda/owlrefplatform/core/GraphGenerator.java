@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
@@ -44,8 +44,8 @@ public class GraphGenerator {
         for (DAGNode node : isa.getClasses()) {
 
             String style = "";
-            if (node.getDescription() instanceof PropertySomeDescription) {
-                PropertySomeDescription ec = (PropertySomeDescription) node.getDescription();
+            if (node.getDescription() instanceof PropertySomeRestriction) {
+                PropertySomeRestriction ec = (PropertySomeRestriction) node.getDescription();
 
                 if (ec.isInverse()) {
                     style = "style=\"filled\" fillcolor=\"darkgoldenrod3\" ";

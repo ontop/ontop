@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 
 import java.util.HashMap;
@@ -43,10 +43,10 @@ public class DAGChain {
             }
 
             // Link ER and ER- nodes children and parents object to single objects
-            if (clsc instanceof PropertySomeDescription) {
-                PropertySomeDescription nodeInv = descFactory.getExistentialConceptDescription(
-                        ((PropertySomeDescription) clsc).getPredicate(),
-                        !((PropertySomeDescription) clsc).isInverse()
+            if (clsc instanceof PropertySomeRestriction) {
+                PropertySomeRestriction nodeInv = descFactory.getPropertySomeRestriction(
+                        ((PropertySomeRestriction) clsc).getPredicate(),
+                        !((PropertySomeRestriction) clsc).isInverse()
                 );
                 DAGNode tnodeInv = dag_nodes.get(nodeInv);
                 if (tnodeInv == null) {
@@ -68,11 +68,11 @@ public class DAGChain {
             ClassDescription nodeDesc = (ClassDescription) node.getDescription();
             DAGNode tnode = dag_nodes.get(nodeDesc);
 
-            PropertySomeDescription invNodeExDesc = null;
+            PropertySomeRestriction invNodeExDesc = null;
 
-            if (nodeDesc instanceof PropertySomeDescription) {
-                PropertySomeDescription nodeExDesc = (PropertySomeDescription) nodeDesc;
-                invNodeExDesc = descFactory.getExistentialConceptDescription(
+            if (nodeDesc instanceof PropertySomeRestriction) {
+                PropertySomeRestriction nodeExDesc = (PropertySomeRestriction) nodeDesc;
+                invNodeExDesc = descFactory.getPropertySomeRestriction(
                         nodeExDesc.getPredicate(),
                         !nodeExDesc.isInverse()
                 );
@@ -82,10 +82,10 @@ public class DAGChain {
                 ClassDescription childNodeDesc = (ClassDescription) child.getDescription();
                 DAGNode tchild = dag_nodes.get(childNodeDesc);
 
-                PropertySomeDescription childInvNodeExDesc = null;
-                if (childNodeDesc instanceof PropertySomeDescription) {
-                    PropertySomeDescription childNodeExDesc = (PropertySomeDescription) childNodeDesc;
-                    childInvNodeExDesc = descFactory.getExistentialConceptDescription(
+                PropertySomeRestriction childInvNodeExDesc = null;
+                if (childNodeDesc instanceof PropertySomeRestriction) {
+                    PropertySomeRestriction childNodeExDesc = (PropertySomeRestriction) childNodeDesc;
+                    childInvNodeExDesc = descFactory.getPropertySomeRestriction(
                             childNodeExDesc.getPredicate(),
                             !childNodeExDesc.isInverse()
                     );

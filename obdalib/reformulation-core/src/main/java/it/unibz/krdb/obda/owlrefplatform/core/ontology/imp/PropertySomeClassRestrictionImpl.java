@@ -2,15 +2,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeClassRestriction;
 
-public class PropertySomeClassDescriptionImpl implements PropertySomeClassDescription{
+public class PropertySomeClassRestrictionImpl implements PropertySomeClassRestriction{
 
 	private final  Predicate	predicate;
 	private final boolean		isInverse;
 	private final Class filler;
 
-	public PropertySomeClassDescriptionImpl(Predicate p, boolean isInverse, Class filler) {
+	public PropertySomeClassRestrictionImpl(Predicate p, boolean isInverse, Class filler) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 		this.filler = filler;
@@ -31,9 +31,9 @@ public class PropertySomeClassDescriptionImpl implements PropertySomeClassDescri
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof PropertySomeClassDescriptionImpl))
+		if (!(obj instanceof PropertySomeClassRestrictionImpl))
 			return false;
-		PropertySomeClassDescriptionImpl concept2 = (PropertySomeClassDescriptionImpl) obj;
+		PropertySomeClassRestrictionImpl concept2 = (PropertySomeClassRestrictionImpl) obj;
 		if (isInverse != concept2.isInverse)
 			return false;
 		if (!predicate.equals(concept2.getPredicate()))

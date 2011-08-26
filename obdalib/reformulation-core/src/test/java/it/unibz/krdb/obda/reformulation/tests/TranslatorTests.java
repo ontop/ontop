@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
@@ -50,7 +50,7 @@ public class TranslatorTests extends TestCase {
 		
 		assertEquals(1, ass.size());
 		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
-		PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) a.getSub();
+		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
 		assertEquals(true, ex.isInverse());
 		ClassImpl con = (ClassImpl) a.getSuper();
 //		assertEquals(false, con.isInverse());
@@ -79,7 +79,7 @@ public class TranslatorTests extends TestCase {
 		
 		assertEquals(1, ass.size());
 		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
-		PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) a.getSub();
+		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
 		assertEquals(false, ex.isInverse());
 		ClassImpl con = (ClassImpl) a.getSuper();
 //		assertEquals(false, con.isInverse());

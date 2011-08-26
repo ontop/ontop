@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -45,7 +45,7 @@ public class DAGConstructor {
 				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
 				Description child = inclusion.getSub();
-				if (parent instanceof PropertySomeDescription) {
+				if (parent instanceof PropertySomeRestriction) {
 					continue;
 				}
 			}
@@ -67,7 +67,7 @@ public class DAGConstructor {
 				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
 				Description child = inclusion.getSub();
-				if (parent instanceof PropertySomeDescription) {
+				if (parent instanceof PropertySomeRestriction) {
 					continue;
 				}
 			}
@@ -101,7 +101,7 @@ public class DAGConstructor {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			if (node.getDescription() instanceof PropertySomeDescription || node.getDescription().equals(DAG.thingConcept)) {
+			if (node.getDescription() instanceof PropertySomeRestriction || node.getDescription().equals(DAG.thingConcept)) {
 				continue;
 			}
 
@@ -115,7 +115,7 @@ public class DAGConstructor {
 			}
 
 			for (DAGNode child : node.getChildren()) {
-				if (child.getDescription() instanceof PropertySomeDescription) {
+				if (child.getDescription() instanceof PropertySomeRestriction) {
 					continue;
 				}
 				DAGNode newChild = classes.get(child.getDescription());
@@ -140,7 +140,7 @@ public class DAGConstructor {
 			}
 
 			if (nodeDesc.isInverse()) {
-				Property posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
+				Property posNode = descFactory.getProperty(nodeDesc.getPredicate(), false);
 				DAGNode newNode = roles.get(posNode);
 				if (newNode == null) {
 					newNode = new DAGNode(posNode);
@@ -162,7 +162,7 @@ public class DAGConstructor {
 					continue;
 				}
 				if (childDesc.isInverse()) {
-					Property posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+					Property posChild = descFactory.getProperty(childDesc.getPredicate(), false);
 					DAGNode newChild = roles.get(posChild);
 					if (newChild == null) {
 						newChild = new DAGNode(posChild);
@@ -201,7 +201,7 @@ public class DAGConstructor {
 
 		if (desc instanceof Property) {
 			Property roleKey = (Property) desc;
-			return descFactory.getRoleDescription(roleKey.getPredicate(), false);
+			return descFactory.getProperty(roleKey.getPredicate(), false);
 
 		} else if (desc instanceof Class) {
 			return desc;

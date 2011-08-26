@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
 import java.util.ArrayList;
@@ -147,7 +147,7 @@ public class DAGOperations {
 
             //Leave an atomic node when removing equivalent nodes from isa-dag
             if (component.size() > 1 &&
-                    cyclehead.getDescription() instanceof PropertySomeDescription) {
+                    cyclehead.getDescription() instanceof PropertySomeRestriction) {
 
                 for (int i = 1; i < component.size(); i++) {
                     if (component.get(i).getDescription() instanceof Class) {

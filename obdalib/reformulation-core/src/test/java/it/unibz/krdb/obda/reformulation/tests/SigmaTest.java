@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
@@ -29,9 +29,9 @@ public class SigmaTest extends TestCase {
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
-        Class ac = descFactory.getAtomicConceptDescription(a);
-        Class cc = descFactory.getAtomicConceptDescription(c);
-        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
+        Class ac = descFactory.getClass(a);
+        Class cc = descFactory.getClass(c);
+        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 
         ontology.addAssertion(new SubClassAxiomImpl(er, ac));
         ontology.addAssertion(new SubClassAxiomImpl(cc, er));

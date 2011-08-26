@@ -77,8 +77,8 @@ public class YAGOTest {
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 2);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
 
-                    ClassDescription rs = descFactory.getExistentialConceptDescription(ps, true);
-                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
+                    ClassDescription co = descFactory.getClass(po);
 
                     onto.addAssertion(new SubClassAxiomImpl(rs, co));
 
@@ -87,15 +87,15 @@ public class YAGOTest {
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 2);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
 
-                    ClassDescription rs = descFactory.getExistentialConceptDescription(ps, false);
-                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
+                    ClassDescription co = descFactory.getClass(po);
 
                     onto.addAssertion(new SubClassAxiomImpl(rs, co));
 
                 } else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription co = descFactory.getClass(po);
 
                     onto.addConcept(co);
 
@@ -104,8 +104,8 @@ public class YAGOTest {
 //                    log.debug("{} {}", subject, object);
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    ClassDescription cs = descFactory.getAtomicConceptDescription(ps);
-                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription cs = descFactory.getClass(ps);
+                    ClassDescription co = descFactory.getClass(po);
                     onto.addAssertion(new SubClassAxiomImpl(cs, co));
 
                 } else if ("rdfs:subPropertyOf".equals(predicate)) {
@@ -113,8 +113,8 @@ public class YAGOTest {
 //                    log.debug("{} {}", subject, object);
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    Property rs = descFactory.getRoleDescription(ps);
-                    Property ro = descFactory.getRoleDescription(po);
+                    Property rs = descFactory.getProperty(ps);
+                    Property ro = descFactory.getProperty(po);
                     onto.addAssertion(new SubPropertyAxiomImpl(rs, ro));
 
                 } else {

@@ -447,8 +447,8 @@ public class CQCUtilitiesTest extends TestCase {
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
 			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
-			ClassDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
-			ClassDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("C"), 1));
+			ClassDescription left = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.getClass(tfac.getPredicate(URI.create("C"), 1));
 			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
@@ -470,8 +470,8 @@ public class CQCUtilitiesTest extends TestCase {
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
-			ClassDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
-			ClassDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
+			ClassDescription left = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), false);
 			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
@@ -493,8 +493,8 @@ public class CQCUtilitiesTest extends TestCase {
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
-			ClassDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
-			ClassDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
+			ClassDescription left = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), true);
 			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
@@ -516,8 +516,8 @@ public class CQCUtilitiesTest extends TestCase {
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
-			ClassDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
-			ClassDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription left = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), false);
+			ClassDescription right = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
 
 			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
@@ -540,8 +540,8 @@ public class CQCUtilitiesTest extends TestCase {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
-			ClassDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
-			ClassDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription left = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), true);
+			ClassDescription right = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
 
 			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);

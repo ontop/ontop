@@ -314,8 +314,8 @@ public class OntologyImpl implements Ontology {
 				Set<SubDescriptionAxiom> rightNonExistential = getRightNotExistential(acd.getPredicate());
 				rightNonExistential.add(pi);
 
-			} else if (description2 instanceof PropertySomeDescriptionImpl) {
-				PropertySomeDescriptionImpl ecd = (PropertySomeDescriptionImpl) description2;
+			} else if (description2 instanceof PropertySomeRestrictionImpl) {
+				PropertySomeRestrictionImpl ecd = (PropertySomeRestrictionImpl) description2;
 				Set<SubDescriptionAxiom> rightAssertion = getRight(ecd.getPredicate());
 				rightAssertion.add(pi);
 
@@ -329,8 +329,8 @@ public class OntologyImpl implements Ontology {
 				Set<SubDescriptionAxiom> leftAssertion = getLeft(acd.getPredicate());
 				leftAssertion.add(pi);
 
-			} else if (description1 instanceof PropertySomeDescriptionImpl) {
-				PropertySomeDescriptionImpl ecd = (PropertySomeDescriptionImpl) description1;
+			} else if (description1 instanceof PropertySomeRestrictionImpl) {
+				PropertySomeRestrictionImpl ecd = (PropertySomeRestrictionImpl) description1;
 				Set<SubDescriptionAxiom> leftAssertion = getLeft(ecd.getPredicate());
 				leftAssertion.add(pi);
 			}
@@ -424,11 +424,11 @@ public class OntologyImpl implements Ontology {
 				Property r1 = rinclusion.getSub();
 				Property r2 = rinclusion.getSuper();
 
-				PropertySomeDescriptionImpl e11 = new PropertySomeDescriptionImpl(r1.getPredicate(), r1.isInverse());
+				PropertySomeRestrictionImpl e11 = new PropertySomeRestrictionImpl(r1.getPredicate(), r1.isInverse());
 				;
-				PropertySomeDescriptionImpl e12 = new PropertySomeDescriptionImpl(r2.getPredicate(), r2.isInverse());
-				PropertySomeDescriptionImpl e21 = new PropertySomeDescriptionImpl(r1.getPredicate(), !r1.isInverse());
-				PropertySomeDescriptionImpl e22 = new PropertySomeDescriptionImpl(r2.getPredicate(), !r2.isInverse());
+				PropertySomeRestrictionImpl e12 = new PropertySomeRestrictionImpl(r2.getPredicate(), r2.isInverse());
+				PropertySomeRestrictionImpl e21 = new PropertySomeRestrictionImpl(r1.getPredicate(), !r1.isInverse());
+				PropertySomeRestrictionImpl e22 = new PropertySomeRestrictionImpl(r2.getPredicate(), !r2.isInverse());
 
 				SubClassAxiomImpl inc1 = new SubClassAxiomImpl(e11, e12);
 				SubClassAxiomImpl inc2 = new SubClassAxiomImpl(e21, e22);

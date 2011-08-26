@@ -160,11 +160,11 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists)
-                        description = descFactory.getExistentialConceptDescription(p, inverse);
+                        description = descFactory.getPropertySomeRestriction(p, inverse);
                     else
-                        description = descFactory.getAtomicConceptDescription(p);
+                        description = descFactory.getClass(p);
                 } else {
-                    description = descFactory.getRoleDescription(p, inverse);
+                    description = descFactory.getProperty(p, inverse);
                 }
 
 

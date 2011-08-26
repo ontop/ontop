@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 
 import java.util.Collection;
@@ -160,11 +160,11 @@ public class CQCUtilities {
 
 						oldTerm1 = patom.getTerm(0);
 
-					} else if (left instanceof PropertySomeDescription) {
+					} else if (left instanceof PropertySomeRestriction) {
 						if (patom.getArity() != 2)
 							continue;
 
-						PropertySomeDescription lefttAtomicRole = (PropertySomeDescription) left;
+						PropertySomeRestriction lefttAtomicRole = (PropertySomeRestriction) left;
 						if (lefttAtomicRole.isInverse()) {
 							oldTerm1 = patom.getTerm(1);
 						} else {
@@ -199,13 +199,13 @@ public class CQCUtilities {
 						newPredicate = rightAtomicConcept.getPredicate();
 						newAtom = fac.getAtom(newPredicate, newTerm1);
 
-					} else if (right instanceof PropertySomeDescription) {
+					} else if (right instanceof PropertySomeRestriction) {
 						// Here we need to introduce new variables, for the
 						// moment
 						// we only do it w.r.t.\ non-anonymous variables.
 						// hence we are incomplete in containment detection.
 
-						PropertySomeDescription rightExistential = (PropertySomeDescription) right;
+						PropertySomeRestriction rightExistential = (PropertySomeRestriction) right;
 						newPredicate = rightExistential.getPredicate();
 						if (rightExistential.isInverse()) {
 							if (newTerm2 instanceof AnonymousVariable)

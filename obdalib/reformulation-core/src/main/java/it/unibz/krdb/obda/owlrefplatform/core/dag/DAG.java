@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -46,7 +46,7 @@ public class DAG {
     public final static String thingStr = "http://www.w3.org/2002/07/owl#Thing";
     public final static URI thingUri = URI.create(thingStr);
     public final static Predicate thingPred = predicateFactory.getPredicate(thingUri, 1);
-    public final static ClassDescription thingConcept = descFactory.getAtomicConceptDescription(thingPred);
+    public final static ClassDescription thingConcept = descFactory.getClass(thingPred);
     public final DAGNode thing = new DAGNode(thingConcept);
 
 
@@ -74,13 +74,13 @@ public class DAG {
         for (Property role : ontology.getRoles()) {
             roles.put(role, new DAGNode(role));
 
-            Property roleInv = descFactory.getRoleDescription(role.getPredicate(), !role.isInverse());
+            Property roleInv = descFactory.getProperty(role.getPredicate(), !role.isInverse());
             roles.put(roleInv, new DAGNode(roleInv));
 
-            PropertySomeDescription existsRole = descFactory.getExistentialConceptDescription(
+            PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(
                     role.getPredicate(),
                     role.isInverse());
-            PropertySomeDescription existsRoleInv = descFactory.getExistentialConceptDescription(
+            PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(
                     role.getPredicate(),
                     !role.isInverse()
             );
@@ -151,8 +151,8 @@ public class DAG {
     private void addRoleEdge(Property parent, Property child) {
         addRoleEdgeSingle(parent, child);
 
-        addRoleEdgeSingle(descFactory.getRoleDescription(parent.getPredicate(), !parent.isInverse()),
-                descFactory.getRoleDescription(child.getPredicate(), !child.isInverse()));
+        addRoleEdgeSingle(descFactory.getProperty(parent.getPredicate(), !parent.isInverse()),
+                descFactory.getProperty(child.getPredicate(), !child.isInverse()));
     }
 
     private void addRoleEdgeSingle(Property parent, Property child) {
@@ -169,12 +169,12 @@ public class DAG {
         }
         addParent(childNode, parentNode);
 
-        ClassDescription existsParent = descFactory.getExistentialConceptDescription(
+        ClassDescription existsParent = descFactory.getPropertySomeRestriction(
                 parent.getPredicate(),
                 parent.isInverse());
 
 
-        ClassDescription existChild = descFactory.getExistentialConceptDescription(
+        ClassDescription existChild = descFactory.getPropertySomeRestriction(
                 child.getPredicate(),
                 child.isInverse());
 

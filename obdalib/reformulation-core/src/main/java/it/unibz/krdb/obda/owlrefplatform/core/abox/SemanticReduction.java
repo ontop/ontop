@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -113,9 +113,9 @@ public class SemanticReduction {
 		Property parentDesc = (Property) parent.getDescription();
 		Property childDesc = (Property) child.getDescription();
 
-		PropertySomeDescription existParentDesc = descFactory.getExistentialConceptDescription(parentDesc.getPredicate(),
+		PropertySomeRestriction existParentDesc = descFactory.getPropertySomeRestriction(parentDesc.getPredicate(),
 				parentDesc.isInverse());
-		PropertySomeDescription existChildDesc = descFactory.getExistentialConceptDescription(childDesc.getPredicate(),
+		PropertySomeRestriction existChildDesc = descFactory.getPropertySomeRestriction(childDesc.getPredicate(),
 				childDesc.isInverse());
 
 		DAGNode exists_parent = isa.getClassNode(existParentDesc);
