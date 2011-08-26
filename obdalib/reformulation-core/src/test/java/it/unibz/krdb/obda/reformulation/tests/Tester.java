@@ -11,9 +11,9 @@ import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
-import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import java.io.File;
 import java.io.FileInputStream;

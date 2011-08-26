@@ -13,9 +13,9 @@
  */
 package it.unibz.krdb.obda.codec;
 
-import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import java.util.Vector;
 

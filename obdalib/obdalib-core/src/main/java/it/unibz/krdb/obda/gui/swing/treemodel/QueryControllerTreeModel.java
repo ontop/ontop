@@ -13,10 +13,10 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
-import it.unibz.krdb.obda.queryanswering.QueryControllerListener;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerListener;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import java.util.Enumeration;
 import java.util.Vector;

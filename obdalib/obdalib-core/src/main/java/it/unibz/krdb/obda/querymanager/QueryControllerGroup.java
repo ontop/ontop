@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.queryanswering;
+package it.unibz.krdb.obda.querymanager;
 
 import java.util.Vector;
 

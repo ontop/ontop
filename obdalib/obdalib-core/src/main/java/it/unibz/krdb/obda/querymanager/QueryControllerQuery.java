@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.queryanswering;
+package it.unibz.krdb.obda.querymanager;
 
 
 public class QueryControllerQuery extends QueryControllerEntity{

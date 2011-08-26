@@ -1,5 +1,5 @@
 /***
-
+ * 
  * 
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
@@ -89,7 +89,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private SourceQueryValidator	validator;
 
-	private OBDAModel		mapc;
+	private OBDAModel				mapc;
 
 	protected OBDAModel				apic;
 
@@ -97,7 +97,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private DatalogProgramParser	datalogParser;
 
-	private OBDADataSource				selectedSource;
+	private OBDADataSource			selectedSource;
 
 	private boolean					canceled;
 
@@ -118,7 +118,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		this.preference = preference;
 		datalogParser = new DatalogProgramParser();
 
-    setOntology(ontology);
+		setOntology(ontology);
 
 		initComponents();
 		registerAction();
@@ -128,7 +128,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		 * Setting up the mappings tree
 		 */
 		mappingsTree.setRootVisible(false);
-		
+
 		MappingTreeCellRenderer map_renderer = new MappingTreeCellRenderer(apic, preference);
 		mappingsTree.setCellRenderer(map_renderer);
 		mappingsTree.setEditable(true);
@@ -143,9 +143,8 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
 		preference.registerPreferenceChangedListener(this);
 
-    setOBDAModel(apic); // TODO Bad code! Change this later!
+		setOBDAModel(apic); // TODO Bad code! Change this later!
 	}
-
 
 	public void setOBDAModel(OBDAModel omodel) {
 		this.apic = omodel;
@@ -156,7 +155,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}
 
 	public void setOntology(OWLOntology ontology) {
-	  this.ontology = ontology;
+		this.ontology = ontology;
 	}
 
 	public OWLOntology getOntology() {
@@ -802,9 +801,31 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 					TreePath current_path = currentSelection[i];
 					MappingNode mapping = (MappingNode) current_path.getLastPathComponent();
 					String id = (String) mapping.getUserObject();
-					String new_id = controller.getNextAvailableDuplicateIDforMapping(current_srcuri, id);
+
+					/* Computing the next available ID */
+
+					int new_index = -1;
+					for (int index = 0; index < 999999999; index++) {
+						if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
+							new_index = index;
+							break;
+						}
+					}
+					String new_id = id + "(" + new_index + ")";
+
+					/* inserting the new mapping */
 					try {
-						controller.duplicateMapping(current_srcuri, id, new_id);
+
+						OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
+						OBDAMappingAxiom newmapping = null;
+						try {
+							newmapping = (OBDAMappingAxiom) oldmapping.clone();
+						} catch (CloneNotSupportedException e) {
+							throw new RuntimeException(e);
+						}
+						newmapping.setId(new_id);
+						controller.addMapping(current_srcuri, newmapping);
+
 					} catch (DuplicateMappingException e) {
 						JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
 					}
@@ -862,9 +883,9 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}
 
 	private void startEditIdOfMapping(TreePath path) {
-	  mappingsTree.setEditable(true);
-    editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-    mappingsTree.startEditingAtPath(path);
+		mappingsTree.setEditable(true);
+		editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+		mappingsTree.startEditingAtPath(path);
 	}
 
 	private void startEditHeadOfMapping(TreePath path) {
@@ -906,13 +927,14 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	// End of variables declaration//GEN-END:variables
 
-	// TODO NOTE: This method duplicates the valueForPathChanged(..) method in the MappingTreeModel class.
+	// TODO NOTE: This method duplicates the valueForPathChanged(..) method in
+	// the MappingTreeModel class.
 	private void updateNode(String str) {
 		OBDAModel con = mapc;
 		URI sourceName = selectedSource.getSourceID();
 		String nodeContent = (String) editedNode.getUserObject();
 		if (editedNode instanceof MappingNode) {
-//			con.updateMapping(sourceName, nodeContent, str);
+			// con.updateMapping(sourceName, nodeContent, str);
 		} else if (editedNode instanceof MappingBodyNode) {
 			MappingBodyNode node = (MappingBodyNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();

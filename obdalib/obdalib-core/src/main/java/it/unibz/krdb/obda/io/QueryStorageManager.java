@@ -2,10 +2,10 @@ package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.codec.QueryGroupXMLReader;
 import it.unibz.krdb.obda.codec.QueryGroupXMLRenderer;
-import it.unibz.krdb.obda.queryanswering.QueryController;
-import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryController;
+import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.obda.utils.XMLUtils;
 
 import java.io.File;

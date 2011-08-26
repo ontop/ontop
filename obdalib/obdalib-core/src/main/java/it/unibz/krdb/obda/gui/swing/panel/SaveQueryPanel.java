@@ -14,8 +14,8 @@
 
 package it.unibz.krdb.obda.gui.swing.panel;
 
-import it.unibz.krdb.obda.queryanswering.QueryController;
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryController;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

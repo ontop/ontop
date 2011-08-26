@@ -18,8 +18,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactor
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
-import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;

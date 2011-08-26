@@ -16,8 +16,8 @@ package it.unibz.krdb.obda.codec;
 //TODO: Refactor so that this is actually an instance of a codec
 /*import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryGroupTreeElement;
 import inf.unibz.it.obda.gui.swing.querycontroller.tree.QueryTreeElement;*/
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

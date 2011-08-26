@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.gui.swing.OBDADataQueryAction;
 import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.SPARQLQueryStyledDocument;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.queryanswering.QueryController;
+import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 

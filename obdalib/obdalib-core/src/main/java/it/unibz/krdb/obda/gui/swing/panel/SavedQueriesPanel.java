@@ -18,10 +18,10 @@ import it.unibz.krdb.obda.gui.swing.treemodel.QueryGroupTreeElement;
 import it.unibz.krdb.obda.gui.swing.treemodel.QueryTreeElement;
 import it.unibz.krdb.obda.gui.swing.treemodel.TreeElement;
 import it.unibz.krdb.obda.io.QueryStorageManager;
-import it.unibz.krdb.obda.queryanswering.QueryController;
-import it.unibz.krdb.obda.queryanswering.QueryControllerEntity;
-import it.unibz.krdb.obda.queryanswering.QueryControllerGroup;
-import it.unibz.krdb.obda.queryanswering.QueryControllerQuery;
+import it.unibz.krdb.obda.querymanager.QueryController;
+import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
+import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;

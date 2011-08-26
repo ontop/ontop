@@ -11,7 +11,7 @@
  *   those of the LGPL.  Information about such licenses can be found in the 
  *   file named OBDAAPI_3DPARTY-LICENSES.txt.
  */
-package it.unibz.krdb.obda.queryanswering;
+package it.unibz.krdb.obda.querymanager;
 
 
 public interface QueryControllerListener {
