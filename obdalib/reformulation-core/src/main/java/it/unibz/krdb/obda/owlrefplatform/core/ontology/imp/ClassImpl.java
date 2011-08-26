@@ -7,7 +7,7 @@ public class ClassImpl implements Class {
 
 	private Predicate	predicate	= null;
 
-	public ClassImpl(Predicate p) {
+	ClassImpl(Predicate p) {
 		this.predicate = p;		
 	}
 

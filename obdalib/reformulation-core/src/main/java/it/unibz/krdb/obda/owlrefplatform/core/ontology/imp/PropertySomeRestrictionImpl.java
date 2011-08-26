@@ -8,7 +8,7 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 	private Predicate	predicate	= null;
 	private boolean		isInverse	= false;
 
-	public PropertySomeRestrictionImpl(Predicate p, boolean isInverse) {
+	PropertySomeRestrictionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 	}

@@ -10,7 +10,7 @@ public class SubPropertyAxiomImpl implements SubDescriptionAxiom {
 
 	String					string		= null;
 
-	public SubPropertyAxiomImpl(Property included, Property including) {
+	SubPropertyAxiomImpl(Property included, Property including) {
 
 		this.including = including;
 		this.included = included;

@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryMana
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
@@ -372,11 +373,11 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 			Assertion assertion = null;
 
 			if (pred.getArity() == 1) {
-				assertion = new ClassAssertionImpl(pred, fac.getURIConstant(URI.create("1")));
+				assertion = BasicDescriptionFactory.createClassAssertionImpl(pred, fac.getURIConstant(URI.create("1")));
 			} else if (pred.getType(1) == COL_TYPE.OBJECT) {
-				assertion = new ObjectPropertyAssertionImpl(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
+				assertion = BasicDescriptionFactory.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
 			} else {
-				assertion = new DataPropertyAssertionImpl(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
+				assertion = BasicDescriptionFactory.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
 			}
 			return assertion;
 		}

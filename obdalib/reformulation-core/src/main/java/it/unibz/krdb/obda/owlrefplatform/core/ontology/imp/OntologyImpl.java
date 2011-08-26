@@ -43,7 +43,7 @@ public class OntologyImpl implements Ontology {
 
 	// private Set<PositiveInclusion> assertions = null;
 
-	public OntologyImpl(URI uri) {
+	OntologyImpl(URI uri) {
 		ontouri = uri;
 		originalassertions = new LinkedHashSet<Axiom>();
 		concepts = new HashSet<ClassDescription>();
@@ -52,7 +52,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public OntologyImpl clone() {
-		OntologyImpl clone = new OntologyImpl(URI.create(ontouri.toString()));
+		OntologyImpl clone = BasicDescriptionFactory.createOntologyImpl(URI.create(ontouri.toString()));
 		clone.originalassertions.addAll(originalassertions);
 		clone.concepts.addAll(concepts);
 		clone.roles.addAll(roles);
@@ -244,22 +244,20 @@ public class OntologyImpl implements Ontology {
 						SubClassAxiomImpl ci1 = (SubClassAxiomImpl) pi1;
 						SubClassAxiomImpl ci2 = (SubClassAxiomImpl) pi2;
 						if (ci1.getSuper().equals(ci2.getSub())) {
-							SubClassAxiomImpl newinclusion = new SubClassAxiomImpl(ci1.getSub(),
-									ci2.getSuper());
+							SubClassAxiomImpl newinclusion = BasicDescriptionFactory.createSubClassAxiom(ci1.getSub(), ci2.getSuper());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getSub().equals(ci2.getSuper())) {
-							SubClassAxiomImpl newinclusion = new SubClassAxiomImpl(ci2.getSub(),
-									ci1.getSuper());
+							SubClassAxiomImpl newinclusion = BasicDescriptionFactory.createSubClassAxiom(ci2.getSub(), ci1.getSuper());
 							newInclusions.add(newinclusion);
 						}
 					} else if ((pi1 instanceof SubPropertyAxiomImpl) && (pi2 instanceof SubPropertyAxiomImpl)) {
 						SubPropertyAxiomImpl ci1 = (SubPropertyAxiomImpl) pi1;
 						SubPropertyAxiomImpl ci2 = (SubPropertyAxiomImpl) pi2;
 						if (ci1.getSuper().equals(ci2.getSub())) {
-							SubPropertyAxiomImpl newinclusion = new SubPropertyAxiomImpl(ci1.getSub(), ci2.getSuper());
+							SubPropertyAxiomImpl newinclusion = BasicDescriptionFactory.createSubPropertyAxiom(ci1.getSub(), ci2.getSuper());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getSub().equals(ci2.getSuper())) {
-							SubPropertyAxiomImpl newinclusion = new SubPropertyAxiomImpl(ci2.getSub(), ci1.getSuper());
+							SubPropertyAxiomImpl newinclusion = BasicDescriptionFactory.createSubPropertyAxiom(ci2.getSub(), ci1.getSuper());
 							newInclusions.add(newinclusion);
 						}
 					}
@@ -424,14 +422,14 @@ public class OntologyImpl implements Ontology {
 				Property r1 = rinclusion.getSub();
 				Property r2 = rinclusion.getSuper();
 
-				PropertySomeRestrictionImpl e11 = new PropertySomeRestrictionImpl(r1.getPredicate(), r1.isInverse());
+				PropertySomeRestrictionImpl e11 = BasicDescriptionFactory.createPropertySomeRestriction(r1.getPredicate(), r1.isInverse());
 				;
-				PropertySomeRestrictionImpl e12 = new PropertySomeRestrictionImpl(r2.getPredicate(), r2.isInverse());
-				PropertySomeRestrictionImpl e21 = new PropertySomeRestrictionImpl(r1.getPredicate(), !r1.isInverse());
-				PropertySomeRestrictionImpl e22 = new PropertySomeRestrictionImpl(r2.getPredicate(), !r2.isInverse());
+				PropertySomeRestrictionImpl e12 = BasicDescriptionFactory.createPropertySomeRestriction(r2.getPredicate(), r2.isInverse());
+				PropertySomeRestrictionImpl e21 = BasicDescriptionFactory.createPropertySomeRestriction(r1.getPredicate(), !r1.isInverse());
+				PropertySomeRestrictionImpl e22 = BasicDescriptionFactory.createPropertySomeRestriction(r2.getPredicate(), !r2.isInverse());
 
-				SubClassAxiomImpl inc1 = new SubClassAxiomImpl(e11, e12);
-				SubClassAxiomImpl inc2 = new SubClassAxiomImpl(e21, e22);
+				SubClassAxiomImpl inc1 = BasicDescriptionFactory.createSubClassAxiom(e11, e12);
+				SubClassAxiomImpl inc2 = BasicDescriptionFactory.createSubClassAxiom(e21, e22);
 				newassertion.add(inc1);
 				newassertion.add(inc2);
 			}

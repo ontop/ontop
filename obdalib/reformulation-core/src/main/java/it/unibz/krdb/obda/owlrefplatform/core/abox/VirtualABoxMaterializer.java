@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
@@ -419,15 +420,15 @@ public class VirtualABoxMaterializer {
 			Assertion assertion = null;
 			if (pred.getArity() == 1) {
 				URIConstant c = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
-				assertion = new ClassAssertionImpl(pred, c);
+				assertion = BasicDescriptionFactory.createClassAssertionImpl(pred, c);
 			} else if (pred.getType(1) == Predicate.COL_TYPE.OBJECT) {
 				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
 				URIConstant c2 = obdafac.getURIConstant(URI.create(currentResults.getString(2)));
-				assertion = new ObjectPropertyAssertionImpl(pred, c1, c2);
+				assertion = BasicDescriptionFactory.createObjectPropertyAssertion(pred, c1, c2);
 			} else {
 				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
 				ValueConstant c2 = obdafac.getValueConstant(currentResults.getString(2));
-				assertion = new DataPropertyAssertionImpl(pred, c1, c2);
+				assertion = BasicDescriptionFactory.createDataPropertyAssertion(pred, c1, c2);
 			}
 			return assertion;
 		}

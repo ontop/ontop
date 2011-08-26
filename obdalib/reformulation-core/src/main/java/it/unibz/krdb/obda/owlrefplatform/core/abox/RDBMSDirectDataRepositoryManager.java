@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -454,7 +455,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	@Override
 	public Ontology getABoxDependencies() {
-		return new OntologyImpl(URI.create("fakeURI"));
+		return BasicDescriptionFactory.createOntologyImpl(URI.create("fakeURI"));
 	}
 
 	@Override

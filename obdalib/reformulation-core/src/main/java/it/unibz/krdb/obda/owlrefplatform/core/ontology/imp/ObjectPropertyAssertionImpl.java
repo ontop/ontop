@@ -10,7 +10,7 @@ public class ObjectPropertyAssertionImpl implements RoleABoxAssertion {
 	private URIConstant	o2;
 	private URIConstant	o1;
 
-	public ObjectPropertyAssertionImpl(Predicate role, URIConstant o1, URIConstant o2) {
+	ObjectPropertyAssertionImpl(Predicate role, URIConstant o1, URIConstant o2) {
 		this.role = role;
 		this.o1 = o1;
 		this.o2 = o2;

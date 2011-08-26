@@ -7,7 +7,7 @@ public class PropertyFunctionalAxiomImpl implements PropertyFunctionalAxiom{
 
 	private Property role = null;
 	
-	public PropertyFunctionalAxiomImpl(Property role) {
+	PropertyFunctionalAxiomImpl(Property role) {
 		this.role = role;
 	}
 	

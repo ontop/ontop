@@ -24,7 +24,7 @@ public class SigmaTest extends TestCase {
     private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public void test_exists_simple() {
-        Ontology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
@@ -33,8 +33,8 @@ public class SigmaTest extends TestCase {
         Class cc = descFactory.getClass(c);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 
-        ontology.addAssertion(new SubClassAxiomImpl(er, ac));
-        ontology.addAssertion(new SubClassAxiomImpl(cc, er));
+        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(er, ac));
+        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cc, er));
         ontology.addConcept(ac);
         ontology.addConcept(cc);
         ontology.addConcept(er);

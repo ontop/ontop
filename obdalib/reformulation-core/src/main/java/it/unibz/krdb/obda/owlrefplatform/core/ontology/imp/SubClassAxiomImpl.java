@@ -10,7 +10,7 @@ public class SubClassAxiomImpl implements SubDescriptionAxiom {
 	
 	String string = null;
 	
-	public SubClassAxiomImpl(ClassDescription concept1, ClassDescription concept2){
+	SubClassAxiomImpl(ClassDescription concept1, ClassDescription concept2){
 		if (concept1 == null || concept2 == null)
 			throw new RuntimeException("Recieved null in concept inclusion");
 		included = concept1;

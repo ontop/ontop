@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
@@ -68,7 +69,7 @@ public class TWOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory, OWLRea
 			Set<OWLOntology> ontologies = manager.getOntologies();
 			URI uri = ontologies.iterator().next().getURI();
 			OWLAPI2Translator translator = new OWLAPI2Translator();
-			Ontology ontology = new OntologyImpl(uri);
+			Ontology ontology = BasicDescriptionFactory.createOntologyImpl(uri);
 
 			for (OWLOntology onto : ontologies) {
 				Ontology aux = translator.translate(onto);

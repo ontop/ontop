@@ -10,7 +10,7 @@ public class PropertySomeClassRestrictionImpl implements PropertySomeClassRestri
 	private final boolean		isInverse;
 	private final Class filler;
 
-	public PropertySomeClassRestrictionImpl(Predicate p, boolean isInverse, Class filler) {
+	PropertySomeClassRestrictionImpl(Predicate p, boolean isInverse, Class filler) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 		this.filler = filler;

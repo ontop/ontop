@@ -55,7 +55,7 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        Ontology onto = new OntologyImpl(URI.create(""));
+        Ontology onto = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
 
         while ((line = triples.readLine()) != null) {
 //            String result = URLDecoder.decode(line, "UTF-8");
@@ -80,7 +80,7 @@ public class YAGOTest {
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
                     ClassDescription co = descFactory.getClass(po);
 
-                    onto.addAssertion(new SubClassAxiomImpl(rs, co));
+                    onto.addAssertion(BasicDescriptionFactory.createSubClassAxiom(rs, co));
 
                 } else if ("rdfs:domain".equals(predicate)) {
                     tbox_count++;
@@ -90,7 +90,7 @@ public class YAGOTest {
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
                     ClassDescription co = descFactory.getClass(po);
 
-                    onto.addAssertion(new SubClassAxiomImpl(rs, co));
+                    onto.addAssertion(BasicDescriptionFactory.createSubClassAxiom(rs, co));
 
                 } else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
@@ -106,7 +106,7 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
                     ClassDescription cs = descFactory.getClass(ps);
                     ClassDescription co = descFactory.getClass(po);
-                    onto.addAssertion(new SubClassAxiomImpl(cs, co));
+                    onto.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cs, co));
 
                 } else if ("rdfs:subPropertyOf".equals(predicate)) {
                     tbox_count++;
@@ -115,7 +115,7 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
                     Property rs = descFactory.getProperty(ps);
                     Property ro = descFactory.getProperty(po);
-                    onto.addAssertion(new SubPropertyAxiomImpl(rs, ro));
+                    onto.addAssertion(BasicDescriptionFactory.createSubPropertyAxiom(rs, ro));
 
                 } else {
 //                    log.debug(predicate);

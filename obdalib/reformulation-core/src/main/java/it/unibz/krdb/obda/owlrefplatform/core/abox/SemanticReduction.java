@@ -52,7 +52,7 @@ public class SemanticReduction {
 	}
 	
 	public Ontology getReducedOntology() {
-		Ontology reformulationOntology = new OntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+		Ontology reformulationOntology = BasicDescriptionFactory.createOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
 		reformulationOntology.addAssertions(reduce());
 		return reformulationOntology;
 	}
@@ -72,7 +72,7 @@ public class SemanticReduction {
 
 				if (!check_redundant(node, child)) {
 
-					rv.add(new SubClassAxiomImpl((ClassDescription) child.getDescription(), (ClassDescription) node
+					rv.add(BasicDescriptionFactory.createSubClassAxiom((ClassDescription) child.getDescription(), (ClassDescription) node
 							.getDescription()));
 				}
 			}
@@ -82,7 +82,7 @@ public class SemanticReduction {
 			for (DAGNode child : node.descendans) {
 				if (!check_redundant_role(node, child)) {
 
-					rv.add(new SubPropertyAxiomImpl((Property) child.getDescription(), (Property) node.getDescription()));
+					rv.add(BasicDescriptionFactory.createSubPropertyAxiom((Property) child.getDescription(), (Property) node.getDescription()));
 				}
 			}
 		}

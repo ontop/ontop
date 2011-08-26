@@ -10,7 +10,7 @@ public class ClassAssertionImpl implements ClassAssertion {
 
 	Predicate	concept	= null;
 
-	public ClassAssertionImpl(Predicate concept, URIConstant object) {
+	ClassAssertionImpl(Predicate concept, URIConstant object) {
 		this.object = object;
 		this.concept = concept;
 	}

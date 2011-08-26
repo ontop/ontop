@@ -38,7 +38,7 @@ public class DAGConstructor {
 
 	public static DAG getSigma(Ontology ontology) {
 
-		Ontology sigma = new OntologyImpl(URI.create(""));
+		Ontology sigma = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
 
 		for (Axiom assertion : ontology.getAssertions()) {
 			if (assertion instanceof SubClassAxiomImpl) {
@@ -60,7 +60,7 @@ public class DAGConstructor {
 
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
-		Ontology sigma = new OntologyImpl(URI.create("sigma"));
+		Ontology sigma = BasicDescriptionFactory.createOntologyImpl(URI.create("sigma"));
 
 		for (Axiom assertion : ontology.getAssertions()) {
 			if (assertion instanceof SubClassAxiomImpl) {

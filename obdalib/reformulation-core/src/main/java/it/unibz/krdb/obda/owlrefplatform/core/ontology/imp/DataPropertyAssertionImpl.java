@@ -11,7 +11,7 @@ public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 	private ValueConstant	o2;
 	private URIConstant		o1;
 
-	public DataPropertyAssertionImpl(Predicate attribute, URIConstant o1, ValueConstant o2) {
+	DataPropertyAssertionImpl(Predicate attribute, URIConstant o1, ValueConstant o2) {
 		this.role = attribute;
 		this.o1 = o1;
 		this.o2 = o2;
