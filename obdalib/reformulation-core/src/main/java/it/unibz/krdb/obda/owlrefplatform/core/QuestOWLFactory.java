@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * reasoner
  */
 
-public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
+public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 
 	private OBDAModel							apic;
 	private ReformulationPlatformPreferences	preferences	= null;
@@ -21,7 +22,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 	private String								name;
 	private OWLOntologyManager					owlOntologyManager;
 
-	private final Logger						log			= LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
+	private final Logger						log			= LoggerFactory.getLogger(QuestOWLFactory.class);
 
 	/**
 	 * Sets up some prerequirements in order to create the reasoner
@@ -72,7 +73,7 @@ public class OBDAOWLReformulationPlatformFactoryImpl implements OBDAOWLReformula
 	 */
 	@Override
 	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
-		return new OBDAOWLReformulationPlatform(manager);
+		return new QuestOWL(manager);
 	}
 
 	public String getReasonerName() {

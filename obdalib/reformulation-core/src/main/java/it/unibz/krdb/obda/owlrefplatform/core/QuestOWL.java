@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryReasoner, MonitorableOWLReasoner {
+public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, MonitorableOWLReasoner {
 
 	private static final String					NOT_IMPLEMENTED_STR		= "Service not available.";
 
@@ -85,7 +85,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 
 	private OBDAModel							obdaModel				= null;
 
-	private Logger								log						= LoggerFactory.getLogger(OBDAOWLReformulationPlatform.class);
+	private Logger								log						= LoggerFactory.getLogger(QuestOWL.class);
 
 	private boolean								isClassified			= false;
 
@@ -99,7 +99,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 
 	OWLAPI2VocabularyExtractor					vext					= new OWLAPI2VocabularyExtractor();
 
-	public OBDAOWLReformulationPlatform(OWLOntologyManager manager) {
+	public QuestOWL(OWLOntologyManager manager) {
 		ontoManager = manager;
 	}
 
@@ -178,7 +178,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 
 		// String useMem = (String)
 		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals(OBDAConstants.INMEMORY);
+		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals(QuestConstants.INMEMORY);
 		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
 		boolean createMappings = preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
@@ -207,7 +207,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 			 * Preparing the data source
 			 */
 
-			if (useInMemoryDB && (OBDAConstants.CLASSIC.equals(unfoldingMode) || createMappings)) {
+			if (useInMemoryDB && (QuestConstants.CLASSIC.equals(unfoldingMode) || createMappings)) {
 
 				log.debug("Using in an memory database");
 				String driver = "org.h2.Driver";
@@ -228,10 +228,10 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 
 				RDBMSDataRepositoryManager dataRepository;
 
-				if (dbType.equals(OBDAConstants.SEMANTIC)) {
+				if (dbType.equals(QuestConstants.SEMANTIC)) {
 					dataRepository = new RDBMSSIRepositoryManager(newsource, vext.getVocabulary(loadedOntologies));
 
-				} else if (dbType.equals(OBDAConstants.DIRECT)) {
+				} else if (dbType.equals(QuestConstants.DIRECT)) {
 					dataRepository = new RDBMSDirectDataRepositoryManager(newsource, vext.getVocabulary(loadedOntologies));
 
 				} else {
@@ -290,9 +290,9 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 			 * Setting up the reformulation engine
 			 */
 
-			if (OBDAConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
+			if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator();
-			} else if (OBDAConstants.UCQBASED.equals(reformulationTechnique)) {
+			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
 				rewriter = new TreeRedReformulator();
 			} else {
 				throw new IllegalArgumentException("Invalid value for argument: "
@@ -319,7 +319,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryR
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 
-			this.techwrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, validator, eval_engine, unfoldingOBDAModel);
+			this.techwrapper = new QuestTechniqueWrapper(unfMech, rewriter, gen, validator, eval_engine, unfoldingOBDAModel);
 			log.debug("... Quest has been setup and is ready for querying");
 			isClassified = true;
 

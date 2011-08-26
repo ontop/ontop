@@ -8,9 +8,9 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -46,7 +46,7 @@ public class Tester {
     private OWLOntologyManager manager = null;
     private OWLOntology ontology = null;
     private OBDAModel apic = null;
-    private OBDAOWLReformulationPlatform reasoner = null;
+    private QuestOWL reasoner = null;
     private String owlloc = null;
     private String xmlLoc = null;
     private Map<String, String> queryMap = null;
@@ -105,10 +105,10 @@ public class Tester {
         loadResults(resultfile);
 
         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, OBDAConstants.UCQBASED);
-        if (unfold_type.equals(OBDAConstants.VIRTUAL))
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+        if (unfold_type.equals(QuestConstants.VIRTUAL))
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        else if (unfold_type.equals(OBDAConstants.CLASSIC)) {
+        else if (unfold_type.equals(QuestConstants.CLASSIC)) {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
         } else {
             throw new Exception("The unfolding mechanism can only be either material or virtual");
@@ -117,15 +117,15 @@ public class Tester {
             // changes
         }
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, dbType);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
 
-        OBDAOWLReformulationPlatformFactoryImpl fac = new OBDAOWLReformulationPlatformFactoryImpl();
+        QuestOWLFactory fac = new QuestOWLFactory();
         
 //        fac.setOBDAController(apic);
         fac.setPreferenceHolder(pref);
 
-        reasoner = (OBDAOWLReformulationPlatform) fac.createReasoner(manager);
+        reasoner = (QuestOWL) fac.createReasoner(manager);
         
         reasoner.loadOBDAModel(apic);
         reasoner.loadOntologies(manager.getOntologies());
@@ -155,7 +155,7 @@ public class Tester {
 
     // TODO workaround for old syntax for calling tester.load
     public void load(String onto, String unfold_type) throws Exception {
-        load(onto, unfold_type, OBDAConstants.DIRECT);
+        load(onto, unfold_type, QuestConstants.DIRECT);
     }
 
     public Set<String> getQueryIds() {

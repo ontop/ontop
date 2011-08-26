@@ -1,22 +1,20 @@
 package it.unibz.krdb.obda.LUBM;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.BolzanoTechniqueWrapper;
 import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestTechniqueWrapper;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -99,27 +97,27 @@ public class LUBMExecutionHelper {
 
 		// Creating a new instance of a Quest reasoner
 
-		OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
+		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 
 		if (aboxmode.equals("semindex")) {
-			p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
+			p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		} else if (aboxmode.equals("classic")) {
-			p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.DIRECT);
+			p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
 
 		} else {
 			System.err.println("Unsupported ABox mode. specify either \"classic\" or \"semindex\"");
 			throw new Exception("Unsupported ABox mode. specify either \"classic\" or \"semindex\"");
 		}
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 
 //		factory.setOBDAController(obdamodel);
 		factory.setPreferenceHolder(p);
 
-		OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
 		reasoner.setPreferences(p);
 		reasoner.loadOntologies(manager.getOntologies());
 		reasoner.loadOBDAModel(obdamodel);
@@ -140,7 +138,7 @@ public class LUBMExecutionHelper {
 				ref.setCBox(reasoner.getABoxDependencies());
 				
 			}
-			((BolzanoTechniqueWrapper) reasoner.getTechniqueWrapper()).setRewriter(ref);
+			((QuestTechniqueWrapper) reasoner.getTechniqueWrapper()).setRewriter(ref);
 		}
 
 		// Now we are ready for querying

@@ -5,10 +5,10 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
@@ -44,7 +44,7 @@ public class LUBMDLLiteQueryExecutionTool {
 			ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
 			// Creating a new instance of a Quest reasoner
-			OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
+			OBDAOWLReasonerFactory factory = new QuestOWLFactory();
 
 			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
@@ -53,7 +53,7 @@ public class LUBMDLLiteQueryExecutionTool {
 //			factory.setOBDAController(obdamodel);
 			factory.setPreferenceHolder(p);
 
-			OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
+			QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
 
 			reasoner.loadOntologies(manager.getOntologies());
 

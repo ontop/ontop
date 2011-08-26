@@ -12,7 +12,7 @@
 package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,9 +61,9 @@ public class ConfigPanel extends javax.swing.JPanel {
 				jLabelDataLoc.setEnabled(true);
 				jLabeldbtype.setEnabled(true);
 				
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 
 			}
 		});
@@ -79,15 +79,15 @@ public class ConfigPanel extends javax.swing.JPanel {
 				jLabelDataLoc.setEnabled(false);
 				jLabeldbtype.setEnabled(false);
 				
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.VIRTUAL);
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.PROVIDED);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
 			}
 		});
         jRadioButtonDirect.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.DIRECT);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
 				preference.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
 //				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
 				//shouldn't this be added in order to ensure that in the direct mode inmemory has to be set
@@ -97,7 +97,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 				
 			}
 		});
@@ -105,7 +105,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 				
 			}
 		});
@@ -113,7 +113,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.UNIVERSAL);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.UNIVERSAL);
 				
 			}
 		});
@@ -121,7 +121,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.PROVIDED);
+				preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
 				
 			}
 		});
@@ -138,14 +138,14 @@ public class ConfigPanel extends javax.swing.JPanel {
         
         
         String refvalue = (String)p.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-        if(refvalue.equals(OBDAConstants.PERFECTREFORMULATION)){
+        if(refvalue.equals(QuestConstants.PERFECTREFORMULATION)){
         	 cmbReformulationMethods.setSelectedIndex(0);
-        }else if(refvalue.equals(OBDAConstants.UCQBASED)){
+        }else if(refvalue.equals(QuestConstants.UCQBASED)){
         	 cmbReformulationMethods.setSelectedIndex(1);
         }      
     	
 		String value = (String)p.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
-		if (value.equals(OBDAConstants.VIRTUAL)) {
+		if (value.equals(QuestConstants.VIRTUAL)) {
 			jRadioButtonVirualABox.setSelected(true);
 			jRadioButtonMaterialAbox.setSelected(false);
 			jRadioButtonDirect.setEnabled(false);
@@ -155,7 +155,7 @@ public class ConfigPanel extends javax.swing.JPanel {
 			jRadioButtonInMemoryDB.setEnabled(false);
 			jLabelDataLoc.setEnabled(false);
 			jLabeldbtype.setEnabled(false);
-		} else if (value.equals(OBDAConstants.CLASSIC)) {
+		} else if (value.equals(QuestConstants.CLASSIC)) {
 			jRadioButtonVirualABox.setSelected(false);
 			jRadioButtonMaterialAbox.setSelected(true);
 			jRadioButtonDirect.setEnabled(true);
@@ -173,10 +173,10 @@ public class ConfigPanel extends javax.swing.JPanel {
 		}
 		
 		value = (String)p.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION);
-		if (value.equals(OBDAConstants.PROVIDED)) {
+		if (value.equals(QuestConstants.PROVIDED)) {
 			jRadioButtonUserProvidedDB.setSelected(false);
 			jRadioButtonInMemoryDB.setSelected(false);
-		} else if (value.equals(OBDAConstants.INMEMORY)) {
+		} else if (value.equals(QuestConstants.INMEMORY)) {
 			jRadioButtonUserProvidedDB.setSelected(false);
 			jRadioButtonInMemoryDB.setSelected(true);
 		} else {
@@ -184,15 +184,15 @@ public class ConfigPanel extends javax.swing.JPanel {
 		}
 		
 		value = (String)p.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
-		if (value.equals(OBDAConstants.DIRECT)) {
+		if (value.equals(QuestConstants.DIRECT)) {
 			jRadioButtonDirect.setSelected(true);
 			jRadioButtonUniversal.setSelected(false);
 			jRadioButtonSemanticIndex.setSelected(false);
-		} else if (value.equals(OBDAConstants.UNIVERSAL)) {
+		} else if (value.equals(QuestConstants.UNIVERSAL)) {
 			jRadioButtonDirect.setSelected(false);
 			jRadioButtonUniversal.setSelected(true);
 			jRadioButtonSemanticIndex.setSelected(false);
-		} else if (value.equals(OBDAConstants.SEMANTIC)) {
+		} else if (value.equals(QuestConstants.SEMANTIC)) {
 			jRadioButtonDirect.setSelected(false);
 			jRadioButtonUniversal.setSelected(false);
 			jRadioButtonSemanticIndex.setSelected(true);
@@ -445,12 +445,12 @@ public class ConfigPanel extends javax.swing.JPanel {
     private void cmbReformulationMethodsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbReformulationMethodsActionPerformed
         javax.swing.JComboBox cb = (javax.swing.JComboBox) evt.getSource();
         String optValue = (String) cb.getSelectedItem();
-        if(optValue.equals(OBDAConstants.PERFECTREFORMULATION)){
+        if(optValue.equals(QuestConstants.PERFECTREFORMULATION)){
         	 preference.setCurrentValueOf(
-             		ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, OBDAConstants.PERFECTREFORMULATION);
+             		ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.PERFECTREFORMULATION);
         }else{
         	 preference.setCurrentValueOf(
-        			 ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, OBDAConstants.UCQBASED);
+        			 ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
         }
     }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
                

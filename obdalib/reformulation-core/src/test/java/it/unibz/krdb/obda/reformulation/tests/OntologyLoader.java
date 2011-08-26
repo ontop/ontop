@@ -7,8 +7,8 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
@@ -29,7 +29,7 @@ public class OntologyLoader {
 
         String owlfile = args[0];
 
-        OBDAOWLReformulationPlatform reasoner = null;
+        QuestOWL reasoner = null;
         try {
 
             // Loading the OWL file
@@ -54,11 +54,11 @@ public class OntologyLoader {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "virtual");
             pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
 
-            OBDAOWLReformulationPlatformFactoryImpl factory = new OBDAOWLReformulationPlatformFactoryImpl();
+            QuestOWLFactory factory = new QuestOWLFactory();
 //            factory.setOBDAController(controller);
             factory.setPreferenceHolder(pref);
 
-            reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
+            reasoner = (QuestOWL) factory.createReasoner(manager);
             reasoner.loadOntologies(manager.getOntologies());
             reasoner.classify();
 

@@ -1,18 +1,19 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.AttributeABoxAssertion;
@@ -49,7 +50,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.antlr.misc.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1048,7 +1048,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	}
 
-	private class MappingKey implements Comparable<MappingKey> {
+	public class MappingKey implements Comparable<MappingKey> {
 
 		public final SemanticIndexRange	range;
 		public final String				projection;

@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexMappingGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
@@ -140,11 +140,11 @@ public class GraphGenerator {
         return out.toString();
     }
 
-    public static void dumpMappings(List<SemanticIndexMappingGenerator.MappingKey> mappings) {
+    public static void dumpMappings(List<RDBMSSIRepositoryManager.MappingKey> mappings) {
         String mappingFile = "mappings";
         try {
             FileWriter out = new FileWriter(new File(mappingFile));
-            for (SemanticIndexMappingGenerator.MappingKey map : mappings) {
+            for (RDBMSSIRepositoryManager.MappingKey map : mappings) {
 
 
                 String uri = map.uri.split("#")[1];

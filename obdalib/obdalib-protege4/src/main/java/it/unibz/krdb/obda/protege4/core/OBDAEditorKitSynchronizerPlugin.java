@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.util.Iterator;
@@ -91,8 +91,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String value = pref.getString(key, null);
 			if(value != null){
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(ReformulationPlatformPreferences.ABOX_MODE) && value.equals(OBDAConstants.CLASSIC)) { 
-					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
+				if (key.equals(ReformulationPlatformPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
+					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;
 				}else if(key.equals(ReformulationPlatformPreferences.DATA_LOCATION)){//if it is classic the data location is already set

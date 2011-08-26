@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-public class OBDAConstants {
+public class QuestConstants {
 	
 	//Reformulation Techniques
 	public static final String PERFECTREFORMULATION = "PerfectRef";

@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
@@ -40,7 +41,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatformFactory {
+public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 
 	private OBDAModel							apic;
 	private ReformulationPlatformPreferences	preferences	= null;
@@ -48,7 +49,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 	private String								name;
 	private OWLOntologyManager					owlOntologyManager;
 
-	private final Logger						log			= LoggerFactory.getLogger(OBDAOWLReformulationPlatformFactoryImpl.class);
+	private final Logger						log			= LoggerFactory.getLogger(QuestOWLFactory.class);
 
 	/**
 	 * Sets up some prerequirements in order to create the reasoner
@@ -107,7 +108,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 		UnfoldingMechanism unfMech;
 		JDBCUtility util;
 		SourceQueryGenerator gen;
-		BolzanoTechniqueWrapper techniqueWrapper;
+		QuestTechniqueWrapper techniqueWrapper;
 		try {
 			Set<OWLOntology> ontologies = manager.getOntologies();
 			URI uri = uri = ontologies.iterator().next().getURI();
@@ -158,8 +159,8 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			util = new JDBCUtility(ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			gen = new ComplexMappingSQLGenerator(viewMan, util);
 
-			techniqueWrapper = new BolzanoTechniqueWrapper(unfMech, rewriter, gen, null, eval_engine, apic);
-			return new OBDAOWLReformulationPlatform(manager);
+			techniqueWrapper = new QuestTechniqueWrapper(unfMech, rewriter, gen, null, eval_engine, apic);
+			return new QuestOWL(manager);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);

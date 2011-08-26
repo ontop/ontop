@@ -2,14 +2,14 @@ package it.unibz.krdb.obda.LUBM;
 
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.DummyOBDAPlatformFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
@@ -49,11 +49,11 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
             OBDADataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
             obdamodel.addSource(ds);
 
-            OBDAOWLReformulationPlatformFactory factory = new DummyOBDAPlatformFactoryImpl();
+            OBDAOWLReasonerFactory factory = new DummyOBDAPlatformFactoryImpl();
 
 //            factory.setOBDAController(obdamodel);
 
-            OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
+            QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
 
             reasoner.loadOntologies(manager.getOntologies());
 

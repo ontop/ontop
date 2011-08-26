@@ -7,10 +7,10 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 
 import java.io.File;
 
@@ -38,18 +38,18 @@ public class StockExchangeTestSemIndex extends TestCase {
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),controller.getPrefixManager());
 		
 		// Creating a new instance of a quonto reasoner
-		OBDAOWLReformulationPlatformFactory factory = new OBDAOWLReformulationPlatformFactoryImpl();
+		OBDAOWLReformulationPlatformFactory factory = new QuestOWLFactory();
 		
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		
 //		factory.setOBDAController(controller);
 		factory.setPreferenceHolder(p);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, OBDAConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, OBDAConstants.INMEMORY);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, OBDAConstants.SEMANTIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
 		
-		OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
 		reasoner.setPreferences(p);
 		reasoner.loadOntologies(manager.getOntologies());
 		reasoner.loadOBDAModel(controller);

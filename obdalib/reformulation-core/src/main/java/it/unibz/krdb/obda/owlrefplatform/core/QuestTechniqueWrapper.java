@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class BolzanoTechniqueWrapper implements TechniqueWrapper {
+public class QuestTechniqueWrapper implements TechniqueWrapper {
 
 	private QueryRewriter				queryRewriter		= null;
 	private UnfoldingMechanism			unfoldingMechanism	= null;
@@ -30,7 +30,7 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	private OBDAModel					apic				= null;
 	private final Logger				log					= LoggerFactory.getLogger(this.getClass());
 
-	public BolzanoTechniqueWrapper(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val,
+	public QuestTechniqueWrapper(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val,
 			EvaluationEngine eng, OBDAModel apic) {
 
 		this.queryRewriter = rew;
@@ -55,7 +55,7 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	 */
 	@Override
 	public OBDAStatement getStatement() throws Exception {
-		return new OBDAStatement(unfoldingMechanism, queryRewriter, queryGenerator, queryValidator, evaluationEngine, apic);
+		return new QuestOBDAStatement(unfoldingMechanism, queryRewriter, queryGenerator, queryValidator, evaluationEngine, apic);
 	}
 
 	@Override

@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
@@ -161,8 +161,8 @@ public class OBDAModelManager implements Disposable {
 
 					if ((!inititializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
 						OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
-						if (reasoner instanceof OBDAOWLReformulationPlatform) {
-							OBDAOWLReformulationPlatform quest = (OBDAOWLReformulationPlatform) reasoner;
+						if (reasoner instanceof QuestOWL) {
+							QuestOWL quest = (QuestOWL) reasoner;
 							ProtegeReformulationPlatformPreferences reasonerPreference = owlEditorKit
 									.get(ReformulationPlatformPreferences.class.getName());
 							quest.setPreferences(reasonerPreference);

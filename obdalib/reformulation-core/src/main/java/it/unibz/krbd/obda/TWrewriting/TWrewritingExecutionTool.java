@@ -1,18 +1,16 @@
 package it.unibz.krbd.obda.TWrewriting;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.BolzanoTechniqueWrapper;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestTechniqueWrapper;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -78,7 +76,7 @@ public class TWrewritingExecutionTool {
 			ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
 			// Creating a new instance of a Quest reasoner
-			OBDAOWLReformulationPlatformFactory factory = new TWOBDAPlatformFactoryImpl();
+			OBDAOWLReasonerFactory factory = new TWOBDAPlatformFactoryImpl();
 
 			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
@@ -87,7 +85,7 @@ public class TWrewritingExecutionTool {
 //			factory.setOBDAController(obdamodel);
 			factory.setPreferenceHolder(p);
 
-			OBDAOWLReformulationPlatform reasoner = (OBDAOWLReformulationPlatform) factory.createReasoner(manager);
+			QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
 			reasoner.setPreferences(p);
 
 			reasoner.loadOntologies(manager.getOntologies());
@@ -106,7 +104,7 @@ public class TWrewritingExecutionTool {
 			TreeWitnessReformulator ref = new TreeWitnessReformulator();
 			ref.setTBox(reasoner.getOntology());
 			
-			((BolzanoTechniqueWrapper)reasoner.getTechniqueWrapper()).setRewriter(ref);
+			((QuestTechniqueWrapper)reasoner.getTechniqueWrapper()).setRewriter(ref);
 
 			// Now we are ready for querying
 

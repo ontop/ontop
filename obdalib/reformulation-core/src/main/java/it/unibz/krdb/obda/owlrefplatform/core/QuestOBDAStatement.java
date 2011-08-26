@@ -43,7 +43,7 @@ import com.hp.hpl.jena.query.QueryException;
  * 
  */
 
-public class OBDAStatement implements OBDAStatement {
+public class QuestOBDAStatement implements OBDAStatement {
 
 	private QueryRewriter			rewriter			= null;
 	private UnfoldingMechanism		unfoldingmechanism	= null;
@@ -58,9 +58,9 @@ public class OBDAStatement implements OBDAStatement {
 	// private DatalogProgram unfolding = null;
 	// private QueryResultSet result = null;
 
-	Logger							log					= LoggerFactory.getLogger(OBDAStatement.class);
+	Logger							log					= LoggerFactory.getLogger(QuestOBDAStatement.class);
 
-	public OBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val, EvaluationEngine eng, OBDAModel apic) {
+	public QuestOBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val, EvaluationEngine eng, OBDAModel apic) {
 
 		this.rewriter = rew;
 		this.unfoldingmechanism = unf;
