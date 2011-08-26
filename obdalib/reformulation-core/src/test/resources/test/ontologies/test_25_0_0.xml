@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<results>
+    <result queryid="c">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples/>
+    </result>
+    <result queryid="k">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>true</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="f">
+        <head>
+            <variable>y</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="b">
+        <head>
+            <variable>y</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="l">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>false</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="h">
+        <head>
+            <variable>x</variable>
+            <variable>y</variable>
+        </head>
+        <tuples/>
+    </result>
+    <result queryid="a">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>r1</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="d">
+        <head>
+            <variable>x</variable>
+            <variable>y</variable>
+        </head>
+        <tuples>
+            <tuple>
+                <constant>r1,r2</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="e">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples/>
+    </result>
+    <result queryid="i">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>true</constant>
+            </tuple>
+        </tuples>
+    </result>
+    <result queryid="g">
+        <head>
+            <variable>x</variable>
+        </head>
+        <tuples/>
+    </result>
+    <result queryid="j">
+        <head/>
+        <tuples>
+            <tuple>
+                <constant>false</constant>
+            </tuple>
+        </tuples>
+    </result>
+</results>

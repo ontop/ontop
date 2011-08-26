@@ -536,6 +536,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 				 * it has different arity or types, i.e., the URI has been
 				 * PUNNED.
 				 */
+				log.warn("PUNNING DETECTED: {}", predicate.getName().toString());
 				throw new PunningException(predicate, existingPredicate);
 			}
 

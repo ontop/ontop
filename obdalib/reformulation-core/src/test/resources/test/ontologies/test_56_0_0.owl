@@ -101,7 +101,7 @@
     <owl:Restriction>
         <rdfs:subClassOf rdf:resource="&test;B"/>
         <owl:onProperty rdf:resource="&test;R"/>
-        <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
 </rdf:RDF>
 

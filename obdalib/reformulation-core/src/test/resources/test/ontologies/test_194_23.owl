@@ -79,13 +79,13 @@
     <owl:Class rdf:about="&test;A">
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
+                <owl:onProperty rdf:resource="&test;P"/>
                 <owl:someValuesFrom rdf:resource="&owl;Thing"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;P"/>
+                <owl:onProperty rdf:resource="&test;R"/>
                 <owl:someValuesFrom rdf:resource="&owl;Thing"/>
             </owl:Restriction>
         </rdfs:subClassOf>

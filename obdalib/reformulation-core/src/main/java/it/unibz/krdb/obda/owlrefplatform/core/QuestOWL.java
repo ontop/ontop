@@ -288,6 +288,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 			SemanticReduction reducer = new SemanticReduction(this.translatedOntologyMerge, sigma);
 			reformulationOntology = reducer.getReducedOntology();
+//			reformulationOntology = this.translatedOntologyMerge;
 
 			/*
 			 * Setting up the reformulation engine

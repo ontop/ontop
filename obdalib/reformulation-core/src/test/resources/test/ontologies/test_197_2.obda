@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE OBDA [
 ]>
-<OBDA>
+<OBDA version="1.0">
   <SavedQueries>
     <Query id="a" text="SELECT $x $y WHERE {$x rdf:type dllite:SEM . $x dllite:WF$y . $y rdf:type dllite:PP}"/>
   </SavedQueries>

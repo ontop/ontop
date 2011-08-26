@@ -390,11 +390,11 @@ These are the first cases which tests the effects of unification and positive in
 ||   || g ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||
 ||46 || a || R RISA S, A ISA ER^^-^^ || A(a) R(r1,r2) S(s1,s2) || q(x)   :- S(x,y) || {s1 r1} || ||
 ||   || b ||            ||              || q(y)   :- S(x,y) || {s2 r2 a} || ||
-||   || c ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||
+||   || c ||            ||              || q(x,y)   :- S(x,y) || {(s1,s2) (r1,r2)} || ||   
 
 
 === With object constants in the queries ===
-
+ 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 ||47 || a || A ISA B || A(a) || q() :- A(<a>) || {true} || ||
 || ||  b ||         ||      || q() :- B(<a>) || {true} || ||
@@ -445,7 +445,7 @@ These are the first cases which tests the effects of unification and positive in
 || ||c ||          ||        || q() :- A(<r2>) || {false}    || ||
 || ||d ||          ||        || q(x) :- R(x,<r2>) || {r1}    || ||
 || ||e ||          ||        || q(y) :- R(<r1>,y) || {r2}  || ||
-|| ||f ||          ||        || q() :- R(<r1>,<r2>) || {true}  || ||
+|| ||f ||          ||        || q() :- R(<r1>,<r2>) || {true}  || ||     
 
 With exists R on the left
 
@@ -555,7 +555,7 @@ With exists R on the left
 ||   || ap    ||           ||                || q() :- S(<s2>,<s2>) || {false} || ||
 
 
-With exists R inverse on the left
+With exists R inverse on the left 
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 || 65||a || ER^^-^^ ISA B || R(r1,r2)        || q(x) :- R(x,<r2>) || {r1} || ||
@@ -627,7 +627,7 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
 ||76 || a || R RISA S   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {r2} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {} || ||
@@ -663,7 +663,7 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
 ||79 || a || R^^-^^ RISA S^^-^^   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {r2} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {} || ||
@@ -699,7 +699,7 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
 ||82 || a || R RISA S^^-^^   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {r1} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {r2} || ||
@@ -735,11 +735,11 @@ With exists R inverse on the left
 ||   || c ||            ||           || q(x)   :- R(x,<s1>)    || {} || ||
 ||   || d ||            ||           || q(x)   :- R(x,<s2>)    || {} || ||
 ||   || e ||            ||           || q()    :- R(<s1>,<s2>) || {false} || ||
-||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || ||
+||   || f ||            ||           || q()    :- R(<s2>,<s1>) || {false} || || 
 ||85 || a || R^^-^^ RISA S   || R(r1,r2) S(s1,s2) || q(x) :- S(<r1>,x)    || {} || ||
 ||   || b ||            ||           || q(x)   :- S(<r2>,x)    || {r1} || ||
 ||   || c ||            ||           || q(x)   :- S(x,<r1>)    || {r2} || ||
-||   || d ||            ||           || q(x)   :- S(x,<r2>)    || {} || ||
+||   || d ||            ||           || q(x)   :- S(x,<r2>)    || {} || ||                                
 ||   || e ||            ||           || q()    :- S(<r1>,<r2>) || {false} || ||
 ||   || f ||            ||           || q()    :- S(<r2>,<r1>) || {true} || ||
 ||   || aa ||            ||           || q(x)   :- S(<s1>,x)    || {s2} || ||
@@ -829,7 +829,7 @@ These are the first cases which tests the effects of unification and positive in
 || 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
 || 198 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
 
-= Inheritance tests =
+= Inheritance tests = 
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
 ||200 || a || A ISA B, B ISA C, C ISA D || A(a), B(b), C(c), D(d) || q(x) :- A(x) || {a} || ||
@@ -840,6 +840,38 @@ These are the first cases which tests the effects of unification and positive in
 || ||  b ||         ||      || q(x,y) :- S(x,y) || {(r1,r2) (s1,s2)} || ||
 || ||  c ||         ||      || q(x,y) :- T(x,y) || {(r1,r2) (s1,s2) (t1,t2)} || ||
 || ||  d ||         ||      || q(x,y) :- V(x,y) || {(r1,r2) (s1,s2) (t1,t2) (v1,v2)} || ||
+
+
+= Existential  = 
+
+||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
+||210 || a || A ISA B, R RISA S, ER ISA A, ER^^-^^ ISA B  || R(r1,r2) S(s1,s2) || q(x) :- A(x) || {r1} || ||
+|| ||  b ||         ||      || q(x) :- B(x) || {r1 r2} || ||
+
+= Equivalence =
+
+||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
+|| 401 || a || A1 ISA A2, A2 ISA A1, A2 ISA A3, A3 ISA A2,B1 ISA B2, B2 ISA B1, B2 ISA B3, B3 ISA B2,C1 ISA C2, C2 ISA C1, C2 ISA C3, C3 ISA C2, C1 ISA B1, B1 ISA A1 || A1(a1) A2(a2) A3(a3) B1(b1) B2(b2) B3(b3) C1(c1) C2(c2) C3(c3) || q(x) :- A1(x) || {a1 a2 a3 b1 b2 b3 c1 c2 c3} || ||
+|| || b || || || q(x) :- A2(x) || {a1 a2 a3 b1 b2 b3 c1 c2 c3} || ||
+|| || c || || || q(x) :- A3(x) || {a1 a2 a3 b1 b2 b3 c1 c2 c3} || ||
+|| || d || || || q(x) :- B1(x) || {b1 b2 b3 c1 c2 c3} || ||
+|| || e || || || q(x) :- B2(x) || {b1 b2 b3 c1 c2 c3} || ||
+|| || f || || || q(x) :- B3(x) || {b1 b2 b3 c1 c2 c3} || ||
+|| || g || || || q(x) :- C1(x) || {c1 c2 c3} || ||
+|| || h || || || q(x) :- C2(x) || {c1 c2 c3} || ||
+|| || i || || || q(x) :- C3(x) || {c1 c2 c3} || ||
+|| 402 || a || A1 RISA A2, A2 RISA A1, A2 RISA A3, A3 RISA A2,B1 RISA B2, B2 RISA B1, B2 RISA B3, B3 RISA B2,C1 RISA C2, C2 RISA C1, C2 RISA C3, C3 RISA C2, C1 RISA B1, B1 RISA A1 || A1(a11,a12) A2(a21,a22) A3(a31,a32) B1(b11,b12) B2(b21,b22) B3(b31,32) C1(c11,c12) C2(c21,c22) C3(c31,c32) || q(x,y) :- A1(x,y) || {(a11,12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,12) (c21,c22) (c31,32)} || ||
+|| || b || || || q(x,y) :- A2(x,y) || {(a11,a12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
+|| || c || || || q(x,y) :- A3(x,y) || {(a11,a12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
+|| || d || || || q(x,y) :- B1(x,y) || {(b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
+|| || e || || || q(x,y) :- B2(x,y) || {(b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
+|| || f || || || q(x,y) :- B3(x,y) || {(b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
+|| || g || || || q(x,y) :- C1(x,y) || {(c11,c12) (c21,c22) (c31,c32)} || ||
+|| || h || || || q(x,y) :- C2(x,y) || {(c11,c12) (c21,c22) (c31,c32)} || ||
+|| || i || || || q(x,y) :- C3(x,y) || {(c11,c12) (c21,c22) (c31,c32)} || ||
+
+
+
 
 
 #END# Correct tests end here, ignore the ones bellow
