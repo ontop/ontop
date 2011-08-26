@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
@@ -64,7 +64,7 @@ public class QuestTechniqueWrapper implements TechniqueWrapper {
 	}
 
 	@Override
-	public void loadDependencies(DLLiterOntology onto) {
+	public void loadDependencies(Ontology onto) {
 		queryRewriter.setCBox(onto);
 
 	}

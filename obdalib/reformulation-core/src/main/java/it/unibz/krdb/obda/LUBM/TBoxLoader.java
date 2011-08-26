@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.DummyOBDAPlatformFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.io.File;
@@ -22,7 +22,7 @@ public class TBoxLoader {
     static final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
     private OWLOntology ontology;
-    private DLLiterOntology dlLiterOntology;
+    private Ontology dlLiterOntology;
     private String dataDir;
     private String owlfile;
 
@@ -35,7 +35,7 @@ public class TBoxLoader {
         dlLiterOntology = translator.translate(ontology);
     }
 
-    public DLLiterOntology loadOnto() throws Exception {
+    public Ontology loadOnto() throws Exception {
 
         return dlLiterOntology;
     }

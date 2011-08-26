@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
@@ -30,7 +30,7 @@ public class DAGChainTest extends TestCase {
     private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public void test_simple_isa() {
-        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
@@ -59,7 +59,7 @@ public class DAGChainTest extends TestCase {
     }
 
     public void test_exists_simple() {
-        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
@@ -96,7 +96,7 @@ public class DAGChainTest extends TestCase {
 
     public void test_exists_complex() {
 
-        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
@@ -155,7 +155,7 @@ public class DAGChainTest extends TestCase {
 
     public void test_exists_complex_2() {
 
-        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);

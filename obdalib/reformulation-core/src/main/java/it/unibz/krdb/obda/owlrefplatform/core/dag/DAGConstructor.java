@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
@@ -38,7 +38,7 @@ public class DAGConstructor {
 
 	public static DAG getSigma(Ontology ontology) {
 
-		DLLiterOntology sigma = new OntologyImpl(URI.create(""));
+		Ontology sigma = new OntologyImpl(URI.create(""));
 
 		for (Axiom assertion : ontology.getAssertions()) {
 			if (assertion instanceof SubClassAxiomImpl) {
@@ -60,7 +60,7 @@ public class DAGConstructor {
 
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
-		DLLiterOntology sigma = new OntologyImpl(URI.create("sigma"));
+		Ontology sigma = new OntologyImpl(URI.create("sigma"));
 
 		for (Axiom assertion : ontology.getAssertions()) {
 			if (assertion instanceof SubClassAxiomImpl) {

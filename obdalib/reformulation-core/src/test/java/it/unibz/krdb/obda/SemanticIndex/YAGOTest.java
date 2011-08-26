@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -36,12 +36,12 @@ public class YAGOTest {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
 
-        DLLiterOntology onto = parse_tbox(dataFile);
+        Ontology onto = parse_tbox(dataFile);
         DAG dag = new DAG(onto);
 
     }
 
-    private static DLLiterOntology parse_tbox(String filename) throws IOException, URISyntaxException {
+    private static Ontology parse_tbox(String filename) throws IOException, URISyntaxException {
         BufferedReader triples = new BufferedReader
                 (new InputStreamReader(new FileInputStream(filename), "UTF-8"));
 
@@ -55,7 +55,7 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        DLLiterOntology onto = new OntologyImpl(URI.create(""));
+        Ontology onto = new OntologyImpl(URI.create(""));
 
         while ((line = triples.readLine()) != null) {
 //            String result = URLDecoder.decode(line, "UTF-8");

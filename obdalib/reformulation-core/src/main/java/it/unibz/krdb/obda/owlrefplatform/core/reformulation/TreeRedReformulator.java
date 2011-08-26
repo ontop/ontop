@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.MemoryUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
@@ -50,7 +50,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * The set of ABox dependencies that will be used to optimize the
 	 * reformulation.
 	 */
-	private DLLiterOntology				sigma			= null;
+	private Ontology				sigma			= null;
 
 	public TreeRedReformulator() {
 
@@ -341,7 +341,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	@Override
 	public void setCBox(Ontology sigma) {
 
-		this.sigma = (DLLiterOntology) sigma;
+		this.sigma = (Ontology) sigma;
 		if (this.sigma != null) {
 			log.debug("Using {} dependencies.", sigma.getAssertions().size());
 			this.sigma.saturate();

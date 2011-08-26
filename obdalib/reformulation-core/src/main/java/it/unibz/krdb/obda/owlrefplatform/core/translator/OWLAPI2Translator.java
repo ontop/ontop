@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertyFunctionalAxiom;
@@ -106,11 +106,11 @@ public class OWLAPI2Translator {
 		dataproperties = new HashSet<String>();
 	}
 
-	public DLLiterOntology translate(OWLOntology owl) throws Exception {
+	public Ontology translate(OWLOntology owl) throws Exception {
 		// ManchesterOWLSyntaxOWLObjectRendererImpl rend = new
 		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
-		DLLiterOntology dl_onto = new OntologyImpl(owl.getURI());
+		Ontology dl_onto = new OntologyImpl(owl.getURI());
 
 		Set<OWLEntity> entities = owl.getSignature();
 		Iterator<OWLEntity> eit = entities.iterator();
@@ -341,7 +341,7 @@ public class OWLAPI2Translator {
 	 * @param subDescription
 	 * @param superDescriptions
 	 */
-	private void addSubclassAxioms(DLLiterOntology dl_onto, ClassDescription subDescription, List<ClassDescription> superDescriptions) {
+	private void addSubclassAxioms(Ontology dl_onto, ClassDescription subDescription, List<ClassDescription> superDescriptions) {
 		for (ClassDescription superDescription : superDescriptions) {
 			if (superDescription == null || subDescription == null) {
 				log.warn("NULL: {} {}", subDescription, superDescription);
@@ -420,7 +420,7 @@ public class OWLAPI2Translator {
 
 	}
 
-	private void addConceptEquivalences(DLLiterOntology ontology, List<ClassDescription> roles) {
+	private void addConceptEquivalences(Ontology ontology, List<ClassDescription> roles) {
 		for (int i = 0; i < roles.size(); i++) {
 			for (int j = i + 1; j < roles.size(); j++) {
 				ClassDescription subclass = roles.get(i);
@@ -433,7 +433,7 @@ public class OWLAPI2Translator {
 		}
 	}
 
-	private void addRoleEquivalences(DLLiterOntology ontology, List<Property> roles) {
+	private void addRoleEquivalences(Ontology ontology, List<Property> roles) {
 		for (int i = 0; i < roles.size(); i++) {
 			for (int j = i + 1; j < roles.size(); j++) {
 				Property subrole = roles.get(i);

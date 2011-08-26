@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
@@ -18,7 +18,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OntologyImpl implements DLLiterOntology {
+public class OntologyImpl implements Ontology {
 
 	private Set<SubDescriptionAxiom>					assertions					= null;
 	private Set<ClassDescription>					concepts					= null;

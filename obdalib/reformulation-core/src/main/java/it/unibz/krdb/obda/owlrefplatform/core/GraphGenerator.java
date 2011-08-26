@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
@@ -166,7 +166,7 @@ public class GraphGenerator {
     }
 
     public static void dumpReducedOnto(List<Axiom> reducedOnto) throws IOException {
-        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = new OntologyImpl(URI.create(""));
         ontology.addAssertions(reducedOnto);
         DAG reducedIsa = DAGConstructor.getISADAG(ontology);
         reducedIsa.index();

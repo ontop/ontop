@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
@@ -43,7 +43,7 @@ public class TranslatorTests extends TestCase {
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI2Translator translator = new OWLAPI2Translator();
-		DLLiterOntology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
 		Iterator<Axiom> assit = ass.iterator();
@@ -71,7 +71,7 @@ public class TranslatorTests extends TestCase {
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI2Translator translator = new OWLAPI2Translator();
-		DLLiterOntology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
 		Iterator<Axiom> assit = ass.iterator();
@@ -100,7 +100,7 @@ public class TranslatorTests extends TestCase {
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI2Translator translator = new OWLAPI2Translator();
-		DLLiterOntology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
 		Iterator<Axiom> assit = ass.iterator();
@@ -141,7 +141,7 @@ public class TranslatorTests extends TestCase {
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI2Translator translator = new OWLAPI2Translator();
-		DLLiterOntology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
 		Iterator<Axiom> assit = ass.iterator();

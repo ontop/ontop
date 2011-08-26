@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -74,12 +74,12 @@ public class SemanticIndexHelper {
         }
     }
 
-    public DLLiterOntology load_onto(String ontoname) throws Exception {
+    public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology owlOntology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
         OWLAPI2Translator translator = new OWLAPI2Translator();
 
-        DLLiterOntology ontology;
+        Ontology ontology;
         return translator.translate(owlOntology);
 
     }

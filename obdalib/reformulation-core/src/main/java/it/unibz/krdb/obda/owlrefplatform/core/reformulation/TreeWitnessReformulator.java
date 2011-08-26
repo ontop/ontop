@@ -16,7 +16,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
@@ -47,7 +47,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	private static final Logger					log					= LoggerFactory.getLogger(TreeWitnessReformulator.class);
 
-	private DLLiterOntology						aboxDependencies	= null;
+	private Ontology						aboxDependencies	= null;
 
 	public TreeWitnessReformulator() {
 
@@ -351,13 +351,13 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	@Override
 	public void setTBox(Ontology ontology) {
-        DAG isa = DAGConstructor.getISADAG((DLLiterOntology)ontology);
+        DAG isa = DAGConstructor.getISADAG((Ontology)ontology);
         this.conceptDAG = isa;
 	}
 
 	@Override
 	public void setCBox(Ontology sigma) {
-		aboxDependencies = (DLLiterOntology) sigma;
+		aboxDependencies = (Ontology) sigma;
 
 	}
 

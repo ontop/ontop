@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class SimpleDirectViewManager implements ViewManager {
 
-	private DLLiterOntology ontology = null;
+	private Ontology ontology = null;
 	private Set<URI> loadedURIs = null;
 	private HashMap<String, String> prefixMap = null;
 	private Map<String, String> ontoMapper = null;
@@ -35,7 +35,7 @@ public class SimpleDirectViewManager implements ViewManager {
 		
 	}
 	
-	public SimpleDirectViewManager(PrefixManager man,DLLiterOntology onto, Set<URI> uris){
+	public SimpleDirectViewManager(PrefixManager man,Ontology onto, Set<URI> uris){
 		ontology = onto;
 		loadedURIs = uris;
 //		ontoMapper = ABoxToDBDumper.getInstance().getOntolgyMapper();

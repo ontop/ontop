@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -66,7 +66,7 @@ public class LUBMTester {
         int universityCount = 1;
 
         starttime = System.nanoTime();
-        DLLiterOntology ontology = tboxHelper.loadOnto();
+        Ontology ontology = tboxHelper.loadOnto();
         DAG dag = new DAG(ontology);
         endtime = System.nanoTime();
         log.info("Building DAG took: {}", (endtime - starttime) * 1.0e-9);

@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
@@ -60,7 +60,7 @@ public class CQCUtilities {
 
 	static Logger					log					= LoggerFactory.getLogger(CQCUtilities.class);
 
-	private DLLiterOntology			sigma				= null;
+	private Ontology			sigma				= null;
 
 	final private OBDADataFactory	fac					= OBDADataFactoryImpl.getInstance();
 
@@ -83,7 +83,7 @@ public class CQCUtilities {
 	 * @param sigma
 	 *            A set of ABox dependencies
 	 */
-	public CQCUtilities(CQIE query, DLLiterOntology sigma) {
+	public CQCUtilities(CQIE query, Ontology sigma) {
 		this.sigma = sigma;
 		if (sigma != null) {
 			// log.debug("Using dependencies to chase the query");
@@ -112,7 +112,7 @@ public class CQCUtilities {
 	 * @param sigma
 	 * @return
 	 */
-	public CQIE chaseQuery(CQIE query, DLLiterOntology sigma) {
+	public CQIE chaseQuery(CQIE query, Ontology sigma) {
 		sigma.saturate();
 		Atom head = (Atom) query.getHead().clone();
 
@@ -575,7 +575,7 @@ public class CQCUtilities {
 		removeContainedQueriesSorted(program.getRules(), twopasses, null);
 	}
 
-	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, DLLiterOntology sigma) {
+	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, Ontology sigma) {
 		removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
 	}
 
@@ -590,7 +590,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, DLLiterOntology sigma) {
+	public static void removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, Ontology sigma) {
 		removeContainedQueries(queries, twopasses, sigma, true);
 	}
 
@@ -605,7 +605,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	public static void removeContainedQueries(List<CQIE> queries, boolean twopasses, DLLiterOntology sigma, boolean sort) {
+	public static void removeContainedQueries(List<CQIE> queries, boolean twopasses, Ontology sigma, boolean sort) {
 
 		int initialsize = queries.size();
 		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);

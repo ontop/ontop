@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class SemanticReductionTest extends TestCase {
 
 
     public void test_2_0_0() throws Exception {
-        DLLiterOntology ontology = helper.load_onto("test_2_0_0");
+        Ontology ontology = helper.load_onto("test_2_0_0");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
@@ -26,7 +26,7 @@ public class SemanticReductionTest extends TestCase {
     }
 
     public void test_2_0_1() throws Exception {
-        DLLiterOntology ontology = helper.load_onto("test_2_0_1");
+        Ontology ontology = helper.load_onto("test_2_0_1");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
@@ -35,7 +35,7 @@ public class SemanticReductionTest extends TestCase {
     }
 
     public void test_2_1_0() throws Exception {
-        DLLiterOntology ontology = helper.load_onto("test_2_1_0");
+        Ontology ontology = helper.load_onto("test_2_1_0");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
@@ -44,7 +44,7 @@ public class SemanticReductionTest extends TestCase {
     }
 
     public void test_1_2_0() throws Exception {
-        DLLiterOntology ontology = helper.load_onto("test_1_2_0");
+        Ontology ontology = helper.load_onto("test_1_2_0");
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));

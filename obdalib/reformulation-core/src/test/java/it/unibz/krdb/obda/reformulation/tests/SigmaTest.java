@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
@@ -24,7 +24,7 @@ public class SigmaTest extends TestCase {
     private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public void test_exists_simple() {
-        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
+        Ontology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);

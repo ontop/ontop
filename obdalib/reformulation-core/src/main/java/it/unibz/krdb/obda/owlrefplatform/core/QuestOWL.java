@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryMana
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
@@ -77,7 +77,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	private OWLOntologyManager					ontoManager				= null;
 
 	/* The merge and tranlsation of all loaded ontologies */
-	private DLLiterOntology						translatedOntologyMerge	= null;
+	private Ontology						translatedOntologyMerge	= null;
 
 	private TechniqueWrapper					techwrapper				= null;
 	private HashSet<OWLOntology>				loadedOntologies		= null;
@@ -117,7 +117,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		obdaModel = model;
 	}
 
-	public void loadDependencies(DLLiterOntology sigma) {
+	public void loadDependencies(Ontology sigma) {
 		techwrapper.loadDependencies(sigma);
 	}
 
@@ -406,10 +406,10 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		Set<URI> uris = new HashSet<URI>();
 
-		DLLiterOntology translation = new OntologyImpl(uri);
+		Ontology translation = new OntologyImpl(uri);
 		for (OWLOntology onto : ontologies) {
 			uris.add(onto.getURI());
-			DLLiterOntology aux;
+			Ontology aux;
 			try {
 				aux = translator.translate(onto);
 			} catch (Exception e) {

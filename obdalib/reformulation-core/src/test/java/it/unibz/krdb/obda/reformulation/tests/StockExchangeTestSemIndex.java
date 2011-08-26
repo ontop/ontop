@@ -6,10 +6,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatformFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 
 import java.io.File;
@@ -38,7 +38,7 @@ public class StockExchangeTestSemIndex extends TestCase {
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),controller.getPrefixManager());
 		
 		// Creating a new instance of a quonto reasoner
-		OBDAOWLReformulationPlatformFactory factory = new QuestOWLFactory();
+		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
 		
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		
