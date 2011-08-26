@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -139,7 +139,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final OBDADataFactory		predicateFactory	= OBDADataFactoryImpl.getInstance();
 
-	private final OntologyFactory	descFactory			= new BasicDescriptionFactory();
+	private final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
 	private Properties					config				= null;
 

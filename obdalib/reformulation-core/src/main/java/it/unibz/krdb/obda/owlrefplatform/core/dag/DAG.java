@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
@@ -41,7 +41,7 @@ public class DAG {
     private final Map<Description, DAGNode> roles;
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     public final static String thingStr = "http://www.w3.org/2002/07/owl#Thing";
     public final static URI thingUri = URI.create(thingStr);

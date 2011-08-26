@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
@@ -31,7 +31,7 @@ public class YAGOTest {
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -55,7 +55,7 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        Ontology onto = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
+        Ontology onto = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
         while ((line = triples.readLine()) != null) {
 //            String result = URLDecoder.decode(line, "UTF-8");
@@ -80,7 +80,7 @@ public class YAGOTest {
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
                     ClassDescription co = descFactory.getClass(po);
 
-                    onto.addAssertion(BasicDescriptionFactory.createSubClassAxiom(rs, co));
+                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
 
                 } else if ("rdfs:domain".equals(predicate)) {
                     tbox_count++;
@@ -90,7 +90,7 @@ public class YAGOTest {
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
                     ClassDescription co = descFactory.getClass(po);
 
-                    onto.addAssertion(BasicDescriptionFactory.createSubClassAxiom(rs, co));
+                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
 
                 } else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
@@ -106,7 +106,7 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
                     ClassDescription cs = descFactory.getClass(ps);
                     ClassDescription co = descFactory.getClass(po);
-                    onto.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cs, co));
+                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cs, co));
 
                 } else if ("rdfs:subPropertyOf".equals(predicate)) {
                     tbox_count++;
@@ -115,7 +115,7 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
                     Property rs = descFactory.getProperty(ps);
                     Property ro = descFactory.getProperty(po);
-                    onto.addAssertion(BasicDescriptionFactory.createSubPropertyAxiom(rs, ro));
+                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));
 
                 } else {
 //                    log.debug(predicate);

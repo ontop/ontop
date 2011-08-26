@@ -14,8 +14,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -103,6 +104,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	final String					strselect_meta_table		= "SELECT uri, type, tablename FROM " + strtablemetada + "";
 
 	private Set<Predicate>			vocabulary;
+	
+	private OntologyFactory			ofac = OntologyFactoryImpl.getInstance();
 
 	public RDBMSDirectDataRepositoryManager(OBDADataSource ds) throws SQLException, PunningException {
 		this(ds, null);
@@ -455,7 +458,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	@Override
 	public Ontology getABoxDependencies() {
-		return BasicDescriptionFactory.createOntologyImpl(URI.create("fakeURI"));
+		return OntologyFactoryImpl.getInstance().createOntology(URI.create("fakeURI"));
 	}
 
 	@Override

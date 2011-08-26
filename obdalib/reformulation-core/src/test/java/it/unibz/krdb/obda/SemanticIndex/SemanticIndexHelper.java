@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.io.BufferedReader;
@@ -57,7 +57,7 @@ public class SemanticIndexHelper {
     public Connection conn;
 
     private final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private final OntologyFactory descFactory = new BasicDescriptionFactory();
+    private final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     private final static String owl_exists = "::__exists__::";
     private final static String owl_inverse_exists = "::__inverse__exists__::";

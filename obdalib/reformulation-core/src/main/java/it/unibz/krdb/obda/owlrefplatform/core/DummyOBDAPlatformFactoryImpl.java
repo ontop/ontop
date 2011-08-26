@@ -16,7 +16,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
@@ -114,7 +114,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 			Set<OWLOntology> ontologies = manager.getOntologies();
 			URI uri = uri = ontologies.iterator().next().getURI();
 			OWLAPI2Translator translator = new OWLAPI2Translator();
-			Ontology ontology = BasicDescriptionFactory.createOntologyImpl(uri);
+			Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(uri);
 
 			for (OWLOntology onto : ontologies) {
 				Ontology aux = translator.translate(onto);
@@ -147,7 +147,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 			apic.addMappings(ds.getSourceID(), man.getMappings());
 
 			// Rewriter
-			Ontology dlliteontology = BasicDescriptionFactory.createOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+			Ontology dlliteontology = OntologyFactoryImpl.getInstance().createOntology(URI.create("http://it.unibz.krdb/obda/auxontology"));
 			dlliteontology.addAssertions(reducedOnto);
 			rewriter = new TreeRedReformulator();
 			rewriter.setTBox(dlliteontology);

@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -46,7 +46,7 @@ public class CSVDumper {
     private String dataDir;
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     public CSVDumper(DAG dag, String dataDir) throws IOException {
         classFile = dataDir + "classes.csv";

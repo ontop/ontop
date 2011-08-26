@@ -1,21 +1,18 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox.tests;
 
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
@@ -364,6 +361,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		@Override
 		public Assertion next() {
+			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 			if (currentassertion >= MAX_ASSERTIONS)
 				throw new NoSuchElementException();
 
@@ -373,11 +371,11 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 			Assertion assertion = null;
 
 			if (pred.getArity() == 1) {
-				assertion = BasicDescriptionFactory.createClassAssertionImpl(pred, fac.getURIConstant(URI.create("1")));
+				assertion = ofac.createClassAssertion(pred, fac.getURIConstant(URI.create("1")));
 			} else if (pred.getType(1) == COL_TYPE.OBJECT) {
-				assertion = BasicDescriptionFactory.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
+				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
 			} else {
-				assertion = BasicDescriptionFactory.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
+				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
 			}
 			return assertion;
 		}

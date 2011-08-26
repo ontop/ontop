@@ -12,7 +12,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
@@ -47,12 +47,12 @@ public class SemanticReduction {
 		this.sigmaChain = new DAGChain(sigma);
 
 		predicateFactory = OBDADataFactoryImpl.getInstance();
-		descFactory = new BasicDescriptionFactory();
+		descFactory = new OntologyFactoryImpl();
 
 	}
 	
 	public Ontology getReducedOntology() {
-		Ontology reformulationOntology = BasicDescriptionFactory.createOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+		Ontology reformulationOntology = descFactory.createOntology(URI.create("http://it.unibz.krdb/obda/auxontology"));
 		reformulationOntology.addAssertions(reduce());
 		return reformulationOntology;
 	}
@@ -72,7 +72,7 @@ public class SemanticReduction {
 
 				if (!check_redundant(node, child)) {
 
-					rv.add(BasicDescriptionFactory.createSubClassAxiom((ClassDescription) child.getDescription(), (ClassDescription) node
+					rv.add(descFactory.createSubClassAxiom((ClassDescription) child.getDescription(), (ClassDescription) node
 							.getDescription()));
 				}
 			}
@@ -82,7 +82,7 @@ public class SemanticReduction {
 			for (DAGNode child : node.descendans) {
 				if (!check_redundant_role(node, child)) {
 
-					rv.add(BasicDescriptionFactory.createSubPropertyAxiom((Property) child.getDescription(), (Property) node.getDescription()));
+					rv.add(descFactory.createSubPropertyAxiom((Property) child.getDescription(), (Property) node.getDescription()));
 				}
 			}
 		}

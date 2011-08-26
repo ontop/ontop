@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
@@ -27,10 +27,10 @@ public class DAGChainTest extends TestCase {
     SemanticIndexHelper helper = new SemanticIndexHelper();
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     public void test_simple_isa() {
-        Ontology ontology = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
@@ -39,8 +39,8 @@ public class DAGChainTest extends TestCase {
         Class ac = descFactory.getClass(a);
         Class bc = descFactory.getClass(b);
         Class cc = descFactory.getClass(c);
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(bc, ac));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cc, bc));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
         ontology.addConcept(ac);
         ontology.addConcept(bc);
         ontology.addConcept(cc);
@@ -59,7 +59,7 @@ public class DAGChainTest extends TestCase {
     }
 
     public void test_exists_simple() {
-        Ontology ontology = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
@@ -69,8 +69,8 @@ public class DAGChainTest extends TestCase {
         PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
         Class cc = descFactory.getClass(c);
 
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cc, ier));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
         ontology.addConcept(ac);
         ontology.addConcept(er);
         ontology.addConcept(ier);
@@ -96,7 +96,7 @@ public class DAGChainTest extends TestCase {
 
     public void test_exists_complex() {
 
-        Ontology ontology = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
@@ -111,10 +111,10 @@ public class DAGChainTest extends TestCase {
         Class bc = descFactory.getClass(b);
         Class dc = descFactory.getClass(d);
 
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cc, ier));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(bc, er));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(ier, dc));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
         ontology.addConcept(ac);
         ontology.addConcept(er);
@@ -155,7 +155,7 @@ public class DAGChainTest extends TestCase {
 
     public void test_exists_complex_2() {
 
-        Ontology ontology = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
@@ -165,9 +165,9 @@ public class DAGChainTest extends TestCase {
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
         PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
 
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(ier, ac));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(ier, er));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(ac, er));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, ac));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, er));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ac, er));
 
         DAGChain resChain = new DAGChain(DAGConstructor.getISADAG(ontology));
         Map<Description, DAGNode> res = resChain.chain();

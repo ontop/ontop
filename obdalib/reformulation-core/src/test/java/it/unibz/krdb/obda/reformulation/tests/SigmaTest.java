@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
@@ -21,10 +21,10 @@ import junit.framework.TestCase;
 public class SigmaTest extends TestCase {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
     public void test_exists_simple() {
-        Ontology ontology = BasicDescriptionFactory.createOntologyImpl(URI.create(""));
+        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
@@ -33,8 +33,8 @@ public class SigmaTest extends TestCase {
         Class cc = descFactory.getClass(c);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(BasicDescriptionFactory.createSubClassAxiom(cc, er));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
+        ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, er));
         ontology.addConcept(ac);
         ontology.addConcept(cc);
         ontology.addConcept(er);

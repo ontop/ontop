@@ -21,7 +21,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.net.URI;
@@ -43,7 +43,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	private OBDADataFactory						fac					= OBDADataFactoryImpl.getInstance();
 
-	private static final OntologyFactory		descFactory			= new BasicDescriptionFactory();
+	private static final OntologyFactory		descFactory			= new OntologyFactoryImpl();
 
 	private static final Logger					log					= LoggerFactory.getLogger(TreeWitnessReformulator.class);
 

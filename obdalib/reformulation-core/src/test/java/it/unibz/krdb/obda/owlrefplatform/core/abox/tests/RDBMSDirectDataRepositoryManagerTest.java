@@ -10,7 +10,8 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
@@ -89,7 +90,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		st.executeUpdate(out.toString());
 		System.out.println(out.toString());
 		out.reset();
-		
+
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
 		dbman.getSQLInserts(ait, out);
 		st.executeUpdate(out.toString());
@@ -153,9 +154,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source,preds);
-
-		
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source, preds);
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
 		Statement st = conn.createStatement();
@@ -215,8 +214,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source,preds);
-		
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source, preds);
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
 		Statement st = conn.createStatement();
@@ -358,6 +356,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		@Override
 		public Assertion next() {
+			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 			if (currentassertion >= MAX_ASSERTIONS)
 				throw new NoSuchElementException();
 
@@ -367,11 +366,12 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 			Assertion assertion = null;
 
 			if (pred.getArity() == 1) {
-				assertion = BasicDescriptionFactory.createClassAssertionImpl(pred, fac.getURIConstant(URI.create("1")));
+				assertion = ofac.createClassAssertion(pred, fac.getURIConstant(URI.create("1")));
 			} else if (pred.getType(1) == COL_TYPE.OBJECT) {
-				assertion = BasicDescriptionFactory.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
+				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")),
+						fac.getURIConstant(URI.create("2")));
 			} else {
-				assertion = BasicDescriptionFactory.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
+				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
 			}
 			return assertion;
 		}

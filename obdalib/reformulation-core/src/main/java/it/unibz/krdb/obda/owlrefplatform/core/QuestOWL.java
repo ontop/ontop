@@ -1,9 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.OBDAQueryReasoner;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -16,10 +16,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -78,7 +77,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	private OWLOntologyManager					ontoManager				= null;
 
 	/* The merge and tranlsation of all loaded ontologies */
-	private Ontology						translatedOntologyMerge	= null;
+	private Ontology							translatedOntologyMerge	= null;
 
 	private TechniqueWrapper					techwrapper				= null;
 	private HashSet<OWLOntology>				loadedOntologies		= null;
@@ -99,6 +98,9 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	private Ontology							reducedOntology			= null;
 
 	OWLAPI2VocabularyExtractor					vext					= new OWLAPI2VocabularyExtractor();
+	
+	private OntologyFactory			ofac = OntologyFactoryImpl.getInstance();
+
 
 	public QuestOWL(OWLOntologyManager manager) {
 		ontoManager = manager;
@@ -198,7 +200,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 		QueryVocabularyValidator validator = new QueryVocabularyValidator(loadedOntologies);
 
-		Ontology sigma = BasicDescriptionFactory.createOntologyImpl(URI.create("sigmaontology"));
+		Ontology sigma = ofac.createOntology(URI.create("sigmaontology"));
 		Ontology reformulationOntology = null;
 		OBDAModel unfoldingOBDAModel = fac.getOBDAModel();
 
@@ -397,7 +399,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		 */
 		URI uri = URI.create("http://it.unibz.krdb.obda/Quest/auxiliaryontology");
 		if (translatedOntologyMerge == null) {
-			translatedOntologyMerge = BasicDescriptionFactory.createOntologyImpl(uri);
+			translatedOntologyMerge = ofac.createOntology(uri);
 		}
 		if (loadedOntologies == null) {
 			loadedOntologies = new HashSet<OWLOntology>();
@@ -407,7 +409,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		Set<URI> uris = new HashSet<URI>();
 
-		Ontology translation = BasicDescriptionFactory.createOntologyImpl(uri);
+		Ontology translation = ofac.createOntology(uri);
 		for (OWLOntology onto : ontologies) {
 			uris.add(onto.getURI());
 			Ontology aux;
