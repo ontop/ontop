@@ -3,16 +3,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
 import java.net.URI;
 import java.util.Collection;
@@ -41,12 +41,12 @@ public class DAG {
     private final Map<Description, DAGNode> roles;
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public final static String thingStr = "http://www.w3.org/2002/07/owl#Thing";
     public final static URI thingUri = URI.create(thingStr);
     public final static Predicate thingPred = predicateFactory.getPredicate(thingUri, 1);
-    public final static ConceptDescription thingConcept = descFactory.getAtomicConceptDescription(thingPred);
+    public final static ClassDescription thingConcept = descFactory.getAtomicConceptDescription(thingPred);
     public final DAGNode thing = new DAGNode(thingConcept);
 
 
@@ -63,7 +63,7 @@ public class DAG {
 
         classes.put(thingConcept, thing);
 
-        for (ConceptDescription concept : ontology.getConcepts()) {
+        for (ClassDescription concept : ontology.getConcepts()) {
             DAGNode node = new DAGNode(concept);
 
             if (!concept.equals(thingConcept)) {
@@ -71,16 +71,16 @@ public class DAG {
                 classes.put(concept, node);
             }
         }
-        for (RoleDescription role : ontology.getRoles()) {
+        for (Property role : ontology.getRoles()) {
             roles.put(role, new DAGNode(role));
 
-            RoleDescription roleInv = descFactory.getRoleDescription(role.getPredicate(), !role.isInverse());
+            Property roleInv = descFactory.getRoleDescription(role.getPredicate(), !role.isInverse());
             roles.put(roleInv, new DAGNode(roleInv));
 
-            ExistentialConceptDescription existsRole = descFactory.getExistentialConceptDescription(
+            PropertySomeDescription existsRole = descFactory.getExistentialConceptDescription(
                     role.getPredicate(),
                     role.isInverse());
-            ExistentialConceptDescription existsRoleInv = descFactory.getExistentialConceptDescription(
+            PropertySomeDescription existsRoleInv = descFactory.getExistentialConceptDescription(
                     role.getPredicate(),
                     !role.isInverse()
             );
@@ -94,18 +94,18 @@ public class DAG {
         }
 
 
-        for (Assertion assertion : ontology.getAssertions()) {
+        for (Axiom assertion : ontology.getAssertions()) {
 
-            if (assertion instanceof DLLiterConceptInclusionImpl) {
-                DLLiterConceptInclusionImpl clsIncl = (DLLiterConceptInclusionImpl) assertion;
-                ConceptDescription parent = clsIncl.getIncluding();
-                ConceptDescription child = clsIncl.getIncluded();
+            if (assertion instanceof SubClassAxiomImpl) {
+                SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
+                ClassDescription parent = clsIncl.getSuper();
+                ClassDescription child = clsIncl.getSub();
 
                 addClassEdge(parent, child);
-            } else if (assertion instanceof DLLiterRoleInclusionImpl) {
-                DLLiterRoleInclusionImpl roleIncl = (DLLiterRoleInclusionImpl) assertion;
-                RoleDescription parent = roleIncl.getIncluding();
-                RoleDescription child = roleIncl.getIncluded();
+            } else if (assertion instanceof SubPropertyAxiomImpl) {
+                SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
+                Property parent = roleIncl.getSuper();
+                Property child = roleIncl.getSub();
 
                 addRoleEdge(parent, child);
             }
@@ -127,7 +127,7 @@ public class DAG {
     }
 
 
-    private void addClassEdge(ConceptDescription parent, ConceptDescription child) {
+    private void addClassEdge(ClassDescription parent, ClassDescription child) {
 
         DAGNode parentNode;
         if (classes.containsKey(parent)) {
@@ -148,14 +148,14 @@ public class DAG {
 
     }
 
-    private void addRoleEdge(RoleDescription parent, RoleDescription child) {
+    private void addRoleEdge(Property parent, Property child) {
         addRoleEdgeSingle(parent, child);
 
         addRoleEdgeSingle(descFactory.getRoleDescription(parent.getPredicate(), !parent.isInverse()),
                 descFactory.getRoleDescription(child.getPredicate(), !child.isInverse()));
     }
 
-    private void addRoleEdgeSingle(RoleDescription parent, RoleDescription child) {
+    private void addRoleEdgeSingle(Property parent, Property child) {
         DAGNode parentNode = roles.get(parent);
         if (parentNode == null) {
             parentNode = new DAGNode(parent);
@@ -169,12 +169,12 @@ public class DAG {
         }
         addParent(childNode, parentNode);
 
-        ConceptDescription existsParent = descFactory.getExistentialConceptDescription(
+        ClassDescription existsParent = descFactory.getExistentialConceptDescription(
                 parent.getPredicate(),
                 parent.isInverse());
 
 
-        ConceptDescription existChild = descFactory.getExistentialConceptDescription(
+        ClassDescription existChild = descFactory.getExistentialConceptDescription(
                 child.getPredicate(),
                 child.isInverse());
 
@@ -290,7 +290,7 @@ public class DAG {
         return roles.values();
     }
 
-    public DAGNode getClassNode(ConceptDescription conceptDescription) {
+    public DAGNode getClassNode(ClassDescription conceptDescription) {
         DAGNode rv = classes.get(conceptDescription);
         if (rv == null) {
             rv = classes.get(equi_mappings.get(conceptDescription));
@@ -298,7 +298,7 @@ public class DAG {
         return rv;
     }
 
-    public DAGNode getRoleNode(RoleDescription roleDescription) {
+    public DAGNode getRoleNode(Property roleDescription) {
         DAGNode rv = roles.get(roleDescription);
         if (rv == null) {
             rv = roles.get(equi_mappings.get(roleDescription));

@@ -3,15 +3,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AttributeABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 
-public class DLLiterAttributeABoxAssertionImpl implements AttributeABoxAssertion {
+public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 
 	private Predicate		role;
 	private ValueConstant	o2;
 	private URIConstant		o1;
 
-	public DLLiterAttributeABoxAssertionImpl(Predicate attribute, URIConstant o1, ValueConstant o2) {
+	public DataPropertyAssertionImpl(Predicate attribute, URIConstant o1, ValueConstant o2) {
 		this.role = attribute;
 		this.o1 = o1;
 		this.o2 = o2;

@@ -8,14 +8,14 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,10 +26,10 @@ import java.util.Set;
 
 public class SemanticQueryOptimizer {
 	
-	 Map<Predicate,Set<PositiveInclusion>> axiomIndex;
+	 Map<Predicate,Set<SubDescriptionAxiom>> axiomIndex;
 	 OBDADataFactory fac;
 	
-	public SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<PositiveInclusion>> includedPredicateIndex) {
+	public SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubDescriptionAxiom>> includedPredicateIndex) {
 		this.fac = fac;
 		this.axiomIndex = includedPredicateIndex;
 	}
@@ -138,34 +138,34 @@ public class SemanticQueryOptimizer {
 				continue;
 			}
 
-			Set<PositiveInclusion> pis = axiomIndex.get(focusAtom.getPredicate());
+			Set<SubDescriptionAxiom> pis = axiomIndex.get(focusAtom.getPredicate());
 			if (pis == null) {
 				continue;
 			}
-			for (PositiveInclusion pi : pis) {
+			for (SubDescriptionAxiom pi : pis) {
 				boolean breakPICycle = false;
 				Atom checkAtom = null;
-				if (pi instanceof DLLiterConceptInclusionImpl) {
-					DLLiterConceptInclusionImpl ci = (DLLiterConceptInclusionImpl) pi;
-					ConceptDescription including = ci.getIncluding();
-					ConceptDescription included = ci.getIncluded();
+				if (pi instanceof SubClassAxiomImpl) {
+					SubClassAxiomImpl ci = (SubClassAxiomImpl) pi;
+					ClassDescription including = ci.getSuper();
+					ClassDescription included = ci.getSub();
 
-					if (focusAtom.getPredicate().getArity() == 1 && including instanceof AtomicConceptDescription) {
+					if (focusAtom.getPredicate().getArity() == 1 && including instanceof Class) {
 						/* case we work with unary atom A(x) or A(_) */
 						// Here the list of terms is always of size 1
 
-						if (included instanceof AtomicConceptDescription) {
+						if (included instanceof Class) {
 							/* Case left side of inclusion is B */
-							AtomicConceptDescription left = (AtomicConceptDescription) included;
+							Class left = (Class) included;
 							checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms());
 
-						} else if (included instanceof ExistentialConceptDescription) {
+						} else if (included instanceof PropertySomeDescription) {
 							/*
 							 * Case left side of inclusion is exists R or exists
 							 * R-
 							 */
 							/* Case left side of inclusion is B */
-							ExistentialConceptDescription left = (ExistentialConceptDescription) included;
+							PropertySomeDescription left = (PropertySomeDescription) included;
 							if (!left.isInverse()) {
 								List<Term> terms = new LinkedList<Term>(focusAtom.getTerms());
 								terms.add(fac.getNondistinguishedVariable());
@@ -179,20 +179,20 @@ public class SemanticQueryOptimizer {
 							continue;
 						}
 
-					} else if (focusAtom.getPredicate().getArity() == 2 && including instanceof ConceptDescription) {
+					} else if (focusAtom.getPredicate().getArity() == 2 && including instanceof ClassDescription) {
 						/*
 						 * case we work with unary atom R(x,_), R(_,y)
 						 */
 
-						if (including instanceof ExistentialConceptDescription && included instanceof AtomicConceptDescription) {
+						if (including instanceof PropertySomeDescription && included instanceof Class) {
 							/*
 							 * Case with left side of inclusion is A
 							 * 
 							 * R(x,_) is redundant if we have A ISA ER and A(x)
 							 * is in the body
 							 */
-							ExistentialConceptDescription right = (ExistentialConceptDescription) including;
-							AtomicConceptDescription left = (AtomicConceptDescription) included;
+							PropertySomeDescription right = (PropertySomeDescription) including;
+							Class left = (Class) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0));
 							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {
@@ -201,8 +201,8 @@ public class SemanticQueryOptimizer {
 								continue;
 							}
 
-						} else if (including instanceof ExistentialConceptDescription
-								&& included instanceof ExistentialConceptDescriptionImpl) {
+						} else if (including instanceof PropertySomeDescription
+								&& included instanceof PropertySomeDescriptionImpl) {
 
 							/*
 							 * Case with left side of inclusion is exists R or
@@ -214,8 +214,8 @@ public class SemanticQueryOptimizer {
 							 * ES ISA ER- we get S(x,_)
 							 */
 
-							ExistentialConceptDescription right = (ExistentialConceptDescription) including;
-							ExistentialConceptDescription left = (ExistentialConceptDescription) included;
+							PropertySomeDescription right = (PropertySomeDescription) including;
+							PropertySomeDescription left = (PropertySomeDescription) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								if (!left.isInverse()) {
 									checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0),
@@ -244,7 +244,7 @@ public class SemanticQueryOptimizer {
 						// Arity more that 2
 						continue;
 					}
-				} else if (pi instanceof DLLiterRoleInclusionImpl) {
+				} else if (pi instanceof SubPropertyAxiomImpl) {
 
 					/*
 					 * Case with left side of inclusion is S or S- and only for
@@ -255,9 +255,9 @@ public class SemanticQueryOptimizer {
 					 * with anonymous variables
 					 */
 
-					DLLiterRoleInclusionImpl roleinclusion = (DLLiterRoleInclusionImpl) pi;
-					RoleDescription rightrole = (RoleDescription) roleinclusion.getIncluding();
-					RoleDescription leftrole = (RoleDescription) roleinclusion.getIncluded();
+					SubPropertyAxiomImpl roleinclusion = (SubPropertyAxiomImpl) pi;
+					Property rightrole = (Property) roleinclusion.getSuper();
+					Property leftrole = (Property) roleinclusion.getSub();
 
 					if (rightrole.isInverse() == leftrole.isInverse()) {
 						checkAtom = fac.getAtom(leftrole.getPredicate(), focusAtom.getTerms());

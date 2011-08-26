@@ -11,12 +11,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -113,13 +113,13 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 			Set<OWLOntology> ontologies = manager.getOntologies();
 			URI uri = uri = ontologies.iterator().next().getURI();
 			OWLAPI2Translator translator = new OWLAPI2Translator();
-			DLLiterOntology ontology = new DLLiterOntologyImpl(uri);
+			DLLiterOntology ontology = new OntologyImpl(uri);
 
 			for (OWLOntology onto : ontologies) {
 				DLLiterOntology aux = translator.translate(onto);
 				ontology.addAssertions(aux.getAssertions());
-				ontology.addConcepts(new ArrayList<ConceptDescription>(aux.getConcepts()));
-				ontology.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
+				ontology.addConcepts(new ArrayList<ClassDescription>(aux.getConcepts()));
+				ontology.addRoles(new ArrayList<Property>(aux.getRoles()));
 			}
 
 			DAG isa = DAGConstructor.getISADAG(ontology);
@@ -131,7 +131,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 			}
 
 			SemanticReduction reducer = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
-			List<Assertion> reducedOnto = reducer.reduce();
+			List<Axiom> reducedOnto = reducer.reduce();
 			if (GraphGenerator.debugInfoDump) {
 				GraphGenerator.dumpReducedOnto(reducedOnto);
 			}
@@ -146,7 +146,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 			apic.addMappings(ds.getSourceID(), man.getMappings());
 
 			// Rewriter
-			Ontology dlliteontology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+			Ontology dlliteontology = new OntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
 			dlliteontology.addAssertions(reducedOnto);
 			rewriter = new TreeRedReformulator();
 			rewriter.setTBox(dlliteontology);

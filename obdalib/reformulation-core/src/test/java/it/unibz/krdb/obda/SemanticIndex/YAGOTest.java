@@ -5,14 +5,14 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -31,7 +31,7 @@ public class YAGOTest {
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -55,7 +55,7 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        DLLiterOntology onto = new DLLiterOntologyImpl(URI.create(""));
+        DLLiterOntology onto = new OntologyImpl(URI.create(""));
 
         while ((line = triples.readLine()) != null) {
 //            String result = URLDecoder.decode(line, "UTF-8");
@@ -77,25 +77,25 @@ public class YAGOTest {
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 2);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
 
-                    ConceptDescription rs = descFactory.getExistentialConceptDescription(ps, true);
-                    ConceptDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription rs = descFactory.getExistentialConceptDescription(ps, true);
+                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
 
-                    onto.addAssertion(new DLLiterConceptInclusionImpl(rs, co));
+                    onto.addAssertion(new SubClassAxiomImpl(rs, co));
 
                 } else if ("rdfs:domain".equals(predicate)) {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 2);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
 
-                    ConceptDescription rs = descFactory.getExistentialConceptDescription(ps, false);
-                    ConceptDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription rs = descFactory.getExistentialConceptDescription(ps, false);
+                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
 
-                    onto.addAssertion(new DLLiterConceptInclusionImpl(rs, co));
+                    onto.addAssertion(new SubClassAxiomImpl(rs, co));
 
                 } else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    ConceptDescription co = descFactory.getAtomicConceptDescription(po);
+                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
 
                     onto.addConcept(co);
 
@@ -104,18 +104,18 @@ public class YAGOTest {
 //                    log.debug("{} {}", subject, object);
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    ConceptDescription cs = descFactory.getAtomicConceptDescription(ps);
-                    ConceptDescription co = descFactory.getAtomicConceptDescription(po);
-                    onto.addAssertion(new DLLiterConceptInclusionImpl(cs, co));
+                    ClassDescription cs = descFactory.getAtomicConceptDescription(ps);
+                    ClassDescription co = descFactory.getAtomicConceptDescription(po);
+                    onto.addAssertion(new SubClassAxiomImpl(cs, co));
 
                 } else if ("rdfs:subPropertyOf".equals(predicate)) {
                     tbox_count++;
 //                    log.debug("{} {}", subject, object);
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    RoleDescription rs = descFactory.getRoleDescription(ps);
-                    RoleDescription ro = descFactory.getRoleDescription(po);
-                    onto.addAssertion(new DLLiterRoleInclusionImpl(rs, ro));
+                    Property rs = descFactory.getRoleDescription(ps);
+                    Property ro = descFactory.getRoleDescription(po);
+                    onto.addAssertion(new SubPropertyAxiomImpl(rs, ro));
 
                 } else {
 //                    log.debug(predicate);

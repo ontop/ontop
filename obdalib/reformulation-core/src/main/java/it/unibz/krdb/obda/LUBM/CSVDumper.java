@@ -7,9 +7,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 
 import java.io.File;
@@ -46,7 +46,7 @@ public class CSVDumper {
     private String dataDir;
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public CSVDumper(DAG dag, String dataDir) throws IOException {
         classFile = dataDir + "classes.csv";
@@ -108,7 +108,7 @@ public class CSVDumper {
                 OWLIndividual o = objAxiom.getObject();
 
                 Predicate propPred = predicateFactory.getPredicate(URI.create(p.asOWLObjectProperty().getURI().toString()), 2);
-                RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+                Property propDesc = descFactory.getRoleDescription(propPred);
                 DAGNode node = dag.getRoleNode(propDesc);
 
                 if (node == null) {
@@ -138,7 +138,7 @@ public class CSVDumper {
                 OWLDescription cls = clsAxiom.getDescription();
 
                 Predicate clsPred = predicateFactory.getPredicate(URI.create(cls.asOWLClass().getURI().toString()), 1);
-                ConceptDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+                ClassDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
                 DAGNode clsNode = dag.getClassNode(clsDesc);
 
                 if (clsNode == null) {

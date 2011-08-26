@@ -1,16 +1,16 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
-public class DLLiterRoleInclusionImpl implements PositiveInclusion {
+public class SubPropertyAxiomImpl implements SubDescriptionAxiom {
 
-	private RoleDescription	including	= null;
-	private RoleDescription	included	= null;
+	private Property	including	= null;
+	private Property	included	= null;
 
 	String					string		= null;
 
-	public DLLiterRoleInclusionImpl(RoleDescription included, RoleDescription including) {
+	public SubPropertyAxiomImpl(Property included, Property including) {
 
 		this.including = including;
 		this.included = included;
@@ -19,11 +19,11 @@ public class DLLiterRoleInclusionImpl implements PositiveInclusion {
 
 	}
 
-	public RoleDescription getIncluded() {
+	public Property getSub() {
 		return included;
 	}
 
-	public RoleDescription getIncluding() {
+	public Property getSuper() {
 		return including;
 	}
 
@@ -33,9 +33,9 @@ public class DLLiterRoleInclusionImpl implements PositiveInclusion {
 
 	public boolean equals(Object obj) {
 
-		if (!(obj instanceof DLLiterRoleInclusionImpl))
+		if (!(obj instanceof SubPropertyAxiomImpl))
 			return false;
-		DLLiterRoleInclusionImpl inc2 = (DLLiterRoleInclusionImpl) obj;
+		SubPropertyAxiomImpl inc2 = (SubPropertyAxiomImpl) obj;
 		if (!including.equals(inc2.including))
 			return false;
 		return (included.equals(inc2.included));

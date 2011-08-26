@@ -9,7 +9,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 
@@ -76,7 +76,7 @@ public class UnificationTest2 extends TestCase {
 		DatalogProgram prog = tfac.getDatalogProgram();
 		prog.appendRule(query);
 
-		List<Assertion> list = new Vector<Assertion>();
+		List<Axiom> list = new Vector<Axiom>();
 		QueryRewriter rew = new DLRPerfectReformulator();
 		DatalogProgram aux = (DatalogProgram) rew.rewrite(prog);
 

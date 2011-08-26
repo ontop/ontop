@@ -4,18 +4,18 @@ import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
@@ -30,7 +30,7 @@ import java.util.Set;
 public class DAGConstructor {
 
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final DescriptionFactory	descFactory			= new BasicDescriptionFactory();
+	private static final OntologyFactory	descFactory			= new BasicDescriptionFactory();
 
 	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);
@@ -38,44 +38,44 @@ public class DAGConstructor {
 
 	public static DAG getSigma(Ontology ontology) {
 
-		DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create(""));
+		DLLiterOntology sigma = new OntologyImpl(URI.create(""));
 
-		for (Assertion assertion : ontology.getAssertions()) {
-			if (assertion instanceof DLLiterConceptInclusionImpl) {
-				DLLiterConceptInclusionImpl inclusion = (DLLiterConceptInclusionImpl) assertion;
-				Description parent = inclusion.getIncluding();
-				Description child = inclusion.getIncluded();
-				if (parent instanceof ExistentialConceptDescription) {
+		for (Axiom assertion : ontology.getAssertions()) {
+			if (assertion instanceof SubClassAxiomImpl) {
+				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
+				Description parent = inclusion.getSuper();
+				Description child = inclusion.getSub();
+				if (parent instanceof PropertySomeDescription) {
 					continue;
 				}
 			}
 			sigma.addAssertion(assertion);
 		}
 
-		sigma.addConcepts(new ArrayList<ConceptDescription>(ontology.getConcepts()));
-		sigma.addRoles(new ArrayList<RoleDescription>(ontology.getRoles()));
+		sigma.addConcepts(new ArrayList<ClassDescription>(ontology.getConcepts()));
+		sigma.addRoles(new ArrayList<Property>(ontology.getRoles()));
 		sigma.saturate();
 		return getISADAG(sigma);
 	}
 
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
-		DLLiterOntology sigma = new DLLiterOntologyImpl(URI.create("sigma"));
+		DLLiterOntology sigma = new OntologyImpl(URI.create("sigma"));
 
-		for (Assertion assertion : ontology.getAssertions()) {
-			if (assertion instanceof DLLiterConceptInclusionImpl) {
-				DLLiterConceptInclusionImpl inclusion = (DLLiterConceptInclusionImpl) assertion;
-				Description parent = inclusion.getIncluding();
-				Description child = inclusion.getIncluded();
-				if (parent instanceof ExistentialConceptDescription) {
+		for (Axiom assertion : ontology.getAssertions()) {
+			if (assertion instanceof SubClassAxiomImpl) {
+				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
+				Description parent = inclusion.getSuper();
+				Description child = inclusion.getSub();
+				if (parent instanceof PropertySomeDescription) {
 					continue;
 				}
 			}
 			sigma.addAssertion(assertion);
 		}
 
-		sigma.addConcepts(new ArrayList<ConceptDescription>(ontology.getConcepts()));
-		sigma.addRoles(new ArrayList<RoleDescription>(ontology.getRoles()));
+		sigma.addConcepts(new ArrayList<ClassDescription>(ontology.getConcepts()));
+		sigma.addRoles(new ArrayList<Property>(ontology.getRoles()));
 
 		return sigma;
 	}
@@ -90,7 +90,7 @@ public class DAGConstructor {
 		return new DAGChain(dag);
 	}
 
-	public Set<Assertion> getSigmaChainDAG(Set<Assertion> assertions) {
+	public Set<Axiom> getSigmaChainDAG(Set<Axiom> assertions) {
 		return null;
 	}
 
@@ -101,7 +101,7 @@ public class DAGConstructor {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			if (node.getDescription() instanceof ExistentialConceptDescription || node.getDescription().equals(DAG.thingConcept)) {
+			if (node.getDescription() instanceof PropertySomeDescription || node.getDescription().equals(DAG.thingConcept)) {
 				continue;
 			}
 
@@ -115,7 +115,7 @@ public class DAGConstructor {
 			}
 
 			for (DAGNode child : node.getChildren()) {
-				if (child.getDescription() instanceof ExistentialConceptDescription) {
+				if (child.getDescription() instanceof PropertySomeDescription) {
 					continue;
 				}
 				DAGNode newChild = classes.get(child.getDescription());
@@ -133,14 +133,14 @@ public class DAGConstructor {
 		}
 
 		for (DAGNode node : dag.getRoles()) {
-			RoleDescription nodeDesc = (RoleDescription) node.getDescription();
+			Property nodeDesc = (Property) node.getDescription();
 
 			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 				continue;
 			}
 
 			if (nodeDesc.isInverse()) {
-				RoleDescription posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
+				Property posNode = descFactory.getRoleDescription(nodeDesc.getPredicate(), false);
 				DAGNode newNode = roles.get(posNode);
 				if (newNode == null) {
 					newNode = new DAGNode(posNode);
@@ -157,12 +157,12 @@ public class DAGConstructor {
 				roles.put(nodeDesc, newNode);
 			}
 			for (DAGNode child : node.getChildren()) {
-				RoleDescription childDesc = (RoleDescription) child.getDescription();
+				Property childDesc = (Property) child.getDescription();
 				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 					continue;
 				}
 				if (childDesc.isInverse()) {
-					RoleDescription posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+					Property posChild = descFactory.getRoleDescription(childDesc.getPredicate(), false);
 					DAGNode newChild = roles.get(posChild);
 					if (newChild == null) {
 						newChild = new DAGNode(posChild);
@@ -199,11 +199,11 @@ public class DAGConstructor {
 
 	private static Description makePositive(Description desc) {
 
-		if (desc instanceof RoleDescription) {
-			RoleDescription roleKey = (RoleDescription) desc;
+		if (desc instanceof Property) {
+			Property roleKey = (Property) desc;
 			return descFactory.getRoleDescription(roleKey.getPredicate(), false);
 
-		} else if (desc instanceof AtomicConceptDescription) {
+		} else if (desc instanceof Class) {
 			return desc;
 		}
 

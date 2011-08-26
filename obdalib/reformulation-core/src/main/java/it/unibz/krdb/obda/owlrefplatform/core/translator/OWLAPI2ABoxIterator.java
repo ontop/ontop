@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,7 +18,7 @@ import org.semanticweb.owl.model.OWLOntology;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class OWLAPI2ABoxIterator implements Iterator<ABoxAssertion> {
+public class OWLAPI2ABoxIterator implements Iterator<Assertion> {
 
 	Iterator<OWLAxiom>		owlaxiomiterator	= null;
 	Iterator<OWLOntology>	ontologies			= null;
@@ -73,11 +73,11 @@ public class OWLAPI2ABoxIterator implements Iterator<ABoxAssertion> {
 	}
 
 	@Override
-	public ABoxAssertion next() {
+	public Assertion next() {
 		while (true) {
 			try {
 				OWLIndividualAxiom next = nextInCurrentIterator();
-				ABoxAssertion ass = translator.translate(next);
+				Assertion ass = translator.translate(next);
 				if (ass == null)
 					throw new NoSuchElementException();
 				else

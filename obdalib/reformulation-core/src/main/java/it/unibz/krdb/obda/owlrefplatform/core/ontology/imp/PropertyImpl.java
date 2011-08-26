@@ -1,15 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.BasicRoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
-
-public class AtomicRoleDescriptionImpl implements BasicRoleDescription {
+public class PropertyImpl implements Property {
 
 	private boolean		inverse		= false;
 	private Predicate	predicate	= null;
 
-	protected AtomicRoleDescriptionImpl(Predicate p, boolean isInverse) {
+	protected PropertyImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
 		this.inverse = isInverse;
 	}
@@ -25,11 +24,11 @@ public class AtomicRoleDescriptionImpl implements BasicRoleDescription {
 	public int hashCode() {
 		return toString().hashCode();
 	}
-	
+
 	public boolean equals(Object obj) {
-		if (!(obj instanceof AtomicRoleDescriptionImpl))
+		if (!(obj instanceof PropertyImpl))
 			return false;
-		AtomicRoleDescriptionImpl concept2 = (AtomicRoleDescriptionImpl)obj;
+		PropertyImpl concept2 = (PropertyImpl) obj;
 		if (inverse != concept2.inverse)
 			return false;
 		return (predicate.equals(concept2.predicate));

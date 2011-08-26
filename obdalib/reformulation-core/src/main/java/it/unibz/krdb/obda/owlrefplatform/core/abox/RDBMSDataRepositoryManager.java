@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 
@@ -54,9 +54,9 @@ public interface RDBMSDataRepositoryManager {
 
 	public void getIndexDDL(OutputStream out) throws IOException;
 
-	public void getSQLInserts(Iterator<ABoxAssertion> data, OutputStream out) throws IOException;
+	public void getSQLInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
 
-	public void getCSVInserts(Iterator<ABoxAssertion> data, OutputStream out) throws IOException;
+	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
 
 	public void createDBSchema(boolean dropExisting) throws SQLException;
 
@@ -70,7 +70,7 @@ public interface RDBMSDataRepositoryManager {
 	 */
 	public void dropDBSchema() throws SQLException;
 
-	public void insertData(Iterator<ABoxAssertion> data) throws SQLException;
+	public void insertData(Iterator<Assertion> data) throws SQLException;
 
 	public Ontology getABoxDependencies();
 

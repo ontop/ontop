@@ -1,16 +1,16 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 
-public class DLLiterConceptInclusionImpl implements PositiveInclusion {
+public class SubClassAxiomImpl implements SubDescriptionAxiom {
 
-	private ConceptDescription including = null;//righthand side
-	private ConceptDescription included = null;
+	private ClassDescription including = null;//righthand side
+	private ClassDescription included = null;
 	
 	String string = null;
 	
-	public DLLiterConceptInclusionImpl(ConceptDescription concept1, ConceptDescription concept2){
+	public SubClassAxiomImpl(ClassDescription concept1, ClassDescription concept2){
 		if (concept1 == null || concept2 == null)
 			throw new RuntimeException("Recieved null in concept inclusion");
 		included = concept1;
@@ -20,11 +20,11 @@ public class DLLiterConceptInclusionImpl implements PositiveInclusion {
 		
 	}
 	
-	public ConceptDescription getIncluded(){
+	public ClassDescription getSub(){
 		return included;
 	}
 	
-	public ConceptDescription getIncluding(){
+	public ClassDescription getSuper(){
 		return including;
 	}
 	
@@ -33,9 +33,9 @@ public class DLLiterConceptInclusionImpl implements PositiveInclusion {
 	}
 	
 	public boolean equals(Object obj) {
-		if (!(obj instanceof DLLiterConceptInclusionImpl))
+		if (!(obj instanceof SubClassAxiomImpl))
 			return false;
-		DLLiterConceptInclusionImpl inc2 = (DLLiterConceptInclusionImpl)obj;
+		SubClassAxiomImpl inc2 = (SubClassAxiomImpl)obj;
 		if (!including.equals(inc2.including))
 			return false;
 		return (included.equals(inc2.included));

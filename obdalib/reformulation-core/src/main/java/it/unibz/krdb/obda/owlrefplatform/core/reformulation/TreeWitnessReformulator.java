@@ -14,12 +14,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -43,7 +43,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	private OBDADataFactory						fac					= OBDADataFactoryImpl.getInstance();
 
-	private static final DescriptionFactory		descFactory			= new BasicDescriptionFactory();
+	private static final OntologyFactory		descFactory			= new BasicDescriptionFactory();
 
 	private static final Logger					log					= LoggerFactory.getLogger(TreeWitnessReformulator.class);
 
@@ -148,7 +148,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		DatalogProgram out = fac.getDatalogProgram();
 		int n = 1;
 
-		Map<ConceptDescription, Predicate>	views = new HashMap<ConceptDescription, Predicate>();
+		Map<ClassDescription, Predicate>	views = new HashMap<ClassDescription, Predicate>();
 		List<Atom> body = new ArrayList<Atom>();
 
 		for (Atom a0 : cqie.getBody()) {
@@ -170,7 +170,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		}
 		out.appendRule(fac.getCQIE(cqie.getHead(), body));
 
-		for (ConceptDescription C : views.keySet()) {
+		for (ClassDescription C : views.keySet()) {
 			Term z = fac.getVariable("z");
 			Atom head = fac.getAtom(views.get(C), z);
 			log.debug("CREATING VIEWS FOR " + C);
@@ -194,11 +194,11 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	private Atom getConceptAtom(Description D, Term z) {
 
-		if (D instanceof AtomicConceptDescription) {
-			return fac.getAtom(((AtomicConceptDescription) D).getPredicate(), z);
-		} else if (D instanceof ExistentialConceptDescription) {
+		if (D instanceof Class) {
+			return fac.getAtom(((Class) D).getPredicate(), z);
+		} else if (D instanceof PropertySomeDescription) {
 			Term w = fac.getVariable("w");
-			ExistentialConceptDescription DD = (ExistentialConceptDescription) D;
+			PropertySomeDescription DD = (PropertySomeDescription) D;
 			if (!DD.isInverse())
 				return fac.getAtom(DD.getPredicate(), z, w);
 			else
@@ -212,11 +212,11 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	// check whether the term t of the tree witness tw can be an instance of C
 	// in the anonymous part
 
-	private boolean checkTree(TreeWitness tw, Term t, ConceptDescription C) {
+	private boolean checkTree(TreeWitness tw, Term t, ClassDescription C) {
 		if (tw.isInDomain(t) && !tw.isRoot(t)) {
 			PredicatePosition pp = tw.getLabelTail(t);
 			log.debug("checking tree for predicate position: " + pp + " for " + t);
-			ConceptDescription ETi = descFactory.getExistentialConceptDescription(pp.getPredicate(), pp.getPosition() == 2);
+			ClassDescription ETi = descFactory.getExistentialConceptDescription(pp.getPredicate(), pp.getPosition() == 2);
 			if (!ETi.equals(C) && !conceptDAG.getClassNode(C).descendans.contains(conceptDAG.getClassNode(ETi))) {
 				log.debug("falsum in " + C + " " + ETi);
 				return false;
@@ -227,7 +227,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	// return the atom that replaces a in the query (either head-atom or ext-atom)
 	
-	private Atom rewriteAtom(DatalogProgram out, Set<TreeWitness> tws, Atom a, CQIE cqie, Atom head, Atom ext, Map<ConceptDescription, Predicate> views) {
+	private Atom rewriteAtom(DatalogProgram out, Set<TreeWitness> tws, Atom a, CQIE cqie, Atom head, Atom ext, Map<ClassDescription, Predicate> views) {
 		
 		boolean nontrivialRule = false;
 		for (TreeWitness tw : tws) {
@@ -265,7 +265,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	
 	// returns null if no rule should be produced for the tree witness
 
-	private List<Atom> getRuleBodyForTreeWitness(TreeWitness tw, CQIE cqie, Map<ConceptDescription, Predicate> views) {
+	private List<Atom> getRuleBodyForTreeWitness(TreeWitness tw, CQIE cqie, Map<ClassDescription, Predicate> views) {
 		List<Term> roots = tw.getRoots();
 		Term x = roots.get(0);
 

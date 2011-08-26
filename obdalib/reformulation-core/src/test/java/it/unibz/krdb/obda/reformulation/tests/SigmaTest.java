@@ -6,13 +6,13 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
 import java.net.URI;
 
@@ -21,20 +21,20 @@ import junit.framework.TestCase;
 public class SigmaTest extends TestCase {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public void test_exists_simple() {
-        DLLiterOntology ontology = new DLLiterOntologyImpl(URI.create(""));
+        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
-        AtomicConceptDescription ac = descFactory.getAtomicConceptDescription(a);
-        AtomicConceptDescription cc = descFactory.getAtomicConceptDescription(c);
-        ExistentialConceptDescription er = descFactory.getExistentialConceptDescription(r, false);
+        Class ac = descFactory.getAtomicConceptDescription(a);
+        Class cc = descFactory.getAtomicConceptDescription(c);
+        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
 
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(er, ac));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(cc, er));
+        ontology.addAssertion(new SubClassAxiomImpl(er, ac));
+        ontology.addAssertion(new SubClassAxiomImpl(cc, er));
         ontology.addConcept(ac);
         ontology.addConcept(cc);
         ontology.addConcept(er);

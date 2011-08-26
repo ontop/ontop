@@ -2,10 +2,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 
 import java.util.HashMap;
@@ -28,13 +28,13 @@ public class DAGChain {
     private final Map<Description, Description> equi_map = new HashMap<Description, Description>();
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public DAGChain(DAG dag) {
 
         // First iteration to create all nodes and link ER and ER- parents and children
         for (DAGNode cls : dag.getClasses()) {
-            ConceptDescription clsc = (ConceptDescription) cls.getDescription();
+            ClassDescription clsc = (ClassDescription) cls.getDescription();
 
             DAGNode tnode = dag_nodes.get(clsc);
             if (tnode == null) {
@@ -43,10 +43,10 @@ public class DAGChain {
             }
 
             // Link ER and ER- nodes children and parents object to single objects
-            if (clsc instanceof ExistentialConceptDescription) {
-                ExistentialConceptDescription nodeInv = descFactory.getExistentialConceptDescription(
-                        ((ExistentialConceptDescription) clsc).getPredicate(),
-                        !((ExistentialConceptDescription) clsc).isInverse()
+            if (clsc instanceof PropertySomeDescription) {
+                PropertySomeDescription nodeInv = descFactory.getExistentialConceptDescription(
+                        ((PropertySomeDescription) clsc).getPredicate(),
+                        !((PropertySomeDescription) clsc).isInverse()
                 );
                 DAGNode tnodeInv = dag_nodes.get(nodeInv);
                 if (tnodeInv == null) {
@@ -65,13 +65,13 @@ public class DAGChain {
 
         for (DAGNode node : dag.getClasses()) {
 
-            ConceptDescription nodeDesc = (ConceptDescription) node.getDescription();
+            ClassDescription nodeDesc = (ClassDescription) node.getDescription();
             DAGNode tnode = dag_nodes.get(nodeDesc);
 
-            ExistentialConceptDescription invNodeExDesc = null;
+            PropertySomeDescription invNodeExDesc = null;
 
-            if (nodeDesc instanceof ExistentialConceptDescription) {
-                ExistentialConceptDescription nodeExDesc = (ExistentialConceptDescription) nodeDesc;
+            if (nodeDesc instanceof PropertySomeDescription) {
+                PropertySomeDescription nodeExDesc = (PropertySomeDescription) nodeDesc;
                 invNodeExDesc = descFactory.getExistentialConceptDescription(
                         nodeExDesc.getPredicate(),
                         !nodeExDesc.isInverse()
@@ -79,12 +79,12 @@ public class DAGChain {
             }
 
             for (DAGNode child : node.getChildren()) {
-                ConceptDescription childNodeDesc = (ConceptDescription) child.getDescription();
+                ClassDescription childNodeDesc = (ClassDescription) child.getDescription();
                 DAGNode tchild = dag_nodes.get(childNodeDesc);
 
-                ExistentialConceptDescription childInvNodeExDesc = null;
-                if (childNodeDesc instanceof ExistentialConceptDescription) {
-                    ExistentialConceptDescription childNodeExDesc = (ExistentialConceptDescription) childNodeDesc;
+                PropertySomeDescription childInvNodeExDesc = null;
+                if (childNodeDesc instanceof PropertySomeDescription) {
+                    PropertySomeDescription childNodeExDesc = (PropertySomeDescription) childNodeDesc;
                     childInvNodeExDesc = descFactory.getExistentialConceptDescription(
                             childNodeExDesc.getPredicate(),
                             !childNodeExDesc.isInverse()

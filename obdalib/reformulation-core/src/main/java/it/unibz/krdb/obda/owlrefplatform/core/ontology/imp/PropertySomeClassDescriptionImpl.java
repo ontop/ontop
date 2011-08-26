@@ -1,16 +1,16 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.QualifiedExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeClassDescription;
 
-public class QualifiedExistentialConceptDescriptionImpl implements QualifiedExistentialConceptDescription{
+public class PropertySomeClassDescriptionImpl implements PropertySomeClassDescription{
 
 	private final  Predicate	predicate;
 	private final boolean		isInverse;
-	private final AtomicConceptDescription filler;
+	private final Class filler;
 
-	public QualifiedExistentialConceptDescriptionImpl(Predicate p, boolean isInverse, AtomicConceptDescription filler) {
+	public PropertySomeClassDescriptionImpl(Predicate p, boolean isInverse, Class filler) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 		this.filler = filler;
@@ -31,9 +31,9 @@ public class QualifiedExistentialConceptDescriptionImpl implements QualifiedExis
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof QualifiedExistentialConceptDescriptionImpl))
+		if (!(obj instanceof PropertySomeClassDescriptionImpl))
 			return false;
-		QualifiedExistentialConceptDescriptionImpl concept2 = (QualifiedExistentialConceptDescriptionImpl) obj;
+		PropertySomeClassDescriptionImpl concept2 = (PropertySomeClassDescriptionImpl) obj;
 		if (isInverse != concept2.isInverse)
 			return false;
 		if (!predicate.equals(concept2.getPredicate()))
@@ -53,7 +53,7 @@ public class QualifiedExistentialConceptDescriptionImpl implements QualifiedExis
 	}
 
 	@Override
-	public AtomicConceptDescription getFiller() {
+	public Class getFiller() {
 		return filler;
 	}
 }

@@ -10,9 +10,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.Iterator;
@@ -28,7 +28,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	private QueryAnonymizer				anonymizer		= null;
 	private AtomUnifier					unifier			= null;
 	private PositiveInclusionApplicator	piApplicator	= null;
-	private List<Assertion>				assertions		= new LinkedList<Assertion>();
+	private List<Axiom>				assertions		= new LinkedList<Axiom>();
 
 	private OBDADataFactory				fac				= OBDADataFactoryImpl.getInstance();
 
@@ -69,11 +69,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 				// Part A
 				for (int atomidx = 0; atomidx < body.size(); atomidx++) {
 					Atom currentAtom = (Atom) body.get(atomidx);
-					Iterator<Assertion> ait = assertions.iterator();
+					Iterator<Axiom> ait = assertions.iterator();
 					while (ait.hasNext()) {
-						Assertion ass = ait.next();
-						if (ass instanceof PositiveInclusion) {
-							PositiveInclusion pi = (PositiveInclusion) ass;
+						Axiom ass = ait.next();
+						if (ass instanceof SubDescriptionAxiom) {
+							SubDescriptionAxiom pi = (SubDescriptionAxiom) ass;
 							if (piApplicator.isPIApplicable(pi, currentAtom)) {
 								CQIE newquery = piApplicator.applyPI(cqie, pi, atomidx);
 								if (!prog.contains(newquery) && !newSet.contains(newquery)) {

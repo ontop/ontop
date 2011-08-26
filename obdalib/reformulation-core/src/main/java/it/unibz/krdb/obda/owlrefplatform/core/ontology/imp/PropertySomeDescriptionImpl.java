@@ -1,14 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 
-public class ExistentialConceptDescriptionImpl implements ExistentialConceptDescription {
+public class PropertySomeDescriptionImpl implements PropertySomeDescription {
 
 	private Predicate	predicate	= null;
 	private boolean		isInverse	= false;
 
-	public ExistentialConceptDescriptionImpl(Predicate p, boolean isInverse) {
+	public PropertySomeDescriptionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 	}
@@ -28,9 +28,9 @@ public class ExistentialConceptDescriptionImpl implements ExistentialConceptDesc
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof ExistentialConceptDescriptionImpl))
+		if (!(obj instanceof PropertySomeDescriptionImpl))
 			return false;
-		ExistentialConceptDescriptionImpl concept2 = (ExistentialConceptDescriptionImpl) obj;
+		PropertySomeDescriptionImpl concept2 = (PropertySomeDescriptionImpl) obj;
 		if (isInverse != concept2.isInverse)
 			return false;
 		return (predicate.equals(concept2.getPredicate()));

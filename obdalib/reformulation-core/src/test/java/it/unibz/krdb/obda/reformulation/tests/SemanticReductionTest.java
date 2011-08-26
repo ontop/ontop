@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class SemanticReductionTest extends TestCase {
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
-        List<Assertion> rv = reduction.reduce();
+        List<Axiom> rv = reduction.reduce();
         assertEquals(0, rv.size());
     }
 
@@ -30,7 +30,7 @@ public class SemanticReductionTest extends TestCase {
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
-        List<Assertion> rv = reduction.reduce();
+        List<Axiom> rv = reduction.reduce();
         assertEquals(0, rv.size());
     }
 
@@ -39,7 +39,7 @@ public class SemanticReductionTest extends TestCase {
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
-        List<Assertion> rv = reduction.reduce();
+        List<Axiom> rv = reduction.reduce();
         assertEquals(1, rv.size());
     }
 
@@ -48,7 +48,7 @@ public class SemanticReductionTest extends TestCase {
         DAG isa = DAGConstructor.getISADAG(ontology);
         isa.index();
         SemanticReduction reduction = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
-        List<Assertion> rv = reduction.reduce();
+        List<Axiom> rv = reduction.reduce();
         assertEquals(0, rv.size());
     }
 

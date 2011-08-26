@@ -14,11 +14,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -197,7 +197,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 		QueryVocabularyValidator validator = new QueryVocabularyValidator(loadedOntologies);
 
-		Ontology sigma = new DLLiterOntologyImpl(URI.create("sigmaontology"));
+		Ontology sigma = new OntologyImpl(URI.create("sigmaontology"));
 		Ontology reformulationOntology = null;
 		OBDAModel unfoldingOBDAModel = fac.getOBDAModel();
 
@@ -396,7 +396,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		 */
 		URI uri = URI.create("http://it.unibz.krdb.obda/Quest/auxiliaryontology");
 		if (translatedOntologyMerge == null) {
-			translatedOntologyMerge = new DLLiterOntologyImpl(uri);
+			translatedOntologyMerge = new OntologyImpl(uri);
 		}
 		if (loadedOntologies == null) {
 			loadedOntologies = new HashSet<OWLOntology>();
@@ -406,7 +406,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		Set<URI> uris = new HashSet<URI>();
 
-		DLLiterOntology translation = new DLLiterOntologyImpl(uri);
+		DLLiterOntology translation = new OntologyImpl(uri);
 		for (OWLOntology onto : ontologies) {
 			uris.add(onto.getURI());
 			DLLiterOntology aux;
@@ -417,15 +417,15 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				};
 			}
 			translation.addAssertions(aux.getAssertions());
-			translation.addConcepts(new ArrayList<ConceptDescription>(aux.getConcepts()));
-			translation.addRoles(new ArrayList<RoleDescription>(aux.getRoles()));
+			translation.addConcepts(new ArrayList<ClassDescription>(aux.getConcepts()));
+			translation.addRoles(new ArrayList<Property>(aux.getRoles()));
 		}
 		/* we translated successfully, now we append the new assertions */
 
 		this.loadedOntologies.addAll(ontologies);
 		translatedOntologyMerge.addAssertions(translation.getAssertions());
-		translatedOntologyMerge.addConcepts(new ArrayList<ConceptDescription>(translation.getConcepts()));
-		translatedOntologyMerge.addRoles(new ArrayList<RoleDescription>(translation.getRoles()));
+		translatedOntologyMerge.addConcepts(new ArrayList<ClassDescription>(translation.getConcepts()));
+		translatedOntologyMerge.addRoles(new ArrayList<Property>(translation.getRoles()));
 		translatedOntologyMerge.saturate();
 		isClassified = false;
 	}

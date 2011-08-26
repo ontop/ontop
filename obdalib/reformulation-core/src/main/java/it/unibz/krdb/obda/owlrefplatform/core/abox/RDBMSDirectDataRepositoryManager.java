@@ -9,13 +9,13 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AttributeABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -266,7 +266,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void getSQLInserts(Iterator<ABoxAssertion> data, OutputStream outstream) throws IOException {
+	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
 
 		/*
@@ -274,9 +274,9 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		 */
 
 		while (data.hasNext()) {
-			Assertion assertion = data.next();
-			if (assertion instanceof ConceptABoxAssertion) {
-				ConceptABoxAssertion cassertion = (ConceptABoxAssertion) assertion;
+			Axiom assertion = data.next();
+			if (assertion instanceof ClassAssertion) {
+				ClassAssertion cassertion = (ClassAssertion) assertion;
 				out.append(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
 						.getObject().getURI())));
 				out.append(";\n");
@@ -285,8 +285,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
 						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
 				out.append(";\n");
-			} else if (assertion instanceof AttributeABoxAssertion) {
-				AttributeABoxAssertion rassertion = (AttributeABoxAssertion) assertion;
+			} else if (assertion instanceof DataPropertyAssertion) {
+				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
 				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()),
 						getQuotedString(rassertion.getObject().getURI()), getQuotedString(rassertion.getValue().getValue())));
 				out.append(";\n");
@@ -297,7 +297,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void getCSVInserts(Iterator<ABoxAssertion> data, OutputStream out) throws IOException {
+	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
@@ -415,7 +415,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void insertData(Iterator<ABoxAssertion> data) throws SQLException {
+	public void insertData(Iterator<Assertion> data) throws SQLException {
 		Statement st = conn.createStatement();
 		conn.setAutoCommit(false);
 		/*
@@ -424,10 +424,10 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 		int batchCount = 0;
 		while (data.hasNext()) {
-			Assertion assertion = data.next();
+			Axiom assertion = data.next();
 			batchCount += 1;
-			if (assertion instanceof ConceptABoxAssertion) {
-				ConceptABoxAssertion cassertion = (ConceptABoxAssertion) assertion;
+			if (assertion instanceof ClassAssertion) {
+				ClassAssertion cassertion = (ClassAssertion) assertion;
 				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
 						.getObject().getURI())));
 			} else if (assertion instanceof RoleABoxAssertion) {
@@ -435,8 +435,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
 						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
 
-			} else if (assertion instanceof AttributeABoxAssertion) {
-				AttributeABoxAssertion rassertion = (AttributeABoxAssertion) assertion;
+			} else if (assertion instanceof DataPropertyAssertion) {
+				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
 				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()),
 						getQuotedString(rassertion.getObject().getURI()), getQuotedString(rassertion.getValue().getValue())));
 			}
@@ -454,7 +454,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	@Override
 	public Ontology getABoxDependencies() {
-		return new DLLiterOntologyImpl(URI.create("fakeURI"));
+		return new OntologyImpl(URI.create("fakeURI"));
 	}
 
 	@Override

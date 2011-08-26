@@ -1,12 +1,12 @@
 package it.unibz.krdb.obda.reformulation.tests;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
@@ -45,14 +45,14 @@ public class TranslatorTests extends TestCase {
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		Set<Assertion> ass = dlliteonto.getAssertions();
-		Iterator<Assertion> assit = ass.iterator();
+		Set<Axiom> ass = dlliteonto.getAssertions();
+		Iterator<Axiom> assit = ass.iterator();
 		
 		assertEquals(1, ass.size());
-		DLLiterConceptInclusionImpl a = (DLLiterConceptInclusionImpl) assit.next();
-		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) a.getIncluded();
+		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
+		PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) a.getSub();
 		assertEquals(true, ex.isInverse());
-		AtomicConceptDescriptionImpl con = (AtomicConceptDescriptionImpl) a.getIncluding();
+		ClassImpl con = (ClassImpl) a.getSuper();
 //		assertEquals(false, con.isInverse());
 		
 	}
@@ -73,15 +73,15 @@ public class TranslatorTests extends TestCase {
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		Set<Assertion> ass = dlliteonto.getAssertions();
-		Iterator<Assertion> assit = ass.iterator();
+		Set<Axiom> ass = dlliteonto.getAssertions();
+		Iterator<Axiom> assit = ass.iterator();
 
 		
 		assertEquals(1, ass.size());
-		DLLiterConceptInclusionImpl a = (DLLiterConceptInclusionImpl) assit.next();
-		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) a.getIncluded();
+		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
+		PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) a.getSub();
 		assertEquals(false, ex.isInverse());
-		AtomicConceptDescriptionImpl con = (AtomicConceptDescriptionImpl) a.getIncluding();
+		ClassImpl con = (ClassImpl) a.getSuper();
 //		assertEquals(false, con.isInverse());
 		
 	}
@@ -102,26 +102,26 @@ public class TranslatorTests extends TestCase {
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		Set<Assertion> ass = dlliteonto.getAssertions();
-		Iterator<Assertion> assit = ass.iterator();
+		Set<Axiom> ass = dlliteonto.getAssertions();
+		Iterator<Axiom> assit = ass.iterator();
 
 		
 		assertEquals(2, ass.size());
-		DLLiterRoleInclusionImpl a = (DLLiterRoleInclusionImpl) assit.next();
-		DLLiterRoleInclusionImpl b = (DLLiterRoleInclusionImpl) assit.next();
+		SubPropertyAxiomImpl a = (SubPropertyAxiomImpl) assit.next();
+		SubPropertyAxiomImpl b = (SubPropertyAxiomImpl) assit.next();
 		
 		
-		RoleDescription included = (RoleDescription) a.getIncluded();
+		Property included = (Property) a.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("R", included.getPredicate().getName().toString());
-		RoleDescription indlucing = (RoleDescription) a.getIncluding();
+		Property indlucing = (Property) a.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("S", indlucing.getPredicate().getName().toString());
 		
-		included = (RoleDescription) b.getIncluded();
+		included = (Property) b.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("S", included.getPredicate().getName().toString());
-		indlucing = (RoleDescription) b.getIncluding();
+		indlucing = (Property) b.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("R", indlucing.getPredicate().getName().toString());
 		
@@ -143,22 +143,22 @@ public class TranslatorTests extends TestCase {
 		OWLAPI2Translator translator = new OWLAPI2Translator();
 		DLLiterOntology dlliteonto = translator.translate(onto);
 		
-		Set<Assertion> ass = dlliteonto.getAssertions();
-		Iterator<Assertion> assit = ass.iterator();
+		Set<Axiom> ass = dlliteonto.getAssertions();
+		Iterator<Axiom> assit = ass.iterator();
 
 		
 		assertEquals(2, ass.size());
-		DLLiterConceptInclusionImpl c1 = (DLLiterConceptInclusionImpl) assit.next();
-		DLLiterConceptInclusionImpl c2 = (DLLiterConceptInclusionImpl) assit.next();
+		SubClassAxiomImpl c1 = (SubClassAxiomImpl) assit.next();
+		SubClassAxiomImpl c2 = (SubClassAxiomImpl) assit.next();
 		
-		AtomicConceptDescription included = (AtomicConceptDescription) c1.getIncluded();
+		Class included = (Class) c1.getSub();
 		assertEquals("A", included.getPredicate().getName().toString());
-		AtomicConceptDescription indlucing = (AtomicConceptDescription) c1.getIncluding();
+		Class indlucing = (Class) c1.getSuper();
 		assertEquals("B", indlucing.getPredicate().getName().toString());
 		
-		included = (AtomicConceptDescription) c2.getIncluded();
+		included = (Class) c2.getSub();
 		assertEquals("B", included.getPredicate().getName().toString());
-		indlucing = (AtomicConceptDescription) c2.getIncluding();
+		indlucing = (Class) c2.getSuper();
 		assertEquals("A", indlucing.getPredicate().getName().toString());
 		
 	}

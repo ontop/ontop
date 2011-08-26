@@ -11,10 +11,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterAttributeABoxAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptABoxAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleABoxAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
@@ -111,12 +111,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
-		List<ABoxAssertion> list = materializer.getAssertionList();
+		List<Assertion> list = materializer.getAssertionList();
 
 		System.out.println("###########################");
 
 		int count = 0;
-		for (ABoxAssertion ass : list) {
+		for (Assertion ass : list) {
 			System.out.println(ass.toString());
 			count += 1;
 		}
@@ -175,12 +175,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
-		List<ABoxAssertion> list = materializer.getAssertionList();
+		List<Assertion> list = materializer.getAssertionList();
 
 		System.out.println("###########################");
 
 		int count = 0;
-		for (ABoxAssertion ass : list) {
+		for (Assertion ass : list) {
 			System.out.println(ass.toString());
 			count += 1;
 		}
@@ -243,12 +243,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
-		List<ABoxAssertion> list = materializer.getAssertionList();
+		List<Assertion> list = materializer.getAssertionList();
 
 		// System.out.println("###########################");
 
 		int count = 0;
-		for (ABoxAssertion ass : list) {
+		for (Assertion ass : list) {
 			// System.out.println(ass.toString());
 			count += 1;
 		}
@@ -313,12 +313,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
-		List<ABoxAssertion> list = materializer.getAssertionList();
+		List<Assertion> list = materializer.getAssertionList();
 
 		System.out.println("###########################");
 
 		int count = 0;
-		for (ABoxAssertion ass : list) {
+		for (Assertion ass : list) {
 			System.out.println(ass.toString());
 			count += 1;
 		}
@@ -333,7 +333,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 	}
 
 
-	public class ABoxAssertionGeneratorIterator implements Iterator<ABoxAssertion> {
+	public class ABoxAssertionGeneratorIterator implements Iterator<Assertion> {
 
 		final int				MAX_ASSERTIONS;
 		int						currentassertion	= 0;
@@ -362,21 +362,21 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		}
 
 		@Override
-		public ABoxAssertion next() {
+		public Assertion next() {
 			if (currentassertion >= MAX_ASSERTIONS)
 				throw new NoSuchElementException();
 
 			currentassertion += 1;
 			int pos = rand.nextInt(size);
 			Predicate pred = vocab.get(pos);
-			ABoxAssertion assertion = null;
+			Assertion assertion = null;
 
 			if (pred.getArity() == 1) {
-				assertion = new DLLiterConceptABoxAssertionImpl(pred, fac.getURIConstant(URI.create("1")));
+				assertion = new ClassAssertionImpl(pred, fac.getURIConstant(URI.create("1")));
 			} else if (pred.getType(1) == COL_TYPE.OBJECT) {
-				assertion = new DLLiterRoleABoxAssertionImpl(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
+				assertion = new ObjectPropertyAssertionImpl(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
 			} else {
-				assertion = new DLLiterAttributeABoxAssertionImpl(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
+				assertion = new DataPropertyAssertionImpl(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
 			}
 			return assertion;
 		}

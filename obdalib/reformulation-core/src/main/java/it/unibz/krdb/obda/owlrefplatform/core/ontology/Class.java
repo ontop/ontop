@@ -2,7 +2,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology;
 
 import it.unibz.krdb.obda.model.Predicate;
 
-public interface AtomicConceptDescription extends BasicConceptDescription {
+/***
+ * A named class
+ * 
+ * @author Mariano Rodriguez Muro
+ * 
+ */
+public interface Class extends BasicClassDescription {
 	public Predicate getPredicate();
 
 }

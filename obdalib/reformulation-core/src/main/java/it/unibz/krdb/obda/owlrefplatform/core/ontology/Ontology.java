@@ -8,23 +8,23 @@ import java.util.Set;
 
 public interface Ontology extends Cloneable {
 
-	public void addAssertion(Assertion assertion);
+	public void addAssertion(Axiom assertion);
 
-	public void addAssertions(Collection<Assertion> assertion);
+	public void addAssertions(Collection<Axiom> assertion);
 
-	public void addConcept(ConceptDescription cd);
+	public void addConcept(ClassDescription cd);
 
-	public void addRole(RoleDescription rd);
+	public void addRole(Property rd);
 
-	public void addConcepts(Collection<ConceptDescription> cd);
+	public void addConcepts(Collection<ClassDescription> cd);
 
-	public void addRoles(Collection<RoleDescription> rd);
+	public void addRoles(Collection<Property> rd);
 
-	public Set<RoleDescription> getRoles();
+	public Set<Property> getRoles();
 
-	public Set<ConceptDescription> getConcepts();
+	public Set<ClassDescription> getConcepts();
 
-	public Set<Assertion> getAssertions();
+	public Set<Axiom> getAssertions();
 
 	/***
 	 * This will retrun all the assertions whose right side concept description
@@ -33,7 +33,7 @@ public interface Ontology extends Cloneable {
 	 * @param pred
 	 * @return
 	 */
-	public Set<PositiveInclusion> getByIncluding(Predicate pred);
+	public Set<SubDescriptionAxiom> getByIncluding(Predicate pred);
 
 	/***
 	 * As before but it will only return assetions where the right side is an
@@ -43,11 +43,11 @@ public interface Ontology extends Cloneable {
 	 * @param onlyAtomic
 	 * @return
 	 */
-	public Set<PositiveInclusion> getByIncludingExistOnly(Predicate pred);
+	public Set<SubDescriptionAxiom> getByIncludingExistOnly(Predicate pred);
 
-	public Set<PositiveInclusion> getByIncludingNoExist(Predicate pred);
+	public Set<SubDescriptionAxiom> getByIncludingNoExist(Predicate pred);
 
-	public Set<PositiveInclusion> getByIncluded(Predicate pred);
+	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred);
 //
 //	public Set<PositiveInclusion> getByIncludedExistOnly(Predicate pred);
 //	

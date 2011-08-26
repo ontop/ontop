@@ -8,16 +8,16 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicConceptDescriptionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.AtomicRoleDescriptionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.SemanticQueryOptimizer;
 
 import java.util.Collection;
@@ -53,31 +53,31 @@ public class PositiveInclusionApplicator {
 	 * @return true if the positive inclusion is applicable to the atom, false
 	 *         otherwise
 	 */
-	public boolean isPIApplicable(PositiveInclusion pi, Atom atom) {
+	public boolean isPIApplicable(SubDescriptionAxiom pi, Atom atom) {
 		/*
 		 * checks: (3) I is a role inclusion assertion and its right-hand side
 		 * is either P or P-
 		 */
-		if (pi instanceof DLLiterRoleInclusionImpl) {
-			RoleDescription including = ((DLLiterRoleInclusionImpl) pi).getIncluding();
-			if (including instanceof AtomicRoleDescriptionImpl) {
-				AtomicRoleDescriptionImpl role = (AtomicRoleDescriptionImpl) including;
+		if (pi instanceof SubPropertyAxiomImpl) {
+			Property including = ((SubPropertyAxiomImpl) pi).getSuper();
+			if (including instanceof PropertyImpl) {
+				PropertyImpl role = (PropertyImpl) including;
 				return role.getPredicate().equals(atom.getPredicate());
 			} else {
 				throw new RuntimeException("Error, unsupported role inclusion. " + pi);
 			}
-		} else if (pi instanceof DLLiterConceptInclusionImpl) {
+		} else if (pi instanceof SubClassAxiomImpl) {
 			/*
 			 * I is applicable to an atom A(x) if it has A in its right-hand
 			 * side
 			 */
 			Predicate pred = atom.getPredicate();
-			ConceptDescription inc = ((DLLiterConceptInclusionImpl) pi).getIncluding();
+			ClassDescription inc = ((SubClassAxiomImpl) pi).getSuper();
 			Predicate inc_predicate = null;
-			if (inc instanceof AtomicConceptDescription) {
-				inc_predicate = ((AtomicConceptDescription) inc).getPredicate();
-			} else if (inc instanceof ExistentialConceptDescription) {
-				inc_predicate = ((ExistentialConceptDescription) inc).getPredicate();
+			if (inc instanceof Class) {
+				inc_predicate = ((Class) inc).getPredicate();
+			} else if (inc instanceof PropertySomeDescription) {
+				inc_predicate = ((PropertySomeDescription) inc).getPredicate();
 			}
 
 			if (!pred.equals(inc_predicate))
@@ -88,9 +88,9 @@ public class PositiveInclusionApplicator {
 			} else if (pred.getArity() == 2 && inc_predicate.getArity() == 2) {
 				Term t2 = atom.getTerms().get(1);
 				Term t1 = atom.getTerms().get(0);
-				ConceptDescription including = ((DLLiterConceptInclusionImpl) pi).getIncluding();
-				if (including instanceof ExistentialConceptDescriptionImpl) {
-					ExistentialConceptDescriptionImpl imp = (ExistentialConceptDescriptionImpl) including;
+				ClassDescription including = ((SubClassAxiomImpl) pi).getSuper();
+				if (including instanceof PropertySomeDescriptionImpl) {
+					PropertySomeDescriptionImpl imp = (PropertySomeDescriptionImpl) including;
 					if (t2 instanceof AnonymousVariable && !imp.isInverse()) {
 						/*
 						 * I is applicable to an atom P(x1, x2) if (1) x2 = _
@@ -118,7 +118,7 @@ public class PositiveInclusionApplicator {
 		}
 	}
 
-	public List<CQIE> apply(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) throws Exception {
+	public List<CQIE> apply(Collection<CQIE> cqs, Collection<SubDescriptionAxiom> pis) throws Exception {
 		List<CQIE> newqueries = new LinkedList<CQIE>();
 		for (CQIE cq : cqs) {
 			
@@ -129,7 +129,7 @@ public class PositiveInclusionApplicator {
 		return newqueries;
 	}
 
-	public List<CQIE> apply(CQIE query, Collection<PositiveInclusion> pis) throws Exception {
+	public List<CQIE> apply(CQIE query, Collection<SubDescriptionAxiom> pis) throws Exception {
 		int bodysize = query.getBody().size();
 		HashSet<CQIE> newqueries = new HashSet<CQIE>(bodysize * pis.size() * 2);
 		newqueries.add(query);
@@ -143,7 +143,7 @@ public class PositiveInclusionApplicator {
 				List<Atom> body = cq.getBody();
 				Atom atom = (Atom) body.get(atomindex);
 
-				for (PositiveInclusion pi : pis) {
+				for (SubDescriptionAxiom pi : pis) {
 					if (isPIApplicable(pi, atom)) {
 						currentatomresults.addAll(Collections.singletonList(applyPI(cq, pi, atomindex)));
 					}
@@ -175,15 +175,15 @@ public class PositiveInclusionApplicator {
 	 * @throws Exception
 	 * @throws Exception
 	 */
-	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<PositiveInclusion> pis) throws Exception {
+	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<SubDescriptionAxiom> pis) throws Exception {
 
 		// HashSet<CQIE> result = new HashSet<CQIE>(6000);
 		if (pis == null || pis.isEmpty())
 			return new HashSet<CQIE>(1);
 
-		DLLiterConceptInclusionImpl samplepi = (DLLiterConceptInclusionImpl) pis.iterator().next();
+		SubClassAxiomImpl samplepi = (SubClassAxiomImpl) pis.iterator().next();
 
-		ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) samplepi.getIncluding();
+		PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) samplepi.getSuper();
 		Set<CQIE> saturatedset = new HashSet<CQIE>();
 		saturatedset.addAll(cqs);
 
@@ -197,7 +197,7 @@ public class PositiveInclusionApplicator {
 		HashSet<CQIE> results = new HashSet<CQIE>(2500);
 		/* Now we try to apoly the inclusions and collect only the results */
 
-		for (PositiveInclusion pi : pis) {
+		for (SubDescriptionAxiom pi : pis) {
 			
 			MemoryUtils.checkAvailableMemory();
 			
@@ -451,7 +451,7 @@ public class PositiveInclusionApplicator {
 	// return results;
 	// }
 
-	public CQIE applyPI(CQIE q, PositiveInclusion inclusion, int atomindex) {
+	public CQIE applyPI(CQIE q, SubDescriptionAxiom inclusion, int atomindex) {
 
 		CQIE newquery = q.clone();
 
@@ -464,12 +464,12 @@ public class PositiveInclusionApplicator {
 			 * Only concept inclusions
 			 */
 
-			if (inclusion instanceof DLLiterConceptInclusionImpl) {
-				DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl) inclusion;
-				ConceptDescription lefthandside = inc.getIncluded();
-				ConceptDescription righthandside = inc.getIncluding();
+			if (inclusion instanceof SubClassAxiomImpl) {
+				SubClassAxiomImpl inc = (SubClassAxiomImpl) inclusion;
+				ClassDescription lefthandside = inc.getSub();
+				ClassDescription righthandside = inc.getSuper();
 
-				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
+				if (lefthandside instanceof ClassImpl) {
 
 					/* This is the simplest case A(x) generates B(x) */
 
@@ -482,17 +482,17 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 
 					Atom newatom = termFactory.getAtom(predicate.clone(), v);
 
 					body.set(atomindex, newatom);
 
-				} else if (lefthandside instanceof ExistentialConceptDescriptionImpl) {
+				} else if (lefthandside instanceof PropertySomeDescriptionImpl) {
 
 					/*
 					 * Generating a role atom from a concept atom A(x) genrates
@@ -502,17 +502,17 @@ public class PositiveInclusionApplicator {
 					Term anonym = termFactory.getNondistinguishedVariable();
 					Atom newatom = null;
 
-					if (((ExistentialConceptDescriptionImpl) lefthandside).isInverse()) {
+					if (((PropertySomeDescriptionImpl) lefthandside).isInverse()) {
 						LinkedList<Term> v = new LinkedList<Term>();
 						v.add(0, anonym);
 						v.add(1, t);
 
 						Predicate predicate = null;
 
-						if (lefthandside instanceof AtomicConceptDescription) {
-							predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-						} else if (lefthandside instanceof ExistentialConceptDescription) {
-							predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+						if (lefthandside instanceof Class) {
+							predicate = ((Class) lefthandside).getPredicate();
+						} else if (lefthandside instanceof PropertySomeDescription) {
+							predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 						}
 						newatom = termFactory.getAtom(predicate.clone(), v);
 					} else {
@@ -522,10 +522,10 @@ public class PositiveInclusionApplicator {
 
 						Predicate predicate = null;
 
-						if (lefthandside instanceof AtomicConceptDescription) {
-							predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-						} else if (lefthandside instanceof ExistentialConceptDescription) {
-							predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+						if (lefthandside instanceof Class) {
+							predicate = ((Class) lefthandside).getPredicate();
+						} else if (lefthandside instanceof PropertySomeDescription) {
+							predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 						}
 						newatom = termFactory.getAtom(predicate.clone(), v);
 					}
@@ -538,15 +538,15 @@ public class PositiveInclusionApplicator {
 				throw new RuntimeException("Application of a non-concept inclusion pi to a non-unary atom is impossible.");
 			}
 
-		} else if (inclusion instanceof DLLiterConceptInclusionImpl) {
+		} else if (inclusion instanceof SubClassAxiomImpl) {
 
 			/*
 			 * These cases cover unification an going from R atoms to C atoms.
 			 */
 
-			DLLiterConceptInclusionImpl inc = (DLLiterConceptInclusionImpl) inclusion;
-			ConceptDescription lefthandside = inc.getIncluded();
-			ExistentialConceptDescription righthandside = (ExistentialConceptDescription) inc.getIncluding();
+			SubClassAxiomImpl inc = (SubClassAxiomImpl) inclusion;
+			ClassDescription lefthandside = inc.getSub();
+			PropertySomeDescription righthandside = (PropertySomeDescription) inc.getSuper();
 
 			Term t1 = a.getTerms().get(0);
 			Term t2 = a.getTerms().get(1);
@@ -557,44 +557,44 @@ public class PositiveInclusionApplicator {
 
 				/* These are the cases that go from a P(x,#) to a A(x) */
 
-				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
+				if (lefthandside instanceof ClassImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (((ExistentialConceptDescription) lefthandside).isInverse()) {
+				} else if (((PropertySomeDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (!((ExistentialConceptDescription) lefthandside).isInverse()) {
+				} else if (!((PropertySomeDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
@@ -603,44 +603,44 @@ public class PositiveInclusionApplicator {
 
 				/* These cases go from R(#,x) to A(x), S(x,#) or S(#,x) */
 
-				if (lefthandside instanceof AtomicConceptDescriptionImpl) {
+				if (lefthandside instanceof ClassImpl) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (((ExistentialConceptDescription) lefthandside).isInverse()) {
+				} else if (((PropertySomeDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t1);
 					v.add(1, t2);
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
-				} else if (!((ExistentialConceptDescription) lefthandside).isInverse()) {
+				} else if (!((PropertySomeDescription) lefthandside).isInverse()) {
 					LinkedList<Term> v = new LinkedList<Term>();
 					v.add(0, t2);
 					v.add(1, t1);
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof AtomicConceptDescription) {
-						predicate = ((AtomicConceptDescription) lefthandside).getPredicate();
-					} else if (lefthandside instanceof ExistentialConceptDescription) {
-						predicate = ((ExistentialConceptDescription) lefthandside).getPredicate();
+					if (lefthandside instanceof Class) {
+						predicate = ((Class) lefthandside).getPredicate();
+					} else if (lefthandside instanceof PropertySomeDescription) {
+						predicate = ((PropertySomeDescription) lefthandside).getPredicate();
 					}
 					newatom = termFactory.getAtom(predicate, v);
 
@@ -650,15 +650,15 @@ public class PositiveInclusionApplicator {
 			if (newatom != null)
 				body.set(atomindex, newatom);
 
-		} else if (inclusion instanceof DLLiterRoleInclusionImpl) {
+		} else if (inclusion instanceof SubPropertyAxiomImpl) {
 
 			/*
 			 * For role inclusion P \ISA S
 			 */
 
-			DLLiterRoleInclusionImpl inc = (DLLiterRoleInclusionImpl) inclusion;
-			RoleDescription lefthandside = inc.getIncluded();
-			RoleDescription righthandside = inc.getIncluding();
+			SubPropertyAxiomImpl inc = (SubPropertyAxiomImpl) inclusion;
+			Property lefthandside = inc.getSub();
+			Property righthandside = inc.getSuper();
 
 			Atom newatom = null;
 

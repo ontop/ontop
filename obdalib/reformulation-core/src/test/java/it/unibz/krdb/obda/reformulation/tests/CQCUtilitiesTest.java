@@ -10,10 +10,10 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -446,10 +446,10 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
-			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
-			ConceptDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
-			ConceptDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("C"), 1));
-			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
+			ClassDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("C"), 1));
+			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -469,10 +469,10 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
-			ConceptDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
-			ConceptDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
-			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
+			ClassDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
+			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -492,10 +492,10 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
-			ConceptDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
-			ConceptDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
-			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
+			ClassDescription left = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
+			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -515,11 +515,11 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
-			ConceptDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
-			ConceptDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
+			ClassDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), false);
+			ClassDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
 
-			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -539,11 +539,11 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
-			DLLiterOntologyImpl sigma = new DLLiterOntologyImpl(URI.create("test"));
-			ConceptDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
-			ConceptDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
+			OntologyImpl sigma = new OntologyImpl(URI.create("test"));
+			ClassDescription left = dfac.getExistentialConceptDescription(tfac.getPredicate(URI.create("R"), 2), true);
+			ClassDescription right = dfac.getAtomicConceptDescription(tfac.getPredicate(URI.create("A"), 1));
 
-			DLLiterConceptInclusionImpl inclusion = new DLLiterConceptInclusionImpl(left, right);
+			SubClassAxiomImpl inclusion = new SubClassAxiomImpl(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));

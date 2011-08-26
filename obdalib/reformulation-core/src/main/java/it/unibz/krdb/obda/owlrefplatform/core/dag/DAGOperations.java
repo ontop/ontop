@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -147,10 +147,10 @@ public class DAGOperations {
 
             //Leave an atomic node when removing equivalent nodes from isa-dag
             if (component.size() > 1 &&
-                    cyclehead.getDescription() instanceof ExistentialConceptDescription) {
+                    cyclehead.getDescription() instanceof PropertySomeDescription) {
 
                 for (int i = 1; i < component.size(); i++) {
-                    if (component.get(i).getDescription() instanceof AtomicConceptDescription) {
+                    if (component.get(i).getDescription() instanceof Class) {
                         DAGNode tmp = component.get(i);
                         component.set(i, cyclehead);
                         component.set(0, tmp);
@@ -161,11 +161,11 @@ public class DAGOperations {
             }
 
             if (component.size() > 0 &&
-                    cyclehead.getDescription() instanceof RoleDescription &&
-                    ((RoleDescription) cyclehead.getDescription()).isInverse()) {
+                    cyclehead.getDescription() instanceof Property &&
+                    ((Property) cyclehead.getDescription()).isInverse()) {
                 for (int i = 1; i < component.size(); i++) {
-                    if (component.get(i).getDescription() instanceof RoleDescription &&
-                            !((RoleDescription) component.get(i).getDescription()).isInverse()) {
+                    if (component.get(i).getDescription() instanceof Property &&
+                            !((Property) component.get(i).getDescription()).isInverse()) {
                         DAGNode tmp = component.get(i);
                         component.set(i, cyclehead);
                         component.set(0, tmp);

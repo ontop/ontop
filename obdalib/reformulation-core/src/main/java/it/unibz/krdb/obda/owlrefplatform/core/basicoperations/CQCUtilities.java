@@ -6,21 +6,20 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.BasicRoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -133,19 +132,19 @@ public class CQCUtilities {
 				Term oldTerm1 = null;
 				Term oldTerm2 = null;
 
-				Set<PositiveInclusion> pis = sigma.getByIncluded(predicate);
+				Set<SubDescriptionAxiom> pis = sigma.getByIncluded(predicate);
 				if (pis == null) {
 					continue;
 				}
-				for (PositiveInclusion pi : pis) {
+				for (SubDescriptionAxiom pi : pis) {
 
-					Description left = pi.getIncluded();
-					if (left instanceof BasicRoleDescription) {
+					Description left = pi.getSub();
+					if (left instanceof Property) {
 
 						if (patom.getArity() != 2)
 							continue;
 
-						BasicRoleDescription lefttRoleDescription = (BasicRoleDescription) left;
+						Property lefttRoleDescription = (Property) left;
 
 						if (lefttRoleDescription.isInverse()) {
 							oldTerm1 = patom.getTerm(1);
@@ -154,18 +153,18 @@ public class CQCUtilities {
 							oldTerm1 = patom.getTerm(0);
 							oldTerm2 = patom.getTerm(1);
 						}
-					} else if (left instanceof AtomicConceptDescription) {
+					} else if (left instanceof Class) {
 
 						if (patom.getArity() != 1)
 							continue;
 
 						oldTerm1 = patom.getTerm(0);
 
-					} else if (left instanceof ExistentialConceptDescription) {
+					} else if (left instanceof PropertySomeDescription) {
 						if (patom.getArity() != 2)
 							continue;
 
-						ExistentialConceptDescription lefttAtomicRole = (ExistentialConceptDescription) left;
+						PropertySomeDescription lefttAtomicRole = (PropertySomeDescription) left;
 						if (lefttAtomicRole.isInverse()) {
 							oldTerm1 = patom.getTerm(1);
 						} else {
@@ -176,15 +175,15 @@ public class CQCUtilities {
 						throw new RuntimeException("ERROR: Unsupported dependnecy: " + pi.toString());
 					}
 
-					Description right = pi.getIncluding();
+					Description right = pi.getSuper();
 
 					Term newTerm1 = null;
 					Term newTerm2 = null;
 					Predicate newPredicate = null;
 					Atom newAtom = null;
 
-					if (right instanceof BasicRoleDescription) {
-						BasicRoleDescription rightRoleDescription = (BasicRoleDescription) right;
+					if (right instanceof Property) {
+						Property rightRoleDescription = (Property) right;
 						newPredicate = rightRoleDescription.getPredicate();
 						if (rightRoleDescription.isInverse()) {
 							newTerm1 = oldTerm2;
@@ -194,19 +193,19 @@ public class CQCUtilities {
 							newTerm2 = oldTerm2;
 						}
 						newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
-					} else if (right instanceof AtomicConceptDescription) {
-						AtomicConceptDescription rightAtomicConcept = (AtomicConceptDescription) right;
+					} else if (right instanceof Class) {
+						Class rightAtomicConcept = (Class) right;
 						newTerm1 = oldTerm1;
 						newPredicate = rightAtomicConcept.getPredicate();
 						newAtom = fac.getAtom(newPredicate, newTerm1);
 
-					} else if (right instanceof ExistentialConceptDescription) {
+					} else if (right instanceof PropertySomeDescription) {
 						// Here we need to introduce new variables, for the
 						// moment
 						// we only do it w.r.t.\ non-anonymous variables.
 						// hence we are incomplete in containment detection.
 
-						ExistentialConceptDescription rightExistential = (ExistentialConceptDescription) right;
+						PropertySomeDescription rightExistential = (PropertySomeDescription) right;
 						newPredicate = rightExistential.getPredicate();
 						if (rightExistential.isInverse()) {
 							if (newTerm2 instanceof AnonymousVariable)

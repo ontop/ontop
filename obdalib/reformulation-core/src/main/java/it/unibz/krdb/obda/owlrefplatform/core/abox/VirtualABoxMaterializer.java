@@ -13,10 +13,10 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterAttributeABoxAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptABoxAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleABoxAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
@@ -113,20 +113,20 @@ public class VirtualABoxMaterializer {
 
 	}
 
-	public Iterator<ABoxAssertion> getAssertionIterator() throws Exception {
+	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), unfoldersMap, sqlgeneratorsMap);
 	}
 
-	public List<ABoxAssertion> getAssertionList() throws Exception {
-		Iterator<ABoxAssertion> it = getAssertionIterator();
-		List<ABoxAssertion> assertions = new LinkedList<ABoxAssertion>();
+	public List<Assertion> getAssertionList() throws Exception {
+		Iterator<Assertion> it = getAssertionIterator();
+		List<Assertion> assertions = new LinkedList<Assertion>();
 		while (it.hasNext()) {
 			assertions.add(it.next());
 		}
 		return assertions;
 	}
 
-	public Iterator<ABoxAssertion> getAssertionIterator(Predicate p) throws Exception {
+	public Iterator<Assertion> getAssertionIterator(Predicate p) throws Exception {
 		return new VirtualTripleIterator(p, this.model.getSources(), this.unfoldersMap, this.sqlgeneratorsMap);
 	}
 
@@ -142,10 +142,10 @@ public class VirtualABoxMaterializer {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<ABoxAssertion> getAssertionList(Predicate p) throws Exception {
+	public List<Assertion> getAssertionList(Predicate p) throws Exception {
 		VirtualTripleIterator it = new VirtualTripleIterator(p, this.model.getSources(), this.unfoldersMap, this.sqlgeneratorsMap);
 
-		List<ABoxAssertion> assertions = new LinkedList<ABoxAssertion>();
+		List<Assertion> assertions = new LinkedList<Assertion>();
 		while (it.hasNext()) {
 			assertions.add(it.next());
 		}
@@ -154,7 +154,7 @@ public class VirtualABoxMaterializer {
 	}
 
 	public int getTripleCount() throws Exception {
-		Iterator<ABoxAssertion> it = getAssertionIterator();
+		Iterator<Assertion> it = getAssertionIterator();
 
 		int tripleCount = 0;
 		while (it.hasNext()) {
@@ -178,7 +178,7 @@ public class VirtualABoxMaterializer {
 	 */
 	public int getTripleCount(Predicate pred) throws Exception {
 
-		Iterator<ABoxAssertion> it = getAssertionIterator(pred);
+		Iterator<Assertion> it = getAssertionIterator(pred);
 
 		int tripleCount = 0;
 		while (it.hasNext()) {
@@ -189,7 +189,7 @@ public class VirtualABoxMaterializer {
 		return tripleCount;
 	}
 
-	public class VirtualTriplePredicateIterator implements Iterator<ABoxAssertion> {
+	public class VirtualTriplePredicateIterator implements Iterator<Assertion> {
 
 		private Iterator<Predicate>							predicates;
 		private Collection<OBDADataSource>						sources;
@@ -236,7 +236,7 @@ public class VirtualABoxMaterializer {
 		}
 
 		@Override
-		public ABoxAssertion next() {
+		public Assertion next() {
 			if (currentIterator == null)
 				throw new NoSuchElementException();
 
@@ -268,7 +268,7 @@ public class VirtualABoxMaterializer {
 	 * @author Mariano Rodriguez Muro
 	 * 
 	 */
-	public class VirtualTripleIterator implements Iterator<ABoxAssertion> {
+	public class VirtualTripleIterator implements Iterator<Assertion> {
 
 		/*
 		 * Indicates that we have peeked to see if there are more rows and that
@@ -384,7 +384,7 @@ public class VirtualABoxMaterializer {
 		}
 
 		@Override
-		public ABoxAssertion next() {
+		public Assertion next() {
 			try {
 				if (peeked) {
 					peeked = false;
@@ -415,19 +415,19 @@ public class VirtualABoxMaterializer {
 		 * 
 		 * @return
 		 */
-		private ABoxAssertion constructAssertion() throws SQLException {
-			ABoxAssertion assertion = null;
+		private Assertion constructAssertion() throws SQLException {
+			Assertion assertion = null;
 			if (pred.getArity() == 1) {
 				URIConstant c = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
-				assertion = new DLLiterConceptABoxAssertionImpl(pred, c);
+				assertion = new ClassAssertionImpl(pred, c);
 			} else if (pred.getType(1) == Predicate.COL_TYPE.OBJECT) {
 				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
 				URIConstant c2 = obdafac.getURIConstant(URI.create(currentResults.getString(2)));
-				assertion = new DLLiterRoleABoxAssertionImpl(pred, c1, c2);
+				assertion = new ObjectPropertyAssertionImpl(pred, c1, c2);
 			} else {
 				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
 				ValueConstant c2 = obdafac.getValueConstant(currentResults.getString(2));
-				assertion = new DLLiterAttributeABoxAssertionImpl(pred, c1, c2);
+				assertion = new DataPropertyAssertionImpl(pred, c1, c2);
 			}
 			return assertion;
 		}

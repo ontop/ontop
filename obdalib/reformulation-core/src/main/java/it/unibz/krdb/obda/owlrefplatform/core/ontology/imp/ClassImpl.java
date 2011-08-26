@@ -1,13 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 
-public class AtomicConceptDescriptionImpl implements AtomicConceptDescription {
+public class ClassImpl implements Class {
 
 	private Predicate	predicate	= null;
 
-	public AtomicConceptDescriptionImpl(Predicate p) {
+	public ClassImpl(Predicate p) {
 		this.predicate = p;		
 	}
 
@@ -21,9 +21,9 @@ public class AtomicConceptDescriptionImpl implements AtomicConceptDescription {
 	}
 
 	public boolean equals(Object obj) {
-		if (!(obj instanceof AtomicConceptDescriptionImpl))
+		if (!(obj instanceof ClassImpl))
 			return false;
-		AtomicConceptDescriptionImpl concept2 = (AtomicConceptDescriptionImpl) obj;
+		ClassImpl concept2 = (ClassImpl) obj;
 		return (predicate.equals(concept2.getPredicate()));
 	}
 

@@ -6,16 +6,16 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterRoleInclusionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -37,7 +37,7 @@ public class SemanticReduction {
 	private final DAGChain				sigmaChain;
 
 	private final OBDADataFactory		predicateFactory;
-	private final DescriptionFactory	descFactory;
+	private final OntologyFactory	descFactory;
 
 	public SemanticReduction(Ontology isat, Ontology sigmat) {
 		this.isa = DAGConstructor.getISADAG(isat);
@@ -52,14 +52,14 @@ public class SemanticReduction {
 	}
 	
 	public Ontology getReducedOntology() {
-		Ontology reformulationOntology = new DLLiterOntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
+		Ontology reformulationOntology = new OntologyImpl(URI.create("http://it.unibz.krdb/obda/auxontology"));
 		reformulationOntology.addAssertions(reduce());
 		return reformulationOntology;
 	}
 
-	public List<Assertion> reduce() {
+	public List<Axiom> reduce() {
 		log.debug("Starting semantic-reduction");
-		List<Assertion> rv = new LinkedList<Assertion>();
+		List<Axiom> rv = new LinkedList<Axiom>();
 
 		for (DAGNode node : isa.getClasses()) {
 
@@ -72,7 +72,7 @@ public class SemanticReduction {
 
 				if (!check_redundant(node, child)) {
 
-					rv.add(new DLLiterConceptInclusionImpl((ConceptDescription) child.getDescription(), (ConceptDescription) node
+					rv.add(new SubClassAxiomImpl((ClassDescription) child.getDescription(), (ClassDescription) node
 							.getDescription()));
 				}
 			}
@@ -82,7 +82,7 @@ public class SemanticReduction {
 			for (DAGNode child : node.descendans) {
 				if (!check_redundant_role(node, child)) {
 
-					rv.add(new DLLiterRoleInclusionImpl((RoleDescription) child.getDescription(), (RoleDescription) node.getDescription()));
+					rv.add(new SubPropertyAxiomImpl((Property) child.getDescription(), (Property) node.getDescription()));
 				}
 			}
 		}
@@ -110,12 +110,12 @@ public class SemanticReduction {
 	}
 
 	private boolean check_directly_redundant_role(DAGNode parent, DAGNode child) {
-		RoleDescription parentDesc = (RoleDescription) parent.getDescription();
-		RoleDescription childDesc = (RoleDescription) child.getDescription();
+		Property parentDesc = (Property) parent.getDescription();
+		Property childDesc = (Property) child.getDescription();
 
-		ExistentialConceptDescription existParentDesc = descFactory.getExistentialConceptDescription(parentDesc.getPredicate(),
+		PropertySomeDescription existParentDesc = descFactory.getExistentialConceptDescription(parentDesc.getPredicate(),
 				parentDesc.isInverse());
-		ExistentialConceptDescription existChildDesc = descFactory.getExistentialConceptDescription(childDesc.getPredicate(),
+		PropertySomeDescription existChildDesc = descFactory.getExistentialConceptDescription(childDesc.getPredicate(),
 				childDesc.isInverse());
 
 		DAGNode exists_parent = isa.getClassNode(existParentDesc);

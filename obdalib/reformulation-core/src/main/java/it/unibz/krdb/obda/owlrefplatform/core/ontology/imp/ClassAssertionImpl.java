@@ -2,15 +2,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 
-public class DLLiterConceptABoxAssertionImpl implements ConceptABoxAssertion {
+public class ClassAssertionImpl implements ClassAssertion {
 
 	URIConstant	object	= null;
 
 	Predicate	concept	= null;
 
-	public DLLiterConceptABoxAssertionImpl(Predicate concept, URIConstant object) {
+	public ClassAssertionImpl(Predicate concept, URIConstant object) {
 		this.object = object;
 		this.concept = concept;
 	}

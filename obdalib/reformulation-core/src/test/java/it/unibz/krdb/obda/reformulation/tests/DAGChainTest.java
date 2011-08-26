@@ -8,14 +8,14 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
 import java.net.URI;
 import java.util.Map;
@@ -27,20 +27,20 @@ public class DAGChainTest extends TestCase {
     SemanticIndexHelper helper = new SemanticIndexHelper();
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final DescriptionFactory descFactory = new BasicDescriptionFactory();
+    private static final OntologyFactory descFactory = new BasicDescriptionFactory();
 
     public void test_simple_isa() {
-        DLLiterOntology ontology = new DLLiterOntologyImpl(URI.create(""));
+        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
 
-        AtomicConceptDescription ac = descFactory.getAtomicConceptDescription(a);
-        AtomicConceptDescription bc = descFactory.getAtomicConceptDescription(b);
-        AtomicConceptDescription cc = descFactory.getAtomicConceptDescription(c);
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(bc, ac));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(cc, bc));
+        Class ac = descFactory.getAtomicConceptDescription(a);
+        Class bc = descFactory.getAtomicConceptDescription(b);
+        Class cc = descFactory.getAtomicConceptDescription(c);
+        ontology.addAssertion(new SubClassAxiomImpl(bc, ac));
+        ontology.addAssertion(new SubClassAxiomImpl(cc, bc));
         ontology.addConcept(ac);
         ontology.addConcept(bc);
         ontology.addConcept(cc);
@@ -59,18 +59,18 @@ public class DAGChainTest extends TestCase {
     }
 
     public void test_exists_simple() {
-        DLLiterOntology ontology = new DLLiterOntologyImpl(URI.create(""));
+        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
-        AtomicConceptDescription ac = descFactory.getAtomicConceptDescription(a);
-        ExistentialConceptDescription er = descFactory.getExistentialConceptDescription(r, false);
-        ExistentialConceptDescription ier = descFactory.getExistentialConceptDescription(r, true);
-        AtomicConceptDescription cc = descFactory.getAtomicConceptDescription(c);
+        Class ac = descFactory.getAtomicConceptDescription(a);
+        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
+        PropertySomeDescription ier = descFactory.getExistentialConceptDescription(r, true);
+        Class cc = descFactory.getAtomicConceptDescription(c);
 
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(er, ac));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(cc, ier));
+        ontology.addAssertion(new SubClassAxiomImpl(er, ac));
+        ontology.addAssertion(new SubClassAxiomImpl(cc, ier));
         ontology.addConcept(ac);
         ontology.addConcept(er);
         ontology.addConcept(ier);
@@ -96,7 +96,7 @@ public class DAGChainTest extends TestCase {
 
     public void test_exists_complex() {
 
-        DLLiterOntology ontology = new DLLiterOntologyImpl(URI.create(""));
+        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
@@ -104,17 +104,17 @@ public class DAGChainTest extends TestCase {
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
         Predicate d = predicateFactory.getPredicate(URI.create("d"), 1);
 
-        AtomicConceptDescription ac = descFactory.getAtomicConceptDescription(a);
-        ExistentialConceptDescription er = descFactory.getExistentialConceptDescription(r, false);
-        ExistentialConceptDescription ier = descFactory.getExistentialConceptDescription(r, true);
-        AtomicConceptDescription cc = descFactory.getAtomicConceptDescription(c);
-        AtomicConceptDescription bc = descFactory.getAtomicConceptDescription(b);
-        AtomicConceptDescription dc = descFactory.getAtomicConceptDescription(d);
+        Class ac = descFactory.getAtomicConceptDescription(a);
+        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
+        PropertySomeDescription ier = descFactory.getExistentialConceptDescription(r, true);
+        Class cc = descFactory.getAtomicConceptDescription(c);
+        Class bc = descFactory.getAtomicConceptDescription(b);
+        Class dc = descFactory.getAtomicConceptDescription(d);
 
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(er, ac));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(cc, ier));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(bc, er));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(ier, dc));
+        ontology.addAssertion(new SubClassAxiomImpl(er, ac));
+        ontology.addAssertion(new SubClassAxiomImpl(cc, ier));
+        ontology.addAssertion(new SubClassAxiomImpl(bc, er));
+        ontology.addAssertion(new SubClassAxiomImpl(ier, dc));
 
         ontology.addConcept(ac);
         ontology.addConcept(er);
@@ -155,19 +155,19 @@ public class DAGChainTest extends TestCase {
 
     public void test_exists_complex_2() {
 
-        DLLiterOntology ontology = new DLLiterOntologyImpl(URI.create(""));
+        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
 
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
 
 
-        AtomicConceptDescription ac = descFactory.getAtomicConceptDescription(a);
-        ExistentialConceptDescription er = descFactory.getExistentialConceptDescription(r, false);
-        ExistentialConceptDescription ier = descFactory.getExistentialConceptDescription(r, true);
+        Class ac = descFactory.getAtomicConceptDescription(a);
+        PropertySomeDescription er = descFactory.getExistentialConceptDescription(r, false);
+        PropertySomeDescription ier = descFactory.getExistentialConceptDescription(r, true);
 
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(ier, ac));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(ier, er));
-        ontology.addAssertion(new DLLiterConceptInclusionImpl(ac, er));
+        ontology.addAssertion(new SubClassAxiomImpl(ier, ac));
+        ontology.addAssertion(new SubClassAxiomImpl(ier, er));
+        ontology.addAssertion(new SubClassAxiomImpl(ac, er));
 
         DAGChain resChain = new DAGChain(DAGConstructor.getISADAG(ontology));
         Map<Description, DAGNode> res = resChain.chain();

@@ -6,11 +6,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterOntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -44,8 +44,8 @@ public class GraphGenerator {
         for (DAGNode node : isa.getClasses()) {
 
             String style = "";
-            if (node.getDescription() instanceof ExistentialConceptDescription) {
-                ExistentialConceptDescription ec = (ExistentialConceptDescription) node.getDescription();
+            if (node.getDescription() instanceof PropertySomeDescription) {
+                PropertySomeDescription ec = (PropertySomeDescription) node.getDescription();
 
                 if (ec.isInverse()) {
                     style = "style=\"filled\" fillcolor=\"darkgoldenrod3\" ";
@@ -66,7 +66,7 @@ public class GraphGenerator {
         for (DAGNode node : isa.getRoles()) {
             String style = "";
 
-            RoleDescription ec = (RoleDescription) node.getDescription();
+            Property ec = (Property) node.getDescription();
 
             if (ec.isInverse()) {
                 style = "style=\"filled\" fillcolor=\"darkgoldenrod3\"";
@@ -165,8 +165,8 @@ public class GraphGenerator {
 
     }
 
-    public static void dumpReducedOnto(List<Assertion> reducedOnto) throws IOException {
-        DLLiterOntology ontology = new DLLiterOntologyImpl(URI.create(""));
+    public static void dumpReducedOnto(List<Axiom> reducedOnto) throws IOException {
+        DLLiterOntology ontology = new OntologyImpl(URI.create(""));
         ontology.addAssertions(reducedOnto);
         DAG reducedIsa = DAGConstructor.getISADAG(ontology);
         reducedIsa.index();

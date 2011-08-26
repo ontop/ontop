@@ -15,9 +15,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionA
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PositiveInclusion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DLLiterConceptInclusionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ExistentialConceptDescriptionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeDescriptionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
@@ -124,9 +124,9 @@ public class TreeRedReformulator implements QueryRewriter {
 			 */
 			for (CQIE oldquery : oldqueries) {
 
-				HashSet<PositiveInclusion> relevantInclusions = new HashSet<PositiveInclusion>(1000);
+				HashSet<SubDescriptionAxiom> relevantInclusions = new HashSet<SubDescriptionAxiom>(1000);
 				for (Atom atom : oldquery.getBody()) {
-					Set<PositiveInclusion> inclusions = ontology.getByIncludingNoExist(((Atom) atom).getPredicate());
+					Set<SubDescriptionAxiom> inclusions = ontology.getByIncludingNoExist(((Atom) atom).getPredicate());
 					if (inclusions != null)
 						relevantInclusions.addAll(ontology.getByIncludingNoExist(((Atom) atom).getPredicate()));
 				}
@@ -170,15 +170,15 @@ public class TreeRedReformulator implements QueryRewriter {
 
 			// Collecting relevant inclusion
 			for (Predicate predicate : predicates) {
-				Set<PositiveInclusion> relevantInclusion = ontology.getByIncludingExistOnly(predicate);
+				Set<SubDescriptionAxiom> relevantInclusion = ontology.getByIncludingExistOnly(predicate);
 				if (relevantInclusion == null)
 					continue;
 				// sorting inverse and not inverse
-				Set<PositiveInclusion> relevantinverse = new HashSet<PositiveInclusion>(1000);
-				Set<PositiveInclusion> relevantnotinverse = new HashSet<PositiveInclusion>(1000);
-				for (PositiveInclusion inc : relevantInclusion) {
-					DLLiterConceptInclusionImpl samplepi = (DLLiterConceptInclusionImpl) inc;
-					ExistentialConceptDescriptionImpl ex = (ExistentialConceptDescriptionImpl) samplepi.getIncluding();
+				Set<SubDescriptionAxiom> relevantinverse = new HashSet<SubDescriptionAxiom>(1000);
+				Set<SubDescriptionAxiom> relevantnotinverse = new HashSet<SubDescriptionAxiom>(1000);
+				for (SubDescriptionAxiom inc : relevantInclusion) {
+					SubClassAxiomImpl samplepi = (SubClassAxiomImpl) inc;
+					PropertySomeDescriptionImpl ex = (PropertySomeDescriptionImpl) samplepi.getSuper();
 					if (ex.isInverse())
 						relevantinverse.add(inc);
 					else

@@ -14,17 +14,17 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AtomicConceptDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.AttributeABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DescriptionFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ExistentialConceptDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.BasicDescriptionFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
@@ -139,7 +139,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final OBDADataFactory		predicateFactory	= OBDADataFactoryImpl.getInstance();
 
-	private final DescriptionFactory	descFactory			= new BasicDescriptionFactory();
+	private final OntologyFactory	descFactory			= new BasicDescriptionFactory();
 
 	private Properties					config				= null;
 
@@ -267,7 +267,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void getSQLInserts(Iterator<ABoxAssertion> data, OutputStream outstream) throws IOException {
+	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
 
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
 
@@ -280,20 +280,20 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		while (data.hasNext()) {
 
-			ABoxAssertion ax = data.next();
+			Assertion ax = data.next();
 
 			insertscount += 1;
 			batchCount += 1;
 
-			if (ax instanceof AttributeABoxAssertion) {
+			if (ax instanceof DataPropertyAssertion) {
 
-				AttributeABoxAssertion attributeABoxAssertion = (AttributeABoxAssertion) ax;
+				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
 				String prop = attributeABoxAssertion.getAttribute().getName().toString();
 				String uri = attributeABoxAssertion.getObject().getURI().toString();
 				String lit = attributeABoxAssertion.getValue().getValue();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getRoleDescription(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
@@ -307,10 +307,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getRoleDescription(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
-					RoleDescription desc = (RoleDescription) dag.equi_mappings.get(propDesc);
+					Property desc = (Property) dag.equi_mappings.get(propDesc);
 					if (desc.isInverse()) {
 						String tmp = uri1;
 						uri1 = uri2;
@@ -323,16 +323,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				out.append(String.format(role_insert_str, getQuotedString(uri1), getQuotedString(uri2), idx));
 
-			} else if (ax instanceof ConceptABoxAssertion) {
+			} else if (ax instanceof ClassAssertion) {
 
-				String cls = ((ConceptABoxAssertion) ax).getConcept().getName().toString();
+				String cls = ((ClassAssertion) ax).getConcept().getName().toString();
 				// XXX: strange behaviour - owlapi generates an extra
 				// assertion of the form ClassAssertion(Thing, i)
 				if (!cls.equals(DAG.thingStr)) {
-					String uri = ((ConceptABoxAssertion) ax).getObject().getURI().toString();
+					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
-					Predicate clsPred = ((ConceptABoxAssertion) ax).getConcept();
-					ConceptDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+					Predicate clsPred = ((ClassAssertion) ax).getConcept();
+					ClassDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
 					DAGNode node = pureIsa.getClassNode(clsDesc);
 					int idx = node.getIndex();
 
@@ -347,7 +347,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void getCSVInserts(Iterator<ABoxAssertion> data, OutputStream out) throws IOException {
+	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
@@ -428,7 +428,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void insertData(Iterator<ABoxAssertion> data) throws SQLException {
+	public void insertData(Iterator<Assertion> data) throws SQLException {
 		log.debug("Inserting data into DB");
 
 		conn.setAutoCommit(false);
@@ -442,20 +442,20 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		while (data.hasNext()) {
 
-			ABoxAssertion ax = data.next();
+			Assertion ax = data.next();
 
 			insertscount += 1;
 			batchCount += 1;
 
-			if (ax instanceof AttributeABoxAssertion) {
+			if (ax instanceof DataPropertyAssertion) {
 
-				AttributeABoxAssertion attributeABoxAssertion = (AttributeABoxAssertion) ax;
+				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
 				String prop = attributeABoxAssertion.getAttribute().getName().toString();
 				String uri = attributeABoxAssertion.getObject().getURI().toString();
 				String lit = attributeABoxAssertion.getValue().getValue();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getRoleDescription(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
@@ -472,10 +472,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				RoleDescription propDesc = descFactory.getRoleDescription(propPred);
+				Property propDesc = descFactory.getRoleDescription(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
-					RoleDescription desc = (RoleDescription) dag.equi_mappings.get(propDesc);
+					Property desc = (Property) dag.equi_mappings.get(propDesc);
 					if (desc.isInverse()) {
 						String tmp = uri1;
 						uri1 = uri2;
@@ -491,16 +491,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				role_stm.setInt(3, idx);
 				role_stm.addBatch();
 
-			} else if (ax instanceof ConceptABoxAssertion) {
+			} else if (ax instanceof ClassAssertion) {
 
-				String cls = ((ConceptABoxAssertion) ax).getConcept().getName().toString();
+				String cls = ((ClassAssertion) ax).getConcept().getName().toString();
 				// XXX: strange behaviour - owlapi generates an extra
 				// assertion of the form ClassAssertion(Thing, i)
 				if (!cls.equals(DAG.thingStr)) {
-					String uri = ((ConceptABoxAssertion) ax).getObject().getURI().toString();
+					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
-					Predicate clsPred = ((ConceptABoxAssertion) ax).getConcept();
-					ConceptDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
+					Predicate clsPred = ((ClassAssertion) ax).getConcept();
+					ClassDescription clsDesc = descFactory.getAtomicConceptDescription(clsPred);
 					DAGNode node = pureIsa.getClassNode(clsDesc);
 					int idx = node.getIndex();
 
@@ -569,7 +569,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					uri = uri.substring(0, uri.length() - 2);
 					inverse = true;
 				}
-				ConceptDescription description;
+				ClassDescription description;
 
 				if (exists) {
 					p = predicateFactory.getPredicate(URI.create(uri), 2);
@@ -590,7 +590,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			} else if (type == ROLE_TYPE) {
 
-				RoleDescription description;
+				Property description;
 				boolean inverse = false;
 
 				// Inverse
@@ -645,7 +645,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		for (DAGNode node : pureIsa.getClasses()) {
 
-			if (!(node.getDescription() instanceof AtomicConceptDescription) || node.getDescription().equals(DAG.thingConcept)) {
+			if (!(node.getDescription() instanceof Class) || node.getDescription().equals(DAG.thingConcept)) {
 				continue;
 			}
 
@@ -658,29 +658,29 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			SemanticIndexRange range = node.getRange();
 
 			for (DAGNode equiNode : equiNodes) {
-				if (!(equiNode.getDescription() instanceof AtomicConceptDescription) || equiNode.getDescription().equals(DAG.thingConcept)) {
+				if (!(equiNode.getDescription() instanceof Class) || equiNode.getDescription().equals(DAG.thingConcept)) {
 					continue;
 				}
-				AtomicConceptDescription equiDesc = (AtomicConceptDescription) equiNode.getDescription();
+				Class equiDesc = (Class) equiNode.getDescription();
 				String equiUri = equiDesc.getPredicate().getName().toString();
 
 				mappings.add(new UnaryMappingKey(range, projection, tablename, equiUri));
 			}
 
 			// check if has child exists(R) in the general ISA DAG
-			DAGNode genNode = dag.getClassNode((ConceptDescription) node.getDescription());
+			DAGNode genNode = dag.getClassNode((ClassDescription) node.getDescription());
 			for (DAGNode descendant : genNode.descendans) {
 
-				if (descendant.getDescription() instanceof ExistentialConceptDescription) {
+				if (descendant.getDescription() instanceof PropertySomeDescription) {
 					SemanticIndexRange descRange;
 
-					Predicate p = ((ExistentialConceptDescription) descendant.getDescription()).getPredicate();
+					Predicate p = ((PropertySomeDescription) descendant.getDescription()).getPredicate();
 					if (p.getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 						continue;
 					}
-					boolean isInverse = ((ExistentialConceptDescription) descendant.getDescription()).isInverse();
+					boolean isInverse = ((PropertySomeDescription) descendant.getDescription()).isInverse();
 
-					RoleDescription role = descFactory.getRoleDescription(p, false);
+					Property role = descFactory.getRoleDescription(p, false);
 
 					if (pureIsa.equi_mappings.containsKey(role)) {
 						// XXX: Very dirty hack, needs to be redone
@@ -696,11 +696,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					descRange = pureIsa.getRoleNode(role).getRange();
 
 					for (DAGNode equiNode : equiNodes) {
-						if (!(equiNode.getDescription() instanceof AtomicConceptDescription)
+						if (!(equiNode.getDescription() instanceof Class)
 								|| equiNode.getDescription().equals(DAG.thingConcept)) {
 							continue;
 						}
-						AtomicConceptDescription equiDesc = (AtomicConceptDescription) equiNode.getDescription();
+						Class equiDesc = (Class) equiNode.getDescription();
 						String equiUri = equiDesc.getPredicate().getName().toString();
 
 						if (isInverse) {
@@ -714,7 +714,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 		for (DAGNode node : dag.getRoles()) {
 
-			RoleDescription nodeDesc = (RoleDescription) node.getDescription();
+			Property nodeDesc = (Property) node.getDescription();
 			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 				continue;
 			}
@@ -729,7 +729,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			for (DAGNode equiNode : node.getEquivalents()) {
 
-				RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
+				Property equiNodeDesc = (Property) equiNode.getDescription();
 
 				if (equiNodeDesc.isInverse()) {
 					projection = "URI1 as Y, URI2 as X";
@@ -739,7 +739,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 
 			for (DAGNode child : node.getChildren()) {
-				RoleDescription childDesc = (RoleDescription) child.getDescription();
+				Property childDesc = (Property) child.getDescription();
 
 				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
 					continue;
@@ -748,7 +748,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				if (!childDesc.isInverse()) {
 					continue;
 				}
-				RoleDescription posChildDesc = descFactory.getRoleDescription(childDesc.getPredicate(), false);
+				Property posChildDesc = descFactory.getRoleDescription(childDesc.getPredicate(), false);
 
 				SemanticIndexRange childRange = pureIsa.getRoleNode(posChildDesc).getRange();
 
@@ -757,7 +757,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				for (DAGNode equiNode : node.getEquivalents()) {
 
-					RoleDescription equiNodeDesc = (RoleDescription) equiNode.getDescription();
+					Property equiNodeDesc = (Property) equiNode.getDescription();
 					String equiProj = "URI1 as Y, URI2 as X";
 					if (equiNodeDesc.isInverse()) {
 						equiProj = "URI1 as X, URI2 as Y";
@@ -801,7 +801,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			ConceptDescription description = (ConceptDescription) node.getDescription();
+			ClassDescription description = (ClassDescription) node.getDescription();
 
 			/*
 			 * we always prefer the pureISA node since it can have extra data
@@ -822,7 +822,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 
 		for (DAGNode node : dag.getRoles()) {
-			RoleDescription description = (RoleDescription) node.getDescription();
+			Property description = (Property) node.getDescription();
 
 			/*
 			 * we always prefer the pureISA node since it can have extra data
@@ -851,7 +851,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		PreparedStatement stm = conn.prepareStatement(insert_query);
 		for (DAGNode node : dag.getClasses()) {
 
-			ConceptDescription description = (ConceptDescription) node.getDescription();
+			ClassDescription description = (ClassDescription) node.getDescription();
 
 			/*
 			 * we always prefer the pureISA node since it can have extra data
@@ -876,7 +876,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.executeBatch();
 
 		for (DAGNode node : dag.getRoles()) {
-			RoleDescription description = (RoleDescription) node.getDescription();
+			Property description = (Property) node.getDescription();
 
 			/*
 			 * we always prefer the pureISA node since it can have extra data
