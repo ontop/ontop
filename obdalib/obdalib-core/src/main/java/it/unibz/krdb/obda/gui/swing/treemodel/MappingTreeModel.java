@@ -16,14 +16,12 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.codec.SourceQueryToTextCodec;
 import it.unibz.krdb.obda.codec.TargetQeryToTextCodec;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.MappingControllerListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.SQLQuery;
-import it.unibz.krdb.obda.model.SourceQuery;
-import it.unibz.krdb.obda.model.TargetQuery;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
@@ -48,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 // TODO Make the three model be based on the actual mapping collection
 public class MappingTreeModel extends DefaultTreeModel implements
-		MappingControllerListener, FilteredTreeModel {
+		OBDAMappingListener, FilteredTreeModel {
 
 	private static final long serialVersionUID = -1151057670798439917L;
 
@@ -114,7 +112,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 					.getUserObject(), newquery);
 		} else if (oldmappingnode instanceof MappingBodyNode) {
 			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-			SQLQuery query = fac.getSQLQuery((String) newValue);
+			OBDASQLQuery query = fac.getSQLQuery((String) newValue);
 			controller.updateMappingsSourceQuery(sourceName, (String) parentnode
 					.getUserObject(), query);
 		}
@@ -185,8 +183,8 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			MappingBodyNode body = mappingnode.getBodyNode();
 			MappingHeadNode head = mappingnode.getHeadNode();
 
-			Query srcq = mapping.getSourceQuery();
-			Query trgq = mapping.getTargetQuery();
+			OBDAQuery srcq = mapping.getSourceQuery();
+			OBDAQuery trgq = mapping.getTargetQuery();
 			TargetQeryToTextCodec tttc = new TargetQeryToTextCodec(apic);
 			SourceQueryToTextCodec sttc = new SourceQueryToTextCodec(apic);
 			String newbodyquery =sttc.encode(srcq);
@@ -266,7 +264,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 */
 	private MappingNode getMappingNodeFromMapping(OBDAMappingAxiom mapping) {
 		mappingnode = new MappingNode(mapping.getId());
-		Query srcquery = mapping.getSourceQuery();
+		OBDAQuery srcquery = mapping.getSourceQuery();
 		CQIE tgtquery = (CQIEImpl) mapping.getTargetQuery();
 		MappingBodyNode body = null;
 		MappingHeadNode head = null;
@@ -301,8 +299,8 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * @param datasourceUri a data source uri.
 	 * @param mappings an array of mapping axioms.
 	 * @see OBDAMappingAxiom
-	 * @see SourceQuery
-	 * @see TargetQuery
+	 * @see OBDASourceQuery
+	 * @see OBDATargetQuery
 	 */
 	public void synchronize(URI datasourceUri, ArrayList<OBDAMappingAxiom> mappings) {
 	  int size = mappings.size();

@@ -12,11 +12,11 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.QueryModifiers;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 
-public class SQLQueryImpl implements Query, SQLQuery {
+public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 
 	private final String	sqlQuery;
 
@@ -51,12 +51,12 @@ public class SQLQueryImpl implements Query, SQLQuery {
 	 * @see inf.unibz.it.obda.model.impl.SQLQuery#getQueryModifiers()
 	 */
 	@Override
-	public QueryModifiers getQueryModifiers() {
-		return new QueryModifiers();
+	public OBDAQueryModifiers getQueryModifiers() {
+		return new OBDAQueryModifiers();
 	}
 
 	@Override
-	public void setQueryModifiers(QueryModifiers modifiers) {
+	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		
 		
 	}

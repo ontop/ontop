@@ -19,7 +19,7 @@ import it.unibz.krdb.obda.gui.swing.treemodel.ResultSetTableModel;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -73,7 +73,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private static final int		TABLE_COLUMN_WITH	= 200;
 
-	private DataSource				selectedSource;
+	private OBDADataSource				selectedSource;
 
 	private OBDAModel	dscontroller		= null;
 
@@ -298,7 +298,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 	}// GEN-LAST:event_cmdRefreshActionPerformed
 
 	@Override
-	public void datasourceChanged(DataSource oldSource, DataSource newSource) {
+	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
 		this.selectedSource = newSource;
 	}
 

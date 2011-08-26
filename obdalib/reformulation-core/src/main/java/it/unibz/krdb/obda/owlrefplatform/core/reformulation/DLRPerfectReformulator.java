@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
@@ -122,7 +122,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	// reformulates according to PerfectRef
 	// #############################
 
-	public Query rewrite(Query input) throws Exception {
+	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
 
 		if (!(input instanceof DatalogProgram)) {
 			throw new Exception("Rewriting exception: The input must be a DatalogProgram instance");

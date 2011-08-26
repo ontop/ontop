@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.model;
 
-public interface Statement {
+public interface OBDAStatement {
 
 	public String getUnfolding(String query) throws Exception;
 	
@@ -8,7 +8,7 @@ public interface Statement {
 
 	public String getRewriting(String query) throws Exception;
 
-	public QueryResultSet executeQuery(String query) throws Exception;
+	public OBDAResultSet executeQuery(String query) throws Exception;
 
 	public int getTupleCount(String query) throws Exception;
 

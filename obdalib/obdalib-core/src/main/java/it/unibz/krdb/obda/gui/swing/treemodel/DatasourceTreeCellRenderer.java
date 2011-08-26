@@ -14,7 +14,7 @@
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.obda.gui.swing.IconLoader;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.awt.Color;
@@ -59,7 +59,7 @@ public class DatasourceTreeCellRenderer extends DefaultTreeCellRenderer {
         if (leaf) {
             setIcon(dbms_source_icon);
             if(value !=null && ((DefaultMutableTreeNode)value).getUserObject() != null){
-	            DataSource ds = dsc.getSource(URI.create(value.toString()));
+	            OBDADataSource ds = dsc.getSource(URI.create(value.toString()));
 	            if (ds != null) {
 	            	if (!ds.isRegistred()) {
 	            		setForeground(Color.RED);

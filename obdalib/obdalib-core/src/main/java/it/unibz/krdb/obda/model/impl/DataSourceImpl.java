@@ -12,7 +12,7 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 
 import java.net.URI;
 import java.util.Enumeration;
@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 //TODO make this an entity too?
-public class DataSourceImpl implements DataSource {
+public class DataSourceImpl implements OBDADataSource {
 	// private String uri = ""
 	private boolean		enabled		= true;
 	private boolean		registred	= false;

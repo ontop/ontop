@@ -14,7 +14,7 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
@@ -27,7 +27,7 @@ import javax.swing.JOptionPane;
  */
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-	DataSource						currentDS			= null;
+	OBDADataSource						currentDS			= null;
 
 	/**
 	 * 
@@ -427,7 +427,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 	// End of variables declaration//GEN-END:variables
 
-	private void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
+	private void currentDatasourceChange(OBDADataSource previousdatasource, OBDADataSource currentsource) {
 
 		if (currentsource == null) {
 			labelDSType.setText("");
@@ -470,7 +470,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	}
 
 	@Override
-	public void datasourceChanged(DataSource oldSource, DataSource newSource) {
+	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
 		currentDatasourceChange(oldSource, newSource);
 
 	}

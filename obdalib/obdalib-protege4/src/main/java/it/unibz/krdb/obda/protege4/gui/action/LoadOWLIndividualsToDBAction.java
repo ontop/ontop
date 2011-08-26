@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.protege4.gui.action;
 
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
@@ -65,7 +65,7 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 				selectDialog.setLocationRelativeTo(getEditorKit().getWorkspace().getParent());
 				selectDialog.setVisible(true);
 				String selectedsource = selectDialog.getSelectedSource();
-				final DataSource source = controller.getActiveOBDAModel().getSource(URI.create(selectedsource));
+				final OBDADataSource source = controller.getActiveOBDAModel().getSource(URI.create(selectedsource));
 				Thread th = new Thread(new Runnable() {
 					@Override
 					public void run() {

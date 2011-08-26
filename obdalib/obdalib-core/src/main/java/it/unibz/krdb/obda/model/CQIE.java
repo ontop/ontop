@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.model;
 
 import java.util.List;
 
-public interface CQIE extends Query {
+public interface CQIE extends OBDAQuery {
 
 	public Atom getHead();
 

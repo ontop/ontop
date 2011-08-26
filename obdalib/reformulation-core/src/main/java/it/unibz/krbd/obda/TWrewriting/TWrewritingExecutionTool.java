@@ -1,10 +1,10 @@
 package it.unibz.krbd.obda.TWrewriting;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
@@ -59,7 +59,7 @@ public class TWrewritingExecutionTool {
             Connection connection;
 
             OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-            DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+            OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
             source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
             source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
             source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -121,7 +121,7 @@ public class TWrewritingExecutionTool {
 				log.info("##################  Executing query: {}", id);
 				
 				
-				Statement st = reasoner.getStatement();
+				OBDAStatement st = reasoner.getStatement();
 				
 				long start = System.currentTimeMillis();				
 				String rewriting = st.getRewriting(sparqlquery);

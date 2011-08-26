@@ -2,7 +2,7 @@ package it.unibz.krdb.sql;
 
 import it.unibz.krdb.obda.gui.swing.exception.NoDatasourceSelectedException;
 import it.unibz.krdb.obda.gui.swing.treemodel.ColumnInspectorTableModel;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
@@ -51,7 +51,7 @@ public class JDBCConnectionManager {
 		statementList = new Vector<Statement>();
 	}
 
-	public void createConnection(DataSource ds) throws ClassNotFoundException, SQLException {
+	public void createConnection(OBDADataSource ds) throws ClassNotFoundException, SQLException {
 
 		if (ds == null) {
 			RuntimeException ex = new RuntimeException("Invalid datasource: null");
@@ -100,7 +100,7 @@ public class JDBCConnectionManager {
 		}
 	}
 
-	public Statement getStatement(URI connID, DataSource ds) throws Exception {
+	public Statement getStatement(URI connID, OBDADataSource ds) throws Exception {
 		Connection con = connectionPool.get(connID);
 		if (con == null || con.isClosed()) {
 			createConnection(ds);
@@ -118,7 +118,7 @@ public class JDBCConnectionManager {
 		return st;
 	}
 
-	public ResultSet executeQuery(URI connID, String query, DataSource ds) throws SQLException {
+	public ResultSet executeQuery(URI connID, String query, OBDADataSource ds) throws SQLException {
 		ResultSet result = null;
 		Connection con = connectionPool.get(connID);
 		if (con == null || con.isClosed()) {
@@ -153,7 +153,7 @@ public class JDBCConnectionManager {
 		return result;
 	}
 
-	public ResultSet executeQuery(DataSource ds, String query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
+	public ResultSet executeQuery(OBDADataSource ds, String query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
 		Connection con = connectionPool.get(ds.getSourceID());
 		if (con == null) {
 			createConnection(ds);
@@ -231,7 +231,7 @@ public class JDBCConnectionManager {
 		connectionPool.clear();
 	}
 
-	public String getApprimateRowCount(String name, DataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException,
+	public String getApprimateRowCount(String name, OBDADataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException,
 			SQLException {
 		Connection con = connectionPool.get(ds.getSourceID());
 		if (con == null) {
@@ -253,7 +253,7 @@ public class JDBCConnectionManager {
 		return "Count error";
 	}
 
-	public Connection getConnection(DataSource source) throws ClassNotFoundException, SQLException {
+	public Connection getConnection(OBDADataSource source) throws ClassNotFoundException, SQLException {
 		if (source == null) {
 			throw new SQLException("No data source selected.");
 		}
@@ -287,7 +287,7 @@ public class JDBCConnectionManager {
 		}
 	}
 
-	public ColumnInspectorTableModel getTableDescriptionTableModel(DataSource source, String tablename) throws SQLException,
+	public ColumnInspectorTableModel getTableDescriptionTableModel(OBDADataSource source, String tablename) throws SQLException,
 			NoDatasourceSelectedException, ClassNotFoundException {
 
 		if (source == null) {

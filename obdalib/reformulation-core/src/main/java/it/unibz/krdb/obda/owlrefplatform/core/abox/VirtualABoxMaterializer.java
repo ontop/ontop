@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -65,9 +65,9 @@ public class VirtualABoxMaterializer {
 
 	JDBCConnectionManager						jdbcMan				= JDBCConnectionManager.getJDBCConnectionManager();
 
-	Map<DataSource, ComplexMappingUnfolder>		unfoldersMap		= new HashMap<DataSource, ComplexMappingUnfolder>();
+	Map<OBDADataSource, ComplexMappingUnfolder>		unfoldersMap		= new HashMap<OBDADataSource, ComplexMappingUnfolder>();
 
-	Map<DataSource, ComplexMappingSQLGenerator>	sqlgeneratorsMap	= new HashMap<DataSource, ComplexMappingSQLGenerator>();
+	Map<OBDADataSource, ComplexMappingSQLGenerator>	sqlgeneratorsMap	= new HashMap<OBDADataSource, ComplexMappingSQLGenerator>();
 
 	Set<Predicate>								vocabulary			= new LinkedHashSet<Predicate>();
 
@@ -81,7 +81,7 @@ public class VirtualABoxMaterializer {
 	public VirtualABoxMaterializer(OBDAModel model) throws Exception {
 		this.model = model;
 
-		for (DataSource source : model.getSources()) {
+		for (OBDADataSource source : model.getSources()) {
 			List<OBDAMappingAxiom> maps = model.getMappings(source.getSourceID());
 
 			/*
@@ -192,15 +192,15 @@ public class VirtualABoxMaterializer {
 	public class VirtualTriplePredicateIterator implements Iterator<ABoxAssertion> {
 
 		private Iterator<Predicate>							predicates;
-		private Collection<DataSource>						sources;
-		private Map<DataSource, ComplexMappingUnfolder>		unfolders;
-		private Map<DataSource, ComplexMappingSQLGenerator>	sqlgens;
+		private Collection<OBDADataSource>						sources;
+		private Map<OBDADataSource, ComplexMappingUnfolder>		unfolders;
+		private Map<OBDADataSource, ComplexMappingSQLGenerator>	sqlgens;
 
 		private Predicate									currentPredicate	= null;
 		private VirtualTripleIterator						currentIterator		= null;
 
-		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<DataSource> sources,
-				Map<DataSource, ComplexMappingUnfolder> unfolders, Map<DataSource, ComplexMappingSQLGenerator> sqlgens) throws SQLException {
+		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
+				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens) throws SQLException {
 			this.predicates = predicates;
 			this.sources = sources;
 			this.unfolders = unfolders;
@@ -282,20 +282,20 @@ public class VirtualABoxMaterializer {
 
 		private DatalogProgram								query			= null;
 
-		private Iterator<DataSource>						sourceIterator	= null;
+		private Iterator<OBDADataSource>						sourceIterator	= null;
 
 		private ResultSet									currentResults	= null;
 
 		private LinkedList<String>							signature;
 
-		private Map<DataSource, ComplexMappingUnfolder>		unfolders;
+		private Map<OBDADataSource, ComplexMappingUnfolder>		unfolders;
 
-		private Map<DataSource, ComplexMappingSQLGenerator>	sqlgens;
+		private Map<OBDADataSource, ComplexMappingSQLGenerator>	sqlgens;
 
 		private Logger										log				= LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(Predicate p, Collection<DataSource> sources, Map<DataSource, ComplexMappingUnfolder> unfolders,
-				Map<DataSource, ComplexMappingSQLGenerator> sqlgens) throws SQLException {
+		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources, Map<OBDADataSource, ComplexMappingUnfolder> unfolders,
+				Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens) throws SQLException {
 
 			this.pred = p;
 			this.unfolders = unfolders;
@@ -341,7 +341,7 @@ public class VirtualABoxMaterializer {
 		private void advanceToNextSource() throws NoSuchElementException, Exception {
 
 			String sql = "";
-			DataSource source = null;
+			OBDADataSource source = null;
 
 			while (sql.equals("")) {
 				source = sourceIterator.next();

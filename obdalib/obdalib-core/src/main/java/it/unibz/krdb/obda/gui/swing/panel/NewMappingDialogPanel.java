@@ -8,12 +8,12 @@ import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
@@ -61,7 +61,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	/** Fields */
 	private OBDAModel	controller = null;
 	private OBDAPreferences	preferences = null;
-	private DataSource dataSource	= null;
+	private OBDADataSource dataSource	= null;
 	private JDialog	parent = null;
 	private TargetQueryValidator validator = null;
 	
@@ -80,7 +80,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * @param dataSource
 	 * @param ontology
 	 */
-	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, DataSource dataSource, OWLOntology ontology) {
+	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, OBDADataSource dataSource, OWLOntology ontology) {
 		this.controller = controller;
 		this.preferences = preference;
 		this.parent = parent;
@@ -188,8 +188,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
   			  OBDAModel mapcon = controller;
   	      URI sourceID = dataSource.getSourceID();
   	      String id = mapcon.getNextAvailableMappingID(sourceID);
-  	      SQLQuery body = dataFactory.getSQLQuery(source);
-  	      RDBMSMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(id, body, targetQuery);
+  	      OBDASQLQuery body = dataFactory.getSQLQuery(source);
+  	      OBDARDBMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(id, body, targetQuery);
   				mapcon.addMapping(sourceID, mapping);
   			} 
   			catch (DuplicateMappingException e) {
@@ -383,7 +383,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	@Override
-	public void datasourceChanged(DataSource oldSource, DataSource newSource) {
+	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
 		dataSource = newSource;
 	}
 }

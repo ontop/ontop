@@ -16,7 +16,7 @@ package it.unibz.krdb.obda.model;
 import java.net.URI;
 
 
-public interface MappingControllerListener {
+public interface OBDAMappingListener {
 	
 	/***
 	 * Called when a mapping has been inserted into the currently selected datasource.

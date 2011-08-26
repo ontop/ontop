@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.LUBM;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
@@ -79,7 +79,7 @@ public class LUBMDLLiteQueryExecutionTool {
 				log.info("##################  Executing query: {}", id);
 				
 				
-				Statement st = reasoner.getStatement();
+				OBDAStatement st = reasoner.getStatement();
 				
 				long start = System.currentTimeMillis();				
 				String rewriting = st.getRewriting(sparqlquery);

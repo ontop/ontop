@@ -1,11 +1,11 @@
 package it.unibz.krdb.obda.LUBM;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
@@ -73,8 +73,8 @@ public class LUBMExecutionHelper {
 		/* Preparing a dummy datsource for this test */
 		DataManager ioManager = new DataManager(obdamodel);
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
-		List<DataSource> sources = obdamodel.getSources();
-		for (DataSource source : sources) {
+		List<OBDADataSource> sources = obdamodel.getSources();
+		for (OBDADataSource source : sources) {
 			obdamodel.removeSource(source.getSourceID());
 		}
 
@@ -85,7 +85,7 @@ public class LUBMExecutionHelper {
 		Connection connection;
 
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -158,7 +158,7 @@ public class LUBMExecutionHelper {
 			String id = query.getID();
 			log.info("##################  Testing query: {}", id);
 
-			Statement st = reasoner.getStatement();
+			OBDAStatement st = reasoner.getStatement();
 
 			long start = System.currentTimeMillis();
 
@@ -217,7 +217,7 @@ public class LUBMExecutionHelper {
 			} else if (testmode.equals("unfold")) {
 				String unfolding = st.getUnfolding(sparqlquery, false);
 			} else if (testmode.equals("execute")) {
-				QueryResultSet res = st.executeQuery(sparqlquery);
+				OBDAResultSet res = st.executeQuery(sparqlquery);
 				log.debug("Result size: {}", res.getFetchSize());
 			} else {
 				System.err.println("Unsupported mode. specify either \"rewrite\" or \"unfold\" or \"execute\"");
@@ -270,11 +270,11 @@ public class LUBMExecutionHelper {
 	public class ReformulationThread extends Thread {
 
 		final private CountDownLatch	latch;
-		final private Statement			st;
+		final private OBDAStatement			st;
 		final private String			query;
 		private String					reformulation	= null;
 
-		public ReformulationThread(CountDownLatch latch, Statement st, String query) {
+		public ReformulationThread(CountDownLatch latch, OBDAStatement st, String query) {
 			this.query = query;
 			this.latch = latch;
 			this.st = st;

@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.QueryModifiers;
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,10 +17,10 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	private Map<Predicate, List<CQIE>>	predicateIndex	= null;
 
-	private QueryModifiers				modifiers;
+	private OBDAQueryModifiers				modifiers;
 
 	protected DatalogProgramImpl() {
-		modifiers = new QueryModifiers();
+		modifiers = new OBDAQueryModifiers();
 		rules = new LinkedList<CQIE>();
 		predicateIndex = new HashMap<Predicate, List<CQIE>>();
 	}
@@ -108,12 +108,12 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	@Override
-	public QueryModifiers getQueryModifiers() {
+	public OBDAQueryModifiers getQueryModifiers() {
 		return modifiers;
 	}
 
 	@Override
-	public void setQueryModifiers(QueryModifiers modifiers) {
+	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
 	}
 

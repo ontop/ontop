@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.OBDAResultSet;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,7 +9,7 @@ import java.io.FileWriter;
 public class ResultSetToFileWriter {
 
 	
-	public static void saveResultSet(QueryResultSet result, File outputFile) throws Exception{
+	public static void saveResultSet(OBDAResultSet result, File outputFile) throws Exception{
 		
 		if(outputFile.exists()){
 			outputFile.delete();

@@ -39,24 +39,24 @@ public interface OBDAModel {
 
 //	public void fireAllDatasourcesDeleted();
 
-	public void fireSourceAdded(DataSource source);
+	public void fireSourceAdded(OBDADataSource source);
 
-	public void fireSourceRemoved(DataSource source);
+	public void fireSourceRemoved(OBDADataSource source);
 
 	public void fireSourceParametersUpdated();
 
 	//TODO remove
-	public void fireSourceNameUpdated(URI old, DataSource neu);
+	public void fireSourceNameUpdated(URI old, OBDADataSource neu);
 
-	public List<DataSource> getSources();
+	public List<OBDADataSource> getSources();
 
-	public DataSource getSource(URI name);
+	public OBDADataSource getSource(URI name);
 
-	public void addSource(DataSource source);
+	public void addSource(OBDADataSource source);
 
 	public void removeSource(URI id);
 	
-	public void updateSource(URI id, DataSource dsd);
+	public void updateSource(URI id, OBDADataSource dsd);
 	
 	public boolean containsSource(URI name);
 
@@ -69,9 +69,9 @@ public interface OBDAModel {
 	 */
 	
 
-	public void addMappingsListener(MappingControllerListener listener);
+	public void addMappingsListener(OBDAMappingListener listener);
 	
-	public void removeMappingsListener(MappingControllerListener listener);
+	public void removeMappingsListener(OBDAMappingListener listener);
 
 	
 
@@ -178,7 +178,7 @@ public interface OBDAModel {
 	 * @param mapping_id
 	 * @param head
 	 */
-	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, Query targetQuery);
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, OBDAQuery targetQuery);
 	
 	/***************************************************************************
 	 * Updates the indicated mapping and fires the appropiate event.
@@ -187,7 +187,7 @@ public interface OBDAModel {
 	 * @param mapping_id
 	 * @param body
 	 */
-	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, Query sourceQuery);
+	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery);
 
 
 	public boolean containsMapping(URI datasourceUri, String mappingId);

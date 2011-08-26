@@ -12,7 +12,7 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -62,7 +62,7 @@ public class RelationsResultSetTableModel implements TableModel {
 	
 	private Vector<TableModelListener> listeners = null;
 	
-	DataSource source = null;
+	OBDADataSource source = null;
 
 	/**
 	 * This constructor creates a TableModel from a ResultSet. It is package
@@ -70,7 +70,7 @@ public class RelationsResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public RelationsResultSetTableModel(ResultSet results, DataSource ds) throws SQLException {
+	public RelationsResultSetTableModel(ResultSet results, OBDADataSource ds) throws SQLException {
 
 		source = ds;
 		listeners = new Vector<TableModelListener>();

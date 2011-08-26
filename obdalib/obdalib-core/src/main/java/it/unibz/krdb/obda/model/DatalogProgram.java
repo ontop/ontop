@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.model;
 
 import java.util.List;
 
-public interface DatalogProgram extends Query {
+public interface DatalogProgram extends OBDAQuery {
 
 	public List<CQIE> getRules();
 

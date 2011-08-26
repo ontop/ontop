@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 
 import java.sql.ResultSet;
 
@@ -30,7 +30,7 @@ public interface EvaluationEngine {
 	 * 
 	 * @param ds the new data source
 	 */
-	public void update(DataSource ds);
+	public void update(OBDADataSource ds);
 	
 	public void closeStatement() throws Exception;
 	

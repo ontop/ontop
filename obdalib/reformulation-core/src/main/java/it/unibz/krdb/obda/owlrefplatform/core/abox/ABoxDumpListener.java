@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 
 /**
  * A simple listener interface that notifies its classes when a 
@@ -17,5 +17,5 @@ public interface ABoxDumpListener {
 	 * 
 	 * @param ds the data source to which the dump was made
 	 */
-	public void dump_successful(DataSource ds);
+	public void dump_successful(OBDADataSource ds);
 }

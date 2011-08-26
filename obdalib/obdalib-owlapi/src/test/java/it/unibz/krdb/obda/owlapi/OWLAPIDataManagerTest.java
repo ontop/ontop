@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.io.File;
@@ -89,13 +89,13 @@ public class OWLAPIDataManagerTest extends TestCase {
 			int i = 0;
 			for (OBDAMappingAxiom axiom : axioms) {
 				// The target queries
-				Query targetQuery = axiom.getTargetQuery();
+				OBDAQuery targetQuery = axiom.getTargetQuery();
 				String sTargetQuery = targetQuery.toString();
 				assertEquals("Target query is not the same!",
 						ORACLE_FAIL[0][i], sTargetQuery);
 
 				// The source queries
-				Query sourceQuery = axiom.getSourceQuery();
+				OBDAQuery sourceQuery = axiom.getSourceQuery();
 				String sSourceQuery = sourceQuery.toString();
 				assertEquals("Source query is not the same!",
 						ORACLE_FAIL[1][i], sSourceQuery);
@@ -117,13 +117,13 @@ public class OWLAPIDataManagerTest extends TestCase {
 			int i = 0;
 			for (OBDAMappingAxiom axiom : axioms) {
 				// The target queries
-				Query targetQuery = axiom.getTargetQuery();
+				OBDAQuery targetQuery = axiom.getTargetQuery();
 				String sTargetQuery = targetQuery.toString();
 				assertEquals("Target query is not the same!",
 						ORACLE_SUCCESS[0][i], sTargetQuery);
 
 				// The source queries
-				Query sourceQuery = axiom.getSourceQuery();
+				OBDAQuery sourceQuery = axiom.getSourceQuery();
 				String sSourceQuery = sourceQuery.toString();
 				assertEquals("Source query is not the same!",
 						ORACLE_SUCCESS[1][i], sSourceQuery);
@@ -145,13 +145,13 @@ public class OWLAPIDataManagerTest extends TestCase {
 			int i = 0;
 			for (OBDAMappingAxiom axiom : axioms) {
 				// The target queries
-				Query targetQuery = axiom.getTargetQuery();
+				OBDAQuery targetQuery = axiom.getTargetQuery();
 				String sTargetQuery = targetQuery.toString();
 				assertEquals("Target query is not the same!",
 						ORACLE_SUCCESS[0][i], sTargetQuery);
 
 				// The source queries
-				Query sourceQuery = axiom.getSourceQuery();
+				OBDAQuery sourceQuery = axiom.getSourceQuery();
 				String sSourceQuery = sourceQuery.toString();
 				assertEquals("Source query is not the same!",
 						ORACLE_SUCCESS[1][i], sSourceQuery);

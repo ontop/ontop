@@ -13,23 +13,23 @@
  */
 package it.unibz.krdb.obda.model.impl;
 
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 
 import java.security.InvalidParameterException;
 
 
-public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements RDBMSMappingAxiom {
+public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDARDBMappingAxiom {
 
-	private SQLQuery sourceQuery = null;
+	private OBDASQLQuery sourceQuery = null;
 	private CQIEImpl targetQuery = null;
 
 //	public RDBMSMappingAxiom(String id) {
 //		super(id);
 //	}
 
-	protected RDBMSMappingAxiomImpl(String id, Query sourceQuery, Query targetQuery) {
+	protected RDBMSMappingAxiomImpl(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
@@ -39,18 +39,18 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements R
 	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#setSourceQuery(inf.unibz.it.obda.model.Query)
 	 */
 	@Override
-	public void setSourceQuery(Query query) {
-		if (!(query instanceof SQLQuery)) {
+	public void setSourceQuery(OBDAQuery query) {
+		if (!(query instanceof OBDASQLQuery)) {
 			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a RDBMSSQLQuery as source query");
 		}
-		this.sourceQuery = (SQLQuery) query;
+		this.sourceQuery = (OBDASQLQuery) query;
 	}
 
 	/* (non-Javadoc)
 	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#setTargetQuery(inf.unibz.it.obda.model.Query)
 	 */
 	@Override
-	public void setTargetQuery(Query query) {
+	public void setTargetQuery(OBDAQuery query) {
 		if (!(query instanceof CQIEImpl)) {
 			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a OntologyQuery as target query");
 		}
@@ -62,7 +62,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements R
 	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#getSourceQuery()
 	 */
 	@Override
-	public SQLQuery getSourceQuery() {
+	public OBDASQLQuery getSourceQuery() {
 		return sourceQuery;
 	}
 
@@ -79,8 +79,8 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements R
 	 * @see inf.unibz.it.obda.model.impl.RDBMSMappingAxiom#clone()
 	 */
 	@Override
-	public RDBMSMappingAxiom clone() {
-		RDBMSMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(),targetQuery.clone());
+	public OBDARDBMappingAxiom clone() {
+		OBDARDBMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(),targetQuery.clone());
 		
 		return clone;
 	}

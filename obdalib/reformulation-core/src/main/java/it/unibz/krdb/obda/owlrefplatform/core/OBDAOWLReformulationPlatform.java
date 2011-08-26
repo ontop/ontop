@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.DataQueryReasoner;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDAQueryReasoner;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryReasoner, MonitorableOWLReasoner {
+public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, OBDAQueryReasoner, MonitorableOWLReasoner {
 
 	private static final String					NOT_IMPLEMENTED_STR		= "Service not available.";
 
@@ -141,7 +141,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryR
 	}
 
 	@Override
-	public Statement getStatement() throws Exception {
+	public OBDAStatement getStatement() throws Exception {
 		if (techwrapper != null && isClassified == true) {
 			return techwrapper.getStatement();
 		} else {
@@ -216,7 +216,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryR
 				String password = "";
 				Connection connection;
 
-				DataSource newsource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
+				OBDADataSource newsource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"));
 				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -261,7 +261,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryR
 			} else {
 				log.debug("Working in virtual mode");
 
-				Collection<DataSource> sources = this.obdaModel.getSources();
+				Collection<OBDADataSource> sources = this.obdaModel.getSources();
 				if (sources == null || sources.size() == 0) {
 					throw new Exception("No datasource has been defined");
 				} else if (sources.size() > 1) {
@@ -270,7 +270,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryR
 
 					/* Setting up the OBDA model */
 
-					DataSource ds = sources.iterator().next();
+					OBDADataSource ds = sources.iterator().next();
 					unfoldingOBDAModel.addSource(ds);
 					unfoldingOBDAModel.addMappings(ds.getSourceID(), this.obdaModel.getMappings(ds.getSourceID()));
 				}
@@ -306,7 +306,7 @@ public class OBDAOWLReformulationPlatform implements OBDAOWLReasoner, DataQueryR
 			 * Setting up the unfolder and SQL generation
 			 */
 
-			DataSource datasource = unfoldingOBDAModel.getSources().get(0);
+			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			MappingValidator mappingValidator = new MappingValidator(loadedOntologies);
 			boolean validmappings = mappingValidator.validate(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
 

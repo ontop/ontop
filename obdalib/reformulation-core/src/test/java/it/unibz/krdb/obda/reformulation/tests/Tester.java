@@ -4,8 +4,8 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
@@ -175,8 +175,8 @@ public class Tester {
 
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
-        Statement statement = reasoner.getStatement();
-        QueryResultSet result = statement.executeQuery(fullquery);
+        OBDAStatement statement = reasoner.getStatement();
+        OBDAResultSet result = statement.executeQuery(fullquery);
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {

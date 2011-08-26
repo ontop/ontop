@@ -1,9 +1,9 @@
 package it.unibz.krdb.obda.model;
 
 
-public interface DataQueryReasoner {
+public interface OBDAQueryReasoner {
 
-	public Statement getStatement() throws Exception;
+	public OBDAStatement getStatement() throws Exception;
 	
 	public void startProgressMonitor(String msg);
 	

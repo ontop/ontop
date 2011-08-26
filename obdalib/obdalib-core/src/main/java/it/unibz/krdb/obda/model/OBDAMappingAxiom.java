@@ -18,13 +18,13 @@ package it.unibz.krdb.obda.model;
 
 public interface OBDAMappingAxiom extends Cloneable {
 
-	public void setSourceQuery(Query query);
+	public void setSourceQuery(OBDAQuery query);
 
-	public Query getSourceQuery();
+	public OBDAQuery getSourceQuery();
 
-	public void setTargetQuery(Query query);
+	public void setTargetQuery(OBDAQuery query);
 
-	public Query getTargetQuery();
+	public OBDAQuery getTargetQuery();
 
 	public Object clone() throws CloneNotSupportedException;
 

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
-import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.OBDAResultSet;
 
 import java.net.URI;
 import java.sql.ResultSet;
@@ -14,7 +14,7 @@ import java.util.Vector;
  *
  */
 
-public class BooleanOWLOBDARefResultSet implements QueryResultSet{
+public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 
 	private ResultSet set = null;
 	private boolean isTrue = false;

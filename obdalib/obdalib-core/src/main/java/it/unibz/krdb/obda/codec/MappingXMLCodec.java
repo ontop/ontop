@@ -4,8 +4,8 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -84,8 +84,8 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 		if (headquery == null) {
 			return null;
 		}
-		SQLQuery bodyquery = fac.getSQLQuery(SQLstring);
-		RDBMSMappingAxiom newmapping = fac.getRDBMSMappingAxiom(id, bodyquery, headquery);
+		OBDASQLQuery bodyquery = fac.getSQLQuery(SQLstring);
+		OBDARDBMappingAxiom newmapping = fac.getRDBMSMappingAxiom(id, bodyquery, headquery);
 		return newmapping;
 	}
 
@@ -103,7 +103,7 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 		Element mappingheadelement = cqcodec.encode(hq);
 		// the body XML child
 		Element mappingbodyelement = createElement("SQLQuery");
-		SQLQuery bq = (SQLQuery) input.getSourceQuery();
+		OBDASQLQuery bq = (OBDASQLQuery) input.getSourceQuery();
 		if (bq != null) {
 			mappingbodyelement.setAttribute("string", bq.toString());
 		} else {

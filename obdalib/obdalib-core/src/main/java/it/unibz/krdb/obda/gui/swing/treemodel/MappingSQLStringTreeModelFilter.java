@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 
 /*
  * @author
@@ -17,7 +17,7 @@ public class MappingSQLStringTreeModelFilter extends TreeModelFilter<OBDAMapping
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
 
-    final SQLQuery bodyquery = (SQLQuery) object.getSourceQuery();
+    final OBDASQLQuery bodyquery = (OBDASQLQuery) object.getSourceQuery();
 
     boolean isMatch = false;
 

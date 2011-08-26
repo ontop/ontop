@@ -5,7 +5,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author obda
  * 
  */
-public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
+public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 
 	private final DatalogProgramParser	datalogParser	= new DatalogProgramParser();
 
@@ -46,7 +46,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 	 * valid target query representation null is returned.
 	 */
 	@Override
-	public Query decode(String input) {
+	public OBDAQuery decode(String input) {
 		return parse(input);
 	}
 
@@ -80,7 +80,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<Query> {
 	 * Create the String representation of the given target query.
 	 */
 	@Override
-	public String encode(Query input) {
+	public String encode(OBDAQuery input) {
 		PrefixManager man = apic.getPrefixManager();
 		StringBuffer sb = new StringBuffer();
 		if (input instanceof CQIE) {

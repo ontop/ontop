@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
@@ -42,7 +42,7 @@ public interface RDBMSDataRepositoryManager {
 
 	public void setConfig(Properties confi);
 
-	public void setDatabase(DataSource db) throws SQLException, ClassNotFoundException;
+	public void setDatabase(OBDADataSource db) throws SQLException, ClassNotFoundException;
 
 	public void setTBox(Ontology ontology);
 

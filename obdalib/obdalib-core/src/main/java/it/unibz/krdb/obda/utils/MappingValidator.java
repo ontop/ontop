@@ -14,18 +14,18 @@
 package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 
 import java.util.Enumeration;
 
 public abstract class MappingValidator {
 
 
-	protected Query sourceQuery = null;
-	protected Query targetQuery = null;
+	protected OBDAQuery sourceQuery = null;
+	protected OBDAQuery targetQuery = null;
 	protected OBDAModel apic = null;
 
-	public MappingValidator (OBDAModel apic, Query sq, Query tg){
+	public MappingValidator (OBDAModel apic, OBDAQuery sq, OBDAQuery tg){
 		this.apic = apic;
 		sourceQuery = sq;
 		targetQuery = tg;

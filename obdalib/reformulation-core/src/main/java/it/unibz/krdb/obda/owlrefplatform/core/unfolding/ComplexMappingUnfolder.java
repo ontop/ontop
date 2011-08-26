@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
+import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -105,7 +105,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 				List<Atom> newBody = new LinkedList<Atom>();
 				newBody.add(atom);
 				CQIE newCQ = termFactory.getCQIE(head, newBody);
-				RDBMSMappingAxiom newMap = termFactory.getRDBMSMappingAxiom(map.getId() + "_" + counter, map.getSourceQuery(), newCQ);
+				OBDARDBMappingAxiom newMap = termFactory.getRDBMSMappingAxiom(map.getId() + "_" + counter, map.getSourceQuery(), newCQ);
 				if (!splitMappings.contains(newMap))
 					splitMappings.add(newMap);
 			}

@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.model;
 
 import java.util.Properties;
 
-public class QueryModifiers extends Properties {
+public class OBDAQueryModifiers extends Properties {
 
 	/**
 	 * 

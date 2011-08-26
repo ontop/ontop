@@ -16,10 +16,10 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.gui.swing.treemodel.ResultSetTableModel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -32,11 +32,11 @@ import java.util.Vector;
 
 public class RDBMSMappingValidator extends MappingValidator {
 
-	private SQLQuery sqlQuery = null;
+	private OBDASQLQuery sqlQuery = null;
 	private CQIE conjunciveQuery = null;
-	private final DataSource dsc;
+	private final OBDADataSource dsc;
 
-	public RDBMSMappingValidator (OBDAModel apic, DataSource dsc, SQLQuery sql, CQIE con){
+	public RDBMSMappingValidator (OBDAModel apic, OBDADataSource dsc, OBDASQLQuery sql, CQIE con){
 
 		super(apic, sql, con);
 		this.dsc = dsc;

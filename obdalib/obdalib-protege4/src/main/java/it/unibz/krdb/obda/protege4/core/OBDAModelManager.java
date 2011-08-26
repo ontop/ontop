@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.MappingControllerListener;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -370,15 +370,15 @@ public class OBDAModelManager implements Disposable {
 	 */
 
 	private class ProtegeDatasourcesControllerListener implements OBDAModelListener {
-		public void datasourceUpdated(String oldname, DataSource currendata) {
+		public void datasourceUpdated(String oldname, OBDADataSource currendata) {
 			triggerOntologyChanged();
 		}
 
-		public void datasourceDeleted(DataSource source) {
+		public void datasourceDeleted(OBDADataSource source) {
 			triggerOntologyChanged();
 		}
 
-		public void datasourceAdded(DataSource source) {
+		public void datasourceAdded(OBDADataSource source) {
 			triggerOntologyChanged();
 		}
 
@@ -391,7 +391,7 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private class ProtegeMappingControllerListener implements MappingControllerListener {
+	private class ProtegeMappingControllerListener implements OBDAMappingListener {
 		public void allMappingsRemoved() {
 			triggerOntologyChanged();
 		}

@@ -2,8 +2,8 @@ package it.unibz.krdb.obda.codec;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 /*
@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
  * @author obda
  *
  */
-public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
+public class SourceQueryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 
 	OBDADataFactory fac= OBDADataFactoryImpl.getInstance();
 	/**
@@ -30,8 +30,8 @@ public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 	 * target query representation null is returned.
 	 */
 	@Override
-	public Query decode(String input) {
-		SQLQuery query = fac.getSQLQuery(input);
+	public OBDAQuery decode(String input) {
+		OBDASQLQuery query = fac.getSQLQuery(input);
 		return query;
 	}
 
@@ -39,7 +39,7 @@ public class SourceQueryToTextCodec extends ObjectToTextCodec<Query> {
 	 * Create the String representation of the given source query.
 	 */
 	@Override
-	public String encode(Query input) {
+	public String encode(OBDAQuery input) {
 		if (input == null)
 			return "";
 

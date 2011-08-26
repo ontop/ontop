@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -64,7 +64,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -153,7 +153,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -178,7 +178,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addSource(source);
 
-		DataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -252,7 +252,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -277,7 +277,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addSource(source);
 
-		DataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -286,7 +286,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source2);
 
-		DataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
+		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -361,7 +361,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -386,7 +386,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addSource(source);
 
-		DataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -395,7 +395,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source2);
 
-		DataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
+		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -432,7 +432,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -457,7 +457,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addSource(source);
 
-		DataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -466,7 +466,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source2);
 
-		DataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
+		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -537,7 +537,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);

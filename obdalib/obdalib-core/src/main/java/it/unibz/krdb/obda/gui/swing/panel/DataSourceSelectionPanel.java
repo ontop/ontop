@@ -4,7 +4,7 @@
  */
 package it.unibz.krdb.obda.gui.swing.panel;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -102,7 +102,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				DataSource ds = selector.getSelectedDataSource();
+				OBDADataSource ds = selector.getSelectedDataSource();
 				if (ds != null) {
 					dscontroller.removeSource(ds.getSourceID());
 				}
@@ -125,7 +125,7 @@ public class DataSourceSelectionPanel extends javax.swing.JPanel {
       URI uri = createUri(name);
       if (uri != null) {
         if (!dscontroller.containsSource(uri)) {
-        	DataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        	OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(uri);
         	dscontroller.addSource(source);
         }
         else {

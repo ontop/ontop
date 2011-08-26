@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlapi.util;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Atom;
@@ -45,14 +45,14 @@ public class OBDA2OWLDataMaterializer {
 	private boolean isCanceled = false;
 	
 	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology) throws Exception {
-		List<DataSource> sources = controller.getSources();
-		Iterator<DataSource> sit = sources.iterator();
+		List<OBDADataSource> sources = controller.getSources();
+		Iterator<OBDADataSource> sit = sources.iterator();
 		while (sit.hasNext()) {
 			materializeAbox(controller, manager, currentOntology, sit.next());
 		}
 	}
 
-	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology, DataSource targetSource)
+	public void materializeAbox(OBDAModel controller, OWLOntologyManager manager, OWLOntology currentOntology, OBDADataSource targetSource)
 			throws Exception {
 
 		OWLDataFactory factory = manager.getOWLDataFactory();

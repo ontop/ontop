@@ -5,7 +5,7 @@
 
 package it.unibz.krdb.obda.protege4.dialogs;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -201,7 +201,7 @@ public class SetParametersDialog extends javax.swing.JDialog {
     		JOptionPane.showMessageDialog(this, "Please fill out all fields.");
     	}else{
     	
-    		DataSource aux = getOldAboxDump();
+    		OBDADataSource aux = getOldAboxDump();
     		if(aux != null){
     			aux.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
     			aux.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, usr);
@@ -212,7 +212,7 @@ public class SetParametersDialog extends javax.swing.JDialog {
     			apic.updateSource(aux.getSourceID(), aux);
     		}else{
 	    		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		    	DataSource ds = fac.getDataSource(URI.create("ABOXDUMP"));
+		    	OBDADataSource ds = fac.getDataSource(URI.create("ABOXDUMP"));
 		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, usr);
 		    	ds.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, pwd);
@@ -226,13 +226,13 @@ public class SetParametersDialog extends javax.swing.JDialog {
     	}
     }
     
-    private DataSource getOldAboxDump(){
+    private OBDADataSource getOldAboxDump(){
     	
-    	DataSource dump = null;
+    	OBDADataSource dump = null;
     	
-    	Iterator<DataSource> it = apic.getSources().iterator();
+    	Iterator<OBDADataSource> it = apic.getSources().iterator();
     	while(it.hasNext()){
-    		DataSource aux = it.next();
+    		OBDADataSource aux = it.next();
     		String s = aux.getParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP);
     		if(s != null && s.equals("true")){
     			dump = aux;

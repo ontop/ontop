@@ -12,7 +12,7 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 
 import java.net.URI;
@@ -32,11 +32,11 @@ public class DatasourceTreeModel extends DefaultTreeModel implements OBDAModelLi
 		super(new DefaultMutableTreeNode());
 	}
 
-	public void datasourceAdded(DataSource source) {
+	public void datasourceAdded(OBDADataSource source) {
 		insertNodeInto(new DefaultMutableTreeNode(source.getSourceID()), (DefaultMutableTreeNode) root, root.getChildCount());
 	}
 
-	public void datasourceDeleted(DataSource source) {
+	public void datasourceDeleted(OBDADataSource source) {
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
 		Enumeration<DefaultMutableTreeNode> children = root.children();
 		DefaultMutableTreeNode affectedchild = null;
@@ -51,7 +51,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements OBDAModelLi
 		nodeStructureChanged(root);
 	}
 
-	public void datasourceUpdated(String oldname, DataSource currendata) {
+	public void datasourceUpdated(String oldname, OBDADataSource currendata) {
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) this.root;
 		Enumeration<DefaultMutableTreeNode> children = root.children();
 		DefaultMutableTreeNode affectedchild = null;
@@ -74,7 +74,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements OBDAModelLi
 		nodeStructureChanged(root);
 	}
 
-	public void currentDatasourceChange(DataSource previousdatasource, DataSource currentsource) {
+	public void currentDatasourceChange(OBDADataSource previousdatasource, OBDADataSource currentsource) {
 
 	}
 
@@ -85,7 +85,7 @@ public class DatasourceTreeModel extends DefaultTreeModel implements OBDAModelLi
 	 * @param datasources
 	 *            the array of data sources.
 	 */
-	public void synchronize(List<DataSource> datasources) {
+	public void synchronize(List<OBDADataSource> datasources) {
 		alldatasourcesDeleted();
 		int size = datasources.size();
 		for (int i = 0; i < size; i++) {

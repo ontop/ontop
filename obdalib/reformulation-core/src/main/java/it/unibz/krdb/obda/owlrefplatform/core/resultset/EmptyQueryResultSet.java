@@ -1,12 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
-import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.OBDAResultSet;
 
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
 
-public class EmptyQueryResultSet implements QueryResultSet {
+public class EmptyQueryResultSet implements OBDAResultSet {
 
 	List<String> head = null;
 	

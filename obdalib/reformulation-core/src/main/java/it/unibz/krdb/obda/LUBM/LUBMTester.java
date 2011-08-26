@@ -1,12 +1,12 @@
 package it.unibz.krdb.obda.LUBM;
 
 
-import it.unibz.krdb.obda.model.DataQueryReasoner;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDAQueryReasoner;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
@@ -46,10 +46,10 @@ public class LUBMTester {
 
         // Prepare reasoner
         tboxHelper = new TBoxLoader(dataDirectory);
-        DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
+        OBDADataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
         apic.addSource(ds);
 
-        DataQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
+        OBDAQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
 
         for (String query : queries) {
             starttime = System.nanoTime();
@@ -86,12 +86,12 @@ public class LUBMTester {
         loader.makeIndexes();
     }
 
-    private static Set<String> execute(String query, DataQueryReasoner reasoner) throws Exception {
+    private static Set<String> execute(String query, OBDAQueryReasoner reasoner) throws Exception {
 
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
-        Statement statement = reasoner.getStatement();
-        QueryResultSet result = statement.executeQuery(fullquery);
+        OBDAStatement statement = reasoner.getStatement();
+        OBDAResultSet result = statement.executeQuery(fullquery);
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {

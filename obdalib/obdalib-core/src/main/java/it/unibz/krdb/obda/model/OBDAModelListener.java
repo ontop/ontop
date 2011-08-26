@@ -14,11 +14,11 @@ package it.unibz.krdb.obda.model;
 
 public interface OBDAModelListener {
 
-	public void datasourceAdded(DataSource source);
+	public void datasourceAdded(OBDADataSource source);
 
-	public void datasourceDeleted(DataSource source);
+	public void datasourceDeleted(OBDADataSource source);
 
-	public void datasourceUpdated(String oldname, DataSource currendata);
+	public void datasourceUpdated(String oldname, OBDADataSource currendata);
 
 	public void alldatasourcesDeleted();
 

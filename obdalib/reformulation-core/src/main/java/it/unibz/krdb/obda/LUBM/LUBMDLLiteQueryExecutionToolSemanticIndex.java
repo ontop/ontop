@@ -2,10 +2,10 @@ package it.unibz.krdb.obda.LUBM;
 
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.DummyOBDAPlatformFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
@@ -46,7 +46,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
             DataManager ioManager = new DataManager(obdamodel);
             ioManager.loadOBDADataFromURI(new File(obdafileBase).toURI(), ontology.getURI(), obdamodel.getPrefixManager());
 
-            DataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
+            OBDADataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
             obdamodel.addSource(ds);
 
             OBDAOWLReformulationPlatformFactory factory = new DummyOBDAPlatformFactoryImpl();
@@ -116,7 +116,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
                 String id = query.getID();
                 log.info("##################  Rewriting query: {}", id);
 
-                Statement st = reasoner.getStatement();
+                OBDAStatement st = reasoner.getStatement();
 
                 long start = System.currentTimeMillis();
                 String rewriting = st.getRewriting(sparqlquery);
@@ -134,7 +134,7 @@ public class LUBMDLLiteQueryExecutionToolSemanticIndex {
                 String id = query.getID();
                 log.info("##################  Unfolding query: {}", id);
 
-                Statement st = reasoner.getStatement();
+                OBDAStatement st = reasoner.getStatement();
 
                 long start = System.currentTimeMillis();
                 String rewriting = st.getUnfolding(sparqlquery);

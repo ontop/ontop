@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.LUBM;
 
 
-import it.unibz.krdb.obda.model.DataQueryReasoner;
+import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.DummyOBDAPlatformFactoryImpl;
@@ -41,11 +41,11 @@ public class TBoxLoader {
     }
 
 
-    public DataQueryReasoner loadReasoner(OBDAModel apic, OWLOntologyManager manager) throws Exception {
+    public OBDAQueryReasoner loadReasoner(OBDAModel apic, OWLOntologyManager manager) throws Exception {
 
         OBDAOWLReasonerFactory fac = new DummyOBDAPlatformFactoryImpl();
 //        fac.setOBDAController(apic);
-        return (DataQueryReasoner) fac.createReasoner(manager);
+        return (OBDAQueryReasoner) fac.createReasoner(manager);
 
 
     }

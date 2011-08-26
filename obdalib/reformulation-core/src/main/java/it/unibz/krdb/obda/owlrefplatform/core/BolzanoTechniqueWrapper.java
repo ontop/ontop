@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
@@ -54,7 +54,7 @@ public class BolzanoTechniqueWrapper implements TechniqueWrapper {
 	 * if the query syntax is not supported
 	 */
 	@Override
-	public Statement getStatement() throws Exception {
+	public OBDAStatement getStatement() throws Exception {
 		return new OBDAStatement(unfoldingMechanism, queryRewriter, queryGenerator, queryValidator, evaluationEngine, apic);
 	}
 

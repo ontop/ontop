@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -320,7 +320,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public Query rewrite(Query input) throws Exception {
+	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
 		if (!(input instanceof DatalogProgram)) 
 			throw new Exception("Rewriting exception: The input must be a DatalogProgram instance");
 

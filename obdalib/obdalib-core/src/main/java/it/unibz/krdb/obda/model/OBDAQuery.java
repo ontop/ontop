@@ -15,10 +15,10 @@ package it.unibz.krdb.obda.model;
 
 
 
-public interface Query {
+public interface OBDAQuery {
 	
-	public QueryModifiers getQueryModifiers();
+	public OBDAQueryModifiers getQueryModifiers();
 	
-	public void setQueryModifiers(QueryModifiers modifiers);
+	public void setQueryModifiers(OBDAQueryModifiers modifiers);
 
 }

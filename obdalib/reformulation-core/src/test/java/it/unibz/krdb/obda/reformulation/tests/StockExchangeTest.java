@@ -3,8 +3,8 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAConstants;
@@ -71,8 +71,8 @@ public class StockExchangeTest extends TestCase {
 		
 		// Getting a prefix for the query
 		
-		Statement st = reasoner.getStatement();
-		QueryResultSet r = st.executeQuery(sparqlstr);
+		OBDAStatement st = reasoner.getStatement();
+		OBDAResultSet r = st.executeQuery(sparqlstr);
 		int ic = r.getColumCount();
 		while (r.nextRow()) {
 			for (int i = 0; i < ic; i++) {

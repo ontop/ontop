@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
       }
 
   		// Check in the Mapping Source Query
-  		final SQLQuery query = (SQLQuery) object.getSourceQuery();
+  		final OBDASQLQuery query = (OBDASQLQuery) object.getSourceQuery();
   		isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
   		if (isMatch) {
         break; // end loop if a match is found!

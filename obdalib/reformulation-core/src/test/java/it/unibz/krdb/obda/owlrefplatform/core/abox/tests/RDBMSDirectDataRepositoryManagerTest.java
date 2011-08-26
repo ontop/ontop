@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox.tests;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -63,7 +63,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -144,7 +144,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP22"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP22"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -206,7 +206,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1000"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1000"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -275,7 +275,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		DataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP4"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP4"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);

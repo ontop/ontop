@@ -1,13 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
@@ -49,7 +49,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	// private APIController apic = null;
 	private List<ABoxDumpListener>	listener					= null;
 
-	private DataSource				db							= null;
+	private OBDADataSource				db							= null;
 	// private int indexcounter = 1;
 	//
 	private boolean					isCanceled					= false;
@@ -103,11 +103,11 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	private Set<Predicate>			vocabulary;
 
-	public RDBMSDirectDataRepositoryManager(DataSource ds) throws SQLException, PunningException {
+	public RDBMSDirectDataRepositoryManager(OBDADataSource ds) throws SQLException, PunningException {
 		this(ds, null);
 	}
 
-	public RDBMSDirectDataRepositoryManager(DataSource ds, Set<Predicate> vocabulary) throws SQLException, PunningException {
+	public RDBMSDirectDataRepositoryManager(OBDADataSource ds, Set<Predicate> vocabulary) throws SQLException, PunningException {
 		this();
 		try {
 			if (vocabulary != null) {
@@ -163,7 +163,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void setDatabase(DataSource db) throws SQLException, ClassNotFoundException {
+	public void setDatabase(OBDADataSource db) throws SQLException, ClassNotFoundException {
 		this.db = db;
 		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(db);
 	}
@@ -474,13 +474,13 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			if (pred.getArity() == 1) {
 				Atom head = obdaFactory.getAtom(unaryq, obdaFactory.getVariable("term0"));
 				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"));
-				Query target = obdaFactory.getCQIE(head, body);
+				OBDAQuery target = obdaFactory.getCQIE(head, body);
 				String sqlquery = String.format(strselect_table_class, predicatetableMap.get(pred));
 				map = obdaFactory.getRDBMSMappingAxiom(sqlquery, target);
 			} else if (pred.getArity() == 2) {
 				Atom head = obdaFactory.getAtom(binaryq, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
 				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
-				Query target = obdaFactory.getCQIE(head, body);
+				OBDAQuery target = obdaFactory.getCQIE(head, body);
 				String sqlquery = String.format(strselect_table_property, predicatetableMap.get(pred));
 				map = obdaFactory.getRDBMSMappingAxiom(sqlquery, target);
 			} else {

@@ -4,7 +4,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface QueryResultSet {
+public interface OBDAResultSet {
 
 	public int getColumCount() throws SQLException;
 

@@ -3,8 +3,8 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.OBDAOWLReformulationPlatform;
@@ -102,8 +102,8 @@ public class OntologyLoader {
                 System.out.println("ID: " + id);
 
                 String sparqlstr = prefix + query;
-                Statement statement = reasoner.getStatement();
-                QueryResultSet result = statement.executeQuery(sparqlstr);
+                OBDAStatement statement = reasoner.getStatement();
+                OBDAResultSet result = statement.executeQuery(sparqlstr);
 
                 // Printing the results
                 System.out.println("Results:");

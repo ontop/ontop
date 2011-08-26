@@ -5,7 +5,7 @@
 
 package it.unibz.krdb.obda.protege4.dialogs;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.util.Iterator;
@@ -61,7 +61,7 @@ public class SelectDB extends javax.swing.JDialog {
 
 	private void addExistingDataSourcesToCombo() {
 
-		Iterator<DataSource> it = apic.getSources().iterator();
+		Iterator<OBDADataSource> it = apic.getSources().iterator();
 		while (it.hasNext()) {
 			jComboBox1.addItem(it.next().getSourceID());
 		}

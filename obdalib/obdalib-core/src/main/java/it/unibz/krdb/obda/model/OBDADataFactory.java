@@ -21,7 +21,7 @@ public interface OBDADataFactory {
 
 	public CQIE getCQIE(Atom head, Atom body);
 
-	public DataSource getDataSource(URI id);
+	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
 
@@ -106,9 +106,9 @@ public interface OBDADataFactory {
 
 	public Function getORFunction(List<Term> terms);
 	
-	public DataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass);
+	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass);
 	
-	public DataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass);
+	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass);
 
 	/**
 	 * Construct a {@link URIConstant} object. This type of term is written as a
@@ -216,12 +216,12 @@ public interface OBDADataFactory {
 
 	public Function getFunctionalTerm(Predicate functor, Term term1, Term term2);
 
-	public RDBMSMappingAxiom getRDBMSMappingAxiom(String id, Query sourceQuery, Query targetQuery);
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 
-	public RDBMSMappingAxiom getRDBMSMappingAxiom(String id, String sql, Query targetQuery);
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery);
 
-	public RDBMSMappingAxiom getRDBMSMappingAxiom(String sql, Query targetQuery);
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery);
 
-	public SQLQuery getSQLQuery(String query);
+	public OBDASQLQuery getSQLQuery(String query);
 
 }

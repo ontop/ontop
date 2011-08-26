@@ -9,9 +9,9 @@ import it.unibz.krdb.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableMod
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.gui.swing.utils.TextMessageFrame;
-import it.unibz.krdb.obda.model.DataQueryReasoner;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAQueryReasoner;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
@@ -173,7 +173,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					action.run();
 					latch.await();
 					monitor.stop();
-					QueryResultSet result = action.getResult();
+					OBDAResultSet result = action.getResult();
 					if (result != null) {
 						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result, obdaController.getActiveOBDAModel().getPrefixManager(), panel_query_interface.isShortURISelect());
 						model.addTableModelListener(panel);
@@ -318,7 +318,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					action.run();
 					latch.await();
 					monitor.stop();
-					QueryResultSet result = action.getResult();
+					OBDAResultSet result = action.getResult();
 					if (result != null) {
 						ResultSetToFileWriter.saveResultSet(result, file);
 					}
@@ -374,7 +374,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	private class UnfoldQueryAction implements OBDAProgressListener {
-		private Statement		statement	= null;
+		private OBDAStatement		statement	= null;
 		private CountDownLatch	latch		= null;
 		private Thread			thread		= null;
 		private String			result		= null;
@@ -393,11 +393,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof DataQueryReasoner) {
+					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-							Statement st = dqr.getStatement();
+							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
+							OBDAStatement st = dqr.getStatement();
 							result = st.getUnfolding(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -436,7 +436,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class ExpandQueryAction implements OBDAProgressListener {
 
-		private Statement		statement	= null;
+		private OBDAStatement		statement	= null;
 		private CountDownLatch	latch		= null;
 		private Thread			thread		= null;
 		private String			result		= null;
@@ -455,11 +455,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof DataQueryReasoner) {
+					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-							Statement st = dqr.getStatement();
+							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
+							OBDAStatement st = dqr.getStatement();
 							result = st.getRewriting(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -498,10 +498,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class ExecuteQueryAction implements OBDAProgressListener {
 
-		private Statement		statement	= null;
+		private OBDAStatement		statement	= null;
 		private CountDownLatch	latch		= null;
 		private Thread			thread		= null;
-		private QueryResultSet	result		= null;
+		private OBDAResultSet	result		= null;
 		private String			query		= null;
 
 		private ExecuteQueryAction(CountDownLatch latch, String query) {
@@ -509,7 +509,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			this.query = query;
 		}
 
-		public QueryResultSet getResult() {
+		public OBDAResultSet getResult() {
 			return result;
 		}
 
@@ -517,11 +517,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof DataQueryReasoner) {
+					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-							Statement st = dqr.getStatement();
+							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
+							OBDAStatement st = dqr.getStatement();
 							result = st.executeQuery(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -561,7 +561,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class CountAllTuplesAction implements OBDAProgressListener {
 
-		private Statement		statement	= null;
+		private OBDAStatement		statement	= null;
 		private CountDownLatch	latch		= null;
 		private Thread			thread		= null;
 		private int				result		= -1;
@@ -580,11 +580,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof DataQueryReasoner) {
+					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							DataQueryReasoner dqr = (DataQueryReasoner) reasoner;
-							Statement st = dqr.getStatement();
+							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
+							OBDAStatement st = dqr.getStatement();
 							result = st.getTupleCount(query);
 							latch.countDown();
 						} catch (Exception e) {

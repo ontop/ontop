@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
@@ -80,7 +80,7 @@ public class MappingViewManager implements ViewManager {
 		HashSet<String> usedSQL = new HashSet<String>();
 		while (it.hasNext()) {
 			OBDAMappingAxiom ax = it.next();
-			SQLQuery sourceQuery = (SQLQuery) ax.getSourceQuery();
+			OBDASQLQuery sourceQuery = (OBDASQLQuery) ax.getSourceQuery();
 			String sql = sourceQuery.toString();
 			Vector<OBDAMappingAxiom> sameSQL = mappingswithsambodyIndex.get(sql);
 			if (sameSQL == null) {

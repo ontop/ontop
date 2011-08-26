@@ -16,8 +16,8 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.gui.swing.exception.NoDatasourceSelectedException;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
-import it.unibz.krdb.obda.model.DataSource;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.sql.ResultSet;
@@ -26,16 +26,16 @@ import java.sql.SQLException;
 
 public class SourceQueryValidator {
 
-	private Query			sourceQuery		= null;
+	private OBDAQuery			sourceQuery		= null;
 	private IncrementalResultSetTableModel	model			= null;
 
 	private Exception			reason			= null;
 
 	JDBCConnectionManager	modelfactory	= null;
 
-	DataSource					source			= null;
+	OBDADataSource					source			= null;
 
-	public SourceQueryValidator(DataSource source, Query q) {
+	public SourceQueryValidator(OBDADataSource source, OBDAQuery q) {
 		this.source = source;
 		sourceQuery = q;
 	}

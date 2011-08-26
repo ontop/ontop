@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.sql.Connection;
@@ -23,14 +23,14 @@ import org.slf4j.LoggerFactory;
 
 public class JDBCEngine implements EvaluationEngine {
 
-	private DataSource	datasource		= null;
+	private OBDADataSource	datasource		= null;
 	private Connection	connection		= null;
 	private Statement	statement		= null;
 	private boolean		actionCanceled	= false;
 
 	Logger				log				= LoggerFactory.getLogger(EvaluationEngine.class);
 
-	public JDBCEngine(DataSource ds) throws SQLException {
+	public JDBCEngine(OBDADataSource ds) throws SQLException {
 		datasource = ds;
 		connect();
 
@@ -83,7 +83,7 @@ public class JDBCEngine implements EvaluationEngine {
 	}
 
 	@Override
-	public void update(DataSource ds) {
+	public void update(OBDADataSource ds) {
 		if (!ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("org.h2.Driver")) {
 			if (connection != null) {
 				try {

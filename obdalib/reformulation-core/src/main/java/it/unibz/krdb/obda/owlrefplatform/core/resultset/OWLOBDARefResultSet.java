@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
-import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.OBDAResultSet;
 
 import java.net.URI;
 import java.sql.ResultSet;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Vector;
 
 
-public class OWLOBDARefResultSet implements QueryResultSet{
+public class OWLOBDARefResultSet implements OBDAResultSet{
 
 	private ResultSet set = null;
 	

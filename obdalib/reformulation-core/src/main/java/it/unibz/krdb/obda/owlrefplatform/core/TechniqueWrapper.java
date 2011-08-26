@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DLLiterOntology;
 
 /**
@@ -19,7 +19,7 @@ public interface TechniqueWrapper {
 	 * @return the answer statement 
 	 * @throws Exception
 	 */
-	public Statement getStatement() throws Exception;
+	public OBDAStatement getStatement() throws Exception;
 //	public void updateOntology(DLLiterOntology onto, Set<URI> uris);
 //	public void updateDataSource(DataSource ds);
 	

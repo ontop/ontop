@@ -1,12 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
@@ -64,7 +64,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private Connection					conn				= null;
 
-	private DataSource					db					= null;
+	private OBDADataSource					db					= null;
 
 	public final static String			index_table			= "IDX";
 
@@ -156,11 +156,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final boolean		mergeUniions		= true;
 
-	public RDBMSSIRepositoryManager(DataSource ds) throws SQLException, PunningException {
+	public RDBMSSIRepositoryManager(OBDADataSource ds) throws SQLException, PunningException {
 		this(ds, null);
 	}
 
-	public RDBMSSIRepositoryManager(DataSource ds, Set<Predicate> vocabulary) throws SQLException, PunningException {
+	public RDBMSSIRepositoryManager(OBDADataSource ds, Set<Predicate> vocabulary) throws SQLException, PunningException {
 		try {
 			if (vocabulary != null) {
 				setVocabulary(vocabulary);
@@ -179,7 +179,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void setDatabase(DataSource db) throws SQLException, ClassNotFoundException {
+	public void setDatabase(OBDADataSource db) throws SQLException, ClassNotFoundException {
 		this.db = db;
 		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(db);
 	}
@@ -1030,7 +1030,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Atom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
 		predicate = predicateFactory.getPredicate(URI.create("q"), 2);
 		Atom head = predicateFactory.getAtom(predicate, qtx, qty);
-		Query cq = predicateFactory.getCQIE(head, bodyAtom);
+		OBDAQuery cq = predicateFactory.getCQIE(head, bodyAtom);
 
 		return predicateFactory.getRDBMSMappingAxiom(sql, cq);
 
@@ -1042,7 +1042,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Atom bodyAtom = predicateFactory.getAtom(predicate, qt);
 		predicate = predicateFactory.getPredicate(URI.create("q"), 1);
 		Atom head = predicateFactory.getAtom(predicate, qt);
-		Query cq = predicateFactory.getCQIE(head, bodyAtom);
+		OBDAQuery cq = predicateFactory.getCQIE(head, bodyAtom);
 
 		return predicateFactory.getRDBMSMappingAxiom(sql, cq);
 

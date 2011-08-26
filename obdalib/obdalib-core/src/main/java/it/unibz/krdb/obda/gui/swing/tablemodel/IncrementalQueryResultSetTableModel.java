@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.gui.swing.tablemodel;
 import it.unibz.krdb.obda.exception.QueryResultException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.QueryResultSet;
+import it.unibz.krdb.obda.model.OBDAResultSet;
 
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ import javax.swing.table.TableModel;
 
 public class IncrementalQueryResultSetTableModel implements TableModel {
 
-	QueryResultSet						results;
+	OBDAResultSet						results;
 	int									numcols, numrows, fetchsize;
 
 	Vector<String[]>					resultsTable	= null;
@@ -35,7 +35,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public IncrementalQueryResultSetTableModel(QueryResultSet results, PrefixManager prefixman, boolean useshortform)
+	public IncrementalQueryResultSetTableModel(OBDAResultSet results, PrefixManager prefixman, boolean useshortform)
 			throws QueryResultException {
 		this.prefixman = prefixman;
 		this.useshortform = useshortform;

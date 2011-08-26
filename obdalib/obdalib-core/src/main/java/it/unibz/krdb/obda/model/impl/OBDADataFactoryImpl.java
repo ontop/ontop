@@ -2,15 +2,15 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.RDBMSMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -106,7 +106,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DataSource getDataSource(URI id) {
+	public OBDADataSource getDataSource(URI id) {
 		return new DataSourceImpl(id);
 	}
 
@@ -158,7 +158,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, Query sourceQuery, Query targetQuery) {
+	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, sourceQuery, targetQuery);
 	}
 
@@ -168,12 +168,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public RDBMSMappingAxiom getRDBMSMappingAxiom(String id, String sql, Query targetQuery) {
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, String sql, OBDAQuery targetQuery) {
 		return new RDBMSMappingAxiomImpl(id, new SQLQueryImpl(sql), targetQuery);
 	}
 
 	@Override
-	public RDBMSMappingAxiom getRDBMSMappingAxiom(String sql, Query targetQuery) {
+	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery) {
 		String id = new String("MAP" + System.nanoTime());
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
@@ -389,13 +389,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass) {
+	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass) {
 		URI id = URI.create(UUID.randomUUID().toString());
 		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
 	}
 
 	@Override
-	public DataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass) {
+	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass) {
 		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);

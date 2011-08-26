@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.model;
 import java.net.URI;
 import java.util.Set;
 
-public interface DataSource {
+public interface OBDADataSource {
 
 	public abstract void setParameter(String parameter_uri, String value);
 

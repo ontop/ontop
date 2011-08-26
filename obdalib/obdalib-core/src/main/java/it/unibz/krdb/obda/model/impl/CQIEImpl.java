@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.QueryModifiers;
+import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
@@ -35,7 +35,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String	COMMA		= ",";
 	private static final String	INV_IMPLIES	= ":-";
 	
-	private QueryModifiers modifiers = null;
+	private OBDAQueryModifiers modifiers = null;
 
 	// TODO Remove isBoolean from the signature and from any method
 	protected CQIEImpl(Atom head, List<Atom> body) {
@@ -149,12 +149,12 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	@Override
-	public QueryModifiers getQueryModifiers() {
+	public OBDAQueryModifiers getQueryModifiers() {
 		return modifiers;
 	}
 	
 	@Override
-	public void setQueryModifiers(QueryModifiers modifiers) {
+	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
 	}
 }

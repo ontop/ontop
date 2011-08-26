@@ -17,7 +17,7 @@ import it.unibz.krdb.obda.codec.MappingXMLCodec;
 import it.unibz.krdb.obda.codec.QueryGroupXMLReader;
 import it.unibz.krdb.obda.codec.QueryGroupXMLRenderer;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
@@ -206,7 +206,7 @@ public class DataManager {
 		dumpMappingsToXML(mappings);
 
 		// Create the Data Source element
-		List<DataSource> datasources = apic.getSources();
+		List<OBDADataSource> datasources = apic.getSources();
 		dumpDatasourcesToXML(datasources);
 
 		// Create the Query element
@@ -309,13 +309,13 @@ public class DataManager {
 					// Found old data-source block
 					System.err.println("WARNING: Loading a datasource using the old "
 							+ "deprecated method. Update your .obda file by saving " + "it again.");
-					DataSource source = dsCodec.decode(node);
+					OBDADataSource source = dsCodec.decode(node);
 					apic.addSource(source);
 				}
 				String newDatasourceTag = dsCodec.getElementTag();
 				if ((major > 0) && (node.getNodeName().equals(newDatasourceTag))) {
 					// Found new data-source block
-					DataSource source = dsCodec.decode(node);
+					OBDADataSource source = dsCodec.decode(node);
 					URI uri = URI.create(prefixManager.getDefaultNamespace());
 					if (uri != null) {
 						source.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uri.toString());
@@ -397,12 +397,12 @@ public class DataManager {
 	 * @param datasources
 	 *            the hash map of the data-source data.
 	 */
-	protected void dumpDatasourcesToXML(List<DataSource> datasources) {
+	protected void dumpDatasourcesToXML(List<OBDADataSource> datasources) {
 		Document doc = root.getOwnerDocument();
-		Iterator<DataSource> sources = datasources.iterator();
+		Iterator<OBDADataSource> sources = datasources.iterator();
 		URI datasourceUri = null;
 		while (sources.hasNext()) {
-			DataSource datasource = sources.next();
+			OBDADataSource datasource = sources.next();
 
 			Element datasourceElement = dsCodec.encode(datasource);
 			doc.adoptNode(datasourceElement);

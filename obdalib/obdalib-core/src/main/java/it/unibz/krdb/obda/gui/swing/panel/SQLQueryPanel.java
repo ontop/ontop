@@ -18,7 +18,7 @@ import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.sql.ResultSet;
@@ -47,10 +47,10 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 	
 	Logger								log				= LoggerFactory.getLogger(SQLQueryPanel.class);
 
-	private DataSource selectedSource;
+	private OBDADataSource selectedSource;
 
     /** Creates new form SQLQueryPanel */
-    public SQLQueryPanel(DataSource ds,String execute_Query) {
+    public SQLQueryPanel(OBDADataSource ds,String execute_Query) {
     	
     	this();
     	this.execute_Query=execute_Query;
@@ -170,7 +170,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
     	
   @Override
-  public void datasourceChanged(DataSource oldSource, DataSource newSource)
+  public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource)
   {
     this.selectedSource = newSource;
   }  

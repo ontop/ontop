@@ -26,12 +26,12 @@ import it.unibz.krdb.obda.gui.swing.utils.MappingFilterLexer;
 import it.unibz.krdb.obda.gui.swing.utils.MappingFilterParser;
 import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.SQLQuery;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
@@ -97,7 +97,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private DatalogProgramParser	datalogParser;
 
-	private DataSource				selectedSource;
+	private OBDADataSource				selectedSource;
 
 	private boolean					canceled;
 
@@ -677,7 +677,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				MappingHeadNode head = node.getHeadNode();
 				RDBMSMappingValidator v;
 
-				SQLQuery rdbmssqlQuery = fac.getSQLQuery(body.getQuery());
+				OBDASQLQuery rdbmssqlQuery = fac.getSQLQuery(body.getQuery());
 				CQIE conjunctiveQuery = parse(head.getQuery());
 				v = new RDBMSMappingValidator(apic, selectedSource, rdbmssqlQuery, conjunctiveQuery);
 				Enumeration<String> errors = v.validate();
@@ -916,12 +916,12 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		} else if (editedNode instanceof MappingBodyNode) {
 			MappingBodyNode node = (MappingBodyNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();
-			Query b = fac.getSQLQuery(str);
+			OBDAQuery b = fac.getSQLQuery(str);
 			con.updateMappingsSourceQuery(sourceName, parent.getMappingID(), b);
 		} else if (editedNode instanceof MappingHeadNode) {
 			MappingHeadNode node = (MappingHeadNode) editedNode;
 			MappingNode parent = (MappingNode) node.getParent();
-			Query h = parse(str);
+			OBDAQuery h = parse(str);
 			con.updateTargetQueryMapping(sourceName, parent.getMappingID(), h);
 		}
 	}
@@ -1014,7 +1014,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}
 
 	@Override
-	public void datasourceChanged(DataSource oldSource, DataSource newSource) {
+	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
 		this.selectedSource = newSource;
 
 		// Update the mapping tree.

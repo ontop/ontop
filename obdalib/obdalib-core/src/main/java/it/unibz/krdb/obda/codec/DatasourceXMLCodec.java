@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.codec;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -11,14 +11,14 @@ import java.util.Collection;
 
 import org.w3c.dom.Element;
 
-public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
+public class DatasourceXMLCodec extends ObjectXMLCodec<OBDADataSource> {
 
 	private static final String	TAG	= "dataSource";
 
 	@Override
-	public DataSource decode(Element input) {
+	public OBDADataSource decode(Element input) {
 
- 		DataSource new_src = null;
+ 		OBDADataSource new_src = null;
  		OBDADataFactory fac =OBDADataFactoryImpl.getInstance();
 
 		String id = input.getAttribute("URI");
@@ -60,7 +60,7 @@ public class DatasourceXMLCodec extends ObjectXMLCodec<DataSource> {
 	}
 
 	@Override
-	public Element encode(DataSource input) {
+	public Element encode(OBDADataSource input) {
 		Element element = createElement(TAG);
 		String id = input.getSourceID().toString();
 		String driver = input.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);

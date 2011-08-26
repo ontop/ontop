@@ -5,9 +5,9 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
-import it.unibz.krdb.obda.model.QueryResultSet;
-import it.unibz.krdb.obda.model.Statement;
+import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -43,7 +43,7 @@ import com.hp.hpl.jena.query.QueryException;
  * 
  */
 
-public class OBDAStatement implements Statement {
+public class OBDAStatement implements OBDAStatement {
 
 	private QueryRewriter			rewriter			= null;
 	private UnfoldingMechanism		unfoldingmechanism	= null;
@@ -80,7 +80,7 @@ public class OBDAStatement implements Statement {
 	 * Returns the result set for the given query
 	 */
 	@Override
-	public QueryResultSet executeQuery(String strquery) throws Exception {
+	public OBDAResultSet executeQuery(String strquery) throws Exception {
 
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			return executeEpistemicQuery(strquery);
@@ -100,8 +100,8 @@ public class OBDAStatement implements Statement {
 	 * @return
 	 * @throws Exception
 	 */
-	private QueryResultSet executeEpistemicQuery(String strquery) throws Exception {
-		QueryResultSet result;
+	private OBDAResultSet executeEpistemicQuery(String strquery) throws Exception {
+		OBDAResultSet result;
 
 		String epistemicUnfolding = getUnfoldingEpistemic(strquery);
 		ResultSet set = engine.execute(epistemicUnfolding);
@@ -110,14 +110,14 @@ public class OBDAStatement implements Statement {
 		return result;
 	}
 	
-	private QueryResultSet executeDirectQuery(String query) throws Exception {
-		QueryResultSet result;
+	private OBDAResultSet executeDirectQuery(String query) throws Exception {
+		OBDAResultSet result;
 		ResultSet set = engine.execute(query);
 		result = new OWLOBDARefResultSet(set);
 		return result;
 	}
 
-	private QueryResultSet executeConjunctiveQuery(String strquery) throws Exception {
+	private OBDAResultSet executeConjunctiveQuery(String strquery) throws Exception {
 		// Contruct the datalog program object from the query string
 	  DatalogProgram program = getDatalogQuery(strquery);
 
@@ -139,11 +139,11 @@ public class OBDAStatement implements Statement {
 		// If the datalog is valid, proceed to the next process.
 		List<String> signature = getSignature(program);
 
-		Query rewriting = rewriter.rewrite(program);
-		Query unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
+		OBDAQuery rewriting = rewriter.rewrite(program);
+		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, signature);
 
-		QueryResultSet result;
+		OBDAResultSet result;
 
 		if (sql.equals("")) {
 			/***
@@ -194,7 +194,7 @@ public class OBDAStatement implements Statement {
 	@Override
 	public String getRewriting(String strquery) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
-		Query rewriting = rewriter.rewrite(program);
+		OBDAQuery rewriting = rewriter.rewrite(program);
 		DatalogProgramToTextCodec codec = new DatalogProgramToTextCodec(apic);
 		return codec.encode((DatalogProgram) rewriting);
 	}
@@ -286,11 +286,11 @@ public class OBDAStatement implements Statement {
 	@Override
 	public String getUnfolding(String strquery, boolean reformulate) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
-		Query unfolding = null;
+		OBDAQuery unfolding = null;
 		if (!reformulate) {
 			unfolding = unfoldingmechanism.unfold(program);
 		} else {
-			Query rewriting = rewriter.rewrite(program);
+			OBDAQuery rewriting = rewriter.rewrite(program);
 			unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
 		}
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, getSignature(program));

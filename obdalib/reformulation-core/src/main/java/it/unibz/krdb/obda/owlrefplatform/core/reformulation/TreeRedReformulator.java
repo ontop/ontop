@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Query;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
@@ -63,7 +63,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	}
 
-	public Query rewrite(Query input) throws Exception {
+	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
 		//		
 
 		log.debug("Query reformulation started...");

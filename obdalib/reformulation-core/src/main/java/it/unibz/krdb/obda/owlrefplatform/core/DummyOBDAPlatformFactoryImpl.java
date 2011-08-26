@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -136,7 +136,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReformulationPlatfor
 			}
 
 			// Mappings
-			DataSource ds = apic.getSources().get(0);
+			OBDADataSource ds = apic.getSources().get(0);
 			Connection connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(ds);
 
 			EvaluationEngine eval_engine = eval_engine = new JDBCEngine(connection);

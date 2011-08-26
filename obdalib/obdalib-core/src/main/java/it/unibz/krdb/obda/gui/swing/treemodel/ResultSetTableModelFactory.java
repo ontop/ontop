@@ -14,7 +14,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.obda.exception.NoConnectionException;
 import it.unibz.krdb.obda.gui.swing.exception.NoDatasourceSelectedException;
-import it.unibz.krdb.obda.model.DataSource;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
@@ -64,7 +64,7 @@ public class ResultSetTableModelFactory {
 
 	}
 
-	public static ResultSetTableModelFactory getInstance(DataSource current_datasource) throws NoDatasourceSelectedException, SQLException, ClassNotFoundException,
+	public static ResultSetTableModelFactory getInstance(OBDADataSource current_datasource) throws NoDatasourceSelectedException, SQLException, ClassNotFoundException,
 			NoConnectionException {
 
 		 
