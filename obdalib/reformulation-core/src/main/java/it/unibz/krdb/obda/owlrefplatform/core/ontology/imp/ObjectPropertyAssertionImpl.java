@@ -2,9 +2,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 
-public class ObjectPropertyAssertionImpl implements RoleABoxAssertion {
+public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion {
 
 	private Predicate	role;
 	private URIConstant	o2;

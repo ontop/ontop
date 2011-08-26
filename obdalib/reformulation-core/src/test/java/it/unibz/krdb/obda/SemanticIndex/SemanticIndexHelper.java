@@ -162,9 +162,9 @@ public class SemanticIndexHelper {
                     if (exists)
                         description = descFactory.getPropertySomeRestriction(p, inverse);
                     else
-                        description = descFactory.getClass(p);
+                        description = descFactory.createClass(p);
                 } else {
-                    description = descFactory.getProperty(p, inverse);
+                    description = descFactory.createProperty(p, inverse);
                 }
 
 

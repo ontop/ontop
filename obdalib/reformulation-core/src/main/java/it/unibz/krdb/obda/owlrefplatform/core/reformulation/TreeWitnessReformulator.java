@@ -155,7 +155,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			Atom a = (Atom) a0;
 			if (a.getArity() == 1) {
 				Predicate pa = fac.getPredicate(URI.create("EXT" + a.getPredicate().getName().getFragment()), 1);
-				views.put(descFactory.getClass(a.getPredicate()), pa);
+				views.put(descFactory.createClass(a.getPredicate()), pa);
 				
 				body.add(rewriteAtom(out, tws, a, cqie, 
 						fac.getAtom(fac.getPredicate(URI.create("A" + n), variables.size()), variables), 
@@ -282,8 +282,8 @@ public class TreeWitnessReformulator implements QueryRewriter {
 						wb.add(fac.getAtom(pa, x));
 					else 
 						log.debug("duplicating atom " + ua);
-					views.put(descFactory.getClass(ca.getPredicate()), pa);
-				} else if (!checkTree(tw, ca.getTerm(0), descFactory.getClass(ca.getPredicate())))
+					views.put(descFactory.createClass(ca.getPredicate()), pa);
+				} else if (!checkTree(tw, ca.getTerm(0), descFactory.createClass(ca.getPredicate())))
 					return null;
 			} else if (ca.getArity() == 2) {
 				if (!checkTree(tw, ca.getTerm(0), descFactory.getPropertySomeRestriction(ca.getPredicate(), false)))

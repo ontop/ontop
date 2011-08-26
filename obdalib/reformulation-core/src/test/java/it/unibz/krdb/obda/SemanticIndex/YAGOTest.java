@@ -78,7 +78,7 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
 
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
-                    ClassDescription co = descFactory.getClass(po);
+                    ClassDescription co = descFactory.createClass(po);
 
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
 
@@ -88,14 +88,14 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
 
                     ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
-                    ClassDescription co = descFactory.getClass(po);
+                    ClassDescription co = descFactory.createClass(po);
 
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
 
                 } else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    ClassDescription co = descFactory.getClass(po);
+                    ClassDescription co = descFactory.createClass(po);
 
                     onto.addConcept(co);
 
@@ -104,8 +104,8 @@ public class YAGOTest {
 //                    log.debug("{} {}", subject, object);
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    ClassDescription cs = descFactory.getClass(ps);
-                    ClassDescription co = descFactory.getClass(po);
+                    ClassDescription cs = descFactory.createClass(ps);
+                    ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cs, co));
 
                 } else if ("rdfs:subPropertyOf".equals(predicate)) {
@@ -113,8 +113,8 @@ public class YAGOTest {
 //                    log.debug("{} {}", subject, object);
                     Predicate ps = predicateFactory.getPredicate(new URI(subject), 1);
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
-                    Property rs = descFactory.getProperty(ps);
-                    Property ro = descFactory.getProperty(po);
+                    Property rs = descFactory.createProperty(ps);
+                    Property ro = descFactory.createProperty(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));
 
                 } else {

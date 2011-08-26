@@ -4,16 +4,16 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -446,10 +446,10 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
-			OntologyImpl sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
-			ClassDescription left = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
-			ClassDescription right = dfac.getClass(tfac.getPredicate(URI.create("C"), 1));
-			SubClassAxiomImpl inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
+			ClassDescription left = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.createClass(tfac.getPredicate(URI.create("C"), 1));
+			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -469,10 +469,10 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-			OntologyImpl sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
-			ClassDescription left = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
+			ClassDescription left = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 			ClassDescription right = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), false);
-			SubClassAxiomImpl inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -492,10 +492,10 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-			OntologyImpl sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
-			ClassDescription left = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
+			ClassDescription left = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 			ClassDescription right = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), true);
-			SubClassAxiomImpl inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -515,11 +515,11 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-			OntologyImpl sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
 			ClassDescription left = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), false);
-			ClassDescription right = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 
-			SubClassAxiomImpl inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -539,11 +539,11 @@ public class CQCUtilitiesTest extends TestCase {
 
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
-			OntologyImpl sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology(URI.create("test"));
 			ClassDescription left = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), true);
-			ClassDescription right = dfac.getClass(tfac.getPredicate(URI.create("A"), 1));
+			ClassDescription right = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 
-			SubClassAxiomImpl inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));

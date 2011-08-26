@@ -117,7 +117,7 @@ public class OWLAPI2Translator {
 
 				URI uri = entity.getURI();
 				Predicate p = predicateFactory.getPredicate(uri, 1);
-				ClassDescription cd = descFactory.getClass(p);
+				ClassDescription cd = descFactory.createClass(p);
 				dl_onto.addConcept(cd);
 
 			} else if (entity instanceof OWLObjectProperty) {
@@ -125,7 +125,7 @@ public class OWLAPI2Translator {
 				URI uri = entity.getURI();
 				objectproperties.add(uri.toString());
 				Predicate p = predicateFactory.getPredicate(uri, 2);
-				Property rd = descFactory.getProperty(p);
+				Property rd = descFactory.createProperty(p);
 				if (dataproperties.contains(uri.toString())) {
 					throw new Exception("Please avoid using the same name for object and data properties.");
 				} else {
@@ -136,7 +136,7 @@ public class OWLAPI2Translator {
 				URI uri = entity.getURI();
 				dataproperties.add(uri.toString());
 				Predicate p = predicateFactory.getPredicate(uri, 2);
-				Property rd = descFactory.getProperty(p);
+				Property rd = descFactory.createProperty(p);
 				if (objectproperties.contains(uri.toString())) {
 					throw new Exception("Please avoid using the same name for object and data properties.");
 				} else {
@@ -197,7 +197,7 @@ public class OWLAPI2Translator {
 					Property subrole = getRoleExpression(aux.getSubProperty());
 					Property superrole = getRoleExpression(aux.getSuperProperty());
 
-					SubPropertyAxiomImpl roleinc = descFactory.createSubPropertyAxiom(subrole, superrole);
+					SubPropertyAxiomImpl roleinc = (SubPropertyAxiomImpl)descFactory.createSubPropertyAxiom(subrole, superrole);
 
 					dl_onto.addAssertion(roleinc);
 
@@ -238,11 +238,11 @@ public class OWLAPI2Translator {
 					Property role1 = getRoleExpression(exp1);
 					Property role2 = getRoleExpression(exp2);
 
-					Property invrole1 = descFactory.getProperty(role1.getPredicate(), !role1.isInverse());
-					Property invrole2 = descFactory.getProperty(role2.getPredicate(), !role2.isInverse());
+					Property invrole1 = descFactory.createProperty(role1.getPredicate(), !role1.isInverse());
+					Property invrole2 = descFactory.createProperty(role2.getPredicate(), !role2.isInverse());
 
-					SubPropertyAxiomImpl inc1 = descFactory.createSubPropertyAxiom(role1, invrole2);
-					SubPropertyAxiomImpl inc2 = descFactory.createSubPropertyAxiom(role2, invrole1);
+					SubPropertyAxiomImpl inc1 = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(role1, invrole2);
+					SubPropertyAxiomImpl inc2 = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(role2, invrole1);
 
 					dl_onto.addAssertion(inc1);
 					dl_onto.addAssertion(inc2);
@@ -253,9 +253,9 @@ public class OWLAPI2Translator {
 					OWLSymmetricObjectPropertyAxiom aux = (OWLSymmetricObjectPropertyAxiom) axiom;
 					OWLObjectPropertyExpression exp1 = aux.getProperty();
 					Property role = getRoleExpression(exp1);
-					Property invrole = descFactory.getProperty(role.getPredicate(), !role.isInverse());
+					Property invrole = descFactory.createProperty(role.getPredicate(), !role.isInverse());
 
-					SubPropertyAxiomImpl symm = descFactory.createSubPropertyAxiom(invrole, role);
+					SubPropertyAxiomImpl symm = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(invrole, role);
 
 					dl_onto.addAssertion(symm);
 
@@ -286,7 +286,7 @@ public class OWLAPI2Translator {
 					Property subrole = getRoleExpression(aux.getSubProperty());
 					Property superrole = getRoleExpression(aux.getSuperProperty());
 
-					SubPropertyAxiomImpl roleinc = descFactory.createSubPropertyAxiom(subrole, superrole);
+					SubPropertyAxiomImpl roleinc = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(subrole, superrole);
 
 					dl_onto.addAssertion(roleinc);
 
@@ -304,7 +304,7 @@ public class OWLAPI2Translator {
 						throw new TranslationException();
 					OWLInverseFunctionalObjectPropertyAxiom aux = (OWLInverseFunctionalObjectPropertyAxiom) axiom;
 					Property role = getRoleExpression(aux.getProperty());
-					Property invrole = descFactory.getProperty(role.getPredicate(), !role.isInverse());
+					Property invrole = descFactory.createProperty(role.getPredicate(), !role.isInverse());
 					PropertyFunctionalAxiom funct = descFactory.createPropertyFunctionalAxiom(invrole);
 
 					dl_onto.addAssertion(funct);
@@ -345,7 +345,7 @@ public class OWLAPI2Translator {
 			}
 
 			if (!(superDescription instanceof PropertySomeClassRestriction)) {
-				SubClassAxiomImpl inc = descFactory.createSubClassAxiom(subDescription, superDescription);
+				SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, superDescription);
 				dl_onto.addAssertion(inc);
 			} else {
 				log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
@@ -363,15 +363,15 @@ public class OWLAPI2Translator {
 					Predicate role = eR.getPredicate();
 					Class filler = eR.getFiller();
 
-					Property auxRole = descFactory.getProperty(predicateFactory.getPredicate(
+					Property auxRole = descFactory.createProperty(predicateFactory.getPredicate(
 							URI.create(AUXROLEURI + auxRoleCounter), 2));
 					auxRoleCounter += 1;
 
 					/* Creating the new subrole assertions */
-					SubPropertyAxiomImpl subrole = descFactory.createSubPropertyAxiom(auxRole, descFactory.getProperty(role,
+					SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(auxRole, descFactory.createProperty(role,
 							eR.isInverse()));
 					/* Creatin the range assertion */
-					SubClassAxiomImpl subclass = descFactory.createSubClassAxiom(descFactory.getPropertySomeRestriction(
+					SubClassAxiomImpl subclass = (SubClassAxiomImpl) descFactory.createSubClassAxiom(descFactory.getPropertySomeRestriction(
 							auxRole.getPredicate(), true), filler);
 					aux = new LinkedList<SubDescriptionAxiom>();
 					aux.add(subclass);
@@ -385,7 +385,7 @@ public class OWLAPI2Translator {
 				Property role = roleinclusion.getSub();
 				PropertySomeRestriction domain = descFactory.getPropertySomeRestriction(role.getPredicate(), false);
 				/* Taking the domain of the aux role as the including */
-				SubClassAxiomImpl inc = descFactory.createSubClassAxiom(subDescription, domain);
+				SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, domain);
 
 			}
 		}
@@ -403,12 +403,12 @@ public class OWLAPI2Translator {
 		Property role = null;
 
 		if (rolExpression instanceof OWLObjectProperty) {
-			role = descFactory.getProperty(this.predicateFactory.getPredicate(rolExpression.asOWLObjectProperty().getURI(), 2));
+			role = descFactory.createProperty(this.predicateFactory.getPredicate(rolExpression.asOWLObjectProperty().getURI(), 2));
 		} else if (rolExpression instanceof OWLObjectPropertyInverse) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
 			OWLObjectPropertyInverse aux = (OWLObjectPropertyInverse) rolExpression;
-			role = descFactory.getProperty(this.predicateFactory.getPredicate(aux.getInverse().asOWLObjectProperty().getURI(), 2),
+			role = descFactory.createProperty(this.predicateFactory.getPredicate(aux.getInverse().asOWLObjectProperty().getURI(), 2),
 					true);
 		} else {
 			throw new TranslationException();
@@ -422,8 +422,8 @@ public class OWLAPI2Translator {
 			for (int j = i + 1; j < roles.size(); j++) {
 				ClassDescription subclass = roles.get(i);
 				ClassDescription superclass = roles.get(j);
-				SubClassAxiomImpl inclusion1 = descFactory.createSubClassAxiom(subclass, superclass);
-				SubClassAxiomImpl inclusion2 = descFactory.createSubClassAxiom(superclass, subclass);
+				SubClassAxiomImpl inclusion1 = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subclass, superclass);
+				SubClassAxiomImpl inclusion2 = (SubClassAxiomImpl) descFactory.createSubClassAxiom(superclass, subclass);
 				ontology.addAssertion(inclusion1);
 				ontology.addAssertion(inclusion2);
 			}
@@ -435,8 +435,8 @@ public class OWLAPI2Translator {
 			for (int j = i + 1; j < roles.size(); j++) {
 				Property subrole = roles.get(i);
 				Property superole = roles.get(j);
-				SubPropertyAxiomImpl inclusion1 = descFactory.createSubPropertyAxiom(subrole, superole);
-				SubPropertyAxiomImpl inclusion2 = descFactory.createSubPropertyAxiom(superole, subrole);
+				SubPropertyAxiomImpl inclusion1 = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(subrole, superole);
+				SubPropertyAxiomImpl inclusion2 = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(superole, subrole);
 				ontology.addAssertion(inclusion1);
 				ontology.addAssertion(inclusion2);
 			}
@@ -464,7 +464,7 @@ public class OWLAPI2Translator {
 		Property role = null;
 
 		if (rolExpression instanceof OWLDataProperty) {
-			role = descFactory.getProperty(this.predicateFactory.getPredicate(rolExpression.asOWLDataProperty().getURI(), 2));
+			role = descFactory.createProperty(this.predicateFactory.getPredicate(rolExpression.asOWLDataProperty().getURI(), 2));
 		} else {
 			throw new TranslationException();
 		}
@@ -497,7 +497,7 @@ public class OWLAPI2Translator {
 				result.add(getSubclassExpression(owlExpression));
 			} else {
 				Property role = getRoleExpression(property);
-				ClassDescription cd = descFactory.getPropertySomeClassRestriction(role.getPredicate(), role.isInverse(),
+				ClassDescription cd = descFactory.createPropertySomeClassRestriction(role.getPredicate(), role.isInverse(),
 						(Class) getSubclassExpression(filler));
 				result.add(cd);
 			}
@@ -529,7 +529,7 @@ public class OWLAPI2Translator {
 		if (owlExpression instanceof OWLClass) {
 			URI uri = ((OWLClass) owlExpression).getURI();
 			Predicate p = predicateFactory.getPredicate(uri, 1);
-			cd = descFactory.getClass(p);
+			cd = descFactory.createClass(p);
 
 		} else if (owlExpression instanceof OWLDataMinCardinalityRestriction) {
 			if (profile.order() < LanguageProfile.DLLITEA.order())

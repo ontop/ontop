@@ -46,7 +46,7 @@ public class DAG {
     public final static String thingStr = "http://www.w3.org/2002/07/owl#Thing";
     public final static URI thingUri = URI.create(thingStr);
     public final static Predicate thingPred = predicateFactory.getPredicate(thingUri, 1);
-    public final static ClassDescription thingConcept = descFactory.getClass(thingPred);
+    public final static ClassDescription thingConcept = descFactory.createClass(thingPred);
     public final DAGNode thing = new DAGNode(thingConcept);
 
 
@@ -74,7 +74,7 @@ public class DAG {
         for (Property role : ontology.getRoles()) {
             roles.put(role, new DAGNode(role));
 
-            Property roleInv = descFactory.getProperty(role.getPredicate(), !role.isInverse());
+            Property roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
             roles.put(roleInv, new DAGNode(roleInv));
 
             PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(
@@ -151,8 +151,8 @@ public class DAG {
     private void addRoleEdge(Property parent, Property child) {
         addRoleEdgeSingle(parent, child);
 
-        addRoleEdgeSingle(descFactory.getProperty(parent.getPredicate(), !parent.isInverse()),
-                descFactory.getProperty(child.getPredicate(), !child.isInverse()));
+        addRoleEdgeSingle(descFactory.createProperty(parent.getPredicate(), !parent.isInverse()),
+                descFactory.createProperty(child.getPredicate(), !child.isInverse()));
     }
 
     private void addRoleEdgeSingle(Property parent, Property child) {

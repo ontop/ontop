@@ -23,7 +23,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
@@ -293,21 +293,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String lit = attributeABoxAssertion.getValue().getValue();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getProperty(propPred);
+				Property propDesc = descFactory.createProperty(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
 				out.append(String.format(role_insert_str, getQuotedString(uri), getQuotedString(lit), idx));
 
-			} else if (ax instanceof RoleABoxAssertion) {
+			} else if (ax instanceof ObjectPropertyAssertion) {
 
-				RoleABoxAssertion roleABoxAssertion = (RoleABoxAssertion) ax;
+				ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
 				String prop = roleABoxAssertion.getRole().getName().toString();
 				String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getProperty(propPred);
+				Property propDesc = descFactory.createProperty(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
 					Property desc = (Property) dag.equi_mappings.get(propDesc);
@@ -332,7 +332,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
 					Predicate clsPred = ((ClassAssertion) ax).getConcept();
-					ClassDescription clsDesc = descFactory.getClass(clsPred);
+					ClassDescription clsDesc = descFactory.createClass(clsPred);
 					DAGNode node = pureIsa.getClassNode(clsDesc);
 					int idx = node.getIndex();
 
@@ -455,7 +455,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String lit = attributeABoxAssertion.getValue().getValue();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getProperty(propPred);
+				Property propDesc = descFactory.createProperty(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
@@ -464,15 +464,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				role_stm.setInt(3, idx);
 				role_stm.addBatch();
 
-			} else if (ax instanceof RoleABoxAssertion) {
+			} else if (ax instanceof ObjectPropertyAssertion) {
 
-				RoleABoxAssertion roleABoxAssertion = (RoleABoxAssertion) ax;
+				ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
 				String prop = roleABoxAssertion.getRole().getName().toString();
 				String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
 				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
-				Property propDesc = descFactory.getProperty(propPred);
+				Property propDesc = descFactory.createProperty(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
 					Property desc = (Property) dag.equi_mappings.get(propDesc);
@@ -500,7 +500,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
 					Predicate clsPred = ((ClassAssertion) ax).getConcept();
-					ClassDescription clsDesc = descFactory.getClass(clsPred);
+					ClassDescription clsDesc = descFactory.createClass(clsPred);
 					DAGNode node = pureIsa.getClassNode(clsDesc);
 					int idx = node.getIndex();
 
@@ -576,7 +576,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					description = descFactory.getPropertySomeRestriction(p, inverse);
 				} else {
 					p = predicateFactory.getPredicate(URI.create(uri), 1);
-					description = descFactory.getClass(p);
+					description = descFactory.createClass(p);
 				}
 
 				if (res_classes.containsKey(description)) {
@@ -599,7 +599,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					inverse = true;
 				}
 				p = predicateFactory.getPredicate(URI.create(uri), 2);
-				description = descFactory.getProperty(p, inverse);
+				description = descFactory.createProperty(p, inverse);
 
 				if (res_roles.containsKey(description)) {
 					res_roles.get(description).getRange().addInterval(start_idx, end_idx);
@@ -680,7 +680,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					}
 					boolean isInverse = ((PropertySomeRestriction) descendant.getDescription()).isInverse();
 
-					Property role = descFactory.getProperty(p, false);
+					Property role = descFactory.createProperty(p, false);
 
 					if (pureIsa.equi_mappings.containsKey(role)) {
 						// XXX: Very dirty hack, needs to be redone
@@ -722,7 +722,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				continue;
 			}
 
-			SemanticIndexRange range = pureIsa.getRoleNode(descFactory.getProperty(nodeDesc.getPredicate(), false)).getRange();
+			SemanticIndexRange range = pureIsa.getRoleNode(descFactory.createProperty(nodeDesc.getPredicate(), false)).getRange();
 			String projection = "URI1 as X, URI2 as Y";
 			mappings.add(new BinaryMappingKey(range, projection, RDBMSSIRepositoryManager.role_table, nodeDesc.getPredicate().getName()
 					.toString()));
@@ -748,7 +748,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				if (!childDesc.isInverse()) {
 					continue;
 				}
-				Property posChildDesc = descFactory.getProperty(childDesc.getPredicate(), false);
+				Property posChildDesc = descFactory.createProperty(childDesc.getPredicate(), false);
 
 				SemanticIndexRange childRange = pureIsa.getRoleNode(posChildDesc).getRange();
 

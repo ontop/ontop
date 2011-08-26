@@ -36,9 +36,9 @@ public class DAGChainTest extends TestCase {
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
 
-        Class ac = descFactory.getClass(a);
-        Class bc = descFactory.getClass(b);
-        Class cc = descFactory.getClass(c);
+        Class ac = descFactory.createClass(a);
+        Class bc = descFactory.createClass(b);
+        Class cc = descFactory.createClass(c);
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
         ontology.addConcept(ac);
@@ -64,10 +64,10 @@ public class DAGChainTest extends TestCase {
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
-        Class ac = descFactory.getClass(a);
+        Class ac = descFactory.createClass(a);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
         PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
-        Class cc = descFactory.getClass(c);
+        Class cc = descFactory.createClass(c);
 
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
@@ -104,12 +104,12 @@ public class DAGChainTest extends TestCase {
         Predicate b = predicateFactory.getPredicate(URI.create("b"), 1);
         Predicate d = predicateFactory.getPredicate(URI.create("d"), 1);
 
-        Class ac = descFactory.getClass(a);
+        Class ac = descFactory.createClass(a);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
         PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
-        Class cc = descFactory.getClass(c);
-        Class bc = descFactory.getClass(b);
-        Class dc = descFactory.getClass(d);
+        Class cc = descFactory.createClass(c);
+        Class bc = descFactory.createClass(b);
+        Class dc = descFactory.createClass(d);
 
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
@@ -161,7 +161,7 @@ public class DAGChainTest extends TestCase {
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
 
 
-        Class ac = descFactory.getClass(a);
+        Class ac = descFactory.createClass(a);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
         PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
 

@@ -29,8 +29,8 @@ public class SigmaTest extends TestCase {
         Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
         Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
         Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
-        Class ac = descFactory.getClass(a);
-        Class cc = descFactory.getClass(c);
+        Class ac = descFactory.createClass(a);
+        Class cc = descFactory.createClass(c);
         PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 
         ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));

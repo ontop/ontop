@@ -108,7 +108,7 @@ public class CSVDumper {
                 OWLIndividual o = objAxiom.getObject();
 
                 Predicate propPred = predicateFactory.getPredicate(URI.create(p.asOWLObjectProperty().getURI().toString()), 2);
-                Property propDesc = descFactory.getProperty(propPred);
+                Property propDesc = descFactory.createProperty(propPred);
                 DAGNode node = dag.getRoleNode(propDesc);
 
                 if (node == null) {
@@ -138,7 +138,7 @@ public class CSVDumper {
                 OWLDescription cls = clsAxiom.getDescription();
 
                 Predicate clsPred = predicateFactory.getPredicate(URI.create(cls.asOWLClass().getURI().toString()), 1);
-                ClassDescription clsDesc = descFactory.getClass(clsPred);
+                ClassDescription clsDesc = descFactory.createClass(clsPred);
                 DAGNode clsNode = dag.getClassNode(clsDesc);
 
                 if (clsNode == null) {

@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 
 import java.net.URI;
 
@@ -43,8 +43,8 @@ public class OWLAPI2ABoxTranslatorTest extends TestCase {
 				factory.getOWLObjectProperty(URI.create("hasfather")), factory.getOWLIndividual(URI.create("b")));
 		Assertion a2 = translator.translate(a1);
 
-		assertTrue(a2 instanceof RoleABoxAssertion);
-		RoleABoxAssertion r = (RoleABoxAssertion) a2;
+		assertTrue(a2 instanceof ObjectPropertyAssertion);
+		ObjectPropertyAssertion r = (ObjectPropertyAssertion) a2;
 		assertTrue(r.getRole().getArity() == 2);
 		assertTrue(r.getRole().getName().toString().equals("hasfather"));
 		assertTrue(r.getFirstObject().getURI().toString().equals("a"));

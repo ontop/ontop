@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 
 import java.net.URI;
@@ -55,7 +56,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public OntologyImpl clone() {
-		OntologyImpl clone = factory.createOntology(URI.create(ontouri.toString()));
+		OntologyImpl clone = (OntologyImpl) factory.createOntology(URI.create(ontouri.toString()));
 		clone.originalassertions.addAll(originalassertions);
 		clone.concepts.addAll(concepts);
 		clone.roles.addAll(roles);
@@ -246,20 +247,20 @@ public class OntologyImpl implements Ontology {
 						SubClassAxiomImpl ci1 = (SubClassAxiomImpl) pi1;
 						SubClassAxiomImpl ci2 = (SubClassAxiomImpl) pi2;
 						if (ci1.getSuper().equals(ci2.getSub())) {
-							SubClassAxiomImpl newinclusion = factory.createSubClassAxiom(ci1.getSub(), ci2.getSuper());
+							SubClassAxiomImpl newinclusion = (SubClassAxiomImpl)factory.createSubClassAxiom(ci1.getSub(), ci2.getSuper());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getSub().equals(ci2.getSuper())) {
-							SubClassAxiomImpl newinclusion = factory.createSubClassAxiom(ci2.getSub(), ci1.getSuper());
+							SubClassAxiomImpl newinclusion = (SubClassAxiomImpl)factory.createSubClassAxiom(ci2.getSub(), ci1.getSuper());
 							newInclusions.add(newinclusion);
 						}
 					} else if ((pi1 instanceof SubPropertyAxiomImpl) && (pi2 instanceof SubPropertyAxiomImpl)) {
 						SubPropertyAxiomImpl ci1 = (SubPropertyAxiomImpl) pi1;
 						SubPropertyAxiomImpl ci2 = (SubPropertyAxiomImpl) pi2;
 						if (ci1.getSuper().equals(ci2.getSub())) {
-							SubPropertyAxiomImpl newinclusion = factory.createSubPropertyAxiom(ci1.getSub(), ci2.getSuper());
+							SubPropertyAxiomImpl newinclusion = (SubPropertyAxiomImpl)factory.createSubPropertyAxiom(ci1.getSub(), ci2.getSuper());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getSub().equals(ci2.getSuper())) {
-							SubPropertyAxiomImpl newinclusion = factory.createSubPropertyAxiom(ci2.getSub(), ci1.getSuper());
+							SubPropertyAxiomImpl newinclusion = (SubPropertyAxiomImpl)factory.createSubPropertyAxiom(ci2.getSub(), ci1.getSuper());
 							newInclusions.add(newinclusion);
 						}
 					}
@@ -424,14 +425,14 @@ public class OntologyImpl implements Ontology {
 				Property r1 = rinclusion.getSub();
 				Property r2 = rinclusion.getSuper();
 
-				PropertySomeRestrictionImpl e11 = factory.createPropertySomeRestriction(r1.getPredicate(), r1.isInverse());
+				PropertySomeRestriction e11 = factory.createPropertySomeRestriction(r1.getPredicate(), r1.isInverse());
 				;
-				PropertySomeRestrictionImpl e12 = factory.createPropertySomeRestriction(r2.getPredicate(), r2.isInverse());
-				PropertySomeRestrictionImpl e21 = factory.createPropertySomeRestriction(r1.getPredicate(), !r1.isInverse());
-				PropertySomeRestrictionImpl e22 = factory.createPropertySomeRestriction(r2.getPredicate(), !r2.isInverse());
+				PropertySomeRestriction e12 = factory.createPropertySomeRestriction(r2.getPredicate(), r2.isInverse());
+				PropertySomeRestriction e21 = factory.createPropertySomeRestriction(r1.getPredicate(), !r1.isInverse());
+				PropertySomeRestriction e22 = factory.createPropertySomeRestriction(r2.getPredicate(), !r2.isInverse());
 
-				SubClassAxiomImpl inc1 = factory.createSubClassAxiom(e11, e12);
-				SubClassAxiomImpl inc2 = factory.createSubClassAxiom(e21, e22);
+				SubClassAxiomImpl inc1 = (SubClassAxiomImpl)factory.createSubClassAxiom(e11, e12);
+				SubClassAxiomImpl inc2 = (SubClassAxiomImpl)factory.createSubClassAxiom(e21, e22);
 				newassertion.add(inc1);
 				newassertion.add(inc2);
 			}

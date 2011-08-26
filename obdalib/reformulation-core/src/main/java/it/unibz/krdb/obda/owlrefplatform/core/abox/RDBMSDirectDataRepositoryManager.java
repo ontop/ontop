@@ -15,7 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.RoleABoxAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
@@ -284,8 +284,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 				out.append(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
 						.getObject().getURI())));
 				out.append(";\n");
-			} else if (assertion instanceof RoleABoxAssertion) {
-				RoleABoxAssertion rassertion = (RoleABoxAssertion) assertion;
+			} else if (assertion instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
 				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
 						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
 				out.append(";\n");
@@ -434,8 +434,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 				ClassAssertion cassertion = (ClassAssertion) assertion;
 				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
 						.getObject().getURI())));
-			} else if (assertion instanceof RoleABoxAssertion) {
-				RoleABoxAssertion rassertion = (RoleABoxAssertion) assertion;
+			} else if (assertion instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
 				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
 						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
 
