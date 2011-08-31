@@ -252,6 +252,24 @@ public class SQL99ParserTest extends TestCase
     final boolean result = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 JOIN grade t2 ON t1.id=t2.st_id");
     assertTrue(result);
   }
+  
+  @Test
+  public void test_5_1_1() {
+	final boolean result = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.mark=\"A\"");
+	assertTrue(result);
+  }
+  
+  @Test
+  public void test_5_1_2() {
+	final boolean result = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.score>=25");
+	assertTrue(result);
+  }
+  
+  @Test
+  public void test_5_1_3() {
+	final boolean result = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.id AND t2.pass=true");
+	assertTrue(result);
+  }
 
   @Test
   public void test_5_2() {
@@ -344,6 +362,12 @@ public class SQL99ParserTest extends TestCase
     assertTrue(result);
   }
 
+  @Test
+  public void test_7_2() {
+	  final boolean result = parse("SELECT (grade.score * 30 / 100) as percentage from grade");
+	  assertTrue(result);
+  }
+  
   @Test
   public void test_8_1() {
     final boolean result = parse("SELECT URI as X FROM class WHERE (IDX = 35) UNION ALL SELECT URI1 as X FROM role WHERE (IDX = 49) OR (IDX = 58)");

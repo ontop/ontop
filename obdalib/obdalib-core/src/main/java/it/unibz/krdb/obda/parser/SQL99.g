@@ -25,7 +25,9 @@ query_specification
   ;
 
 select_clause
-  : SELECT set_quantifier? select_list
+  : SELECT set_quantifier? (
+      ASTERISK
+      | select_list)
   ; 
 
 set_quantifier
@@ -34,8 +36,7 @@ set_quantifier
   ;
   
 select_list
-  : ASTERISK
-  | select_sublist (COMMA select_sublist)*
+  : select_sublist (COMMA select_sublist)*
   ;
   
 select_sublist
@@ -44,7 +45,7 @@ select_sublist
   ;
   
 qualified_asterisk
-  : table_identifier DOT ASTERISK
+  : table_identifier PERIOD ASTERISK
   ;
   
 derived_column
@@ -52,9 +53,32 @@ derived_column
   ;  
  
 value_expression
-  : string_value_expression
+  : numeric_value_expression
+  | string_value_expression
   | reference_value_expression
   | collection_value_expression
+  ;
+
+numeric_value_expression
+  : LPAREN numeric_operation RPAREN
+  ;
+
+numeric_operation
+  : term ((PLUS|MINUS) term)*
+  ;
+
+term
+  : factor ((ASTERISK|SOLIDUS) factor)*
+  ;
+  
+factor
+  : column_reference
+  | numeric_literal
+  ;
+
+sign
+  : PLUS
+  | MINUS
   ;
 
 string_value_expression
@@ -67,7 +91,7 @@ concatenation
 
 concatenation_value
   : column_reference
-  | value
+  | general_literal
   ;
 
 reference_value_expression
@@ -75,7 +99,7 @@ reference_value_expression
   ;
 
 column_reference
-  : (table_identifier DOT)? column_name
+  : (table_identifier PERIOD)? column_name
   ;  
   
 collection_value_expression
@@ -101,7 +125,17 @@ set_function_op
   | SOME
   | COUNT
   ;  
-    
+
+row_value_expression
+  : literal
+  | value_expression
+  ;
+
+literal
+  : numeric_literal
+  | general_literal
+  ;
+
 table_expression
   : from_clause (where_clause)? (group_by_clause)?
   ;
@@ -158,7 +192,7 @@ predicate
   ;
   
 comparison_predicate
-  : value_expression comp_op (value|value_expression)
+  : row_value_expression comp_op (row_value_expression)
   ;
 
 comp_op
@@ -180,7 +214,7 @@ in_predicate
   
 in_predicate_value
   : table_subquery
-  | LPAREN value_list RPAREN
+  | LPAREN in_value_list RPAREN
   ;
 
 table_subquery
@@ -191,8 +225,8 @@ subquery
   : LPAREN query RPAREN
   ;
   
-value_list
-  : value (COMMA value)*
+in_value_list
+  : row_value_expression (COMMA row_value_expression)*
   ;
 
 group_by_clause
@@ -254,7 +288,7 @@ table_primary
   ; 
  
 table_name
-  : (schema_name DOT)? table_identifier
+  : (schema_name PERIOD)? table_identifier
   ;  
 
 alias_name
@@ -290,11 +324,19 @@ delimited_identifier
   : STRING_WITH_QUOTE_DOUBLE
   ;
 
-value
+general_literal
   : TRUE
   | FALSE
-  | INTEGER 
   | STRING_WITH_QUOTE
+  ;
+
+numeric_literal
+  : INTEGER
+  | DECIMAL
+  | INTEGER_POSITIVE
+  | DECIMAL_POSITIVE
+  | INTEGER_NEGATIVE
+  | DECIMAL_NEGATIVE
   ;
 
 truth_value
@@ -403,7 +445,7 @@ FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
 TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
 
 SEMI:          ';';
-DOT:           '.';
+PERIOD:        '.';
 COMMA:         ',';
 LSQ_BRACKET:   '[';
 RSQ_BRACKET:   ']';
@@ -415,7 +457,7 @@ QUOTE_DOUBLE:  '"';
 QUOTE_SINGLE:  '\'';
 APOSTROPHE:    '`';
 UNDERSCORE:    '_';
-DASH:          '-';
+MINUS:         '-';
 ASTERISK:      '*';
 AMPERSAND:     '&';
 AT:            '@';
@@ -427,7 +469,7 @@ EQUALS:        '=';
 COLON:         ':';
 LESS:          '<';
 GREATER:       '>';
-SLASH:         '/';
+SOLIDUS:       '/';
 DOUBLE_SLASH:  '//';
 BACKSLASH:     '\\';
 TILDE:         '~';
@@ -451,7 +493,7 @@ fragment ALPHANUM
 fragment CHAR
   : ALPHANUM
   | UNDERSCORE
-  | DASH
+  | MINUS
   ;
 
 fragment ECHAR
@@ -462,8 +504,29 @@ INTEGER
   : DIGIT+
   ;
 
+DECIMAL
+  : DIGIT+ PERIOD DIGIT+
+  | PERIOD DIGIT+
+  ;
+  
+INTEGER_POSITIVE
+  : PLUS INTEGER
+  ;
+
+INTEGER_NEGATIVE
+  : MINUS INTEGER
+  ;	  
+
+DECIMAL_POSITIVE
+  : PLUS DECIMAL
+  ;
+  
+DECIMAL_NEGATIVE
+  : MINUS DECIMAL
+  ;
+
 VARNAME
-  : CHAR*
+  : ALPHA CHAR*
   ;
 
 STRING_WITH_QUOTE
