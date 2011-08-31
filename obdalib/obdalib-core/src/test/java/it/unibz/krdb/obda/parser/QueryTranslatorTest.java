@@ -9,13 +9,10 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.PredicateAtom;
 
 import java.util.List;
 
 import junit.framework.TestCase;
-
-import org.junit.Test;
 
 import com.hp.hpl.jena.query.QueryException;
 
@@ -112,7 +109,6 @@ public class QueryTranslatorTest extends TestCase {
 		translator = new SPARQLDatalogTranslator();
 	}
 
-	@Test
 	public void testGetDatalog() {
 		DatalogProgram datalog = translator.parse(QUERIES[0]);
 		List<CQIE> rules = datalog.getRules();
@@ -121,7 +117,6 @@ public class QueryTranslatorTest extends TestCase {
 		assertTrue("Number of body atoms", body.size() == 7);
 	}
 
-	@Test
 	public void testRdfTypeAndSubjectIsNodeLiteral() {
 		DatalogProgram datalog = translator.parse(QUERIES[1]);
 		List<CQIE> rules = datalog.getRules();
@@ -130,7 +125,6 @@ public class QueryTranslatorTest extends TestCase {
 		assertTrue("Number of body atoms", body.size() == 3);
 	}
 
-	@Test
 	public void testRdfTypeAndSubjectIsNodeUri() {
 		DatalogProgram datalog = translator.parse(QUERIES[2]);
 		List<CQIE> rules = datalog.getRules();
@@ -139,7 +133,6 @@ public class QueryTranslatorTest extends TestCase {
 		assertTrue("Number of body atoms", body.size() == 3);
 	}
 
-	@Test
 	public void testSubjectAndObjectAreNodeLiteral() {
 		DatalogProgram datalog = translator.parse(QUERIES[3]);
 		List<CQIE> rules = datalog.getRules();
@@ -148,7 +141,6 @@ public class QueryTranslatorTest extends TestCase {
 		assertTrue("Number of body atoms", body.size() == 2);
 	}
 
-	@Test
 	public void testSubjectAndObjectAreNodeUri() {
 		DatalogProgram datalog = translator.parse(QUERIES[4]);
 		List<CQIE> rules = datalog.getRules();
@@ -157,43 +149,54 @@ public class QueryTranslatorTest extends TestCase {
 		assertTrue("Number of body atoms", body.size() == 2);
 	}
 
-	@Test(expected=QueryException.class)
 	public void testRdfTypeAndObjectIsVariable() {
-		DatalogProgram datalog = translator.parse(QUERIES[5]);
-		List<CQIE> rules = datalog.getRules();
-		List<Atom> body = rules.get(0).getBody();
-		assertTrue("Number of rules", rules.size() == 1);
-		assertTrue("Number of body atoms", body.size() == 2);
+		try {
+			DatalogProgram datalog = translator.parse(QUERIES[5]);
+			List<CQIE> rules = datalog.getRules();
+			List<Atom> body = rules.get(0).getBody();
+			assertTrue("Number of rules", rules.size() == 1);
+			assertTrue("Number of body atoms", body.size() == 2);
+			fail("parse() should've thrown an exception!");
+		}
+		catch(QueryException e) {}
 	}
 
-	@Test(expected=QueryException.class)
 	public void testRdfTypeAndObjectIsNodeLiteral() {
-		DatalogProgram datalog = translator.parse(QUERIES[6]);
-		List<CQIE> rules = datalog.getRules();
-		List<Atom> body = rules.get(0).getBody();
-		assertTrue("Number of rules", rules.size() == 1);
-		assertTrue("Number of body atoms", body.size() == 2);
+		try {
+			DatalogProgram datalog = translator.parse(QUERIES[6]);
+			List<CQIE> rules = datalog.getRules();
+			List<Atom> body = rules.get(0).getBody();
+			assertTrue("Number of rules", rules.size() == 1);
+			assertTrue("Number of body atoms", body.size() == 2);
+			fail("parse() should've thrown an exception!");
+		}
+		catch(QueryException e) {}
 	}
 
-	@Test(expected=QueryException.class)
 	public void testPredicateIsVariable() {
-		DatalogProgram datalog = translator.parse(QUERIES[7]);
-		List<CQIE> rules = datalog.getRules();
-		List<Atom> body = rules.get(0).getBody();
-		assertTrue("Number of rules", rules.size() == 1);
-		assertTrue("Number of body atoms", body.size() == 1);
+		try {
+			DatalogProgram datalog = translator.parse(QUERIES[7]);
+			List<CQIE> rules = datalog.getRules();
+			List<Atom> body = rules.get(0).getBody();
+			assertTrue("Number of rules", rules.size() == 1);
+			assertTrue("Number of body atoms", body.size() == 1);
+			fail("parse() should've thrown an exception!");
+		}
+		catch(QueryException e) {}
 	}
 
-	@Test(expected=QueryException.class)
 	public void testPredicateIsNodeLiteral() {
-		DatalogProgram datalog = translator.parse(QUERIES[8]);
-		List<CQIE> rules = datalog.getRules();
-		List<Atom> body = rules.get(0).getBody();
-		assertTrue("Number of rules", rules.size() == 1);
-		assertTrue("Number of body atoms", body.size() == 1);
+		try {
+			DatalogProgram datalog = translator.parse(QUERIES[8]);
+			List<CQIE> rules = datalog.getRules();
+			List<Atom> body = rules.get(0).getBody();
+			assertTrue("Number of rules", rules.size() == 1);
+			assertTrue("Number of body atoms", body.size() == 1);
+			fail("parse() should've thrown an exception!");
+		}
+		catch(QueryException e) {}
 	}
 
-	@Test(expected=QueryException.class)
 	public void testPredicateIsNodeUri() {
 		DatalogProgram datalog = translator.parse(QUERIES[9]);
 		List<CQIE> rules = datalog.getRules();
@@ -202,7 +205,6 @@ public class QueryTranslatorTest extends TestCase {
 		assertTrue("Number of body atoms", body.size() == 1);
 	}
 
-	@Test(expected=QueryException.class)
 	public void testDifferentElementGroup() {
 		DatalogProgram datalog = translator.parse(QUERIES[10]);
 		List<CQIE> rules = datalog.getRules();
