@@ -1,168 +1,173 @@
-// $ANTLR 3.3 Nov 30, 2010 12:50:56 SQL99.g 2011-06-27 10:58:54
+// $ANTLR 3.4 C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g 2011-08-31 10:45:35
 
 package it.unibz.krdb.obda.parser;
 
 
-import org.antlr.runtime.BaseRecognizer;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.DFA;
-import org.antlr.runtime.EarlyExitException;
-import org.antlr.runtime.Lexer;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.*;
+import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
+@SuppressWarnings({"all", "warnings", "unchecked"})
 public class SQL99Lexer extends Lexer {
     public static final int EOF=-1;
-    public static final int UNION=4;
-    public static final int SELECT=5;
-    public static final int DISTINCT=6;
-    public static final int ALL=7;
-    public static final int ASTERISK=8;
-    public static final int COMMA=9;
-    public static final int DOT=10;
+    public static final int ALL=4;
+    public static final int ALPHA=5;
+    public static final int ALPHANUM=6;
+    public static final int AMPERSAND=7;
+    public static final int AND=8;
+    public static final int ANY=9;
+    public static final int APOSTROPHE=10;
     public static final int AS=11;
-    public static final int LPAREN=12;
-    public static final int RPAREN=13;
-    public static final int COUNT=14;
-    public static final int AVG=15;
-    public static final int MAX=16;
-    public static final int MIN=17;
-    public static final int SUM=18;
-    public static final int EVERY=19;
-    public static final int ANY=20;
-    public static final int SOME=21;
-    public static final int FROM=22;
-    public static final int WHERE=23;
-    public static final int OR=24;
-    public static final int AND=25;
-    public static final int NOT=26;
-    public static final int IS=27;
-    public static final int NULL=28;
-    public static final int IN=29;
-    public static final int GROUP=30;
-    public static final int BY=31;
-    public static final int JOIN=32;
-    public static final int INNER=33;
-    public static final int OUTER=34;
-    public static final int LEFT=35;
-    public static final int RIGHT=36;
-    public static final int FULL=37;
-    public static final int ON=38;
-    public static final int STRING=39;
-    public static final int STRING_WITH_QUOTE_DOUBLE=40;
-    public static final int TRUE=41;
-    public static final int FALSE=42;
-    public static final int NUMERIC=43;
-    public static final int STRING_WITH_QUOTE=44;
-    public static final int CONCATENATION=45;
-    public static final int EQUALS=46;
-    public static final int LESS=47;
-    public static final int GREATER=48;
-    public static final int ORDER=49;
-    public static final int SEMI=50;
-    public static final int LSQ_BRACKET=51;
-    public static final int RSQ_BRACKET=52;
-    public static final int QUESTION=53;
-    public static final int DOLLAR=54;
-    public static final int QUOTE_DOUBLE=55;
-    public static final int QUOTE_SINGLE=56;
-    public static final int APOSTROPHE=57;
-    public static final int UNDERSCORE=58;
-    public static final int DASH=59;
-    public static final int AMPERSAND=60;
-    public static final int AT=61;
-    public static final int EXCLAMATION=62;
-    public static final int HASH=63;
-    public static final int PERCENT=64;
-    public static final int PLUS=65;
-    public static final int COLON=66;
-    public static final int SLASH=67;
-    public static final int DOUBLE_SLASH=68;
-    public static final int BACKSLASH=69;
-    public static final int TILDE=70;
-    public static final int CARET=71;
-    public static final int ALPHA=72;
-    public static final int DIGIT=73;
-    public static final int ALPHANUM=74;
-    public static final int CHAR=75;
-    public static final int WS=76;
+    public static final int ASTERISK=12;
+    public static final int AT=13;
+    public static final int AVG=14;
+    public static final int BACKSLASH=15;
+    public static final int BY=16;
+    public static final int CARET=17;
+    public static final int CHAR=18;
+    public static final int COLON=19;
+    public static final int COMMA=20;
+    public static final int CONCATENATION=21;
+    public static final int COUNT=22;
+    public static final int DASH=23;
+    public static final int DIGIT=24;
+    public static final int DISTINCT=25;
+    public static final int DOLLAR=26;
+    public static final int DOT=27;
+    public static final int DOUBLE_SLASH=28;
+    public static final int ECHAR=29;
+    public static final int EQUALS=30;
+    public static final int EVERY=31;
+    public static final int EXCLAMATION=32;
+    public static final int FALSE=33;
+    public static final int FROM=34;
+    public static final int FULL=35;
+    public static final int GREATER=36;
+    public static final int GROUP=37;
+    public static final int HASH=38;
+    public static final int IN=39;
+    public static final int INNER=40;
+    public static final int INTEGER=41;
+    public static final int IS=42;
+    public static final int JOIN=43;
+    public static final int LEFT=44;
+    public static final int LESS=45;
+    public static final int LPAREN=46;
+    public static final int LSQ_BRACKET=47;
+    public static final int MAX=48;
+    public static final int MIN=49;
+    public static final int NOT=50;
+    public static final int NULL=51;
+    public static final int ON=52;
+    public static final int OR=53;
+    public static final int ORDER=54;
+    public static final int OUTER=55;
+    public static final int PERCENT=56;
+    public static final int PLUS=57;
+    public static final int QUESTION=58;
+    public static final int QUOTE_DOUBLE=59;
+    public static final int QUOTE_SINGLE=60;
+    public static final int RIGHT=61;
+    public static final int RPAREN=62;
+    public static final int RSQ_BRACKET=63;
+    public static final int SELECT=64;
+    public static final int SEMI=65;
+    public static final int SLASH=66;
+    public static final int SOME=67;
+    public static final int STRING_WITH_QUOTE=68;
+    public static final int STRING_WITH_QUOTE_DOUBLE=69;
+    public static final int SUM=70;
+    public static final int TILDE=71;
+    public static final int TRUE=72;
+    public static final int UNDERSCORE=73;
+    public static final int UNION=74;
+    public static final int USING=75;
+    public static final int VARNAME=76;
+    public static final int WHERE=77;
+    public static final int WS=78;
 
     // delegates
     // delegators
+    public Lexer[] getDelegates() {
+        return new Lexer[] {};
+    }
 
-    public SQL99Lexer() {;} 
+    public SQL99Lexer() {} 
     public SQL99Lexer(CharStream input) {
         this(input, new RecognizerSharedState());
     }
     public SQL99Lexer(CharStream input, RecognizerSharedState state) {
         super(input,state);
-
     }
-    public String getGrammarFileName() { return "SQL99.g"; }
+    public String getGrammarFileName() { return "C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g"; }
 
     // $ANTLR start "SELECT"
     public final void mSELECT() throws RecognitionException {
         try {
             int _type = SELECT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:327:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // SQL99.g:327:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:337:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:337:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -171,6 +176,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "SELECT"
@@ -180,80 +186,87 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DISTINCT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:329:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // SQL99.g:329:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:339:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:339:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -262,6 +275,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "DISTINCT"
@@ -271,35 +285,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ALL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:331:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:331:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:341:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:341:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -308,6 +324,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ALL"
@@ -317,35 +334,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AVG;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:333:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
-            // SQL99.g:333:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:343:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:343:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='V'||input.LA(1)=='v' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -354,6 +373,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "AVG"
@@ -363,35 +383,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MAX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:335:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
-            // SQL99.g:335:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:345:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:345:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='X'||input.LA(1)=='x' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -400,6 +422,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "MAX"
@@ -409,35 +432,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:337:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:337:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:347:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:347:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -446,6 +471,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "MIN"
@@ -455,35 +481,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SUM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:339:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
-            // SQL99.g:339:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:349:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:349:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -492,6 +520,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "SUM"
@@ -501,53 +530,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EVERY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:341:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
-            // SQL99.g:341:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:351:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:351:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='V'||input.LA(1)=='v' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -556,6 +589,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "EVERY"
@@ -565,35 +599,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ANY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:343:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
-            // SQL99.g:343:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:353:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:353:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -602,6 +638,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ANY"
@@ -611,44 +648,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SOME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:345:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
-            // SQL99.g:345:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:355:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:355:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -657,6 +697,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "SOME"
@@ -666,53 +707,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COUNT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:347:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
-            // SQL99.g:347:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:357:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:357:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -721,6 +766,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "COUNT"
@@ -730,44 +776,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FROM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:349:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
-            // SQL99.g:349:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:359:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:359:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -776,6 +825,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "FROM"
@@ -785,53 +835,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WHERE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:351:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
-            // SQL99.g:351:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:361:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:361:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='W'||input.LA(1)=='w' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='H'||input.LA(1)=='h' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -840,6 +894,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "WHERE"
@@ -849,35 +904,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:353:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
-            // SQL99.g:353:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:363:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:363:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -886,6 +943,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "AND"
@@ -895,26 +953,27 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:355:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
-            // SQL99.g:355:5: ( 'O' | 'o' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:365:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:365:5: ( 'O' | 'o' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -923,6 +982,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "OR"
@@ -932,35 +992,37 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:357:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
-            // SQL99.g:357:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:367:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:367:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -969,6 +1031,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "NOT"
@@ -978,53 +1041,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ORDER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:359:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:359:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:369:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:369:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1033,6 +1100,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ORDER"
@@ -1042,53 +1110,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GROUP;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:361:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
-            // SQL99.g:361:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:371:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:371:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
             {
             if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1097,6 +1169,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "GROUP"
@@ -1106,26 +1179,27 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:363:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
-            // SQL99.g:363:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:373:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:373:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='Y'||input.LA(1)=='y' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1134,6 +1208,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "BY"
@@ -1143,26 +1218,27 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:365:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
-            // SQL99.g:365:5: ( 'A' | 'a' ) ( 'S' | 's' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:375:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:375:5: ( 'A' | 'a' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1171,6 +1247,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "AS"
@@ -1180,44 +1257,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = JOIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:367:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:367:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:377:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:377:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='J'||input.LA(1)=='j' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1226,6 +1306,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "JOIN"
@@ -1235,53 +1316,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = INNER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:369:6: ( ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:369:8: ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:379:6: ( ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:379:8: ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1290,6 +1375,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "INNER"
@@ -1299,53 +1385,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OUTER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:371:6: ( ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // SQL99.g:371:8: ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:381:6: ( ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:381:8: ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1354,6 +1444,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "OUTER"
@@ -1363,44 +1454,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LEFT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:373:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
-            // SQL99.g:373:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:383:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:383:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1409,6 +1503,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "LEFT"
@@ -1418,53 +1513,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RIGHT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:375:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
-            // SQL99.g:375:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:385:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:385:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='H'||input.LA(1)=='h' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1473,6 +1572,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "RIGHT"
@@ -1482,44 +1582,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:377:5: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:377:7: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:387:5: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:387:7: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1528,6 +1631,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "FULL"
@@ -1537,53 +1641,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:379:6: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // SQL99.g:379:8: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:389:6: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:389:8: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1592,35 +1700,106 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "UNION"
+
+    // $ANTLR start "USING"
+    public final void mUSING() throws RecognitionException {
+        try {
+            int _type = USING;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:391:6: ( ( 'U' | 'u' ) ( 'S' | 's' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'G' | 'g' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:391:8: ( 'U' | 'u' ) ( 'S' | 's' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'G' | 'g' )
+            {
+            if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
+
+            if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
+
+            if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
+
+            if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
+
+            if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "USING"
 
     // $ANTLR start "ON"
     public final void mON() throws RecognitionException {
         try {
             int _type = ON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:381:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // SQL99.g:381:5: ( 'O' | 'o' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:393:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:393:5: ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1629,6 +1808,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ON"
@@ -1638,26 +1818,27 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:383:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // SQL99.g:383:5: ( 'I' | 'i' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:395:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:395:5: ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1666,6 +1847,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "IN"
@@ -1675,26 +1857,27 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:385:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
-            // SQL99.g:385:5: ( 'I' | 'i' ) ( 'S' | 's' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:397:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:397:5: ( 'I' | 'i' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1703,6 +1886,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "IS"
@@ -1712,44 +1896,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:387:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // SQL99.g:387:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:399:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:399:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1758,6 +1945,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "NULL"
@@ -1767,53 +1955,57 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FALSE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:389:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // SQL99.g:389:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:401:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:401:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1822,6 +2014,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "FALSE"
@@ -1831,44 +2024,47 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TRUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:391:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-            // SQL99.g:391:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:403:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:403:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
+
 
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
@@ -1877,6 +2073,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "TRUE"
@@ -1886,8 +2083,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:393:5: ( ';' )
-            // SQL99.g:393:16: ';'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:405:5: ( ';' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:405:16: ';'
             {
             match(';'); 
 
@@ -1897,6 +2094,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "SEMI"
@@ -1906,8 +2104,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:394:4: ( '.' )
-            // SQL99.g:394:16: '.'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:406:4: ( '.' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:406:16: '.'
             {
             match('.'); 
 
@@ -1917,6 +2115,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "DOT"
@@ -1926,8 +2125,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:395:6: ( ',' )
-            // SQL99.g:395:16: ','
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:407:6: ( ',' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:407:16: ','
             {
             match(','); 
 
@@ -1937,6 +2136,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "COMMA"
@@ -1946,8 +2146,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:396:12: ( '[' )
-            // SQL99.g:396:16: '['
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:408:12: ( '[' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:408:16: '['
             {
             match('['); 
 
@@ -1957,6 +2157,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "LSQ_BRACKET"
@@ -1966,8 +2167,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:397:12: ( ']' )
-            // SQL99.g:397:16: ']'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:409:12: ( ']' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:409:16: ']'
             {
             match(']'); 
 
@@ -1977,6 +2178,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "RSQ_BRACKET"
@@ -1986,8 +2188,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:398:7: ( '(' )
-            // SQL99.g:398:16: '('
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:410:7: ( '(' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:410:16: '('
             {
             match('('); 
 
@@ -1997,6 +2199,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "LPAREN"
@@ -2006,8 +2209,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:399:7: ( ')' )
-            // SQL99.g:399:16: ')'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:411:7: ( ')' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:411:16: ')'
             {
             match(')'); 
 
@@ -2017,6 +2220,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "RPAREN"
@@ -2026,8 +2230,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:400:9: ( '?' )
-            // SQL99.g:400:16: '?'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:412:9: ( '?' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:412:16: '?'
             {
             match('?'); 
 
@@ -2037,6 +2241,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "QUESTION"
@@ -2046,8 +2251,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:401:7: ( '$' )
-            // SQL99.g:401:16: '$'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:413:7: ( '$' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:413:16: '$'
             {
             match('$'); 
 
@@ -2057,6 +2262,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "DOLLAR"
@@ -2066,8 +2272,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:402:13: ( '\"' )
-            // SQL99.g:402:16: '\"'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:414:13: ( '\"' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:414:16: '\"'
             {
             match('\"'); 
 
@@ -2077,6 +2283,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "QUOTE_DOUBLE"
@@ -2086,8 +2293,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:403:13: ( '\\'' )
-            // SQL99.g:403:16: '\\''
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:415:13: ( '\\'' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:415:16: '\\''
             {
             match('\''); 
 
@@ -2097,6 +2304,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "QUOTE_SINGLE"
@@ -2106,8 +2314,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:404:11: ( '`' )
-            // SQL99.g:404:16: '`'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:416:11: ( '`' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:416:16: '`'
             {
             match('`'); 
 
@@ -2117,6 +2325,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "APOSTROPHE"
@@ -2126,8 +2335,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:405:11: ( '_' )
-            // SQL99.g:405:16: '_'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:417:11: ( '_' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:417:16: '_'
             {
             match('_'); 
 
@@ -2137,6 +2346,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "UNDERSCORE"
@@ -2146,8 +2356,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:406:5: ( '-' )
-            // SQL99.g:406:16: '-'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:418:5: ( '-' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:418:16: '-'
             {
             match('-'); 
 
@@ -2157,6 +2367,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "DASH"
@@ -2166,8 +2377,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:407:9: ( '*' )
-            // SQL99.g:407:16: '*'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:419:9: ( '*' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:419:16: '*'
             {
             match('*'); 
 
@@ -2177,6 +2388,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ASTERISK"
@@ -2186,8 +2398,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:408:10: ( '&' )
-            // SQL99.g:408:16: '&'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:420:10: ( '&' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:420:16: '&'
             {
             match('&'); 
 
@@ -2197,6 +2409,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "AMPERSAND"
@@ -2206,8 +2419,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:409:3: ( '@' )
-            // SQL99.g:409:16: '@'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:421:3: ( '@' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:421:16: '@'
             {
             match('@'); 
 
@@ -2217,6 +2430,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "AT"
@@ -2226,8 +2440,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:410:12: ( '!' )
-            // SQL99.g:410:16: '!'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:422:12: ( '!' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:422:16: '!'
             {
             match('!'); 
 
@@ -2237,6 +2451,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "EXCLAMATION"
@@ -2246,8 +2461,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:411:5: ( '#' )
-            // SQL99.g:411:16: '#'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:423:5: ( '#' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:423:16: '#'
             {
             match('#'); 
 
@@ -2257,6 +2472,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "HASH"
@@ -2266,8 +2482,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:412:8: ( '%' )
-            // SQL99.g:412:16: '%'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:424:8: ( '%' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:424:16: '%'
             {
             match('%'); 
 
@@ -2277,6 +2493,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "PERCENT"
@@ -2286,8 +2503,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:413:5: ( '+' )
-            // SQL99.g:413:16: '+'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:425:5: ( '+' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:425:16: '+'
             {
             match('+'); 
 
@@ -2297,6 +2514,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "PLUS"
@@ -2306,8 +2524,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:414:7: ( '=' )
-            // SQL99.g:414:16: '='
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:426:7: ( '=' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:426:16: '='
             {
             match('='); 
 
@@ -2317,6 +2535,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "EQUALS"
@@ -2326,8 +2545,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:415:6: ( ':' )
-            // SQL99.g:415:16: ':'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:427:6: ( ':' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:427:16: ':'
             {
             match(':'); 
 
@@ -2337,6 +2556,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "COLON"
@@ -2346,8 +2566,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:416:5: ( '<' )
-            // SQL99.g:416:16: '<'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:428:5: ( '<' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:428:16: '<'
             {
             match('<'); 
 
@@ -2357,6 +2577,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "LESS"
@@ -2366,8 +2587,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:417:8: ( '>' )
-            // SQL99.g:417:16: '>'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:429:8: ( '>' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:429:16: '>'
             {
             match('>'); 
 
@@ -2377,6 +2598,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "GREATER"
@@ -2386,8 +2608,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:418:6: ( '/' )
-            // SQL99.g:418:16: '/'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:430:6: ( '/' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:430:16: '/'
             {
             match('/'); 
 
@@ -2397,6 +2619,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "SLASH"
@@ -2406,10 +2629,11 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:419:13: ( '//' )
-            // SQL99.g:419:16: '//'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:431:13: ( '//' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:431:16: '//'
             {
             match("//"); 
+
 
 
             }
@@ -2418,6 +2642,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "DOUBLE_SLASH"
@@ -2427,8 +2652,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:420:10: ( '\\\\' )
-            // SQL99.g:420:16: '\\\\'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:432:10: ( '\\\\' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:432:16: '\\\\'
             {
             match('\\'); 
 
@@ -2438,6 +2663,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "BACKSLASH"
@@ -2447,8 +2673,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:421:6: ( '~' )
-            // SQL99.g:421:16: '~'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:433:6: ( '~' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:433:16: '~'
             {
             match('~'); 
 
@@ -2458,6 +2684,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "TILDE"
@@ -2467,8 +2694,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:422:6: ( '^' )
-            // SQL99.g:422:16: '^'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:434:6: ( '^' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:434:16: '^'
             {
             match('^'); 
 
@@ -2478,6 +2705,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "CARET"
@@ -2487,10 +2715,11 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CONCATENATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:423:14: ( '||' )
-            // SQL99.g:423:16: '||'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:435:14: ( '||' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:435:16: '||'
             {
             match("||"); 
+
 
 
             }
@@ -2499,6 +2728,7 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "CONCATENATION"
@@ -2506,23 +2736,25 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // SQL99.g:425:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
-            // SQL99.g:425:17: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:438:3: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
-            if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+            if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
 
+
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ALPHA"
@@ -2530,15 +2762,25 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // SQL99.g:427:15: ( '0' .. '9' )
-            // SQL99.g:427:17: '0' .. '9'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:443:3: ( '0' .. '9' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
-            matchRange('0','9'); 
+            if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
 
             }
 
+
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "DIGIT"
@@ -2546,23 +2788,25 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // SQL99.g:429:18: ( ( ALPHA | DIGIT ) )
-            // SQL99.g:429:20: ( ALPHA | DIGIT )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:447:3: ( ALPHA | DIGIT )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
-            if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+            if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
 
+
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "ALPHANUM"
@@ -2570,52 +2814,90 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "CHAR"
     public final void mCHAR() throws RecognitionException {
         try {
-            // SQL99.g:431:14: ( ( ALPHANUM | UNDERSCORE | DASH ) )
-            // SQL99.g:431:16: ( ALPHANUM | UNDERSCORE | DASH )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:452:3: ( ALPHANUM | UNDERSCORE | DASH )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
-            if ( input.LA(1)=='-'||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+            if ( input.LA(1)=='-'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
                 input.consume();
-
             }
             else {
                 MismatchedSetException mse = new MismatchedSetException(null,input);
                 recover(mse);
-                throw mse;}
+                throw mse;
+            }
 
 
             }
 
+
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "CHAR"
 
-    // $ANTLR start "NUMERIC"
-    public final void mNUMERIC() throws RecognitionException {
+    // $ANTLR start "ECHAR"
+    public final void mECHAR() throws RecognitionException {
         try {
-            int _type = NUMERIC;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:433:8: ( ( DIGIT )+ )
-            // SQL99.g:433:10: ( DIGIT )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:458:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:458:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
             {
-            // SQL99.g:433:10: ( DIGIT )+
+            match('\\'); 
+
+            if ( input.LA(1)=='\"'||input.LA(1)=='\''||input.LA(1)=='\\'||input.LA(1)=='b'||input.LA(1)=='f'||input.LA(1)=='n'||input.LA(1)=='r'||input.LA(1)=='t' ) {
+                input.consume();
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;
+            }
+
+
+            }
+
+
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "ECHAR"
+
+    // $ANTLR start "INTEGER"
+    public final void mINTEGER() throws RecognitionException {
+        try {
+            int _type = INTEGER;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:462:3: ( ( DIGIT )+ )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:462:5: ( DIGIT )+
+            {
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:462:5: ( DIGIT )+
             int cnt1=0;
             loop1:
             do {
                 int alt1=2;
                 int LA1_0 = input.LA(1);
 
-                if ( ((LA1_0>='0' && LA1_0<='9')) ) {
+                if ( ((LA1_0 >= '0' && LA1_0 <= '9')) ) {
                     alt1=1;
                 }
 
 
                 switch (alt1) {
             	case 1 :
-            	    // SQL99.g:433:10: DIGIT
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             	    {
-            	    mDIGIT(); 
+            	    if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+            	        input.consume();
+            	    }
+            	    else {
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;
+            	    }
+
 
             	    }
             	    break;
@@ -2636,34 +2918,43 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
-    // $ANTLR end "NUMERIC"
+    // $ANTLR end "INTEGER"
 
-    // $ANTLR start "STRING"
-    public final void mSTRING() throws RecognitionException {
+    // $ANTLR start "VARNAME"
+    public final void mVARNAME() throws RecognitionException {
         try {
-            int _type = STRING;
+            int _type = VARNAME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:435:7: ( ( CHAR )* )
-            // SQL99.g:435:9: ( CHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:466:3: ( ( CHAR )* )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:466:5: ( CHAR )*
             {
-            // SQL99.g:435:9: ( CHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:466:5: ( CHAR )*
             loop2:
             do {
                 int alt2=2;
                 int LA2_0 = input.LA(1);
 
-                if ( (LA2_0=='-'||(LA2_0>='0' && LA2_0<='9')||(LA2_0>='A' && LA2_0<='Z')||LA2_0=='_'||(LA2_0>='a' && LA2_0<='z')) ) {
+                if ( (LA2_0=='-'||(LA2_0 >= '0' && LA2_0 <= '9')||(LA2_0 >= 'A' && LA2_0 <= 'Z')||LA2_0=='_'||(LA2_0 >= 'a' && LA2_0 <= 'z')) ) {
                     alt2=1;
                 }
 
 
                 switch (alt2) {
             	case 1 :
-            	    // SQL99.g:435:9: CHAR
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             	    {
-            	    mCHAR(); 
+            	    if ( input.LA(1)=='-'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
+            	        input.consume();
+            	    }
+            	    else {
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;
+            	    }
+
 
             	    }
             	    break;
@@ -2680,35 +2971,59 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
-    // $ANTLR end "STRING"
+    // $ANTLR end "VARNAME"
 
-    // $ANTLR start "STRING_WITH_QUOTE_DOUBLE"
-    public final void mSTRING_WITH_QUOTE_DOUBLE() throws RecognitionException {
+    // $ANTLR start "STRING_WITH_QUOTE"
+    public final void mSTRING_WITH_QUOTE() throws RecognitionException {
         try {
-            int _type = STRING_WITH_QUOTE_DOUBLE;
+            int _type = STRING_WITH_QUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:437:25: ( QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE )
-            // SQL99.g:437:27: QUOTE_DOUBLE ( CHAR )* QUOTE_DOUBLE
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:470:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:470:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
             {
-            mQUOTE_DOUBLE(); 
-            // SQL99.g:437:40: ( CHAR )*
+            match('\''); 
+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:470:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop3:
             do {
-                int alt3=2;
+                int alt3=3;
                 int LA3_0 = input.LA(1);
 
-                if ( (LA3_0=='-'||(LA3_0>='0' && LA3_0<='9')||(LA3_0>='A' && LA3_0<='Z')||LA3_0=='_'||(LA3_0>='a' && LA3_0<='z')) ) {
+                if ( ((LA3_0 >= '\u0000' && LA3_0 <= '\t')||(LA3_0 >= '\u000B' && LA3_0 <= '\f')||(LA3_0 >= '\u000E' && LA3_0 <= '&')||(LA3_0 >= '(' && LA3_0 <= '[')||(LA3_0 >= ']' && LA3_0 <= '\uFFFF')) ) {
                     alt3=1;
+                }
+                else if ( (LA3_0=='\\') ) {
+                    alt3=2;
+                }
+                else if ( (LA3_0=='\'') ) {
+                    alt3=3;
                 }
 
 
                 switch (alt3) {
             	case 1 :
-            	    // SQL99.g:437:40: CHAR
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:470:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
-            	    mCHAR(); 
+            	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
+            	        input.consume();
+            	    }
+            	    else {
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;
+            	    }
+
+
+            	    }
+            	    break;
+            	case 2 :
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:470:87: ECHAR
+            	    {
+            	    mECHAR(); 
+
 
             	    }
             	    break;
@@ -2718,7 +3033,8 @@ public class SQL99Lexer extends Lexer {
                 }
             } while (true);
 
-            mQUOTE_DOUBLE(); 
+
+            match('\''); 
 
             }
 
@@ -2726,43 +3042,59 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
-    // $ANTLR end "STRING_WITH_QUOTE_DOUBLE"
+    // $ANTLR end "STRING_WITH_QUOTE"
 
-    // $ANTLR start "STRING_WITH_QUOTE"
-    public final void mSTRING_WITH_QUOTE() throws RecognitionException {
+    // $ANTLR start "STRING_WITH_QUOTE_DOUBLE"
+    public final void mSTRING_WITH_QUOTE_DOUBLE() throws RecognitionException {
         try {
-            int _type = STRING_WITH_QUOTE;
+            int _type = STRING_WITH_QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:439:18: ( ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE ) )
-            // SQL99.g:439:20: ( QUOTE_SINGLE | QUOTE_DOUBLE ) ( CHAR )* ( QUOTE_SINGLE | QUOTE_DOUBLE )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:474:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:474:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
             {
-            if ( input.LA(1)=='\"'||input.LA(1)=='\'' ) {
-                input.consume();
+            match('\"'); 
 
-            }
-            else {
-                MismatchedSetException mse = new MismatchedSetException(null,input);
-                recover(mse);
-                throw mse;}
-
-            // SQL99.g:439:48: ( CHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:474:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop4:
             do {
-                int alt4=2;
+                int alt4=3;
                 int LA4_0 = input.LA(1);
 
-                if ( (LA4_0=='-'||(LA4_0>='0' && LA4_0<='9')||(LA4_0>='A' && LA4_0<='Z')||LA4_0=='_'||(LA4_0>='a' && LA4_0<='z')) ) {
+                if ( ((LA4_0 >= '\u0000' && LA4_0 <= '\t')||(LA4_0 >= '\u000B' && LA4_0 <= '\f')||(LA4_0 >= '\u000E' && LA4_0 <= '!')||(LA4_0 >= '#' && LA4_0 <= '[')||(LA4_0 >= ']' && LA4_0 <= '\uFFFF')) ) {
                     alt4=1;
+                }
+                else if ( (LA4_0=='\\') ) {
+                    alt4=2;
+                }
+                else if ( (LA4_0=='\"') ) {
+                    alt4=3;
                 }
 
 
                 switch (alt4) {
             	case 1 :
-            	    // SQL99.g:439:48: CHAR
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:474:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
-            	    mCHAR(); 
+            	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
+            	        input.consume();
+            	    }
+            	    else {
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;
+            	    }
+
+
+            	    }
+            	    break;
+            	case 2 :
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:474:87: ECHAR
+            	    {
+            	    mECHAR(); 
+
 
             	    }
             	    break;
@@ -2772,15 +3104,8 @@ public class SQL99Lexer extends Lexer {
                 }
             } while (true);
 
-            if ( input.LA(1)=='\"'||input.LA(1)=='\'' ) {
-                input.consume();
 
-            }
-            else {
-                MismatchedSetException mse = new MismatchedSetException(null,input);
-                recover(mse);
-                throw mse;}
-
+            match('\"'); 
 
             }
 
@@ -2788,19 +3113,20 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
-    // $ANTLR end "STRING_WITH_QUOTE"
+    // $ANTLR end "STRING_WITH_QUOTE_DOUBLE"
 
     // $ANTLR start "WS"
     public final void mWS() throws RecognitionException {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // SQL99.g:441:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // SQL99.g:441:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // SQL99.g:441:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt6=0;
             loop6:
             do {
@@ -2827,23 +3153,23 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // SQL99.g:441:6: ' '
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // SQL99.g:441:10: '\\t'
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // SQL99.g:441:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // SQL99.g:441:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt5=2;
             	    int LA5_0 = input.LA(1);
 
@@ -2858,21 +3184,23 @@ public class SQL99Lexer extends Lexer {
             	            new NoViableAltException("", 5, 0, input);
 
             	        throw nvae;
+
             	    }
             	    switch (alt5) {
             	        case 1 :
-            	            // SQL99.g:441:16: '\\n'
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // SQL99.g:441:21: '\\r' ( '\\n' )
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
-            	            // SQL99.g:441:25: ( '\\n' )
-            	            // SQL99.g:441:26: '\\n'
+
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:25: ( '\\n' )
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:477:26: '\\n'
             	            {
             	            match('\n'); 
 
@@ -2897,6 +3225,7 @@ public class SQL99Lexer extends Lexer {
                 cnt6++;
             } while (true);
 
+
             _channel=HIDDEN;
 
             }
@@ -2905,495 +3234,573 @@ public class SQL99Lexer extends Lexer {
             state.channel = _channel;
         }
         finally {
+        	// do for sure before leaving
         }
     }
     // $ANTLR end "WS"
 
     public void mTokens() throws RecognitionException {
-        // SQL99.g:1:8: ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | GROUP | BY | AS | JOIN | INNER | OUTER | LEFT | RIGHT | FULL | UNION | ON | IN | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | CONCATENATION | NUMERIC | STRING | STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE | WS )
-        int alt7=69;
+        // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:8: ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | GROUP | BY | AS | JOIN | INNER | OUTER | LEFT | RIGHT | FULL | UNION | USING | ON | IN | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | CONCATENATION | INTEGER | VARNAME | STRING_WITH_QUOTE | STRING_WITH_QUOTE_DOUBLE | WS )
+        int alt7=70;
         alt7 = dfa7.predict(input);
         switch (alt7) {
             case 1 :
-                // SQL99.g:1:10: SELECT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:10: SELECT
                 {
                 mSELECT(); 
+
 
                 }
                 break;
             case 2 :
-                // SQL99.g:1:17: DISTINCT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:17: DISTINCT
                 {
                 mDISTINCT(); 
+
 
                 }
                 break;
             case 3 :
-                // SQL99.g:1:26: ALL
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:26: ALL
                 {
                 mALL(); 
+
 
                 }
                 break;
             case 4 :
-                // SQL99.g:1:30: AVG
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:30: AVG
                 {
                 mAVG(); 
+
 
                 }
                 break;
             case 5 :
-                // SQL99.g:1:34: MAX
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:34: MAX
                 {
                 mMAX(); 
+
 
                 }
                 break;
             case 6 :
-                // SQL99.g:1:38: MIN
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:38: MIN
                 {
                 mMIN(); 
+
 
                 }
                 break;
             case 7 :
-                // SQL99.g:1:42: SUM
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:42: SUM
                 {
                 mSUM(); 
+
 
                 }
                 break;
             case 8 :
-                // SQL99.g:1:46: EVERY
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:46: EVERY
                 {
                 mEVERY(); 
+
 
                 }
                 break;
             case 9 :
-                // SQL99.g:1:52: ANY
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:52: ANY
                 {
                 mANY(); 
+
 
                 }
                 break;
             case 10 :
-                // SQL99.g:1:56: SOME
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:56: SOME
                 {
                 mSOME(); 
+
 
                 }
                 break;
             case 11 :
-                // SQL99.g:1:61: COUNT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:61: COUNT
                 {
                 mCOUNT(); 
+
 
                 }
                 break;
             case 12 :
-                // SQL99.g:1:67: FROM
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:67: FROM
                 {
                 mFROM(); 
+
 
                 }
                 break;
             case 13 :
-                // SQL99.g:1:72: WHERE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:72: WHERE
                 {
                 mWHERE(); 
+
 
                 }
                 break;
             case 14 :
-                // SQL99.g:1:78: AND
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:78: AND
                 {
                 mAND(); 
+
 
                 }
                 break;
             case 15 :
-                // SQL99.g:1:82: OR
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:82: OR
                 {
                 mOR(); 
+
 
                 }
                 break;
             case 16 :
-                // SQL99.g:1:85: NOT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:85: NOT
                 {
                 mNOT(); 
+
 
                 }
                 break;
             case 17 :
-                // SQL99.g:1:89: ORDER
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:89: ORDER
                 {
                 mORDER(); 
+
 
                 }
                 break;
             case 18 :
-                // SQL99.g:1:95: GROUP
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:95: GROUP
                 {
                 mGROUP(); 
+
 
                 }
                 break;
             case 19 :
-                // SQL99.g:1:101: BY
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:101: BY
                 {
                 mBY(); 
+
 
                 }
                 break;
             case 20 :
-                // SQL99.g:1:104: AS
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:104: AS
                 {
                 mAS(); 
+
 
                 }
                 break;
             case 21 :
-                // SQL99.g:1:107: JOIN
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:107: JOIN
                 {
                 mJOIN(); 
+
 
                 }
                 break;
             case 22 :
-                // SQL99.g:1:112: INNER
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:112: INNER
                 {
                 mINNER(); 
+
 
                 }
                 break;
             case 23 :
-                // SQL99.g:1:118: OUTER
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:118: OUTER
                 {
                 mOUTER(); 
+
 
                 }
                 break;
             case 24 :
-                // SQL99.g:1:124: LEFT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:124: LEFT
                 {
                 mLEFT(); 
+
 
                 }
                 break;
             case 25 :
-                // SQL99.g:1:129: RIGHT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:129: RIGHT
                 {
                 mRIGHT(); 
+
 
                 }
                 break;
             case 26 :
-                // SQL99.g:1:135: FULL
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:135: FULL
                 {
                 mFULL(); 
+
 
                 }
                 break;
             case 27 :
-                // SQL99.g:1:140: UNION
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:140: UNION
                 {
                 mUNION(); 
+
 
                 }
                 break;
             case 28 :
-                // SQL99.g:1:146: ON
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:146: USING
                 {
-                mON(); 
+                mUSING(); 
+
 
                 }
                 break;
             case 29 :
-                // SQL99.g:1:149: IN
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:152: ON
                 {
-                mIN(); 
+                mON(); 
+
 
                 }
                 break;
             case 30 :
-                // SQL99.g:1:152: IS
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:155: IN
                 {
-                mIS(); 
+                mIN(); 
+
 
                 }
                 break;
             case 31 :
-                // SQL99.g:1:155: NULL
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:158: IS
                 {
-                mNULL(); 
+                mIS(); 
+
 
                 }
                 break;
             case 32 :
-                // SQL99.g:1:160: FALSE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:161: NULL
                 {
-                mFALSE(); 
+                mNULL(); 
+
 
                 }
                 break;
             case 33 :
-                // SQL99.g:1:166: TRUE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:166: FALSE
                 {
-                mTRUE(); 
+                mFALSE(); 
+
 
                 }
                 break;
             case 34 :
-                // SQL99.g:1:171: SEMI
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:172: TRUE
                 {
-                mSEMI(); 
+                mTRUE(); 
+
 
                 }
                 break;
             case 35 :
-                // SQL99.g:1:176: DOT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:177: SEMI
                 {
-                mDOT(); 
+                mSEMI(); 
+
 
                 }
                 break;
             case 36 :
-                // SQL99.g:1:180: COMMA
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:182: DOT
                 {
-                mCOMMA(); 
+                mDOT(); 
+
 
                 }
                 break;
             case 37 :
-                // SQL99.g:1:186: LSQ_BRACKET
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:186: COMMA
                 {
-                mLSQ_BRACKET(); 
+                mCOMMA(); 
+
 
                 }
                 break;
             case 38 :
-                // SQL99.g:1:198: RSQ_BRACKET
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:192: LSQ_BRACKET
                 {
-                mRSQ_BRACKET(); 
+                mLSQ_BRACKET(); 
+
 
                 }
                 break;
             case 39 :
-                // SQL99.g:1:210: LPAREN
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:204: RSQ_BRACKET
                 {
-                mLPAREN(); 
+                mRSQ_BRACKET(); 
+
 
                 }
                 break;
             case 40 :
-                // SQL99.g:1:217: RPAREN
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:216: LPAREN
                 {
-                mRPAREN(); 
+                mLPAREN(); 
+
 
                 }
                 break;
             case 41 :
-                // SQL99.g:1:224: QUESTION
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:223: RPAREN
                 {
-                mQUESTION(); 
+                mRPAREN(); 
+
 
                 }
                 break;
             case 42 :
-                // SQL99.g:1:233: DOLLAR
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:230: QUESTION
                 {
-                mDOLLAR(); 
+                mQUESTION(); 
+
 
                 }
                 break;
             case 43 :
-                // SQL99.g:1:240: QUOTE_DOUBLE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:239: DOLLAR
                 {
-                mQUOTE_DOUBLE(); 
+                mDOLLAR(); 
+
 
                 }
                 break;
             case 44 :
-                // SQL99.g:1:253: QUOTE_SINGLE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:246: QUOTE_DOUBLE
                 {
-                mQUOTE_SINGLE(); 
+                mQUOTE_DOUBLE(); 
+
 
                 }
                 break;
             case 45 :
-                // SQL99.g:1:266: APOSTROPHE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:259: QUOTE_SINGLE
                 {
-                mAPOSTROPHE(); 
+                mQUOTE_SINGLE(); 
+
 
                 }
                 break;
             case 46 :
-                // SQL99.g:1:277: UNDERSCORE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:272: APOSTROPHE
                 {
-                mUNDERSCORE(); 
+                mAPOSTROPHE(); 
+
 
                 }
                 break;
             case 47 :
-                // SQL99.g:1:288: DASH
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:283: UNDERSCORE
                 {
-                mDASH(); 
+                mUNDERSCORE(); 
+
 
                 }
                 break;
             case 48 :
-                // SQL99.g:1:293: ASTERISK
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:294: DASH
                 {
-                mASTERISK(); 
+                mDASH(); 
+
 
                 }
                 break;
             case 49 :
-                // SQL99.g:1:302: AMPERSAND
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:299: ASTERISK
                 {
-                mAMPERSAND(); 
+                mASTERISK(); 
+
 
                 }
                 break;
             case 50 :
-                // SQL99.g:1:312: AT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:308: AMPERSAND
                 {
-                mAT(); 
+                mAMPERSAND(); 
+
 
                 }
                 break;
             case 51 :
-                // SQL99.g:1:315: EXCLAMATION
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:318: AT
                 {
-                mEXCLAMATION(); 
+                mAT(); 
+
 
                 }
                 break;
             case 52 :
-                // SQL99.g:1:327: HASH
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:321: EXCLAMATION
                 {
-                mHASH(); 
+                mEXCLAMATION(); 
+
 
                 }
                 break;
             case 53 :
-                // SQL99.g:1:332: PERCENT
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:333: HASH
                 {
-                mPERCENT(); 
+                mHASH(); 
+
 
                 }
                 break;
             case 54 :
-                // SQL99.g:1:340: PLUS
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:338: PERCENT
                 {
-                mPLUS(); 
+                mPERCENT(); 
+
 
                 }
                 break;
             case 55 :
-                // SQL99.g:1:345: EQUALS
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:346: PLUS
                 {
-                mEQUALS(); 
+                mPLUS(); 
+
 
                 }
                 break;
             case 56 :
-                // SQL99.g:1:352: COLON
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:351: EQUALS
                 {
-                mCOLON(); 
+                mEQUALS(); 
+
 
                 }
                 break;
             case 57 :
-                // SQL99.g:1:358: LESS
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:358: COLON
                 {
-                mLESS(); 
+                mCOLON(); 
+
 
                 }
                 break;
             case 58 :
-                // SQL99.g:1:363: GREATER
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:364: LESS
                 {
-                mGREATER(); 
+                mLESS(); 
+
 
                 }
                 break;
             case 59 :
-                // SQL99.g:1:371: SLASH
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:369: GREATER
                 {
-                mSLASH(); 
+                mGREATER(); 
+
 
                 }
                 break;
             case 60 :
-                // SQL99.g:1:377: DOUBLE_SLASH
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:377: SLASH
                 {
-                mDOUBLE_SLASH(); 
+                mSLASH(); 
+
 
                 }
                 break;
             case 61 :
-                // SQL99.g:1:390: BACKSLASH
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:383: DOUBLE_SLASH
                 {
-                mBACKSLASH(); 
+                mDOUBLE_SLASH(); 
+
 
                 }
                 break;
             case 62 :
-                // SQL99.g:1:400: TILDE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:396: BACKSLASH
                 {
-                mTILDE(); 
+                mBACKSLASH(); 
+
 
                 }
                 break;
             case 63 :
-                // SQL99.g:1:406: CARET
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:406: TILDE
                 {
-                mCARET(); 
+                mTILDE(); 
+
 
                 }
                 break;
             case 64 :
-                // SQL99.g:1:412: CONCATENATION
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:412: CARET
                 {
-                mCONCATENATION(); 
+                mCARET(); 
+
 
                 }
                 break;
             case 65 :
-                // SQL99.g:1:426: NUMERIC
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:418: CONCATENATION
                 {
-                mNUMERIC(); 
+                mCONCATENATION(); 
+
 
                 }
                 break;
             case 66 :
-                // SQL99.g:1:434: STRING
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:432: INTEGER
                 {
-                mSTRING(); 
+                mINTEGER(); 
+
 
                 }
                 break;
             case 67 :
-                // SQL99.g:1:441: STRING_WITH_QUOTE_DOUBLE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:440: VARNAME
                 {
-                mSTRING_WITH_QUOTE_DOUBLE(); 
+                mVARNAME(); 
+
 
                 }
                 break;
             case 68 :
-                // SQL99.g:1:466: STRING_WITH_QUOTE
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:448: STRING_WITH_QUOTE
                 {
                 mSTRING_WITH_QUOTE(); 
+
 
                 }
                 break;
             case 69 :
-                // SQL99.g:1:484: WS
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:466: STRING_WITH_QUOTE_DOUBLE
+                {
+                mSTRING_WITH_QUOTE_DOUBLE(); 
+
+
+                }
+                break;
+            case 70 :
+                // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:1:491: WS
                 {
                 mWS(); 
+
 
                 }
                 break;
@@ -3405,57 +3812,57 @@ public class SQL99Lexer extends Lexer {
 
     protected DFA7 dfa7 = new DFA7(this);
     static final String DFA7_eotS =
-        "\23\62\11\uffff\1\122\1\126\1\uffff\1\127\1\130\13\uffff\1\132\4"+
+        "\23\62\11\uffff\1\123\1\125\1\uffff\1\127\1\130\13\uffff\1\132\4"+
         "\uffff\1\133\2\uffff\7\62\1\144\10\62\1\156\1\62\1\160\3\62\1\164"+
-        "\1\62\1\167\1\170\4\62\12\uffff\1\62\1\177\2\62\1\u0082\1\u0083"+
+        "\1\62\1\167\1\170\5\62\11\uffff\1\62\1\177\2\62\1\u0082\1\u0083"+
         "\1\u0084\1\u0085\1\uffff\1\u0086\1\u0087\7\62\1\uffff\1\62\1\uffff"+
-        "\1\u0090\2\62\1\uffff\2\62\2\uffff\4\62\1\uffff\1\62\1\uffff\1\u009a"+
-        "\1\62\6\uffff\2\62\1\u009e\1\u009f\4\62\1\uffff\1\u00a4\1\62\1\u00a6"+
-        "\1\62\1\u00a8\2\62\1\u00ab\1\62\1\uffff\1\62\1\u00ae\1\u00af\2\uffff"+
-        "\1\u00b0\1\u00b1\1\u00b2\1\u00b3\1\uffff\1\u00b4\1\uffff\1\u00b5"+
-        "\1\uffff\1\u00b6\1\u00b7\1\uffff\1\u00b8\1\62\13\uffff\1\62\1\u00bb"+
+        "\1\u0090\2\62\1\uffff\2\62\2\uffff\6\62\1\uffff\1\u009b\1\62\6\uffff"+
+        "\2\62\1\u009f\1\u00a0\4\62\1\uffff\1\u00a5\1\62\1\u00a7\1\62\1\u00a9"+
+        "\3\62\1\u00ad\1\62\1\uffff\1\62\1\u00b0\1\u00b1\2\uffff\1\u00b2"+
+        "\1\u00b3\1\u00b4\1\u00b5\1\uffff\1\u00b6\1\uffff\1\u00b7\1\uffff"+
+        "\1\u00b8\1\u00b9\1\u00ba\1\uffff\1\u00bb\1\62\14\uffff\1\62\1\u00be"+
         "\1\uffff";
     static final String DFA7_eofS =
-        "\u00bc\uffff";
+        "\u00bf\uffff";
     static final String DFA7_minS =
         "\1\11\1\105\1\111\1\114\1\101\1\126\1\117\1\101\1\110\1\116\1\117"+
-        "\1\122\1\131\1\117\1\116\1\105\1\111\1\116\1\122\11\uffff\2\42\1"+
+        "\1\122\1\131\1\117\1\116\1\105\1\111\1\116\1\122\11\uffff\2\0\1"+
         "\uffff\2\55\13\uffff\1\57\4\uffff\1\55\2\uffff\1\114\2\115\1\123"+
         "\1\114\1\107\1\104\1\55\1\130\1\116\1\105\1\125\1\117\2\114\1\105"+
-        "\1\55\1\124\1\55\1\124\1\114\1\117\1\55\1\111\2\55\1\106\1\107\1"+
-        "\111\1\125\1\uffff\1\42\10\uffff\1\105\1\55\1\105\1\124\4\55\1\uffff"+
-        "\2\55\1\122\1\116\1\115\1\114\1\123\1\122\1\105\1\uffff\1\105\1"+
-        "\uffff\1\55\1\114\1\125\1\uffff\1\116\1\105\2\uffff\1\124\1\110"+
-        "\1\117\1\105\1\uffff\1\103\1\uffff\1\55\1\111\6\uffff\1\131\1\124"+
-        "\2\55\2\105\2\122\1\uffff\1\55\1\120\1\55\1\122\1\55\1\124\1\116"+
-        "\1\55\1\124\1\uffff\1\116\2\55\2\uffff\4\55\1\uffff\1\55\1\uffff"+
-        "\1\55\1\uffff\2\55\1\uffff\1\55\1\103\13\uffff\1\124\1\55\1\uffff";
+        "\1\55\1\124\1\55\1\124\1\114\1\117\1\55\1\111\2\55\1\106\1\107\2"+
+        "\111\1\125\11\uffff\1\105\1\55\1\105\1\124\4\55\1\uffff\2\55\1\122"+
+        "\1\116\1\115\1\114\1\123\1\122\1\105\1\uffff\1\105\1\uffff\1\55"+
+        "\1\114\1\125\1\uffff\1\116\1\105\2\uffff\1\124\1\110\1\117\1\116"+
+        "\1\105\1\103\1\uffff\1\55\1\111\6\uffff\1\131\1\124\2\55\2\105\2"+
+        "\122\1\uffff\1\55\1\120\1\55\1\122\1\55\1\124\1\116\1\107\1\55\1"+
+        "\124\1\uffff\1\116\2\55\2\uffff\4\55\1\uffff\1\55\1\uffff\1\55\1"+
+        "\uffff\3\55\1\uffff\1\55\1\103\14\uffff\1\124\1\55\1\uffff";
     static final String DFA7_maxS =
         "\1\176\1\165\1\151\1\166\1\151\1\166\1\157\1\165\1\150\2\165\1\162"+
-        "\1\171\1\157\1\163\1\145\1\151\1\156\1\162\11\uffff\2\172\1\uffff"+
+        "\1\171\1\157\1\163\1\145\1\151\1\163\1\162\11\uffff\2\uffff\1\uffff"+
         "\2\172\13\uffff\1\57\4\uffff\1\172\2\uffff\1\154\2\155\1\163\1\154"+
         "\1\147\1\171\1\172\1\170\1\156\1\145\1\165\1\157\2\154\1\145\1\172"+
-        "\1\164\1\172\1\164\1\154\1\157\1\172\1\151\2\172\1\146\1\147\1\151"+
-        "\1\165\1\uffff\1\172\10\uffff\1\145\1\172\1\145\1\164\4\172\1\uffff"+
-        "\2\172\1\162\1\156\1\155\1\154\1\163\1\162\1\145\1\uffff\1\145\1"+
-        "\uffff\1\172\1\154\1\165\1\uffff\1\156\1\145\2\uffff\1\164\1\150"+
-        "\1\157\1\145\1\uffff\1\143\1\uffff\1\172\1\151\6\uffff\1\171\1\164"+
-        "\2\172\2\145\2\162\1\uffff\1\172\1\160\1\172\1\162\1\172\1\164\1"+
-        "\156\1\172\1\164\1\uffff\1\156\2\172\2\uffff\4\172\1\uffff\1\172"+
-        "\1\uffff\1\172\1\uffff\2\172\1\uffff\1\172\1\143\13\uffff\1\164"+
-        "\1\172\1\uffff";
+        "\1\164\1\172\1\164\1\154\1\157\1\172\1\151\2\172\1\146\1\147\2\151"+
+        "\1\165\11\uffff\1\145\1\172\1\145\1\164\4\172\1\uffff\2\172\1\162"+
+        "\1\156\1\155\1\154\1\163\1\162\1\145\1\uffff\1\145\1\uffff\1\172"+
+        "\1\154\1\165\1\uffff\1\156\1\145\2\uffff\1\164\1\150\1\157\1\156"+
+        "\1\145\1\143\1\uffff\1\172\1\151\6\uffff\1\171\1\164\2\172\2\145"+
+        "\2\162\1\uffff\1\172\1\160\1\172\1\162\1\172\1\164\1\156\1\147\1"+
+        "\172\1\164\1\uffff\1\156\2\172\2\uffff\4\172\1\uffff\1\172\1\uffff"+
+        "\1\172\1\uffff\3\172\1\uffff\1\172\1\143\14\uffff\1\164\1\172\1"+
+        "\uffff";
     static final String DFA7_acceptS =
-        "\23\uffff\1\42\1\43\1\44\1\45\1\46\1\47\1\50\1\51\1\52\2\uffff\1"+
-        "\55\2\uffff\1\60\1\61\1\62\1\63\1\64\1\65\1\66\1\67\1\70\1\71\1"+
-        "\72\1\uffff\1\75\1\76\1\77\1\100\1\uffff\1\102\1\105\36\uffff\1"+
-        "\53\1\uffff\1\103\1\104\1\54\1\56\1\57\1\74\1\73\1\101\10\uffff"+
-        "\1\24\11\uffff\1\17\1\uffff\1\34\3\uffff\1\23\2\uffff\1\35\1\36"+
-        "\4\uffff\1\103\1\uffff\1\7\2\uffff\1\3\1\4\1\11\1\16\1\5\1\6\10"+
-        "\uffff\1\20\11\uffff\1\12\3\uffff\1\14\1\32\4\uffff\1\37\1\uffff"+
-        "\1\25\1\uffff\1\30\2\uffff\1\41\2\uffff\1\10\1\13\1\40\1\15\1\21"+
-        "\1\27\1\22\1\26\1\31\1\33\1\1\2\uffff\1\2";
+        "\23\uffff\1\43\1\44\1\45\1\46\1\47\1\50\1\51\1\52\1\53\2\uffff\1"+
+        "\56\2\uffff\1\61\1\62\1\63\1\64\1\65\1\66\1\67\1\70\1\71\1\72\1"+
+        "\73\1\uffff\1\76\1\77\1\100\1\101\1\uffff\1\103\1\106\37\uffff\1"+
+        "\54\1\105\1\55\1\104\1\57\1\60\1\75\1\74\1\102\10\uffff\1\24\11"+
+        "\uffff\1\17\1\uffff\1\35\3\uffff\1\23\2\uffff\1\36\1\37\6\uffff"+
+        "\1\7\2\uffff\1\3\1\4\1\11\1\16\1\5\1\6\10\uffff\1\20\12\uffff\1"+
+        "\12\3\uffff\1\14\1\32\4\uffff\1\40\1\uffff\1\25\1\uffff\1\30\3\uffff"+
+        "\1\42\2\uffff\1\10\1\13\1\41\1\15\1\21\1\27\1\22\1\26\1\31\1\33"+
+        "\1\34\1\1\2\uffff\1\2";
     static final String DFA7_specialS =
-        "\u00bc\uffff}>";
+        "\34\uffff\1\0\1\1\u00a1\uffff}>";
     static final String[] DFA7_transitionS = {
             "\2\63\2\uffff\1\63\22\uffff\1\63\1\44\1\34\1\45\1\33\1\46\1"+
             "\42\1\35\1\30\1\31\1\41\1\47\1\25\1\40\1\24\1\54\12\61\1\51"+
@@ -3485,8 +3892,8 @@ public class SQL99Lexer extends Lexer {
             "\1\114\4\uffff\1\115\32\uffff\1\114\4\uffff\1\115",
             "\1\116\37\uffff\1\116",
             "\1\117\37\uffff\1\117",
-            "\1\120\37\uffff\1\120",
-            "\1\121\37\uffff\1\121",
+            "\1\120\4\uffff\1\121\32\uffff\1\120\4\uffff\1\121",
+            "\1\122\37\uffff\1\122",
             "",
             "",
             "",
@@ -3496,10 +3903,8 @@ public class SQL99Lexer extends Lexer {
             "",
             "",
             "",
-            "\1\124\4\uffff\1\125\5\uffff\1\123\2\uffff\12\123\7\uffff\32"+
-            "\123\4\uffff\1\123\1\uffff\32\123",
-            "\1\125\4\uffff\1\125\5\uffff\1\125\2\uffff\12\125\7\uffff\32"+
-            "\125\4\uffff\1\125\1\uffff\32\125",
+            "\12\124\1\uffff\2\124\1\uffff\ufff2\124",
+            "\12\126\1\uffff\2\126\1\uffff\ufff2\126",
             "",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
@@ -3554,9 +3959,8 @@ public class SQL99Lexer extends Lexer {
             "\1\172\37\uffff\1\172",
             "\1\173\37\uffff\1\173",
             "\1\174\37\uffff\1\174",
+            "\1\175\37\uffff\1\175",
             "",
-            "\1\124\4\uffff\1\125\5\uffff\1\123\2\uffff\12\123\7\uffff\32"+
-            "\123\4\uffff\1\123\1\uffff\32\123",
             "",
             "",
             "",
@@ -3598,37 +4002,38 @@ public class SQL99Lexer extends Lexer {
             "\1\u0096\37\uffff\1\u0096",
             "\1\u0097\37\uffff\1\u0097",
             "\1\u0098\37\uffff\1\u0098",
-            "",
             "\1\u0099\37\uffff\1\u0099",
+            "\1\u009a\37\uffff\1\u009a",
             "",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
-            "\1\u009b\37\uffff\1\u009b",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
             "\1\u009c\37\uffff\1\u009c",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "\1\u009d\37\uffff\1\u009d",
+            "\1\u009e\37\uffff\1\u009e",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
-            "\1\u00a0\37\uffff\1\u00a0",
             "\1\u00a1\37\uffff\1\u00a1",
             "\1\u00a2\37\uffff\1\u00a2",
             "\1\u00a3\37\uffff\1\u00a3",
+            "\1\u00a4\37\uffff\1\u00a4",
             "",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
-            "\1\u00a5\37\uffff\1\u00a5",
+            "\1\u00a6\37\uffff\1\u00a6",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
-            "\1\u00a7\37\uffff\1\u00a7",
+            "\1\u00a8\37\uffff\1\u00a8",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
-            "\1\u00a9\37\uffff\1\u00a9",
             "\1\u00aa\37\uffff\1\u00aa",
-            "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
+            "\1\u00ab\37\uffff\1\u00ab",
             "\1\u00ac\37\uffff\1\u00ac",
+            "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
+            "\1\u00ae\37\uffff\1\u00ae",
             "",
-            "\1\u00ad\37\uffff\1\u00ad",
+            "\1\u00af\37\uffff\1\u00af",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             "",
@@ -3644,9 +4049,10 @@ public class SQL99Lexer extends Lexer {
             "",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
+            "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             "",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
-            "\1\u00b9\37\uffff\1\u00b9",
+            "\1\u00bc\37\uffff\1\u00bc",
             "",
             "",
             "",
@@ -3658,7 +4064,8 @@ public class SQL99Lexer extends Lexer {
             "",
             "",
             "",
-            "\1\u00ba\37\uffff\1\u00ba",
+            "",
+            "\1\u00bd\37\uffff\1\u00bd",
             "\1\62\2\uffff\12\62\7\uffff\32\62\4\uffff\1\62\1\uffff\32\62",
             ""
     };
@@ -3693,8 +4100,40 @@ public class SQL99Lexer extends Lexer {
             this.transition = DFA7_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | GROUP | BY | AS | JOIN | INNER | OUTER | LEFT | RIGHT | FULL | UNION | ON | IN | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | CONCATENATION | NUMERIC | STRING | STRING_WITH_QUOTE_DOUBLE | STRING_WITH_QUOTE | WS );";
+            return "1:1: Tokens : ( SELECT | DISTINCT | ALL | AVG | MAX | MIN | SUM | EVERY | ANY | SOME | COUNT | FROM | WHERE | AND | OR | NOT | ORDER | GROUP | BY | AS | JOIN | INNER | OUTER | LEFT | RIGHT | FULL | UNION | USING | ON | IN | IS | NULL | FALSE | TRUE | SEMI | DOT | COMMA | LSQ_BRACKET | RSQ_BRACKET | LPAREN | RPAREN | QUESTION | DOLLAR | QUOTE_DOUBLE | QUOTE_SINGLE | APOSTROPHE | UNDERSCORE | DASH | ASTERISK | AMPERSAND | AT | EXCLAMATION | HASH | PERCENT | PLUS | EQUALS | COLON | LESS | GREATER | SLASH | DOUBLE_SLASH | BACKSLASH | TILDE | CARET | CONCATENATION | INTEGER | VARNAME | STRING_WITH_QUOTE | STRING_WITH_QUOTE_DOUBLE | WS );";
         }
+        public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
+            IntStream input = _input;
+        	int _s = s;
+            switch ( s ) {
+                    case 0 : 
+                        int LA7_28 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA7_28 >= '\u0000' && LA7_28 <= '\t')||(LA7_28 >= '\u000B' && LA7_28 <= '\f')||(LA7_28 >= '\u000E' && LA7_28 <= '\uFFFF')) ) {s = 84;}
+
+                        else s = 83;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 1 : 
+                        int LA7_29 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA7_29 >= '\u0000' && LA7_29 <= '\t')||(LA7_29 >= '\u000B' && LA7_29 <= '\f')||(LA7_29 >= '\u000E' && LA7_29 <= '\uFFFF')) ) {s = 86;}
+
+                        else s = 85;
+
+                        if ( s>=0 ) return s;
+                        break;
+            }
+            NoViableAltException nvae =
+                new NoViableAltException(getDescription(), 7, _s, input);
+            error(nvae);
+            throw nvae;
+        }
+
     }
  
 

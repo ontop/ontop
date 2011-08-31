@@ -294,7 +294,32 @@ public class SQL99ParserTest extends TestCase
     final boolean result = parse("SELECT id, name, class_id, grade FROM student t1 FULL OUTER JOIN grade t2 ON t1.id=t2.st_id");
     assertTrue(result);
   }
+  
+  @Test
+  public void test_5_9() {
+    final boolean result = parse("SELECT id, name, class_id, grade FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.id=t3.sm_id");
+    assertTrue(result);
+  }
 
+  @Test
+  public void test_5_10() {
+	  final boolean result = parse("SELECT id, name, course, grade, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.id=t3.sm_id " +
+	  		"UNION ALL SELECT id, name, course, grade, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN SEMESTER t3 ON t2.id=t3.sm_id");
+	  assertTrue(result);
+  }
+  
+  @Test
+  public void test_5_11() {
+	  final boolean result = parse("SELECT view1.id, view1.name, table2.* FROM (SELECT id, name FROM table1 WHERE table1.name=\"John\") AS view1 JOIN table2 ON view1.id=table2.id");
+	  assertTrue(result);
+  }
+  
+  @Test
+  public void test_5_12() {
+	  final boolean result = parse("SELECT id, name, grade FROM student JOIN grade USING (id)");
+	  assertTrue(result);
+  }
+  
   @Test
   public void test_6_1() {
     final boolean result = parse("SELECT t1.id, t1.name, t2.grade FROM (SELECT id, name FROM student) t1, (SELECT st_id, grade FROM grade) t2 WHERE t1.id=t2.sid");

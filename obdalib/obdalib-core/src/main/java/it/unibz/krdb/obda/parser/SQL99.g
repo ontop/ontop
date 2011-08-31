@@ -17,13 +17,17 @@ parse
   ;
   
 query
-  : query_expression (UNION (set_quantifier)? query_expression)*
+  : query_specification (UNION (set_quantifier)? query_specification)*
   ;
   
-query_expression
-  : SELECT set_quantifier? select_list table_expression
+query_specification
+  : select_clause table_expression
   ;
-  
+
+select_clause
+  : SELECT set_quantifier? select_list
+  ; 
+
 set_quantifier
   : DISTINCT 
   | ALL
@@ -111,9 +115,6 @@ table_reference_list
   ;
   
 table_reference
-options {
-  backtrack=true;
-}
   : table_primary (joined_table)?
   ;
 
@@ -216,11 +217,7 @@ grouping_column_reference_list
   ;  
 
 joined_table
-  : qualified_join
-  ;
-
-qualified_join
-  : (join_type)? JOIN table_primary join_condition
+  : ((join_type)? JOIN table_reference join_specification)+
   ;
 
 join_type
@@ -234,8 +231,21 @@ outer_join_type
   | FULL
   ;
 
+join_specification
+  : join_condition
+  | named_columns_join
+  ;
+
 join_condition
   : ON search_condition
+  ;
+
+named_columns_join
+  : USING LPAREN join_column_list RPAREN
+  ;
+
+join_column_list
+  : column_name (COMMA column_name)*
   ;
 
 table_primary
@@ -273,7 +283,7 @@ identifier
   ;
 
 regular_identifier
-  : STRING
+  : VARNAME
   ;
 
 delimited_identifier
@@ -283,7 +293,7 @@ delimited_identifier
 value
   : TRUE
   | FALSE
-  | NUMERIC 
+  | INTEGER 
   | STRING_WITH_QUOTE
   ;
 
@@ -378,6 +388,8 @@ FULL: ('F'|'f')('U'|'u')('L'|'l')('L'|'l');
 
 UNION: ('U'|'u')('N'|'n')('I'|'i')('O'|'o')('N'|'n');
 
+USING: ('U'|'u')('S'|'s')('I'|'i')('N'|'n')('G'|'g');
+
 ON:	('O'|'o')('N'|'n');
 
 IN: ('I'|'i')('N'|'n');
@@ -422,20 +434,44 @@ TILDE:         '~';
 CARET:         '^';
 CONCATENATION: '||';
 
-fragment ALPHA: ('a'..'z'|'A'..'Z');
+fragment ALPHA
+  : 'a'..'z'
+  | 'A'..'Z'
+  ;
 
-fragment DIGIT: '0'..'9'; 
+fragment DIGIT
+  : '0'..'9'
+  ; 
 
-fragment ALPHANUM: (ALPHA|DIGIT);
+fragment ALPHANUM
+  : ALPHA
+  | DIGIT
+  ;
 
-fragment CHAR: (ALPHANUM|UNDERSCORE|DASH);
+fragment CHAR
+  : ALPHANUM
+  | UNDERSCORE
+  | DASH
+  ;
 
-NUMERIC: DIGIT+;
+fragment ECHAR
+  : '\\' ('t' | 'b' | 'n' | 'r' | 'f' | '\\' | '"' | '\'')
+  ;
 
-STRING: CHAR*;
+INTEGER
+  : DIGIT+
+  ;
 
-STRING_WITH_QUOTE_DOUBLE: QUOTE_DOUBLE CHAR* QUOTE_DOUBLE;
+VARNAME
+  : CHAR*
+  ;
 
-STRING_WITH_QUOTE: (QUOTE_SINGLE|QUOTE_DOUBLE) CHAR* (QUOTE_SINGLE|QUOTE_DOUBLE);
+STRING_WITH_QUOTE
+  : '\'' ( options {greedy=false  ;} : ~('\u0027' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '\''
+  ;
+
+STRING_WITH_QUOTE_DOUBLE
+  : '"'  ( options {greedy=false  ;} : ~('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '"'
+  ;
 
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};
