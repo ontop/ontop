@@ -277,6 +277,21 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 					unfoldingOBDAModel.addMappings(ds.getSourceID(), this.obdaModel.getMappings(ds.getSourceID()));
 				}
 			}
+			
+			/*
+			 * Setting up the unfolder and SQL generation
+			 */
+
+			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
+			MappingValidator mappingValidator = new MappingValidator(loadedOntologies);
+			boolean validmappings = mappingValidator.validate(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
+
+			MappingViewManager viewMan = new MappingViewManager(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
+			
+			unfMech = new ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(datasource.getSourceID()), viewMan);
+			
+			JDBCUtility util = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			gen = new ComplexMappingSQLGenerator(viewMan, util);
 
 			log.debug("Setting up the connection;");
 			eval_engine = new JDBCEngine(unfoldingOBDAModel.getSources().get(0));
@@ -304,19 +319,6 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 			rewriter.setTBox(reformulationOntology);
 			rewriter.setCBox(sigma);
-
-			/*
-			 * Setting up the unfolder and SQL generation
-			 */
-
-			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
-			MappingValidator mappingValidator = new MappingValidator(loadedOntologies);
-			boolean validmappings = mappingValidator.validate(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
-
-			MappingViewManager viewMan = new MappingViewManager(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
-			unfMech = new ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(datasource.getSourceID()), viewMan);
-			JDBCUtility util = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			gen = new ComplexMappingSQLGenerator(viewMan, util);
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
