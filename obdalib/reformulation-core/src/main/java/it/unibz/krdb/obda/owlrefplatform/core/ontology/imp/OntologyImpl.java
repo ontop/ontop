@@ -106,6 +106,10 @@ public class OntologyImpl implements Ontology {
 	public Set<Axiom> getAssertions() {
 		return originalassertions;
 	}
+	
+	public String toString() {
+		return getAssertions().toString();
+	}
 
 	@Override
 	public void addAssertions(Collection<Axiom> ass) {

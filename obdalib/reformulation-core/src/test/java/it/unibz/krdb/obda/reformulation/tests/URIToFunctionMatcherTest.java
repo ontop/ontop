@@ -17,13 +17,11 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
-
 public class URIToFunctionMatcherTest extends TestCase {
 
 	URIToFunctionMatcher matcher;
 	
-	@Before
+	
 	public void setUp() throws Exception {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		List<Term> variables = new LinkedList<Term>();

@@ -6,31 +6,30 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.5.1-RC1</version>
+		<version>1.6</version>
 	</parent>
 
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>reformulation-core</artifactId>
-	<version>1.5.1-RC1</version>
+	<version>1.6</version>
 	<name>reformulation-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.5.1-RC1</version>
-		</dependency>
+			<version>1.6</version>
+					</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.5.1-RC1</version>
-		</dependency>
+			<version>1.6</version></dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<!--<version>3.8.1</version> -->
-			<version>4.8.2</version>
+			<version>3.8.1</version> 
+			<!-- <version>4.8.2</version> -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>

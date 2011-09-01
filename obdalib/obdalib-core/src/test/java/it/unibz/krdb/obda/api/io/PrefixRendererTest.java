@@ -6,7 +6,6 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -18,8 +17,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
-
 public class PrefixRendererTest extends TestCase {
 
 	PrefixManager	pm;
@@ -28,7 +25,7 @@ public class PrefixRendererTest extends TestCase {
 
 	// EntityNameRenderer rend;
 
-	@Before
+	//@Beforere
 	public void setUp() throws Exception {
 		pm = new SimplePrefixManager();
 		// rend = new EntityNameRenderer(pm);

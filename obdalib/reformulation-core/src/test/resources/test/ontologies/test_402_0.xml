@@ -24,7 +24,7 @@
         </head>
         <tuples>
             <tuple>
-                <constant>a11,12</constant>
+                <constant>a11,a12</constant>
             </tuple>
             <tuple>
                 <constant>a21,a22</constant>
@@ -42,13 +42,13 @@
                 <constant>b31,b32</constant>
             </tuple>
             <tuple>
-                <constant>c11,12</constant>
+                <constant>c11,c12</constant>
             </tuple>
             <tuple>
                 <constant>c21,c22</constant>
             </tuple>
             <tuple>
-                <constant>c31,32</constant>
+                <constant>c31,c32</constant>
             </tuple>
         </tuples>
     </result>

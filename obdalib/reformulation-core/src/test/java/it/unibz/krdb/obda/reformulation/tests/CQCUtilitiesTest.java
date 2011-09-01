@@ -12,7 +12,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionA
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 
 import java.net.URI;
@@ -20,8 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
-
-import org.junit.Before;
 
 public class CQCUtilitiesTest extends TestCase {
 
@@ -44,7 +41,7 @@ public class CQCUtilitiesTest extends TestCase {
 	Term						u1				= tfac.getNondistinguishedVariable();
 	Term						u2				= tfac.getNondistinguishedVariable();
 
-	@Before
+	
 	public void setUp() throws Exception {
 		/*
 		 * Creating the query:

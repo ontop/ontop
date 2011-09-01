@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-	<version>1.5.1-RC1</version>
+		<version>1.6</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -13,7 +13,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<packaging>jar</packaging>
 	<name>obdalib-owlapi</name>
-	<version>1.5.1-RC1</version>
+	<version>1.6</version>
 
 	<repositories>
 		<repository>
@@ -34,8 +34,8 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-	<version>1.5.1-RC1</version>
-		</dependency>
+			<version>1.6</version>
+			</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi</artifactId>
@@ -44,7 +44,8 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
+			<version>3.8.1</version>
+			<!-- <version>4.8.2</version> -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>

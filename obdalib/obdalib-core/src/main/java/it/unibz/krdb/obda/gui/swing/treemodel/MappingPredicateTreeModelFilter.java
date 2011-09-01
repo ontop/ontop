@@ -3,7 +3,6 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
 
 import java.util.List;

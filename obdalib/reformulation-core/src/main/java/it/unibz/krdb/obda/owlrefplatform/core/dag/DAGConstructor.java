@@ -7,21 +7,20 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +57,12 @@ public class DAGConstructor {
 		return getISADAG(sigma);
 	}
 
+	/***
+	 * DONT USE, BUGGY
+	 * @param ontology
+	 * @return
+	 */
+	@Deprecated
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
 		Ontology sigma = descFactory.createOntology(URI.create("sigma"));
@@ -76,6 +81,31 @@ public class DAGConstructor {
 
 		sigma.addConcepts(new ArrayList<ClassDescription>(ontology.getConcepts()));
 		sigma.addRoles(new ArrayList<Property>(ontology.getRoles()));
+
+		return sigma;
+	}
+
+	public static Ontology getSigmaOntology(DAG dag) {
+
+		Ontology sigma = descFactory.createOntology(URI.create("sigma"));
+
+		DAGEdgeIterator edgeiterator = new DAGEdgeIterator(dag);
+		OntologyFactory fac = OntologyFactoryImpl.getInstance();
+
+		while (edgeiterator.hasNext()) {
+			Edge edge = edgeiterator.next();
+			if (edge.getLeft().getDescription() instanceof ClassDescription) {
+				ClassDescription sub = (ClassDescription) edge.getLeft().getDescription();
+				ClassDescription superp = (ClassDescription) edge.getRight().getDescription();
+				if (superp instanceof PropertySomeRestriction)
+					continue;
+				sigma.addAssertion(fac.createSubClassAxiom(sub, superp));
+			} else {
+				Property sub = (Property) edge.getLeft().getDescription();
+				Property superp = (Property) edge.getRight().getDescription();
+				sigma.addAssertion(fac.createSubPropertyAxiom(sub, superp));
+			}
+		}
 
 		return sigma;
 	}
@@ -101,7 +131,7 @@ public class DAGConstructor {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			if (node.getDescription() instanceof PropertySomeRestriction || node.getDescription().equals(DAG.thingConcept)) {
+			if (node.getDescription() instanceof PropertySomeRestriction) {
 				continue;
 			}
 
@@ -110,7 +140,7 @@ public class DAGConstructor {
 				newNode = new DAGNode(node.getDescription());
 				newNode.setIndex(node.getIndex());
 				newNode.getRange().addRange(node.getRange());
-				newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
+				newNode.equivalents = new LinkedHashSet<DAGNode>(node.equivalents);
 				classes.put(node.getDescription(), newNode);
 			}
 
@@ -121,7 +151,7 @@ public class DAGConstructor {
 				DAGNode newChild = classes.get(child.getDescription());
 				if (newChild == null) {
 					newChild = new DAGNode(child.getDescription());
-					newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
+					newChild.equivalents = new LinkedHashSet<DAGNode>(child.equivalents);
 					classes.put(child.getDescription(), newChild);
 				}
 
@@ -153,7 +183,7 @@ public class DAGConstructor {
 
 			if (newNode == null) {
 				newNode = new DAGNode(nodeDesc);
-				newNode.equivalents = new LinkedList<DAGNode>(node.equivalents);
+				newNode.equivalents = new LinkedHashSet<DAGNode>(node.equivalents);
 				roles.put(nodeDesc, newNode);
 			}
 			for (DAGNode child : node.getChildren()) {
@@ -174,7 +204,7 @@ public class DAGConstructor {
 				DAGNode newChild = roles.get(childDesc);
 				if (newChild == null) {
 					newChild = new DAGNode(childDesc);
-					newChild.equivalents = new LinkedList<DAGNode>(child.equivalents);
+					newChild.equivalents = new LinkedHashSet<DAGNode>(child.equivalents);
 					roles.put(childDesc, newChild);
 				}
 				if (!newChild.getDescription().equals(newNode.getDescription())) {
@@ -185,8 +215,11 @@ public class DAGConstructor {
 		}
 		Map<Description, Description> newEquivalentMappings = new HashMap<Description, Description>();
 		for (Description desc : dag.equi_mappings.keySet()) {
-			Description key = makePositive(desc);
-			Description val = makePositive(dag.equi_mappings.get(desc));
+			// Description key = makePositive(desc);
+			// Description val = makePositive(dag.equi_mappings.get(desc));
+
+			Description key = desc;
+			Description val = dag.equi_mappings.get(desc);
 
 			if (key != null && val != null)
 				newEquivalentMappings.put(key, val);

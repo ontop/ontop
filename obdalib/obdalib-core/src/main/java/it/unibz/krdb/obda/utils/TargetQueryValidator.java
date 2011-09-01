@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Atom;
 
 import java.net.URI;
 import java.util.Iterator;

@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.model.impl;
 
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
+import it.unibz.krdb.obda.model.Predicate;
 
 import java.util.HashMap;
 import java.util.LinkedList;

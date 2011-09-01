@@ -12,10 +12,18 @@ public interface OntologyFactory {
 	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
 	
 	public Class createClass(Predicate p);
+	
+	public Class createClass(URI c);
 
 	public Property createProperty(Predicate p, boolean inverse);
 
 	public Property createProperty(Predicate p);
+	
+	public Property createObjectProperty(URI uri, boolean inverse);
+	
+	public Property createObjectProperty(URI uri);
+	
+	public Property createDataProperty(URI p);
 	
 	public Ontology createOntology(URI uri);
 	

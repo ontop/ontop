@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
@@ -131,7 +131,7 @@ public class DummyOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory {
 				GraphGenerator.dumpISA(pureIsa, "simple");
 			}
 
-			SemanticReduction reducer = new SemanticReduction(ontology, DAGConstructor.getSigmaOntology(ontology));
+			SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(ontology, DAGConstructor.getSigmaOntology(ontology));
 			List<Axiom> reducedOnto = reducer.reduce();
 			if (GraphGenerator.debugInfoDump) {
 				GraphGenerator.dumpReducedOnto(reducedOnto);

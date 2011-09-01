@@ -1,13 +1,8 @@
 package it.unibz.krdb.obda.parser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
@@ -16,11 +11,11 @@ import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.List;
 
-import org.antlr.runtime.RecognitionException;
-import org.junit.Before;
-import org.junit.Test;
+import junit.framework.TestCase;
 
-public class DatalogParserTest {
+import org.antlr.runtime.RecognitionException;
+
+public class DatalogParserTest extends TestCase {
 
 	/** Test inputs */
 	private static final String[] CQ_STRINGS = {
@@ -95,7 +90,7 @@ public class DatalogParserTest {
 	private List<Term> terms;
 	private Term term;
 
-	@Before
+	//@Beforere
 	public void setUp() throws Exception {
 		parser = new DatalogProgramParser();
 	}
@@ -105,7 +100,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testBasicInputDatalogSyntax() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[0]);
@@ -186,7 +181,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testBasicInputSwirlSyntax() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[1]);
@@ -267,7 +262,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testDifferentTypesOfTerm() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[2]);
@@ -380,7 +375,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testMultipleRules() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[3]);
@@ -569,7 +564,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testIterativeObjectTerms() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[4]);
@@ -692,7 +687,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testNoHead() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[5]);
@@ -736,7 +731,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testNoBody() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[6]);
@@ -777,7 +772,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testSelectAll() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[7]);
@@ -859,7 +854,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testBasicInputUsingCaretSymbol() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[8]);
@@ -940,7 +935,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testEmptyHeadTerm() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[9]);
@@ -1009,7 +1004,7 @@ public class DatalogParserTest {
 	 *
 	 * @throws RecognitionException
 	 */
-	@Test
+	//@Test
 	public void testFullNameWithUri() throws RecognitionException {
 
 		datalog = parser.parse(CQ_STRINGS[10]);

@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
@@ -16,9 +15,6 @@ import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class PositiveInclusionApplicatorTest extends TestCase {
 
@@ -49,7 +45,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	Term						u1				= tfac.getNondistinguishedVariable();
 	Term						u2				= tfac.getNondistinguishedVariable();
 
-	@Before
+	
 	public void setUp() throws Exception {
 
 		// q(y) :- R(x, y), R(x, z), S(y, m), S(z, m),
@@ -168,12 +164,12 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 
 	}
 
-	@Test
+	
 	public void testApplyExistentialInclusions() {
 		// TODO
 	}
 
-	@Test
+	
 	public void testSaturateByUnification1() throws Exception {
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
 		initialset.add(initialquery1);
@@ -187,7 +183,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void testSaturateByUnification2() throws Exception {
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
 		initialset.add(initialquery1);
@@ -206,7 +202,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void testSaturateByUnification3() throws Exception {
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
 		initialset.add(initialquery2);
@@ -219,7 +215,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void testSaturateByUnification4() throws Exception {
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
 		initialset.add(initialquery3);
@@ -238,7 +234,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void testSaturateByUnification5() throws Exception {
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
 		initialset.add(initialquery4);
@@ -251,7 +247,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void testSaturateByUnification6() throws Exception {
 		HashSet<CQIE> initialset = new HashSet<CQIE>();
 		initialset.add(initialquery5);
@@ -259,7 +255,7 @@ public class PositiveInclusionApplicatorTest extends TestCase {
 		assertTrue(saturatedset.size() == 2);
 	}
 
-	@Test
+	
 	public void testApplyExistentialInclusion() {
 		// TODO
 	}

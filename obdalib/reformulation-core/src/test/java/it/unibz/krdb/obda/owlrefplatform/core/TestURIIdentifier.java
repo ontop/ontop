@@ -32,11 +32,11 @@ public class TestURIIdentifier extends TestCase {
 			
 		}
 		for (String sqli: sql) {
-			System.out.println(sqli);
+//			System.out.println(sqli);
 		}
-		System.out.println("now the CQs");
+//		System.out.println("now the CQs");
 		for (String cqs1: cqs) {
-			System.out.println(cqs1);
+//			System.out.println(cqs1);
 		}
 		
 		

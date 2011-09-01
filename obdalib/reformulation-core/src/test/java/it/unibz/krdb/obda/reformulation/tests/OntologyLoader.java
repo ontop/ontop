@@ -99,27 +99,27 @@ public class OntologyLoader {
                 String query = query_it.next();
                 String id = queryid.next();
 
-                System.out.println("ID: " + id);
+                //System.out.println("ID: " + id);
 
                 String sparqlstr = prefix + query;
                 OBDAStatement statement = reasoner.getStatement();
                 OBDAResultSet result = statement.executeQuery(sparqlstr);
 
                 // Printing the results
-                System.out.println("Results:");
+                //System.out.println("Results:");
                 if (result == null) {
-                    System.out.print("no answers\n\n");
+                    //System.out.print("no answers\n\n");
                 } else {
                     int cols = result.getColumCount();
                     while (result.nextRow()) {
                         for (int i = 0; i < cols; i++) {
-                            System.out.print(result.getAsString(i + 1) + " ");
+                            //System.out.print(result.getAsString(i + 1) + " ");
                         }
-                        System.out.println("");
+                        //System.out.println("");
                         resultcount += 1;
                     }
-                    System.out.println("Result count: " + resultcount);
-                    System.out.println("-------------------\n");
+                    //System.out.println("Result count: " + resultcount);
+                    //System.out.println("-------------------\n");
                 }
             }
 

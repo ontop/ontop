@@ -7,8 +7,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
@@ -79,8 +79,8 @@ public class SemanticIndexHelper {
         OWLOntology owlOntology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
         OWLAPI2Translator translator = new OWLAPI2Translator();
 
-        Ontology ontology;
-        return translator.translate(owlOntology);
+        Ontology ontology = translator.translate(owlOntology);
+        return ontology;
 
     }
 

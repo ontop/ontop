@@ -151,7 +151,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
 	@Override
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception {
-		log.info("Generating source query");
+		log.debug("Generating source query");
 		List<CQIE> queries = query.getRules();
 
 		if (queries.size() < 1)

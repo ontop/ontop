@@ -1,15 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 
 import java.net.URI;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLIndividualAxiom;
@@ -21,7 +20,7 @@ public class OWLAPI2ABoxTranslatorTest extends TestCase {
 	OWLDataFactory		factory		= manager.getOWLDataFactory();
 	OWLAPI2Translator	translator	= new OWLAPI2Translator();
 
-	@Before
+	
 	public void setUp() throws Exception {
 	}
 

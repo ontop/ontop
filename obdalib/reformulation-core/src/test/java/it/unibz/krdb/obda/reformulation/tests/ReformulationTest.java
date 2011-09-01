@@ -1,13 +1,15 @@
 package it.unibz.krdb.obda.reformulation.tests;
-import junit.framework.TestCase;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.LinkedList;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 
 public class ReformulationTest extends TestCase {
@@ -417,6 +419,34 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
 		String ontoname = "test_90_0";
 		test_function(ontoname);
 	}
+	public void test_200_0() throws Exception {
+		String ontoname = "test_200_0";
+		test_function(ontoname);
+	}
+	public void test_201_0() throws Exception {
+		String ontoname = "test_201_0";
+		test_function(ontoname);
+	}
+	public void test_210_0() throws Exception {
+		String ontoname = "test_210_0";
+		test_function(ontoname);
+	}
+	public void test_401_0() throws Exception {
+		String ontoname = "test_401_0";
+		test_function(ontoname);
+	}
+	public void test_402_0() throws Exception {
+		String ontoname = "test_402_0";
+		test_function(ontoname);
+	}
+	public void test_403_0() throws Exception {
+		String ontoname = "test_403_0";
+		test_function(ontoname);
+	}
+	public void test_404_0() throws Exception {
+		String ontoname = "test_404_0";
+		test_function(ontoname);
+	}
 	public void test_190_0() throws Exception {
 		String ontoname = "test_190_0";
 		test_function(ontoname);
@@ -451,26 +481,6 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
 	}
 	public void test_198_0() throws Exception {
 		String ontoname = "test_198_0";
-		test_function(ontoname);
-	}
-	public void test_200_0() throws Exception {
-		String ontoname = "test_200_0";
-		test_function(ontoname);
-	}
-	public void test_201_0() throws Exception {
-		String ontoname = "test_201_0";
-		test_function(ontoname);
-	}
-	public void test_210_0() throws Exception {
-		String ontoname = "test_210_0";
-		test_function(ontoname);
-	}
-	public void test_401_0() throws Exception {
-		String ontoname = "test_401_0";
-		test_function(ontoname);
-	}
-	public void test_402_0() throws Exception {
-		String ontoname = "test_402_0";
 		test_function(ontoname);
 	}
 }

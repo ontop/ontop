@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.5.1-RC1</version>
+		<version>1.6</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -11,7 +11,7 @@
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
 	<name>obdalib-protege4</name>
-	<version>1.5.1-RC1</version>
+	<version>1.6</version>
 
 	<repositories>
 		<!-- This repository holds protege 4 and obdalib related dependencies, 
@@ -33,6 +33,13 @@
 
 	<dependencies>
 
+ <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    
 		<!-- <dependency> <groupId>org.apache.felix</groupId> <artifactId>org.osgi.core</artifactId> 
 			<version>1.0.0</version> <scope>provided</scope> </dependency> -->
 
@@ -43,15 +50,13 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.5.1-RC1</version>
-
-		</dependency>
+			<version>1.6</version>
+			</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.5.1-RC1</version>
-
-		</dependency>
+			<version>1.6</version>
+			</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
 
@@ -60,9 +65,8 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.5.1-RC1</version>
-
-		</dependency>
+			<version>1.6</version>
+	</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 
 			and are not available in the OSGi, or Protege 4 classpath. They must be packed 
@@ -268,7 +272,7 @@
 							Centre</Bundle-Vendor>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.5.1-RC1</Bundle-Version>
+						<Bundle-Version>1.6</Bundle-Version>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 

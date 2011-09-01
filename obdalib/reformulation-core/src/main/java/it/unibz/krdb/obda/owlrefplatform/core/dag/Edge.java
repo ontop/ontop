@@ -32,5 +32,13 @@ public class Edge {
         Edge otherEdge = (Edge) other;
         return this.left.equals(otherEdge.left) && this.right.equals(otherEdge.right);
     }
+    
+    public String toString() {
+    	StringBuilder bf = new StringBuilder();
+    	bf.append(left.toString());
+    	bf.append(" is-a ");
+    	bf.append(right.toString());
+    	return bf.toString();
+    }
 
 }

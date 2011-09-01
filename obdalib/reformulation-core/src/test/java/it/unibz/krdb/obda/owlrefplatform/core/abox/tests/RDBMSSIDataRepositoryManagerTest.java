@@ -81,24 +81,24 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		dbman.getTablesDDL(out);
-		System.out.println(out.toString());
+//		//System.out.println(out.toString());
 		st.executeUpdate(out.toString());
 		out.reset();
 
 		dbman.getMetadataSQLInserts(out);
-		System.out.println(out.toString());
+//		//System.out.println(out.toString());
 		st.executeUpdate(out.toString());
 		out.reset();
-		
+
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
 		dbman.getSQLInserts(ait, out);
-		System.out.println(out.toString());
+//		//System.out.println(out.toString());
 		st.executeUpdate(out.toString());
 		out.reset();
 
 		dbman.getIndexDDL(out);
 		st.executeUpdate(out.toString());
-		System.out.println(out.toString());
+//		//System.out.println(out.toString());
 		out.reset();
 
 		conn.commit();
@@ -111,16 +111,16 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		System.out.println("###########################");
+		//System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			System.out.println(ass.toString());
+			//System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-		System.out.println("###########################");
+		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -155,6 +155,9 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(source);
 		dbman.setVocabulary(preds);
+
+		log.debug("Test ontology: {}", trans.translate(ontology));
+
 		dbman.setTBox(trans.translate(ontology));
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
@@ -175,16 +178,16 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		System.out.println("###########################");
+//		//System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			System.out.println(ass.toString());
+//			//System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-		System.out.println("###########################");
+//		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -192,7 +195,6 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		conn.close();
 	}
 
-	
 	public void testDBCreationBIGDATA() throws Exception {
 		String owlfile = "src/test/resources/test/ontologies/translation/onto2.owl";
 
@@ -243,16 +245,16 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		// System.out.println("###########################");
+		// //System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			// System.out.println(ass.toString());
+			// //System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 100000);
 
-		// System.out.println("###########################");
+		// //System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 100000);
@@ -313,23 +315,22 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		System.out.println("###########################");
+		//System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			System.out.println(ass.toString());
+			//System.out.println(ass.toString());
 			count += 1;
 		}
-		assertTrue("count: " + count, count == 9);
+		assertEquals(count, 9);
 
-		System.out.println("###########################");
+		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
 
 		conn.close();
 	}
-
 
 	public class ABoxAssertionGeneratorIterator implements Iterator<Assertion> {
 
@@ -373,7 +374,8 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 			if (pred.getArity() == 1) {
 				assertion = ofac.createClassAssertion(pred, fac.getURIConstant(URI.create("1")));
 			} else if (pred.getType(1) == COL_TYPE.OBJECT) {
-				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getURIConstant(URI.create("2")));
+				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")),
+						fac.getURIConstant(URI.create("2")));
 			} else {
 				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
 			}

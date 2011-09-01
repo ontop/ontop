@@ -76,9 +76,9 @@ public class StockExchangeTestSemIndex extends TestCase {
 		int ic = r.getColumCount();
 		while (r.nextRow()) {
 			for (int i = 0; i < ic; i++) {
-				System.out.print(r.getAsString(i+1) + ", ");
+				//System.out.print(r.getAsString(i+1) + ", ");
 			}
-			System.out.println("");
+			//System.out.println("");
 		}
 		r.close();
 		st.close();
@@ -95,9 +95,9 @@ public class StockExchangeTestSemIndex extends TestCase {
 		while (r.nextRow()) {
 			count +=1;
 			for (int i = 0; i < ic; i++) {
-				System.out.print(r.getAsString(i+1) + ", ");
+				//System.out.print(r.getAsString(i+1) + ", ");
 			}
-			System.out.println("");
+			//System.out.println("");
 		}
 		r.close();
 		st.close();

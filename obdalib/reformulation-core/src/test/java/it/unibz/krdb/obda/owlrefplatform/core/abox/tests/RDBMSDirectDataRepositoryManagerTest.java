@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox.tests;
 
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -12,9 +12,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.DataPropertyAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassAssertionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ObjectPropertyAssertionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -83,23 +80,23 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		dbman.getTablesDDL(out);
 		st.executeUpdate(out.toString());
-		System.out.println(out.toString());
+//		System.out.println(out.toString());
 		out.reset();
 
 		dbman.getMetadataSQLInserts(out);
 		st.executeUpdate(out.toString());
-		System.out.println(out.toString());
+//		System.out.println(out.toString());
 		out.reset();
 
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
 		dbman.getSQLInserts(ait, out);
 		st.executeUpdate(out.toString());
-		System.out.println(out.toString());
+//		System.out.println(out.toString());
 		out.reset();
 
 		dbman.getIndexDDL(out);
 		st.executeUpdate(out.toString());
-		System.out.println(out.toString());
+//		System.out.println(out.toString());
 		out.reset();
 
 		conn.commit();
@@ -112,16 +109,16 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		System.out.println("###########################");
+//		System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			System.out.println(ass.toString());
+//			System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-		System.out.println("###########################");
+//		System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -174,16 +171,16 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		System.out.println("###########################");
+//		System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			System.out.println(ass.toString());
+//			System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-		System.out.println("###########################");
+//		System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -242,16 +239,16 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		List<Assertion> list = materializer.getAssertionList();
 
-		System.out.println("###########################");
+//		System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-			System.out.println(ass.toString());
+//			System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-		System.out.println("###########################");
+//		System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);

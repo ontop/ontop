@@ -1,13 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -44,7 +43,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 0);
 
@@ -129,7 +128,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 18);
 
@@ -228,7 +227,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 36);
 
@@ -337,7 +336,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 54);
 
@@ -408,7 +407,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 0);
 
@@ -515,7 +514,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 18);
 
@@ -620,7 +619,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 18);
 

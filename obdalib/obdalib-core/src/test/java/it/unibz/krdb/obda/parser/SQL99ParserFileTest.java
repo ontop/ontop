@@ -19,7 +19,6 @@ import junit.framework.TestCase;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,67 +29,67 @@ public class SQL99ParserFileTest extends TestCase
 
   final static Logger log = LoggerFactory.getLogger(SQL99ParserFileTest.class);
 
-  @Test
+  //@Test
   public void testStockExchange_Pgsql() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/stockexchange-pgsql.owl");
     execute(model, new URI("RandBStockExchange"));
   }
 
-  @Test
+  //@Test
   public void testImdbGroup4_Pgsql() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/imdb-group4-pgsql.owl");
     execute(model, new URI("kbdb_imdb"));
   }
 
-  @Test
+  //@Test
   public void testImdbGroup4_Oracle() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/imdb-group4-oracle.owl");
     execute(model, new URI("kbdb_imdb"));
   }
 
-  @Test
+  //@Test
   public void testAdolenaSlim_Pgsql() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/adolena-slim-pgsql.owl");
     execute(model, new URI("nap"));
   }
 
-  @Test
+  //@Test
   public void testBooksApril20_Pgsql() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/books-april20-pgsql.owl");
     execute(model, new URI("datasource"));
   }
 
-  @Test
+  //@Test
   public void testHgt090303_Mysql() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/hgt-090303-mysql.owl");
     execute(model, new URI("HGT"));
   }
 
-  @Test
+  //@Test
   public void testHgt090324_Pgsql() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/hgt-090324-pgsql.owl");
     execute(model, new URI("HGT"));
   }
 
-  @Test
+  //@Test
   public void testHgt091007_Oracle() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/hgt-091007-oracle.owl");
     execute(model, new URI("HGT"));
   }
 
-  @Test
+  //@Test
   public void testMpsOntologiaGcc_DB2() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/mps-ontologiagcc-db2.owl");
     execute(model, new URI("sourceGCC"));
   }
 
-  @Test
+  //@Test
   public void testOperationNoyauV5_Oracle() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/operation-noyau-v5-oracle.owl");
     execute(model, new URI("PgmOpe"));
   }
 
-  @Test
+  //@Test
   public void testOperationNoyauV6_Oracle() throws URISyntaxException {
     OBDAModel model = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
     execute(model, new URI("CORIOLIS-CRAQ"));

@@ -1,8 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
@@ -15,12 +18,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeClassRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.utils.ObdaFileCompatibilityRepair;
 
 import java.net.URI;
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
 	private static OntologyFactoryImpl	instance	= new OntologyFactoryImpl();
+	
+	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	public static OntologyFactory getInstance() {
 		return instance;
@@ -152,6 +158,30 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	public Property createProperty(Predicate p) {
 		return new PropertyImpl(p, false);
+	}
+
+	@Override
+	public Class createClass(URI c) {
+		Predicate classp = ofac.getPredicate(c, 1);
+		return createClass(classp);
+	}
+
+	@Override
+	public Property createObjectProperty(URI uri, boolean inverse) {
+		Predicate prop = ofac.getPredicate(uri, 2);
+		return createProperty(prop, inverse);
+	}
+
+	@Override
+	public Property createObjectProperty(URI uri) {
+		Predicate prop = ofac.getPredicate(uri, 2);
+		return createProperty(prop);
+	}
+
+	@Override
+	public Property createDataProperty(URI p) {
+		Predicate prop = ofac.getPredicate(p, 2, new COL_TYPE[] {COL_TYPE.OBJECT, COL_TYPE.LITERAL});
+		return createProperty(prop);
 	}
 
 }

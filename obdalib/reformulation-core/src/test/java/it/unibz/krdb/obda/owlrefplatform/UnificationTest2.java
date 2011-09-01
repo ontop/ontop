@@ -4,12 +4,10 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 
@@ -18,8 +16,6 @@ import java.util.List;
 import java.util.Vector;
 
 import junit.framework.TestCase;
-
-import org.junit.Test;
 
 public class UnificationTest2 extends TestCase {
 
@@ -34,7 +30,7 @@ public class UnificationTest2 extends TestCase {
 	 *
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void test_1() throws Exception {
 
 		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();

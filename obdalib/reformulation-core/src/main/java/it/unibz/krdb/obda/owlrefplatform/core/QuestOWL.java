@@ -13,7 +13,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.MappingValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticReduction;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
@@ -98,9 +98,8 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	private Ontology							reducedOntology			= null;
 
 	OWLAPI2VocabularyExtractor					vext					= new OWLAPI2VocabularyExtractor();
-	
-	private OntologyFactory			ofac = OntologyFactoryImpl.getInstance();
 
+	private OntologyFactory						ofac					= OntologyFactoryImpl.getInstance();
 
 	public QuestOWL(OWLOntologyManager manager) {
 		ontoManager = manager;
@@ -286,9 +285,9 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			 * Setting up the ontology we will use for the reformulation
 			 */
 
-			SemanticReduction reducer = new SemanticReduction(this.translatedOntologyMerge, sigma);
+			SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(this.translatedOntologyMerge, sigma);
 			reformulationOntology = reducer.getReducedOntology();
-//			reformulationOntology = this.translatedOntologyMerge;
+			// reformulationOntology = this.translatedOntologyMerge;
 
 			/*
 			 * Setting up the reformulation engine
@@ -431,6 +430,9 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		translatedOntologyMerge.addConcepts(new ArrayList<ClassDescription>(translation.getConcepts()));
 		translatedOntologyMerge.addRoles(new ArrayList<Property>(translation.getRoles()));
 		translatedOntologyMerge.saturate();
+		
+		log.debug("Ontology loaded: {}", translatedOntologyMerge);
+		
 		isClassified = false;
 	}
 

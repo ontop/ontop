@@ -5,7 +5,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>obdalib-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.5.1-RC1</version>
+	<version>1.6</version>
 	<name>obdalib-parent</name>
 
 	<dependencies>
@@ -26,7 +26,7 @@
 	</modules>
 
 	<properties>
-		<aversion>1.5.1-RC1</aversion>
+		<aversion>1.6</aversion>
 	</properties>
 
 	<repositories>

@@ -14,7 +14,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.junit.Test;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -77,7 +76,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 
 	private OBDAModel controller;
 
-	@Test
+	
 	public void testMappingOnVersionOne() throws Exception {
 
 		loadObdaFile("input-v1.owl");
@@ -105,7 +104,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 		}
 	}
 
-	@Test
+	
 	public void testMappingOnVersionTwo() throws Exception {
 
 		loadObdaFile("input-v2.owl");
@@ -133,7 +132,7 @@ public class OWLAPIDataManagerTest extends TestCase {
 		}
 	}
 
-	@Test
+	
 	public void testMappingOnVersionThree() throws Exception {
 
 		loadObdaFile("input-v3.owl");

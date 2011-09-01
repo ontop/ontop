@@ -855,7 +855,7 @@ public class Generator {
      * Begins data generation according to the specification
      */
     private void _generate() {
-        System.out.println("Started...");
+//        System.out.println("Started...");
         try {
             log_ = new PrintStream(new FileOutputStream(System.getProperty("user.dir") +
                     "\\" + LOG_FILE));
@@ -866,9 +866,9 @@ public class Generator {
             writer_.end();
             log_.close();
         } catch (IOException e) {
-            System.out.println("Failed to create log file!");
+//            System.out.println("Failed to create log file!");
         }
-        System.out.println("Completed!");
+//        System.out.println("Completed!");
     }
 
     /**
@@ -946,7 +946,7 @@ public class Generator {
         _generateCourses();
         _generateRaTa();
 
-        System.out.println(fileName + " generated");
+//        System.out.println(fileName + " generated");
         String bar = "";
         for (int i = 0; i < fileName.length(); i++)
             bar += '-';
@@ -1728,11 +1728,11 @@ public class Generator {
         comment = "TOTAL SO FAR: " + totalPropInstNum;
         log_.println(comment);
 
-        System.out.println("CLASS INSTANCE #: " + classInstNum + ", TOTAL SO FAR: " +
-                totalClassInstNum);
-        System.out.println("PROPERTY INSTANCE #: " + propInstNum +
-                ", TOTAL SO FAR: " + totalPropInstNum);
-        System.out.println();
+//        System.out.println("CLASS INSTANCE #: " + classInstNum + ", TOTAL SO FAR: " +
+//                totalClassInstNum);
+//        System.out.println("PROPERTY INSTANCE #: " + propInstNum +
+//                ", TOTAL SO FAR: " + totalPropInstNum);
+//        System.out.println();
 
         log_.println();
     }

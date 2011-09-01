@@ -7,10 +7,12 @@ public class ClassImpl implements Class {
 
 	private Predicate	predicate	= null;
 
-	ClassImpl(Predicate p) {
-		this.predicate = p;		
-	}
+	String				str			= null;
 
+	ClassImpl(Predicate p) {
+		this.predicate = p;
+		str = predicate.toString();
+	}
 
 	public Predicate getPredicate() {
 		return predicate;
@@ -28,7 +30,6 @@ public class ClassImpl implements Class {
 	}
 
 	public String toString() {
-		return predicate.toString();
+		return str;
 	}
-
 }

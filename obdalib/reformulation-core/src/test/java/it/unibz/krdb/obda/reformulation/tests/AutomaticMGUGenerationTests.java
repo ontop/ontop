@@ -19,8 +19,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	
 	public void setUp() throws Exception {
 		/*
 		 * TODO modify the API so that function symbols for object terms use the
@@ -56,7 +54,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+	
 	public void testGetMGUAtomAtomBoolean() throws Exception {
 		log.debug("Testing computation of MGUs");
 		File inputFile = new File("src/test/java/it/unibz/krdb/obda/reformulation/tests/mgu-computation-test-cases.txt");
@@ -111,7 +109,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 //	 * {@link org.obda.reformulation.dllite.AtomUnifier#getMGU(org.obda.query.domain.CQIE, int, int, boolean)}
 //	 * .
 //	 */
-//	@Test
+//	
 //	public void testGetMGUCQIEIntIntBoolean() {
 //		("Not yet implemented"); // TODO
 //	}
@@ -121,7 +119,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 //	 * {@link org.obda.reformulation.dllite.AtomUnifier#applySubstitution(org.obda.query.domain.CQIE, org.obda.reformulation.dllite.Substitution)}
 //	 * .
 //	 */
-//	@Test
+//	
 //	public void testApplySubstitution() {
 //		fail("Not yet implemented"); // TODO
 //	}

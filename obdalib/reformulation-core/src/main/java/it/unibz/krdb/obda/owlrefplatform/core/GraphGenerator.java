@@ -141,30 +141,30 @@ public class GraphGenerator {
         return out.toString();
     }
 
-    public static void dumpMappings(List<RDBMSSIRepositoryManager.MappingKey> mappings) {
-        String mappingFile = "mappings";
-        try {
-            FileWriter out = new FileWriter(new File(mappingFile));
-            for (RDBMSSIRepositoryManager.MappingKey map : mappings) {
-
-
-                String uri = map.uri.split("#")[1];
-                String project = map.projection;
-                SemanticIndexRange range = map.range;
-
-                try {
-                    out.write(String.format("%s %s %s \n", uri, project, range));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
+//    public static void dumpMappings(List<RDBMSSIRepositoryManager.MappingKey> mappings) {
+//        String mappingFile = "mappings";
+//        try {
+//            FileWriter out = new FileWriter(new File(mappingFile));
+//            for (RDBMSSIRepositoryManager.MappingKey map : mappings) {
+//
+//
+//                String uri = map.uri.split("#")[1];
+//                String project = map.projection;
+//                SemanticIndexRange range = map.range;
+//
+//                try {
+//                    out.write(String.format("%s %s %s \n", uri, project, range));
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//            out.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 
     public static void dumpReducedOnto(List<Axiom> reducedOnto) throws IOException {
         Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));

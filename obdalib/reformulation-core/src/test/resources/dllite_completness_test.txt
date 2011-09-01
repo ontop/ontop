@@ -816,18 +816,6 @@ These are the first cases which tests the effects of unification and positive in
 ||   || e ||            ||              || q(x)  :- R(x,<s1>) || {} || ||
 ||   || f ||            ||              || q(x)  :- R(x,<s2>) || {s1} || ||
 
-= Combined tests with booleans and constants =
-
-||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
-|| 190 || a ||  A ISA ER, R RISA S, ER^^-^^ ISA B, B ISA EP, P RISA Q || A(a)  || q() :- P(x,y), Q(x,y) || {true}  || ||
-|| 191 || a || A ISA ER, ER^^-^^ ISA ER || A(a1) A(a2) R(a2,r1) R(r1,r2) R(r2,r3) || q(x) :- A(x) R(x,y) R(y,z) R(z,m) || {a1 a2}|| ||
-|| 192 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) || {a} || ||
-|| 193 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) R(x,y3) A(y3) R(y3,z2) || {a} || ||
-|| 194 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
-|| 195 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
-|| 196 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
-|| 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
-|| 198 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
 
 = Inheritance tests = 
 
@@ -860,7 +848,7 @@ These are the first cases which tests the effects of unification and positive in
 || || g || || || q(x) :- C1(x) || {c1 c2 c3} || ||
 || || h || || || q(x) :- C2(x) || {c1 c2 c3} || ||
 || || i || || || q(x) :- C3(x) || {c1 c2 c3} || ||
-|| 402 || a || A1 RISA A2, A2 RISA A1, A2 RISA A3, A3 RISA A2,B1 RISA B2, B2 RISA B1, B2 RISA B3, B3 RISA B2,C1 RISA C2, C2 RISA C1, C2 RISA C3, C3 RISA C2, C1 RISA B1, B1 RISA A1 || A1(a11,a12) A2(a21,a22) A3(a31,a32) B1(b11,b12) B2(b21,b22) B3(b31,32) C1(c11,c12) C2(c21,c22) C3(c31,c32) || q(x,y) :- A1(x,y) || {(a11,12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,12) (c21,c22) (c31,32)} || ||
+|| 402 || a || A1 RISA A2, A2 RISA A1, A2 RISA A3, A3 RISA A2,B1 RISA B2, B2 RISA B1, B2 RISA B3, B3 RISA B2,C1 RISA C2, C2 RISA C1, C2 RISA C3, C3 RISA C2, C1 RISA B1, B1 RISA A1 || A1(a11,a12) A2(a21,a22) A3(a31,a32) B1(b11,b12) B2(b21,b22) B3(b31,b32) C1(c11,c12) C2(c21,c22) C3(c31,c32) || q(x,y) :- A1(x,y) || {(a11,a12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
 || || b || || || q(x,y) :- A2(x,y) || {(a11,a12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
 || || c || || || q(x,y) :- A3(x,y) || {(a11,a12) (a21,a22) (a31,a32) (b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
 || || d || || || q(x,y) :- B1(x,y) || {(b11,b12) (b21,b22) (b31,b32) (c11,c12) (c21,c22) (c31,c32)} || ||
@@ -869,8 +857,41 @@ These are the first cases which tests the effects of unification and positive in
 || || g || || || q(x,y) :- C1(x,y) || {(c11,c12) (c21,c22) (c31,c32)} || ||
 || || h || || || q(x,y) :- C2(x,y) || {(c11,c12) (c21,c22) (c31,c32)} || ||
 || || i || || || q(x,y) :- C3(x,y) || {(c11,c12) (c21,c22) (c31,c32)} || ||
+|| 403 || a || A1 ISA ER, ER ISA A1, ER ISA A3, A3 ISA ER,B1 ISA ES^^-^^, ES^^-^^ ISA B1, ES^^-^^ ISA B3, B3 ISA ES^^-^^,C1 ISA EM, EM ISA C1, EM ISA C3, C3 ISA EM, C1 ISA B1, B1 ISA A1 || A1(a1) R(r1,r2) A3(a3) B1(b1) S(s1,s2) B3(b3) C1(c1) M(m1,m2) C3(c3) || q(x) :- A1(x) || {a1 r1 a3 b1 s2 b3 c1 m1 c3} || existentials in the middle and inverses ||
+|| || b || || || q(x) :- R(x,y) || {a1 r1 a3 b1 s2 b3 c1 m1 c3} || ||
+|| || c || || || q(x) :- A3(x) || {a1 r1 a3 b1 s2 b3 c1 m1 c3}  || ||
+|| || d || || || q(x) :- B1(x) || {b1 s2 b3 c1 m1 c3} || ||
+|| || e || || || q(x) :- S(y,x) || {b1 s2 b3 c1 m1 c3} || ||
+|| || f || || || q(x) :- B3(x) || {b1 s2 b3 c1 m1 c3} || ||
+|| || g || || || q(x) :- C1(x) || {c1 m1 c3} || ||
+|| || h || || || q(x) :- M(x,y) || {c1 m1 c3} || ||
+|| || i || || || q(x) :- C3(x) || {c1 m1 c3} || ||
+|| 404 || a || A1 RISA A2^^-^^, A2^^-^^ RISA A1, A2^^-^^ RISA A3, A3 RISA A2^^-^^,B1 RISA B2^^-^^, B2^^-^^ RISA B1, B2^^-^^ RISA B3, B3 RISA B2^^-^^,C1 RISA C2^^-^^, C2^^-^^ RISA C1, C2^^-^^ RISA C3, C3 RISA C2^^-^^, C1 RISA B1, B1 RISA A1 || A1(a11,a12) A2(a21,a22) A3(a31,a32) B1(b11,b12) B2(b21,b22) B3(b31,b32) C1(c11,c12) C2(c21,c22) C3(c31,c32) || q(x,y) :- A1(x,y) || {(a11,a12) (a22,a21) (a31,a32) (b11,b12) (b22,b21) (b31,b32) (c11,c12) (c22,c21) (c31,c32)} || with inverse roles in the middle ||
+|| || b || || || q(x,y) :- A2(y,x) || {(a11,a12) (a22,a21) (a31,a32) (b11,b12) (b22,b21) (b31,b32) (c11,c12) (c22,c21) (c31,c32)} || ||
+|| || c || || || q(x,y) :- A3(x,y) || {(a11,a12) (a22,a21) (a31,a32) (b11,b12) (b22,b21) (b31,b32) (c11,c12) (c22,c21) (c31,c32)} || ||
+|| || d || || || q(x,y) :- B1(x,y) || {(b11,b12) (b22,b21) (b31,b32) (c11,c12) (c22,c21) (c31,c32)} || ||
+|| || e || || || q(x,y) :- B2(y,x) || {(b11,b12) (b22,b21) (b31,b32) (c11,c12) (c22,c21) (c31,c32)} || ||
+|| || f || || || q(x,y) :- B3(x,y) || {(b11,b12) (b22,b21) (b31,b32) (c11,c12) (c22,c21) (c31,c32)} || ||
+|| || g || || || q(x,y) :- C1(x,y) || {(c11,c12) (c22,c21) (c31,c32)} || ||
+|| || h || || || q(x,y) :- C2(y,x) || {(c11,c12) (c22,c21) (c31,c32)} || ||
+|| || i || || || q(x,y) :- C3(x,y) || {(c11,c12) (c22,c21) (c31,c32)} || ||
 
 
+
+= Combined tests with booleans and constants =
+
+The following are hard cases, they involve reasoning with respect to existential constants.
+
+||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
+|| 190 || a ||  A ISA ER, R RISA S, ER^^-^^ ISA B, B ISA EP, P RISA Q || A(a)  || q() :- P(x,y), Q(x,y) || {true}  || ||
+|| 191 || a || A ISA ER, ER^^-^^ ISA ER || A(a1) A(a2) R(a2,r1) R(r1,r2) R(r2,r3) || q(x) :- A(x) R(x,y) R(y,z) R(z,m) || {a1 a2}|| ||
+|| 192 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) || {a} || ||
+|| 193 || a || ER^^-^^ ISA A, ER^^-^^ ISA ER, A ISA ER || A(a) || q(x) :- R(x,y1) R(x,y2) R(y1,z1) R(y2,z1) A(y1) A(y2) R(x,y3) A(y3) R(y3,z2) || {a} || ||
+|| 194 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
+|| 195 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
+|| 196 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
+|| 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
+|| 198 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
 
 
 

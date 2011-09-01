@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <dag>
     <classes>
-        <class uri="http://www.w3.org/2002/07/owl#Thing" index="2" range="2:6"/>
         <class uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#A" index="5" range="5:6"/>
         <class uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#B" index="3" range="3:4"/>
         <class uri="::__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299171585922.owl#C" index="6"

@@ -1,12 +1,12 @@
 package it.unibz.krdb.obda.unfolding;
 
 
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
@@ -17,15 +17,13 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
-
 public class BasicUnfoldingTests extends TestCase {
 
 	ComplexMappingUnfolder unfolder = null;
 	MappingViewManager viewman = null;
 	List<OBDAMappingAxiom> mappings = null;
 	
-	@Before
+	
 	public void setUp() throws Exception {
 		mappings = new LinkedList<OBDAMappingAxiom>();
 		/**

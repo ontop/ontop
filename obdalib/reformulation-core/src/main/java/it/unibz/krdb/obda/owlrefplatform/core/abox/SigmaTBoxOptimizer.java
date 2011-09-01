@@ -5,43 +5,45 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGEdgeIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Prune Ontology for redundant assertions based on dependencies
  */
-public class SemanticReduction {
+public class SigmaTBoxOptimizer {
 
-	private static final Logger			log	= LoggerFactory.getLogger(SemanticReduction.class);
-	private final DAG					isa;
-	private final DAG					sigma;
-	private final DAGChain				isaChain;
-	private final DAGChain				sigmaChain;
+	private static final Logger		log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
+	private final DAG				isa;
+	private final DAG				sigma;
+	private final DAGChain			isaChain;
+	private final DAGChain			sigmaChain;
 
-	private final OBDADataFactory		predicateFactory;
+	private final OBDADataFactory	predicateFactory;
 	private final OntologyFactory	descFactory;
 
-	public SemanticReduction(Ontology isat, Ontology sigmat) {
+	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
 		this.isa = DAGConstructor.getISADAG(isat);
+		this.isa.clean();
 		this.sigma = DAGConstructor.getISADAG(sigmat);
+		this.sigma.clean();
 
 		this.isaChain = new DAGChain(isa);
 		this.sigmaChain = new DAGChain(sigma);
@@ -50,7 +52,7 @@ public class SemanticReduction {
 		descFactory = new OntologyFactoryImpl();
 
 	}
-	
+
 	public Ontology getReducedOntology() {
 		Ontology reformulationOntology = descFactory.createOntology(URI.create("http://it.unibz.krdb/obda/auxontology"));
 		reformulationOntology.addAssertions(reduce());
@@ -61,33 +63,23 @@ public class SemanticReduction {
 		log.debug("Starting semantic-reduction");
 		List<Axiom> rv = new LinkedList<Axiom>();
 
-		for (DAGNode node : isa.getClasses()) {
-
-			// Ignore all edges from T
-			if (node.getDescription().equals(DAG.thingConcept)) {
-				continue;
-			}
-
-			for (DAGNode child : node.descendans) {
-
-				if (!check_redundant(node, child)) {
-
-					rv.add(descFactory.createSubClassAxiom((ClassDescription) child.getDescription(), (ClassDescription) node
+		DAGEdgeIterator edgeIterator = new DAGEdgeIterator(isa);
+		while (edgeIterator.hasNext()) {
+			Edge edge = edgeIterator.next();
+			if (edge.getLeft().getDescription() instanceof ClassDescription) {
+				if (!check_redundant(edge.getRight(), edge.getLeft())) {
+					rv.add(descFactory.createSubClassAxiom((ClassDescription) edge.getLeft().getDescription(), (ClassDescription) edge
+							.getRight().getDescription()));
+				}
+			} else {
+				if (!check_redundant_role(edge.getRight(), edge.getLeft())) {
+					rv.add(descFactory.createSubPropertyAxiom((Property) edge.getLeft().getDescription(), (Property) edge.getRight()
 							.getDescription()));
 				}
+
 			}
 		}
-		for (DAGNode node : isa.getRoles()) {
-
-			for (DAGNode child : node.descendans) {
-				if (!check_redundant_role(node, child)) {
-
-					rv.add(descFactory.createSubPropertyAxiom((Property) child.getDescription(), (Property) node.getDescription()));
-				}
-			}
-		}
-
-		log.debug("Finished semantic-reduction {}", rv);
+		log.debug("Finished semantic-reduction.");
 		return rv;
 	}
 
@@ -113,10 +105,8 @@ public class SemanticReduction {
 		Property parentDesc = (Property) parent.getDescription();
 		Property childDesc = (Property) child.getDescription();
 
-		PropertySomeRestriction existParentDesc = descFactory.getPropertySomeRestriction(parentDesc.getPredicate(),
-				parentDesc.isInverse());
-		PropertySomeRestriction existChildDesc = descFactory.getPropertySomeRestriction(childDesc.getPredicate(),
-				childDesc.isInverse());
+		PropertySomeRestriction existParentDesc = descFactory.getPropertySomeRestriction(parentDesc.getPredicate(), parentDesc.isInverse());
+		PropertySomeRestriction existChildDesc = descFactory.getPropertySomeRestriction(childDesc.getPredicate(), childDesc.isInverse());
 
 		DAGNode exists_parent = isa.getClassNode(existParentDesc);
 		DAGNode exists_child = isa.getClassNode(existChildDesc);

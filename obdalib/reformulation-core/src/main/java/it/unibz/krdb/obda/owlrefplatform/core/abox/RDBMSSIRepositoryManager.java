@@ -1,14 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
@@ -16,17 +16,17 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -40,14 +40,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -60,101 +61,116 @@ import org.slf4j.LoggerFactory;
  */
 public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
-	private final static Logger			log					= LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
+	private final static Logger		log								= LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
-	private Connection					conn				= null;
+	private Connection				conn							= null;
 
-	private OBDADataSource					db					= null;
+	private OBDADataSource			db								= null;
 
-	public final static String			index_table			= "IDX";
+	public final static String		index_table						= "IDX";
 
-	private final static String			create_ddl			= "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(100), "
-																	+ "IDX INTEGER, " + "IDX_FROM INTEGER, " + "IDX_TO INTEGER, "
-																	+ "ENTITY_TYPE INTEGER" + ")";
+	private final static String		create_ddl						= "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(100), "
+																			+ "IDX INTEGER, " + "IDX_FROM INTEGER, " + "IDX_TO INTEGER, "
+																			+ "ENTITY_TYPE INTEGER" + ")";
 
-	private final static String			drop_dll			= "DROP TABLE " + index_table + " IF EXISTS";
+	private final static String		drop_dll						= "DROP TABLE " + index_table + " IF EXISTS";
 
-	private final static String			insert_query		= "INSERT INTO " + index_table
-																	+ "(URI, IDX, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?, ?)";
+	private final static String		insert_query					= "INSERT INTO "
+																			+ index_table
+																			+ "(URI, IDX, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?, ?)";
 
-	private final static String			select_query		= "SELECT * FROM " + index_table;
+	private final static String		select_query					= "SELECT * FROM " + index_table;
 
-	public static final String			class_table			= "class";
+	public static final String		class_table						= "class";
 
-	public static final String			role_table			= "role";
+	public static final String		role_table						= "role";
 
-	public static final String			class_table_create	= "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(100)," + "IDX SMALLINT"
-																	+ ")";
+	public static final String		class_table_create				= "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(100),"
+																			+ "IDX SMALLINT" + ")";
 
-	public static final String			role_table_create	= "CREATE TABLE " + role_table + " ( " + "URI1 VARCHAR(100), "
-																	+ "URI2 VARCHAR(100), " + "IDX SMALLINT" + ")";
+	public static final String		role_table_create				= "CREATE TABLE " + role_table + " ( " + "URI1 VARCHAR(100), "
+																			+ "URI2 VARCHAR(100), " + "IDX SMALLINT" + ")";
 
-	public static final String			class_table_drop	= "DROP TABLE IF EXISTS " + class_table;
+	public static final String		class_table_drop				= "DROP TABLE IF EXISTS " + class_table;
 
-	public static final String			role_table_drop		= "DROP TABLE IF EXISTS " + role_table;
+	public static final String		role_table_drop					= "DROP TABLE IF EXISTS " + role_table;
 
-	public static final String			class_insert		= "INSERT INTO " + class_table + " (URI, IDX) VALUES (?, ?)";
+	public static final String		class_insert					= "INSERT INTO " + class_table + " (URI, IDX) VALUES (?, ?)";
 
-	public static final String			role_insert			= "INSERT INTO " + role_table + " (URI1, URI2, IDX) VALUES (?, ?, ?)";
+	public static final String		role_insert						= "INSERT INTO " + role_table + " (URI1, URI2, IDX) VALUES (?, ?, ?)";
 
-	public static final String			indexclass1			= "CREATE INDEX idxclass1 ON " + class_table + "(URI)";
+	public static final String		indexclass1						= "CREATE INDEX idxclass1 ON " + class_table + "(URI)";
 
-	public static final String			indexclass2			= "CREATE INDEX idxclass2 ON " + class_table + "(IDX)";
+	public static final String		indexclass2						= "CREATE INDEX idxclass2 ON " + class_table + "(IDX)";
 
-	public static final String			indexclass3			= "CREATE INDEX idxclass3 ON " + class_table + "(IDX, URI)";
+	public static final String		indexclass3						= "CREATE INDEX idxclass3 ON " + class_table + "(IDX, URI)";
 
-	public static final String			indexclass4			= "CREATE INDEX idxclass4 ON " + class_table + "(URI, IDX)";
+	public static final String		indexclass4						= "CREATE INDEX idxclass4 ON " + class_table + "(URI, IDX)";
 
-	public static final String			indexrole1			= "CREATE INDEX idxrole1 ON " + role_table + "(URI1)";
+	public static final String		indexrole1						= "CREATE INDEX idxrole1 ON " + role_table + "(URI1)";
 
-	public static final String			indexrole2			= "CREATE INDEX idxrole2 ON " + role_table + "(IDX)";
+	public static final String		indexrole2						= "CREATE INDEX idxrole2 ON " + role_table + "(IDX)";
 
-	public static final String			indexrole3			= "CREATE INDEX idxrole3 ON " + role_table + "(URI2)";
+	public static final String		indexrole3						= "CREATE INDEX idxrole3 ON " + role_table + "(URI2)";
 
-	public static final String			indexrole4			= "CREATE INDEX idxrole4 ON " + role_table + "(URI1, URI2)";
+	public static final String		indexrole4						= "CREATE INDEX idxrole4 ON " + role_table + "(URI1, URI2)";
 
-	public static final String			indexrole5			= "CREATE INDEX idxrole5 ON " + role_table + "(URI1, IDX)";
+	public static final String		indexrole5						= "CREATE INDEX idxrole5 ON " + role_table + "(URI1, IDX)";
 
-	public static final String			indexrole6			= "CREATE INDEX idxrole6 ON " + role_table + "(URI2, URI1)";
+	public static final String		indexrole6						= "CREATE INDEX idxrole6 ON " + role_table + "(URI2, URI1)";
 
-	public static final String			indexrole7			= "CREATE INDEX idxrole7 ON " + role_table + "(URI2, IDX)";
+	public static final String		indexrole7						= "CREATE INDEX idxrole7 ON " + role_table + "(URI2, IDX)";
 
-	public static final String			indexrole8			= "CREATE INDEX idxrole8 ON " + role_table + "(IDX, URI1)";
+	public static final String		indexrole8						= "CREATE INDEX idxrole8 ON " + role_table + "(IDX, URI1)";
 
-	public static final String			indexrole9			= "CREATE INDEX idxrole9 ON " + role_table + "(IDX, URI2)";
+	public static final String		indexrole9						= "CREATE INDEX idxrole9 ON " + role_table + "(IDX, URI2)";
 
-	public static final String			indexrole10			= "CREATE INDEX idxrole10 ON " + role_table + "(IDX, URI1, URI2)";
+	public static final String		indexrole10						= "CREATE INDEX idxrole10 ON " + role_table + "(IDX, URI1, URI2)";
 
-	public static final String			indexrole11			= "CREATE INDEX idxrole11 ON " + role_table + "(IDX, URI2, URI1)";
+	public static final String		indexrole11						= "CREATE INDEX idxrole11 ON " + role_table + "(IDX, URI2, URI1)";
 
-	public static final String			indexrole12			= "CREATE INDEX idxrole12 ON " + role_table + "(URI1, URI2, IDX)";
+	public static final String		indexrole12						= "CREATE INDEX idxrole12 ON " + role_table + "(URI1, URI2, IDX)";
 
-	public static final String			indexrole13			= "CREATE INDEX idxrole13 ON " + role_table + "(URI1, IDX, URI2)";
+	public static final String		indexrole13						= "CREATE INDEX idxrole13 ON " + role_table + "(URI1, IDX, URI2)";
 
-	public static final String			indexrole14			= "CREATE INDEX idxrole14 ON " + role_table + "(URI2, URI1, IDX)";
+	public static final String		indexrole14						= "CREATE INDEX idxrole14 ON " + role_table + "(URI2, URI1, IDX)";
 
-	public static final String			indexrole15			= "CREATE INDEX idxrole15 ON " + role_table + "(URI2, IDX, URI1)";
+	public static final String		indexrole15						= "CREATE INDEX idxrole15 ON " + role_table + "(URI2, IDX, URI1)";
 
-	public static final String			analyze				= "ANALYZE";
+	public static final String		analyze							= "ANALYZE";
 
-	private final OBDADataFactory		predicateFactory	= OBDADataFactoryImpl.getInstance();
+	public static final String		select_mapping_class			= "SELECT URI as X FROM " + class_table;
 
-	private final OntologyFactory	descFactory			= new OntologyFactoryImpl();
+	public static final String		select_mapping_class_role_left	= "SELECT URI1 as X FROM " + role_table;
 
-	private Properties					config				= null;
+	public static final String		select_mapping_class_role_right	= "SELECT URI2 as X FROM " + role_table;
 
-	private DAG							dag;
+	public static final String		select_mapping_role				= "SELECT URI1 as X, URI2 as Y FROM " + role_table;
 
-	private DAG							pureIsa;
+	public static final String		select_mapping_role_inverse		= "SELECT URI2 as X, URI1 as Y FROM " + role_table;
 
-	private DAG							sigmaDag;
+	public static final String		whereSingleCondition			= "(IDX = %d)";
 
-	private Ontology					aboxDependencies;
+	public static final String		whereIntervalCondition			= "(IDX >= %d AND IDX <= %d)";
 
-	final static int					CLASS_TYPE			= 1;
-	final static int					ROLE_TYPE			= 2;
+	private final OBDADataFactory	predicateFactory				= OBDADataFactoryImpl.getInstance();
 
-	private static final boolean		mergeUniions		= true;
+	private final OntologyFactory	descFactory						= new OntologyFactoryImpl();
+
+	private Properties				config							= null;
+
+	private DAG						dag;
+
+	private DAG						pureIsa;
+
+	private DAG						sigmaDag;
+
+	private Ontology				aboxDependencies;
+
+	final static int				CLASS_TYPE						= 1;
+	final static int				ROLE_TYPE						= 2;
+
+	private static final boolean	mergeUniions					= true;
 
 	public RDBMSSIRepositoryManager(OBDADataSource ds) throws SQLException, PunningException {
 		this(ds, null);
@@ -186,10 +202,33 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public void setTBox(Ontology ontology) {
-		dag = DAGConstructor.getISADAG(ontology);
+
+		log.debug("Ontology: {}", ontology.toString());
+		
+		 dag = DAGConstructor.getISADAG(ontology);
+
+		//USE THE DAG GRAPHS FOR DEBUGGING
+		//
+		// try {
+		// GraphGenerator.dumpISA(dag, "given");
+		// } catch (IOException e1) {
+		// e1.printStackTrace();
+		// }
+
+		dag.clean();
+
 		pureIsa = DAGConstructor.filterPureISA(dag);
-		aboxDependencies = DAGConstructor.getSigmaOntology(ontology);
+		aboxDependencies = DAGConstructor.getSigmaOntology(dag);
+
 		pureIsa.index();
+
+//		try {
+//			GraphGenerator.dumpISA(dag, "no-cycles");
+//			GraphGenerator.dumpISA(pureIsa, "isa-indexed");
+//
+//		} catch (IOException e) {
+//
+//		}
 
 	}
 
@@ -328,17 +367,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String cls = ((ClassAssertion) ax).getConcept().getName().toString();
 				// XXX: strange behaviour - owlapi generates an extra
 				// assertion of the form ClassAssertion(Thing, i)
-				if (!cls.equals(DAG.thingStr)) {
-					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
+				// if (!cls.equals(DAG.thingStr)) {
+				String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
-					Predicate clsPred = ((ClassAssertion) ax).getConcept();
-					ClassDescription clsDesc = descFactory.createClass(clsPred);
-					DAGNode node = pureIsa.getClassNode(clsDesc);
-					int idx = node.getIndex();
+				Predicate clsPred = ((ClassAssertion) ax).getConcept();
+				ClassDescription clsDesc = descFactory.createClass(clsPred);
+				DAGNode node = pureIsa.getClassNode(clsDesc);
+				int idx = node.getIndex();
 
-					out.append(String.format(cls_insert_str, getQuotedString(uri), idx));
+				out.append(String.format(cls_insert_str, getQuotedString(uri), idx));
 
-				}
+				// }
 			}
 			out.append(";\n");
 		}
@@ -496,18 +535,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String cls = ((ClassAssertion) ax).getConcept().getName().toString();
 				// XXX: strange behaviour - owlapi generates an extra
 				// assertion of the form ClassAssertion(Thing, i)
-				if (!cls.equals(DAG.thingStr)) {
-					String uri = ((ClassAssertion) ax).getObject().getURI().toString();
+				// if (!cls.equals(DAG.thingStr)) {
+				String uri = ((ClassAssertion) ax).getObject().getURI().toString();
 
-					Predicate clsPred = ((ClassAssertion) ax).getConcept();
-					ClassDescription clsDesc = descFactory.createClass(clsPred);
-					DAGNode node = pureIsa.getClassNode(clsDesc);
-					int idx = node.getIndex();
+				Predicate clsPred = ((ClassAssertion) ax).getConcept();
+				ClassDescription clsDesc = descFactory.createClass(clsPred);
+				DAGNode node = pureIsa.getClassNode(clsDesc);
+				int idx = node.getIndex();
 
-					cls_stm.setString(1, uri);
-					cls_stm.setInt(2, idx);
-					cls_stm.addBatch();
-				}
+				cls_stm.setString(1, uri);
+				cls_stm.setInt(2, idx);
+				cls_stm.addBatch();
+				// }
 			}
 
 			if (batchCount == 50000) {
@@ -623,154 +662,434 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() {
-		try {
-			List<MappingKey> keys = build(dag, pureIsa);
-			return compile(keys);
-		} catch (DuplicateMappingException e) {
-			// TODO remove this Duplicate mapping exception form the API
-			return null;
+
+		/*
+		 * 
+		 * PART 1: Collecting relevant nodes for mappings
+		 */
+
+		/*
+		 * Collecting relevant nodes for each role. For a Role P, the relevant
+		 * nodes are, the DAGNode for P, and the top most inverse children of P
+		 */
+		Set<DAGNode> roleNodes = new HashSet<DAGNode>();
+		Map<DAGNode, List<DAGNode>> roleInverseMaps = new HashMap<DAGNode, List<DAGNode>>();
+
+		for (DAGNode node : dag.getRoles()) {
+			// We only map named roles
+			if (!(node.getDescription() instanceof Property) || ((Property) node.getDescription()).isInverse()) {
+				continue;
+			}
+			roleNodes.add(node);
+
+			List<DAGNode> roleInverseChildren = roleInverseMaps.get(node);
+			if (roleInverseChildren == null) {
+				roleInverseChildren = new LinkedList<DAGNode>();
+				roleInverseMaps.put(node, roleInverseChildren);
+			}
+
+			/*
+			 * collecting the top most inverse children, we do a bredth first
+			 * traversal, stopping a branch when we find an inverse child.
+			 * 
+			 * Collecting the top most allows us to avoid redundancy elimination
+			 */
+			Queue<DAGNode> childrenQueue = new LinkedList<DAGNode>();
+			childrenQueue.addAll(node.getChildren());
+			childrenQueue.addAll(node.getEquivalents());
+
+			while (!childrenQueue.isEmpty()) {
+				DAGNode child = childrenQueue.poll();
+				if ((child.getDescription() instanceof Property) && ((Property) child.getDescription()).isInverse()) {
+					roleInverseChildren.add(child);
+				} else {
+					childrenQueue.addAll(child.getChildren());
+				}
+			}
+
+			/* Removing redundant nodes */
+
+			HashSet<DAGNode> inverseRedundants = new HashSet<DAGNode>();
+			for (DAGNode inverseNode : roleInverseChildren) {
+				Property role = ((Property) inverseNode.getDescription());
+				for (DAGNode possibleRedundantNode : roleInverseChildren) {
+					Property possibleRedundantRole = ((Property) possibleRedundantNode.getDescription());
+					if (dag.getRoleNode(role).descendans.contains(possibleRedundantRole))
+						inverseRedundants.add(possibleRedundantNode);
+				}
+			}
+			roleInverseChildren.removeAll(inverseRedundants);
+
 		}
+
+		/*
+		 * Collecting relevant nodes for each class, that is, the Node itself,
+		 * and each exists R such that there is no other exists P, such that R
+		 * isa P
+		 * 
+		 * Here we cannot collect only the top most, so we do it in two passes.
+		 * First we callect all exsts R children, then we remove redundant ones.
+		 */
+
+		// TODO this part can be optimized if we know some existing dependencies
+		// (e.g., coming from given mappings)
+
+		Set<DAGNode> classNodesMaps = new HashSet<DAGNode>();
+		Map<DAGNode, Set<DAGNode>> classExistsMaps = new HashMap<DAGNode, Set<DAGNode>>();
+		for (DAGNode node : dag.getClasses()) {
+			// we only map named classes
+			if (!(node.getDescription() instanceof Class)) {
+				continue;
+			}
+			classNodesMaps.add(node);
+
+			Set<DAGNode> existChildren = classExistsMaps.get(node);
+			if (existChildren == null) {
+				existChildren = new HashSet<DAGNode>();
+				classExistsMaps.put(node, existChildren);
+			}
+
+			/* Collecting Exists R children */
+			for (DAGNode child : node.descendans) {
+				if (child.getDescription() instanceof PropertySomeRestrictionImpl) {
+					existChildren.add(child);
+				}
+			}
+
+			/*
+			 * Cleaning exists children (removing any exists R implied by the
+			 * role hierarchy )
+			 */
+			// Set<DAGNode> existChildren = classExistsMaps.get(node);
+			Set<DAGNode> redundantNodes = new HashSet<DAGNode>();
+			for (DAGNode existsnode : existChildren) {
+				/* Here we have ES */
+				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsnode.getDescription();
+				Property role = descFactory.createProperty(existsDesc.getPredicate(), existsDesc.isInverse());
+				DAGNode roleNode = dag.getRoleNode(role);
+
+				for (DAGNode possiblyRedundantNode : existChildren) {
+					/* Here we have ER */
+					PropertySomeRestriction existsDesc2 = (PropertySomeRestriction) possiblyRedundantNode.getDescription();
+					Property role2 = descFactory.createProperty(existsDesc2.getPredicate(), existsDesc2.isInverse());
+					DAGNode roleNode2 = dag.getRoleNode(role2);
+
+					if (roleNode.descendans.contains(roleNode2))
+						/*
+						 * The DAG implies that R ISA S, so we remove ER
+						 */
+						redundantNodes.add(possiblyRedundantNode);
+				}
+			}
+			existChildren.removeAll(redundantNodes);
+		}
+
+		/*
+		 * We collected all classes and properties that need mappings, and the
+		 * nodes that are relevant for each of their mappings
+		 */
+
+		/*
+		 * 
+		 * PART 2: Creating the mappings
+		 * 
+		 * 
+		 * Note, at every step we always use the pureIsa dag to get the indexes
+		 * and ranges for each class.
+		 */
+
+		/* Creating the mappings for each role */
+
+		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
+
+		for (DAGNode roleNode : roleNodes) {
+
+			Predicate role = ((Property) roleNode.getDescription()).getPredicate();
+
+			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
+
+			mappings.put(role, currentMappings);
+
+			// Mapping head
+
+			Atom head = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 2), predicateFactory.getVariable("X"),
+					predicateFactory.getVariable("Y"));
+			Atom body = predicateFactory.getAtom(role, predicateFactory.getVariable("X"), predicateFactory.getVariable("Y"));
+
+			/*
+			 * This target query is shared by all mappings for this role
+			 */
+
+			CQIE targetQuery = predicateFactory.getCQIE(head, body);
+
+			/*
+			 * First mapping: Getting the SQL for the *BASIC* mapping using
+			 * ranges
+			 */
+
+			StringBuffer sql = new StringBuffer();
+			sql.append(select_mapping_role);
+			sql.append(" WHERE ");
+
+			/*
+			 * Getting the indexed node (from the pureIsa dag)
+			 */
+
+			DAGNode indexedNode = pureIsa.getRoleNode((Property) roleNode.getDescription());
+			List<Interval> intervals = indexedNode.getRange().getIntervals();
+			appendIntervalString(intervals.get(0), sql);
+
+			for (int intervali = 1; intervali < intervals.size(); intervali++) {
+				sql.append(" OR ");
+				appendIntervalString(intervals.get(intervali), sql);
+			}
+
+			OBDAMappingAxiom basicmapping = predicateFactory.getRDBMSMappingAxiom(sql.toString(), targetQuery);
+			currentMappings.add(basicmapping);
+
+			/* Rest mappings: computing mappings for inverses */
+
+			if (roleInverseMaps.get(roleNode).size() > 0) {
+				sql = new StringBuffer();
+				sql.append(select_mapping_role_inverse);
+				sql.append(" WHERE ");
+
+				boolean alreadyAppendedOne = false;
+
+				for (DAGNode inverseSubNodes : roleInverseMaps.get(roleNode)) {
+
+					/*
+					 * Getting the indexed node (from the pureIsa dag)
+					 */
+
+					Property inverseRole = (Property) inverseSubNodes.getDescription();
+					Property directRole = descFactory.createProperty(inverseRole.getPredicate());
+					indexedNode = pureIsa.getRoleNode(directRole);
+					intervals = indexedNode.getRange().getIntervals();
+
+					for (int intervali = 0; intervali < intervals.size(); intervali++) {
+						if (alreadyAppendedOne)
+							sql.append(" OR ");
+						appendIntervalString(intervals.get(intervali), sql);
+						alreadyAppendedOne = true;
+					}
+
+				}
+				OBDAMappingAxiom inverseMapping = predicateFactory.getRDBMSMappingAxiom(sql.toString(), targetQuery);
+				currentMappings.add(inverseMapping);
+			}
+
+			/*
+			 * Generating mappings for the equivalent nodes
+			 */
+
+			for (DAGNode equivalent : roleNode.getEquivalents()) {
+
+				Property equiproperty = (Property) equivalent.getDescription();
+
+				if (equiproperty.isInverse()) {
+					Property directEquiProperty = descFactory.createProperty(equiproperty.getPredicate(), false);
+					if ((pureIsa.getRoleNode(directEquiProperty) != null) && (pureIsa.getRoleNode(directEquiProperty).getIndex() != -1))
+						continue;
+				}
+
+				Atom headequi = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 2),
+						predicateFactory.getVariable("X"), predicateFactory.getVariable("Y"));
+				Atom bodyequi = predicateFactory.getAtom(equiproperty.getPredicate(), predicateFactory.getVariable("X"),
+						predicateFactory.getVariable("Y"));
+
+				CQIE targetQueryEqui = predicateFactory.getCQIE(headequi, bodyequi);
+
+				List<OBDAMappingAxiom> equimappings = new LinkedList<OBDAMappingAxiom>();
+				mappings.put(equiproperty.getPredicate(), equimappings);
+
+				for (OBDAMappingAxiom mapping : currentMappings) {
+					equimappings.add(predicateFactory.getRDBMSMappingAxiom(mapping.getSourceQuery().toString(), targetQueryEqui));
+				}
+			}
+		}
+
+		/*
+		 * Creating mappings for each concept
+		 */
+
+		for (DAGNode classNode : classNodesMaps) {
+
+			Predicate classuri = ((Class) classNode.getDescription()).getPredicate();
+
+			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
+
+			mappings.put(classuri, currentMappings);
+
+			// Mapping head
+
+			Atom head = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 1), predicateFactory.getVariable("X"));
+			Atom body = predicateFactory.getAtom(classuri, predicateFactory.getVariable("X"));
+
+			/*
+			 * This target query is shared by all mappings for this role
+			 */
+
+			CQIE targetQuery = predicateFactory.getCQIE(head, body);
+
+			/*
+			 * First mapping: Getting the SQL for the *BASIC* mapping using
+			 * ranges
+			 */
+
+			StringBuffer sql = new StringBuffer();
+			sql.append(select_mapping_class);
+			sql.append(" WHERE ");
+
+			/*
+			 * Getting the indexed node (from the pureIsa dag)
+			 */
+			DAGNode indexedNode = pureIsa.getClassNode((Class) classNode.getDescription());
+			List<Interval> intervals = indexedNode.getRange().getIntervals();
+			appendIntervalString(intervals.get(0), sql);
+
+			for (int intervali = 1; intervali < intervals.size(); intervali++) {
+				sql.append(" OR ");
+				appendIntervalString(intervals.get(intervali), sql);
+			}
+
+			OBDAMappingAxiom basicmapping = predicateFactory.getRDBMSMappingAxiom(sql.toString(), targetQuery);
+			currentMappings.add(basicmapping);
+
+			/* Rest mappings 1: computing mappings for all exists R children */
+
+			// TODO this code is ugly because we are doing the direct and
+			// inverse mapping at the same time
+			// we need to split this into two blocks for readability
+
+			StringBuffer sqlroledirect = new StringBuffer();
+			StringBuffer sqlroleinverse = new StringBuffer();
+
+			sqlroledirect.append(select_mapping_class_role_left);
+			sqlroleinverse.append(select_mapping_class_role_right);
+
+			sqlroledirect.append(" WHERE ");
+			sqlroleinverse.append(" WHERE ");
+
+			boolean alreadyAppendedOneDirect = false;
+			boolean alreadyAppendedOneInverse = false;
+
+			for (DAGNode existsSubNode : classExistsMaps.get(classNode)) {
+
+				boolean direct = false;
+				StringBuffer currentBuffer = null;
+				if (!((PropertySomeRestriction) existsSubNode.getDescription()).isInverse()) {
+					currentBuffer = sqlroledirect;
+					direct = true;
+				} else {
+					currentBuffer = sqlroleinverse;
+					direct = false;
+				}
+
+				/*
+				 * Getting the indexed node (from the pureIsa dag)
+				 */
+				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsSubNode.getDescription();
+				Property role = descFactory.createProperty(existsDesc.getPredicate(), false);
+
+				indexedNode = pureIsa.getRoleNode(role);
+				intervals = indexedNode.getRange().getIntervals();
+
+				for (int intervali = 0; intervali < intervals.size(); intervali++) {
+					if ((direct && alreadyAppendedOneDirect) || ((!direct && alreadyAppendedOneInverse)))
+						currentBuffer.append(" OR ");
+					appendIntervalString(intervals.get(intervali), currentBuffer);
+					if (direct)
+						alreadyAppendedOneDirect = true;
+					else
+						alreadyAppendedOneInverse = true;
+
+				}
+
+			}
+
+			if (alreadyAppendedOneDirect) {
+				OBDAMappingAxiom existsMapping = predicateFactory.getRDBMSMappingAxiom(sqlroledirect.toString(), targetQuery);
+				currentMappings.add(existsMapping);
+			}
+			if (alreadyAppendedOneInverse) {
+				OBDAMappingAxiom existsMapping = predicateFactory.getRDBMSMappingAxiom(sqlroleinverse.toString(), targetQuery);
+				currentMappings.add(existsMapping);
+			}
+
+			/*
+			 * Generating mappings for the equivalent nodes
+			 */
+
+			for (DAGNode equivalent : classNode.getEquivalents()) {
+				if (!(equivalent.getDescription() instanceof Class))
+					continue;
+
+				Class equiclass = (Class) equivalent.getDescription();
+				Atom headequi = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 1),
+						predicateFactory.getVariable("X"));
+				Atom bodyequi = predicateFactory.getAtom(equiclass.getPredicate(), predicateFactory.getVariable("X"));
+
+				CQIE targetQueryEqui = predicateFactory.getCQIE(headequi, bodyequi);
+
+				List<OBDAMappingAxiom> equimappings = new LinkedList<OBDAMappingAxiom>();
+				mappings.put(equiclass.getPredicate(), equimappings);
+
+				for (OBDAMappingAxiom mapping : currentMappings) {
+					equimappings.add(predicateFactory.getRDBMSMappingAxiom(mapping.getSourceQuery().toString(), targetQueryEqui));
+				}
+			}
+		}
+
+		/*
+		 * PART 4: Optimizing.
+		 */
+
+		// Merging multiple mappings into 1 with UNION ALL to minimize the
+		// number of the mappings.
+
+		if (mergeUniions) {
+			for (Predicate predicate : mappings.keySet()) {
+
+				List<OBDAMappingAxiom> currentMappings = mappings.get(predicate);
+
+				/* Getting the current head */
+				CQIE targetQuery = (CQIE) currentMappings.get(0).getTargetQuery();
+
+				/* Computing the merged SQL */
+				StringBuffer newSQL = new StringBuffer();
+				newSQL.append(((OBDASQLQuery) currentMappings.get(0).getSourceQuery()).toString());
+				for (int mapi = 1; mapi < currentMappings.size(); mapi++) {
+					newSQL.append(" UNION ALL ");
+					newSQL.append(((OBDASQLQuery) currentMappings.get(mapi).getSourceQuery()).toString());
+				}
+
+				/* Replacing the old mappings */
+				OBDAMappingAxiom mergedMapping = predicateFactory.getRDBMSMappingAxiom(newSQL.toString(), targetQuery);
+				currentMappings.clear();
+				currentMappings.add(mergedMapping);
+
+			}
+		}
+
+		/*
+		 * Collecting the result
+		 */
+		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
+		for (Predicate predicate : mappings.keySet()) {
+			result.addAll(mappings.get(predicate));
+		}
+
+		return result;
+
 	}
 
-	/**
-	 * Generate mappings for DAG
-	 * 
-	 * @throws DuplicateMappingException
-	 *             error creating mappings
-	 */
-	private List<MappingKey> build(DAG dag, DAG pureIsa) throws DuplicateMappingException {
-		log.debug("Generating mappings for DAG {}", pureIsa);
-
-		List<MappingKey> mappings = new ArrayList<MappingKey>();
-
-		for (DAGNode node : pureIsa.getClasses()) {
-
-			if (!(node.getDescription() instanceof Class) || node.getDescription().equals(DAG.thingConcept)) {
-				continue;
-			}
-
-			List<DAGNode> equiNodes = new ArrayList<DAGNode>(node.getEquivalents().size() + 1);
-			equiNodes.add(node);
-			equiNodes.addAll(node.getEquivalents());
-
-			String tablename = RDBMSSIRepositoryManager.class_table;
-			String projection = "URI as X";
-			SemanticIndexRange range = node.getRange();
-
-			for (DAGNode equiNode : equiNodes) {
-				if (!(equiNode.getDescription() instanceof Class) || equiNode.getDescription().equals(DAG.thingConcept)) {
-					continue;
-				}
-				Class equiDesc = (Class) equiNode.getDescription();
-				String equiUri = equiDesc.getPredicate().getName().toString();
-
-				mappings.add(new UnaryMappingKey(range, projection, tablename, equiUri));
-			}
-
-			// check if has child exists(R) in the general ISA DAG
-			DAGNode genNode = dag.getClassNode((ClassDescription) node.getDescription());
-			for (DAGNode descendant : genNode.descendans) {
-
-				if (descendant.getDescription() instanceof PropertySomeRestriction) {
-					SemanticIndexRange descRange;
-
-					Predicate p = ((PropertySomeRestriction) descendant.getDescription()).getPredicate();
-					if (p.getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
-						continue;
-					}
-					boolean isInverse = ((PropertySomeRestriction) descendant.getDescription()).isInverse();
-
-					Property role = descFactory.createProperty(p, false);
-
-					if (pureIsa.equi_mappings.containsKey(role)) {
-						// XXX: Very dirty hack, needs to be redone
-						continue;
-					}
-
-					if (isInverse) {
-						projection = "URI2 as X";
-					} else {
-						projection = "URI1 as X";
-					}
-
-					descRange = pureIsa.getRoleNode(role).getRange();
-
-					for (DAGNode equiNode : equiNodes) {
-						if (!(equiNode.getDescription() instanceof Class)
-								|| equiNode.getDescription().equals(DAG.thingConcept)) {
-							continue;
-						}
-						Class equiDesc = (Class) equiNode.getDescription();
-						String equiUri = equiDesc.getPredicate().getName().toString();
-
-						if (isInverse) {
-							mappings.add(new UnaryMappingKey(descRange, projection, RDBMSSIRepositoryManager.role_table, equiUri));
-						} else {
-							mappings.add(new UnaryMappingKey(descRange, projection, RDBMSSIRepositoryManager.role_table, equiUri));
-						}
-					}
-				}
-			}
+	private void appendIntervalString(Interval interval, StringBuffer out) {
+		if (interval.getStart() == interval.getEnd()) {
+			out.append(String.format(whereSingleCondition, interval.getStart()));
+		} else {
+			out.append(String.format(whereIntervalCondition, interval.getStart(), interval.getEnd()));
 		}
-		for (DAGNode node : dag.getRoles()) {
-
-			Property nodeDesc = (Property) node.getDescription();
-			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
-				continue;
-			}
-			if (nodeDesc.isInverse()) {
-				continue;
-			}
-
-			SemanticIndexRange range = pureIsa.getRoleNode(descFactory.createProperty(nodeDesc.getPredicate(), false)).getRange();
-			String projection = "URI1 as X, URI2 as Y";
-			mappings.add(new BinaryMappingKey(range, projection, RDBMSSIRepositoryManager.role_table, nodeDesc.getPredicate().getName()
-					.toString()));
-
-			for (DAGNode equiNode : node.getEquivalents()) {
-
-				Property equiNodeDesc = (Property) equiNode.getDescription();
-
-				if (equiNodeDesc.isInverse()) {
-					projection = "URI1 as Y, URI2 as X";
-				}
-				mappings.add(new BinaryMappingKey(range, projection, RDBMSSIRepositoryManager.role_table, equiNodeDesc.getPredicate()
-						.getName().toString()));
-			}
-
-			for (DAGNode child : node.getChildren()) {
-				Property childDesc = (Property) child.getDescription();
-
-				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
-					continue;
-				}
-
-				if (!childDesc.isInverse()) {
-					continue;
-				}
-				Property posChildDesc = descFactory.createProperty(childDesc.getPredicate(), false);
-
-				SemanticIndexRange childRange = pureIsa.getRoleNode(posChildDesc).getRange();
-
-				mappings.add(new BinaryMappingKey(childRange, "URI1 as Y, URI2 as X", RDBMSSIRepositoryManager.role_table, nodeDesc
-						.getPredicate().getName().toString()));
-
-				for (DAGNode equiNode : node.getEquivalents()) {
-
-					Property equiNodeDesc = (Property) equiNode.getDescription();
-					String equiProj = "URI1 as Y, URI2 as X";
-					if (equiNodeDesc.isInverse()) {
-						equiProj = "URI1 as X, URI2 as Y";
-					}
-
-					mappings.add(new BinaryMappingKey(childRange, equiProj, RDBMSSIRepositoryManager.role_table, equiNodeDesc
-							.getPredicate().getName().toString()));
-				}
-			}
-		}
-
-		return mappings;
-		// return compile(mappings);
 	}
 
 	@Override
@@ -910,210 +1229,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		/* This method should initialize the vocabulary of the DAG */
 
-	}
-
-	private String genQuerySQL(MappingKey map) {
-		// Generate the WHERE clause
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT ");
-		sql.append(map.projection);
-		sql.append(" FROM ");
-		sql.append(map.table);
-		sql.append(" WHERE ");
-
-		for (SemanticIndexRange.Interval it : map.range.getIntervals()) {
-			int st = it.getStart();
-			int end = it.getEnd();
-			String interval;
-			if (st == end) {
-				interval = String.format("(IDX = %d) OR ", st);
-			} else {
-				interval = String.format("((IDX >= %d) AND ( IDX <= %d)) OR ", st, end);
-			}
-			sql.append(interval);
-		}
-		if (map.range.getIntervals().size() != 0) {
-			// remove the last AND
-			sql.delete(sql.length() - 4, sql.length());
-		}
-
-		return sql.toString();
-	}
-
-	public List<OBDAMappingAxiom> compile(List<MappingKey> mappings) throws DuplicateMappingException {
-
-		List<OBDAMappingAxiom> rv = new ArrayList<OBDAMappingAxiom>(128);
-		List<MappingKey> mergedElements = new ArrayList<MappingKey>(128);
-		Collections.sort(mappings);
-
-		List<List<MappingKey>> mergedGroup = new ArrayList<List<MappingKey>>();
-		List<MappingKey> firstGroup = new ArrayList<MappingKey>();
-		firstGroup.add(mappings.get(0));
-		mergedGroup.add(firstGroup);
-
-		for (MappingKey map : mappings) {
-			List<MappingKey> uriTabel = mergedGroup.get(mergedGroup.size() - 1);
-			MappingKey lastElem = uriTabel.get(uriTabel.size() - 1);
-			if (lastElem.uri.equals(map.uri) && lastElem.projection.equals(map.projection)) {
-				uriTabel.add(map);
-			} else {
-				List<MappingKey> group = new ArrayList<MappingKey>();
-				group.add(map);
-				mergedGroup.add(group);
-			}
-		}
-		for (List<MappingKey> group : mergedGroup) {
-			MappingKey cur = group.get(0);
-			SemanticIndexRange curRange = new SemanticIndexRange(cur.range);
-			for (MappingKey map : group) {
-				curRange.addRange(map.range);
-			}
-			if (mergeUniions) {
-				if (cur instanceof UnaryMappingKey) {
-					mergedElements.add(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
-				} else if (cur instanceof BinaryMappingKey) {
-					mergedElements.add(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri));
-				}
-			} else {
-				if (cur instanceof UnaryMappingKey) {
-					rv.add(makeUnaryMapp(cur.uri, genQuerySQL(new UnaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
-				} else if (cur instanceof BinaryMappingKey) {
-					rv.add(makeBinaryMapp(cur.uri, genQuerySQL(new BinaryMappingKey(curRange, cur.projection, cur.table, cur.uri))));
-				}
-			}
-		}
-		if (mergeUniions) {
-
-			mergedGroup = new ArrayList<List<MappingKey>>();
-			firstGroup = new ArrayList<MappingKey>();
-			firstGroup.add(mergedElements.get(0));
-			mergedGroup.add(firstGroup);
-
-			for (int i = 1; i < mappings.size(); ++i) {
-				MappingKey map = mappings.get(i);
-				List<MappingKey> uriTabel = mergedGroup.get(mergedGroup.size() - 1);
-				MappingKey lastElem = uriTabel.get(uriTabel.size() - 1);
-				if (lastElem.uri.equals(map.uri)
-						&& ((lastElem instanceof UnaryMappingKey && map instanceof UnaryMappingKey) || (lastElem instanceof BinaryMappingKey
-								&& map instanceof BinaryMappingKey && lastElem.projection.equals(map.projection)))) {
-					uriTabel.add(map);
-				} else {
-					List<MappingKey> group = new ArrayList<MappingKey>();
-					group.add(map);
-					mergedGroup.add(group);
-				}
-			}
-			for (List<MappingKey> group : mergedGroup) {
-				MappingKey cur = group.get(0);
-				StringBuilder sql = new StringBuilder();
-				sql.append(genQuerySQL(cur));
-
-				for (int j = 1; j < group.size(); ++j) {
-					MappingKey map = group.get(j);
-					sql.append(" UNION ALL ");
-					sql.append(genQuerySQL(map));
-				}
-				if (cur instanceof UnaryMappingKey) {
-					rv.add(makeUnaryMapp(cur.uri, sql.toString()));
-				} else if (cur instanceof BinaryMappingKey) {
-					rv.add(makeBinaryMapp(cur.uri, sql.toString()));
-				}
-			}
-		}
-		return rv;
-	}
-
-	private OBDAMappingAxiom makeBinaryMapp(String uri, String sql) {
-		Term qtx = predicateFactory.getVariable("X");
-		Term qty = predicateFactory.getVariable("Y");
-		Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 2);
-		Atom bodyAtom = predicateFactory.getAtom(predicate, qtx, qty);
-		predicate = predicateFactory.getPredicate(URI.create("q"), 2);
-		Atom head = predicateFactory.getAtom(predicate, qtx, qty);
-		OBDAQuery cq = predicateFactory.getCQIE(head, bodyAtom);
-
-		return predicateFactory.getRDBMSMappingAxiom(sql, cq);
-
-	}
-
-	private OBDAMappingAxiom makeUnaryMapp(String uri, String sql) {
-		Term qt = predicateFactory.getVariable("x");
-		Predicate predicate = predicateFactory.getPredicate(URI.create(uri), 1);
-		Atom bodyAtom = predicateFactory.getAtom(predicate, qt);
-		predicate = predicateFactory.getPredicate(URI.create("q"), 1);
-		Atom head = predicateFactory.getAtom(predicate, qt);
-		OBDAQuery cq = predicateFactory.getCQIE(head, bodyAtom);
-
-		return predicateFactory.getRDBMSMappingAxiom(sql, cq);
-
-	}
-
-	public class MappingKey implements Comparable<MappingKey> {
-
-		public final SemanticIndexRange	range;
-		public final String				projection;
-		public final String				table;
-		public final String				uri;
-
-		public MappingKey(SemanticIndexRange range, String projection, String table, String uri) {
-			this.range = range;
-			this.projection = projection;
-			this.table = table;
-			this.uri = uri;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
-
-			MappingKey that = (MappingKey) o;
-
-			if (projection != null ? !projection.equals(that.projection) : that.projection != null)
-				return false;
-			if (range != null ? !range.equals(that.range) : that.range != null)
-				return false;
-			if (table != null ? !table.equals(that.table) : that.table != null)
-				return false;
-			if (uri != null ? !uri.equals(that.uri) : that.uri != null)
-				return false;
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = range != null ? range.hashCode() : 0;
-			result = 31 * result + (projection != null ? projection.hashCode() : 0);
-			result = 31 * result + (table != null ? table.hashCode() : 0);
-			result = 31 * result + (uri != null ? uri.hashCode() : 0);
-			return result;
-		}
-
-		@Override
-		public int compareTo(MappingKey mappingKey) {
-			int i = this.uri.compareTo(mappingKey.uri);
-			if (i != 0) {
-				return i;
-			}
-			return this.projection.compareTo(mappingKey.projection);
-		}
-	}
-
-	private class UnaryMappingKey extends MappingKey {
-
-		UnaryMappingKey(SemanticIndexRange range, String projection, String table, String uri) {
-			super(range, projection, table, uri);
-		}
-	}
-
-	private class BinaryMappingKey extends MappingKey {
-
-		BinaryMappingKey(SemanticIndexRange range, String projection, String table, String uri) {
-			super(range, projection, table, uri);
-		}
 	}
 
 	/*

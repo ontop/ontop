@@ -124,12 +124,6 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_402_0.owl#32 -->
-
-    <owl:Thing rdf:about="#32"/>
-    
-
-
     <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_402_0.owl#a11 -->
 
     <owl:Thing rdf:about="#a11">
@@ -203,8 +197,14 @@
     <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_402_0.owl#b31 -->
 
     <owl:Thing rdf:about="#b31">
-        <test:B3 rdf:resource="#32"/>
+        <test:B3 rdf:resource="#b32"/>
     </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_402_0.owl#b32 -->
+
+    <owl:Thing rdf:about="#b32"/>
     
 
 

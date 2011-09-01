@@ -270,7 +270,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 	@Override
 	public DatalogProgram unfold(DatalogProgram inputquery) throws Exception {
-		log.info("Computing unfolding for query of size: {}", inputquery.getRules().size());
+		log.debug("Computing unfolding for query of size: {}", inputquery.getRules().size());
 		long startime = System.currentTimeMillis();
 
 		log.debug("Computing partial evaluation for: \n{}", inputquery);
@@ -334,7 +334,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		log.debug("Computed partial evaluation: \n{}", dp);
 		long endtime = System.currentTimeMillis();
 		long timeelapsedseconds = (endtime - startime) / 1000;
-		log.info("Final size of unfolding: {}   Time elapsed: {}s", dp.getRules().size(), timeelapsedseconds);
+		log.debug("Final size of unfolding: {}   Time elapsed: {}s", dp.getRules().size(), timeelapsedseconds);
 		return dp;
 	}
 

@@ -14,7 +14,6 @@ package it.unibz.krdb.obda.utils;
 
 
 
-import it.unibz.krdb.obda.gui.swing.exception.NoDatasourceSelectedException;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAQuery;
