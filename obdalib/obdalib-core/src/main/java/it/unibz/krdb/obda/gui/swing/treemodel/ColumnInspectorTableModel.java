@@ -13,8 +13,11 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.TablePrimary;
+
+import java.util.ArrayList;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -26,120 +29,70 @@ import javax.swing.table.TableModel;
  * ResultSet. Also note that it provides read-only access to the results
  */
 public class ColumnInspectorTableModel implements TableModel {
-	// ResultSet results; // The ResultSet to interpret
 
-	ResultSetMetaData	metadata;	// Additional information about the
-	// results
-
-	int					numcols, numrows;	// How many rows and columns
-
-	// in the table
-
-	// ResultSetTableModelFactory factory;
-
-	/**
-	 * This constructor creates a TableModel from a ResultSet. It is package
-	 * private because it is only intended to be used by
-	 * ResultSetTableModelFactory, which is what you should use to obtain a
-	 * ResultSetTableModel
-	 */
-	public ColumnInspectorTableModel(ResultSetMetaData meta) throws SQLException {
-		// this.factory = parentFactory;
-		// this.results = results; // Save the results
-		metadata = meta; // Get metadata on them
-		numcols = 4; // How many columns?
-		// results.last(); // Move to last row
-		numrows = metadata.getColumnCount(); // How many rows?
-
+	private static final int NUM_COLS = 4;
+	private static final String[] COLUMN_NAMES = {
+		"Attribute", "Type", "Primary Key", "Nullable"
+	};
+	
+	private ArrayList<Attribute> attributes;
+	
+	public ColumnInspectorTableModel(DBMetadata metadata, String tableName) {
+		TablePrimary table = metadata.getTable(tableName);
+		attributes = table.getAttributeList();
 	}
 
-	/**
-	 * Call this when done with the table model. It closes the ResultSet and the
-	 * Statement object used to create it.
-	 */
-	public void close() {
-		// try {
-		//		
-		// } catch (SQLException e) {
-		// e.printStackTrace(System.err);
-		// }
-		// ;
-	}
-
-	/** Automatically close when we're garbage collected */
-	protected void finalize() {
-		// close();
-	}
-
+	@Override
 	public int getColumnCount() {
-		return 4;
+		return NUM_COLS;
 	}
 
-	public int getRowCount() {
-		return numrows;
-
+	@Override
+	public int getRowCount() {		
+		return attributes.size();
 	}
 
+	@Override
 	public String getColumnName(int column) {
-		if (column == 0)
-			return "Attribute";
-		if (column == 1)
-			return "Type";
-		if (column == 2)
-			return "Autoincrement";
-		if (column == 3)
-			return "Null";
-		return "Nonexistent";
+		return COLUMN_NAMES[column];
 	}
 
+	@Override
 	public Class getColumnClass(int column) {
 		return String.class;
 	}
 
+	@Override
 	public Object getValueAt(int row, int column) {
-		if (!((row >= 0) && (column >= 0))) {
-			return "";
+		
+		Attribute attr = attributes.get(row);
+		
+		switch(column) {
+			case 0: return attr.name;
+			case 1: return attr.type;
+			case 2: return (attr.bPrimaryKey)? "Yes" : "No";
+			case 3: return (attr.canNull==0)? "No" : "Yes";
 		}
-		try {
-			// results.absolute(row + 1); // Go to the specified row
-			if (column == 0)
-				return metadata.getColumnName(row + 1);
-			if (column == 1) {
-
-				return metadata.getColumnTypeName(row + 1);
-				// return 0;
-				// try {
-				// return factory.getRelationsRowCount((String)
-				// results.getObject(1));
-				// } catch (Exception e) {
-				// e.printStackTrace(System.err);
-				// return e.getMessage();
-				// }
-
-			} if (column == 2) {
-				return metadata.isAutoIncrement(row + 1);
-			} if (column == 3) {
-				return metadata.isNullable(row + 1);
-			} else
-				return "ERROR";
-		} catch (SQLException e) {
-			e.printStackTrace(System.err);
-			return e.toString();
-		}
+		return "";
 	}
 
-	// Our table isn't editable
+	@Override
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 
-	// Since its not editable, we don't need to implement these methods
+	@Override
 	public void setValueAt(Object value, int row, int column) {
+		// Does nothing.
 	}
 
+	@Override
 	public void addTableModelListener(TableModelListener l) {
+		// Does nothing.
 	}
 
+	@Override
 	public void removeTableModelListener(TableModelListener l) {
+		// Does nothing.
 	}
 }

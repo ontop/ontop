@@ -22,6 +22,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.awt.BorderLayout;
@@ -30,6 +31,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -64,20 +66,14 @@ import org.slf4j.LoggerFactory;
  */
 public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-	/**
-	 * 
-	 */
-	private static final long		serialVersionUID	= 6497114195036386873L;
+	private static final long serialVersionUID	= 6497114195036386873L;
+	private static final int TABLE_ROW_HEIGHT	= 17;
+	private static final int TABLE_COLUMN_WIDTH	= 200;
 
-	private static final int		TABLE_ROW_HEIGHT	= 17;
+	private OBDADataSource selectedSource;
+	private OBDAModel dscontroller;
 
-	private static final int		TABLE_COLUMN_WITH	= 200;
-
-	private OBDADataSource				selectedSource;
-
-	private OBDAModel	dscontroller		= null;
-
-	Logger							log					= LoggerFactory.getLogger(SQLSchemaInspectorPanel.class);
+	private Logger log = LoggerFactory.getLogger(SQLSchemaInspectorPanel.class);
 
 	/** Creates new form SQLSchemaInspectorPanel */
 	public SQLSchemaInspectorPanel(OBDAModel dsController) {
@@ -200,7 +196,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 				try {
 					int row = tblRelations.getSelectedRow();
 					if (row != -1) {
-						String s = tblRelations.getModel().getValueAt(row, 0).toString();
 						CountDownLatch latch = new CountDownLatch(1);
 						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
 						CountAllTuplesAction action = new CountAllTuplesAction(latch);
@@ -280,7 +275,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 					if (set != null) {
 						RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
 						tblRelations.setModel(model);
-						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount() * TABLE_ROW_HEIGHT));
+						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WIDTH, model.getRowCount() * TABLE_ROW_HEIGHT));
 					}
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(SQLSchemaInspectorPanel.this, "Error while updating table.\n Please refer to the log file for more information.");
@@ -310,42 +305,30 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			if (event.getValueIsAdjusting()) {
 				return;
 			}
-			int row = tblRelations.getSelectedRow();
-
-			// final DataSource current_datasource =
-			// DatasourcesController.getInstance().getCurrentDataSource();
-			final String relation = (String) tblRelations.getValueAt(row, 0);
-			if (relation.equals(""))
+			
+			final int row = tblRelations.getSelectedRow();
+			final String table = (String)tblRelations.getValueAt(row, 0);
+			if (table.equals("")) {
 				return;
+			}
+			
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
-
-						JDBCConnectionManager factory = JDBCConnectionManager.getJDBCConnectionManager();
-
+						JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
 						TableModel oldmodel = tblAttributes.getModel();
-
 						if ((oldmodel != null) && (oldmodel instanceof ResultSetTableModel)) {
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-
-						// ResultSetTableModel model =
-						// factory.getResultSetTableModel("describe " + relation
-						// + ";");
-						ColumnInspectorTableModel model = factory.getTableDescriptionTableModel(selectedSource, relation);
+						URI sourceUri = selectedSource.getSourceID();
+						DBMetadata metadata = conn.getMetadata(sourceUri);
+						ColumnInspectorTableModel model = new ColumnInspectorTableModel(metadata, table);						
+						
 						tblAttributes.setModel(model);
-						tblAttributes.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WITH, model.getRowCount()
-								* TABLE_ROW_HEIGHT));
-					} catch (SQLException ex) {
-						ex.printStackTrace(System.err);
-						System.err.println(ex.getErrorCode());
-						JOptionPane.showMessageDialog(null, new String[] { ex.getClass().getName() + ": ", ex.getMessage() });
-					} catch (ClassNotFoundException ex) {
-						ex.printStackTrace(System.err);
-						JOptionPane.showMessageDialog(null, new String[] { "JDBC Driver Missing. Make sure the JDBC jar",
-								"is accesible in the classpath." });
-
+						
+						Dimension dimension = new Dimension(model.getColumnCount()*TABLE_COLUMN_WIDTH, model.getRowCount()*TABLE_ROW_HEIGHT);
+						tblAttributes.setPreferredSize(dimension);
 					} catch (Exception e) {
 						e.printStackTrace(System.err);
 					}

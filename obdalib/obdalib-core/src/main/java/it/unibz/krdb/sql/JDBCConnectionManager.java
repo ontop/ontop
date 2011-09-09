@@ -1,17 +1,17 @@
 package it.unibz.krdb.sql;
 
 import it.unibz.krdb.obda.gui.swing.exception.NoDatasourceSelectedException;
-import it.unibz.krdb.obda.gui.swing.treemodel.ColumnInspectorTableModel;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
@@ -31,11 +31,10 @@ public class JDBCConnectionManager {
 
 	private HashMap<String, Object>			properties				= null;
 	private HashMap<URI, Connection>		connectionPool			= null;
-
+	private HashMap<URI, DBMetadata>	    metadataCache			= null;
+	
 	private Vector<Statement>				statementList			= null;
 	private Statement						currentStatement		= null;
-
-	private String							currentDriver			= null;
 
 	Logger									log						= LoggerFactory.getLogger(JDBCConnectionManager.class);
 
@@ -46,6 +45,7 @@ public class JDBCConnectionManager {
 		properties.put(JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY);
 		properties.put(JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
 		connectionPool = new HashMap<URI, Connection>();
+		metadataCache = new HashMap<URI, DBMetadata>();
 		statementList = new Vector<Statement>();
 	}
 
@@ -57,7 +57,6 @@ public class JDBCConnectionManager {
 			throw ex;
 		}
 		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-		currentDriver = driver;
 		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
 		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
@@ -65,27 +64,16 @@ public class JDBCConnectionManager {
 
 		Connection con = connectionPool.get(connID);
 		if (con == null) {
-
 			try {
 				Class d = Class.forName(driver);
 			} catch (Exception e) {
-				log.warn("Driver class not found our it has already been loaded");
+				log.warn("Driver class not found or it has already been loaded!");
 			}
 			con = DriverManager.getConnection(url, username, password);
 			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
 			con.setAutoCommit(b.booleanValue());
 			connectionPool.put(connID, con);
-		} else {
-			con.close();
-			try {
-				Class d = Class.forName(driver);
-			} catch (Exception e) {
-				log.warn("Driver class not found our it has already been loaded");
-			}
-			con = DriverManager.getConnection(url, username, password);
-			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
-			con.setAutoCommit(b.booleanValue());
-			connectionPool.put(connID, con);
+			collectMetadata(ds);
 		}
 	}
 
@@ -284,39 +272,57 @@ public class JDBCConnectionManager {
 			properties.put(JDBC_RESULTSETCONCUR, concur);
 		}
 	}
-
-	public ColumnInspectorTableModel getTableDescriptionTableModel(OBDADataSource source, String tablename) throws SQLException,
-			NoDatasourceSelectedException, ClassNotFoundException {
-
+	
+	public void collectMetadata(OBDADataSource source) throws SQLException, ClassNotFoundException {
+		
 		if (source == null) {
-			throw new SQLException("No data source selected.");
+			throw new SQLException("No data source found!");
 		}
 
-		Connection connection = connectionPool.get(source.getSourceID());
-		if (connection == null) {
+		URI sourceUri = source.getSourceID();
+		Connection conn = connectionPool.get(sourceUri);
+		if (conn == null) {
 			createConnection(source);
+			conn = connectionPool.get(sourceUri);
 		}
-		connection = connectionPool.get(source.getSourceID());
-
-		String driverClassName = source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
-		if (currentStatement != null) {
-			currentStatement.close();
+		
+		DatabaseMetaData md = conn.getMetaData();
+		ResultSet rsTables = md.getTables("metadata", null, null, null);
+		
+		DBMetadata metadata = new DBMetadata(sourceUri.toString()); // This should be the database name. The OBDADataSource must implement the database name setting.
+		
+		while(rsTables.next()) {
+			String tblName = rsTables.getString("TABLE_NAME");
+			String tblSchema = rsTables.getString("TABLE_SCHEM");
+			ResultSet rsColumns = md.getColumns("metadata", tblSchema, tblName, null);
+			ArrayList<String> pk = getPrimaryKey(md, tblSchema, tblName);
+            while(rsColumns.next()) {
+                String colName = rsColumns.getString("COLUMN_NAME");
+                String colType = rsColumns.getString("TYPE_NAME");
+                boolean bPrimaryKey = pk.contains(colName);
+                int canNull = rsColumns.getInt("NULLABLE");
+                
+                // Add this information to the DBMetadata
+                metadata.add(tblSchema, tblName, colName, colType, bPrimaryKey, canNull);
+            }                
+		}		
+		metadataCache.put(sourceUri, metadata);
+	}
+	
+	public DBMetadata getMetadata(URI sourceUri) {
+		return metadataCache.get(sourceUri);
+	}
+	
+	private ArrayList<String> getPrimaryKey(DatabaseMetaData md, String schema, String table) throws SQLException {
+		ArrayList<String> pk = new ArrayList<String>();
+		ResultSet rsPrimaryKeys = md.getPrimaryKeys("metadata", schema, table);
+		while(rsPrimaryKeys.next()) {
+			String colName = rsPrimaryKeys.getString("COLUMN_NAME");
+			String pkName = rsPrimaryKeys.getString("PK_NAME");
+			if (pkName != null) {
+				pk.add(colName);
+			}
 		}
-		connection.setAutoCommit(true);
-		currentStatement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		String query = "";
-		if (driverClassName.equals("oracle.jdbc.driver.OracleDriver")) {
-			query = "select * from " + tablename + " where rownum =0";
-		} else if (driverClassName.equals("com.ibm.db2.jcc.DB2Driver")) {
-			query = "select * from " + tablename + " fetch first 1 rows only ";
-		} else if (driverClassName.equals("org.postgresql.Driver")) {
-			query = "select * from \"" + tablename + "\" LIMIT 1";
-		} else {
-			query = "select * from " + tablename + " LIMIT 1";
-		}
-		ResultSet r = currentStatement.executeQuery(query);
-		ResultSetMetaData rmeta = r.getMetaData();
-		return new ColumnInspectorTableModel(rmeta);
+		return pk;
 	}
 }

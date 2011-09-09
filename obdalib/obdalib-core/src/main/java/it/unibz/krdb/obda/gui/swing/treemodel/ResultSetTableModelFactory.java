@@ -182,44 +182,6 @@ public class ResultSetTableModelFactory {
 	 * results as a ResultSet, and returns a ResultSetTableModel object that
 	 * holds the results in a form that the Swing JTable component can use.
 	 */
-	public ColumnInspectorTableModel getTableDescriptionTableModel(String tablename) throws SQLException {
-		// If we've called close(), then we can't call this method
-		if (connection == null)
-			throw new IllegalStateException("Connection already closed.");
-
-		// Create a Statement object that will be used to excecute the query.
-		// The arguments specify that the returned ResultSet will be
-		// scrollable, read-only, and insensitive to changes in the db.
-		Statement statement = null;
-		ResultSet r = null;
-
-		statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		String query = "";
-		if(driverClassName.equals("oracle.jdbc.driver.OracleDriver")){
-			query = "select * from " + tablename + " where rownum =0";
-		}else if(driverClassName.equals("com.ibm.db2.jcc.DB2Driver")){
-			query = "select * from " + tablename + " fetch first 1 rows only ";
-		}else{
-			query = "select * from " + tablename + " LIMIT 1";
-		}
-		r = statement.executeQuery(query);
-		ResultSetMetaData rmeta = r.getMetaData();
-		// rmeta.getC
-		// Run the query, creating a ResultSet
-		// DatabaseMetaData meta = connection.getMetaData();
-		// ResultSet r = meta.getColumns(null, null, tablename, null);
-
-		// r = statement.executeQuery(query);
-
-		// Create and return a TableModel for the ResultSet
-		return new ColumnInspectorTableModel(rmeta);
-	}
-
-	/**
-	 * This method takes a SQL query, passes it to the database, obtains the
-	 * results as a ResultSet, and returns a ResultSetTableModel object that
-	 * holds the results in a form that the Swing JTable component can use.
-	 */
 
 	public RelationsResultSetTableModel getRelationsResultSetTableModel() throws SQLException {
 		
