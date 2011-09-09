@@ -2,10 +2,145 @@ grammar SQL99;
 
 @header {
 package it.unibz.krdb.obda.parser;
+
+import java.util.Stack;
+import java.util.Queue;
+import java.util.LinkedList;
+
+import java.lang.Number;
+
+import it.unibz.krdb.sql.DBMetadata;
+
+import it.unibz.krdb.sql.api.IValueExpression;
+import it.unibz.krdb.sql.api.IPredicate;
+
+import it.unibz.krdb.sql.api.QueryTree;
+import it.unibz.krdb.sql.api.Projection;
+import it.unibz.krdb.sql.api.Selection;
+import it.unibz.krdb.sql.api.Aggregation;
+
+import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.CrossJoin;
+import it.unibz.krdb.sql.api.NaturalJoin;
+import it.unibz.krdb.sql.api.Relation;
+import it.unibz.krdb.sql.api.RelationalAlgebra;
+
+import it.unibz.krdb.sql.api.TableExpression;
+import it.unibz.krdb.sql.api.AbstractValueExpression;
+import it.unibz.krdb.sql.api.NumericValueExpression;
+import it.unibz.krdb.sql.api.StringValueExpression;
+import it.unibz.krdb.sql.api.ReferenceValueExpression;
+import it.unibz.krdb.sql.api.CollectionValueExpression;
+import it.unibz.krdb.sql.api.BooleanValueExpression;
+
+import it.unibz.krdb.sql.api.TablePrimary;
+import it.unibz.krdb.sql.api.DerivedColumn;
+import it.unibz.krdb.sql.api.GroupingElement;
+import it.unibz.krdb.sql.api.ComparisonPredicate;
+import it.unibz.krdb.sql.api.AndOperator;
+import it.unibz.krdb.sql.api.OrOperator;
+import it.unibz.krdb.sql.api.ColumnReference;
+
+import it.unibz.krdb.sql.api.Literal;
+import it.unibz.krdb.sql.api.StringLiteral;
+import it.unibz.krdb.sql.api.BooleanLiteral;
+import it.unibz.krdb.sql.api.NumericLiteral;
+import it.unibz.krdb.sql.api.IntegerLiteral;
+import it.unibz.krdb.sql.api.DecimalLiteral;
 }
 
 @lexer::header {
 package it.unibz.krdb.obda.parser;
+}
+
+@members {
+/** Global stack for keeping the projection column list */
+private Stack<Projection> projectionStack = new Stack<Projection>();
+
+/** Global stack for keeping the select all projection */
+private Stack<Boolean> AsteriskStack = new Stack<Boolean>();
+
+/** Global stack for keeping the relations */
+private Stack<RelationalAlgebra> relationStack = new Stack<RelationalAlgebra>();
+
+/** Temporary cache for keeping the numeric value expression */
+private NumericValueExpression numericExp;
+
+/** Temporary cache for keeping the string value expression */
+private StringValueExpression stringExp;
+
+/** Temporary cache for keeping the reference value expression */
+private ReferenceValueExpression referenceExp;
+
+/** Temporary cache for keeping the collection value expression */
+private CollectionValueExpression collectionExp;
+
+/** Temporary cache for keeping the boolean value expression */
+private BooleanValueExpression booleanExp;
+
+/** The root of the query tree */
+private QueryTree queryTree;
+
+/** The metadata of the datasource (i.e., database) */
+private DBMetadata metadata;
+
+/** Asterisk select all flag */
+private boolean bSelectAll = false;
+
+
+/**
+ * Sets the database metadata.
+ */
+public void setMetadata(DBMetadata metadata) {
+  this.metadata = metadata;
+}
+
+public QueryTree getQueryTree() {
+  return queryTree;
+}
+
+public Projection createProjection(ArrayList<TablePrimary> tableList, ArrayList<DerivedColumn> columnList) {
+
+  Projection prj = new Projection();
+  
+  if (bSelectAll) { // If Asterisk is identified
+    if (columnList == null) {
+      columnList = new ArrayList<DerivedColumn>();
+    }
+    for (TablePrimary tableObj : tableList) {
+      String schema = tableObj.getSchema();
+      String table = tableObj.getName();
+      ArrayList<Attribute> attributeList = tableObj.getAttributeList();
+      for (Attribute attr : attributeList) {
+        String column = attr.name;
+        ReferenceValueExpression referenceExp = new ReferenceValueExpression();
+        referenceExp.add(schema, table, column);
+        columnList.add(new DerivedColumn(referenceExp));
+      }
+    }
+  }
+  prj.addAll(columnList);
+  return prj;
+}
+
+public Selection createSelection(BooleanValueExpression booleanExp) {
+  if (booleanExp == null) {
+    return null;
+  }
+  Selection slc = new Selection();
+  Queue<Object> specification = booleanExp.getSpecification();
+  slc.copy(specification);
+  return slc;
+}
+
+public Aggregation createAggregation(ArrayList<GroupingElement> groupingList) {
+  if (groupingList == null) {
+    return null;
+  }
+  Aggregation agg = new Aggregation();
+  agg.addAll(groupingList);
+  return agg;
+}
 }
 
 /*------------------------------------------------------------------
@@ -17,63 +152,127 @@ parse
   ;
   
 query
-  : query_specification (UNION (set_quantifier)? query_specification)*
+  : a=query_specification
+    (UNION (set_quantifier)? b=query_specification)*
   ;
   
 query_specification
-  : select_clause table_expression
+  : SELECT set_quantifier? select_list table_expression {      
+      TableExpression te = $table_expression.value;
+      
+      ArrayList<TablePrimary> tableList = te.getFromClause();
+      ArrayList<DerivedColumn> columnList = $select_list.value;
+      Projection prj = createProjection(tableList, columnList);
+      prj.setType($set_quantifier.value);
+      
+      BooleanValueExpression booleanExp = te.getWhereClause();
+      Selection slc = createSelection(booleanExp);
+      
+      ArrayList<GroupingElement> groupingList = te.getGroupByClause();
+      Aggregation agg = createAggregation(groupingList);
+      
+      // Construct the query tree
+      RelationalAlgebra relation = relationStack.pop();
+      
+      relation.setProjection(prj);
+      if (slc != null) {
+        relation.setSelection(slc);
+      }
+      if (agg != null) {
+        relation.setAggregation(agg);
+      }
+
+      QueryTree parent = new QueryTree(relation);
+      
+      int flag = 1;
+      while (!relationStack.isEmpty()) {
+        relation = relationStack.pop();
+        QueryTree node = new QueryTree(relation);
+        
+        if ((flag \% 2) == 1) {
+          parent.attachRight(node);
+        }
+        else {
+          parent.attachLeft(node);
+          parent = node;
+        }
+        flag++;
+      }
+      queryTree = parent.root();   
+    }
   ;
 
-select_clause
-  : SELECT set_quantifier? (
-      ASTERISK
-      | select_list)
-  ; 
-
-set_quantifier
-  : DISTINCT 
-  | ALL
+set_quantifier returns [Projection.Type value]
+  : DISTINCT { $value = Projection.Type.DISTINCT; }
+  | ALL { $value = Projection.Type.ALL; }
   ;
   
-select_list
-  : select_sublist (COMMA select_sublist)*
+select_list returns [ArrayList<DerivedColumn> value]
+@init {
+  bSelectAll = false;
+  $value = new ArrayList<DerivedColumn>();
+}
+  : ASTERISK { bSelectAll = true; $value = null; }
+  | a=select_sublist { $value.add($a.value); } (COMMA b=select_sublist { $value.add($b.value); })*
   ;
   
-select_sublist
-  : qualified_asterisk
-  | derived_column
+select_sublist returns [DerivedColumn value]
+  : qualified_asterisk { $value = null; }
+  | derived_column { $value = $derived_column.value; }
   ;
   
 qualified_asterisk
   : table_identifier PERIOD ASTERISK
   ;
   
-derived_column
-  : value_expression (AS? alias_name)?
+derived_column returns [DerivedColumn value]
+@init {
+  $value = new DerivedColumn();
+}
+  : value_expression (AS? alias_name)? {
+      $value.setValueExpression($value_expression.value);
+      String alias = $alias_name.value;
+      if (alias != null) {
+        $value.setAlias($alias_name.value);
+      }
+    }
   ;  
  
-value_expression
-  : numeric_value_expression
-  | string_value_expression
-  | reference_value_expression
-  | collection_value_expression
+value_expression returns [AbstractValueExpression value]
+  : numeric_value_expression { $value = $numeric_value_expression.value; }
+  | string_value_expression { $value = $string_value_expression.value; }
+  | reference_value_expression { $value = $reference_value_expression.value; }
+  | collection_value_expression { $value = $collection_value_expression.value; }
   ;
 
-numeric_value_expression
-  : LPAREN numeric_operation RPAREN
+numeric_value_expression returns [NumericValueExpression value]
+@init {
+  numericExp = new NumericValueExpression();
+}
+  : LPAREN numeric_operation RPAREN {
+      $value = numericExp;
+    }
   ;
 
 numeric_operation
-  : term ((PLUS|MINUS) term)*
+  : term 
+    (
+      (t=PLUS|t=MINUS) { numericExp.putSpecification($t.text); } 
+       term
+    )*
   ;
 
 term
-  : factor ((ASTERISK|SOLIDUS) factor)*
+  : a=factor { numericExp.putSpecification($a.value); } 
+    (
+      (t=ASTERISK|t=SOLIDUS) { numericExp.putSpecification($t.text); }
+       b=factor { numericExp.putSpecification($b.value); }
+    )*
   ;
   
-factor
-  : column_reference
-  | numeric_literal
+factor returns [Object value]
+  : column_reference { $value = $column_reference.value; }
+  | numeric_literal { $value = $numeric_literal.value; }
   ;
 
 sign
@@ -81,127 +280,169 @@ sign
   | MINUS
   ;
 
-string_value_expression
-  : LPAREN concatenation RPAREN
+string_value_expression returns [StringValueExpression value]
+@init {
+  stringExp = new StringValueExpression();
+}
+  : LPAREN concatenation RPAREN {
+      $value = stringExp;
+    }
   ;
   
 concatenation
-  : concatenation_value (concatenation_operator concatenation_value)+
+  : a=character_factor { stringExp.putSpecification($a.value); } (
+      CONCATENATION { stringExp.putSpecification(StringValueExpression.CONCAT_OP); } 
+      b=character_factor { stringExp.putSpecification($b.value); })+
   ;
 
-concatenation_value
-  : column_reference
-  | general_literal
+character_factor returns [Object value]
+  : column_reference { $value = $column_reference.value; }
+  | general_literal { $value = $general_literal.value; }
   ;
 
-reference_value_expression
-  : column_reference
+reference_value_expression returns [ReferenceValueExpression value]
+@init {
+  referenceExp = new ReferenceValueExpression();
+}
+  : column_reference { 
+      referenceExp.add($column_reference.value);
+      $value = referenceExp;
+    }
   ;
 
-column_reference
-  : (table_identifier PERIOD)? column_name
+column_reference returns [ColumnReference value]
+  : (t=table_identifier PERIOD)? column_name {
+      String table = "";
+      if (t != null) {
+        table = $t.value;
+      }
+      $value = new ColumnReference(table, $column_name.value);
+    }
   ;  
   
-collection_value_expression
-  : set_function_specification
+collection_value_expression returns [CollectionValueExpression value]
+@init {
+  collectionExp = new CollectionValueExpression();
+}
+  : set_function_specification { 
+      $value = collectionExp;
+    }
   ;
 
 set_function_specification
-  : COUNT LPAREN ASTERISK RPAREN
+  : COUNT LPAREN ASTERISK RPAREN {
+      collectionExp.putSpecification($COUNT.text);
+      collectionExp.putSpecification($ASTERISK.text);
+    }
   | general_set_function
   ;
-  
+ 
+// Limitation: only accept one column reference as the parameter!
 general_set_function
-  : set_function_op LPAREN (set_quantifier)? value_expression RPAREN
+  : set_function_op LPAREN column_reference RPAREN {
+      collectionExp.putSpecification($set_function_op.value);
+      collectionExp.add($column_reference.value);
+    }
   ;
   
-set_function_op
-  : AVG
-  | MAX
-  | MIN
-  | SUM
-  | EVERY
-  | ANY
-  | SOME
-  | COUNT
+set_function_op returns [String value]
+  : (t=AVG | t=MAX | t=MIN | t=SUM | t=EVERY | t=ANY | t=SOME | t=COUNT) {
+      $value = $t.text;
+    }
   ;  
 
-row_value_expression
-  : literal
-  | value_expression
+row_value_expression returns [IValueExpression value]
+  : literal { $value = $literal.value; }
+  | value_expression { $value = $value_expression.value; }
   ;
 
-literal
-  : numeric_literal
-  | general_literal
+literal returns [Literal value]
+  : numeric_literal { $value = $numeric_literal.value; }
+  | general_literal { $value = $general_literal.value; }
   ;
 
-table_expression
-  : from_clause (where_clause)? (group_by_clause)?
+table_expression returns [TableExpression value]
+  : from_clause {
+      $value = new TableExpression($from_clause.value);
+    }
+    (where_clause { $value.setWhereClause($where_clause.value); })? 
+    (group_by_clause { $value.setGroupByClause($group_by_clause.value); })?
   ;
   
-from_clause
-  : FROM table_reference_list
+from_clause returns [ArrayList<TablePrimary> value]
+  : FROM table_reference_list {
+      $value = $table_reference_list.value;
+    }
   ;  
   
-table_reference_list
-  : table_reference (COMMA table_reference)*
+table_reference_list returns [ArrayList<TablePrimary> value]
+@init {
+  $value = new ArrayList<TablePrimary>();
+}
+  : a=table_reference { $value.add($a.value); } 
+    (
+      COMMA b=table_reference {
+        CrossJoin crJoin = new CrossJoin();
+        relationStack.push(crJoin);
+        
+        $value.add($b.value);
+      })*    
   ;
   
-table_reference
-  : table_primary (joined_table)?
+table_reference returns [TablePrimary value]
+  : table_primary { $value = $table_primary.value; }
+    (joined_table { $value = $table_primary.value; })? 
   ;
 
-where_clause
-  : WHERE search_condition
+where_clause returns [BooleanValueExpression value]
+  : WHERE search_condition {
+      $value = $search_condition.value;
+    }
   ;
 
-search_condition
-  : boolean_value_expression
+search_condition returns [BooleanValueExpression value]
+  : boolean_value_expression {
+      $value = $boolean_value_expression.value;
+    }
   ;
   
-boolean_value_expression
-  : boolean_term (OR boolean_term)*
+boolean_value_expression returns [BooleanValueExpression value]
+@init {
+  booleanExp = new BooleanValueExpression();
+}
+  : boolean_term (OR { booleanExp.putSpecification(new OrOperator()); } boolean_term)* {
+      $value = booleanExp;
+    }
   ;
   
 boolean_term
-  : boolean_factor (AND boolean_factor)*
+  : boolean_factor (AND { booleanExp.putSpecification(new AndOperator()); } boolean_factor)*
   ;
-  
+
+// Limitation: No support for parenthesis!
 boolean_factor
-  : (NOT)? boolean_test
-  ;
-
-boolean_test
-  : boolean_primary (IS (NOT)? truth_value)?
-  ;
-
-boolean_primary
-  : predicate
-  | parenthesized_boolean_value_expression
-  ;
-
-parenthesized_boolean_value_expression
-  : LPAREN boolean_value_expression RPAREN
+  : predicate { booleanExp.putSpecification($predicate.value); }
   ;
  
-predicate
-  : comparison_predicate
+predicate returns [IPredicate value]
+  : comparison_predicate { $value = $comparison_predicate.value; }
   | null_predicate
   | in_predicate
   ;
   
-comparison_predicate
-  : row_value_expression comp_op (row_value_expression)
+comparison_predicate returns [ComparisonPredicate value]
+  : a=row_value_expression comp_op b=row_value_expression {
+      $value = new ComparisonPredicate($a.value, $b.value, $comp_op.value);
+    }
   ;
 
-comp_op
-  : equals_operator
-  | not_equals_operator
-  | less_than_operator
-  | greater_than_operator
-  | less_than_or_equals_operator
-  | greater_than_or_equals_operator
+comp_op returns [ComparisonPredicate.Operator value]
+  : EQUALS { $value = ComparisonPredicate.Operator.EQ; }
+  | LESS GREATER { $value = ComparisonPredicate.Operator.NE; }
+  | LESS { $value = ComparisonPredicate.Operator.LT; }
+  | GREATER { $value = ComparisonPredicate.Operator.GT; }
+  | LESS EQUALS { $value = ComparisonPredicate.Operator.LE; }
+  | GREATER EQUALS { $value = ComparisonPredicate.Operator.GE; }
   ;
 
 null_predicate
@@ -229,49 +470,78 @@ in_value_list
   : row_value_expression (COMMA row_value_expression)*
   ;
 
-group_by_clause
-  : GROUP BY grouping_element_list
+group_by_clause returns [ArrayList<GroupingElement> value]
+  : GROUP BY grouping_element_list {
+      $value = $grouping_element_list.value;
+    }
   ;
 
-grouping_element_list
-  : grouping_element (COMMA grouping_element)*
+grouping_element_list returns [ArrayList<GroupingElement> value]
+@init {
+  $value = new ArrayList<GroupingElement>();
+}
+  : a=grouping_element { $value.add($a.value); } 
+    (COMMA b=grouping_element { $value.add($b.value); })*
   ;
   
-grouping_element
-  : grouping_column_reference
-  | LPAREN grouping_column_reference_list RPAREN 
+grouping_element returns [GroupingElement value]
+@init {
+  $value = new GroupingElement();
+}
+  : grouping_column_reference { $value.add($grouping_column_reference.value); }
+  | LPAREN grouping_column_reference_list RPAREN { $value.update($grouping_column_reference_list.value); }
   ;
   
-grouping_column_reference
-  : column_reference
+grouping_column_reference returns [ColumnReference value]
+  : column_reference { $value = $column_reference.value; }
   ;  
 
-grouping_column_reference_list
-  : column_reference (COMMA column_reference)*
+grouping_column_reference_list returns [ArrayList<ColumnReference> value]
+@init {
+  $value = new ArrayList<ColumnReference>();
+}
+  : a=column_reference { $value.add($a.value); }
+    (COMMA b=column_reference { $value.add($b.value); })*
   ;  
 
-joined_table
-  : ((join_type)? JOIN table_reference join_specification)+
+// The types of join are based on a particular coding system.
+joined_table returns [TablePrimary value]
+@init {
+  int joinType = 0;
+}
+  : ((join_type)? JOIN table_reference join_specification {
+      joinType += $join_type.value;
+      NaturalJoin ntJoin = new NaturalJoin(joinType);
+      ntJoin.copy($join_specification.value.getSpecification());
+      relationStack.push(ntJoin);  
+    })+
   ;
 
-join_type
-  : INNER
-  | outer_join_type (OUTER)?
+join_type returns [int value]
+@init {
+  int outer = 0;
+}
+  : INNER { $value = 1; }
+  | outer_join_type (OUTER { outer = 3; })? {
+      $value = $outer_join_type.value + outer;
+    }
   ;
   
-outer_join_type
-  : LEFT 
-  | RIGHT 
-  | FULL
+outer_join_type returns [int value]
+  : LEFT { $value = 2; }
+  | RIGHT { $value = 3; }
+  | FULL { $value = 4; }
   ;
 
-join_specification
-  : join_condition
+join_specification returns [BooleanValueExpression value]
+  : join_condition { $value = $join_condition.value; }
   | named_columns_join
   ;
 
-join_condition
-  : ON search_condition
+join_condition returns [BooleanValueExpression value]
+  : ON search_condition {
+      $value = $search_condition.value;
+    }
   ;
 
 named_columns_join
@@ -282,94 +552,106 @@ join_column_list
   : column_name (COMMA column_name)*
   ;
 
-table_primary
-  : table_name (AS? alias_name)?
-  | derived_table AS? alias_name
+// Limitation: nested table is not supported yet.
+table_primary returns [TablePrimary value]
+  : table_name
+    (AS? alias_name)? {
+      $value = $table_name.value; 
+      $value.setAlias($alias_name.value);
+      Relation table = new Relation($value);      
+      relationStack.push(table);
+    }
+  | derived_table
+    AS? alias_name {
+      $value = null;
+    }
   ; 
  
-table_name
-  : (schema_name PERIOD)? table_identifier
+table_name returns [TablePrimary value]
+  : (schema_name PERIOD)? table_identifier {
+      String schema = $schema_name.value;
+      if (metadata != null) {
+	      if (schema != null && schema != "") {
+	        $value = metadata.getTable(schema, $table_identifier.value);
+	      }
+	      else {
+	        $value = metadata.getTable($table_identifier.value);
+	      }
+      }
+    }
   ;  
 
-alias_name
-  : identifier
+alias_name returns [String value]
+  : identifier  { $value = $identifier.value; }
   ;
 
 derived_table
   : table_subquery
   ;
     
-table_identifier
-  : identifier
+table_identifier returns [String value]
+  : identifier { $value = $identifier.value; }
   ;
   
-schema_name
-  : identifier
+schema_name returns [String value]
+  : identifier { $value = $identifier.value; }
   ;
     
-column_name
-  : identifier
+column_name returns [String value]
+  : identifier { $value = $identifier.value; }
   ;
   
-identifier
-  : regular_identifier 
-  | delimited_identifier
+identifier returns [String value]
+  : (t=regular_identifier | t=delimited_identifier) { $value = $t.value; }
   ;
 
-regular_identifier
-  : VARNAME
+regular_identifier returns [String value]
+  : VARNAME { $value = $VARNAME.text; }
   ;
 
-delimited_identifier
-  : STRING_WITH_QUOTE_DOUBLE
+delimited_identifier returns [String value]
+  : STRING_WITH_QUOTE_DOUBLE { 
+      $value = $STRING_WITH_QUOTE_DOUBLE.text;
+      $value = $value.substring(1, $value.length()-1);
+    }
   ;
 
-general_literal
-  : TRUE
-  | FALSE
-  | STRING_WITH_QUOTE
+general_literal returns [Literal value]
+  : string_literal { $value = $string_literal.value; }
+  | boolean_literal { $value = $boolean_literal.value; }
   ;
 
-numeric_literal
-  : INTEGER
-  | DECIMAL
-  | INTEGER_POSITIVE
-  | DECIMAL_POSITIVE
-  | INTEGER_NEGATIVE
-  | DECIMAL_NEGATIVE
+string_literal returns [StringLiteral value]
+  : STRING_WITH_QUOTE { $value = new StringLiteral($STRING_WITH_QUOTE.text); }
   ;
 
-truth_value
-  : TRUE
-  | FALSE
+boolean_literal returns [BooleanLiteral value]
+  : (t=TRUE | t=FALSE) { $value = new BooleanLiteral(Boolean.getBoolean($t.text)); }
   ;
 
-concatenation_operator
-  : CONCATENATION
+numeric_literal returns [NumericLiteral value]
+  : numeric_literal_unsigned { $value = $numeric_literal_unsigned.value; }
+  | numeric_literal_positive { $value = $numeric_literal_positive.value; }
+  | numeric_literal_negative { $value = $numeric_literal_negative.value; }
   ;
 
-equals_operator
-  : EQUALS
+numeric_literal_unsigned returns [NumericLiteral value]
+  : INTEGER { $value = new IntegerLiteral($INTEGER.text); }
+  | DECIMAL { $value = new DecimalLiteral($DECIMAL.text); }
   ;
 
-not_equals_operator
-  : LESS GREATER
+numeric_literal_positive returns [NumericLiteral value]
+  : INTEGER_POSITIVE { $value = new IntegerLiteral($INTEGER_POSITIVE.text); }
+  | DECIMAL_POSITIVE { $value = new DecimalLiteral($DECIMAL_POSITIVE.text); }
   ;
   
-less_than_operator
-  : LESS
+numeric_literal_negative returns [NumericLiteral value]
+  : INTEGER_NEGATIVE { $value = new IntegerLiteral($INTEGER_NEGATIVE.text); }
+  | DECIMAL_NEGATIVE { $value = new DecimalLiteral($DECIMAL_NEGATIVE.text); }
   ;
   
-greater_than_operator
-  : GREATER
-  ;
- 
-less_than_or_equals_operator
-  : LESS EQUALS
-  ;
- 
-greater_than_or_equals_operator
-  : GREATER EQUALS
+truth_value returns [boolean value]
+  : (t=TRUE | t=FALSE) { $value = Boolean.getBoolean($t.text); }
   ;
 
 /*------------------------------------------------------------------
@@ -378,7 +660,7 @@ greater_than_or_equals_operator
 
 SELECT: ('S'|'s')('E'|'e')('L'|'l')('E'|'e')('C'|'c')('T'|'t');
 
-DISTINCT:	('D'|'d')('I'|'i')('S'|'s')('T'|'t')('I'|'i')('N'|'n')('C'|'c')('T'|'t');
+DISTINCT: ('D'|'d')('I'|'i')('S'|'s')('T'|'t')('I'|'i')('N'|'n')('C'|'c')('T'|'t');
 
 ALL: ('A'|'a')('L'|'l')('L'|'l');
 
@@ -398,13 +680,13 @@ SOME: ('S'|'s')('O'|'o')('M'|'m')('E'|'e');
 
 COUNT: ('C'|'c')('O'|'o')('U'|'u')('N'|'n')('T'|'t');
 
-FROM:	('F'|'f')('R'|'r')('O'|'o')('M'|'m');
+FROM: ('F'|'f')('R'|'r')('O'|'o')('M'|'m');
 
 WHERE: ('W'|'w')('H'|'h')('E'|'e')('R'|'r')('E'|'e');
 
 AND: ('A'|'a')('N'|'n')('D'|'d');
 
-OR:	('O'|'o')('R'|'r');
+OR: ('O'|'o')('R'|'r');
 
 NOT: ('N'|'n')('O'|'o')('T'|'t');
 
@@ -412,9 +694,9 @@ ORDER: ('O'|'o')('R'|'r')('D'|'d')('E'|'e')('R'|'r');
 
 GROUP: ('G'|'g')('R'|'r')('O'|'o')('U'|'u')('P'|'p');
 
-BY:	('B'|'b')('Y'|'y');
+BY: ('B'|'b')('Y'|'y');
 
-AS:	('A'|'a')('S'|'s');
+AS: ('A'|'a')('S'|'s');
 
 JOIN: ('J'|'j')('O'|'o')('I'|'i')('N'|'n');
 
@@ -432,7 +714,7 @@ UNION: ('U'|'u')('N'|'n')('I'|'i')('O'|'o')('N'|'n');
 
 USING: ('U'|'u')('S'|'s')('I'|'i')('N'|'n')('G'|'g');
 
-ON:	('O'|'o')('N'|'n');
+ON: ('O'|'o')('N'|'n');
 
 IN: ('I'|'i')('N'|'n');
 
@@ -515,7 +797,7 @@ INTEGER_POSITIVE
 
 INTEGER_NEGATIVE
   : MINUS INTEGER
-  ;	  
+  ;   
 
 DECIMAL_POSITIVE
   : PLUS DECIMAL
