@@ -148,8 +148,14 @@ private Selection createSelection(BooleanValueExpression booleanExp) {
     return null;
   }
   Selection slc = new Selection();
-  Queue<Object> specification = booleanExp.getSpecification();
-  slc.copy(specification);
+  
+  try {
+	  Queue<Object> specification = booleanExp.getSpecification();
+	  slc.copy(specification);
+	}
+  catch(Exception e) {
+    // Does nothing.
+  }
   return slc;
 }
 
@@ -216,8 +222,8 @@ int quantifier = 0;
       queryTree = $a.value; 
       $value = queryTree;
     }
-    (UNION set_quantifier? b=query_specification {          
-      quantifier += $set_quantifier.value;
+    (UNION set_quantifier? b=query_specification {
+      quantifier = $set_quantifier.value;
       SetUnion union = new SetUnion(quantifier);
           
       QueryTree parent = new QueryTree(union);      
@@ -242,7 +248,7 @@ int quantifier = 0;
       ArrayList<DerivedColumn> columnList = $select_list.value;
       Projection prj = createProjection(tableList, columnList);
       
-      quantifier += $set_quantifier.value;
+      quantifier = $set_quantifier.value;
       prj.setType(quantifier);
       
       // Construct the selection
@@ -579,12 +585,15 @@ joined_table returns [TablePrimary value]
   int joinType = 0;
 }
   : ((join_type)? JOIN table_reference join_specification {
-      joinType += $join_type.value;
+      joinType = $join_type.value;
       NaturalJoin ntJoin = new NaturalJoin(joinType);
       ntJoin.copy($join_specification.value.getSpecification());
       relationStack.push(ntJoin);  
     })+
   ;
+  catch [Exception e] {
+     // Does nothing.
+  }  
 
 /**
  * The types of join are based on a particular ordering system.

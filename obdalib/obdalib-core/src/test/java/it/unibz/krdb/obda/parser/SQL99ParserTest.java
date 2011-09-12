@@ -405,7 +405,7 @@ public class SQL99ParserTest extends TestCase
 
   //@Test
   public void test_8_2() {
-    final boolean result = parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION ALL SELECT payee FROM tax");
+    final boolean result = parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax");
     print("test_8_2");
     assertTrue(result);
   }
