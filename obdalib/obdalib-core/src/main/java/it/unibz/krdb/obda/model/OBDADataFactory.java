@@ -40,7 +40,23 @@ public interface OBDADataFactory {
 	 */
 	public Predicate getPredicate(URI name, int arity);
 	
+	public Predicate getPredicate(String uri, int arity);
+	
 	public Predicate getPredicate(URI name, int arity, COL_TYPE[] types);
+	
+	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types);
+	
+	public Predicate getObjectPropertyPredicate(URI name);
+	
+	public Predicate getObjectPropertyPredicate(String name);
+	
+	public Predicate getDataPropertyPredicate(URI name);
+	
+	public Predicate getDataPropertyPredicate(String name);
+	
+	public Predicate getClassPredicate(String  name);
+	
+	public Predicate getClassPredicate(URI name);
 	
 	/*
 	 * Boolean atoms

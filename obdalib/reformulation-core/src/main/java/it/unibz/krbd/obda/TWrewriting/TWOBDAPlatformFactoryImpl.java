@@ -8,7 +8,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestTechniqueWrapper;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
@@ -20,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 
@@ -74,8 +74,8 @@ public class TWOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory, OWLRea
 			for (OWLOntology onto : ontologies) {
 				Ontology aux = translator.translate(onto);
 				ontology.addAssertions(aux.getAssertions());
-				ontology.addConcepts(new ArrayList<ClassDescription>(aux.getConcepts()));
-				ontology.addRoles(new ArrayList<Property>(aux.getRoles()));
+//				ontology.addConcepts(new ArrayList<ClassDescription>(aux.getConcepts()));
+//				ontology.addRoles(new ArrayList<Property>(aux.getRoles()));
 			}
 
 			DAG isa = DAGConstructor.getISADAG(ontology);

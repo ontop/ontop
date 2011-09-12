@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.LUBM.TBoxLoader;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -15,7 +16,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
@@ -167,6 +168,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private Ontology				aboxDependencies;
 
+	private Ontology	ontology;
+
 	final static int				CLASS_TYPE						= 1;
 	final static int				ROLE_TYPE						= 2;
 
@@ -202,6 +205,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public void setTBox(Ontology ontology) {
+		
+		this.ontology = ontology;
 
 		log.debug("Ontology: {}", ontology.toString());
 		
@@ -331,7 +336,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri = attributeABoxAssertion.getObject().getURI().toString();
 				String lit = attributeABoxAssertion.getValue().getValue();
 
-				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
+				Predicate propPred = predicateFactory.getDataPropertyPredicate(URI.create(prop));
 				Property propDesc = descFactory.createProperty(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
@@ -345,7 +350,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
-				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
+				Predicate propPred = predicateFactory.getObjectPropertyPredicate(URI.create(prop));
 				Property propDesc = descFactory.createProperty(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
@@ -493,7 +498,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri = attributeABoxAssertion.getObject().getURI().toString();
 				String lit = attributeABoxAssertion.getValue().getValue();
 
-				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
+				Predicate propPred = predicateFactory.getDataPropertyPredicate(URI.create(prop));
 				Property propDesc = descFactory.createProperty(propPred);
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
@@ -510,7 +515,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
 				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
 
-				Predicate propPred = predicateFactory.getPredicate(URI.create(prop), 2);
+				Predicate propPred = predicateFactory.getObjectPropertyPredicate(URI.create(prop));
 				Property propDesc = descFactory.createProperty(propPred);
 
 				if (dag.equi_mappings.containsKey(propDesc)) {
@@ -583,6 +588,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Map<Description, DAGNode> res_classes = new HashMap<Description, DAGNode>();
 		Map<Description, DAGNode> res_roles = new HashMap<Description, DAGNode>();
+		Map<Description, DAGNode> res_allnodes = new HashMap<Description, DAGNode>();
 
 		ResultSet res_rows = conn.createStatement().executeQuery(select_query);
 		while (res_rows.next()) {
@@ -614,7 +620,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					p = predicateFactory.getPredicate(URI.create(uri), 2);
 					description = descFactory.getPropertySomeRestriction(p, inverse);
 				} else {
-					p = predicateFactory.getPredicate(URI.create(uri), 1);
+					p = predicateFactory.getClassPredicate(URI.create(uri));
 					description = descFactory.createClass(p);
 				}
 
@@ -625,6 +631,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					node.setIndex(idx);
 					node.setRange(new SemanticIndexRange(start_idx, end_idx));
 					res_classes.put(description, node);
+					res_allnodes.put(description, node);
 				}
 
 			} else if (type == ROLE_TYPE) {
@@ -637,7 +644,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					uri = uri.substring(0, uri.length() - 2);
 					inverse = true;
 				}
-				p = predicateFactory.getPredicate(URI.create(uri), 2);
+				p = predicateFactory.getObjectPropertyPredicate(URI.create(uri));
 				description = descFactory.createProperty(p, inverse);
 
 				if (res_roles.containsKey(description)) {
@@ -647,11 +654,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					node.setIndex(idx);
 					node.setRange(new SemanticIndexRange(start_idx, end_idx));
 					res_roles.put(description, node);
+					res_allnodes.put(description, node);
 				}
 			}
 		}
 
-		dag = new DAG(res_classes, res_roles, new HashMap<Description, Description>());
+		dag = new DAG(res_classes, res_roles, new HashMap<Description, Description>(), res_allnodes);
 		pureIsa = DAGConstructor.filterPureISA(dag);
 	}
 
@@ -675,7 +683,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<DAGNode> roleNodes = new HashSet<DAGNode>();
 		Map<DAGNode, List<DAGNode>> roleInverseMaps = new HashMap<DAGNode, List<DAGNode>>();
 
-		for (DAGNode node : dag.getRoles()) {
+		Set<Predicate> roles = ontology.getRoles();
+		for (Predicate rolepred : roles) {
+			
+			DAGNode node = dag.getRoleNode(descFactory.createProperty(rolepred));
 			// We only map named roles
 			if (!(node.getDescription() instanceof Property) || ((Property) node.getDescription()).isInverse()) {
 				continue;
@@ -714,7 +725,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				Property role = ((Property) inverseNode.getDescription());
 				for (DAGNode possibleRedundantNode : roleInverseChildren) {
 					Property possibleRedundantRole = ((Property) possibleRedundantNode.getDescription());
-					if (dag.getRoleNode(role).descendans.contains(possibleRedundantRole))
+					if (dag.getRoleNode(role).getDescendants().contains(possibleRedundantRole))
 						inverseRedundants.add(possibleRedundantNode);
 				}
 			}
@@ -738,7 +749,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Map<DAGNode, Set<DAGNode>> classExistsMaps = new HashMap<DAGNode, Set<DAGNode>>();
 		for (DAGNode node : dag.getClasses()) {
 			// we only map named classes
-			if (!(node.getDescription() instanceof Class)) {
+			if (!(node.getDescription() instanceof OClass)) {
 				continue;
 			}
 			classNodesMaps.add(node);
@@ -750,7 +761,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 
 			/* Collecting Exists R children */
-			for (DAGNode child : node.descendans) {
+			for (DAGNode child : node.getDescendants()) {
 				if (child.getDescription() instanceof PropertySomeRestrictionImpl) {
 					existChildren.add(child);
 				}
@@ -774,7 +785,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					Property role2 = descFactory.createProperty(existsDesc2.getPredicate(), existsDesc2.isInverse());
 					DAGNode roleNode2 = dag.getRoleNode(role2);
 
-					if (roleNode.descendans.contains(roleNode2))
+					if (roleNode.getDescendants().contains(roleNode2))
 						/*
 						 * The DAG implies that R ISA S, so we remove ER
 						 */
@@ -883,30 +894,30 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * Generating mappings for the equivalent nodes
 			 */
 
-			for (DAGNode equivalent : roleNode.getEquivalents()) {
-
-				Property equiproperty = (Property) equivalent.getDescription();
-
-				if (equiproperty.isInverse()) {
-					Property directEquiProperty = descFactory.createProperty(equiproperty.getPredicate(), false);
-					if ((pureIsa.getRoleNode(directEquiProperty) != null) && (pureIsa.getRoleNode(directEquiProperty).getIndex() != -1))
-						continue;
-				}
-
-				Atom headequi = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 2),
-						predicateFactory.getVariable("X"), predicateFactory.getVariable("Y"));
-				Atom bodyequi = predicateFactory.getAtom(equiproperty.getPredicate(), predicateFactory.getVariable("X"),
-						predicateFactory.getVariable("Y"));
-
-				CQIE targetQueryEqui = predicateFactory.getCQIE(headequi, bodyequi);
-
-				List<OBDAMappingAxiom> equimappings = new LinkedList<OBDAMappingAxiom>();
-				mappings.put(equiproperty.getPredicate(), equimappings);
-
-				for (OBDAMappingAxiom mapping : currentMappings) {
-					equimappings.add(predicateFactory.getRDBMSMappingAxiom(mapping.getSourceQuery().toString(), targetQueryEqui));
-				}
-			}
+//			for (DAGNode equivalent : roleNode.getEquivalents()) {
+//
+//				Property equiproperty = (Property) equivalent.getDescription();
+//
+//				if (equiproperty.isInverse()) {
+//					Property directEquiProperty = descFactory.createProperty(equiproperty.getPredicate(), false);
+//					if ((pureIsa.getRoleNode(directEquiProperty) != null) && (pureIsa.getRoleNode(directEquiProperty).getIndex() != -1))
+//						continue;
+//				}
+//
+//				Atom headequi = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 2),
+//						predicateFactory.getVariable("X"), predicateFactory.getVariable("Y"));
+//				Atom bodyequi = predicateFactory.getAtom(equiproperty.getPredicate(), predicateFactory.getVariable("X"),
+//						predicateFactory.getVariable("Y"));
+//
+//				CQIE targetQueryEqui = predicateFactory.getCQIE(headequi, bodyequi);
+//
+//				List<OBDAMappingAxiom> equimappings = new LinkedList<OBDAMappingAxiom>();
+//				mappings.put(equiproperty.getPredicate(), equimappings);
+//
+//				for (OBDAMappingAxiom mapping : currentMappings) {
+//					equimappings.add(predicateFactory.getRDBMSMappingAxiom(mapping.getSourceQuery().toString(), targetQueryEqui));
+//				}
+//			}
 		}
 
 		/*
@@ -915,7 +926,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		for (DAGNode classNode : classNodesMaps) {
 
-			Predicate classuri = ((Class) classNode.getDescription()).getPredicate();
+			Predicate classuri = ((OClass) classNode.getDescription()).getPredicate();
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 
@@ -944,7 +955,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			/*
 			 * Getting the indexed node (from the pureIsa dag)
 			 */
-			DAGNode indexedNode = pureIsa.getClassNode((Class) classNode.getDescription());
+			DAGNode indexedNode = pureIsa.getClassNode((OClass) classNode.getDescription());
 			List<Interval> intervals = indexedNode.getRange().getIntervals();
 			appendIntervalString(intervals.get(0), sql);
 
@@ -1021,24 +1032,24 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * Generating mappings for the equivalent nodes
 			 */
 
-			for (DAGNode equivalent : classNode.getEquivalents()) {
-				if (!(equivalent.getDescription() instanceof Class))
-					continue;
-
-				Class equiclass = (Class) equivalent.getDescription();
-				Atom headequi = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 1),
-						predicateFactory.getVariable("X"));
-				Atom bodyequi = predicateFactory.getAtom(equiclass.getPredicate(), predicateFactory.getVariable("X"));
-
-				CQIE targetQueryEqui = predicateFactory.getCQIE(headequi, bodyequi);
-
-				List<OBDAMappingAxiom> equimappings = new LinkedList<OBDAMappingAxiom>();
-				mappings.put(equiclass.getPredicate(), equimappings);
-
-				for (OBDAMappingAxiom mapping : currentMappings) {
-					equimappings.add(predicateFactory.getRDBMSMappingAxiom(mapping.getSourceQuery().toString(), targetQueryEqui));
-				}
-			}
+//			for (DAGNode equivalent : classNode.getEquivalents()) {
+//				if (!(equivalent.getDescription() instanceof OClass))
+//					continue;
+//
+//				OClass equiclass = (OClass) equivalent.getDescription();
+//				Atom headequi = predicateFactory.getAtom(predicateFactory.getPredicate(URI.create("m"), 1),
+//						predicateFactory.getVariable("X"));
+//				Atom bodyequi = predicateFactory.getAtom(equiclass.getPredicate(), predicateFactory.getVariable("X"));
+//
+//				CQIE targetQueryEqui = predicateFactory.getCQIE(headequi, bodyequi);
+//
+//				List<OBDAMappingAxiom> equimappings = new LinkedList<OBDAMappingAxiom>();
+//				mappings.put(equiclass.getPredicate(), equimappings);
+//
+//				for (OBDAMappingAxiom mapping : currentMappings) {
+//					equimappings.add(predicateFactory.getRDBMSMappingAxiom(mapping.getSourceQuery().toString(), targetQueryEqui));
+//				}
+//			}
 		}
 
 		/*
@@ -1077,8 +1088,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 */
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (Predicate predicate : mappings.keySet()) {
+			log.debug("Predicate: {} Mappings: {}", predicate, mappings.get(predicate).size());
 			result.addAll(mappings.get(predicate));
 		}
+		
+		log.debug("Total: {} mappings", result.size());
 
 		return result;
 

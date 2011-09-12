@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
@@ -147,14 +147,14 @@ public class TranslatorTests extends TestCase {
 		SubClassAxiomImpl c1 = (SubClassAxiomImpl) assit.next();
 		SubClassAxiomImpl c2 = (SubClassAxiomImpl) assit.next();
 		
-		Class included = (Class) c1.getSub();
+		OClass included = (OClass) c1.getSub();
 		assertEquals("A", included.getPredicate().getName().toString());
-		Class indlucing = (Class) c1.getSuper();
+		OClass indlucing = (OClass) c1.getSuper();
 		assertEquals("B", indlucing.getPredicate().getName().toString());
 		
-		included = (Class) c2.getSub();
+		included = (OClass) c2.getSub();
 		assertEquals("B", included.getPredicate().getName().toString());
-		indlucing = (Class) c2.getSuper();
+		indlucing = (OClass) c2.getSuper();
 		assertEquals("A", indlucing.getPredicate().getName().toString());
 		
 	}

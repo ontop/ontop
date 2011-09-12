@@ -1,6 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -19,7 +22,7 @@ public class DAGNode {
 	private Set<DAGNode>		parents				= new LinkedHashSet<DAGNode>();
 	private Set<DAGNode>		children			= new LinkedHashSet<DAGNode>();
 
-	public Set<DAGNode>			descendans			= new LinkedHashSet<DAGNode>();
+	private Set<DAGNode>		descendans			= new LinkedHashSet<DAGNode>();
 
 	public Set<DAGNode>			equivalents			= new LinkedHashSet<DAGNode>();
 
@@ -53,7 +56,24 @@ public class DAGNode {
 			return;
 		StringBuilder bf = new StringBuilder();
 		bf.append("DAGNode{");
-		bf.append(description);
+		if (description instanceof PropertySomeRestriction) {
+			bf.append("E");
+			bf.append(((PropertySomeRestriction) description).getPredicate().getName().getFragment());
+			if (((PropertySomeRestriction) description).isInverse())
+				bf.append("^-");
+		}
+		
+		if (description instanceof OClass) {
+			bf.append(((OClass) description).getPredicate().getName().getFragment());
+		}
+		if (description instanceof Property) {
+			bf.append(((Property) description).getPredicate().getName().getFragment());
+			if (((Property) description).isInverse()) {
+				bf.append("^-");
+			}
+		}
+
+//		bf.append(description);
 		bf.append(", range=");
 		bf.append(range);
 		bf.append(", index=");
@@ -120,6 +140,14 @@ public class DAGNode {
 
 	public Collection<DAGNode> getEquivalents() {
 		return equivalents;
+	}
+
+	public void setDescendants(Set<DAGNode> descendans) {
+		this.descendans = descendans;
+	}
+
+	public Set<DAGNode> getDescendants() {
+		return descendans;
 	}
 
 	public void setChildren(Set<DAGNode> children) {

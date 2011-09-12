@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.Predicate;
  * @author Mariano Rodriguez Muro
  * 
  */
-public interface Class extends BasicClassDescription {
+public interface OClass extends BasicClassDescription {
 	public Predicate getPredicate();
 
 }

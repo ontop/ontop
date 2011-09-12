@@ -1,10 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.semanticweb.owl.model.OWLAxiom;
@@ -26,8 +30,14 @@ public class OWLAPI2ABoxIterator implements Iterator<Assertion> {
 	OWLIndividualAxiom		next				= null;
 
 	OWLAPI2Translator		translator			= new OWLAPI2Translator();
+	private Map<Predicate, Description>	equivalenceMap;
 
 	public OWLAPI2ABoxIterator(Collection<OWLOntology> ontologies) {
+		this(ontologies, new HashMap<Predicate,Description>());
+	}
+	
+	public OWLAPI2ABoxIterator(Collection<OWLOntology> ontologies, Map<Predicate, Description> equivalenceMap) {
+		this.equivalenceMap = equivalenceMap;
 		if (ontologies.size() > 0) {
 			this.ontologies = ontologies.iterator();
 			this.owlaxiomiterator = this.ontologies.next().getAxioms().iterator();
@@ -35,15 +45,29 @@ public class OWLAPI2ABoxIterator implements Iterator<Assertion> {
 	}
 
 	public OWLAPI2ABoxIterator(OWLOntology ontology) {
+		this(ontology, new HashMap<Predicate,Description>());
+	}
+	
+	public OWLAPI2ABoxIterator(OWLOntology ontology, Map<Predicate, Description> equivalenceMap) {
 		this.ontologies = Collections.singleton(ontology).iterator();
 		this.owlaxiomiterator = ontologies.next().getAxioms().iterator();
 	}
 
 	public OWLAPI2ABoxIterator(Iterable<OWLAxiom> axioms) {
+		this(axioms, new HashMap<Predicate,Description>());
+	}
+	
+	
+	public OWLAPI2ABoxIterator(Iterable<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
 		this.owlaxiomiterator = axioms.iterator();
 	}
 
+	
 	public OWLAPI2ABoxIterator(Iterator<OWLAxiom> axioms) {
+		this(axioms, new HashMap<Predicate,Description>());
+	}
+	
+	public OWLAPI2ABoxIterator(Iterator<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
 		this.owlaxiomiterator = axioms;
 	}
 
@@ -77,7 +101,7 @@ public class OWLAPI2ABoxIterator implements Iterator<Assertion> {
 		while (true) {
 			try {
 				OWLIndividualAxiom next = nextInCurrentIterator();
-				Assertion ass = translator.translate(next);
+				Assertion ass = translator.translate(next,equivalenceMap);
 				if (ass == null)
 					throw new NoSuchElementException();
 				else

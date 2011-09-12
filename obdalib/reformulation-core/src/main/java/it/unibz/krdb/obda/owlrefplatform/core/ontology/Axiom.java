@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology;
 
+import it.unibz.krdb.obda.model.Predicate;
+
+import java.util.Set;
+
 /***
  * A logical axiom
  * 
@@ -7,5 +11,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology;
  * 
  */
 public interface Axiom {
+
+	public Set<Predicate> getReferencedEntities();
 
 }

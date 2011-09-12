@@ -1,11 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
@@ -17,14 +14,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DAGConstructor {
 
@@ -38,8 +31,10 @@ public class DAGConstructor {
 	public static DAG getSigma(Ontology ontology) {
 
 		Ontology sigma = descFactory.createOntology(URI.create(""));
-
+		sigma.addConcepts(ontology.getConcepts());
+		sigma.addRoles(ontology.getRoles());
 		for (Axiom assertion : ontology.getAssertions()) {
+
 			if (assertion instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
@@ -48,17 +43,17 @@ public class DAGConstructor {
 					continue;
 				}
 			}
+
 			sigma.addAssertion(assertion);
 		}
 
-		sigma.addConcepts(new ArrayList<ClassDescription>(ontology.getConcepts()));
-		sigma.addRoles(new ArrayList<Property>(ontology.getRoles()));
 		sigma.saturate();
 		return getISADAG(sigma);
 	}
 
 	/***
 	 * DONT USE, BUGGY
+	 * 
 	 * @param ontology
 	 * @return
 	 */
@@ -66,6 +61,8 @@ public class DAGConstructor {
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
 		Ontology sigma = descFactory.createOntology(URI.create("sigma"));
+		sigma.addConcepts(ontology.getConcepts());
+		sigma.addRoles(ontology.getRoles());
 
 		for (Axiom assertion : ontology.getAssertions()) {
 			if (assertion instanceof SubClassAxiomImpl) {
@@ -78,9 +75,6 @@ public class DAGConstructor {
 			}
 			sigma.addAssertion(assertion);
 		}
-
-		sigma.addConcepts(new ArrayList<ClassDescription>(ontology.getConcepts()));
-		sigma.addRoles(new ArrayList<Property>(ontology.getRoles()));
 
 		return sigma;
 	}
@@ -99,35 +93,29 @@ public class DAGConstructor {
 				ClassDescription superp = (ClassDescription) edge.getRight().getDescription();
 				if (superp instanceof PropertySomeRestriction)
 					continue;
-				sigma.addAssertion(fac.createSubClassAxiom(sub, superp));
+
+				Axiom ax = fac.createSubClassAxiom(sub, superp);
+				sigma.addEntities(ax.getReferencedEntities());
+				sigma.addAssertion(ax);
 			} else {
 				Property sub = (Property) edge.getLeft().getDescription();
 				Property superp = (Property) edge.getRight().getDescription();
-				sigma.addAssertion(fac.createSubPropertyAxiom(sub, superp));
+
+				Axiom ax = fac.createSubPropertyAxiom(sub, superp);
+				sigma.addEntities(ax.getReferencedEntities());
+
+				sigma.addAssertion(ax);
 			}
 		}
 
 		return sigma;
 	}
 
-	public List<OBDAMappingAxiom> getMappings(DAG dag) throws DuplicateMappingException {
-		return null;
-		// return SemanticIndexMappingGenerator.build(dag);
-	}
-
-	public DAGChain getTChainDAG(DAG dag) {
-
-		return new DAGChain(dag);
-	}
-
-	public Set<Axiom> getSigmaChainDAG(Set<Axiom> assertions) {
-		return null;
-	}
-
 	public static DAG filterPureISA(DAG dag) {
 
 		Map<Description, DAGNode> classes = new LinkedHashMap<Description, DAGNode>();
 		Map<Description, DAGNode> roles = new LinkedHashMap<Description, DAGNode>();
+		Map<Description, DAGNode> allnodes = new LinkedHashMap<Description, DAGNode>();
 
 		for (DAGNode node : dag.getClasses()) {
 
@@ -142,6 +130,7 @@ public class DAGConstructor {
 				newNode.getRange().addRange(node.getRange());
 				newNode.equivalents = new LinkedHashSet<DAGNode>(node.equivalents);
 				classes.put(node.getDescription(), newNode);
+				allnodes.put(node.getDescription(), newNode);
 			}
 
 			for (DAGNode child : node.getChildren()) {
@@ -153,6 +142,7 @@ public class DAGConstructor {
 					newChild = new DAGNode(child.getDescription());
 					newChild.equivalents = new LinkedHashSet<DAGNode>(child.equivalents);
 					classes.put(child.getDescription(), newChild);
+					allnodes.put(child.getDescription(), newChild);
 				}
 
 				if (!newChild.getDescription().equals(newNode.getDescription())) {
@@ -175,6 +165,7 @@ public class DAGConstructor {
 				if (newNode == null) {
 					newNode = new DAGNode(posNode);
 					roles.put(posNode, newNode);
+					allnodes.put(posNode, newNode);
 				}
 				continue;
 			}
@@ -185,6 +176,7 @@ public class DAGConstructor {
 				newNode = new DAGNode(nodeDesc);
 				newNode.equivalents = new LinkedHashSet<DAGNode>(node.equivalents);
 				roles.put(nodeDesc, newNode);
+				allnodes.put(nodeDesc, newNode);
 			}
 			for (DAGNode child : node.getChildren()) {
 				Property childDesc = (Property) child.getDescription();
@@ -197,6 +189,7 @@ public class DAGConstructor {
 					if (newChild == null) {
 						newChild = new DAGNode(posChild);
 						roles.put(posChild, newChild);
+						allnodes.put(posChild, newChild);
 					}
 					continue;
 				}
@@ -206,6 +199,7 @@ public class DAGConstructor {
 					newChild = new DAGNode(childDesc);
 					newChild.equivalents = new LinkedHashSet<DAGNode>(child.equivalents);
 					roles.put(childDesc, newChild);
+					allnodes.put(childDesc, newChild);
 				}
 				if (!newChild.getDescription().equals(newNode.getDescription())) {
 					newChild.getParents().add(newNode);
@@ -225,24 +219,9 @@ public class DAGConstructor {
 				newEquivalentMappings.put(key, val);
 
 		}
-		DAG newDag = new DAG(classes, roles, newEquivalentMappings);
+		DAG newDag = new DAG(classes, roles, newEquivalentMappings, allnodes);
 
 		return newDag;
-	}
-
-	private static Description makePositive(Description desc) {
-
-		if (desc instanceof Property) {
-			Property roleKey = (Property) desc;
-			return descFactory.createProperty(roleKey.getPredicate(), false);
-
-		} else if (desc instanceof Class) {
-			return desc;
-		}
-
-		// Simple DAG should not contain ER nodes
-		return null;
-
 	}
 
 }

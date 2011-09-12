@@ -1,34 +1,20 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
-public class SubPropertyAxiomImpl implements SubDescriptionAxiom {
-
-	private Property	including	= null;
-	private Property	included	= null;
-
-	String					string		= null;
+public class SubPropertyAxiomImpl extends AbstractSubDescriptionAxiom {
 
 	SubPropertyAxiomImpl(Property included, Property including) {
 
-		this.including = including;
-		this.included = included;
-
-		this.string = toString();
-
+		super(included, including);
 	}
 
 	public Property getSub() {
-		return included;
+		return (Property) included;
 	}
 
 	public Property getSuper() {
-		return including;
-	}
-
-	public int hashCode() {
-		return toString().hashCode();
+		return (Property) including;
 	}
 
 	public boolean equals(Object obj) {
@@ -39,16 +25,6 @@ public class SubPropertyAxiomImpl implements SubDescriptionAxiom {
 		if (!including.equals(inc2.including))
 			return false;
 		return (included.equals(inc2.included));
-	}
-
-	public String toString() {
-		if (string != null)
-			return string;
-		StringBuffer bf = new StringBuffer();
-		bf.append(included.toString());
-		bf.append(" ISAR ");
-		bf.append(including.toString());
-		return bf.toString();
 	}
 
 }

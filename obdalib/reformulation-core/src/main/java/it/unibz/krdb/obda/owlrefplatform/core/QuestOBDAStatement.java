@@ -45,22 +45,23 @@ import com.hp.hpl.jena.query.QueryException;
 
 public class QuestOBDAStatement implements OBDAStatement {
 
-	private QueryRewriter			rewriter			= null;
-	private UnfoldingMechanism		unfoldingmechanism	= null;
-	private SourceQueryGenerator	querygenerator		= null;
-	private EvaluationEngine		engine				= null;
-	private QueryVocabularyValidator validator = null;
+	private QueryRewriter				rewriter			= null;
+	private UnfoldingMechanism			unfoldingmechanism	= null;
+	private SourceQueryGenerator		querygenerator		= null;
+	private EvaluationEngine			engine				= null;
+	private QueryVocabularyValidator	validator			= null;
 	// private DatalogProgram query = null;
-	private OBDAModel				apic				= null;
-	private boolean					canceled			= false;
+	private OBDAModel					apic				= null;
+	private boolean						canceled			= false;
 
 	// private DatalogProgram rewriting = null;
 	// private DatalogProgram unfolding = null;
 	// private QueryResultSet result = null;
 
-	Logger							log					= LoggerFactory.getLogger(QuestOBDAStatement.class);
+	Logger								log					= LoggerFactory.getLogger(QuestOBDAStatement.class);
 
-	public QuestOBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val, EvaluationEngine eng, OBDAModel apic) {
+	public QuestOBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val,
+			EvaluationEngine eng, OBDAModel apic) {
 
 		this.rewriter = rew;
 		this.unfoldingmechanism = unf;
@@ -84,7 +85,8 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			return executeEpistemicQuery(strquery);
-		} if (strquery.contains("/*direct*/")) {
+		}
+		if (strquery.contains("/*direct*/")) {
 			return executeDirectQuery(strquery);
 		} else {
 			return executeConjunctiveQuery(strquery);
@@ -109,7 +111,7 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 		return result;
 	}
-	
+
 	private OBDAResultSet executeDirectQuery(String query) throws Exception {
 		OBDAResultSet result;
 		ResultSet set = engine.execute(query);
@@ -119,22 +121,23 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 	private OBDAResultSet executeConjunctiveQuery(String strquery) throws Exception {
 		// Contruct the datalog program object from the query string
-	  DatalogProgram program = getDatalogQuery(strquery);
+		DatalogProgram program = getDatalogQuery(strquery);
 
-	  // Check the datalog object
+		// Check the datalog object
 		if (validator != null) {
-		  boolean isValid = validator.validate(program);
+			boolean isValid = validator.validate(program);
 
-		  if (!isValid) {
-		    Vector<String> invalidList = validator.getInvalidPredicates();
+			if (!isValid) {
+				Vector<String> invalidList = validator.getInvalidPredicates();
 
-		    String msg = "";
-		    for (String predicate : invalidList) {
-		      msg += "- " + predicate + "\n";
-		    }
-	      throw new Exception("These predicates are missing from the ontology's vocabulary: \n" + msg);
-		  }
+				String msg = "";
+				for (String predicate : invalidList) {
+					msg += "- " + predicate + "\n";
+				}
+				throw new Exception("These predicates are missing from the ontology's vocabulary: \n" + msg);
+			}
 		}
+		program = validator.replaceEquivalences(program);
 
 		// If the datalog is valid, proceed to the next process.
 		List<String> signature = getSignature(program);
@@ -237,6 +240,21 @@ public class QuestOBDAStatement implements OBDAStatement {
 			String cq = cqs.get(i);
 			try {
 				DatalogProgram p = t.parse(cq);
+
+				p = validator.replaceEquivalences(p);
+
+				boolean isValid = validator.validate(p);
+
+				if (!isValid) {
+					Vector<String> invalidList = validator.getInvalidPredicates();
+
+					String msg = "";
+					for (String predicate : invalidList) {
+						msg += "- " + predicate + "\n";
+					}
+					throw new Exception("These predicates are missing from the ontology's vocabulary: \n" + msg);
+				}
+
 				DatalogProgram rew = (DatalogProgram) rewriter.rewrite(p);
 				DatalogProgram unf = unfoldingmechanism.unfold(rew);
 				// querygenerator.getViewManager().storeOrgQueryHead(p.getRules().get(0).getHead());

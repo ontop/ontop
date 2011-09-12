@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox;
+package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -17,10 +17,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 
 import java.net.URI;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,23 +28,37 @@ import org.slf4j.LoggerFactory;
  */
 public class SigmaTBoxOptimizer {
 
-	private static final Logger		log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
+	private static final Logger		log					= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 	private final DAG				isa;
 	private final DAG				sigma;
-	private final DAGChain			isaChain;
-	private final DAGChain			sigmaChain;
+	private final DAG				isaChain;
+	private final DAG				sigmaChain;
 
 	private final OBDADataFactory	predicateFactory;
 	private final OntologyFactory	descFactory;
 
+	private Ontology				originalOntology	= null;
+
+	private Ontology				originalSigma		= null;
+
 	public SigmaTBoxOptimizer(Ontology isat, Ontology sigmat) {
+		this.originalOntology = isat;
+
+		this.originalSigma = sigmat;
+
 		this.isa = DAGConstructor.getISADAG(isat);
 		this.isa.clean();
 		this.sigma = DAGConstructor.getISADAG(sigmat);
 		this.sigma.clean();
 
-		this.isaChain = new DAGChain(isa);
-		this.sigmaChain = new DAGChain(sigma);
+		this.isaChain = DAGConstructor.getISADAG(isat);
+		isaChain.clean();
+		DAGChain.getChainDAG(isaChain);
+		
+
+		this.sigmaChain = DAGConstructor.getISADAG(sigmat);
+		sigmaChain.clean();
+		DAGChain.getChainDAG(sigmaChain);
 
 		predicateFactory = OBDADataFactoryImpl.getInstance();
 		descFactory = new OntologyFactoryImpl();
@@ -55,6 +67,8 @@ public class SigmaTBoxOptimizer {
 
 	public Ontology getReducedOntology() {
 		Ontology reformulationOntology = descFactory.createOntology(URI.create("http://it.unibz.krdb/obda/auxontology"));
+		reformulationOntology.addEntities(originalOntology.getVocabulary());
+
 		reformulationOntology.addAssertions(reduce());
 		return reformulationOntology;
 	}
@@ -128,15 +142,23 @@ public class SigmaTBoxOptimizer {
 	}
 
 	private boolean check_directly_redundant(DAGNode parent, DAGNode child) {
-		DAGNode sp = sigmaChain.chain().get(parent.getDescription());
-		DAGNode sc = sigmaChain.chain().get(child.getDescription());
-		DAGNode tc = isaChain.chain().get(child.getDescription());
+		DAGNode sp = sigmaChain.getNode(parent.getDescription());
+		DAGNode sc = sigmaChain.getNode(child.getDescription());
+		DAGNode tc = isaChain.getNode(child.getDescription());
 
 		if (sp == null || sc == null || tc == null) {
 			return false;
 		}
+		
+		if (sigmaChain.equi_mappings.get(parent.getDescription()) != null)
+			sp = sigmaChain.getNode(sigmaChain.equi_mappings.get(parent.getDescription()));
+		if (sigmaChain.equi_mappings.get(child.getDescription()) != null)
+			sc = sigmaChain.getNode(sigmaChain.equi_mappings.get(child.getDescription()));
+		if (isaChain.equi_mappings.get(child.getDescription()) != null)
+			tc = sigmaChain.getNode(isaChain.equi_mappings.get(child.getDescription()));
 
-		return (sp.getChildren().contains(sc) && sc.descendans.containsAll(tc.descendans));
+		boolean redundant = sp.getChildren().contains(sc) && sc.getDescendants().containsAll(tc.getDescendants());
+		return (redundant);
 
 	}
 

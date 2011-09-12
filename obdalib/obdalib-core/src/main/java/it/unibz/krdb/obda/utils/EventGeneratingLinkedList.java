@@ -20,7 +20,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> {
 
 	LinkedList<ListListener>	listeners			= new LinkedList<ListListener>();
 
-	Logger						log					= LoggerFactory.getLogger(EventGeneratingLinkedList.class);
+	private static Logger						log					= LoggerFactory.getLogger(EventGeneratingLinkedList.class);
 
 	private static final long	serialVersionUID	= 893780365770320662L;
 

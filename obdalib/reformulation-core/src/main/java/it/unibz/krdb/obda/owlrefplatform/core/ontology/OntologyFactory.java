@@ -1,19 +1,20 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology;
 
-import java.net.URI;
-
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
+
+import java.net.URI;
 
 public interface OntologyFactory {
 
 	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
 	
-	public Class createClass(Predicate p);
+	public OClass createClass(Predicate p);
 	
-	public Class createClass(URI c);
+	public OClass createClass(URI uri);
+	
+	public OClass createClass(String uri);
 
 	public Property createProperty(Predicate p, boolean inverse);
 
@@ -21,9 +22,15 @@ public interface OntologyFactory {
 	
 	public Property createObjectProperty(URI uri, boolean inverse);
 	
+	public Property createObjectProperty(String uri, boolean inverse);
+	
 	public Property createObjectProperty(URI uri);
 	
-	public Property createDataProperty(URI p);
+	public Property createObjectProperty(String uri);
+	
+	public Property createDataProperty(URI uri);
+	
+	public Property createDataProperty(String uri);
 	
 	public Ontology createOntology(URI uri);
 	
@@ -35,7 +42,7 @@ public interface OntologyFactory {
 
 	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
 
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, Class filler);
+	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler);
 
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
 
@@ -44,6 +51,8 @@ public interface OntologyFactory {
 	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, URIConstant o1, ValueConstant o2);
 	
 	public ClassAssertion createClassAssertion(Predicate concept, URIConstant object);
+	
+	
 
 
 }

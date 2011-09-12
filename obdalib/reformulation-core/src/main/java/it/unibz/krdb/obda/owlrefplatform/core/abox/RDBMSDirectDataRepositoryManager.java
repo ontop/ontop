@@ -432,15 +432,31 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			batchCount += 1;
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion cassertion = (ClassAssertion) assertion;
+				if (predicatetableMap.get(cassertion.getConcept()) == null) {
+					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", cassertion.getConcept());
+					continue;
+				}
 				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
 						.getObject().getURI())));
 			} else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
+				
+				if (predicatetableMap.get(rassertion.getRole()) == null) {
+					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", rassertion.getRole());
+					continue;
+				}
+				
 				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
 						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
 
 			} else if (assertion instanceof DataPropertyAssertion) {
 				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
+				
+				if (predicatetableMap.get(rassertion.getAttribute()) == null) {
+					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", rassertion.getAttribute());
+					continue;
+				}
+
 				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()),
 						getQuotedString(rassertion.getObject().getURI()), getQuotedString(rassertion.getValue().getValue())));
 			}

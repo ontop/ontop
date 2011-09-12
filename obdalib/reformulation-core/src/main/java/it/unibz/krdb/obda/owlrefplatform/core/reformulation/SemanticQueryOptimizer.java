@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
@@ -150,13 +150,13 @@ public class SemanticQueryOptimizer {
 					ClassDescription including = ci.getSuper();
 					ClassDescription included = ci.getSub();
 
-					if (focusAtom.getPredicate().getArity() == 1 && including instanceof Class) {
+					if (focusAtom.getPredicate().getArity() == 1 && including instanceof OClass) {
 						/* case we work with unary atom A(x) or A(_) */
 						// Here the list of terms is always of size 1
 
-						if (included instanceof Class) {
+						if (included instanceof OClass) {
 							/* Case left side of inclusion is B */
-							Class left = (Class) included;
+							OClass left = (OClass) included;
 							checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms());
 
 						} else if (included instanceof PropertySomeRestriction) {
@@ -184,7 +184,7 @@ public class SemanticQueryOptimizer {
 						 * case we work with unary atom R(x,_), R(_,y)
 						 */
 
-						if (including instanceof PropertySomeRestriction && included instanceof Class) {
+						if (including instanceof PropertySomeRestriction && included instanceof OClass) {
 							/*
 							 * Case with left side of inclusion is A
 							 * 
@@ -192,7 +192,7 @@ public class SemanticQueryOptimizer {
 							 * is in the body
 							 */
 							PropertySomeRestriction right = (PropertySomeRestriction) including;
-							Class left = (Class) included;
+							OClass left = (OClass) included;
 							if (!right.isInverse() && focusAtom.getTerms().get(1) instanceof AnonymousVariable) {
 								checkAtom = fac.getAtom(left.getPredicate(), focusAtom.getTerms().get(0));
 							} else if (right.isInverse() && focusAtom.getTerms().get(0) instanceof AnonymousVariable) {

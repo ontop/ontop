@@ -94,7 +94,7 @@ public class YAGOTest {
                     Predicate po = predicateFactory.getPredicate(new URI(object), 1);
                     ClassDescription co = descFactory.createClass(po);
 
-                    onto.addConcept(co);
+                    onto.addConcept(po);
 
                 } else if ("rdfs:subClassOf".equals(predicate)) {
                     tbox_count++;

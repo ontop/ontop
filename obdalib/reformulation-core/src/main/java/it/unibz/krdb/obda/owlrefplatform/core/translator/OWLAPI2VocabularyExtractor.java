@@ -115,4 +115,5 @@ public class OWLAPI2VocabularyExtractor {
 		}
 		return predicate;
 	}
+	
 }

@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 
@@ -23,8 +24,11 @@ import org.slf4j.LoggerFactory;
 public class OntologyImpl implements Ontology {
 
 	private Set<SubDescriptionAxiom>					assertions					= null;
-	private Set<ClassDescription>						concepts					= null;
-	private Set<Property>								roles						= null;
+
+	private Set<Predicate>								concepts					= null;
+
+	private Set<Predicate>								roles						= null;
+
 	private URI											ontouri						= null;
 
 	private Set<Axiom>									originalassertions			= null;
@@ -43,15 +47,17 @@ public class OntologyImpl implements Ontology {
 
 	public boolean										isSaturated					= false;
 
-	private final OntologyFactory				factory						= OntologyFactoryImpl.getInstance();
+	private final OntologyFactory						factory						= OntologyFactoryImpl.getInstance();
+
+	private Set<PropertyFunctionalAxiom>				functionalAxioms			= new HashSet<PropertyFunctionalAxiom>();
 
 	// private Set<PositiveInclusion> assertions = null;
 
 	OntologyImpl(URI uri) {
 		ontouri = uri;
 		originalassertions = new LinkedHashSet<Axiom>();
-		concepts = new HashSet<ClassDescription>();
-		roles = new HashSet<Property>();
+		concepts = new HashSet<Predicate>();
+		roles = new HashSet<Predicate>();
 	}
 
 	@Override
@@ -95,60 +101,110 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
+	public boolean referencesPredicate(Predicate pred) {
+		return concepts.contains(pred) || roles.contains(pred);
+	}
+
+	@Override
+	public boolean referencesPredicates(Collection<Predicate> preds) {
+		for (Predicate pred : preds)
+			if (!(concepts.contains(pred) || roles.contains(pred)))
+				return false;
+		return true;
+	}
+
+	@Override
 	public void addAssertion(Axiom assertion) {
+
 		if (originalassertions.contains(assertion))
 			return;
+
+		if (!referencesPredicates(assertion.getReferencedEntities())) {
+			throw new IllegalArgumentException("At least one of these predicates is unknown: "
+					+ assertion.getReferencedEntities().toString());
+		}
+
 		isSaturated = false;
-		originalassertions.add(assertion);
+
+		if (assertion instanceof SubDescriptionAxiom) {
+			SubDescriptionAxiom axiom = (SubDescriptionAxiom) assertion;
+			/*
+			 * We avoid redundant axioms
+			 */
+			if (axiom.getSub().equals(axiom.getSuper()))
+				return;
+			originalassertions.add(assertion);
+		} else if (assertion instanceof PropertyFunctionalAxiom) {
+			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
+		}
+
 	}
 
 	@Override
 	public Set<Axiom> getAssertions() {
 		return originalassertions;
 	}
-	
+
 	public String toString() {
-		return getAssertions().toString();
+		StringBuffer str = new StringBuffer();
+		str.append("[Ontology info.");
+		if (originalassertions != null)
+			str.append(String.format(" Axioms: %d", originalassertions.size()));
+		if (concepts != null)
+			str.append(String.format(" Classes: %d", concepts.size()));
+		if (roles != null)
+			str.append(String.format(" Properties: %d]", roles.size()));
+		return str.toString();
 	}
 
 	@Override
 	public void addAssertions(Collection<Axiom> ass) {
 		isSaturated = false;
-		originalassertions.addAll(ass);
+		for (Axiom axiom : ass)
+			addAssertion(axiom);
 	}
 
 	@Override
-	public void addConcept(ClassDescription cd) {
+	public void addConcept(Predicate cd) {
 		concepts.add(cd);
 	}
 
 	@Override
-	public void addConcepts(Collection<ClassDescription> cd) {
+	public void addConcepts(Collection<Predicate> cd) {
 		isSaturated = false;
-		concepts.addAll(cd);
+		for (Predicate p : cd)
+			concepts.add(p);
 	}
 
 	@Override
-	public void addRole(Property rd) {
+	public void addRole(Predicate rd) {
 		isSaturated = false;
 		roles.add(rd);
 	}
 
 	@Override
-	public void addRoles(Collection<Property> rd) {
+	public void addRoles(Collection<Predicate> rd) {
 		isSaturated = false;
 		roles.addAll(rd);
 	}
 
 	@Override
-	public Set<ClassDescription> getConcepts() {
+	public Set<Predicate> getConcepts() {
 
 		return concepts;
 	}
 
 	@Override
-	public Set<Property> getRoles() {
+	public Set<Predicate> getRoles() {
 		return roles;
+	}
+
+	@Override
+	public Set<Predicate> getVocabulary() {
+		HashSet<Predicate> set = new HashSet<Predicate>();
+		set.addAll(getConcepts());
+		set.addAll(getRoles());
+		return set;
 	}
 
 	@Override
@@ -251,20 +307,22 @@ public class OntologyImpl implements Ontology {
 						SubClassAxiomImpl ci1 = (SubClassAxiomImpl) pi1;
 						SubClassAxiomImpl ci2 = (SubClassAxiomImpl) pi2;
 						if (ci1.getSuper().equals(ci2.getSub())) {
-							SubClassAxiomImpl newinclusion = (SubClassAxiomImpl)factory.createSubClassAxiom(ci1.getSub(), ci2.getSuper());
+							SubClassAxiomImpl newinclusion = (SubClassAxiomImpl) factory.createSubClassAxiom(ci1.getSub(), ci2.getSuper());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getSub().equals(ci2.getSuper())) {
-							SubClassAxiomImpl newinclusion = (SubClassAxiomImpl)factory.createSubClassAxiom(ci2.getSub(), ci1.getSuper());
+							SubClassAxiomImpl newinclusion = (SubClassAxiomImpl) factory.createSubClassAxiom(ci2.getSub(), ci1.getSuper());
 							newInclusions.add(newinclusion);
 						}
 					} else if ((pi1 instanceof SubPropertyAxiomImpl) && (pi2 instanceof SubPropertyAxiomImpl)) {
 						SubPropertyAxiomImpl ci1 = (SubPropertyAxiomImpl) pi1;
 						SubPropertyAxiomImpl ci2 = (SubPropertyAxiomImpl) pi2;
 						if (ci1.getSuper().equals(ci2.getSub())) {
-							SubPropertyAxiomImpl newinclusion = (SubPropertyAxiomImpl)factory.createSubPropertyAxiom(ci1.getSub(), ci2.getSuper());
+							SubPropertyAxiomImpl newinclusion = (SubPropertyAxiomImpl) factory.createSubPropertyAxiom(ci1.getSub(),
+									ci2.getSuper());
 							newInclusions.add(newinclusion);
 						} else if (ci1.getSub().equals(ci2.getSuper())) {
-							SubPropertyAxiomImpl newinclusion = (SubPropertyAxiomImpl)factory.createSubPropertyAxiom(ci2.getSub(), ci1.getSuper());
+							SubPropertyAxiomImpl newinclusion = (SubPropertyAxiomImpl) factory.createSubPropertyAxiom(ci2.getSub(),
+									ci1.getSuper());
 							newInclusions.add(newinclusion);
 						}
 					}
@@ -435,13 +493,25 @@ public class OntologyImpl implements Ontology {
 				PropertySomeRestriction e21 = factory.createPropertySomeRestriction(r1.getPredicate(), !r1.isInverse());
 				PropertySomeRestriction e22 = factory.createPropertySomeRestriction(r2.getPredicate(), !r2.isInverse());
 
-				SubClassAxiomImpl inc1 = (SubClassAxiomImpl)factory.createSubClassAxiom(e11, e12);
-				SubClassAxiomImpl inc2 = (SubClassAxiomImpl)factory.createSubClassAxiom(e21, e22);
+				SubClassAxiomImpl inc1 = (SubClassAxiomImpl) factory.createSubClassAxiom(e11, e12);
+				SubClassAxiomImpl inc2 = (SubClassAxiomImpl) factory.createSubClassAxiom(e21, e22);
 				newassertion.add(inc1);
 				newassertion.add(inc2);
 			}
 		}
 		return newassertion;
+	}
+
+	@Override
+	public void addEntities(Set<Predicate> referencedEntities) {
+		for (Predicate pred : referencedEntities) {
+			if (pred.getArity() == 1) {
+				addConcept(pred);
+			} else {
+				addRole(pred);
+			}
+		}
+
 	}
 
 }

@@ -447,6 +447,9 @@ public class CQCUtilitiesTest extends TestCase {
 			ClassDescription left = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 			ClassDescription right = dfac.createClass(tfac.getPredicate(URI.create("C"), 1));
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			sigma.addConcept(tfac.getPredicate(URI.create("A"), 1));
+			sigma.addConcept(tfac.getPredicate(URI.create("C"), 1));
+			
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -470,6 +473,11 @@ public class CQCUtilitiesTest extends TestCase {
 			ClassDescription left = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 			ClassDescription right = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), false);
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			
+			sigma.addConcept(tfac.getPredicate(URI.create("A"), 1));
+			sigma.addRole(tfac.getPredicate(URI.create("R"), 2));
+
+			
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -493,6 +501,10 @@ public class CQCUtilitiesTest extends TestCase {
 			ClassDescription left = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 			ClassDescription right = dfac.getPropertySomeRestriction(tfac.getPredicate(URI.create("R"), 2), true);
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			
+			sigma.addConcept(tfac.getPredicate(URI.create("A"), 1));
+			sigma.addRole(tfac.getPredicate(URI.create("R"), 2));
+
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -517,6 +529,10 @@ public class CQCUtilitiesTest extends TestCase {
 			ClassDescription right = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			
+			sigma.addConcept(tfac.getPredicate(URI.create("A"), 1));
+			sigma.addRole(tfac.getPredicate(URI.create("R"), 2));
+
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("x"));
@@ -541,6 +557,10 @@ public class CQCUtilitiesTest extends TestCase {
 			ClassDescription right = dfac.createClass(tfac.getPredicate(URI.create("A"), 1));
 
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			
+			sigma.addConcept(tfac.getPredicate(URI.create("A"), 1));
+			sigma.addRole(tfac.getPredicate(URI.create("R"), 2));
+
 			sigma.addAssertion(inclusion);
 
 			Atom head1 = tfac.getAtom(tfac.getPredicate(URI.create("q"), 1), tfac.getVariable("y"));

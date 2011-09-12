@@ -1,13 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
 		<version>1.6</version>
-
-		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<modelVersion>4.0.0</modelVersion>
+	
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
 	<name>obdalib-protege4</name>
@@ -33,13 +32,13 @@
 
 	<dependencies>
 
- <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- <dependency> <groupId>org.apache.felix</groupId> <artifactId>org.osgi.core</artifactId> 
 			<version>1.0.0</version> <scope>provided</scope> </dependency> -->
 
@@ -51,12 +50,12 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.6</version>
-			</dependency>
+		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
 			<version>1.6</version>
-			</dependency>
+		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
 
@@ -66,7 +65,7 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
 			<version>1.6</version>
-	</dependency>
+		</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 
 			and are not available in the OSGi, or Protege 4 classpath. They must be packed 

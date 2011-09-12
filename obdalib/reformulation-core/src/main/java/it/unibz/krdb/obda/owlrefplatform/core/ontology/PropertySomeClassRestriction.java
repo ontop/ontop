@@ -14,5 +14,5 @@ public interface PropertySomeClassRestriction extends ClassDescription {
 
 	public Predicate getPredicate();
 
-	public Class getFiller();
+	public OClass getFiller();
 }

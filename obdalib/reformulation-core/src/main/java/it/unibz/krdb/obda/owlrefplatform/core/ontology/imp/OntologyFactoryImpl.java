@@ -2,14 +2,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
@@ -18,15 +17,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeClassRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
-import it.unibz.krdb.obda.utils.ObdaFileCompatibilityRepair;
 
 import java.net.URI;
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
 	private static OntologyFactoryImpl	instance	= new OntologyFactoryImpl();
-	
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+
+	private OBDADataFactory				ofac		= OBDADataFactoryImpl.getInstance();
 
 	public static OntologyFactory getInstance() {
 		return instance;
@@ -135,7 +133,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new PropertySomeRestrictionImpl(p, inverse);
 	}
 
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean inverse, Class filler) {
+	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean inverse, OClass filler) {
 		if (p.getArity() != 2) {
 			throw new IllegalArgumentException("Roles must have arity = 2");
 		}
@@ -144,7 +142,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new PropertySomeClassRestrictionImpl(p, inverse, filler);
 	}
 
-	public Class createClass(Predicate p) {
+	public OClass createClass(Predicate p) {
 		if (p.getArity() != 1) {
 			throw new IllegalArgumentException("Concepts must have arity = 1");
 		}
@@ -161,27 +159,47 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Class createClass(URI c) {
-		Predicate classp = ofac.getPredicate(c, 1);
+	public OClass createClass(URI c) {
+		Predicate classp = ofac.getClassPredicate(c);
 		return createClass(classp);
 	}
 
 	@Override
 	public Property createObjectProperty(URI uri, boolean inverse) {
-		Predicate prop = ofac.getPredicate(uri, 2);
+		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return createProperty(prop, inverse);
 	}
 
 	@Override
 	public Property createObjectProperty(URI uri) {
-		Predicate prop = ofac.getPredicate(uri, 2);
+		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return createProperty(prop);
 	}
 
 	@Override
 	public Property createDataProperty(URI p) {
-		Predicate prop = ofac.getPredicate(p, 2, new COL_TYPE[] {COL_TYPE.OBJECT, COL_TYPE.LITERAL});
+		Predicate prop = ofac.getDataPropertyPredicate(p);
 		return createProperty(prop);
+	}
+
+	@Override
+	public OClass createClass(String c) {
+		return createClass(URI.create(c));
+	}
+
+	@Override
+	public Property createObjectProperty(String uri, boolean inverse) {
+		return createObjectProperty(URI.create(uri), inverse);
+	}
+
+	@Override
+	public Property createObjectProperty(String uri) {
+		return createObjectProperty(URI.create(uri));
+	}
+
+	@Override
+	public Property createDataProperty(String p) {
+		return createDataProperty(URI.create(p));
 	}
 
 }

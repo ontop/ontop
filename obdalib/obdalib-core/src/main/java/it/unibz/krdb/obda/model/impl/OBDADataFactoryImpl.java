@@ -55,6 +55,20 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public PredicateImpl getPredicate(URI name, int arity, COL_TYPE[] types) {
 		return new PredicateImpl(name, arity, types);
 	}
+	
+	public Predicate getObjectPropertyPredicate(URI name) {
+		return new PredicateImpl(name, 2, new COL_TYPE[] {COL_TYPE.OBJECT, COL_TYPE.OBJECT});
+	}
+
+	
+	public Predicate getDataPropertyPredicate(URI name) {
+		return new PredicateImpl(name, 2, new COL_TYPE[] {COL_TYPE.OBJECT, COL_TYPE.LITERAL});
+	}
+
+	
+	public Predicate getClassPredicate(URI name) {
+		return new PredicateImpl(name, 1, new COL_TYPE[] {COL_TYPE.OBJECT});
+	}
 
 	@Override
 	public URIConstant getURIConstant(URI uri) {
@@ -401,6 +415,33 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driverclass);
 		return source;
+
+	}
+
+	@Override
+	public Predicate getPredicate(String uri, int arity) {
+		return getPredicate(URI.create(uri), arity);
+	}
+
+	@Override
+	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types) {
+		return getPredicate(URI.create(uri), arity, types);
+	}
+
+	@Override
+	public Predicate getObjectPropertyPredicate(String name) {
+		return getObjectPropertyPredicate(URI.create(name));
+	}
+
+	@Override
+	public Predicate getDataPropertyPredicate(String name) {
+		return getDataPropertyPredicate(URI.create(name));
+
+	}
+
+	@Override
+	public Predicate getClassPredicate(String name) {
+		return getClassPredicate(URI.create(name));
 
 	}
 

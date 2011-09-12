@@ -1,16 +1,16 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeClassRestriction;
 
 public class PropertySomeClassRestrictionImpl implements PropertySomeClassRestriction{
 
 	private final  Predicate	predicate;
 	private final boolean		isInverse;
-	private final Class filler;
+	private final OClass filler;
 
-	PropertySomeClassRestrictionImpl(Predicate p, boolean isInverse, Class filler) {
+	PropertySomeClassRestrictionImpl(Predicate p, boolean isInverse, OClass filler) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 		this.filler = filler;
@@ -53,7 +53,7 @@ public class PropertySomeClassRestrictionImpl implements PropertySomeClassRestri
 	}
 
 	@Override
-	public Class getFiller() {
+	public OClass getFiller() {
 		return filler;
 	}
 }

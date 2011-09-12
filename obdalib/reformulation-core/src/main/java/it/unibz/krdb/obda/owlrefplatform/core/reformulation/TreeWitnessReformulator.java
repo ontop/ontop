@@ -14,7 +14,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
@@ -179,7 +179,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 			DAGNode cnode = conceptDAG.getClassNode(C);
 			if (cnode != null) {
-				for (DAGNode node : cnode.descendans) {
+				for (DAGNode node : cnode.getDescendants()) {
 					Description D = node.getDescription();
 					log.debug("subclass " + D + " of " + C);
 					out.appendRule(fac.getCQIE(head, Collections.singletonList(getConceptAtom(D,z))));
@@ -194,8 +194,8 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	private Atom getConceptAtom(Description D, Term z) {
 
-		if (D instanceof Class) {
-			return fac.getAtom(((Class) D).getPredicate(), z);
+		if (D instanceof OClass) {
+			return fac.getAtom(((OClass) D).getPredicate(), z);
 		} else if (D instanceof PropertySomeRestriction) {
 			Term w = fac.getVariable("w");
 			PropertySomeRestriction DD = (PropertySomeRestriction) D;
@@ -217,7 +217,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			PredicatePosition pp = tw.getLabelTail(t);
 			log.debug("checking tree for predicate position: " + pp + " for " + t);
 			ClassDescription ETi = descFactory.getPropertySomeRestriction(pp.getPredicate(), pp.getPosition() == 2);
-			if (!ETi.equals(C) && !conceptDAG.getClassNode(C).descendans.contains(conceptDAG.getClassNode(ETi))) {
+			if (!ETi.equals(C) && !conceptDAG.getClassNode(C).getDescendants().contains(conceptDAG.getClassNode(ETi))) {
 				log.debug("falsum in " + C + " " + ETi);
 				return false;
 			}

@@ -16,15 +16,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
 import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.io.DefaultOntologyFormat;
 import org.semanticweb.owl.model.OWLAxiom;
 import org.semanticweb.owl.model.OWLClass;
 import org.semanticweb.owl.model.OWLDataFactory;
 import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLEntity;
 import org.semanticweb.owl.model.OWLIndividual;
 import org.semanticweb.owl.model.OWLObjectMinCardinalityRestriction;
 import org.semanticweb.owl.model.OWLObjectProperty;
@@ -48,8 +51,8 @@ public class TestFileGenerator {
 	private String																		testlocation						= null;
 	private String																		mode								= null;
 
-	private OWLOntologyManager															manager								= null;
-	private OWLDataFactory																dataFactory							= null;
+	// private OWLOntologyManager manager = null;
+//	private OWLDataFactory																dataFactory							= null;
 	private OBDAModel																	apic								= null;
 	private it.unibz.krdb.obda.reformulation.tests.XMLResultWriter						writer								= null;
 	private Vector<String>																tests								= null;
@@ -71,7 +74,7 @@ public class TestFileGenerator {
 		this.mode = mode;
 		tests = new Vector<String>();
 		expressions = new Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>();
-		manager = OWLManager.createOWLOntologyManager();
+		// manager = OWLManager.createOWLOntologyManager();
 		log.info("Main Location: {}", tl);
 		log.info("Location for OBDA files: {}", obdalocation);
 		log.info("Location for XML files: {}", xmllocation);
@@ -170,8 +173,19 @@ public class TestFileGenerator {
 			String tbox = ex.getTbox();
 			String id = ex.getId();
 			Vector<OWLOntology> o = null;
+
+			// Iterator<OWLOntology> oit = o.iterator();
+
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
+			// OWLOntology onto = oit.next();
+
+			OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+			apic = obdafac.getOBDAModel();
+
+			OWLOntology onto = null;
 			try {
-				o = createOntology(id, abox, tbox);
+				onto = createOntology(id, abox, tbox, manager, manager.getOWLDataFactory());
 			} catch (Exception e) {
 				log.error(e.getMessage());
 				log.error("Processing ontology: {} {}", id, abox + " " + tbox);
@@ -180,53 +194,47 @@ public class TestFileGenerator {
 			HashMap<String, String> queriesMap = ex.getQueries();
 			HashMap<String, String> ids = ex.getQueriesIds();
 			Set<String> queries = queriesMap.keySet();
-			Iterator<OWLOntology> oit = o.iterator();
-			while (oit.hasNext()) {
-				OWLOntology onto = oit.next();
 
-				OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-				apic = obdafac.getOBDAModel();
+			String ontoname = onto.getURI().toString();
+			int z = ontoname.lastIndexOf("/");
+			ontoname = ontoname.substring(z + 1, ontoname.length() - 4);
+			writer = new XMLResultWriter(ontoname);
 
-				String ontoname = onto.getURI().toString();
-				int z = ontoname.lastIndexOf("/");
-				ontoname = ontoname.substring(z + 1, ontoname.length() - 4);
-				writer = new XMLResultWriter(ontoname);
+			Iterator<String> qit = queries.iterator();
+			while (qit.hasNext()) {
+				String query = qit.next();
 
-				Iterator<String> qit = queries.iterator();
-				while (qit.hasNext()) {
-					String query = qit.next();
-
-					String genQuery = "";
-					try {
-						if (mode.equals(SPARQL_MODE))
-							genQuery = getSPARQLQuery(query);
-						else if (mode.equals(DATALOG_MODE))
-							genQuery = getDatalogQuery(query);
-						else
-							throw new Exception("Cannot generate the proper query");
-					} catch (Exception e) {
-						log.error("Processing query: {}", query);
-						log.error(e.getMessage());
-						throw e;
-					}
-
-					apic.getQueryController().addQuery(genQuery, ids.get(query));
-					String[] queryhead = getQueryHead(query);
-					String[] results = getResults(queriesMap.get(query));
-					writer.addResult(ids.get(query), queryhead, results);
+				String genQuery = "";
+				try {
+					if (mode.equals(SPARQL_MODE))
+						genQuery = getSPARQLQuery(query);
+					else if (mode.equals(DATALOG_MODE))
+						genQuery = getDatalogQuery(query);
+					else
+						throw new Exception("Cannot generate the proper query");
+				} catch (Exception e) {
+					log.error("Processing query: {}", query);
+					log.error(e.getMessage());
+					throw e;
 				}
-				String loc = obdalocation + ontoname + ".obda";
-				DataManager ioManager = new DataManager(apic);
-				ioManager.saveOBDAData(URI.create(loc), apic.getPrefixManager());
 
-				/* we start from 7 because the location must start with file:// */
-				String owluri = obdalocation.substring(7) + ontoname + ".owl";
-				manager.saveOntology(onto, new File(owluri).toURI());
-				String xmluri = xmllocation + ontoname + ".xml";
-				writer.saveXMLResults(xmluri);
-				tests.add(ontoname);
-				t++;
+				apic.getQueryController().addQuery(genQuery, ids.get(query));
+				String[] queryhead = getQueryHead(query);
+				String[] results = getResults(queriesMap.get(query));
+				writer.addResult(ids.get(query), queryhead, results);
 			}
+			String loc = obdalocation + ontoname + ".obda";
+			DataManager ioManager = new DataManager(apic);
+			ioManager.saveOBDAData(URI.create(loc), apic.getPrefixManager());
+
+			/* we start from 7 because the location must start with file:// */
+			String owluri = obdalocation.substring(7) + ontoname + ".owl";
+			manager.saveOntology(onto, new DefaultOntologyFormat(), new File(owluri).toURI());
+			String xmluri = xmllocation + ontoname + ".xml";
+			writer.saveXMLResults(xmluri);
+			tests.add(ontoname);
+			t++;
+
 		}
 
 		generateJUnitTestClass();
@@ -250,33 +258,28 @@ public class TestFileGenerator {
 		}
 	}
 
-	private Vector<OWLDescription> getOWLEntity(URI ontouri, String e) {
+	private OWLDescription getOWLEntity(URI ontouri, String e, OWLDataFactory dataFactory) {
 		e = e.trim();
-		Vector<OWLDescription> desc = new Vector<OWLDescription>();
+		
+		if (e.length() == 0)
+			return null;
 		if (e.startsWith("E")) {
 			e = e.substring(1);
 			if (e.contains("-")) {
 				e = e.substring(0, e.length() - 5);// remove ^^-^^ from end
 				OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + e));
 				OWLObjectPropertyInverse inv = dataFactory.getOWLObjectPropertyInverse(op);
-				if (GENERATE_ALTERNATIVES_FOR_EXISTS) {
-					desc.add(dataFactory.getOWLObjectMinCardinalityRestriction(inv, 1));
-				}
-				desc.add(dataFactory.getOWLObjectSomeRestriction(inv, dataFactory.getOWLThing()));
+				return dataFactory.getOWLObjectSomeRestriction(inv, dataFactory.getOWLThing());
 			} else {
 				OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + e));
-				if (GENERATE_ALTERNATIVES_FOR_EXISTS) {
-					desc.add(dataFactory.getOWLObjectMinCardinalityRestriction(op, 1));
-				}
-				desc.add(dataFactory.getOWLObjectSomeRestriction(op, dataFactory.getOWLThing()));
+				return dataFactory.getOWLObjectSomeRestriction(op, dataFactory.getOWLThing());
 			}
-		} else {
-			desc.add(dataFactory.getOWLClass(URI.create(ontouri.toString() + "#" + e)));
 		}
-		return desc;
+		return dataFactory.getOWLClass(URI.create(ontouri.toString() + "#" + e));
+
 	}
 
-	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri, String name) {
+	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri, String name, OWLDataFactory dataFactory) {
 		name = name.trim();
 		if (name.contains("-")) {
 			name = name.substring(0, name.length() - 5);// remove ^^-^^ from end
@@ -287,261 +290,125 @@ public class TestFileGenerator {
 		}
 	}
 
-	private Vector<OWLOntology> createOntology(String testid, String abox, String tbox) throws Exception {
+	private OWLOntology createOntology(String testid, String abox, String tbox, OWLOntologyManager manager, OWLDataFactory dataFactory) throws Exception {
 
+		
 		URI uri = URI.create(ONTOURI + "test.owl");
-		Vector<OWLOntology> vec = new Vector<OWLOntology>();
-		dataFactory = manager.getOWLDataFactory();
 
-		if (tbox.contains("ISA")) {
-			String tboxcontent[] = tbox.split(",");
-			if (tboxcontent.length == 1) {
-				for (int i = 0; i < tboxcontent.length; i++) {
-					String exp = tboxcontent[i].trim();
-					String[] entities = null;
-					boolean isRoleInclusion = false;
-					if (exp.contains(" RISA ")) {
-						entities = exp.split("RISA");
-						isRoleInclusion = true;
-					} else {
-						entities = exp.split("ISA");
-					}
-					if (entities.length != 2) {
-						throw new Exception(" TBox at " + linenr + " is not in proper format!");
-					} else {
-						String s1 = entities[0].trim();
-						String s2 = entities[1].trim();
-						if (isRoleInclusion) {
+		/*
+		 * Adding the TBox
+		 */
+		String tboxcontent[] = tbox.split(",");
+		List<OWLAxiom> axioms = getAxiomsFromTBox(tboxcontent, uri, manager, dataFactory);
+		OWLOntology onto = getOntolgoies(axioms, testid);
 
-							OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri, s1);
-							OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri, s2);
-							OWLAxiom ax = dataFactory.getOWLSubObjectPropertyAxiom(role1, role2);
-							URI u = URI.create(ONTOURI + "test_" + testid.trim() + ".owl");
-							OWLOntology o = manager.createOntology(u);
-							manager.addAxiom(o, ax);
-							vec.add(o);
-						} else {
-							Vector<OWLDescription> left = getOWLEntity(uri, s1);
-							Vector<OWLDescription> right = getOWLEntity(uri, s2);
-							int c = 1;
-							for (int j = 0; j < left.size(); j++) {
-								OWLDescription d1 = left.get(j);
-								int indj = j;
-								if (right.size() > 1) {
-									indj = j + 1;
-								}
-								for (int k = 0; k < right.size(); k++) {
-									OWLDescription d2 = right.get(k);
-									int indk = k;
-									if (right.size() > 1) {
-										indk = k + 1;
-									}
-									URI u = URI.create(ONTOURI + "test_" + testid.trim() + "_" + indj + "_" + indk + ".owl");
-									OWLOntology o = manager.createOntology(u);
-									OWLAxiom ax = dataFactory.getOWLSubClassAxiom(d1, d2);
-									manager.addAxiom(o, ax);
-									c++;
-									vec.add(o);
-								}
-							}
-							if (left.size() > 1) {// means the left side
-								// contains an exist
+		/*
+		 * Adding the individuals
+		 */
+		String[] individuals = abox.trim().split(" ");
+		OWLAxiom axiom = null;
+		for (int i = 0; i < individuals.length; i++) {
+			String aux = individuals[i].trim();
+			if (aux.length() > 0) {
+				int i1 = aux.indexOf("(");
+				int i2 = aux.indexOf(")");
+				String entity = aux.substring(0, i1);
+				String parameters = aux.substring(i1 + 1, i2);
+				String[] names = parameters.split(",");
+				axiom = null;
+				if (names.length == 2) {
+					String objprop = uri.toString() + "#" + entity;
+					OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(objprop));
+					String ind1uri = onto.getURI() + "#" + names[0];
+					String ind2uri = onto.getURI() + "#" + names[1];
+					OWLIndividual ind1 = dataFactory.getOWLIndividual(URI.create(ind1uri));
+					OWLIndividual ind2 = dataFactory.getOWLIndividual(URI.create(ind2uri));
+					
+					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(ind1, op, ind2);
 
-								OWLDescription d1 = left.get(0);
-								OWLObjectPropertyExpression op = null;
-								if (d1 instanceof OWLObjectSomeRestriction) {
-									OWLObjectSomeRestriction rest = (OWLObjectSomeRestriction) d1;
-									op = rest.getProperty();
-								} else if (d1 instanceof OWLObjectMinCardinalityRestriction) {
-									OWLObjectMinCardinalityRestriction card = (OWLObjectMinCardinalityRestriction) d1;
-									op = card.getProperty();
-								} else {
-									throw new Exception("Error: Unexpected owldescription!");
-								}
-								if (op instanceof OWLObjectPropertyInverse) {
-									op = ((OWLObjectPropertyInverse) op).getNamedProperty();
-									for (int j = 0; j < right.size(); j++) {
-										OWLDescription d2 = right.get(j);
-										int indj = j;
-										if (right.size() > 1) {
-											indj = j + 1;
-										}
-										URI u = URI.create(ONTOURI + "test_" + testid.trim() + "_" + indj + "_3.owl");
-										OWLOntology o = manager.createOntology(u);
-										OWLAxiom ax = dataFactory.getOWLObjectPropertyRangeAxiom(op, d2);
-										manager.addAxiom(o, ax);
-										c++;
-										vec.add(o);
-									}
-								} else {
-									for (int j = 0; j < right.size(); j++) {
-										OWLDescription d2 = right.get(j);
-										int indj = j;
-										if (right.size() > 1) {
-											indj = j + 1;
-										}
-										URI u = URI.create(ONTOURI + "test_" + testid.trim() + "_" + indj + "_3.owl");
-										OWLOntology o = manager.createOntology(u);
-										OWLAxiom ax = dataFactory.getOWLObjectPropertyDomainAxiom(op, d2);
-										manager.addAxiom(o, ax);
-										c++;
-										vec.add(o);
-									}
-								}
-							}
-						}
-					}
+					// declaration
+					manager.addAxiom(onto, dataFactory.getOWLDeclarationAxiom(op));
+
+				} else {
+					String clazz = uri.toString() + "#" + entity;
+					OWLClass cl = dataFactory.getOWLClass(URI.create(clazz));
+					String induri = onto.getURI() + "#" + parameters;
+					OWLIndividual ind = dataFactory.getOWLIndividual(URI.create(induri));
+					axiom = dataFactory.getOWLClassAssertionAxiom(ind, cl);
+
+					
 				}
-			} else {
-				List<Vector<OWLAxiom>> axioms = getAxiomsFromTBox(tboxcontent, uri);
-				vec = getOntolgoies(axioms, testid);
+			}
+			if (axiom != null) {
+				manager.addAxiom(onto, axiom);
 			}
 		}
-		if (vec.size() == 0) {
-			URI u = URI.create(ONTOURI + "test_" + testid.trim() + ".owl");
-			OWLOntology o = manager.createOntology(u);
-			vec.add(o);
-		}
-		Iterator<OWLOntology> it = vec.iterator();
-		while (it.hasNext()) {
-			OWLOntology onto = it.next();
-			String[] individuals = abox.trim().split(" ");
-			OWLAxiom axiom = null;
-			for (int i = 0; i < individuals.length; i++) {
-				String aux = individuals[i].trim();
-				if (aux.length() > 0) {
-					int i1 = aux.indexOf("(");
-					int i2 = aux.indexOf(")");
-					String entity = aux.substring(0, i1);
-					String parameters = aux.substring(i1 + 1, i2);
-					String[] names = parameters.split(",");
-					axiom = null;
-					if (names.length == 2) {
-						String objprop = uri.toString() + "#" + entity;
-						OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(objprop));
-						String ind1uri = onto.getURI() + "#" + names[0];
-						String ind2uri = onto.getURI() + "#" + names[1];
-						OWLIndividual ind1 = dataFactory.getOWLIndividual(URI.create(ind1uri));
-						OWLIndividual ind2 = dataFactory.getOWLIndividual(URI.create(ind2uri));
-						axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(ind1, op, ind2);
-					} else {
-						String clazz = uri.toString() + "#" + entity;
-						OWLClass cl = dataFactory.getOWLClass(URI.create(clazz));
-						String induri = onto.getURI() + "#" + parameters;
-						OWLIndividual ind = dataFactory.getOWLIndividual(URI.create(induri));
-						axiom = dataFactory.getOWLClassAssertionAxiom(ind, cl);
-					}
-				}
-				if (axiom != null)
-					manager.addAxiom(onto, axiom);
-			}
 
-		}
-		return vec;
+		return onto;
 	}
 
-	private Vector<OWLOntology> getOntolgoies(List<Vector<OWLAxiom>> axioms, String testid) throws Exception {
+	private OWLOntology getOntolgoies(List<OWLAxiom> axioms, String testid) throws Exception {
 
-		Vector<OWLOntology> ontos = new Vector<OWLOntology>();
-		int nr = 1;
-		for (int i = 0; i < axioms.size(); i++) {
-			Vector<OWLAxiom> vex = axioms.get(i);
-			nr = nr * vex.size();
-		}
-		for (int i = 0; i < nr; i++) {
-			ontos.add(manager.createOntology(URI.create(ONTOURI + "test_" + testid.trim() + "_" + i + ".owl")));
-		}
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology onto = manager.createOntology(URI.create(ONTOURI + "test_" + testid.trim() + ".owl"));
 
 		for (int i = 0; i < axioms.size(); i++) {
-			Vector<OWLAxiom> vex = axioms.get(i);
-			int j = nr / vex.size();
-			int h = 0;
-			for (int a = 0; a < vex.size(); a++) {
-				OWLAxiom ax = vex.get(a);
-				for (int k = 0; k < j; k++) {
-					OWLOntology onto = ontos.get(h);
-					manager.addAxiom(onto, ax);
-					h++;
-				}
-			}
-			if (h != ontos.size()) {
-				throw new Exception("Not all ontologies were filled properly");
-			}
+			OWLAxiom vex = axioms.get(i);
+			manager.addAxiom(onto, vex);
 		}
-		return ontos;
+		return onto;
 	}
 
-	private List<Vector<OWLAxiom>> getAxiomsFromTBox(String[] tbox, URI uri) throws Exception {
+	private List<OWLAxiom> getAxiomsFromTBox(String[] tbox, URI uri, OWLOntologyManager manager, OWLDataFactory dataFactory) throws Exception {
 
-		List<Vector<OWLAxiom>> result = new Vector<Vector<OWLAxiom>>();
+		List<OWLAxiom> axioms = new LinkedList<OWLAxiom>();
 		for (int i = 0; i < tbox.length; i++) {
-			Vector<OWLAxiom> axioms = new Vector<OWLAxiom>();
+			// Vector<OWLAxiom> axioms = new Vector<OWLAxiom>();
 			String exp = tbox[i].trim();
 			String[] entities = null;
 			boolean isRoleInclusion = false;
+
 			if (exp.contains(" RISA ")) {
 				entities = exp.split("RISA");
 				isRoleInclusion = true;
 			} else {
 				entities = exp.split("ISA");
 			}
-			if (entities.length != 2) {
-				throw new Exception(" TBox at " + linenr + " is not in proper format!");
-			} else {
-				String s1 = entities[0].trim();
-				String s2 = entities[1].trim();
-				if (isRoleInclusion) {
-					OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri, s1);
-					OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri, s2);
-					OWLAxiom ax = dataFactory.getOWLSubObjectPropertyAxiom(role1, role2);
-					axioms.add(ax);
-				} else {
-					Vector<OWLDescription> left = getOWLEntity(uri, s1);
-					Vector<OWLDescription> right = getOWLEntity(uri, s2);
-					int c = 1;
-					for (int j = 0; j < left.size(); j++) {
-						OWLDescription d1 = left.get(j);
-						for (int k = 0; k < right.size(); k++) {
-							OWLDescription d2 = right.get(k);
-							OWLAxiom ax = dataFactory.getOWLSubClassAxiom(d1, d2);
-							axioms.add(ax);
-						}
-					}
-					if (left.size() > 1) {// means the left side contains an
-						// exist
 
-						OWLDescription d1 = left.get(0);
-						OWLObjectPropertyExpression op = null;
-						if (d1 instanceof OWLObjectSomeRestriction) {
-							OWLObjectSomeRestriction rest = (OWLObjectSomeRestriction) d1;
-							op = rest.getProperty();
-						} else if (d1 instanceof OWLObjectMinCardinalityRestriction) {
-							OWLObjectMinCardinalityRestriction card = (OWLObjectMinCardinalityRestriction) d1;
-							op = card.getProperty();
-						} else {
-							throw new Exception("Error: Unexpected owldescription!");
-						}
-						if (op instanceof OWLObjectPropertyInverse) {
-							op = ((OWLObjectPropertyInverse) op).getNamedProperty();
-							for (int j = 0; j < right.size(); j++) {
-								OWLDescription d2 = right.get(j);
-								OWLAxiom ax = dataFactory.getOWLObjectPropertyRangeAxiom(op, d2);
-								axioms.add(ax);
-								;
-							}
-						} else {
-							for (int j = 0; j < right.size(); j++) {
-								OWLDescription d2 = right.get(j);
-								OWLAxiom ax = dataFactory.getOWLObjectPropertyDomainAxiom(op, d2);
-								axioms.add(ax);
-							}
-						}
-					}
+			if (entities.length != 2)
+				throw new Exception(" TBox at " + linenr + " is not in proper format!");
+
+			String s1 = entities[0].trim();
+			String s2 = entities[1].trim();
+			if (isRoleInclusion) {
+				OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri, s1, dataFactory);
+				OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri, s2, dataFactory);
+				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyAxiom(role1, role2);
+
+				for (OWLEntity ent : role1.getSignature()) {
+					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
 				}
+				for (OWLEntity ent : role2.getSignature()) {
+					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
+				}
+
+				axioms.add(ax);
+			} else {
+				OWLDescription left = getOWLEntity(uri, s1, dataFactory);
+				OWLDescription right = getOWLEntity(uri, s2, dataFactory);
+				int c = 1;
+
+				OWLAxiom ax = dataFactory.getOWLSubClassAxiom(left, right);
+
+				for (OWLEntity ent : ax.getSignature()) {
+					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
+				}
+
+				axioms.add(ax);
+
 			}
-			result.add(axioms);
 		}
-		return result;
+		return axioms;
 	}
 
 	private String getSPARQLQuery(String query) throws Exception {

@@ -270,11 +270,11 @@ Note: Whenever we have ER or ER^^-^^ on the left we have two test ontologies. On
 All these can be handled by the DB with the original query without rewriting or unification. Here we check that the query algorithm doesn't introduce any mistakes (e.g. introducing extra queries that generate wrong answers)
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
-||28 || a ||    ||  R(r1,r2) || q(x) :- R(x,y) R(x,z) R(y,m) R(z,m) || {} || ||
+||28 || a ||  R RISA R  ||  R(r1,r2) || q(x) :- R(x,y) R(x,z) R(y,m) R(z,m) || {} || R RISA R is temporally necessary to include R in the vocabulary ||
 ||      || b ||    ||   || q(x) :- R(x,y) R(x,z) R(m,y) R(m,z) || {r1} || ||
 ||      || c ||    ||   || q(x) :- R(y,x) R(z,x) R(y,m) R(z,m) || {r2} || ||
 ||      || d ||    ||   || q(x) :- R(y,x) R(z,x) R(m,y) R(m,z) || {} || ||
-||29 || a ||    || R(r1,r1) || q(x) :- R(x,y) R(x,z) R(y,m) R(z,m) || {r1} || this and the next have a correspondent case 28 ||
+||29 || a || R RISA R   || R(r1,r1) || q(x) :- R(x,y) R(x,z) R(y,m) R(z,m) || {r1} || this and the next have a correspondent case 28, R RISA R is temporally necessary to include R in the vocabulary ||
 ||      || b ||    ||  || q(x) :- R(y,x) R(z,x) R(m,y) R(m,z) || {r1} || ||
 
 == Combined tests ==
@@ -765,7 +765,7 @@ With exists R inverse on the left
 == Unification tests ==
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
-||86    || a ||    ||  R(r1,r2) || q(x) :- R(x,<r2>) R(x,z) R(<r2>,m) R(z,m) || {} || ||
+||86    || a ||  R RISA R  ||  R(r1,r2) || q(x) :- R(x,<r2>) R(x,z) R(<r2>,m) R(z,m) || {} || R RISA R is temporally necessary to include R in the vocabulary ||
 ||      || b ||    ||   || q(x) :- R(x,y) R(x,<r2>) R(m,y) R(m,z) || {r1} || ||
 ||      || c ||    ||   || q(x) :- R(x,y) R(x,<r2>) R(m,y) R(m,<r2>) || {r1} || ||
 ||      || d ||    ||   || q(x) :- R(x,y) R(x,<r2>) R(m,y) R(m,<r1>) || {} || ||
@@ -890,7 +890,7 @@ The following are hard cases, they involve reasoning with respect to existential
 || 194 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
 || 195 || a || A ISA ER, ER^^-^^ ISA ES, A ISA EP, P RISA S || A(a) R(n1,n2) R(n1,n3) S(n2,n4) S(n3,n4) || q(x,y,z) :- R(x,y1) R(x,y2) R(x,y3) S(y1,z1) S(y2,z1) S(y3,z1) S(y1,z2) P(m,n) R(o,y) S(y,p) R(o,z) S(z,p) || {(a,n2,n2) (a,n2,n3) (a,n3,n2) (a,n3,n3) (n1,n2,n2) (n1,n2,n3) (n1,n3,n2) (n1,n3,n3)} || ||
 || 196 ||a ||A ISA B, B ISA A, B ISA C, C ISA B || A(a) B(b) C(c) || q(x) :- A(x) || {a b c} || ||
-|| 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} || ||
+|| 197 || a || PP ISA P, SEM ISA P, SB ISA SEM, ESSN ISA PP, WF RISA WF || SB(m) WF(m,c) SSN(c,ssn1) || q(x,y) :- SEM(x) WF(x,y) PP(y) || {(m,c)} ||  NOTE WF RSIA WF is tempraly necessary to include WF in the vocabulary||
 || 198 || a || A2 ISA A1, B2 ISA B1|| A2(a) B2(b) R(a,b) || q(x,y) :- A1(x) R(x,y) B1(y) || {(a,b)} || ||
 
 

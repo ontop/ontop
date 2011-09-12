@@ -1,9 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 
 public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 
@@ -34,6 +38,13 @@ public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 	
 	public String toString() {
 		return role.toString() + "(" + o1.toString() + ", " + o2.getValue() + ")";
+	}
+
+	@Override
+	public Set<Predicate> getReferencedEntities() {
+		Set<Predicate> res = new HashSet<Predicate>();
+		res.add(role);
+		return res;
 	}
 
 }

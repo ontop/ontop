@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox.tests;
 
-import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
@@ -8,6 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
@@ -182,11 +182,14 @@ public class DAGEquivalenceTests extends TestCase {
 //		GraphGenerator.dumpISA(dag, "simplified");
 
 		DAG pureIsa = DAGConstructor.filterPureISA(dag);
+		pureIsa.clean();
 		pureIsa.index();
 //		GraphGenerator.dumpISA(pureIsa, "isa");
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
+		DAGNode equi = pureIsa.getRoleNode((Property)pureIsa.equi_mappings.get(ofac.createObjectProperty(URI.create(testURI + "A1"))));
+		
 		DAGNode node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "A1")));
 		SemanticIndexRange range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);

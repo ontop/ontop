@@ -14,14 +14,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +38,19 @@ public class DAG {
 	private final Map<Description, DAGNode>	classes;
 	private final Map<Description, DAGNode>	roles;
 
+	private final Map<Description, DAGNode>	allnodes;
+
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
-//	public final static String				thingStr			= "http://www.w3.org/2002/07/owl#Thing";
-//	public final static URI					thingUri			= URI.create(thingStr);
-//	public final static Predicate			thingPred			= predicateFactory.getPredicate(thingUri, 1);
-//	public final static ClassDescription	thingConcept		= descFactory.createClass(thingPred);
-//	public final DAGNode					thing				= new DAGNode(thingConcept);
+	// public final static String thingStr =
+	// "http://www.w3.org/2002/07/owl#Thing";
+	// public final static URI thingUri = URI.create(thingStr);
+	// public final static Predicate thingPred =
+	// predicateFactory.getPredicate(thingUri, 1);
+	// public final static ClassDescription thingConcept =
+	// descFactory.createClass(thingPred);
+	// public final DAGNode thing = new DAGNode(thingConcept);
 
 	/**
 	 * Build the DAG from the ontology
@@ -57,29 +60,42 @@ public class DAG {
 	 */
 	public DAG(Ontology ontology) {
 
-		classes = new LinkedHashMap<Description, DAGNode>(ontology.getConcepts().size());
-		roles = new LinkedHashMap<Description, DAGNode>(ontology.getRoles().size());
+		int rolenodes = ontology.getRoles().size() * 2;
 
-//		classes.put(thingConcept, thing);
+		int classnodes = ontology.getConcepts().size() + rolenodes * 2;
 
-		for (ClassDescription concept : ontology.getConcepts()) {
+		classes = new LinkedHashMap<Description, DAGNode>(classnodes * 2);
+		roles = new LinkedHashMap<Description, DAGNode>(rolenodes * 2);
+
+		allnodes = new HashMap<Description, DAGNode>((rolenodes + classnodes) * 2);
+
+		// classes.put(thingConcept, thing);
+
+		for (Predicate conceptp : ontology.getConcepts()) {
+			ClassDescription concept = descFactory.createClass(conceptp);
 			DAGNode node = new DAGNode(concept);
 
-//			if (!concept.equals(thingConcept)) {
-//				addParent(node, thing);
-				classes.put(concept, node);
-//			}
+			// if (!concept.equals(thingConcept)) {
+			// addParent(node, thing);
+			classes.put(concept, node);
+
+			allnodes.put(concept, node);
+
+			// }
 		}
-		
+
 		/*
 		 * For each role we add nodes for its inverse, its domain and its range
-		 * 
 		 */
-		for (Property role : ontology.getRoles()) {
-			roles.put(role, new DAGNode(role));
+		for (Predicate rolep : ontology.getRoles()) {
+			Property role = descFactory.createProperty(rolep);
+			DAGNode rolenode = new DAGNode(role);
+
+			roles.put(role, rolenode);
 
 			Property roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
-			roles.put(roleInv, new DAGNode(roleInv));
+			DAGNode rolenodeinv = new DAGNode(roleInv);
+			roles.put(roleInv, rolenodeinv);
 
 			PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
 			PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
@@ -88,8 +104,13 @@ public class DAG {
 			classes.put(existsRole, existsNode);
 			classes.put(existsRoleInv, existsNodeInv);
 
-//			addParent(existsNode, thing);
-//			addParent(existsNodeInv, thing);
+			allnodes.put(role, rolenode);
+			allnodes.put(existsRole, existsNode);
+			allnodes.put(existsRoleInv, existsNodeInv);
+			allnodes.put(roleInv, rolenodeinv);
+
+			// addParent(existsNode, thing);
+			// addParent(existsNodeInv, thing);
 		}
 
 		for (Axiom assertion : ontology.getAssertions()) {
@@ -105,12 +126,13 @@ public class DAG {
 				Property parent = roleIncl.getSuper();
 				Property child = roleIncl.getSub();
 
-				// This adds the direct edge and the inverse, e.g., R ISA S and R- ISA S-,
+				// This adds the direct edge and the inverse, e.g., R ISA S and
+				// R- ISA S-,
 				// R- ISA S and R ISA S-
 				addRoleEdge(parent, child);
 			}
 		}
-//		clean();
+		// clean();
 	}
 
 	private void addParent(DAGNode child, DAGNode parent) {
@@ -120,10 +142,12 @@ public class DAG {
 		}
 	}
 
-	public DAG(Map<Description, DAGNode> classes, Map<Description, DAGNode> roles, Map<Description, Description> equiMap) {
+	public DAG(Map<Description, DAGNode> classes, Map<Description, DAGNode> roles, Map<Description, Description> equiMap,
+			Map<Description, DAGNode> allnodes) {
 		this.classes = classes;
 		this.roles = roles;
 		this.equi_mappings = equiMap;
+		this.allnodes = allnodes;
 	}
 
 	private void addClassEdge(ClassDescription parent, ClassDescription child) {
@@ -134,6 +158,8 @@ public class DAG {
 		} else {
 			parentNode = new DAGNode(parent);
 			classes.put(parent, parentNode);
+
+			allnodes.put(parent, parentNode);
 		}
 		DAGNode childNode;
 		if (classes.containsKey(child)) {
@@ -141,9 +167,10 @@ public class DAG {
 		} else {
 			childNode = new DAGNode(child);
 			classes.put(child, childNode);
+
+			allnodes.put(child, childNode);
 		}
 		addParent(childNode, parentNode);
-//		addParent(parentNode, thing);
 
 	}
 
@@ -159,12 +186,16 @@ public class DAG {
 		if (parentNode == null) {
 			parentNode = new DAGNode(parent);
 			roles.put(parent, parentNode);
+
+			allnodes.put(parent, parentNode);
 		}
 
 		DAGNode childNode = roles.get(child);
 		if (childNode == null) {
 			childNode = new DAGNode(child);
 			roles.put(child, childNode);
+
+			allnodes.put(parent, parentNode);
 		}
 		addParent(childNode, parentNode);
 
@@ -173,19 +204,25 @@ public class DAG {
 		ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
 
 		addClassEdge(existsParent, existChild);
-//		addClassEdge(thingConcept, existsParent);
+		// addClassEdge(thingConcept, existsParent);
 
 	}
 
 	public void clean() {
-		DAGOperations.removeCycles(classes, equi_mappings);
-		DAGOperations.computeTransitiveReduct(classes);
 
-		DAGOperations.removeCycles(roles, equi_mappings);
+		/*
+		 * First we remove all cycles in roles, not that while doing so we might
+		 * also need to colapse some nodes in the class hierarchy, i.e., those
+		 * for \exists R and \exists R-
+		 */
+		DAGOperations.removeCycles(roles, equi_mappings,this);
 		DAGOperations.computeTransitiveReduct(roles);
 
-		DAGOperations.buildDescendants(classes);
+		DAGOperations.removeCycles(classes, equi_mappings,this);
+		DAGOperations.computeTransitiveReduct(classes);
+
 		DAGOperations.buildDescendants(roles);
+		DAGOperations.buildDescendants(classes);
 	}
 
 	public void index() {
@@ -280,7 +317,18 @@ public class DAG {
 	public Collection<DAGNode> getRoles() {
 		return roles.values();
 	}
+	
+	
+	public DAGNode get(Description desc) {
+		return allnodes.get(desc);
+	}
 
+	/***
+	 * Returns the nodes of this DAG considering the equivalence maps.
+	 * 
+	 * @param conceptDescription
+	 * @return
+	 */
 	public DAGNode getClassNode(ClassDescription conceptDescription) {
 		DAGNode rv = classes.get(conceptDescription);
 		if (rv == null) {
@@ -289,12 +337,33 @@ public class DAG {
 		return rv;
 	}
 
+	/***
+	 * Returns the nodes of this DAG considering the equivalence maps.
+	 * 
+	 * @param conceptDescription
+	 * @return
+	 */
 	public DAGNode getRoleNode(Property roleDescription) {
 		DAGNode rv = roles.get(roleDescription);
 		if (rv == null) {
 			rv = roles.get(equi_mappings.get(roleDescription));
 		}
 		return rv;
+	}
+
+	/***
+	 * Returns the node associated to this description. It doesnt take into
+	 * account equivalences.
+	 * 
+	 * @param description
+	 * @return
+	 */
+	public DAGNode getNode(Description description) {
+		return allnodes.get(description);
+	}
+
+	public Map<Description, DAGNode> getAllnodes() {
+		return allnodes;
 	}
 
 	public Iterator<Edge> getTransitiveEdgeIterator() {

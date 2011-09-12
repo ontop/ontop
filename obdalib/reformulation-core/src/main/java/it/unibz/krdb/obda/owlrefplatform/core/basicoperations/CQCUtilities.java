@@ -14,7 +14,7 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
@@ -153,7 +153,7 @@ public class CQCUtilities {
 							oldTerm1 = patom.getTerm(0);
 							oldTerm2 = patom.getTerm(1);
 						}
-					} else if (left instanceof Class) {
+					} else if (left instanceof OClass) {
 
 						if (patom.getArity() != 1)
 							continue;
@@ -193,8 +193,8 @@ public class CQCUtilities {
 							newTerm2 = oldTerm2;
 						}
 						newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
-					} else if (right instanceof Class) {
-						Class rightAtomicConcept = (Class) right;
+					} else if (right instanceof OClass) {
+						OClass rightAtomicConcept = (OClass) right;
 						newTerm1 = oldTerm1;
 						newPredicate = rightAtomicConcept.getPredicate();
 						newAtom = fac.getAtom(newPredicate, newTerm1);

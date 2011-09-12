@@ -1,15 +1,13 @@
 package it.unibz.krdb.obda.reformulation.tests;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import junit.framework.TestCase;
-
+import java.util.Set;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 
 public class ReformulationTest extends TestCase {
@@ -59,112 +57,112 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
      }
  }
 
-	public void test_1_0_0() throws Exception {
-		String ontoname = "test_1_0_0";
+	public void test_1() throws Exception {
+		String ontoname = "test_1";
 		test_function(ontoname);
 	}
-	public void test_2_0_0() throws Exception {
-		String ontoname = "test_2_0_0";
+	public void test_2() throws Exception {
+		String ontoname = "test_2";
 		test_function(ontoname);
 	}
-	public void test_3_0_0() throws Exception {
-		String ontoname = "test_3_0_0";
+	public void test_3() throws Exception {
+		String ontoname = "test_3";
 		test_function(ontoname);
 	}
-	public void test_4_0_0() throws Exception {
-		String ontoname = "test_4_0_0";
+	public void test_4() throws Exception {
+		String ontoname = "test_4";
 		test_function(ontoname);
 	}
-	public void test_5_0_0() throws Exception {
-		String ontoname = "test_5_0_0";
+	public void test_5() throws Exception {
+		String ontoname = "test_5";
 		test_function(ontoname);
 	}
-	public void test_6_0_0() throws Exception {
-		String ontoname = "test_6_0_0";
+	public void test_6() throws Exception {
+		String ontoname = "test_6";
 		test_function(ontoname);
 	}
-	public void test_7_0_0() throws Exception {
-		String ontoname = "test_7_0_0";
+	public void test_7() throws Exception {
+		String ontoname = "test_7";
 		test_function(ontoname);
 	}
-	public void test_8_0_0() throws Exception {
-		String ontoname = "test_8_0_0";
+	public void test_8() throws Exception {
+		String ontoname = "test_8";
 		test_function(ontoname);
 	}
-	public void test_9_0_0() throws Exception {
-		String ontoname = "test_9_0_0";
+	public void test_9() throws Exception {
+		String ontoname = "test_9";
 		test_function(ontoname);
 	}
-	public void test_10_0_0() throws Exception {
-		String ontoname = "test_10_0_0";
+	public void test_10() throws Exception {
+		String ontoname = "test_10";
 		test_function(ontoname);
 	}
-	public void test_11_0_0() throws Exception {
-		String ontoname = "test_11_0_0";
+	public void test_11() throws Exception {
+		String ontoname = "test_11";
 		test_function(ontoname);
 	}
-	public void test_12_0_0() throws Exception {
-		String ontoname = "test_12_0_0";
+	public void test_12() throws Exception {
+		String ontoname = "test_12";
 		test_function(ontoname);
 	}
-	public void test_13_0_0() throws Exception {
-		String ontoname = "test_13_0_0";
+	public void test_13() throws Exception {
+		String ontoname = "test_13";
 		test_function(ontoname);
 	}
-	public void test_14_0_0() throws Exception {
-		String ontoname = "test_14_0_0";
+	public void test_14() throws Exception {
+		String ontoname = "test_14";
 		test_function(ontoname);
 	}
-	public void test_15_0_0() throws Exception {
-		String ontoname = "test_15_0_0";
+	public void test_15() throws Exception {
+		String ontoname = "test_15";
 		test_function(ontoname);
 	}
-	public void test_16_0_0() throws Exception {
-		String ontoname = "test_16_0_0";
+	public void test_16() throws Exception {
+		String ontoname = "test_16";
 		test_function(ontoname);
 	}
-	public void test_17_0_0() throws Exception {
-		String ontoname = "test_17_0_0";
+	public void test_17() throws Exception {
+		String ontoname = "test_17";
 		test_function(ontoname);
 	}
-	public void test_18_0_0() throws Exception {
-		String ontoname = "test_18_0_0";
+	public void test_18() throws Exception {
+		String ontoname = "test_18";
 		test_function(ontoname);
 	}
-	public void test_19_0_0() throws Exception {
-		String ontoname = "test_19_0_0";
+	public void test_19() throws Exception {
+		String ontoname = "test_19";
 		test_function(ontoname);
 	}
-	public void test_20_0_0() throws Exception {
-		String ontoname = "test_20_0_0";
+	public void test_20() throws Exception {
+		String ontoname = "test_20";
 		test_function(ontoname);
 	}
-	public void test_21_0_0() throws Exception {
-		String ontoname = "test_21_0_0";
+	public void test_21() throws Exception {
+		String ontoname = "test_21";
 		test_function(ontoname);
 	}
-	public void test_22_0_0() throws Exception {
-		String ontoname = "test_22_0_0";
+	public void test_22() throws Exception {
+		String ontoname = "test_22";
 		test_function(ontoname);
 	}
-	public void test_23_0_0() throws Exception {
-		String ontoname = "test_23_0_0";
+	public void test_23() throws Exception {
+		String ontoname = "test_23";
 		test_function(ontoname);
 	}
-	public void test_24_0_0() throws Exception {
-		String ontoname = "test_24_0_0";
+	public void test_24() throws Exception {
+		String ontoname = "test_24";
 		test_function(ontoname);
 	}
-	public void test_25_0_0() throws Exception {
-		String ontoname = "test_25_0_0";
+	public void test_25() throws Exception {
+		String ontoname = "test_25";
 		test_function(ontoname);
 	}
-	public void test_26_0_0() throws Exception {
-		String ontoname = "test_26_0_0";
+	public void test_26() throws Exception {
+		String ontoname = "test_26";
 		test_function(ontoname);
 	}
-	public void test_27_0_0() throws Exception {
-		String ontoname = "test_27_0_0";
+	public void test_27() throws Exception {
+		String ontoname = "test_27";
 		test_function(ontoname);
 	}
 	public void test_28() throws Exception {
@@ -175,8 +173,8 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
 		String ontoname = "test_29";
 		test_function(ontoname);
 	}
-	public void test_30_0_0() throws Exception {
-		String ontoname = "test_30_0_0";
+	public void test_30() throws Exception {
+		String ontoname = "test_30";
 		test_function(ontoname);
 	}
 	public void test_31() throws Exception {
@@ -227,128 +225,128 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
 		String ontoname = "test_42";
 		test_function(ontoname);
 	}
-	public void test_43_0() throws Exception {
-		String ontoname = "test_43_0";
+	public void test_43() throws Exception {
+		String ontoname = "test_43";
 		test_function(ontoname);
 	}
-	public void test_44_0() throws Exception {
-		String ontoname = "test_44_0";
+	public void test_44() throws Exception {
+		String ontoname = "test_44";
 		test_function(ontoname);
 	}
-	public void test_45_0() throws Exception {
-		String ontoname = "test_45_0";
+	public void test_45() throws Exception {
+		String ontoname = "test_45";
 		test_function(ontoname);
 	}
-	public void test_46_0() throws Exception {
-		String ontoname = "test_46_0";
+	public void test_46() throws Exception {
+		String ontoname = "test_46";
 		test_function(ontoname);
 	}
-	public void test_47_0_0() throws Exception {
-		String ontoname = "test_47_0_0";
+	public void test_47() throws Exception {
+		String ontoname = "test_47";
 		test_function(ontoname);
 	}
-	public void test_48_0_0() throws Exception {
-		String ontoname = "test_48_0_0";
+	public void test_48() throws Exception {
+		String ontoname = "test_48";
 		test_function(ontoname);
 	}
-	public void test_49_0_0() throws Exception {
-		String ontoname = "test_49_0_0";
+	public void test_49() throws Exception {
+		String ontoname = "test_49";
 		test_function(ontoname);
 	}
-	public void test_50_0_0() throws Exception {
-		String ontoname = "test_50_0_0";
+	public void test_50() throws Exception {
+		String ontoname = "test_50";
 		test_function(ontoname);
 	}
-	public void test_51_0_0() throws Exception {
-		String ontoname = "test_51_0_0";
+	public void test_51() throws Exception {
+		String ontoname = "test_51";
 		test_function(ontoname);
 	}
-	public void test_52_0_0() throws Exception {
-		String ontoname = "test_52_0_0";
+	public void test_52() throws Exception {
+		String ontoname = "test_52";
 		test_function(ontoname);
 	}
-	public void test_53_0_0() throws Exception {
-		String ontoname = "test_53_0_0";
+	public void test_53() throws Exception {
+		String ontoname = "test_53";
 		test_function(ontoname);
 	}
-	public void test_54_0_0() throws Exception {
-		String ontoname = "test_54_0_0";
+	public void test_54() throws Exception {
+		String ontoname = "test_54";
 		test_function(ontoname);
 	}
-	public void test_55_0_0() throws Exception {
-		String ontoname = "test_55_0_0";
+	public void test_55() throws Exception {
+		String ontoname = "test_55";
 		test_function(ontoname);
 	}
-	public void test_56_0_0() throws Exception {
-		String ontoname = "test_56_0_0";
+	public void test_56() throws Exception {
+		String ontoname = "test_56";
 		test_function(ontoname);
 	}
-	public void test_57_0_0() throws Exception {
-		String ontoname = "test_57_0_0";
+	public void test_57() throws Exception {
+		String ontoname = "test_57";
 		test_function(ontoname);
 	}
-	public void test_58_0_0() throws Exception {
-		String ontoname = "test_58_0_0";
+	public void test_58() throws Exception {
+		String ontoname = "test_58";
 		test_function(ontoname);
 	}
-	public void test_59_0_0() throws Exception {
-		String ontoname = "test_59_0_0";
+	public void test_59() throws Exception {
+		String ontoname = "test_59";
 		test_function(ontoname);
 	}
-	public void test_60_0_0() throws Exception {
-		String ontoname = "test_60_0_0";
+	public void test_60() throws Exception {
+		String ontoname = "test_60";
 		test_function(ontoname);
 	}
-	public void test_61_0_0() throws Exception {
-		String ontoname = "test_61_0_0";
+	public void test_61() throws Exception {
+		String ontoname = "test_61";
 		test_function(ontoname);
 	}
-	public void test_62_0_0() throws Exception {
-		String ontoname = "test_62_0_0";
+	public void test_62() throws Exception {
+		String ontoname = "test_62";
 		test_function(ontoname);
 	}
-	public void test_63_0_0() throws Exception {
-		String ontoname = "test_63_0_0";
+	public void test_63() throws Exception {
+		String ontoname = "test_63";
 		test_function(ontoname);
 	}
-	public void test_64_0_0() throws Exception {
-		String ontoname = "test_64_0_0";
+	public void test_64() throws Exception {
+		String ontoname = "test_64";
 		test_function(ontoname);
 	}
-	public void test_65_0_0() throws Exception {
-		String ontoname = "test_65_0_0";
+	public void test_65() throws Exception {
+		String ontoname = "test_65";
 		test_function(ontoname);
 	}
-	public void test_66_0_0() throws Exception {
-		String ontoname = "test_66_0_0";
+	public void test_66() throws Exception {
+		String ontoname = "test_66";
 		test_function(ontoname);
 	}
-	public void test_67_0_0() throws Exception {
-		String ontoname = "test_67_0_0";
+	public void test_67() throws Exception {
+		String ontoname = "test_67";
 		test_function(ontoname);
 	}
-	public void test_68_0_0() throws Exception {
-		String ontoname = "test_68_0_0";
+	public void test_68() throws Exception {
+		String ontoname = "test_68";
 		test_function(ontoname);
 	}
-	public void test_69_0_0() throws Exception {
-		String ontoname = "test_69_0_0";
+	public void test_69() throws Exception {
+		String ontoname = "test_69";
 		test_function(ontoname);
 	}
-	public void test_70_0_0() throws Exception {
-		String ontoname = "test_70_0_0";
+	public void test_70() throws Exception {
+		String ontoname = "test_70";
 		test_function(ontoname);
 	}
-	public void test_71_0_0() throws Exception {
-		String ontoname = "test_71_0_0";
+	public void test_71() throws Exception {
+		String ontoname = "test_71";
 		test_function(ontoname);
 	}
-	public void test_72_0_0() throws Exception {
-		String ontoname = "test_72_0_0";
+	public void test_72() throws Exception {
+		String ontoname = "test_72";
 		test_function(ontoname);
 	}
-	public void test_73_0_0() throws Exception {
-		String ontoname = "test_73_0_0";
+	public void test_73() throws Exception {
+		String ontoname = "test_73";
 		test_function(ontoname);
 	}
 	public void test_74() throws Exception {
@@ -403,84 +401,84 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
 		String ontoname = "test_86";
 		test_function(ontoname);
 	}
-	public void test_87_0_0() throws Exception {
-		String ontoname = "test_87_0_0";
+	public void test_87() throws Exception {
+		String ontoname = "test_87";
 		test_function(ontoname);
 	}
-	public void test_88_0() throws Exception {
-		String ontoname = "test_88_0";
+	public void test_88() throws Exception {
+		String ontoname = "test_88";
 		test_function(ontoname);
 	}
-	public void test_89_0() throws Exception {
-		String ontoname = "test_89_0";
+	public void test_89() throws Exception {
+		String ontoname = "test_89";
 		test_function(ontoname);
 	}
-	public void test_90_0() throws Exception {
-		String ontoname = "test_90_0";
+	public void test_90() throws Exception {
+		String ontoname = "test_90";
 		test_function(ontoname);
 	}
-	public void test_200_0() throws Exception {
-		String ontoname = "test_200_0";
+	public void test_200() throws Exception {
+		String ontoname = "test_200";
 		test_function(ontoname);
 	}
-	public void test_201_0() throws Exception {
-		String ontoname = "test_201_0";
+	public void test_201() throws Exception {
+		String ontoname = "test_201";
 		test_function(ontoname);
 	}
-	public void test_210_0() throws Exception {
-		String ontoname = "test_210_0";
+	public void test_210() throws Exception {
+		String ontoname = "test_210";
 		test_function(ontoname);
 	}
-	public void test_401_0() throws Exception {
-		String ontoname = "test_401_0";
+	public void test_401() throws Exception {
+		String ontoname = "test_401";
 		test_function(ontoname);
 	}
-	public void test_402_0() throws Exception {
-		String ontoname = "test_402_0";
+	public void test_402() throws Exception {
+		String ontoname = "test_402";
 		test_function(ontoname);
 	}
-	public void test_403_0() throws Exception {
-		String ontoname = "test_403_0";
+	public void test_403() throws Exception {
+		String ontoname = "test_403";
 		test_function(ontoname);
 	}
-	public void test_404_0() throws Exception {
-		String ontoname = "test_404_0";
+	public void test_404() throws Exception {
+		String ontoname = "test_404";
 		test_function(ontoname);
 	}
-	public void test_190_0() throws Exception {
-		String ontoname = "test_190_0";
+	public void test_190() throws Exception {
+		String ontoname = "test_190";
 		test_function(ontoname);
 	}
-	public void test_191_0() throws Exception {
-		String ontoname = "test_191_0";
+	public void test_191() throws Exception {
+		String ontoname = "test_191";
 		test_function(ontoname);
 	}
-	public void test_192_0() throws Exception {
-		String ontoname = "test_192_0";
+	public void test_192() throws Exception {
+		String ontoname = "test_192";
 		test_function(ontoname);
 	}
-	public void test_193_0() throws Exception {
-		String ontoname = "test_193_0";
+	public void test_193() throws Exception {
+		String ontoname = "test_193";
 		test_function(ontoname);
 	}
-	public void test_194_0() throws Exception {
-		String ontoname = "test_194_0";
+	public void test_194() throws Exception {
+		String ontoname = "test_194";
 		test_function(ontoname);
 	}
-	public void test_195_0() throws Exception {
-		String ontoname = "test_195_0";
+	public void test_195() throws Exception {
+		String ontoname = "test_195";
 		test_function(ontoname);
 	}
-	public void test_196_0() throws Exception {
-		String ontoname = "test_196_0";
+	public void test_196() throws Exception {
+		String ontoname = "test_196";
 		test_function(ontoname);
 	}
-	public void test_197_0() throws Exception {
-		String ontoname = "test_197_0";
+	public void test_197() throws Exception {
+		String ontoname = "test_197";
 		test_function(ontoname);
 	}
-	public void test_198_0() throws Exception {
-		String ontoname = "test_198_0";
+	public void test_198() throws Exception {
+		String ontoname = "test_198";
 		test_function(ontoname);
 	}
 }

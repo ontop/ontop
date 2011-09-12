@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
@@ -74,8 +74,8 @@ public class PositiveInclusionApplicator {
 			Predicate pred = atom.getPredicate();
 			ClassDescription inc = ((SubClassAxiomImpl) pi).getSuper();
 			Predicate inc_predicate = null;
-			if (inc instanceof Class) {
-				inc_predicate = ((Class) inc).getPredicate();
+			if (inc instanceof OClass) {
+				inc_predicate = ((OClass) inc).getPredicate();
 			} else if (inc instanceof PropertySomeRestriction) {
 				inc_predicate = ((PropertySomeRestriction) inc).getPredicate();
 			}
@@ -482,8 +482,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
@@ -509,8 +509,8 @@ public class PositiveInclusionApplicator {
 
 						Predicate predicate = null;
 
-						if (lefthandside instanceof Class) {
-							predicate = ((Class) lefthandside).getPredicate();
+						if (lefthandside instanceof OClass) {
+							predicate = ((OClass) lefthandside).getPredicate();
 						} else if (lefthandside instanceof PropertySomeRestriction) {
 							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
@@ -522,8 +522,8 @@ public class PositiveInclusionApplicator {
 
 						Predicate predicate = null;
 
-						if (lefthandside instanceof Class) {
-							predicate = ((Class) lefthandside).getPredicate();
+						if (lefthandside instanceof OClass) {
+							predicate = ((OClass) lefthandside).getPredicate();
 						} else if (lefthandside instanceof PropertySomeRestriction) {
 							predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 						}
@@ -563,8 +563,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
@@ -577,8 +577,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
@@ -591,8 +591,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
@@ -609,8 +609,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
@@ -623,8 +623,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}
@@ -637,8 +637,8 @@ public class PositiveInclusionApplicator {
 
 					Predicate predicate = null;
 
-					if (lefthandside instanceof Class) {
-						predicate = ((Class) lefthandside).getPredicate();
+					if (lefthandside instanceof OClass) {
+						predicate = ((OClass) lefthandside).getPredicate();
 					} else if (lefthandside instanceof PropertySomeRestriction) {
 						predicate = ((PropertySomeRestriction) lefthandside).getPredicate();
 					}

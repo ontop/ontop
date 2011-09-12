@@ -1,9 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.ontology.imp;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Class;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 
-public class ClassImpl implements Class {
+public class ClassImpl implements OClass {
 
 	private Predicate	predicate	= null;
 

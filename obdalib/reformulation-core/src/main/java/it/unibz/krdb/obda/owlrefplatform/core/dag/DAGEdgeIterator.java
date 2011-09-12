@@ -46,16 +46,21 @@ public class DAGEdgeIterator implements Iterator<Edge> {
 	boolean			allowParentAdvance				= true;
 
 	public DAGEdgeIterator(DAG dag) {
-		for (DAGNode node : dag.getClasses()) {
+		for (DAGNode node: dag.getAllnodes().values()) {
 			if (node.getParents().isEmpty()) {
 				parentNodeQueue.add(node);
 			}
 		}
-		for (DAGNode node : dag.getRoles()) {
-			if (node.getParents().isEmpty()) {
-				parentNodeQueue.add(node);
-			}
-		}
+//		for (DAGNode node : dag.getClasses()) {
+//			if (node.getParents().isEmpty()) {
+//				parentNodeQueue.add(node);
+//			}
+//		}
+//		for (DAGNode node : dag.getRoles()) {
+//			if (node.getParents().isEmpty()) {
+//				parentNodeQueue.add(node);
+//			}
+//		}
 		processChildrensEquivalences = false;
 		setCurrentParent(parentNodeQueue.poll());
 
