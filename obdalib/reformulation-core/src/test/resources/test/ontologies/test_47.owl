@@ -8,15 +8,15 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
-    <!ENTITY test_86 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#" >
+    <!ENTITY test_47 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_47.owl#" >
 ]>
 
 
-<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#"
-     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl"
-     xmlns:test_86="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#"
+<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_47.owl#"
+     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_47.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:test_47="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_47.owl#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
@@ -28,7 +28,7 @@
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
-    // Object Properties
+    // Classes
     //
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
@@ -36,11 +36,17 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A -->
 
-    <owl:ObjectProperty rdf:about="&test;R">
-        <rdfs:subPropertyOf rdf:resource="&test;R"/>
-    </owl:ObjectProperty>
+    <owl:Class rdf:about="&test;A">
+        <rdfs:subClassOf rdf:resource="&test;B"/>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B -->
+
+    <owl:Class rdf:about="&test;B"/>
     
 
 
@@ -55,17 +61,11 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#r1 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_47.owl#a -->
 
-    <owl:Thing rdf:about="#r1">
-        <test:R rdf:resource="#r2"/>
+    <owl:Thing rdf:about="#a">
+        <rdf:type rdf:resource="&test;A"/>
     </owl:Thing>
-    
-
-
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#r2 -->
-
-    <owl:Thing rdf:about="#r2"/>
 </rdf:RDF>
 
 

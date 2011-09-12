@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE OBDA [
-]>
-<OBDA>
-  <SavedQueries>
-    <Query id="a" text="SELECT $x $y $z WHERE {$x dllite:R$y1 . $x dllite:R$y2 . $x dllite:R$y3 . $y1 dllite:S$z1 . $y2 dllite:S$z1 . $y3 dllite:S$z1 . $y1 dllite:S$z2 . $m dllite:P$n . $o dllite:R$y . $y dllite:S$p . $o dllite:R$z . $z dllite:S$p}"/>
-  </SavedQueries>
-</OBDA>

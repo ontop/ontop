@@ -38,7 +38,9 @@
 
     <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R -->
 
-    <owl:ObjectProperty rdf:about="&test;R"/>
+    <owl:ObjectProperty rdf:about="&test;R">
+        <rdfs:subPropertyOf rdf:resource="&test;R"/>
+    </owl:ObjectProperty>
     
 
 

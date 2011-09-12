@@ -8,14 +8,14 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
-    <!ENTITY test_86 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#" >
+    <!ENTITY test_65 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_65.owl#" >
 ]>
 
 
-<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#"
-     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl"
-     xmlns:test_86="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#"
+<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_65.owl#"
+     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_65.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:test_65="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_65.owl#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
@@ -38,9 +38,30 @@
 
     <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R -->
 
-    <owl:ObjectProperty rdf:about="&test;R">
-        <rdfs:subPropertyOf rdf:resource="&test;R"/>
-    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="&test;R"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B -->
+
+    <owl:Class rdf:about="&test;B"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
     
 
 
@@ -55,7 +76,7 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#r1 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_65.owl#r1 -->
 
     <owl:Thing rdf:about="#r1">
         <test:R rdf:resource="#r2"/>
@@ -63,9 +84,29 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_86.owl#r2 -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_65.owl#r2 -->
 
     <owl:Thing rdf:about="#r2"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;B"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;R"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
 </rdf:RDF>
 
 
