@@ -350,24 +350,17 @@ public class SQL99ParserTest extends TestCase
     print("test_5_9");
     assertTrue(result);
   }
-
+  
   //@Test
   public void test_5_10() {
-	  final boolean result = parse("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id " +
-	  		"UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
+	  final boolean result = parse("SELECT t1.id, t1.name, t2.score FROM (SELECT id, name FROM student WHERE student.name='John') AS t1 JOIN grade as t2 ON t1.id=t2.st_id");
 	  print("test_5_10");
 	  assertTrue(result);
   }
   
   //@Test
   public void test_5_11() {
-	  final boolean result = parse("SELECT view1.id, view1.name, table2.* FROM (SELECT id, name FROM table1 WHERE table1.name='John') AS view1 JOIN table2 ON view1.id=table2.id");
-	  assertTrue(result);
-  }
-  
-  //@Test
-  public void test_5_12() {
-	  final boolean result = parse("SELECT id, name, grade FROM student JOIN grade USING (id)");
+	  final boolean result = parse("SELECT id, name, score FROM student JOIN grade USING (id)");
 	  assertTrue(result);
   }
   
@@ -379,13 +372,13 @@ public class SQL99ParserTest extends TestCase
 
   //@Test
   public void test_6_2() {
-    final boolean result = parse("SELECT * FROM (SELECT id, name, class_name FROM student JOIN class ON student.id=class.st_id) t1");
+    final boolean result = parse("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1");
     assertTrue(result);
   }
 
   //@Test
   public void test_6_3() {
-    final boolean result = parse("SELECT t1.* FROM (SELECT id, name, class_name FROM student JOIN class ON student.id=class.st_id) t1 WHERE t1.class_name='Economy'");
+    final boolean result = parse("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1 WHERE t1.score>=25");
     assertTrue(result);
   }
 
@@ -405,23 +398,42 @@ public class SQL99ParserTest extends TestCase
   
   //@Test
   public void test_8_1() {
-    final boolean result = parse("SELECT URI as X FROM class WHERE (IDX = 35) UNION ALL SELECT URI1 as X FROM role WHERE (IDX = 49) OR (IDX = 58)");
+    final boolean result = parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus");
+    print("test_8_1");
     assertTrue(result);
   }
 
   //@Test
   public void test_8_2() {
-    final boolean result = parse("SELECT URI as X FROM class WHERE (IDX = 15) UNION ALL SELECT URI1 as X FROM role WHERE (IDX = 59)");
+    final boolean result = parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION ALL SELECT payee FROM tax");
+    print("test_8_2");
     assertTrue(result);
   }
 
   //@Test
   public void test_8_3() {
-    final boolean result = parse("SELECT URI as X FROM class WHERE ((IDX >= 9) AND ( IDX <= 12)) UNION ALL SELECT URI2 as X FROM role WHERE (IDX = 51) OR (IDX = 59) OR (IDX = 64) OR (IDX = 70) OR (IDX = 73)");
+    final boolean result = parse("SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20");
+    print("test_8_3");
+    assertTrue(result);
+  }
+  
+  //@Test
+  public void test_8_4() {
+    final boolean result = parse("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus");
+    print("test_8_4");
     assertTrue(result);
   }
 
+  //@Test
+  public void test_8_5() {
+	  final boolean result = parse("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id " +
+	  		"UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
+	  print("test_5_10");
+	  assertTrue(result);
+  }
+
   private SQL99Parser parser;
+  private QueryTree query;
   
   private boolean parse(String input) {
     ANTLRStringStream inputStream = new ANTLRStringStream(input);
@@ -442,12 +454,13 @@ public class SQL99ParserTest extends TestCase
     metadata.add("public", "semester", "semester", "integer", true, 0);
     metadata.add("public", "erasmus", "id", "integer", true, 0);
     metadata.add("public", "erasmus", "name", "string", false, 0);
+    metadata.add("public", "tax", "payee", "string", false, 0);
     metadata.add("public", "tax", "amount", "double", false, 0);
 
     parser.setMetadata(metadata);
 
     try {
-      parser.parse();
+    	query = parser.parse();
     }
     catch (RecognitionException e) {
       log.debug(e.getMessage());
@@ -459,8 +472,7 @@ public class SQL99ParserTest extends TestCase
     return true;
   }
   
-  private void print(String head) {
-	QueryTree tree = parser.getQueryTree();
-	System.out.println(head + ": " + tree.toString());
+  private void print(String title) {
+	System.out.println(title + ": " + query.toString());
   }
 }
