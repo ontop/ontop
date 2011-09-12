@@ -22,6 +22,7 @@ import it.unibz.krdb.sql.api.Aggregation;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.CrossJoin;
 import it.unibz.krdb.sql.api.NaturalJoin;
+import it.unibz.krdb.sql.api.SetUnion;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.RelationalAlgebra;
 
@@ -90,16 +91,30 @@ private boolean bSelectAll = false;
 
 /**
  * Sets the database metadata.
+ * 
+ * @param metadata
+ *           The database metadata object.
  */
 public void setMetadata(DBMetadata metadata) {
   this.metadata = metadata;
 }
 
+/**
+ * Retrieves the query tree object. The tree represents
+ * the data structure of the SQL statement.
+ *
+ * @return Returns a query tree.
+ */
 public QueryTree getQueryTree() {
   return queryTree;
 }
 
-public Projection createProjection(ArrayList<TablePrimary> tableList, ArrayList<DerivedColumn> columnList) {
+/**
+ * A helper method to construct the projection. A projection
+ * object holds the information about the table columns in
+ * the SELECT keyword.
+ */
+private Projection createProjection(ArrayList<TablePrimary> tableList, ArrayList<DerivedColumn> columnList) {
 
   Projection prj = new Projection();
   
@@ -123,7 +138,12 @@ public Projection createProjection(ArrayList<TablePrimary> tableList, ArrayList<
   return prj;
 }
 
-public Selection createSelection(BooleanValueExpression booleanExp) {
+/**
+ * A helper method to construct the selection. A selection object
+ * holds the information about the comparison predicate (e.g., A = B)
+ * in the WHERE statment.
+ */
+private Selection createSelection(BooleanValueExpression booleanExp) {
   if (booleanExp == null) {
     return null;
   }
@@ -133,7 +153,12 @@ public Selection createSelection(BooleanValueExpression booleanExp) {
   return slc;
 }
 
-public Aggregation createAggregation(ArrayList<GroupingElement> groupingList) {
+/**
+ * A helper method to constuct the aggregation. An aggregation object
+ * holds the information about the table attributes that are used
+ * to group the data records. They appear in the GROUP BY statement.
+ */
+private Aggregation createAggregation(ArrayList<GroupingElement> groupingList) {
   if (groupingList == null) {
     return null;
   }
@@ -141,70 +166,115 @@ public Aggregation createAggregation(ArrayList<GroupingElement> groupingList) {
   agg.addAll(groupingList);
   return agg;
 }
+
+/**
+ * Another helper method to construct the query tree. This method
+ * constructs the sub-tree taken the information from a query 
+ * specification.
+ *
+ * @param relation
+ *           The root of this sub-tree.
+ * @return Returns the query sub-tree.
+ */
+private QueryTree constructQueryTree(RelationalAlgebra relation) {
+
+  QueryTree parent = new QueryTree(relation);
+  
+  int flag = 1;
+  while (!relationStack.isEmpty()) {
+    relation = relationStack.pop();
+    QueryTree node = new QueryTree(relation);
+        
+    if ((flag \% 2) == 1) {  // right child
+      parent.attachRight(node);
+    }
+    else {  // left child
+      parent.attachLeft(node);
+      parent = node;
+    }
+    flag++;
+  }
+  return parent.root();
+}
 }
 
 /*------------------------------------------------------------------
  * PARSER RULES
  *------------------------------------------------------------------*/
 
-parse
-  : query EOF
+parse returns [QueryTree value]
+  : query EOF {
+      $value = $query.value;
+    }
   ;
   
-query
-  : a=query_specification
-    (UNION (set_quantifier)? b=query_specification)*
+query returns [QueryTree value]
+@init {
+int quantifier = 0;
+}
+  : a=query_specification { 
+      queryTree = $a.value; 
+      $value = queryTree;
+    }
+    (UNION set_quantifier? b=query_specification {          
+      quantifier += $set_quantifier.value;
+      SetUnion union = new SetUnion(quantifier);
+          
+      QueryTree parent = new QueryTree(union);      
+      parent.attachLeft(queryTree);
+      parent.attachRight($b.value);
+       
+      queryTree = parent.root();
+      $value = queryTree;
+    })*
   ;
   
-query_specification
-  : SELECT set_quantifier? select_list table_expression {      
+query_specification returns [QueryTree value]
+@init {
+int quantifier = 0;
+}
+  : SELECT set_quantifier? select_list table_expression {
+  
       TableExpression te = $table_expression.value;
       
+      // Construct the projection
       ArrayList<TablePrimary> tableList = te.getFromClause();
       ArrayList<DerivedColumn> columnList = $select_list.value;
       Projection prj = createProjection(tableList, columnList);
-      prj.setType($set_quantifier.value);
       
+      quantifier += $set_quantifier.value;
+      prj.setType(quantifier);
+      
+      // Construct the selection
       BooleanValueExpression booleanExp = te.getWhereClause();
       Selection slc = createSelection(booleanExp);
       
+      // Construct the aggregation
       ArrayList<GroupingElement> groupingList = te.getGroupByClause();
       Aggregation agg = createAggregation(groupingList);
       
       // Construct the query tree
-      RelationalAlgebra relation = relationStack.pop();
-      
-      relation.setProjection(prj);
+      RelationalAlgebra root = relationStack.pop();
+      root.setProjection(prj);
       if (slc != null) {
-        relation.setSelection(slc);
+        root.setSelection(slc);
       }
       if (agg != null) {
-        relation.setAggregation(agg);
+        root.setAggregation(agg);
       }
-
-      QueryTree parent = new QueryTree(relation);
-      
-      int flag = 1;
-      while (!relationStack.isEmpty()) {
-        relation = relationStack.pop();
-        QueryTree node = new QueryTree(relation);
-        
-        if ((flag \% 2) == 1) {
-          parent.attachRight(node);
-        }
-        else {
-          parent.attachLeft(node);
-          parent = node;
-        }
-        flag++;
-      }
-      queryTree = parent.root();   
+      $value = constructQueryTree(root);   
     }
   ;
 
-set_quantifier returns [Projection.Type value]
-  : DISTINCT { $value = Projection.Type.DISTINCT; }
-  | ALL { $value = Projection.Type.ALL; }
+/**
+ * The types of quantifier are based on a particular ordering system.
+ * Therefore, the integers given here are not arbitrary.
+ * 
+ * {@link Projection, SetUnion}
+ */
+set_quantifier returns [int value]
+  : ALL { $value = 1; }
+  | DISTINCT { $value = 2; }
   ;
   
 select_list returns [ArrayList<DerivedColumn> value]
@@ -504,7 +574,6 @@ grouping_column_reference_list returns [ArrayList<ColumnReference> value]
     (COMMA b=column_reference { $value.add($b.value); })*
   ;  
 
-// The types of join are based on a particular coding system.
 joined_table returns [TablePrimary value]
 @init {
   int joinType = 0;
@@ -517,6 +586,12 @@ joined_table returns [TablePrimary value]
     })+
   ;
 
+/**
+ * The types of join are based on a particular ordering system.
+ * Therefore, the integers given here are not arbitrary.
+ *
+ * {@link NaturalJoin}
+ */
 join_type returns [int value]
 @init {
   int outer = 0;
