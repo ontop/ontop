@@ -445,6 +445,10 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
 		String ontoname = "test_404";
 		test_function(ontoname);
 	}
+	public void test_405() throws Exception {
+		String ontoname = "test_405";
+		test_function(ontoname);
+	}
 	public void test_190() throws Exception {
 		String ontoname = "test_190";
 		test_function(ontoname);

@@ -875,6 +875,21 @@ These are the first cases which tests the effects of unification and positive in
 || || g || || || q(x,y) :- C1(x,y) || {(c11,c12) (c22,c21) (c31,c32)} || ||
 || || h || || || q(x,y) :- C2(y,x) || {(c11,c12) (c22,c21) (c31,c32)} || ||
 || || i || || || q(x,y) :- C3(x,y) || {(c11,c12) (c22,c21) (c31,c32)} || ||
+|| 405 || a || A1 ISA ER1, ER1 ISA A1, ER1 ISA A3, A3 ISA ER1,B1 ISA ES1^^-^^, ES1^^-^^ ISA B1, ES1^^-^^ ISA B3, B3 ISA ES1^^-^^,C1 ISA EM1, EM1 ISA C1, EM1 ISA C3, C3 ISA EM1, C1 ISA B1, B1 ISA A1,R1 RISA R2^^-^^, R2^^-^^ RISA R1, R2^^-^^ RISA R3, R3 RISA R2^^-^^,S1 RISA S2^^-^^, S2^^-^^ RISA S1, S2^^-^^ RISA S3, S3 RISA S2^^-^^,M1 RISA M2^^-^^, M2^^-^^ RISA M1, M2^^-^^ RISA M3, M3 RISA M2^^-^^, M1 RISA S1, S1 RISA R1 || A1(a1) A3(a3) B1(b1) B3(b3) C1(c1) C3(c3) R1(r11,r12) R2(r21,r22) R3(r31,r32) S1(s11,s12) S2(s21,s22) S3(s31,s32) M1(m11,m12) M2(m21,m22) M3(m31,m32) || q(x,y) :- R1(x,y) || {(r11,r12) (r22,r21) (r31,r32) (s11,s12) (s22,s21) (s31,s32) (m11,m12) (m22,m21) (m31,m32)} || with inverse roles in the middle ||
+|| || b || || || q(x,y) :- R2(y,x) || {(r11,r12) (r22,r21) (r31,r32) (s11,s12) (s22,s21) (s31,s32) (m11,m12) (m22,m21) (m31,m32)} || ||
+|| || c || || || q(x,y) :- R3(x,y) || {(r11,r12) (r22,r21) (r31,r32) (s11,s12) (s22,s21) (s31,s32) (m11,m12) (m22,m21) (m31,m32)} || ||
+|| || d || || || q(x,y) :- S1(x,y) || {(s11,s12) (s22,s21) (s31,s32) (m11,m12) (m22,m21) (m31,m32)} || ||
+|| || e || || || q(x,y) :- S2(y,x) || {(s11,s12) (s22,s21) (s31,s32) (m11,m12) (m22,m21) (m31,m32)} || ||
+|| || f || || || q(x,y) :- S3(x,y) || {(s11,s12) (s22,s21) (s31,s32) (m11,m12) (m22,m21) (m31,m32)} || ||
+|| || g || || || q(x,y) :- M1(x,y) || {(m11,m12) (m22,m21) (m31,m32)} || ||
+|| || h || || || q(x,y) :- M2(y,x) || {(m11,m12) (m22,m21) (m31,m32)} || ||
+|| || i || || || q(x,y) :- M3(x,y) || {(m11,m12) (m22,m21) (m31,m32)} || ||
+|| || j || || || q(x) :- A1(x) || {a1 a3 b1 b3 c1 c3 r11 r22 r31 s11 s12 s21 s22 s31 s32 m12 m21 m32 m11 m22 m31} || ||
+|| || k || || || q(x) :- A3(x) || {a1 a3 b1 b3 c1 c3 r11 r22 r31 s11 s12 s21 s22 s31 s32 m12 m21 m32 m11 m22 m31}  || ||
+|| || l || || || q(x) :- B1(x) || {b1 b3 c1 c3 s12 s21 s32 m12 m21 m32 m11 m22 m31} || ||
+|| || m || || || q(x) :- B3(x) || {b1 b3 c1 c3 s12 s21 s32 m12 m21 m32 m11 m22 m31} || ||
+|| || n || || || q(x) :- C1(x) || {c1 c3 m11 m22 m31} || ||
+|| || o || || || q(x) :- C3(x) || {c1 c3 m11 m22 m31} || ||
 
 
 
@@ -897,4 +912,4 @@ The following are hard cases, they involve reasoning with respect to existential
 
 #END# Correct tests end here, ignore the ones bellow
 
-We need to complement with transtivity tests for all concept description and role description types.
+We need to complement with transitivity tests for all concept description and role description types.

@@ -1,0 +1,496 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
+    <!ENTITY test_405 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#"
+     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:test_405="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#"
+     xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#M1 -->
+
+    <owl:ObjectProperty rdf:about="&test;M1">
+        <rdfs:subPropertyOf rdf:resource="&test;S1"/>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;M2"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#M2 -->
+
+    <owl:ObjectProperty rdf:about="&test;M2"/>
+    <owl:ObjectProperty>
+        <owl:inverseOf rdf:resource="&test;M2"/>
+        <rdfs:subPropertyOf rdf:resource="&test;M3"/>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty>
+        <rdfs:subPropertyOf rdf:resource="&test;M1"/>
+        <owl:inverseOf rdf:resource="&test;M2"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#M3 -->
+
+    <owl:ObjectProperty rdf:about="&test;M3">
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;M2"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R1 -->
+
+    <owl:ObjectProperty rdf:about="&test;R1">
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;R2"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R2 -->
+
+    <owl:ObjectProperty rdf:about="&test;R2"/>
+    <owl:ObjectProperty>
+        <owl:inverseOf rdf:resource="&test;R2"/>
+        <rdfs:subPropertyOf rdf:resource="&test;R3"/>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty>
+        <rdfs:subPropertyOf rdf:resource="&test;R1"/>
+        <owl:inverseOf rdf:resource="&test;R2"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R3 -->
+
+    <owl:ObjectProperty rdf:about="&test;R3">
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;R2"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#S1 -->
+
+    <owl:ObjectProperty rdf:about="&test;S1">
+        <rdfs:subPropertyOf rdf:resource="&test;R1"/>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;S2"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#S2 -->
+
+    <owl:ObjectProperty rdf:about="&test;S2"/>
+    <owl:ObjectProperty>
+        <rdfs:subPropertyOf rdf:resource="&test;S1"/>
+        <owl:inverseOf rdf:resource="&test;S2"/>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty>
+        <owl:inverseOf rdf:resource="&test;S2"/>
+        <rdfs:subPropertyOf rdf:resource="&test;S3"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#S3 -->
+
+    <owl:ObjectProperty rdf:about="&test;S3">
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;S2"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1 -->
+
+    <owl:Class rdf:about="&test;A1">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;R1"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3 -->
+
+    <owl:Class rdf:about="&test;A3">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;R1"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1 -->
+
+    <owl:Class rdf:about="&test;B1">
+        <rdfs:subClassOf rdf:resource="&test;A1"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="&test;S1"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3 -->
+
+    <owl:Class rdf:about="&test;B3">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <owl:ObjectProperty>
+                        <owl:inverseOf rdf:resource="&test;S1"/>
+                    </owl:ObjectProperty>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1 -->
+
+    <owl:Class rdf:about="&test;C1">
+        <rdfs:subClassOf rdf:resource="&test;B1"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;M1"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3 -->
+
+    <owl:Class rdf:about="&test;C3">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&test;M1"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#a1 -->
+
+    <owl:Thing rdf:about="#a1">
+        <rdf:type rdf:resource="&test;A1"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#a3 -->
+
+    <owl:Thing rdf:about="#a3">
+        <rdf:type rdf:resource="&test;A3"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#b1 -->
+
+    <test:B1 rdf:about="#b1">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </test:B1>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#b3 -->
+
+    <owl:Thing rdf:about="#b3">
+        <rdf:type rdf:resource="&test;B3"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#c1 -->
+
+    <test:C1 rdf:about="#c1">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </test:C1>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#c3 -->
+
+    <owl:Thing rdf:about="#c3">
+        <rdf:type rdf:resource="&test;C3"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#m11 -->
+
+    <owl:Thing rdf:about="#m11">
+        <test:M1 rdf:resource="#m12"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#m12 -->
+
+    <owl:Thing rdf:about="#m12"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#m21 -->
+
+    <owl:Thing rdf:about="#m21">
+        <test:M2 rdf:resource="#m22"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#m22 -->
+
+    <owl:Thing rdf:about="#m22"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#m31 -->
+
+    <owl:Thing rdf:about="#m31">
+        <test:M3 rdf:resource="#m32"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#m32 -->
+
+    <owl:Thing rdf:about="#m32"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#r11 -->
+
+    <owl:Thing rdf:about="#r11">
+        <test:R1 rdf:resource="#r12"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#r12 -->
+
+    <owl:Thing rdf:about="#r12"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#r21 -->
+
+    <owl:Thing rdf:about="#r21">
+        <test:R2 rdf:resource="#r22"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#r22 -->
+
+    <owl:Thing rdf:about="#r22"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#r31 -->
+
+    <owl:Thing rdf:about="#r31">
+        <test:R3 rdf:resource="#r32"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#r32 -->
+
+    <owl:Thing rdf:about="#r32"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#s11 -->
+
+    <owl:Thing rdf:about="#s11">
+        <test:S1 rdf:resource="#s12"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#s12 -->
+
+    <owl:Thing rdf:about="#s12"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#s21 -->
+
+    <owl:Thing rdf:about="#s21">
+        <test:S2 rdf:resource="#s22"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#s22 -->
+
+    <owl:Thing rdf:about="#s22"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#s31 -->
+
+    <owl:Thing rdf:about="#s31">
+        <test:S3 rdf:resource="#s32"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_405.owl#s32 -->
+
+    <owl:Thing rdf:about="#s32"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;A1"/>
+        <owl:onProperty rdf:resource="&test;R1"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;B3"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;S1"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;A3"/>
+        <owl:onProperty rdf:resource="&test;R1"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;C1"/>
+        <owl:onProperty rdf:resource="&test;M1"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;B1"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;S1"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;C3"/>
+        <owl:onProperty rdf:resource="&test;M1"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1317) http://owlapi.sourceforge.net -->
+
