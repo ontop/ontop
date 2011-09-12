@@ -8,6 +8,9 @@ public class StringValueExpression extends AbstractValueExpression {
 
 	public static final String CONCAT_OP = "||";
 	
+	/**
+	 * Collection of custom string expressions.
+	 */
 	private Queue<Object> cache = new LinkedList<Object>();
 	
 	@Override
@@ -22,6 +25,10 @@ public class StringValueExpression extends AbstractValueExpression {
 		return cache;
 	}
 	
+	/**
+	 * Retrieves all the {@link ColumnReference} objects that
+	 * are used in this expression.
+	 */
 	public ArrayList<ColumnReference> getColumns() {
 		ArrayList<ColumnReference> columns = new ArrayList<ColumnReference>();
 		for (Object obj : cache) {

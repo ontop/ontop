@@ -3,17 +3,18 @@ package it.unibz.krdb.sql.api;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-/**
- * 
- **/
 public class Projection {
 	
 	private static final int SELECT_DEFAULT = 0;
 	private static final int SELECT_ALL = 1;
 	private static final int SELECT_DISTINCT = 2;
 	
-	private ArrayList<DerivedColumn> selectList;
 	private int type;
+	
+	/**
+	 * Collection of columns for this projection.
+	 */
+	private ArrayList<DerivedColumn> selectList;
 	
 	public Projection() {
 		selectList = new ArrayList<DerivedColumn>(); 
@@ -32,6 +33,12 @@ public class Projection {
 		return "";
 	}
 	
+	/**
+	 * Inserts this column to the projection list.
+	 * 
+	 * @param column
+	 * 			The input column object.
+	 */
 	public void add(DerivedColumn column) {
 		selectList.add(column);
 	}
@@ -59,6 +66,14 @@ public class Projection {
 		addAll(columns);
 	}
 	
+	/**
+	 * Retrieves all column names that are particularly used in
+	 * the query string for a specific table name.
+	 * 
+	 * @param table
+	 * 			The table name.
+	 * @return Returns a list of table name.
+	 */
 	public String[] getColumns(String table) {
 		TreeSet<String> list = new TreeSet<String>();  // use set to avoid duplication.		
 		for (DerivedColumn column : selectList) {
@@ -75,8 +90,6 @@ public class Projection {
 	
 	/**
 	 * Retrieves the number of columns this projection has.
-	 * 
-	 * @return Returns the projection size.
 	 */
 	public int size() {
 		return selectList.size();

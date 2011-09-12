@@ -1,5 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * This class represents the natural join operation in the
+ * SQL query.
+ */
 public class NaturalJoin extends JoinOperator {
 
 	public static final int JOIN = 0;

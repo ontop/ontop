@@ -1,5 +1,8 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * This class represents the literal of integer value.
+ */
 public class IntegerLiteral extends NumericLiteral {
 
 	/**

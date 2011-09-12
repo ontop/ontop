@@ -4,7 +4,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class BooleanValueExpression extends AbstractValueExpression {
-
+	
+	/**
+	 * Collection of custom boolean expressions.
+	 */
 	private Queue<Object> cache = new LinkedList<Object>();
 	
 	@Override

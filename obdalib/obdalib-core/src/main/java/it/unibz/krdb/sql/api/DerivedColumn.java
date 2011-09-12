@@ -1,5 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * The DerivedColumn class stores the column expression
+ * and the alternative name (its alias).
+ */
 public class DerivedColumn {
 	
 	private AbstractValueExpression value;

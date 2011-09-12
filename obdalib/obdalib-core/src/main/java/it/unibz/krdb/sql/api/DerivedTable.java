@@ -1,5 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * The DerivedTable class represents the notation of nested query
+ * in SQL.
+ */
 public class DerivedTable implements IRelation {
 	
 	private IRelation subquery;

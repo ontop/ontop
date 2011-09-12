@@ -1,5 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * The ColumnReference class is the basic structure for 
+ * representing a column in the SQL query.
+ */
 public class ColumnReference {
 	
 	private String schema;

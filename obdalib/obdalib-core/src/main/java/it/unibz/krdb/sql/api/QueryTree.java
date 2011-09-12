@@ -3,7 +3,7 @@ package it.unibz.krdb.sql.api;
 import it.unibz.krdb.sql.util.BinaryTree;
 
 /**
- * A tree structure to represent relational algebraic notation.
+ * A tree structure to represent SQL query string.
  */
 public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	
@@ -84,6 +84,9 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 		return String.format(statement, lNode, rNode);
 	}
 	
+	/**
+	 * Constructs the SELECT statement based on the Projection object.
+	 */
 	private String getSelectClause(Projection prj) {
 		String selectClause = "";
 		if (prj != null) {
@@ -91,7 +94,10 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 		}
 		return selectClause;
 	}
-	
+
+	/**
+	 * Constructs the WHERE statement based on the Selection object.
+	 */
 	private String getWhereClause(Selection slc) {
 		String whereClause = "";
 		if (slc != null) {
@@ -100,6 +106,10 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 		return whereClause;
 	}
 	
+	/**
+	 * Constructs the GROUP BY statement based on the Aggregation
+	 * object.
+	 */
 	private String getGroupByClause(Aggregation agg) {
 		String groupByClause = "";
 		if (agg != null) {

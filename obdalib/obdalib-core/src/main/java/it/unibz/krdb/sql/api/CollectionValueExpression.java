@@ -2,6 +2,9 @@ package it.unibz.krdb.sql.api;
 
 public class CollectionValueExpression extends AbstractValueExpression {
 
+	/**
+	 * The name of the function operation.
+	 */
 	private String functionOp = "";
 	
 	@Override

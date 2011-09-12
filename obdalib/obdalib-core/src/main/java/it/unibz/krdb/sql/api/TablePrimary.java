@@ -7,6 +7,10 @@ public class TablePrimary implements IRelation {
 	private String schema;
 	private String name;
 	private String alias;
+	
+	/**
+	 * Collection of table attributes.
+	 */
 	private ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
 	public TablePrimary(String name) {

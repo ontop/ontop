@@ -4,19 +4,19 @@ import java.util.ArrayList;
 
 public class GroupingElement {
 	
+	/**
+	 * Collection of columns that is used for grouping.
+	 */
 	private ArrayList<ColumnReference> columnList;
 	
 	private boolean bAsGroup = false; // a single element or a group?
 	
-	/**
-	 * The default constructor.
-	 */
 	public GroupingElement() {
 		columnList = new ArrayList<ColumnReference>();
 	}
 	
 	/**
-	 * Adds a column to this grouping element.
+	 * Inserts a column to this grouping element.
 	 * 
 	 * @param column
 	 * 			A single column.
@@ -29,7 +29,9 @@ public class GroupingElement {
 	}
 	
 	/**
-	 * Overrides the existing list with the new one.
+	 * Updates the column list in this grouping element. Any 
+	 * existing columns are going to be replaced by the given
+	 * new list.
 	 * 
 	 * @param columnList
 	 * 			The new column list.

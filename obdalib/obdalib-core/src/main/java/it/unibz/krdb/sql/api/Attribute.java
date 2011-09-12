@@ -27,6 +27,15 @@ public class Attribute {
 		this.canNull = canNull;
 	}
 	
+	/**
+	 * Determines whether this attribute object contains a
+	 * specified name.
+	 * 
+	 * @param name
+	 * 			The name in question.
+	 * @return Returns true if the attribute has the name,
+	 * or false, otherwise.
+	 */
 	public boolean hasName(String name) {
 		return (this.name == name)? true : false;
 	}

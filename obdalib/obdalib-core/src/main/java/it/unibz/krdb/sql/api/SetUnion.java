@@ -9,7 +9,7 @@ public class SetUnion extends Operator {
 	private int type;
 	
 	public SetUnion() {
-		// Does nothing.
+		type = UNION_DEFAULT;
 	}
 	
 	public SetUnion(int type) {

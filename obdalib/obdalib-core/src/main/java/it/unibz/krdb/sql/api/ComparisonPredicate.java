@@ -1,5 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * The ComparisonPredicate class stores the compared terms
+ * and the operator.
+ */
 public class ComparisonPredicate implements IPredicate, ICondition {
 	
 	private IValueExpression left;

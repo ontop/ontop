@@ -1,11 +1,23 @@
 package it.unibz.krdb.sql.api;
 
+/**
+ * An abstract base class for each term in relational algebra.
+ */
 public abstract class RelationalAlgebra implements Cloneable {
 	
-	protected IRelation table;
-
+	/**
+	 * The SELECT statement.
+	 */
 	protected Projection projection;
+	
+	/**
+	 * The WHERE statement.
+	 */
 	protected Selection selection;
+	
+	/**
+	 * The GROUP BY statement.
+	 */
 	protected Aggregation aggregation;
 
 	public void setProjection(Projection projection) {

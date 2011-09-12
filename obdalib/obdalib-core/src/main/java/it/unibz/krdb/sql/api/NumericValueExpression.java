@@ -6,6 +6,9 @@ import java.util.Queue;
 
 public class NumericValueExpression extends AbstractValueExpression {
 
+	/**
+	 * Collection of custom numerical expression.
+	 */
 	private Queue<Object> cache = new LinkedList<Object>();
 	
 	@Override
@@ -20,6 +23,10 @@ public class NumericValueExpression extends AbstractValueExpression {
 		return cache;
 	}
 	
+	/**
+	 * Retrieves all the {@link ColumnReference} objects that
+	 * are used in this expression.
+	 */
 	public ArrayList<ColumnReference> getColumns() {
 		ArrayList<ColumnReference> columns = new ArrayList<ColumnReference>();
 		for (Object obj : cache) {
