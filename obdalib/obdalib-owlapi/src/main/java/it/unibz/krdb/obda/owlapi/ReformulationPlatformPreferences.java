@@ -24,7 +24,6 @@ public class ReformulationPlatformPreferences extends Properties {
 
 	private static final String	DEFAULT_PROPERTIESFILE	= "default.properties";
 
-	public static final String	CREATE_TEST_MAPPINGS	= "org.obda.owlreformulationplatform.createTestMappings";
 	public static final String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
 
 	public static final String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";

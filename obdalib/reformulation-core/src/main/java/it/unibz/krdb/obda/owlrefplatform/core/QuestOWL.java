@@ -39,7 +39,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 
 import java.net.URI;
-import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -193,14 +192,12 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals(QuestConstants.INMEMORY);
 		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
-		boolean createMappings = preferences.getCurrentValue(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS).equals("true");
 		log.debug("Initializing Quest query answering engine...");
 		log.debug("Active preferences:");
 		log.debug("{} = {}", ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, reformulationTechnique);
 		log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION, useInMemoryDB);
 		log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE, unfoldingMode);
 		log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE, dbType);
-		log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
 
 		QueryRewriter rewriter = null;
 		UnfoldingMechanism unfMech = null;
@@ -241,14 +238,13 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			 * Preparing the data source
 			 */
 
-			if (useInMemoryDB && (QuestConstants.CLASSIC.equals(unfoldingMode) || createMappings)) {
+			if (useInMemoryDB && QuestConstants.CLASSIC.equals(unfoldingMode)) {
 
 				log.debug("Using in an memory database");
 				String driver = "org.h2.Driver";
 				String url = "jdbc:h2:mem:aboxdump" + System.currentTimeMillis();
 				String username = "sa";
 				String password = "";
-				Connection connection;
 
 				OBDADataSource newsource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
@@ -286,7 +282,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 				log.debug("Loading data into the DB");
 				OWLAPI2ABoxIterator aboxiterator = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
+				
+				
 				dataRepository.insertData(aboxiterator);
+				
+				
 				dataRepository.createIndexes();
 
 				/* Setting up the OBDA model */
