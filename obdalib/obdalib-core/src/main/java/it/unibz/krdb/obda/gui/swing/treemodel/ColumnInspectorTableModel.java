@@ -39,7 +39,7 @@ public class ColumnInspectorTableModel implements TableModel {
 	
 	public ColumnInspectorTableModel(DBMetadata metadata, String tableName) {
 		TablePrimary table = metadata.getTable(tableName);
-		attributes = table.getAttributeList();
+		attributes = table.getAttributes();
 	}
 
 	@Override
