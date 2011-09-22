@@ -60,8 +60,11 @@ public class LookupTable {
 	 * Returns the alternative name for the given entry.
 	 */
 	public String lookup(String entry) {
-		Integer index = log.get(entry);
-		return retrieve(index);
+		if (log.containsKey(entry)) {
+			Integer index = log.get(entry);
+			return retrieve(index);
+		}
+		return "";
 	}
 	
 	/**
@@ -149,7 +152,7 @@ public class LookupTable {
 		Set<Integer> set = new HashSet<Integer>();
 		Collections.addAll(set, log.values().toArray(new Integer[0]));
 		Integer[] logIndex = set.toArray(new Integer[0]);		
-		Integer[] masterIndex = master.values().toArray(new Integer[0]);
+		Integer[] masterIndex = master.keySet().toArray(new Integer[0]);
 		
 		for (int i = 0; i < masterIndex.length; i++) {
 			boolean bExist = false;

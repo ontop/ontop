@@ -56,4 +56,21 @@ public class LookupTableTest extends TestCase {
 		String altName2 = lookupTable.lookup("Employee.id");
 		assertEquals(altName, altName2);
 	}
+	
+	public void testEntryDeleting() {
+		System.out.println("Before deletions:");
+		System.out.println(lookupTable.toString());
+		
+		lookupTable.remove("Employee.id");
+		String name = lookupTable.lookup("Employee.id");
+		assertEquals(name, "");
+		
+		lookupTable.remove("public.Salary.id");
+		name = lookupTable.lookup("Salary.id");
+		assertEquals(name, "t3");
+		
+		lookupTable.remove(new String[] {"public.Salary.pid", "Salary.pid", "pid"});
+		System.out.println("After deletions:");
+		System.out.println(lookupTable.toString());
+	}
 }
