@@ -10,26 +10,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A class that represents the preferences which can be modified by the user
- * 
+ * A class that represents the preferences which can be modified by the user.
  */
-
 public class ReformulationPlatformPreferences extends Properties {
-	// TODO create a configuration listener to handle changes in these values
 
-	/**
-	 * 
-	 */
+	// TODO create a configuration listener to handle changes in these values
 	private static final long	serialVersionUID		= -5954970472045517594L;
 
 	private static final String	DEFAULT_PROPERTIESFILE	= "default.properties";
 
 	public static final String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
-
 	public static final String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
 	public static final String	DBTYPE					= "org.obda.owlreformulationplatform.dbtype";
 	public static final String	DATA_LOCATION			= "org.obda.owlreformulationplatform.datalocation";
-
+	public static final String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";
+	public static final String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
+	public static final String  ELIMINATE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.eliminateEquivalences";
+	
 	private Logger				log						= LoggerFactory.getLogger(ReformulationPlatformPreferences.class);
 
 	public ReformulationPlatformPreferences() {
@@ -51,36 +48,33 @@ public class ReformulationPlatformPreferences extends Properties {
 		readDefaultPropertiesFile(in);
 	}
 
-
 	/**
-	 * Reads the properties from the input stream and sets them as default
+	 * Reads the properties from the input stream and sets them as default.
 	 * 
 	 * @param in
-	 *            the input stream
-	 * @throws IOException
+	 *            The input stream.
 	 */
 	public void readDefaultPropertiesFile(InputStream in) throws IOException {
 		this.load(in);
 	}
 
-
 	/**
-	 * Returns the current value for the given parameter
+	 * Returns the current value for the given parameter.
 	 * 
 	 * @param var
-	 *            the parameter value
-	 * @return the current value
+	 *            The parameter value.
+	 * @return The current value.
 	 */
 	public Object getCurrentValue(String var) {
 		return get(var);
 	}
 
 	/**
-	 * Returns the current value as boolean for the given parameter
+	 * Returns the current value as boolean for the given parameter.
 	 * 
 	 * @param var
-	 *            the parameter value
-	 * @return the current value as boolean if possible null otherwise
+	 *            The parameter value.
+	 * @return The current value as boolean if possible null otherwise.
 	 */
 	public boolean getCurrentBooleanValueFor(String var) {
 		String value = (String) getCurrentValue(var);
@@ -88,11 +82,11 @@ public class ReformulationPlatformPreferences extends Properties {
 	}
 
 	/**
-	 * Returns the current value as int for the given parameter
+	 * Returns the current value as an integer for the given parameter.
 	 * 
 	 * @param var
-	 *            the parameter value
-	 * @return the current value as int if possible null otherwise
+	 *            The parameter value.
+	 * @return The current value as an integer if possible null otherwise.
 	 */
 	public int getCurrentIntegerValueFor(String var) {
 		String value = (String) getCurrentValue(var);
@@ -103,9 +97,9 @@ public class ReformulationPlatformPreferences extends Properties {
 	 * Updates the current value of the given parameter to the given object
 	 * 
 	 * @param var
-	 *            the parameter
+	 *            The parameter.
 	 * @param obj
-	 *            the new current value
+	 *            The new current value.
 	 */
 	public void setCurrentValueOf(String var, Object obj) {
 		put(var, obj);
@@ -113,11 +107,13 @@ public class ReformulationPlatformPreferences extends Properties {
 	
 	public List<String> getReformulationPlatformPreferencesKeys(){
 		ArrayList<String> keys = new ArrayList<String>();
-		keys.add(CREATE_TEST_MAPPINGS);
 		keys.add(REFORMULATION_TECHNIQUE);
 		keys.add(ABOX_MODE);
 		keys.add(DBTYPE);
 		keys.add(DATA_LOCATION);
+		keys.add(OBTAIN_FROM_ONTOLOGY);
+		keys.add(OBTAIN_FROM_MAPPINGS);
+		keys.add(ELIMINATE_EQUIVALENCES);
 
 		return keys;
 	}
