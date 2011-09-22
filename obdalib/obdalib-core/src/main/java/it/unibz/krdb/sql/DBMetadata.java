@@ -85,7 +85,7 @@ public class DBMetadata {
 		Attribute attr = new Attribute(column, type, primaryKey, canNull);
 		
 		Hashtable<String, TablePrimary> tableList = getTableList(schema);
-		if (tableList == null) {
+		if (tableList == null) {  // creates a table list for a new schema name
 			tableList = new Hashtable<String, TablePrimary>();
 			metadata.put(schema, tableList);
 		}

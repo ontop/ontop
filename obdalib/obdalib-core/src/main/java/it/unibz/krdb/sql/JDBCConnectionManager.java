@@ -289,7 +289,7 @@ public class JDBCConnectionManager {
 		DatabaseMetaData md = conn.getMetaData();
 		ResultSet rsTables = md.getTables("metadata", null, null, null);
 		
-		DBMetadata metadata = new DBMetadata(sourceUri.toString()); // This should be the database name. The OBDADataSource must implement the database name setting.
+		DBMetadata metadata = new DBMetadata(sourceUri.toString()); // TODO: This should be the database name. The OBDADataSource must implement the database name setting.
 		
 		while(rsTables.next()) {
 			String tblName = rsTables.getString("TABLE_NAME");
