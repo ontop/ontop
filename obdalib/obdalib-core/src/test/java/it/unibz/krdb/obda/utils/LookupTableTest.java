@@ -73,4 +73,14 @@ public class LookupTableTest extends TestCase {
 		System.out.println("After deletions:");
 		System.out.println(lookupTable.toString());
 	}
+	
+	public void testAddingWithReference() {
+		lookupTable.add("security_id", "Employee.id");
+		String name = lookupTable.lookup("security_id");
+		assertEquals(name, "t1");
+		
+		lookupTable.add("monthly_salary", "public.Salary.amount");
+		name = lookupTable.lookup("monthly_salary");
+		assertEquals(name, "t4");
+	}
 }

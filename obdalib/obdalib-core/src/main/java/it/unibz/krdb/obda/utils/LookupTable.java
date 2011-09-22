@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 
+ */
 public class LookupTable {
 	
 	private static final String DEFAULT_NAME_FORMAT = "t%s";  // e.g., t1, t2, ...
@@ -36,6 +39,9 @@ public class LookupTable {
 	 * 			Any string.
 	 */
 	public void add(String entry) {
+		if (entry == null) {
+			return;
+		}		
 		log.put(entry, index);
 		register();
 		increaseIndex();
@@ -50,10 +56,48 @@ public class LookupTable {
 	 */
 	public void add(String[] entries) {
 		for (int i = 0; i < entries.length; i++) {
-			log.put(entries[i], index);
+			if (entries[i] != null) {
+				log.put(entries[i], index);
+			}
 		}
 		register();
 		increaseIndex();
+	}
+	
+	/**
+	 * Adds a string entry to this lookup table with a reference of an existing
+	 * entry. This method is used when users want to insert a new entry that 
+	 * has a similarity to the existing one, so both have a same alternative
+	 * name. For example, consider the initial lookup table has:
+	 * <pre>
+	 * "Employee.id" --> "t1"
+	 * "Employee.name" --> "t2"</pre>
+	 * Calling the method add("id_number", "Employee.id") will give you the 
+	 * result:
+	 * <pre>
+	 * "Employee.id" --> "t1"
+	 * "Employee.name" --> "t2"
+	 * "id_number" --> "t1" </pre>
+	 * 
+	 * @param entry
+	 * 			A new entry.
+	 * @param reference
+	 * 			An entry that exists already in the lookup table. The method
+	 * 			will get its index and assign it to the new entry. If the 
+	 * 			reference is not existed yet, then the new entry will get
+	 * 			a new index.
+	 */
+	public void add(String entry, String reference) {
+		if (entry == null) {
+			return;
+		}
+		if (!log.containsKey(reference)) {
+			add(entry);
+		}
+		else {
+			Integer index = log.get(reference);
+			log.put(entry, index);
+		}
 	}
 	
 	/**
