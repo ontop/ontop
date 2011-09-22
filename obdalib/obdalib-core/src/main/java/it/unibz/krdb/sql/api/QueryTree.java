@@ -2,6 +2,11 @@ package it.unibz.krdb.sql.api;
 
 import it.unibz.krdb.sql.util.BinaryTree;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Stack;
+import java.util.TreeSet;
+
 /**
  * A tree structure to represent SQL query string.
  */
@@ -52,16 +57,117 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	public QueryTree right() {
 		return (QueryTree)super.right();
 	}
+	
+	@Override
+	public RelationalAlgebra value() {
+		return (RelationalAlgebra)super.value();
+	}
 
 	@Override
 	public String toString() {
-		return preOrder(this); 
+		return print(this); 
+	}
+	
+	public ArrayList<Relation> getTableSet() {
+		ArrayList<Relation> tableList = new ArrayList<Relation>();
+		Stack<QueryTree> nodes = new Stack<QueryTree>();
+		
+		nodes.push(this);		
+		QueryTree currentNode = null; 
+        while (!nodes.isEmpty()) {
+	        currentNode = nodes.pop();
+	        QueryTree right = currentNode.right();
+	        if (right != null) {
+	        	nodes.push(right);
+	        }
+	        QueryTree left = currentNode.left();
+	        if (left != null) {
+	        	nodes.push(left);      
+	        }
+	        if (currentNode.isLeaf()) {
+				tableList.add((Relation)currentNode.value());
+			}
+        }
+        return tableList;
+	}
+	
+	public HashMap<String, String> getAliasMap() {
+		HashMap<String, String> aliasMap = new HashMap<String, String>();
+		Stack<QueryTree> nodes = new Stack<QueryTree>();
+		
+		nodes.push(this);		
+		QueryTree currentNode = null; 
+        while (!nodes.isEmpty()) {
+	        currentNode = nodes.pop();
+	        QueryTree right = currentNode.right();
+	        if (right != null) {
+	        	nodes.push(right);
+	        }
+	        QueryTree left = currentNode.left();
+	        if (left != null) {
+	        	nodes.push(left);      
+	        }
+	        
+	        Projection prj = currentNode.value().getProjection();
+	        if (prj != null) {
+	        	ArrayList<DerivedColumn> selectList = prj.getSelectList();
+	        	for (DerivedColumn selection : selectList) {
+	        		if (selection.hasAlias()) {  // check if the column has an alias name
+		        		AbstractValueExpression exp = selection.getValueExpression();
+		        		if (exp instanceof ReferenceValueExpression) {
+		        			ColumnReference reference = exp.get(0);
+		        			aliasMap.put(selection.getAlias(), reference.toString());
+		        		}
+	        		}
+	        	}
+			}
+        }
+        return aliasMap;
+	}
+	
+	public HashMap<String, String> getJoinCondition() {
+		HashMap<String, String> equalConditions = new HashMap<String, String>();
+		Stack<QueryTree> nodes = new Stack<QueryTree>();
+		
+		nodes.push(this);		
+		QueryTree currentNode = null; 
+        while (!nodes.isEmpty()) {
+	        currentNode = nodes.pop();
+	        QueryTree right = currentNode.right();
+	        if (right != null) {
+	        	if (!right.isLeaf()) {
+	        		nodes.push(right);
+	        	}
+	        }
+	        QueryTree left = currentNode.left();
+	        if (left != null) {
+		        if (!left.isLeaf()) {
+		        	nodes.push(left);      
+		        }
+	        }
+	        
+	        RelationalAlgebra operator = currentNode.value();
+	        if (operator instanceof JoinOperator) {
+	        	JoinOperator joinOp = (JoinOperator)operator;
+	        	for (int index = 0; index < joinOp.conditionSize(); index++) {
+	        		ComparisonPredicate predicate = joinOp.getCondition(index);
+	        		if (predicate.useEqualOperator()) {
+	        			IValueExpression[] expressions = predicate.getValueExpressions();
+	        			if (expressions[0] instanceof ReferenceValueExpression && 
+	        				expressions[1] instanceof ReferenceValueExpression) {
+	        				equalConditions.put(expressions[0].toString(), expressions[1].toString());
+	        			}
+	        		}
+	        	}
+	        }
+        }		
+		return equalConditions;
 	}
 	
 	/**
 	 * Algorithm for browsing the tree in pre-order traversal.
 	 */
-	public String preOrder(QueryTree tree) {		
+	private String print(QueryTree tree) {		
 		String statement = "";
 		
 		RelationalAlgebra node = tree.value();
@@ -74,14 +180,14 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 		QueryTree left = tree.left();
 		String lNode = "";
 		if (left != null) {
-			lNode = preOrder(left);
+			lNode = print(left);
 		}
 		QueryTree right = tree.right();
 		String rNode = "";
 		if (right != null) {
-			rNode = right.preOrder(right);
+			rNode = print(right);
 		}
-		return String.format(statement, lNode, rNode);
+		return String.format(statement, lNode.trim(), rNode.trim());
 	}
 	
 	/**

@@ -49,11 +49,11 @@ public class DerivedColumn {
 	/**
 	 * Sets the alternative name for this column.
 	 * 
-	 * @param name
+	 * @param alias
 	 * 			The alternative name.
 	 */
-	public void setAlias(String name) {
-		this.alias = name;
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 	
 	/**
@@ -63,6 +63,16 @@ public class DerivedColumn {
 	 */
 	public String getAlias() {
 		return alias;
+	}
+	
+	/**
+	 * Determines whether the column has an alternative name.
+	 * 
+	 * @return Returns true if the column has an alias name,
+	 * or false otherwise.
+	 */
+	public boolean hasAlias() {
+		return (alias != "")? true : false;
 	}
 	
 	/**

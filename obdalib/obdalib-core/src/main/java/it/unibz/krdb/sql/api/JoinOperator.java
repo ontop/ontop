@@ -6,15 +6,50 @@ import java.util.Queue;
 /**
  * An abstract base class for join operator.
  */
-public abstract class JoinOperator extends Operator {
+public class JoinOperator extends Operator {
+
+	public static final int JOIN = 0;
+	public static final int INNER_JOIN = 1;
+	public static final int LEFT_JOIN = 2;
+	public static final int RIGHT_JOIN = 3;
+	public static final int FULL_JOIN = 4;
+	public static final int LEFT_OUTER_JOIN = 5;
+	public static final int RIGHT_OUTER_JOIN = 6;
+	public static final int FULL_OUTER_JOIN = 7;
+	public static final int CROSS_JOIN = 8;
+	
+	private int joinType = JoinOperator.JOIN; // by default
 
 	/**
 	 * Collection of known conditions and the boolean operators.
 	 */
-	protected LinkedList<Object> conditions;
+	private LinkedList<Object> conditions = new LinkedList<Object>();
 	
 	public JoinOperator() {
-		conditions = new LinkedList<Object>();
+		// Does nothing.
+	}
+	
+	public JoinOperator(int joinType) {
+		setType(joinType);
+	}
+	
+	public void setType(int type) {
+		joinType = type;
+	}
+	
+	public String getType() {
+		switch(joinType) {
+			case JOIN: return "join";
+			case INNER_JOIN: return "inner join";
+			case LEFT_JOIN: return "left join";
+			case RIGHT_JOIN: return "right join";
+			case FULL_JOIN: return "full join";
+			case LEFT_OUTER_JOIN: return "left outer join";
+			case RIGHT_OUTER_JOIN: return "right outer join";
+			case FULL_OUTER_JOIN: return "full outer join";
+			case CROSS_JOIN: return ", ";
+			default: return "join";
+		}
 	}
 	
 	/**
@@ -50,11 +85,11 @@ public abstract class JoinOperator extends Operator {
 	public void addCondition(LogicalOperator op) throws Exception {
 		if (!conditions.isEmpty()) {
 			Object obj = conditions.peekLast();
-			if (!(obj instanceof LogicalOperator)) {
-				conditions.add(op);
+			if (obj instanceof LogicalOperator) {
+				throw new Exception("Illegal conditional expression!");
 			}
 		}
-		throw new Exception("Illegal conditional expression!");
+		conditions.add(op);
 	}
 	
 	/**
@@ -127,5 +162,16 @@ public abstract class JoinOperator extends Operator {
 		return (String)conditions.get(index);
 	}
 	
-	public abstract String toString();
+	@Override
+	public String toString() {
+		String str = "%s " + getType() + " %s";
+		
+		str += " ";
+		str += "on";		
+		for (Object obj : conditions) {
+			str += " ";
+			str += obj.toString();
+		}		
+		return str;
+	}
 }

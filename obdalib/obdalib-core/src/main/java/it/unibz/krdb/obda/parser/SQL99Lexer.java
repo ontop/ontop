@@ -1,4 +1,4 @@
-// $ANTLR 3.4 C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g 2011-09-12 15:41:53
+// $ANTLR 3.4 C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g 2011-09-20 11:44:23
 
 package it.unibz.krdb.obda.parser;
 
@@ -112,8 +112,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SELECT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:745:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:745:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:742:7: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:742:9: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -191,8 +191,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DISTINCT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:747:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:747:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:744:9: ( ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:744:11: ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'S' | 's' ) ( 'T' | 't' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
@@ -290,8 +290,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ALL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:749:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:749:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:746:4: ( ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:746:6: ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -339,8 +339,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AVG;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:751:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:751:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:748:4: ( ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:748:6: ( 'A' | 'a' ) ( 'V' | 'v' ) ( 'G' | 'g' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -388,8 +388,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MAX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:753:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:753:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:750:4: ( ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:750:6: ( 'M' | 'm' ) ( 'A' | 'a' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
@@ -437,8 +437,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:755:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:755:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:752:4: ( ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:752:6: ( 'M' | 'm' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='M'||input.LA(1)=='m' ) {
                 input.consume();
@@ -486,8 +486,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SUM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:757:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:757:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:754:4: ( ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:754:6: ( 'S' | 's' ) ( 'U' | 'u' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -535,8 +535,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EVERY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:759:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:759:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:756:6: ( ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:756:8: ( 'E' | 'e' ) ( 'V' | 'v' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
@@ -604,8 +604,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ANY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:761:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:761:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:758:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:758:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -653,8 +653,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SOME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:763:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:763:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:760:5: ( ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:760:7: ( 'S' | 's' ) ( 'O' | 'o' ) ( 'M' | 'm' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -712,8 +712,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COUNT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:765:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:765:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:762:6: ( ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:762:8: ( 'C' | 'c' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='C'||input.LA(1)=='c' ) {
                 input.consume();
@@ -781,8 +781,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FROM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:767:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:767:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:764:5: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:764:7: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -840,8 +840,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WHERE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:769:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:769:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:766:6: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:766:8: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='W'||input.LA(1)=='w' ) {
                 input.consume();
@@ -909,8 +909,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:771:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:771:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:768:4: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:768:6: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -958,8 +958,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:773:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:773:5: ( 'O' | 'o' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:770:3: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:770:5: ( 'O' | 'o' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -997,8 +997,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:775:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:775:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:772:4: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:772:6: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -1046,8 +1046,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ORDER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:777:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:777:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:774:6: ( ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:774:8: ( 'O' | 'o' ) ( 'R' | 'r' ) ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1115,8 +1115,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GROUP;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:779:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:779:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:776:6: ( ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:776:8: ( 'G' | 'g' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'P' | 'p' )
             {
             if ( input.LA(1)=='G'||input.LA(1)=='g' ) {
                 input.consume();
@@ -1184,8 +1184,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:781:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:781:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:778:3: ( ( 'B' | 'b' ) ( 'Y' | 'y' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:778:5: ( 'B' | 'b' ) ( 'Y' | 'y' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
@@ -1223,8 +1223,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:783:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:783:5: ( 'A' | 'a' ) ( 'S' | 's' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:780:3: ( ( 'A' | 'a' ) ( 'S' | 's' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:780:5: ( 'A' | 'a' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -1262,8 +1262,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = JOIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:785:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:785:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:782:5: ( ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:782:7: ( 'J' | 'j' ) ( 'O' | 'o' ) ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='J'||input.LA(1)=='j' ) {
                 input.consume();
@@ -1321,8 +1321,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = INNER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:787:6: ( ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:787:8: ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:784:6: ( ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:784:8: ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1390,8 +1390,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = OUTER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:789:6: ( ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:789:8: ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:786:6: ( ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:786:8: ( 'O' | 'o' ) ( 'U' | 'u' ) ( 'T' | 't' ) ( 'E' | 'e' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1459,8 +1459,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LEFT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:791:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:791:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:788:5: ( ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:788:7: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                 input.consume();
@@ -1518,8 +1518,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RIGHT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:793:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:793:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:790:6: ( ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:790:8: ( 'R' | 'r' ) ( 'I' | 'i' ) ( 'G' | 'g' ) ( 'H' | 'h' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
                 input.consume();
@@ -1587,8 +1587,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:795:5: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:795:7: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:792:5: ( ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:792:7: ( 'F' | 'f' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -1646,8 +1646,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:797:6: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:797:8: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:794:6: ( ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:794:8: ( 'U' | 'u' ) ( 'N' | 'n' ) ( 'I' | 'i' ) ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
@@ -1715,8 +1715,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = USING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:799:6: ( ( 'U' | 'u' ) ( 'S' | 's' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'G' | 'g' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:799:8: ( 'U' | 'u' ) ( 'S' | 's' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'G' | 'g' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:796:6: ( ( 'U' | 'u' ) ( 'S' | 's' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'G' | 'g' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:796:8: ( 'U' | 'u' ) ( 'S' | 's' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'G' | 'g' )
             {
             if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
                 input.consume();
@@ -1784,8 +1784,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:801:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:801:5: ( 'O' | 'o' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:798:3: ( ( 'O' | 'o' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:798:5: ( 'O' | 'o' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -1823,8 +1823,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:803:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:803:5: ( 'I' | 'i' ) ( 'N' | 'n' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:800:3: ( ( 'I' | 'i' ) ( 'N' | 'n' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:800:5: ( 'I' | 'i' ) ( 'N' | 'n' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1862,8 +1862,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = IS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:805:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:805:5: ( 'I' | 'i' ) ( 'S' | 's' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:802:3: ( ( 'I' | 'i' ) ( 'S' | 's' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:802:5: ( 'I' | 'i' ) ( 'S' | 's' )
             {
             if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
                 input.consume();
@@ -1901,8 +1901,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = NULL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:807:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:807:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:804:5: ( ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:804:7: ( 'N' | 'n' ) ( 'U' | 'u' ) ( 'L' | 'l' ) ( 'L' | 'l' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -1960,8 +1960,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = FALSE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:809:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:809:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:806:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:806:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -2029,8 +2029,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TRUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:811:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:811:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:808:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:808:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
@@ -2088,8 +2088,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:813:5: ( ';' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:813:16: ';'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:810:5: ( ';' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:810:16: ';'
             {
             match(';'); 
 
@@ -2109,8 +2109,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PERIOD;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:814:7: ( '.' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:814:16: '.'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:811:7: ( '.' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:811:16: '.'
             {
             match('.'); 
 
@@ -2130,8 +2130,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:815:6: ( ',' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:815:16: ','
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:812:6: ( ',' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:812:16: ','
             {
             match(','); 
 
@@ -2151,8 +2151,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:816:12: ( '[' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:816:16: '['
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:813:12: ( '[' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:813:16: '['
             {
             match('['); 
 
@@ -2172,8 +2172,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:817:12: ( ']' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:817:16: ']'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:814:12: ( ']' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:814:16: ']'
             {
             match(']'); 
 
@@ -2193,8 +2193,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:818:7: ( '(' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:818:16: '('
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:815:7: ( '(' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:815:16: '('
             {
             match('('); 
 
@@ -2214,8 +2214,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:819:7: ( ')' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:819:16: ')'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:816:7: ( ')' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:816:16: ')'
             {
             match(')'); 
 
@@ -2235,8 +2235,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:820:9: ( '?' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:820:16: '?'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:817:9: ( '?' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:817:16: '?'
             {
             match('?'); 
 
@@ -2256,8 +2256,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:821:7: ( '$' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:821:16: '$'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:818:7: ( '$' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:818:16: '$'
             {
             match('$'); 
 
@@ -2277,8 +2277,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:822:13: ( '\"' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:822:16: '\"'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:819:13: ( '\"' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:819:16: '\"'
             {
             match('\"'); 
 
@@ -2298,8 +2298,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:823:13: ( '\\'' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:823:16: '\\''
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:820:13: ( '\\'' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:820:16: '\\''
             {
             match('\''); 
 
@@ -2319,8 +2319,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:824:11: ( '`' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:824:16: '`'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:821:11: ( '`' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:821:16: '`'
             {
             match('`'); 
 
@@ -2340,8 +2340,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:825:11: ( '_' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:825:16: '_'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:822:11: ( '_' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:822:16: '_'
             {
             match('_'); 
 
@@ -2361,8 +2361,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = MINUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:826:6: ( '-' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:826:16: '-'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:823:6: ( '-' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:823:16: '-'
             {
             match('-'); 
 
@@ -2382,8 +2382,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:827:9: ( '*' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:827:16: '*'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:824:9: ( '*' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:824:16: '*'
             {
             match('*'); 
 
@@ -2403,8 +2403,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:828:10: ( '&' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:828:16: '&'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:825:10: ( '&' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:825:16: '&'
             {
             match('&'); 
 
@@ -2424,8 +2424,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:829:3: ( '@' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:829:16: '@'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:826:3: ( '@' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:826:16: '@'
             {
             match('@'); 
 
@@ -2445,8 +2445,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:830:12: ( '!' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:830:16: '!'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:827:12: ( '!' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:827:16: '!'
             {
             match('!'); 
 
@@ -2466,8 +2466,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:831:5: ( '#' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:831:16: '#'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:828:5: ( '#' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:828:16: '#'
             {
             match('#'); 
 
@@ -2487,8 +2487,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:832:8: ( '%' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:832:16: '%'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:829:8: ( '%' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:829:16: '%'
             {
             match('%'); 
 
@@ -2508,8 +2508,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:833:5: ( '+' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:833:16: '+'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:830:5: ( '+' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:830:16: '+'
             {
             match('+'); 
 
@@ -2529,8 +2529,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:834:7: ( '=' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:834:16: '='
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:831:7: ( '=' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:831:16: '='
             {
             match('='); 
 
@@ -2550,8 +2550,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:835:6: ( ':' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:835:16: ':'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:832:6: ( ':' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:832:16: ':'
             {
             match(':'); 
 
@@ -2571,8 +2571,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:836:5: ( '<' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:836:16: '<'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:833:5: ( '<' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:833:16: '<'
             {
             match('<'); 
 
@@ -2592,8 +2592,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:837:8: ( '>' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:837:16: '>'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:834:8: ( '>' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:834:16: '>'
             {
             match('>'); 
 
@@ -2613,8 +2613,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = SOLIDUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:838:8: ( '/' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:838:16: '/'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:835:8: ( '/' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:835:16: '/'
             {
             match('/'); 
 
@@ -2634,8 +2634,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:839:13: ( '//' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:839:16: '//'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:836:13: ( '//' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:836:16: '//'
             {
             match("//"); 
 
@@ -2657,8 +2657,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:840:10: ( '\\\\' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:840:16: '\\\\'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:837:10: ( '\\\\' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:837:16: '\\\\'
             {
             match('\\'); 
 
@@ -2678,8 +2678,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:841:6: ( '~' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:841:16: '~'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:838:6: ( '~' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:838:16: '~'
             {
             match('~'); 
 
@@ -2699,8 +2699,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:842:6: ( '^' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:842:16: '^'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:839:6: ( '^' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:839:16: '^'
             {
             match('^'); 
 
@@ -2720,8 +2720,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = CONCATENATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:843:14: ( '||' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:843:16: '||'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:840:14: ( '||' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:840:16: '||'
             {
             match("||"); 
 
@@ -2741,7 +2741,7 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:846:3: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:843:3: ( 'a' .. 'z' | 'A' .. 'Z' )
             // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2767,7 +2767,7 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:851:3: ( '0' .. '9' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:848:3: ( '0' .. '9' )
             // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -2793,7 +2793,7 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:855:3: ( ALPHA | DIGIT )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:852:3: ( ALPHA | DIGIT )
             // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2819,7 +2819,7 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "CHAR"
     public final void mCHAR() throws RecognitionException {
         try {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:860:3: ( ALPHANUM | UNDERSCORE | MINUS )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:857:3: ( ALPHANUM | UNDERSCORE | MINUS )
             // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:
             {
             if ( input.LA(1)=='-'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2845,8 +2845,8 @@ public class SQL99Lexer extends Lexer {
     // $ANTLR start "ECHAR"
     public final void mECHAR() throws RecognitionException {
         try {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:866:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:866:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:863:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:863:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
             {
             match('\\'); 
 
@@ -2875,10 +2875,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = INTEGER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:870:3: ( ( DIGIT )+ )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:870:5: ( DIGIT )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:867:3: ( ( DIGIT )+ )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:867:5: ( DIGIT )+
             {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:870:5: ( DIGIT )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:867:5: ( DIGIT )+
             int cnt1=0;
             loop1:
             do {
@@ -2933,7 +2933,7 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DECIMAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:874:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:871:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -2952,9 +2952,9 @@ public class SQL99Lexer extends Lexer {
             }
             switch (alt5) {
                 case 1 :
-                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:874:5: ( DIGIT )+ PERIOD ( DIGIT )+
+                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:871:5: ( DIGIT )+ PERIOD ( DIGIT )+
                     {
-                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:874:5: ( DIGIT )+
+                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:871:5: ( DIGIT )+
                     int cnt2=0;
                     loop2:
                     do {
@@ -2996,7 +2996,7 @@ public class SQL99Lexer extends Lexer {
                     mPERIOD(); 
 
 
-                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:874:19: ( DIGIT )+
+                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:871:19: ( DIGIT )+
                     int cnt3=0;
                     loop3:
                     do {
@@ -3038,12 +3038,12 @@ public class SQL99Lexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:875:5: PERIOD ( DIGIT )+
+                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:872:5: PERIOD ( DIGIT )+
                     {
                     mPERIOD(); 
 
 
-                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:875:12: ( DIGIT )+
+                    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:872:12: ( DIGIT )+
                     int cnt4=0;
                     loop4:
                     do {
@@ -3100,8 +3100,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = INTEGER_POSITIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:879:3: ( PLUS INTEGER )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:879:5: PLUS INTEGER
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:876:3: ( PLUS INTEGER )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:876:5: PLUS INTEGER
             {
             mPLUS(); 
 
@@ -3125,8 +3125,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = INTEGER_NEGATIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:883:3: ( MINUS INTEGER )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:883:5: MINUS INTEGER
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:880:3: ( MINUS INTEGER )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:880:5: MINUS INTEGER
             {
             mMINUS(); 
 
@@ -3150,8 +3150,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DECIMAL_POSITIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:887:3: ( PLUS DECIMAL )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:887:5: PLUS DECIMAL
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:884:3: ( PLUS DECIMAL )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:884:5: PLUS DECIMAL
             {
             mPLUS(); 
 
@@ -3175,8 +3175,8 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = DECIMAL_NEGATIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:891:3: ( MINUS DECIMAL )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:891:5: MINUS DECIMAL
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:888:3: ( MINUS DECIMAL )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:888:5: MINUS DECIMAL
             {
             mMINUS(); 
 
@@ -3200,13 +3200,13 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = VARNAME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:895:3: ( ALPHA ( CHAR )* )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:895:5: ALPHA ( CHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:892:3: ( ALPHA ( CHAR )* )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:892:5: ALPHA ( CHAR )*
             {
             mALPHA(); 
 
 
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:895:11: ( CHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:892:11: ( CHAR )*
             loop6:
             do {
                 int alt6=2;
@@ -3256,12 +3256,12 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:899:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:899:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:896:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:896:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
             {
             match('\''); 
 
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:899:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:896:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop7:
             do {
                 int alt7=3;
@@ -3280,7 +3280,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt7) {
             	case 1 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:899:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:896:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -3295,7 +3295,7 @@ public class SQL99Lexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:899:87: ECHAR
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:896:87: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -3327,12 +3327,12 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:900:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:900:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
             {
             match('\"'); 
 
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:900:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop8:
             do {
                 int alt8=3;
@@ -3351,7 +3351,7 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:900:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -3366,7 +3366,7 @@ public class SQL99Lexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:87: ECHAR
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:900:87: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -3398,10 +3398,10 @@ public class SQL99Lexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt10=0;
             loop10:
             do {
@@ -3428,23 +3428,23 @@ public class SQL99Lexer extends Lexer {
 
                 switch (alt10) {
             	case 1 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:6: ' '
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:10: '\\t'
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt9=2;
             	    int LA9_0 = input.LA(1);
 
@@ -3463,19 +3463,19 @@ public class SQL99Lexer extends Lexer {
             	    }
             	    switch (alt9) {
             	        case 1 :
-            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:16: '\\n'
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:21: '\\r' ( '\\n' )
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
 
-            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:25: ( '\\n' )
-            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:906:26: '\\n'
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:25: ( '\\n' )
+            	            // C:\\Project\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\SQL99.g:903:26: '\\n'
             	            {
             	            match('\n'); 
 

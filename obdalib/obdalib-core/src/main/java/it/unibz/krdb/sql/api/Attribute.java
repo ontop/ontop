@@ -3,11 +3,11 @@ package it.unibz.krdb.sql.api;
 public class Attribute {
 	
 	/** Fields */
-	public String name;
-	public String type;
-	public boolean bPrimaryKey;
-	public int canNull;
-
+	public final String name;
+	public final String type;
+	public final boolean bPrimaryKey;
+	public final int canNull;
+	
 	public Attribute(String name) {
 		this(name, "", false, 0);
 	}

@@ -20,6 +20,19 @@ public class ComparisonPredicate implements IPredicate, ICondition {
 		operator = op;
 	}
 	
+	public IValueExpression[] getValueExpressions() {
+		IValueExpression[] values = {left, right};
+		return values;
+	}
+	
+	public Operator getOperator() {
+		return operator;
+	}
+	
+	public boolean useEqualOperator() {
+		return (operator == Operator.EQ)? true : false;
+	}
+	
 	private String opString() {
 		switch(operator) {
 			case EQ: return "=";

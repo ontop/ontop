@@ -20,8 +20,7 @@ import it.unibz.krdb.sql.api.Selection;
 import it.unibz.krdb.sql.api.Aggregation;
 
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.CrossJoin;
-import it.unibz.krdb.sql.api.NaturalJoin;
+import it.unibz.krdb.sql.api.JoinOperator;
 import it.unibz.krdb.sql.api.SetUnion;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.RelationalAlgebra;
@@ -89,13 +88,8 @@ private DBMetadata metadata;
 private boolean bSelectAll = false;
 
 
-/**
- * Sets the database metadata.
- * 
- * @param metadata
- *           The database metadata object.
- */
-public void setMetadata(DBMetadata metadata) {
+public SQL99Parser(TokenStream input, DBMetadata metadata) {
+  this(input);
   this.metadata = metadata;
 }
 
@@ -125,7 +119,7 @@ private Projection createProjection(ArrayList<TablePrimary> tableList, ArrayList
     for (TablePrimary tableObj : tableList) {
       String schema = tableObj.getSchema();
       String table = tableObj.getName();
-      ArrayList<Attribute> attributeList = tableObj.getAttributeList();
+      ArrayList<Attribute> attributeList = tableObj.getAttributes();
       for (Attribute attr : attributeList) {
         String column = attr.name;
         ReferenceValueExpression referenceExp = new ReferenceValueExpression();
@@ -458,8 +452,8 @@ table_reference_list returns [ArrayList<TablePrimary> value]
   : a=table_reference { $value.add($a.value); } 
     (
       COMMA b=table_reference {
-        CrossJoin crJoin = new CrossJoin();
-        relationStack.push(crJoin);
+        JoinOperator joinOp = new JoinOperator(JoinOperator.CROSS_JOIN);
+        relationStack.push(joinOp);
         
         $value.add($b.value);
       })*    
@@ -467,7 +461,7 @@ table_reference_list returns [ArrayList<TablePrimary> value]
   
 table_reference returns [TablePrimary value]
   : table_primary { $value = $table_primary.value; }
-    (joined_table { $value = $table_primary.value; })? 
+    (joined_table { $value = $joined_table.value; })? 
   ;
 
 where_clause returns [BooleanValueExpression value]
@@ -582,39 +576,42 @@ grouping_column_reference_list returns [ArrayList<ColumnReference> value]
 
 joined_table returns [TablePrimary value]
 @init {
-  int joinType = 0;
+  int joinType = JoinOperator.JOIN; // by default
 }
-  : ((join_type)? JOIN table_reference join_specification {
-      joinType = $join_type.value;
-      NaturalJoin ntJoin = new NaturalJoin(joinType);
-      ntJoin.copy($join_specification.value.getSpecification());
-      relationStack.push(ntJoin);  
+  : ((join_type { joinType = $join_type.value; })? JOIN table_reference join_specification {
+      JoinOperator joinOp = new JoinOperator(joinType);
+      joinOp.copy($join_specification.value.getSpecification());
+      relationStack.push(joinOp);
+      $value = $table_reference.value;
     })+
   ;
   catch [Exception e] {
      // Does nothing.
   }  
 
-/**
- * The types of join are based on a particular ordering system.
- * Therefore, the integers given here are not arbitrary.
- *
- * {@link NaturalJoin}
- */
 join_type returns [int value]
 @init {
-  int outer = 0;
+  boolean bHasOuter = false;
 }
-  : INNER { $value = 1; }
-  | outer_join_type (OUTER { outer = 3; })? {
-      $value = $outer_join_type.value + outer;
+  : INNER { $value = JoinOperator.INNER_JOIN; }
+  | outer_join_type (OUTER { bHasOuter = true; })? {
+      if (bHasOuter) {
+        switch($outer_join_type.value) {
+          case JoinOperator.LEFT_JOIN: $value = JoinOperator.LEFT_OUTER_JOIN; break;
+          case JoinOperator.RIGHT_JOIN: $value = JoinOperator.RIGHT_OUTER_JOIN; break;
+          case JoinOperator.FULL_JOIN: $value = JoinOperator.FULL_OUTER_JOIN; break;
+        }
+      }
+      else {
+        $value = $outer_join_type.value;
+      }
     }
   ;
   
 outer_join_type returns [int value]
-  : LEFT { $value = 2; }
-  | RIGHT { $value = 3; }
-  | FULL { $value = 4; }
+  : LEFT { $value = JoinOperator.LEFT_JOIN; }
+  | RIGHT { $value = JoinOperator.RIGHT_JOIN; }
+  | FULL { $value = JoinOperator.FULL_JOIN; }
   ;
 
 join_specification returns [BooleanValueExpression value]

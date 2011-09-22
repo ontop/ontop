@@ -67,6 +67,13 @@ public class Projection {
 	}
 	
 	/**
+	 * Retrieves all columns that are mentioned in the SELECT clause.
+	 */
+	public ArrayList<DerivedColumn> getSelectList() {
+		return selectList;
+	}
+	
+	/**
 	 * Retrieves all column names that are particularly used in
 	 * the query string for a specific table name.
 	 * 

@@ -2,7 +2,7 @@ package it.unibz.krdb.sql.api;
 
 import java.util.ArrayList;
 
-public class TablePrimary implements IRelation {
+public class TablePrimary implements ITable {
 	
 	private String schema;
 	private String name;
@@ -55,11 +55,32 @@ public class TablePrimary implements IRelation {
 		}
 		return null;
 	}
+
+	public int getAttributeIndex(String name) {
+		for (Attribute entry : attributes) {
+			if (entry.hasName(name)) {
+				return attributes.indexOf(entry);
+			}
+		}
+		return -1;
+	}
 	
-	public ArrayList<Attribute> getAttributeList() {
+	public ArrayList<Attribute> getAttributes() {
 		return attributes;
 	}
+	
+	public ArrayList<String> getAttributeNames() {
+		ArrayList<String> values = new ArrayList<String>();
+		for (Attribute attr : getAttributes()) {
+			values.add(attr.name);
+		}
+		return values;
+	}
 
+	public int getAttributeCount() {
+		return attributes.size();
+	}
+	
 	public void setAlias(String alias) {
 		if (alias == null) {
 			return;
@@ -69,15 +90,6 @@ public class TablePrimary implements IRelation {
 
 	public String getAlias() {
 		return alias;
-	}
-
-	public boolean hasAttribute(String name) {
-		for (Attribute entry : attributes) {
-			if (entry.hasName(name)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override
