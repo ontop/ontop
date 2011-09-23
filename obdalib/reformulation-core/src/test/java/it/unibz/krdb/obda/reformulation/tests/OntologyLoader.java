@@ -53,6 +53,8 @@ public class OntologyLoader {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "inmemory");
             pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "virtual");
             pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
+            pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+    		pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 
             QuestOWLFactory factory = new QuestOWLFactory();
 //            factory.setOBDAController(controller);

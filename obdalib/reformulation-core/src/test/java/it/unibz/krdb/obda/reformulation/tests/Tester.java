@@ -110,15 +110,12 @@ public class Tester {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
         else if (unfold_type.equals(QuestConstants.CLASSIC)) {
             pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
-        } else {
-            throw new Exception("The unfolding mechanism can only be either material or virtual");
-            // Note: Due to resent changes the semantic mode has been removed. It is now a
-            // submode of the material Abox mode and the tester has still to be adapted to that
-            // changes
         }
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, dbType);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 
         QuestOWLFactory fac = new QuestOWLFactory();
         

@@ -25,7 +25,8 @@ public class ReformulationPlatformPreferences extends Properties {
 	public static final String	DATA_LOCATION			= "org.obda.owlreformulationplatform.datalocation";
 	public static final String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";
 	public static final String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
-	public static final String  ELIMINATE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.eliminateEquivalences";
+	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
+	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 	
 	private Logger				log						= LoggerFactory.getLogger(ReformulationPlatformPreferences.class);
 
@@ -113,7 +114,8 @@ public class ReformulationPlatformPreferences extends Properties {
 		keys.add(DATA_LOCATION);
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
-		keys.add(ELIMINATE_EQUIVALENCES);
+		keys.add(OPTIMIZE_EQUIVALENCES);
+		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;
 	}

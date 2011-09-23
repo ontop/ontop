@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi.util.OBDA2OWLDataMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
@@ -67,10 +68,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
- * 
- * 
  */
-
 public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, MonitorableOWLReasoner {
 
 	private static final String					NOT_IMPLEMENTED_STR		= "Service not available.";
@@ -106,7 +104,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	 * Optimization flags
 	 */
 
-	private boolean								optimizeEquivalences	= true;
+//	private boolean								optimizeEquivalences	= true;
 
 	private boolean								optimizeSigma			= true;
 
@@ -184,20 +182,29 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 		/***
-		 * Duplicating the OBDA model to avoid strange behaivors
+		 * Duplicating the OBDA model to avoid strange behavior.
 		 */
-
-		// String useMem = (String)
 		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+		boolean optimizeEquivalences = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES);
 		boolean useInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals(QuestConstants.INMEMORY);
+		boolean obtainFromOntology = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY);
+		boolean obtainFromMappings = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS);
 		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
+		
+		// For testing purposes.
+		boolean createMappings = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
+		
 		log.debug("Initializing Quest query answering engine...");
 		log.debug("Active preferences:");
 		log.debug("{} = {}", ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, reformulationTechnique);
+		log.debug("{} = {}", ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, optimizeEquivalences);
 		log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION, useInMemoryDB);
+		log.debug("{} = {}", ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, obtainFromOntology);
+		log.debug("{} = {}", ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, obtainFromMappings);
 		log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE, unfoldingMode);
 		log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE, dbType);
+		log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
 
 		QueryRewriter rewriter = null;
 		UnfoldingMechanism unfMech = null;
@@ -238,7 +245,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			 * Preparing the data source
 			 */
 
-			if (useInMemoryDB && QuestConstants.CLASSIC.equals(unfoldingMode)) {
+			if (useInMemoryDB && (QuestConstants.CLASSIC.equals(unfoldingMode) || createMappings)) {
 
 				log.debug("Using in an memory database");
 				String driver = "org.h2.Driver";
@@ -278,14 +285,19 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				getProgressMonitor().setMessage("Creating database schema...");
 
 				dataRepository.createDBSchema(true);
-				dataRepository.insertMetadata();
-
-				log.debug("Loading data into the DB");
-				OWLAPI2ABoxIterator aboxiterator = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
+				dataRepository.insertMetadata();				
 				
-				
-				dataRepository.insertData(aboxiterator);
-				
+				if (obtainFromOntology) {
+					log.debug("Loading data from Ontology into the database");
+					OWLAPI2ABoxIterator aboxiterator = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
+					dataRepository.insertData(aboxiterator);
+				}
+				if (obtainFromMappings) {
+					log.debug("Loading data from Mappings into the database");
+					OBDA2OWLDataMaterializer materializer = new OBDA2OWLDataMaterializer();
+//					materializer.materializeAbox(obdaModel, ontoManager, );
+//					dataRepository.insertData(data);
+				}
 				
 				dataRepository.createIndexes();
 

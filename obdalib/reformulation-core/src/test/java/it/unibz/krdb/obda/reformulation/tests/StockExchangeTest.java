@@ -44,6 +44,8 @@ public class StockExchangeTest extends TestCase {
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		
 //		factory.setOBDAController(controller);
