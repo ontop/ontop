@@ -11,10 +11,11 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlapi.util.OBDA2OWLDataMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
@@ -289,14 +290,14 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				
 				if (obtainFromOntology) {
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI2ABoxIterator aboxiterator = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
-					dataRepository.insertData(aboxiterator);
+					OWLAPI2ABoxIterator aBoxIter = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
+					dataRepository.insertData(aBoxIter);
 				}
 				if (obtainFromMappings) {
 					log.debug("Loading data from Mappings into the database");
-					OBDA2OWLDataMaterializer materializer = new OBDA2OWLDataMaterializer();
-//					materializer.materializeAbox(obdaModel, ontoManager, );
-//					dataRepository.insertData(data);
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
+					VirtualTriplePredicateIterator triplePredicateIter = (VirtualTriplePredicateIterator)materializer.getAssertionIterator();
+					dataRepository.insertData(triplePredicateIter);
 				}
 				
 				dataRepository.createIndexes();
