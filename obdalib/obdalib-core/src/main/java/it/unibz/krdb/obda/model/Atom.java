@@ -6,8 +6,9 @@ public interface Atom extends Cloneable {
 	
 	public Atom clone();
 
-
 	public int getArity();
+	
+	public void setPredicate(Predicate predicate);
 	
 	public Predicate getPredicate();
 	

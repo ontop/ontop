@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.io.DataManager;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
+import it.unibz.krdb.obda.utils.OBDAModelRefactorer;
 
 import java.io.File;
 import java.io.IOException;
@@ -221,7 +222,10 @@ public class OBDAModelManager implements Disposable {
 						DataManager ioManager = new DataManager(getActiveOBDAModel());
 						File file = new File(obdafile);
 						if (file.canRead()) {
-							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), getActiveOBDAModel().getPrefixManager());
+							final OBDAModel obdaModel = getActiveOBDAModel();			
+							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), obdaModel.getPrefixManager());
+							OBDAModelRefactorer refactorer = new OBDAModelRefactorer(obdaModel, activeonto);
+							refactorer.run(); // adding type information to the mapping predicates.
 						} else {
 							log.debug("Cannot read file: {}", obdafile.toString());
 							log.debug("If this is a new model, or a model without a .obda file then ignore this message");
@@ -246,7 +250,10 @@ public class OBDAModelManager implements Disposable {
 						DataManager ioManager = new DataManager(getActiveOBDAModel());
 						File file = new File(obdafile);
 						if (file.canRead()) {
+							final OBDAModel obdaModel = getActiveOBDAModel();
 							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), getActiveOBDAModel().getPrefixManager());
+							OBDAModelRefactorer refactorer = new OBDAModelRefactorer(obdaModel, activeonto);
+							refactorer.run(); // adding type information to the mapping predicates.
 						} else {
 							log.debug("Cannot read file: {}", obdafile.toString());
 							log.debug("If this is a new model, or a model without a .obda file then ignore this message");

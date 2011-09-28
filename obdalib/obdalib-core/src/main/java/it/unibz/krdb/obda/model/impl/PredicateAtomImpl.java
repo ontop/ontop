@@ -198,4 +198,9 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		return terms.set(index, newTerm);
 	}
 
+	@Override
+	public void setPredicate(Predicate predicate) {
+		this.predicate = predicate;
+		listChanged();
+	}
 }

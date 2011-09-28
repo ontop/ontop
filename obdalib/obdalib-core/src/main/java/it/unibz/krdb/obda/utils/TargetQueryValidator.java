@@ -2,6 +2,10 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -15,6 +19,9 @@ public class TargetQueryValidator
 {
   /** The source ontology for validating the target query */
   private OWLOntology ontology;
+  
+  /** Data factory **/
+  private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
   
   /** List of invalid predicates */
   private Vector<String> invalidPredicates = new Vector<String>();
@@ -33,37 +40,41 @@ public class TargetQueryValidator
     // Get the predicates in the target query.
     Iterator<Atom> iterAtom = targetQuery.getBody().iterator();
     while(iterAtom.hasNext()) {
-      Atom a1 = iterAtom.next();
-      if (!(a1 instanceof Atom))
-    	  continue;
-      Atom atom = (Atom)a1;
-      
-      URI predicate = atom.getPredicate().getName();
+    	
+      Atom atom = iterAtom.next();
+	      
+      URI predicateUri = atom.getPredicate().getName();
  
       // TODO Add a predicate type for better identification.
-      boolean isClass = ontology.containsClassReference(predicate);      
-      boolean isObjectProp = ontology.containsObjectPropertyReference(predicate);
-      boolean isDataProp = ontology.containsDataPropertyReference(predicate);
+      boolean isClass = ontology.containsClassReference(predicateUri);      
+      boolean isObjectProp = ontology.containsObjectPropertyReference(predicateUri);
+      boolean isDataProp = ontology.containsDataPropertyReference(predicateUri);
       
       // Check if the predicate contains in the ontology vocabulary as one
       // of these components (i.e., class, object property, data property).
       boolean isPredicateValid = isClass || isObjectProp || isDataProp;
       
-      String debugMsg = "The predicate: [" + predicate.toString() + "]";
+      String debugMsg = "The predicate: [" + predicateUri.toString() + "]";
       if (isPredicateValid) {
-        if (isClass) {
+        COL_TYPE colType[] = null; 
+    	if (isClass) {
+    	  colType = new COL_TYPE[]{COL_TYPE.OBJECT};
           debugMsg += " is a Class.";
         }
         else if (isObjectProp) {
+          colType =  new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.OBJECT};
           debugMsg += " is an Object property.";
         }
         else if (isDataProp) {
+          colType =  new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.LITERAL};
           debugMsg += " is a Data property.";
         }
+    	Predicate predicate = dataFactory.getPredicate(predicateUri, atom.getArity(), colType);
+    	atom.setPredicate(predicate);  // TODO Fix the API!
         log.debug(debugMsg);
       }
       else {
-        invalidPredicates.add(predicate.toString());
+        invalidPredicates.add(predicateUri.toString());
         log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
       }
     }

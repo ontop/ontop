@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlapi.util.OBDA2OWLDataMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2IndividualIterator;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.Container;
@@ -26,55 +26,51 @@ import org.slf4j.LoggerFactory;
  * existing mappings from ALL datasources
  * 
  * @author Mariano Rodriguez Muro
- * 
  */
 public class AboxMaterializationAction extends ProtegeAction {
 
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= -1211395039869926309L;
-
-	private Logger				log					= LoggerFactory.getLogger(AboxMaterializationAction.class);
-
+	private static final long serialVersionUID = -1211395039869926309L;
+	
 	private MaterializeAction action = null;
+
+	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
 	
 	@Override
 	public void initialise() throws Exception {
-		// TODO Auto-generated method stub
-
+		// Does nothing!
 	}
 
 	@Override
 	public void dispose() throws Exception {
-		// TODO Auto-generated method stub
-
+		// Does nothing!
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-
-		if (!(getEditorKit() instanceof OWLEditorKit) || !(getEditorKit().getModelManager() instanceof OWLModelManager))
+		
+		if (!(getEditorKit() instanceof OWLEditorKit)) {
 			return;
+		}
 
 		int response = JOptionPane
 				.showConfirmDialog(
 						this.getEditorKit().getWorkspace(),
 						"This will use the mappings of the OWL-OBDA model \n to create a set of 'individual' assertions as specified \n by the mappings. \n\n This operation can take a long time and can require a lot of memory \n if the volume data retrieved by the mappings is high.",
 						"Confirm", JOptionPane.OK_CANCEL_OPTION);
-		if (response == JOptionPane.CANCEL_OPTION || response == JOptionPane.CLOSED_OPTION || response == JOptionPane.NO_OPTION)
+		
+		if (response == JOptionPane.CANCEL_OPTION) {
 			return;
+		}
 
-		OWLEditorKit kit = (OWLEditorKit) this.getEditorKit();
-		OWLModelManager mm = kit.getOWLModelManager();
-		Container cont = this.getWorkspace().getRootPane().getParent();
-		OBDAModel obdaapi = ((OBDAModelManager) kit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		OWLEditorKit kit = (OWLEditorKit)getEditorKit();
+		Container container = getWorkspace().getRootPane().getParent();
+		OBDAModel obdaModel = ((OBDAModelManager) kit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
 
 		try {
-			OWLOntologyManager owlOntManager = mm.getOWLOntologyManager();
-			OWLOntology owl_ont = mm.getActiveOntology();
-			OBDA2OWLDataMaterializer mat = new OBDA2OWLDataMaterializer();
-			action = new MaterializeAction(mat, obdaapi, owl_ont, owlOntManager);
+			OWLModelManager modelManager = kit.getOWLModelManager();
+			OWLAPI2IndividualIterator individuals = new OWLAPI2IndividualIterator(obdaModel);
+			
+			action = new MaterializeAction(modelManager, individuals);
 			
 			Thread th = new Thread(new Runnable() {
 				@Override
@@ -88,37 +84,36 @@ public class AboxMaterializationAction extends ProtegeAction {
 						action.run();
 						latch.await();
 						monitor.stop();
-					} catch (InterruptedException e) {
+					} 
+					catch (InterruptedException e) {
 						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+						JOptionPane.showMessageDialog(null, "ERROR: could not materialize ABox.");
 					}
 				}
 			});
 			th.start();
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(cont, "ERROR: could not create individuals. See the log for more informaiton.", "Error", JOptionPane.ERROR_MESSAGE);
-			
 		}
-
+		catch (Exception e) {
+			log.error(e.getMessage(), e);
+			JOptionPane.showMessageDialog(container, "ERROR: could not create individuals. See the log for more informaiton.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private class MaterializeAction implements OBDAProgressListener {
 
-		private Thread				thread	= null;
+		private Thread thread = null;
+		private CountDownLatch latch = null;
+		
+		private OWLOntology currentOntology = null;
+		private OWLOntologyManager ontologyManager = null;
+		private OWLAPI2IndividualIterator iterator = null;
+		
+		private boolean bCancel = false;
 
-		private CountDownLatch		latch	= null;
-
-		private OBDA2OWLDataMaterializer	mat		= null;
-		private OWLOntology			owl_ont	= null;
-		private OWLOntologyManager	man		= null;
-		OBDAModel				obdapi	= null;
-
-		public MaterializeAction(OBDA2OWLDataMaterializer mat, OBDAModel obdaapi, OWLOntology owl_ont, OWLOntologyManager man) {
-			this.obdapi = obdaapi;
-			this.mat = mat;
-			this.owl_ont = owl_ont;
-			this.man = man;
+		public MaterializeAction(OWLModelManager modelManager, OWLAPI2IndividualIterator iterator) {
+			currentOntology = modelManager.getActiveOntology();
+			ontologyManager = modelManager.getOWLOntologyManager();			
+			this.iterator = iterator;
 		}
 
 		public void setCountdownLatch(CountDownLatch cdl){
@@ -126,25 +121,31 @@ public class AboxMaterializationAction extends ProtegeAction {
 		}
 		
 		public void run() {
-			if(latch == null){
+			if (latch == null){
 				try {
 					throw new Exception("No CountDownLatch set");
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					log.error(e.getMessage(), e);
 					JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
 					return;
 				}
 			}
+			
 			thread = new Thread() {
 				public void run() {
 					try {
-						mat.materializeAbox(obdapi, man, owl_ont);						
+						while(iterator.hasNext()) {
+							ontologyManager.addAxiom(currentOntology, iterator.next());
+						}
+						
 						latch.countDown();
 						Container cont = AboxMaterializationAction.this.getWorkspace().getRootPane().getParent();
-						if(!mat.isCanceled()){
-							JOptionPane.showMessageDialog(cont, "Task completed", "Done", JOptionPane.INFORMATION_MESSAGE);
+						if(!bCancel){
+							JOptionPane.showMessageDialog(cont, "Task is completed", "Done", JOptionPane.INFORMATION_MESSAGE);
 						}
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						latch.countDown();
 						log.error("Materialization of Abox failed", e);
 					}
@@ -156,7 +157,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		@Override
 		public void actionCanceled() {
 			if (thread != null) {
-				mat.cancelAction();
+				bCancel = true;
 				latch.countDown();
 				thread.interrupt();
 			}
