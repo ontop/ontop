@@ -701,8 +701,6 @@ public class OWLAPI2Translator {
 
 			OWLObjectPropertyAssertionAxiom assertion = (OWLObjectPropertyAssertionAxiom) axiom;
 			OWLObjectPropertyExpression propertyExperssion = assertion.getProperty();
-			if (!(propertyExperssion instanceof OWLObjectPropertyExpression))
-				return null;
 
 			URI property = null;
 			OWLIndividual subject = null;
