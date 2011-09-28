@@ -370,7 +370,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			String input = prepareQuery(query);
 			DatalogProgram dp = datalogParser.parse(input);
 			if (dp.getRules().size() > 0) {
-				cq = dp.getRules().get(0);
+				cq = dp.getRules().get(0);  // TODO Change this when the system supports multiple data sources.
 			}
 		} catch (RecognitionException e) {
 			log.warn(e.getMessage());
