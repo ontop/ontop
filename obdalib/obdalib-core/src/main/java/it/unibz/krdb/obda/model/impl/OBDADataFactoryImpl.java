@@ -44,6 +44,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new OBDAModelImpl();
 	}
 
+	@Deprecated
 	public PredicateImpl getPredicate(URI name, int arity) {
 		if (arity == 1) {
 			return new PredicateImpl(name, arity, new COL_TYPE[] {COL_TYPE.OBJECT});
@@ -419,6 +420,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	@Deprecated
 	public Predicate getPredicate(String uri, int arity) {
 		return getPredicate(URI.create(uri), arity);
 	}

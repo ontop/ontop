@@ -38,8 +38,10 @@ public interface OBDADataFactory {
 	 *            the number of elements inside the predicate.
 	 * @return a predicate object.
 	 */
+	@Deprecated
 	public Predicate getPredicate(URI name, int arity);
 	
+	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 	
 	public Predicate getPredicate(URI name, int arity, COL_TYPE[] types);
