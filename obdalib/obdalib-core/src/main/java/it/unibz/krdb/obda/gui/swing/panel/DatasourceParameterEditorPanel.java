@@ -14,6 +14,7 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.net.URI;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
@@ -21,6 +22,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import javax.swing.JOptionPane;
 
@@ -87,28 +89,31 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         txtDatabasePassword = new javax.swing.JTextField();
         lblJdbcDriver = new javax.swing.JLabel();
         txtJdbcDriver = new javax.swing.JTextField();
+        pnlTestConnection = new javax.swing.JPanel();
+        cmdTestConnection = new javax.swing.JButton();
+        lblConnectionStatus = new javax.swing.JLabel();
         pnlCommandButton = new javax.swing.JPanel();
         cmdNew = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
 
-        setMinimumSize(new java.awt.Dimension(210, 200));
-        setPreferredSize(new java.awt.Dimension(210, 235));
+        setMinimumSize(new java.awt.Dimension(540, 270));
+        setPreferredSize(new java.awt.Dimension(540, 270));
         setLayout(new java.awt.BorderLayout());
 
         pnlDataSourceSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Datasource Settings"));
         pnlDataSourceSettings.setAutoscrolls(true);
-        pnlDataSourceSettings.setMinimumSize(new java.awt.Dimension(200, 230));
-        pnlDataSourceSettings.setPreferredSize(new java.awt.Dimension(200, 220));
-        pnlDataSourceSettings.setLayout(new java.awt.GridBagLayout());
+        pnlDataSourceSettings.setMinimumSize(new java.awt.Dimension(540, 250));
+        pnlDataSourceSettings.setPreferredSize(new java.awt.Dimension(540, 250));
+        pnlDataSourceSettings.setLayout(new java.awt.BorderLayout());
 
         pnlDataSourceInfo.setAutoscrolls(true);
         pnlDataSourceInfo.setMaximumSize(new java.awt.Dimension(32767, 23));
-        pnlDataSourceInfo.setMinimumSize(new java.awt.Dimension(140, 65));
-        pnlDataSourceInfo.setPreferredSize(new java.awt.Dimension(140, 70));
+        pnlDataSourceInfo.setMinimumSize(new java.awt.Dimension(540, 70));
+        pnlDataSourceInfo.setPreferredSize(new java.awt.Dimension(540, 70));
         pnlDataSourceInfo.setLayout(new java.awt.GridBagLayout());
 
         lblDataSourceName.setBackground(new java.awt.Color(153, 153, 153));
-        lblDataSourceName.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblDataSourceName.setFont(new java.awt.Font("Arial", 1, 11));
         lblDataSourceName.setForeground(new java.awt.Color(153, 153, 153));
         lblDataSourceName.setText("Data Source Name:");
         lblDataSourceName.setFocusable(false);
@@ -129,7 +134,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         pnlDataSourceInfo.add(pnlDataSourceSelector, gridBagConstraints);
 
         lblDataSourceType.setBackground(new java.awt.Color(153, 153, 153));
-        lblDataSourceType.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblDataSourceType.setFont(new java.awt.Font("Arial", 1, 11));
         lblDataSourceType.setForeground(new java.awt.Color(153, 153, 153));
         lblDataSourceType.setText("Type:");
         lblDataSourceType.setFocusable(false);
@@ -145,7 +150,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlDataSourceInfo.add(lblDataSourceType, gridBagConstraints);
 
-        lblDataSourceTypeValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        lblDataSourceTypeValue.setFont(new java.awt.Font("Arial", 0, 11));
         lblDataSourceTypeValue.setFocusable(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -172,7 +177,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         pnlDataSourceInfo.add(lblMappingType, gridBagConstraints);
 
-        lblMappingTypeValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        lblMappingTypeValue.setFont(new java.awt.Font("Arial", 0, 11));
         lblMappingTypeValue.setFocusable(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -184,22 +189,15 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.weighty = 1.0;
         pnlDataSourceInfo.add(lblMappingTypeValue, gridBagConstraints);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-        pnlDataSourceSettings.add(pnlDataSourceInfo, gridBagConstraints);
+        pnlDataSourceSettings.add(pnlDataSourceInfo, java.awt.BorderLayout.NORTH);
 
         pnlDataSourceParameters.setAlignmentX(5.0F);
         pnlDataSourceParameters.setAlignmentY(5.0F);
         pnlDataSourceParameters.setAutoscrolls(true);
         pnlDataSourceParameters.setFocusTraversalPolicyProvider(true);
         pnlDataSourceParameters.setMaximumSize(new java.awt.Dimension(6404444, 34452345));
-        pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(220, 110));
-        pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(220, 110));
+        pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(540, 110));
+        pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(540, 110));
         pnlDataSourceParameters.setLayout(new java.awt.GridBagLayout());
 
         lblJdbcUrl.setFont(new java.awt.Font("Arial", 1, 11));
@@ -322,15 +320,27 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
         pnlDataSourceParameters.add(txtJdbcDriver, gridBagConstraints);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        pnlDataSourceSettings.add(pnlDataSourceParameters, gridBagConstraints);
+        pnlDataSourceSettings.add(pnlDataSourceParameters, java.awt.BorderLayout.CENTER);
+
+        pnlTestConnection.setMinimumSize(new java.awt.Dimension(540, 33));
+        pnlTestConnection.setPreferredSize(new java.awt.Dimension(540, 33));
+        pnlTestConnection.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        cmdTestConnection.setText("Test Connection");
+        cmdTestConnection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdTestConnectionActionPerformed(evt);
+            }
+        });
+        pnlTestConnection.add(cmdTestConnection);
+        pnlTestConnection.add(lblConnectionStatus);
+
+        pnlDataSourceSettings.add(pnlTestConnection, java.awt.BorderLayout.SOUTH);
 
         add(pnlDataSourceSettings, java.awt.BorderLayout.CENTER);
 
+        pnlCommandButton.setMinimumSize(new java.awt.Dimension(540, 33));
+        pnlCommandButton.setPreferredSize(new java.awt.Dimension(540, 33));
         pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
         cmdNew.setText("Create New...");
@@ -383,19 +393,37 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 	private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
 		OBDADataSource ds = selector.getSelectedDataSource();
-		if (ds != null) {
-			int answer = JOptionPane.showConfirmDialog(this, 
-					"Are you sure want to delete this data source?", "Delete Confirmation", 
-					JOptionPane.OK_CANCEL_OPTION);
-			if (answer == JOptionPane.OK_OPTION) {
-				obdaModel.removeSource(ds.getSourceID());
-			}
+		if (ds == null) {
+			JOptionPane.showMessageDialog(this, "Select the target data source first!", "Warning", JOptionPane.WARNING_MESSAGE);
+			return;
 		}
-		else {
-			JOptionPane.showMessageDialog(this, 
-					"Select the target data source first!", "Warning", JOptionPane.WARNING_MESSAGE);
+		
+		int answer = JOptionPane.showConfirmDialog(this, 
+				"Are you sure want to delete this data source?", "Delete Confirmation", 
+				JOptionPane.OK_CANCEL_OPTION);
+		if (answer == JOptionPane.OK_OPTION) {
+			obdaModel.removeSource(ds.getSourceID());
 		}
 	}//GEN-LAST:event_cmdRemoveActionPerformed
+
+private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTestConnectionActionPerformed
+	OBDADataSource ds = selector.getSelectedDataSource();
+	if (ds == null) {
+		JOptionPane.showMessageDialog(this, "Select the target data source first!", "Warning", JOptionPane.WARNING_MESSAGE);
+		return;
+	}
+	
+	JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
+	boolean bSuccess = conn.testConnection(selectedDataSource);
+	if (bSuccess) {
+		lblConnectionStatus.setForeground(Color.GREEN);
+		lblConnectionStatus.setText("Connection OK!");
+	}
+	else {
+		lblConnectionStatus.setForeground(Color.RED);
+		lblConnectionStatus.setText("Cannot connect to the database!");
+	}
+}//GEN-LAST:event_cmdTestConnectionActionPerformed
 
 	private URI createUri(String name) {
 	    URI uri = null;
@@ -430,6 +458,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdNew;
     private javax.swing.JButton cmdRemove;
+    private javax.swing.JButton cmdTestConnection;
+    private javax.swing.JLabel lblConnectionStatus;
     private javax.swing.JLabel lblDataSourceName;
     private javax.swing.JLabel lblDataSourceType;
     private javax.swing.JLabel lblDataSourceTypeValue;
@@ -444,6 +474,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     private javax.swing.JPanel pnlDataSourceParameters;
     private javax.swing.JPanel pnlDataSourceSelector;
     private javax.swing.JPanel pnlDataSourceSettings;
+    private javax.swing.JPanel pnlTestConnection;
     private javax.swing.JTextField txtDatabasePassword;
     private javax.swing.JTextField txtDatabaseUsername;
     private javax.swing.JTextField txtJdbcDriver;
@@ -465,6 +496,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			txtDatabaseUsername.setEnabled(false);
 			txtDatabasePassword.setEnabled(false);
 			txtJdbcUrl.setEnabled(false);
+			lblConnectionStatus.setText("");
 			selectedDataSource = null;
 		} else {
 
@@ -484,6 +516,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			txtDatabaseUsername.setEnabled(true);
 			txtDatabasePassword.setEnabled(true);
 			txtJdbcUrl.setEnabled(true);
+			lblConnectionStatus.setText("");
 			selectedDataSource = currentsource;
 		}
 	}

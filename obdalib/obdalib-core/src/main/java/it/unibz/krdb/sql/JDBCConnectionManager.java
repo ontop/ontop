@@ -56,16 +56,16 @@ public class JDBCConnectionManager {
 			ex.fillInStackTrace();
 			throw ex;
 		}
-		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
 		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 		URI connID = ds.getSourceID();
 
 		Connection con = connectionPool.get(connID);
 		if (con == null) {
 			try {
-				Class d = Class.forName(driver);
+				Class.forName(driver);  // for registering the JDBC driver.
 			} catch (Exception e) {
 				log.warn("Driver class not found or it has already been loaded!");
 			}
@@ -76,7 +76,34 @@ public class JDBCConnectionManager {
 			collectMetadata(ds);
 		}
 	}
-
+	
+	public boolean testConnection(OBDADataSource ds) {
+		
+		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e1) {
+			// Does nothing
+		}		
+		
+		boolean bFlag = false;
+		try {
+			Connection dummy = DriverManager.getConnection(url, username, password);
+			if (dummy != null) {
+				bFlag = true;
+				dummy.close();
+			}
+		}
+		catch (Exception e) { 
+			return false;
+		}
+		return bFlag;
+	}
+	
 	public boolean isConnectionAlive(URI connID) throws SQLException {
 		Connection con = connectionPool.get(connID);
 		if (con == null) {
