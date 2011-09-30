@@ -325,7 +325,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		menuMappings.addSeparator();
 
 		menuValidateAll = new JMenuItem();
-		menuValidateAll.setText("Validate");
+		menuValidateAll.setText("Validate All");
 		menuValidateAll.setEnabled(false);
 		menuValidateAll.addActionListener(new java.awt.event.ActionListener() {
 			@Override
@@ -335,18 +335,8 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		});
 		menuMappings.add(menuValidateAll);
 
-		menuValidateBody = new JMenuItem();
-		menuValidateBody.setText("Validate body");
-		menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuValidateBodyActionPerformed(evt);
-			}
-		});
-		menuMappings.add(menuValidateBody);
-
 		menuValidateHead = new JMenuItem();
-		menuValidateHead.setText("Validate head");
+		menuValidateHead.setText("Validate Target Query");
 		menuValidateHead.setEnabled(false);
 		menuValidateHead.addActionListener(new java.awt.event.ActionListener() {
 			@Override
@@ -355,7 +345,16 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			}
 		});
 		menuMappings.add(menuValidateHead);
-		menuMappings.addSeparator();
+		
+		menuValidateBody = new JMenuItem();
+		menuValidateBody.setText("Validate Source Query");
+		menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				menuValidateBodyActionPerformed(evt);
+			}
+		});
+		menuMappings.add(menuValidateBody);
 	}
 
 	/**
