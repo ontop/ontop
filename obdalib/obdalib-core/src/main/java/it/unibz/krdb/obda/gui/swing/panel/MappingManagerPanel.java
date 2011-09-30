@@ -874,6 +874,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	private void addMapping() {
 
 		JDialog dialog = new JDialog();
+		dialog.setTitle("Insert New Mapping");
 		dialog.setModal(true);
 		dialog.setContentPane(new NewMappingDialogPanel(apic, preference, dialog, selectedSource, ontology));
 		dialog.setSize(500, 300);
