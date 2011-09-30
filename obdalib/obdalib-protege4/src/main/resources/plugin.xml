@@ -165,7 +165,7 @@
 
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference.reasonerfactory">
-    <name value="Quest 1.0"/>
+    <name value="Quest 1.6"/>
     <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
 

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
+	<parent> 
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
 		<version>1.6</version>
@@ -242,6 +242,7 @@
 
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.3.4</version>
 				<extensions>true</extensions>
 				<configuration>
 
@@ -266,7 +267,7 @@
 						<!-- general information -->
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
-						<Bundle-Description>The OBDA-Plugin for Protege 4.0</Bundle-Description>
+						<Bundle-Description>The OBDA and Quest plugins for Protege 4.0</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research
 							Centre</Bundle-Vendor>
 

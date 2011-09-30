@@ -236,7 +236,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			 * mappings
 			 */
 			equivalenceMaps = equiOptimizer.getEquivalenceMap();
-			log.debug("Equivalence optimization. Output ontology: {}", translatedOntologyMerge.toString());
+			log.debug("Equivalence optimization. Output ontology: {}", reformulationOntology.toString());
 		} else {
 			reformulationOntology = translatedOntologyMerge;
 			equivalenceMaps = new HashMap<Predicate, Description>();
