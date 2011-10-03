@@ -70,7 +70,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public final static String		index_table						= "IDX";
 
-	private final static String		create_ddl						= "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(100), "
+	private final static String		create_ddl						= "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(255), "
 																			+ "IDX INTEGER, " + "IDX_FROM INTEGER, " + "IDX_TO INTEGER, "
 																			+ "ENTITY_TYPE INTEGER" + ")";
 
@@ -86,11 +86,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String		role_table						= "role";
 
-	public static final String		class_table_create				= "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(100),"
+	public static final String		class_table_create				= "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(255),"
 																			+ "IDX SMALLINT" + ")";
 
-	public static final String		role_table_create				= "CREATE TABLE " + role_table + " ( " + "URI1 VARCHAR(100), "
-																			+ "URI2 VARCHAR(100), " + "IDX SMALLINT" + ")";
+	public static final String		role_table_create				= "CREATE TABLE " + role_table + " ( " + "URI1 VARCHAR(255), "
+																			+ "URI2 VARCHAR(255), " + "IDX SMALLINT" + ")";
 
 	public static final String		class_table_drop				= "DROP TABLE IF EXISTS " + class_table;
 
