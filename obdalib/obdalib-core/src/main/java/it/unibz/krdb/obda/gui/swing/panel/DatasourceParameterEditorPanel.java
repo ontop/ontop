@@ -16,6 +16,7 @@ package it.unibz.krdb.obda.gui.swing.panel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.net.URI;
+import java.sql.SQLException;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -213,7 +214,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtJdbcUrl.setMinimumSize(new java.awt.Dimension(180, 19));
         txtJdbcUrl.setName("somename"); // NOI18N
-        txtJdbcUrl.setNextFocusableComponent(txtDatabaseUsername);
         txtJdbcUrl.setPreferredSize(new java.awt.Dimension(180, 19));
         txtJdbcUrl.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -243,7 +243,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         txtDatabaseUsername.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtDatabaseUsername.setMinimumSize(new java.awt.Dimension(180, 19));
         txtDatabaseUsername.setName("somename"); // NOI18N
-        txtDatabaseUsername.setNextFocusableComponent(txtDatabasePassword);
         txtDatabaseUsername.setPreferredSize(new java.awt.Dimension(180, 19));
         txtDatabaseUsername.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -285,7 +284,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         txtJdbcDriver.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 19));
         txtJdbcDriver.setName("somename"); // NOI18N
-        txtJdbcDriver.setNextFocusableComponent(txtJdbcUrl);
         txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 19));
         txtJdbcDriver.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -410,14 +408,14 @@ private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {/
 	}
 	
 	JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
-	boolean bSuccess = conn.testConnection(selectedDataSource);
-	if (bSuccess) {
+	try {
+		conn.testConnection(selectedDataSource);
 		lblConnectionStatus.setForeground(Color.GREEN);
-		lblConnectionStatus.setText("Connection OK!");
-	}
-	else {
+		lblConnectionStatus.setText("Connection is OK");
+	} 
+	catch (SQLException e) {  // if fails
 		lblConnectionStatus.setForeground(Color.RED);
-		lblConnectionStatus.setText("Cannot connect to the database!");
+		lblConnectionStatus.setText(String.format("%s (ERR-CODE: %s)", e.getMessage(), e.getErrorCode()));
 	}
 }//GEN-LAST:event_cmdTestConnectionActionPerformed
 

@@ -77,7 +77,7 @@ public class JDBCConnectionManager {
 		}
 	}
 	
-	public boolean testConnection(OBDADataSource ds) {
+	public void testConnection(OBDADataSource ds) throws SQLException {
 		
 		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
@@ -86,22 +86,13 @@ public class JDBCConnectionManager {
 		
 		try {
 			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			// Does nothing
+		}
+		catch (ClassNotFoundException e1) {
+			// Does nothing because the SQLException handles this problem also.
 		}		
 		
-		boolean bFlag = false;
-		try {
-			Connection dummy = DriverManager.getConnection(url, username, password);
-			if (dummy != null) {
-				bFlag = true;
-				dummy.close();
-			}
-		}
-		catch (Exception e) { 
-			return false;
-		}
-		return bFlag;
+		Connection dummy = DriverManager.getConnection(url, username, password);
+		dummy.close();
 	}
 	
 	public boolean isConnectionAlive(URI connID) throws SQLException {
