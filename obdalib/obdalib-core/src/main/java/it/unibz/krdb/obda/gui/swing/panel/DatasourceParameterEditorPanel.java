@@ -86,9 +86,9 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblDatabaseUsername = new javax.swing.JLabel();
         txtDatabaseUsername = new javax.swing.JTextField();
         lblDatabasePassword = new javax.swing.JLabel();
-        txtDatabasePassword = new javax.swing.JTextField();
         lblJdbcDriver = new javax.swing.JLabel();
         txtJdbcDriver = new javax.swing.JTextField();
+        txtDatabasePassword = new javax.swing.JPasswordField();
         pnlTestConnection = new javax.swing.JPanel();
         cmdTestConnection = new javax.swing.JButton();
         lblConnectionStatus = new javax.swing.JLabel();
@@ -163,7 +163,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         pnlDataSourceInfo.add(lblDataSourceTypeValue, gridBagConstraints);
 
         lblMappingType.setBackground(new java.awt.Color(153, 153, 153));
-        lblMappingType.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblMappingType.setFont(new java.awt.Font("Arial", 1, 11));
         lblMappingType.setForeground(new java.awt.Color(153, 153, 153));
         lblMappingType.setText("Mapping Type:");
         lblMappingType.setFocusable(false);
@@ -269,25 +269,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         pnlDataSourceParameters.add(lblDatabasePassword, gridBagConstraints);
 
-        txtDatabasePassword.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-        txtDatabasePassword.setMinimumSize(new java.awt.Dimension(180, 19));
-        txtDatabasePassword.setName("somename"); // NOI18N
-        txtDatabasePassword.setNextFocusableComponent(txtJdbcDriver);
-        txtDatabasePassword.setPreferredSize(new java.awt.Dimension(180, 19));
-        txtDatabasePassword.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                fieldChangeHandler(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
-        pnlDataSourceParameters.add(txtDatabasePassword, gridBagConstraints);
-
         lblJdbcDriver.setFont(new java.awt.Font("Arial", 1, 11));
         lblJdbcDriver.setForeground(new java.awt.Color(153, 153, 153));
         lblJdbcDriver.setText("  JDBC Driver:");
@@ -319,6 +300,21 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
         pnlDataSourceParameters.add(txtJdbcDriver, gridBagConstraints);
+
+        txtDatabasePassword.setMinimumSize(new java.awt.Dimension(180, 19));
+        txtDatabasePassword.setPreferredSize(new java.awt.Dimension(180, 19));
+        txtDatabasePassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fieldChangeHandler(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
+        pnlDataSourceParameters.add(txtDatabasePassword, gridBagConstraints);
 
         pnlDataSourceSettings.add(pnlDataSourceParameters, java.awt.BorderLayout.CENTER);
 
@@ -445,7 +441,7 @@ private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {/
 		}
 		// currentsrc.setUri(fieldURI.getText());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, txtDatabaseUsername.getText());
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, txtDatabasePassword.getText());
+		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, new String(txtDatabasePassword.getPassword()));
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, txtJdbcDriver.getText());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, txtJdbcUrl.getText());
 		// currentDS.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,
@@ -475,7 +471,7 @@ private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {/
     private javax.swing.JPanel pnlDataSourceSelector;
     private javax.swing.JPanel pnlDataSourceSettings;
     private javax.swing.JPanel pnlTestConnection;
-    private javax.swing.JTextField txtDatabasePassword;
+    private javax.swing.JPasswordField txtDatabasePassword;
     private javax.swing.JTextField txtDatabaseUsername;
     private javax.swing.JTextField txtJdbcDriver;
     private javax.swing.JTextField txtJdbcUrl;
