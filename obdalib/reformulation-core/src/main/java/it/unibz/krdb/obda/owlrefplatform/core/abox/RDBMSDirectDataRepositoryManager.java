@@ -1,23 +1,22 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
-import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -85,11 +84,11 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 																		+ strtablemetada
 																		+ " (uri VARCHAR NOT NULL, type VARCHAR NOT NULL, tablename VARCHAR NOT NULL)";
 
-	final String					strinsert_meta_table		= "INSERT INTO " + strtablemetada + " VALUES (%s, %s, %s)";
+	final String					strinsert_meta_table		= "INSERT INTO " + strtablemetada + " VALUES ('%s', '%s', '%s')";
 
-	final String					strinsert_table_class		= "INSERT INTO " + strtabledata + " VALUES (%s)";
+	final String					strinsert_table_class		= "INSERT INTO " + strtabledata + " VALUES ('%s')";
 
-	final String					strinsert_table_property	= "INSERT INTO " + strtabledata + " VALUES (%s, %s)";
+	final String					strinsert_table_property	= "INSERT INTO " + strtabledata + " VALUES ('%s', '%s')";
 
 	final String					strselect_table_class		= "SELECT term0 FROM " + strtabledata + "";
 
@@ -250,16 +249,13 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		 */
 		for (Predicate predicate : predicatetableMap.keySet()) {
 			if (predicate.getArity() == 1) {
-				out.append(String.format(strinsert_meta_table, getQuotedString(predicate.getName()), getQuotedString("CONCEPT"),
-						getQuotedString(predicatetableMap.get(predicate))));
+				out.append(String.format(strinsert_meta_table, predicate.getName(), "CONCEPT", escaped(predicatetableMap.get(predicate))));
 				out.append(";\n");
 			} else if (predicate.getType(1) == COL_TYPE.OBJECT) {
-				out.append(String.format(strinsert_meta_table, getQuotedString(predicate.getName()), getQuotedString("OBJECTPROPERTY"),
-						getQuotedString(predicatetableMap.get(predicate))));
+				out.append(String.format(strinsert_meta_table, predicate.getName(), "OBJECTPROPERTY", escaped(predicatetableMap.get(predicate))));
 				out.append(";\n");
 			} else if (predicate.getType(1) == COL_TYPE.LITERAL) {
-				out.append(String.format(strinsert_meta_table, getQuotedString(predicate.getName()), getQuotedString("DATAPROPERTY"),
-						getQuotedString(predicatetableMap.get(predicate))));
+				out.append(String.format(strinsert_meta_table, predicate.getName(), "DATAPROPERTY", escaped(predicatetableMap.get(predicate))));
 				out.append(";\n");
 			} else {
 				throw new RuntimeException("Unsupported predicate: " + predicate);
@@ -281,18 +277,15 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			Axiom assertion = data.next();
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion cassertion = (ClassAssertion) assertion;
-				out.append(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
-						.getObject().getURI())));
+				out.append(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), cassertion.getObject().getURI()));
 				out.append(";\n");
 			} else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
-				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
-						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
+				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), rassertion.getFirstObject().getURI(), rassertion.getSecondObject().getURI()));
 				out.append(";\n");
 			} else if (assertion instanceof DataPropertyAssertion) {
 				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
-				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()),
-						getQuotedString(rassertion.getObject().getURI()), getQuotedString(rassertion.getValue().getValue())));
+				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()), rassertion.getObject().getURI(), escaped(rassertion.getValue().getValue())));
 				out.append(";\n");
 			}
 		}
@@ -325,7 +318,6 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		for (Predicate predicate : predicatetableMap.keySet()) {
 			if (predicate.getArity() == 1) {
 				st.addBatch(String.format(strcreate_table_class, predicatetableMap.get(predicate)));
-
 			} else if (predicate.getArity() == 2) {
 				st.addBatch(String.format(strcreate_table_property, predicatetableMap.get(predicate)));
 			} else {
@@ -347,7 +339,6 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		for (Predicate predicate : predicatetableMap.keySet()) {
 			if (predicate.getArity() == 1) {
 				st.addBatch(String.format(strcreate_index_class, predicatetableMap.get(predicate), predicatetableMap.get(predicate)));
-
 			} else if (predicate.getArity() == 2) {
 				st.addBatch(String.format(strcreate_index_property_1, predicatetableMap.get(predicate), predicatetableMap.get(predicate)));
 				st.addBatch(String.format(strcreate_index_property_2, predicatetableMap.get(predicate), predicatetableMap.get(predicate)));
@@ -400,15 +391,11 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		 */
 		for (Predicate predicate : predicatetableMap.keySet()) {
 			if (predicate.getArity() == 1) {
-				st.addBatch(String.format(strinsert_meta_table, getQuotedString(predicate.getName()), getQuotedString("CONCEPT"),
-						getQuotedString(predicatetableMap.get(predicate))));
-
+				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "CONCEPT", escaped(predicatetableMap.get(predicate))));
 			} else if (predicate.getType(1) == COL_TYPE.OBJECT) {
-				st.addBatch(String.format(strinsert_meta_table, getQuotedString(predicate.getName()), getQuotedString("OBJECTPROPERTY"),
-						getQuotedString(predicatetableMap.get(predicate))));
+				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "OBJECTPROPERTY", escaped(predicatetableMap.get(predicate))));
 			} else if (predicate.getType(1) == COL_TYPE.LITERAL) {
-				st.addBatch(String.format(strinsert_meta_table, getQuotedString(predicate.getName()), getQuotedString("DATAPROPERTY"),
-						getQuotedString(predicatetableMap.get(predicate))));
+				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "DATAPROPERTY", escaped(predicatetableMap.get(predicate))));
 			} else {
 				throw new RuntimeException("Unsupported predicate: " + predicate);
 			}
@@ -436,8 +423,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", cassertion.getConcept());
 					continue;
 				}
-				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), getQuotedString(cassertion
-						.getObject().getURI())));
+				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), cassertion.getObject().getURI()));
 			} else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
 				
@@ -446,8 +432,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 					continue;
 				}
 				
-				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), getQuotedString(rassertion
-						.getFirstObject().getURI()), getQuotedString(rassertion.getSecondObject().getURI())));
+				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), rassertion.getFirstObject().getURI(), rassertion.getSecondObject().getURI()));
 
 			} else if (assertion instanceof DataPropertyAssertion) {
 				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
@@ -457,8 +442,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 					continue;
 				}
 
-				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()),
-						getQuotedString(rassertion.getObject().getURI()), getQuotedString(rassertion.getValue().getValue())));
+				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()), rassertion.getObject().getURI(), escaped(rassertion.getValue().getValue())));
 			}
 
 			if (batchCount == 50000) {
@@ -651,21 +635,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	/*
 	 * Utilities
 	 */
-
-	private String getQuotedString(String str) {
-		StringBuffer bf = new StringBuffer();
-		bf.append("'");
-		bf.append(str);
-		bf.append("'");
-		return bf.toString();
+	private static String escaped(String str) {
+		str = str.replace("\'", "\'\'");  // H2 requires two single quotes as the escaped character for a single quote.
+		return str;
 	}
-
-	private String getQuotedString(URI str) {
-		StringBuffer bf = new StringBuffer();
-		bf.append("'");
-		bf.append(str.toString());
-		bf.append("'");
-		return bf.toString();
-	}
-
 }
