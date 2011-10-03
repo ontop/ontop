@@ -50,10 +50,9 @@ import java.util.Vector;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -64,15 +63,13 @@ import javax.swing.tree.TreeSelectionModel;
  */
 public class SavedQueriesPanel extends javax.swing.JPanel {
 
-	/**
-	 * 
-	 */
 	private static final long					serialVersionUID	= 6920100822784727963L;
 	public Vector<SavedQueriesPanelListener>	listeners;
 	private QueryController						queryController		= null;
 	private QueryControllerTreeModel			queryControllerModel;
 	private String								currentQuery		= null;
 	private QueryTreeElement					currentId			= null;
+	private QueryTreeElement					previousId			= null;
 
 	/** Creates new form SavedQueriesPanel */
 
@@ -88,35 +85,10 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 
 		queryControllerModel = new QueryControllerTreeModel();
 
-		treeSavedQueries.setModel(queryControllerModel);
-		treeSavedQueries.setCellRenderer(new SavedQueriesTreeCellRenderer());
-		treeSavedQueries.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		treSavedQuery.setModel(queryControllerModel);
+		treSavedQuery.setCellRenderer(new SavedQueriesTreeCellRenderer());
+		treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-		treeSavedQueries.addTreeSelectionListener(new TreeSelectionListener() {
-			public void valueChanged(TreeSelectionEvent e) {
-				TreePath currentSelection = e.getPath();
-				DefaultMutableTreeNode currentNode = (DefaultMutableTreeNode) (currentSelection.getLastPathComponent());
-
-				if (currentNode instanceof QueryTreeElement) {
-					QueryTreeElement current_query = (QueryTreeElement) currentNode;
-					currentQuery = current_query.getQuery();
-					currentId = current_query;
-					if ((current_query.getParent() == null) || (current_query.getParent().toString()).equals(""))
-						fireQueryChanged(null, currentQuery, currentId.getID());
-					else
-						fireQueryChanged(current_query.getParent().toString(), currentQuery, currentId.getID());
-				} else if (currentNode instanceof QueryGroupTreeElement) {
-					QueryGroupTreeElement current_group = (QueryGroupTreeElement) currentNode;
-					currentId = null;
-					currentQuery = null;
-					fireQueryChanged(current_group.toString(), null, null);
-				} else if (currentNode == null) {
-					currentId = null;
-					currentQuery = null;
-				}
-			}
-		});
-		
 		setQueryController(queryController);
 	}
 
@@ -130,7 +102,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 	}
 
 	private void addListenerToButtons() {
-		jButtonExport.addActionListener(new ActionListener() {
+		cmdExport.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -161,7 +133,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 			}
 		});
 
-		jButtonImport.addActionListener(new ActionListener() {
+		cmdImport.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -213,101 +185,155 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 	 */
 	// <editor-fold defaultstate="collapsed" desc=" Generated Code
 	// <editor-fold defaultstate="collapsed"
-	// desc="Generated Code">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		panel_saved_queries = new javax.swing.JPanel();
-		scroll_saved_queries = new javax.swing.JScrollPane();
-		treeSavedQueries = new javax.swing.JTree();
-		panel_saved_queries_header = new javax.swing.JPanel();
-		lavel_saved_queries = new javax.swing.JLabel();
-		removeQueryButton = new javax.swing.JButton();
-		jButtonImport = new javax.swing.JButton();
-		jButtonExport = new javax.swing.JButton();
+        pnlSavedQuery = new javax.swing.JPanel();
+        scrSavedQuery = new javax.swing.JScrollPane();
+        treSavedQuery = new javax.swing.JTree();
+        pnlCommandPanel = new javax.swing.JPanel();
+        lblSavedQuery = new javax.swing.JLabel();
+        cmdRemove = new javax.swing.JButton();
+        cmdImport = new javax.swing.JButton();
+        cmdExport = new javax.swing.JButton();
 
-		setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.BorderLayout());
 
-		panel_saved_queries.setMinimumSize(new java.awt.Dimension(200, 50));
-		panel_saved_queries.setLayout(new java.awt.BorderLayout());
+        pnlSavedQuery.setMinimumSize(new java.awt.Dimension(200, 50));
+        pnlSavedQuery.setLayout(new java.awt.BorderLayout());
 
-		scroll_saved_queries.setMinimumSize(new java.awt.Dimension(400, 200));
-		scroll_saved_queries.setOpaque(false);
-		scroll_saved_queries.setPreferredSize(new java.awt.Dimension(300, 200));
+        scrSavedQuery.setMinimumSize(new java.awt.Dimension(400, 200));
+        scrSavedQuery.setOpaque(false);
+        scrSavedQuery.setPreferredSize(new java.awt.Dimension(300, 200));
 
-		treeSavedQueries.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		treeSavedQueries.setForeground(new java.awt.Color(51, 51, 51));
-		treeSavedQueries.setMaximumSize(new java.awt.Dimension(5000, 5000));
-		treeSavedQueries.setRootVisible(false);
-		scroll_saved_queries.setViewportView(treeSavedQueries);
+        treSavedQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        treSavedQuery.setForeground(new java.awt.Color(51, 51, 51));
+        treSavedQuery.setMaximumSize(new java.awt.Dimension(5000, 5000));
+        treSavedQuery.setRootVisible(false);
+        treSavedQuery.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                reselectQueryNode(evt);
+            }
+        });
+        treSavedQuery.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                selectQueryNode(evt);
+            }
+        });
+        scrSavedQuery.setViewportView(treSavedQuery);
 
-		panel_saved_queries.add(scroll_saved_queries, java.awt.BorderLayout.CENTER);
+        pnlSavedQuery.add(scrSavedQuery, java.awt.BorderLayout.CENTER);
 
-		panel_saved_queries_header.setLayout(new java.awt.GridBagLayout());
+        pnlCommandPanel.setLayout(new java.awt.GridBagLayout());
 
-		lavel_saved_queries.setFont(new java.awt.Font("Arial", 1, 11));
-		lavel_saved_queries.setForeground(new java.awt.Color(153, 153, 153));
-		lavel_saved_queries.setText("  Saved queries:");
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weightx = 1.5;
-		panel_saved_queries_header.add(lavel_saved_queries, gridBagConstraints);
+        lblSavedQuery.setFont(new java.awt.Font("Arial", 1, 11));
+        lblSavedQuery.setForeground(new java.awt.Color(153, 153, 153));
+        lblSavedQuery.setText("Stored Query:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.5;
+        pnlCommandPanel.add(lblSavedQuery, gridBagConstraints);
 
-		removeQueryButton.setIcon(IconLoader.getImageIcon("images/minus.png"));
-		removeQueryButton.setToolTipText("Remove the selected datasource");
-		removeQueryButton.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		removeQueryButton.setContentAreaFilled(false);
-		removeQueryButton.setIconTextGap(0);
-		removeQueryButton.setMaximumSize(new java.awt.Dimension(25, 25));
-		removeQueryButton.setMinimumSize(new java.awt.Dimension(25, 25));
-		removeQueryButton.setPreferredSize(new java.awt.Dimension(25, 25));
-		removeQueryButton.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				removeQueryButtonActionPerformed(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 3;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		panel_saved_queries_header.add(removeQueryButton, gridBagConstraints);
+        cmdRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
+        cmdRemove.setToolTipText("Remove the selected datasource");
+        cmdRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdRemove.setContentAreaFilled(false);
+        cmdRemove.setIconTextGap(0);
+        cmdRemove.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdRemove.setMinimumSize(new java.awt.Dimension(25, 25));
+        cmdRemove.setPreferredSize(new java.awt.Dimension(25, 25));
+        cmdRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRemoveActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        pnlCommandPanel.add(cmdRemove, gridBagConstraints);
 
-		jButtonImport.setText("Import");
-		jButtonImport.setToolTipText("Import queries from an obda file");
-		jButtonImport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		jButtonImport.setContentAreaFilled(false);
-		jButtonImport.setMaximumSize(new java.awt.Dimension(100, 25));
-		jButtonImport.setMinimumSize(new java.awt.Dimension(25, 25));
-		jButtonImport.setPreferredSize(new java.awt.Dimension(50, 25));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-		panel_saved_queries_header.add(jButtonImport, gridBagConstraints);
+        cmdImport.setText("Import");
+        cmdImport.setToolTipText("Import queries from an obda file");
+        cmdImport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdImport.setContentAreaFilled(false);
+        cmdImport.setMaximumSize(new java.awt.Dimension(100, 25));
+        cmdImport.setMinimumSize(new java.awt.Dimension(25, 25));
+        cmdImport.setPreferredSize(new java.awt.Dimension(50, 25));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        pnlCommandPanel.add(cmdImport, gridBagConstraints);
 
-		jButtonExport.setText("Export");
-		jButtonExport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		jButtonExport.setContentAreaFilled(false);
-		jButtonExport.setMaximumSize(new java.awt.Dimension(100, 25));
-		jButtonExport.setMinimumSize(new java.awt.Dimension(50, 25));
-		jButtonExport.setPreferredSize(new java.awt.Dimension(50, 25));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-		panel_saved_queries_header.add(jButtonExport, gridBagConstraints);
+        cmdExport.setText("Export");
+        cmdExport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdExport.setContentAreaFilled(false);
+        cmdExport.setMaximumSize(new java.awt.Dimension(100, 25));
+        cmdExport.setMinimumSize(new java.awt.Dimension(50, 25));
+        cmdExport.setPreferredSize(new java.awt.Dimension(50, 25));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        pnlCommandPanel.add(cmdExport, gridBagConstraints);
 
-		panel_saved_queries.add(panel_saved_queries_header, java.awt.BorderLayout.NORTH);
+        pnlSavedQuery.add(pnlCommandPanel, java.awt.BorderLayout.NORTH);
 
-		add(panel_saved_queries, java.awt.BorderLayout.CENTER);
-	}// </editor-fold>//GEN-END:initComponents
+        add(pnlSavedQuery, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>//GEN-END:initComponents
+    
+    private void selectQueryNode(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_selectQueryNode
+        TreePath path = evt.getPath();
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
 
-	private void removeQueryButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
-		TreePath selected_path = treeSavedQueries.getSelectionPath();
+        if (node instanceof QueryTreeElement) {
+            QueryTreeElement queryElement = (QueryTreeElement)node;
+            currentQuery = queryElement.getQuery();
+            currentId = queryElement;
+            
+            TreeNode parent = queryElement.getParent();
+            if (parent == null || parent.toString().equals("")) {
+                fireQueryChanged(null, currentQuery, currentId.getID());
+            }
+            else {
+                fireQueryChanged(parent.toString(), currentQuery, currentId.getID());
+            }
+        }
+        else if (node instanceof QueryGroupTreeElement) {
+            QueryGroupTreeElement groupElement = (QueryGroupTreeElement)node;
+            currentId = null;
+            currentQuery = null;
+            fireQueryChanged(groupElement.toString(), null, null);
+        }
+        else if (node == null) {
+            currentId = null;
+            currentQuery = null;
+        }
+    }//GEN-LAST:event_selectQueryNode
+
+	private void reselectQueryNode(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_reselectQueryNode
+		if (currentId == null) {
+			return;
+		}
+		
+		if (previousId == currentId) {
+			fireQueryChanged(currentId.getParent().toString(), currentId.getQuery(), currentId.getID());
+		}
+		else { // register the selected node
+			previousId = currentId;
+		}
+	}//GEN-LAST:event_reselectQueryNode
+
+	private void cmdRemoveActionPerformed
+	(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
+		TreePath selected_path = treSavedQuery.getSelectionPath();
 		if (selected_path == null)
 			return;
 
@@ -328,17 +354,16 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		}
 	}// GEN-LAST:event_removeQueryButtonActionPerformed
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton		jButtonExport;
-	private javax.swing.JButton		jButtonImport;
-	private javax.swing.JLabel		lavel_saved_queries;
-	private javax.swing.JPanel		panel_saved_queries;
-	private javax.swing.JPanel		panel_saved_queries_header;
-	private javax.swing.JButton		removeQueryButton;
-	private javax.swing.JScrollPane	scroll_saved_queries;
-	private javax.swing.JTree		treeSavedQueries;
-
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdExport;
+    private javax.swing.JButton cmdImport;
+    private javax.swing.JButton cmdRemove;
+    private javax.swing.JLabel lblSavedQuery;
+    private javax.swing.JPanel pnlCommandPanel;
+    private javax.swing.JPanel pnlSavedQuery;
+    private javax.swing.JScrollPane scrSavedQuery;
+    private javax.swing.JTree treSavedQuery;
+    // End of variables declaration//GEN-END:variables
 
 	public void fireQueryChanged(String newgroup, String newquery, String newid) {
 		for (SavedQueriesPanelListener listener : listeners) {
@@ -355,19 +380,19 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 			String nodeId = elementGroup.getID();
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(nodeId);
 
-			treeSavedQueries.requestFocus();
-			treeSavedQueries.expandPath(new TreePath(node.getPath()));
-			treeSavedQueries.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-			treeSavedQueries.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
+			treSavedQuery.requestFocus();
+			treSavedQuery.expandPath(new TreePath(node.getPath()));
+			treSavedQuery.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
+			treSavedQuery.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
 		}
 		if (element instanceof QueryControllerQuery) {
 			QueryControllerQuery elementQuery = (QueryControllerQuery) element;
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(elementQuery.getID());
 
-			treeSavedQueries.requestFocus();
-			treeSavedQueries.expandPath(new TreePath(node.getPath()));
-			treeSavedQueries.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-			treeSavedQueries.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
+			treSavedQuery.requestFocus();
+			treSavedQuery.expandPath(new TreePath(node.getPath()));
+			treSavedQuery.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
+			treSavedQuery.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
 		}
 	}
 
@@ -380,10 +405,10 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(elementTreeQuery.getID(),
 				elementTreeGroup.getID());
 
-		treeSavedQueries.requestFocus();
-		treeSavedQueries.setSelectionPath(new TreePath(node.getPath()));
-		treeSavedQueries.expandPath(new TreePath(node.getPath()));
-		treeSavedQueries.scrollPathToVisible(new TreePath(node.getPath()));
+		treSavedQuery.requestFocus();
+		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
+		treSavedQuery.expandPath(new TreePath(node.getPath()));
+		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 
 	public void elementRemoved(QueryControllerEntity element) {
@@ -401,10 +426,10 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(elementTreeQuery.getID(),
 				elementTreeGroup.getID());
 
-		treeSavedQueries.requestFocus();
-		treeSavedQueries.setSelectionPath(new TreePath(node.getPath()));
-		treeSavedQueries.expandPath(new TreePath(node.getPath()));
-		treeSavedQueries.scrollPathToVisible(new TreePath(node.getPath()));
+		treSavedQuery.requestFocus();
+		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
+		treSavedQuery.expandPath(new TreePath(node.getPath()));
+		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 
 	/**
@@ -415,10 +440,10 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		String nodeId = elementQuery.getID();
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(nodeId);
 
-		treeSavedQueries.requestFocus();
-		treeSavedQueries.expandPath(new TreePath(node.getPath()));
-		treeSavedQueries.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-		treeSavedQueries.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
+		treSavedQuery.requestFocus();
+		treSavedQuery.expandPath(new TreePath(node.getPath()));
+		treSavedQuery.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
+		treSavedQuery.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
 	}
 
 	/**
@@ -626,6 +651,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		queryControllerModel.reset();
 		queryControllerModel.synchronize(queryController.getElements());
 		queryControllerModel.reload();
-		treeSavedQueries.setModel(queryControllerModel);
+		treSavedQuery.setModel(queryControllerModel);
 	}
 }
