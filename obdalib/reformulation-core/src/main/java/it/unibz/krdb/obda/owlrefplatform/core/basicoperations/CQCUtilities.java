@@ -221,7 +221,7 @@ public class CQCUtilities {
 							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
 						}
 					} else {
-						throw new RuntimeException("ERROR: Unsupported dependnecy: " + pi.toString());
+						throw new RuntimeException("ERROR: Unsupported dependency: " + pi.toString());
 					}
 
 					if (!newbody.contains(newAtom)) {
