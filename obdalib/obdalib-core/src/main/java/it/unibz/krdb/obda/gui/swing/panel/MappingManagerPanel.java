@@ -68,14 +68,8 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author mariano
- */
 public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeListener, DatasourceSelectorListener {
 
-	/**
-	 *
-	 */
 	private static final long		serialVersionUID	= -486013653814714526L;
 
 	private DefaultMutableTreeNode	editedNode;
@@ -103,7 +97,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private final Logger			log					= LoggerFactory.getLogger(this.getClass());
 
-	OBDADataFactory					fac					= OBDADataFactoryImpl.getInstance();
+	private OBDADataFactory			fac					= OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a new panel.
@@ -355,6 +349,16 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			}
 		});
 		menuMappings.add(menuValidateBody);
+		
+		menuExecuteBody = new JMenuItem();
+		menuExecuteBody.setText("Execute Source Query");
+		menuExecuteBody.addActionListener(new java.awt.event.ActionListener() {
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				menuExecuteBodyActionPerformed(evt);
+			}
+		});
+		menuMappings.add(menuExecuteBody);
 	}
 
 	/**
@@ -778,6 +782,21 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
 
+	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
+		final TreePath path = mappingsTree.getSelectionPath();
+		final MappingNode mapping = (MappingNode)path.getLastPathComponent();
+		final String sqlQuery = mapping.getBodyNode().getQuery();
+		
+		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);
+
+		JDialog dlgQueryResult = new JDialog();	
+		dlgQueryResult.setContentPane(pnlQueryResult);
+		dlgQueryResult.pack();
+		dlgQueryResult.setLocationRelativeTo(this);
+		dlgQueryResult.setVisible(true);
+		dlgQueryResult.setTitle("SQL Query Result");
+	}// GEN-LAST:event_menuExecuteBodyActionPerformed
+	
 	private void menuValidateHeadActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateHeadActionPerformed
 		// TODO add your handling code here:
 	}// GEN-LAST:event_menuValidateHeadActionPerformed
@@ -919,6 +938,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	private javax.swing.JMenuItem	menuValidateAll;
 	private javax.swing.JMenuItem	menuValidateBody;
 	private javax.swing.JMenuItem	menuValidateHead;
+	private javax.swing.JMenuItem   menuExecuteBody;
 	private javax.swing.JPanel		pnlExtraButtons;
 	private javax.swing.JPanel		pnlMappingButtons;
 	private javax.swing.JPanel		pnlMappingManager;
