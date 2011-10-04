@@ -240,7 +240,7 @@ public class DataManager {
 			doc.getDocumentElement().normalize();
 		} catch (Exception e) {
 			log.error("OBDA info file could not be read.");
-			log.error(e.getMessage(),e);
+			log.error(e.getLocalizedMessage());
 			return;
 		}
 
@@ -400,7 +400,7 @@ public class DataManager {
 	protected void dumpDatasourcesToXML(List<OBDADataSource> datasources) {
 		Document doc = root.getOwnerDocument();
 		Iterator<OBDADataSource> sources = datasources.iterator();
-		URI datasourceUri = null;
+//		URI datasourceUri = null;
 		while (sources.hasNext()) {
 			OBDADataSource datasource = sources.next();
 
