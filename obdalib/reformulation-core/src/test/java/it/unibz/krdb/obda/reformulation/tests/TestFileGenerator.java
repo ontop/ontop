@@ -281,6 +281,7 @@ public class TestFileGenerator {
 
 	private OWLObjectPropertyExpression getOWLObjectProperty(URI ontouri, String name, OWLDataFactory dataFactory) {
 		name = name.trim();
+//		System.out.println(name);
 		if (name.contains("-")) {
 			name = name.substring(0, name.length() - 5);// remove ^^-^^ from end
 			OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + name));
@@ -622,18 +623,18 @@ public class TestFileGenerator {
 			out.append("         }\n");
 			out.append("     }\n");
 			out.append("\n");
-			out.append("     log.debug(\"Testing in-memory db/vitual abox\");\n");
-			out.append("     tester.load(ontoname, QuestConstants.VIRTUAL);\n");
-			out.append("     for (String id : tester.getQueryIds()) {\n");
-			out.append("         log.debug(\"Testing query: {}\", id);\n");
-			out.append("         Set<String> exp = tester.getExpectedResult(id);\n");
-			out.append("         Set<String> res = tester.executeQuery(id);\n");
-			out.append("assertTrue(\"Expected \" + exp + \" Result \" + res, exp.size() == res.size());\n");
-			// out.append("         assertTrue(exp.size() == res.size());\n");
-			out.append("         for (String realResult : res) {\n");
-			out.append("             assertTrue(\"expeted: \" +exp.toString() + \" obtained: \" + res.toString(),exp.contains(realResult));\n");
-			out.append("         }\n");
-			out.append("     }\n");
+//			out.append("     log.debug(\"Testing in-memory db/vitual abox\");\n");
+//			out.append("     tester.load(ontoname, QuestConstants.VIRTUAL);\n");
+//			out.append("     for (String id : tester.getQueryIds()) {\n");
+//			out.append("         log.debug(\"Testing query: {}\", id);\n");
+//			out.append("         Set<String> exp = tester.getExpectedResult(id);\n");
+//			out.append("         Set<String> res = tester.executeQuery(id);\n");
+//			out.append("assertTrue(\"Expected \" + exp + \" Result \" + res, exp.size() == res.size());\n");
+//			// out.append("         assertTrue(exp.size() == res.size());\n");
+//			out.append("         for (String realResult : res) {\n");
+//			out.append("             assertTrue(\"expeted: \" +exp.toString() + \" obtained: \" + res.toString(),exp.contains(realResult));\n");
+//			out.append("         }\n");
+//			out.append("     }\n");
 			out.append("     log.debug(\"Testing in-memory db/SemanticIndex\");\n");
 			out.append("     tester.load(ontoname, QuestConstants.CLASSIC, QuestConstants.SEMANTIC);\n");
 			out.append("     for (String id : tester.getQueryIds()) {\n");
