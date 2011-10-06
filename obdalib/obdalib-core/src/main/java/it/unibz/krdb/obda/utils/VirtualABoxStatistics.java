@@ -40,7 +40,6 @@ public class VirtualABoxStatistics {
 	 */
 	public VirtualABoxStatistics(OBDAModel model) {
 		this.model = model;
-		refresh();
 	}
 		
 	/**

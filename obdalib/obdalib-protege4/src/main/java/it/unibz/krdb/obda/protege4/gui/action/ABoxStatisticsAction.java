@@ -40,6 +40,8 @@ public class ABoxStatisticsAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		statistics.refresh();  // refresh the statistics every time users click the menu.
+		
 		JDialog dialog = new JDialog();
 		dialog.setModal(true);
 		dialog.setSize(520, 400);
