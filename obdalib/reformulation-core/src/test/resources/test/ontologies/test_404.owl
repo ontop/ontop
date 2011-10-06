@@ -52,12 +52,12 @@
 
     <owl:ObjectProperty rdf:about="&test;A2"/>
     <owl:ObjectProperty>
-        <rdfs:subPropertyOf rdf:resource="&test;A1"/>
-        <owl:inverseOf rdf:resource="&test;A2"/>
-    </owl:ObjectProperty>
-    <owl:ObjectProperty>
         <owl:inverseOf rdf:resource="&test;A2"/>
         <rdfs:subPropertyOf rdf:resource="&test;A3"/>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty>
+        <rdfs:subPropertyOf rdf:resource="&test;A1"/>
+        <owl:inverseOf rdf:resource="&test;A2"/>
     </owl:ObjectProperty>
     
 

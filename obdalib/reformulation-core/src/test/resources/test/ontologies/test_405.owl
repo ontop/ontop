@@ -53,12 +53,12 @@
 
     <owl:ObjectProperty rdf:about="&test;M2"/>
     <owl:ObjectProperty>
-        <owl:inverseOf rdf:resource="&test;M2"/>
-        <rdfs:subPropertyOf rdf:resource="&test;M3"/>
-    </owl:ObjectProperty>
-    <owl:ObjectProperty>
         <rdfs:subPropertyOf rdf:resource="&test;M1"/>
         <owl:inverseOf rdf:resource="&test;M2"/>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty>
+        <owl:inverseOf rdf:resource="&test;M2"/>
+        <rdfs:subPropertyOf rdf:resource="&test;M3"/>
     </owl:ObjectProperty>
     
 
@@ -451,8 +451,22 @@
      -->
 
     <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;A3"/>
+        <owl:onProperty rdf:resource="&test;R1"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
         <rdfs:subClassOf rdf:resource="&test;A1"/>
         <owl:onProperty rdf:resource="&test;R1"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;B1"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;S1"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
@@ -465,22 +479,8 @@
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;A3"/>
-        <owl:onProperty rdf:resource="&test;R1"/>
-        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-    </owl:Restriction>
-    <owl:Restriction>
         <rdfs:subClassOf rdf:resource="&test;C1"/>
         <owl:onProperty rdf:resource="&test;M1"/>
-        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-    </owl:Restriction>
-    <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;B1"/>
-        <owl:onProperty>
-            <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;S1"/>
-            </owl:ObjectProperty>
-        </owl:onProperty>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>

@@ -8,16 +8,16 @@
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY test "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#" >
-    <!ENTITY test_193 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_193.owl#" >
+    <!ENTITY test_600 "http://obda.inf.unibz.it/ontologies/tests/dllitef/test_600.owl#" >
 ]>
 
 
-<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_193.owl#"
-     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_193.owl"
+<rdf:RDF xmlns="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_600.owl#"
+     xml:base="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_600.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:test_193="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_193.owl#"
      xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
      xmlns:test="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#"
+     xmlns:test_600="http://obda.inf.unibz.it/ontologies/tests/dllitef/test_600.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -36,9 +36,25 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#involvesInstrument -->
 
-    <owl:ObjectProperty rdf:about="&test;R"/>
+    <owl:ObjectProperty rdf:about="&test;involvesInstrument">
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="&test;isTradedIn"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#isTradedIn -->
+
+    <owl:ObjectProperty rdf:about="&test;isTradedIn"/>
+    <owl:ObjectProperty>
+        <rdfs:subPropertyOf rdf:resource="&test;involvesInstrument"/>
+        <owl:inverseOf rdf:resource="&test;isTradedIn"/>
+    </owl:ObjectProperty>
     
 
 
@@ -53,12 +69,18 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#FinantialInstrument -->
 
-    <owl:Class rdf:about="&test;A">
+    <owl:Class rdf:about="&test;FinantialInstrument"/>
+    
+
+
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#Transaction -->
+
+    <owl:Class rdf:about="&test;Transaction">
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
+                <owl:onProperty rdf:resource="&test;involvesInstrument"/>
                 <owl:someValuesFrom rdf:resource="&owl;Thing"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -83,11 +105,11 @@
     
 
 
-    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_193.owl#a -->
+    <!-- http://obda.inf.unibz.it/ontologies/tests/dllitef/test_600.owl#a -->
 
-    <test:A rdf:about="#a">
+    <test:Transaction rdf:about="#a">
         <rdf:type rdf:resource="&owl;Thing"/>
-    </test:A>
+    </test:Transaction>
     
 
 
@@ -100,24 +122,24 @@
      -->
 
     <owl:Restriction>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&test;R"/>
-                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="&test;Transaction"/>
+        <owl:onProperty rdf:resource="&test;involvesInstrument"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;FinantialInstrument"/>
         <owl:onProperty>
             <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;R"/>
+                <owl:inverseOf rdf:resource="&test;involvesInstrument"/>
             </owl:ObjectProperty>
         </owl:onProperty>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;A"/>
+        <rdfs:subClassOf rdf:resource="&test;Transaction"/>
         <owl:onProperty>
             <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;R"/>
+                <owl:inverseOf rdf:resource="&test;isTradedIn"/>
             </owl:ObjectProperty>
         </owl:onProperty>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
