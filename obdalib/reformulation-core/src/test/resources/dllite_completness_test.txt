@@ -7,6 +7,7 @@ Tests for axioms in isolation
 With A on the left
 
 ||=Test (M)=||=Test (m)=||= TBox =||= ABox ||= Query=||= Result  =||= Notes =||
+||600 || a || Transaction ISA EinvolvesInstrument, EinvolvesInstrument ISA Transaction, EinvolvesInstrument^^-^^ ISA FinantialInstrument, isTradedIn^^-^^ RISA involvesInstrument, involvesInstrument RISA isTradedIn^^-^^, EisTradedIn^^-^^ ISA Transaction || Transaction(a) || q(x) :- Transaction(x),involvesInstrument(x,y),FinantialInstrument(y) || {a} || Testing TBox sigma-optim ||
 ||1 || a || A ISA B || A(a) || q(x) :- A(x) || {a} || ||
 || ||  b ||         ||      || q(x) :- B(x) || {a} || ||
 || || c  ||         ||      || q() :- A(x) || {true} || ||
