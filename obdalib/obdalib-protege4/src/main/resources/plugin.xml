@@ -137,21 +137,28 @@
     
   <!-- MENUS -->
 	
-	<extension id="menu.obda"
-               point="org.protege.editor.core.application.EditorKitMenuAction">
+	<extension id="menu.obda" point="org.protege.editor.core.application.EditorKitMenuAction">
        <name value="OBDA"/>
        <toolTip value="Actions related to the OBDA plugin"/>
        <path value="/SlotZ-A"/>
        <editorKitId value="any"/>
    </extension>
 	
-	<extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Create OWL individuals from mappings..."/> 
-		<toolTip value="Inserts new individuals to the current ontology based on the data comming from the mappings..."/>
+  <extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Generate OWL Individuals from OBDA mappings..."/> 
+		<toolTip value="Inserts OWL Individuals to the current ontology based on the data generated from the mappings"/>
 		<class value="it.unibz.krdb.obda.protege4.gui.action.AboxMaterializationAction"/>
-		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotA-B"></path>
+		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotA-A"></path>
 		<editorKitId value="OWLEditorKit"/>
-	</extension> -
+	</extension>
+
+   <extension id="menu.obda.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
+		<name value="Display the OBDA model statistics..."/> 
+		<toolTip value="Provide information about the size of triples inside the OBDA model"/>
+		<class value="it.unibz.krdb.obda.protege4.gui.action.ABoxStatisticsAction"/>
+		<path value="it.unibz.krdb.obda.protege4.menu.obda/SlotB-A"></path>
+		<editorKitId value="OWLEditorKit"/>
+	</extension>
 	
   <!-- <extension id="menu.obda.loadaboxtodb" point="org.protege.editor.core.application.EditorKitMenuAction">
     <name value="Load OWL individuals (ABox) to a DB..."/> 
