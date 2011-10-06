@@ -67,7 +67,7 @@ public class OntologyLoader2 {
 	            URI obdaUri = ioManager.getOBDAFile(new File(owlfile).toURI());
 	            ioManager.loadOBDADataFromURI(obdaUri);
 
-	            // Creating a new instance of a quonto reasoner
+	            // Creating a new instance of the reasoner
 	            OBDAOWLReformulationPlatformFactoryImpl factory = new OBDAOWLReformulationPlatformFactoryImpl();
 	            factory.setup(manager, "asdf", "asdf");
 	            factory.setOBDAController(controller);

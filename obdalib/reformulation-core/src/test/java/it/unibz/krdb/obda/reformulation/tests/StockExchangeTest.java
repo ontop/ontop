@@ -37,8 +37,8 @@ public class StockExchangeTest extends TestCase {
 		DataManager ioManager = new DataManager(controller);
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(),ontology.getURI(),controller.getPrefixManager());
 		
-		// Creating a new instance of a quonto reasoner
-		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
+		// Creating a new instance of the reasoner
+        		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
 		
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -57,11 +57,6 @@ public class StockExchangeTest extends TestCase {
 		reasoner.loadOBDAModel(controller);
 		
 		
-		// Loading a set of configurations for the reasoner and giving them to quonto
-//		Properties properties = new Properties();
-//		properties.load(new FileInputStream(configFile));
-//		QuontoConfiguration config = new QuontoConfiguration(properties);
-//		reasoner.setConfiguration(config);
 		
 		// One time classification call.
 		reasoner.classify();
