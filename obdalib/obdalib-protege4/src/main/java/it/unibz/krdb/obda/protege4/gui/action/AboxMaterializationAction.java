@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -30,14 +31,16 @@ import org.slf4j.LoggerFactory;
 public class AboxMaterializationAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
-	
-	private MaterializeAction action = null;
 
+	private OWLEditorKit editorKit = null;
+	private OBDAModel obdaModel = null;
+	
 	private Logger log = LoggerFactory.getLogger(AboxMaterializationAction.class);
 	
 	@Override
 	public void initialise() throws Exception {
-		// Does nothing!
+		editorKit = (OWLEditorKit)getEditorKit();		
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
 	}
 
 	@Override
@@ -48,54 +51,48 @@ public class AboxMaterializationAction extends ProtegeAction {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		
-		if (!(getEditorKit() instanceof OWLEditorKit)) {
-			return;
-		}
-
-		int response = JOptionPane
-				.showConfirmDialog(
-						this.getEditorKit().getWorkspace(),
-						"This will use the mappings of the OWL-OBDA model \n to create a set of 'individual' assertions as specified \n by the mappings. \n\n This operation can take a long time and can require a lot of memory \n if the volume data retrieved by the mappings is high.",
-						"Confirm", JOptionPane.OK_CANCEL_OPTION);
+		final OWLWorkspace workspace = editorKit.getWorkspace();	
 		
-		if (response == JOptionPane.CANCEL_OPTION) {
-			return;
-		}
-
-		OWLEditorKit kit = (OWLEditorKit)getEditorKit();
-		Container container = getWorkspace().getRootPane().getParent();
-		OBDAModel obdaModel = ((OBDAModelManager) kit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
-
-		try {
-			OWLModelManager modelManager = kit.getOWLModelManager();
-			OWLAPI2IndividualIterator individuals = new OWLAPI2IndividualIterator(obdaModel);
-			
-			action = new MaterializeAction(modelManager, individuals);
-			
-			Thread th = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
-						CountDownLatch latch = new CountDownLatch(1);
-						action.setCountdownLatch(latch);
-						monitor.addProgressListener(action);
-						monitor.start("Materializing Abox ....");
-						action.run();
-						latch.await();
-						monitor.stop();
-					} 
-					catch (InterruptedException e) {
-						log.error(e.getMessage(), e);
-						JOptionPane.showMessageDialog(null, "ERROR: could not materialize ABox.");
+		String message = "The plugin will generate several triples and save them in this current ontology.\n" +
+				"The operation may take some time and may require a lot of memory if the data volume is too high.\n\n" +
+				"Do you want to continue?";
+		
+		int response = JOptionPane.showConfirmDialog(workspace, message, "Confirmation", JOptionPane.YES_NO_OPTION);
+		
+		if (response == JOptionPane.YES_OPTION) {			
+			try {
+				OWLModelManager modelManager = editorKit.getOWLModelManager();
+				OWLAPI2IndividualIterator individuals = new OWLAPI2IndividualIterator(obdaModel);
+				
+				final MaterializeAction action = new MaterializeAction(modelManager, individuals);
+				
+				Thread th = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+							CountDownLatch latch = new CountDownLatch(1);
+							action.setCountdownLatch(latch);
+							monitor.addProgressListener(action);
+							monitor.start("Materializing Abox ....");
+							action.run();
+							latch.await();
+							monitor.stop();
+						} 
+						catch (InterruptedException e) {
+							log.error(e.getMessage(), e);
+							JOptionPane.showMessageDialog(null, "ERROR: could not materialize ABox.");
+						}
 					}
-				}
-			});
-			th.start();
-		}
-		catch (Exception e) {
-			log.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(container, "ERROR: could not create individuals. See the log for more informaiton.", "Error", JOptionPane.ERROR_MESSAGE);
+				});
+				th.start();
+			}
+			catch (Exception e) {
+				Container container = getWorkspace().getRootPane().getParent();
+				JOptionPane.showMessageDialog(container, "Cannot create individuals! See the log information for the details.", "Error", JOptionPane.ERROR_MESSAGE);
+			
+				log.error(e.getMessage(), e);
+			}
 		}
 	}
 
