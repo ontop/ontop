@@ -47,7 +47,7 @@ public class RDBMSInspectorView extends AbstractOWLViewComponent implements OBDA
 
 		OBDAModel dsController = apic.getActiveOBDAModel();
 
-		inspectorPanel = new SQLSchemaInspectorPanel(dsController);
+		inspectorPanel = new SQLSchemaInspectorPanel();
 		datasourceSelector = new DatasourceSelector(dsController);
 		
 		datasourceSelector.addDatasourceListListener(inspectorPanel);
@@ -92,7 +92,6 @@ public class RDBMSInspectorView extends AbstractOWLViewComponent implements OBDA
 
 	@Override
 	public void activeOntologyChanged() {
-		inspectorPanel.setDatasourceController(apic.getActiveOBDAModel());
 		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel());
 	}
 }

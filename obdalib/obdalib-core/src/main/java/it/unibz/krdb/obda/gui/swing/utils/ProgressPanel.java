@@ -1,48 +1,25 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package it.unibz.krdb.obda.gui.swing.utils;
 
+import javax.swing.JOptionPane;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-/**
- *
- * @author obda
- */
 public class ProgressPanel extends javax.swing.JPanel {
 
-	private OBDAProgessMonitor monitor = null;
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 8447122293962076783L;
-	/** Creates new form ProgressPanel */
 	
+	private OBDAProgessMonitor monitor = null;
+ 
+	/** 
+	 * Creates new form ProgressPanel
+	 */	
 	public ProgressPanel(OBDAProgessMonitor monitor){
-		this(monitor, null);
+		this(monitor, "Operation in progress...");
 	}
 	
     public ProgressPanel(OBDAProgessMonitor monitor, String msg) {
         this.monitor = monitor;
-    	initComponents();
-    	addActionListener();
-    	if(msg != null){
-    		jLabel1.setText(msg);
-    	}
-    }
-    
-    private void addActionListener(){
-    	jButton1.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				monitor.triggerActionCanceled();
-				
-			}
-		});
+
+    	initComponents();   	
+    	lblMessage.setText(msg);
     }
 
     /** This method is called from within the constructor to
@@ -55,63 +32,56 @@ public class ProgressPanel extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jLabel1 = new javax.swing.JLabel();
-        jProgressBar1 = new javax.swing.JProgressBar();
-        jButton1 = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
+        lblMessage = new javax.swing.JLabel();
+        barProgressActivity = new javax.swing.JProgressBar();
+        cmdCancelOperation = new javax.swing.JButton();
 
         setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setText("Executing Query");
+        lblMessage.setText("Executing Query");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
-        add(jLabel1, gridBagConstraints);
+        add(lblMessage, gridBagConstraints);
 
-        jProgressBar1.setIndeterminate(true);
-        jProgressBar1.setMinimumSize(new java.awt.Dimension(200, 15));
-        jProgressBar1.setPreferredSize(new java.awt.Dimension(300, 18));
+        barProgressActivity.setIndeterminate(true);
+        barProgressActivity.setMinimumSize(new java.awt.Dimension(200, 15));
+        barProgressActivity.setPreferredSize(new java.awt.Dimension(300, 18));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        add(jProgressBar1, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+        add(barProgressActivity, gridBagConstraints);
 
-        jButton1.setText("Cancel");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        add(jButton1, gridBagConstraints);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 366, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 30, Short.MAX_VALUE)
-        );
-
+        cmdCancelOperation.setText("Cancel Operation");
+        cmdCancelOperation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	cmdCancelOperationActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(jPanel1, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        add(cmdCancelOperation, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
+	private void cmdCancelOperationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelOperationActionPerformed
+		try {
+			monitor.cancel();
+		} 
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}//GEN-LAST:event_cmdCancelOperationActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JProgressBar barProgressActivity;
+    private javax.swing.JButton cmdCancelOperation;
+    private javax.swing.JLabel lblMessage;
     // End of variables declaration//GEN-END:variables
-
 }

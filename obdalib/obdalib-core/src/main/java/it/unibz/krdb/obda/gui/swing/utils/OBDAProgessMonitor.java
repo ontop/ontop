@@ -7,33 +7,27 @@ import javax.swing.SwingUtilities;
 
 public class OBDAProgessMonitor {
 
-	private Vector<OBDAProgressListener>	listeners	= null;
-	private JDialog							parent		= new JDialog();
-
-	private boolean							canceled	= false;
+	private JDialog parent = new JDialog();
 	
-	private boolean finished = false;
+	private boolean	bCancel = false;
+	private boolean bFinish = false;
 	
-	private String text = null;
+	private String msg = null;
 
-	public OBDAProgessMonitor() {
-		listeners = new Vector<OBDAProgressListener>();
+	private Vector<OBDAProgressListener> listeners = new Vector<OBDAProgressListener>();
+	
+	public OBDAProgessMonitor(String msg) {
+		this.msg = msg;
 	}
 	
-	public void start(){
-		start(null);
-	}
-	
-	public void start(String msg) {
-		text = msg;
+	public void start() {	
 		Runnable action = new Runnable() {
-
 			@Override
 			public void run() {
-				if (finished)
+				if (bFinish) {
 					return;
-				final ProgressPanel panel = new ProgressPanel(OBDAProgessMonitor.this, text);
-				
+				}
+				ProgressPanel panel = new ProgressPanel(OBDAProgessMonitor.this, msg);
 				parent.setModal(true);
 				parent.setContentPane(panel);
 				parent.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -43,16 +37,26 @@ public class OBDAProgessMonitor {
 			}
 		};
 		SwingUtilities.invokeLater(action);
-
 	}
 
 	public void stop() {
-		finished = true;
+		bFinish = true;
+		bCancel = false;
+		parent.setVisible(false);
+		parent.dispose();
+	}
+
+	public void cancel() throws Exception {
+		bFinish = false;
+		bCancel = true;
 		parent.setVisible(false);
 		parent.dispose();
 		
+		for (OBDAProgressListener pl : listeners) {
+			pl.actionCanceled();
+		}
 	}
-
+	
 	public void addProgressListener(OBDAProgressListener list) {
 		listeners.add(list);
 	}
@@ -61,16 +65,11 @@ public class OBDAProgessMonitor {
 		listeners.remove(list);
 	}
 
-	public void triggerActionCanceled() {
-		finished = true;
-		canceled = true;
-		parent.setVisible(false);
-		for (OBDAProgressListener pl : listeners) {
-			pl.actionCanceled();
-		}
+	public boolean isFinished() {
+		return bFinish;
 	}
-
+	
 	public boolean isCanceled() {
-		return canceled;
+		return bCancel;
 	}
 }

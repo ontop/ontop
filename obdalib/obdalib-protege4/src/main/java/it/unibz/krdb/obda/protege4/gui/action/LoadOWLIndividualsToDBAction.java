@@ -69,7 +69,7 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 				Thread th = new Thread(new Runnable() {
 					@Override
 					public void run() {
-						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+						OBDAProgessMonitor monitor = new OBDAProgessMonitor("Loading data instances to database...");
 						monitor.start();
 						try {
 

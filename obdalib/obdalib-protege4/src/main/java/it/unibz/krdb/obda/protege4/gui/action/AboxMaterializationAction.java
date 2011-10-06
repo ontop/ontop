@@ -70,18 +70,18 @@ public class AboxMaterializationAction extends ProtegeAction {
 					@Override
 					public void run() {
 						try {
-							OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+							OBDAProgessMonitor monitor = new OBDAProgessMonitor("Materializing data instances...");
 							CountDownLatch latch = new CountDownLatch(1);
 							action.setCountdownLatch(latch);
 							monitor.addProgressListener(action);
-							monitor.start("Materializing Abox ....");
+							monitor.start();
 							action.run();
 							latch.await();
 							monitor.stop();
 						} 
 						catch (InterruptedException e) {
 							log.error(e.getMessage(), e);
-							JOptionPane.showMessageDialog(null, "ERROR: could not materialize ABox.");
+							JOptionPane.showMessageDialog(null, "ERROR: could not materialize data instances.");
 						}
 					}
 				});

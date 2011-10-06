@@ -134,7 +134,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void run(String query, QueryInterfacePanel panel) {
 
 				try {
-					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Counting tuples...");
 					CountDownLatch latch = new CountDownLatch(1);
 					CountAllTuplesAction action = new CountAllTuplesAction(latch, query);
 					monitor.addProgressListener(action);
@@ -164,7 +164,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void run(String query, QueryInterfacePanel panel) {
 
 				try {
-					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Executing queries...");
 					monitor.start();
 					CountDownLatch latch = new CountDownLatch(1);
 					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
@@ -211,7 +211,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void run(String query, QueryInterfacePanel pane) {
 
 				try {
-					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Expanding queries...");
 					CountDownLatch latch = new CountDownLatch(1);
 					ExpandQueryAction action = new ExpandQueryAction(latch, query);
 					monitor.addProgressListener(action);
@@ -261,7 +261,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void run(String query, QueryInterfacePanel pane) {
 
 				try {
-					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Unfolding queries...");
 					CountDownLatch latch = new CountDownLatch(1);
 					UnfoldQueryAction action = new UnfoldQueryAction(latch, query);
 					monitor.addProgressListener(action);
@@ -310,7 +310,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void run(String query, File file) {
 
 				try {
-					OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Saving...");
 					CountDownLatch latch = new CountDownLatch(1);
 					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
 					monitor.addProgressListener(action);
