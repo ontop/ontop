@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.List;
 
 public class ResultSetToFileWriter {
 
@@ -21,6 +22,20 @@ public class ResultSetToFileWriter {
 		FileWriter fstream = new FileWriter(outputFile, true);
         BufferedWriter out = new BufferedWriter(fstream);
         
+        /* Print the CSV header */
+        List<String> columnNames = result.getSignature();
+        StringBuffer header = new StringBuffer();
+        boolean bNeedComma = false;
+        for (String column : columnNames) {
+        	if (bNeedComma) {
+        		header.append(",");
+        	}
+        	header.append(column);
+        	bNeedComma = true;
+        }
+        out.append(header+"\n");
+        
+        /* Print the CSV content */
         int column = result.getColumCount();
         while(result.nextRow()){
         	StringBuffer line = new StringBuffer();

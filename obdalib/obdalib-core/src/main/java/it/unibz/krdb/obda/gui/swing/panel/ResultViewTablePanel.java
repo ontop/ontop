@@ -66,29 +66,15 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        panellViewSourceSquemaButtons = new javax.swing.JPanel();
-        buttonSaveResults = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        resultsTable = new javax.swing.JTable();
+        scrQueryResult = new javax.swing.JScrollPane();
+        tblQueryResult = new javax.swing.JTable();
+        pnlCommandButton = new javax.swing.JPanel();
+        cmdExportResult = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(400, 480));
         setLayout(new java.awt.BorderLayout());
 
-        panellViewSourceSquemaButtons.setMinimumSize(new java.awt.Dimension(100, 480));
-        panellViewSourceSquemaButtons.setPreferredSize(new java.awt.Dimension(100, 45));
-        panellViewSourceSquemaButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
-
-        buttonSaveResults.setText("Save results");
-        buttonSaveResults.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonSaveResultsActionPerformed(evt);
-            }
-        });
-        panellViewSourceSquemaButtons.add(buttonSaveResults);
-
-        add(panellViewSourceSquemaButtons, java.awt.BorderLayout.SOUTH);
-
-        resultsTable.setModel(new javax.swing.table.DefaultTableModel(
+        tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -96,56 +82,67 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
                 "Results"
             }
         ));
-        jScrollPane1.setViewportView(resultsTable);
+        scrQueryResult.setViewportView(tblQueryResult);
 
-        add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        add(scrQueryResult, java.awt.BorderLayout.CENTER);
+
+        pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
+        pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
+        pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        cmdExportResult.setText("Export Result to CSV File");
+        cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdExportResultActionPerformed(evt);
+            }
+        });
+        pnlCommandButton.add(cmdExportResult);
+
+        add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
 
 
-	private void buttonSaveResultsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveResultsActionPerformed
-
+	private void cmdExportResultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveResultsActionPerformed
 		GetOutputFileDialog dialog = new GetOutputFileDialog();
 		final File file = dialog.getOutPutFile();
 		if(file != null){
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
-						saveToFileAction.run(querypanel.getQuery(), file);
+					saveToFileAction.run(querypanel.getQuery(), file);
 				}
 			});
 		}
-
-	
 	}// GEN-LAST:event_buttonSaveResultsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton buttonSaveResults;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JPanel panellViewSourceSquemaButtons;
-    private javax.swing.JTable resultsTable;
+    private javax.swing.JButton cmdExportResult;
+    private javax.swing.JPanel pnlCommandButton;
+    private javax.swing.JScrollPane scrQueryResult;
+    private javax.swing.JTable tblQueryResult;
     // End of variables declaration//GEN-END:variables
 	
 	public void setTableModel(final TableModel newmodel) {
 		Runnable updateModel = new Runnable() {
 			public void run() {
 				
-				resultsTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-				ToolTipManager.sharedInstance().unregisterComponent(resultsTable);
-				ToolTipManager.sharedInstance().unregisterComponent(resultsTable.getTableHeader());
+				tblQueryResult.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+				ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult);
+				ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult.getTableHeader());
 
-				TableModel oldmodel = resultsTable.getModel();
+				TableModel oldmodel = tblQueryResult.getModel();
 				if (oldmodel != null) {
-					oldmodel.removeTableModelListener(resultsTable);
+					oldmodel.removeTableModelListener(tblQueryResult);
 					if (oldmodel instanceof IncrementalResultSetTableModel) {
 						IncrementalResultSetTableModel incm = (IncrementalResultSetTableModel) oldmodel;
 						incm.close();
 					}
 				}
-				resultsTable.setModel(newmodel);
+				tblQueryResult.setModel(newmodel);
 
 				addNotify();
 
-				resultsTable.invalidate();
-				resultsTable.repaint();
+				tblQueryResult.invalidate();
+				tblQueryResult.repaint();
 			}
 		};
 		SwingUtilities.invokeLater(updateModel);
@@ -171,7 +168,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 			
 		});
 		menu.add(countAll);
-		resultsTable.setComponentPopupMenu(menu);
+		tblQueryResult.setComponentPopupMenu(menu);
 	}
 
 	public OBDADataQueryAction getCountAllTuplesActionForUCQ() {
