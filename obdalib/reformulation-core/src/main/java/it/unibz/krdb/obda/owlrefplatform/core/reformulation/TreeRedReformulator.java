@@ -253,6 +253,8 @@ public class TreeRedReformulator implements QueryRewriter {
 		// log.debug("Removing auxiliary queries...");
 		resultlist = cleanAuxiliaryQueries(resultlist);
 		log.debug("Removed auxiliary queries. New size: {}", resultlist.size());
+		
+		log.debug("Reformulation: {}", resultlist);
 
 		/* One last pass of the syntactic containment checker */
 
