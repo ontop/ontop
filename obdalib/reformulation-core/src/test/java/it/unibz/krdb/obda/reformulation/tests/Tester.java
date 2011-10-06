@@ -106,15 +106,11 @@ public class Tester {
 
         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
         pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-        if (unfold_type.equals(QuestConstants.VIRTUAL))
-            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        else if (unfold_type.equals(QuestConstants.CLASSIC)) {
-            pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "false");
-        }
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, dbType);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
 		pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 
         QuestOWLFactory fac = new QuestOWLFactory();
