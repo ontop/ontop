@@ -96,22 +96,13 @@ public class Tester {
 
     }
 
-    public void load(String onto, String unfold_type, String dbType) throws Exception {
+    public void load(String onto, ReformulationPlatformPreferences pref) throws Exception {
         Runtime.getRuntime().gc();
 
         String owlfile = owlloc + onto + ".owl";
         String resultfile = xmlLoc + onto + ".xml";
         loadOntology(owlfile);
         loadResults(resultfile);
-
-        ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, dbType);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, unfold_type);
-        pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 
         QuestOWLFactory fac = new QuestOWLFactory();
         
@@ -144,11 +135,6 @@ public class Tester {
                 }
             }
         }
-    }
-
-    // TODO workaround for old syntax for calling tester.load
-    public void load(String onto, String unfold_type) throws Exception {
-        load(onto, unfold_type, QuestConstants.DIRECT);
     }
 
     public Set<String> getQueryIds() {

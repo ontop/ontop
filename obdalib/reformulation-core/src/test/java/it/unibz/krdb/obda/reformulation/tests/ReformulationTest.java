@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 
@@ -18,10 +20,21 @@ public class ReformulationTest extends TestCase {
 	public ReformulationTest(){
 		tester = new Tester(propfile);
 	}
+	
 private void test_function(String ontoname) throws Exception {
      log.debug("Test case: {}", ontoname);
-     log.debug("Testing in-memory db/material abox");
-     tester.load(ontoname, QuestConstants.CLASSIC);
+     
+     
+     {
+    	   log.debug("Testing in-memory classic direct equivalences");
+    	    ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
+   pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+   pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+   pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+   pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+   pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+   pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+     tester.load(ontoname, pref);
      for (String id : tester.getQueryIds()) {
          log.debug("Testing query: {}", id);
          Set<String> exp = tester.getExpectedResult(id);
@@ -31,20 +44,40 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
              assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
          }
      }
-
-     log.debug("Testing in-memory db/vitual abox");
-     tester.load(ontoname, QuestConstants.VIRTUAL);
-     for (String id : tester.getQueryIds()) {
-         log.debug("Testing query: {}", id);
-         Set<String> exp = tester.getExpectedResult(id);
-         Set<String> res = tester.executeQuery(id);
-assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
-         for (String realResult : res) {
-             assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(),exp.contains(realResult));
-         }
      }
-     log.debug("Testing in-memory db/SemanticIndex");
-     tester.load(ontoname, QuestConstants.CLASSIC, QuestConstants.SEMANTIC);
+     
+     {
+  	   log.debug("Testing in-memory classic direct no-equivalences");
+  	    ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
+ pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+ pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+ pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+ pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+ pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+ pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+   tester.load(ontoname, pref);
+   for (String id : tester.getQueryIds()) {
+       log.debug("Testing query: {}", id);
+       Set<String> exp = tester.getExpectedResult(id);
+       Set<String> res = tester.executeQuery(id);
+assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
+       for (String realResult : res) {
+           assertTrue("expeted: " +exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
+       }
+   }
+   }
+
+     {
+     log.debug("Testing in-memory semantic index direct equivalences");
+     ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
+     pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+     pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+     pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+     pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+     pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+     pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+
+     tester.load(ontoname, pref);
      for (String id : tester.getQueryIds()) {
          log.debug("Testing query: {}", id);
          Set<String> exp = tester.getExpectedResult(id);
@@ -55,8 +88,39 @@ assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
          Collections.sort(res_list);
          assertEquals(exp_list, res_list);
      }
+     }
+     
+     {
+         log.debug("Testing in-memory semantic index direct no-equivalences");
+         ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
+         pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+         pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+         pref.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+         pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+         pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+         pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+
+         tester.load(ontoname, pref);
+         for (String id : tester.getQueryIds()) {
+             log.debug("Testing query: {}", id);
+             Set<String> exp = tester.getExpectedResult(id);
+             Set<String> res = tester.executeQuery(id);
+             List<String> exp_list = new LinkedList<String>(exp);
+             List<String> res_list = new LinkedList<String>(res);
+             Collections.sort(exp_list);
+             Collections.sort(res_list);
+             assertEquals(exp_list, res_list);
+         }
+         }
+     
+
+
  }
 
+	public void test_600() throws Exception {
+		String ontoname = "test_600";
+		test_function(ontoname);
+	}
 	public void test_1() throws Exception {
 		String ontoname = "test_1";
 		test_function(ontoname);
