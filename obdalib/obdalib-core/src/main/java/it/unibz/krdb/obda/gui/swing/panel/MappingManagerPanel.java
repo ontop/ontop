@@ -59,6 +59,7 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -973,14 +974,10 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}
 
 	public void stopTreeEditing() {
-		if (mappingsTree.isEditing()) {
-			MappingTreeNodeCellEditor editor = (MappingTreeNodeCellEditor) mappingsTree.getCellEditor();
-			if (editor.isInputValid()) {
-				if (mappingsTree.stopEditing()) {
-					String txt = editor.getCellEditorValue().toString();
-					updateNode(txt);
-				}
-			}
+		TreeCellEditor editor = mappingsTree.getCellEditor();
+		if (editor.stopCellEditing()) {
+			String txt = editor.getCellEditorValue().toString();
+			updateNode(txt);
 		}
 	}
 

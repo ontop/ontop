@@ -16,9 +16,7 @@ package it.unibz.krdb.obda.gui.swing.treemodel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class MappingHeadNode extends DefaultMutableTreeNode {
-	/**
-	 * 
-	 */
+	
 	private static final long	serialVersionUID	= -172088331390892183L;
 
 	public MappingHeadNode(String name) {
@@ -31,5 +29,10 @@ public class MappingHeadNode extends DefaultMutableTreeNode {
 	
 	public void setQuery(String query) {
 		setUserObject(query);
+	}
+	
+	@Override
+	public String toString() {
+		return "Target Query";
 	}
 }

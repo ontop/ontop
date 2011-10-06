@@ -20,7 +20,6 @@ import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -60,37 +59,24 @@ import javax.swing.table.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 
- * @author mariano
- */
 public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID	= 6497114195036386873L;
+	
 	private static final int TABLE_ROW_HEIGHT	= 17;
 	private static final int TABLE_COLUMN_WIDTH	= 200;
 
 	private OBDADataSource selectedSource;
-	private OBDAModel dscontroller;
 
 	private Logger log = LoggerFactory.getLogger(SQLSchemaInspectorPanel.class);
 
 	/** Creates new form SQLSchemaInspectorPanel */
-	public SQLSchemaInspectorPanel(OBDAModel dsController) {
-		this.dscontroller = dsController;
-
+	public SQLSchemaInspectorPanel() {
 		initComponents();
 		addPopupMenu();
-		/***********************************************************************
-		 * Setting up the database utilities
-		 */
-
+		
 		tblRelations.getSelectionModel().setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
 		tblRelations.getSelectionModel().addListSelectionListener(new RowListener());
-	}
-	
-	public void setDatasourceController(OBDAModel dsController) {
-		this.dscontroller = dsController;
 	}
 
 	/**
@@ -117,7 +103,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		pnlButtons.setPreferredSize(new Dimension(100, 35));
 		pnlButtons.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-		cmdRefresh.setText("Refresh");
+		cmdRefresh.setText("Refresh Schema");
 		cmdRefresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				cmdRefreshActionPerformed(evt);
@@ -137,22 +123,22 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrRelationsTable.setOpaque(false);
 		scrRelationsTable.setPreferredSize(new Dimension(250, 100));
 
-		tblRelations.setModel(new DefaultTableModel(new Object[][] {
+		tblRelations.setModel(new DefaultTableModel(
+			new Object[][] {}, new String[] { "Relation Name", "Row Count" }) 
+			{
+				Class[] types = new Class[] { String.class, String.class };
+				boolean[] canEdit = new boolean[] { false, false };
 
-		}, new String[] { "Relation Name", "Row Count" }) {
-			Class[]		types	= new Class[] { String.class, String.class };
-			boolean[]	canEdit	= new boolean[] { false, false };
+				@Override
+				public Class getColumnClass(int columnIndex) {
+					return types[columnIndex];
+				}
 
-			@Override
-      public Class getColumnClass(int columnIndex) {
-				return types[columnIndex];
-			}
-
-			@Override
-      public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return canEdit[columnIndex];
-			}
-		});
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+					return canEdit[columnIndex];
+				}
+			});
 		tblRelations.setPreferredSize(new Dimension(150, 999999));
 		scrRelationsTable.setViewportView(tblRelations);
 
@@ -164,16 +150,16 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrAttributesTable.setMinimumSize(new Dimension(250, 100));
 		scrAttributesTable.setPreferredSize(new Dimension(250, 100));
 
-		tblAttributes.setModel(new DefaultTableModel(new Object[][] {
+		tblAttributes.setModel(new DefaultTableModel(
+			new Object[][] {}, new String[] { "Field", "Type", "Null", "Key", "Default", "Extra" }) 
+			{
+				boolean[] canEdit = new boolean[] { false, false, false, false, false, false };
 
-		}, new String[] { "Field", "Type", "Null", "Key", "Default", "Extra" }) {
-			boolean[]	canEdit	= new boolean[] { false, false, false, false, false, false };
-
-			@Override
-      public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return canEdit[columnIndex];
-			}
-		});
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+					return canEdit[columnIndex];
+				}
+			});
 		tblAttributes.setPreferredSize(new Dimension(150, 2000));
 		scrAttributesTable.setViewportView(tblAttributes);
 
@@ -184,20 +170,18 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private void addPopupMenu() {
 		JPopupMenu menu = new JPopupMenu();
-
+		
 		JMenuItem countAll = new JMenuItem();
-		countAll.setText("count all");
+		countAll.setText("Count All");
 		countAll.setToolTipText("Counts the number of rows in each table");
 		countAll.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
 				try {
 					int row = tblRelations.getSelectedRow();
 					if (row != -1) {
 						CountDownLatch latch = new CountDownLatch(1);
-						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+						OBDAProgessMonitor monitor = new OBDAProgessMonitor("Counting all tuples...");
 						CountAllTuplesAction action = new CountAllTuplesAction(latch);
 						monitor.addProgressListener(action);
 						monitor.start();
@@ -210,30 +194,28 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 								tblRelations.getModel().setValueAt(result[i], i, 1);
 							}
 						}
-
 					}
-
-				} catch (InterruptedException e1) {
+				}
+				catch (InterruptedException e1) {
 					JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
 					log.error("Error while counting.", e);
 				}
 			}
-
 		});
 		menu.add(countAll);
+		
 		JMenuItem countrow = new JMenuItem();
-		countrow.setText("count");
+		countrow.setText("Count");
 		countrow.setToolTipText("Counts the number of rows in the selected table");
 		countrow.addActionListener(new ActionListener() {
-
-			// @Override
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					int row = tblRelations.getSelectedRow();
 					if (row != -1) {
 						String s = tblRelations.getModel().getValueAt(row, 0).toString();
 						CountDownLatch latch = new CountDownLatch(1);
-						OBDAProgessMonitor monitor = new OBDAProgessMonitor();
+						OBDAProgessMonitor monitor = new OBDAProgessMonitor("Counting all tuples...");
 						CountTuplesAction action = new CountTuplesAction(latch, s);
 						monitor.addProgressListener(action);
 						monitor.start();
@@ -244,26 +226,25 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						if (!count.equals("-1")) {
 							tblRelations.getModel().setValueAt(count, row, 1);
 						}
-
 					}
-
-				} catch (InterruptedException e1) {
+				} 
+				catch (InterruptedException e1) {
 					JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
 					log.error("Error while counting.", e);
 				}
 			}
 		});
 		menu.add(countrow);
+		
 		tblRelations.setComponentPopupMenu(menu);
 	}
 
 	private void cmdRefreshActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdRefreshActionPerformed
 		Runnable run = new Runnable() {
-			
 			@Override
 			public void run() {
 				try {
-					OBDAProgessMonitor progMonitor = new OBDAProgessMonitor();
+					OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Counting all tuples...");
 					progMonitor.start();
 					CountDownLatch latch = new CountDownLatch(1);
 					UpdateRelationTableAction action = new UpdateRelationTableAction(latch);
@@ -285,10 +266,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		};
 
 		if (selectedSource == null) {
-      JOptionPane.showMessageDialog(this, "Select a datasource first!", "Error", JOptionPane.ERROR_MESSAGE);
-    }
+			JOptionPane.showMessageDialog(this, "Select a datasource first!", "Error", JOptionPane.ERROR_MESSAGE);
+	    }
 		else {
-		  SwingUtilities.invokeLater(run);
+			SwingUtilities.invokeLater(run);
 		}
 	}// GEN-LAST:event_cmdRefreshActionPerformed
 
@@ -297,9 +278,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		this.selectedSource = newSource;
 	}
 
-	/***************************************************************************
-	 * Called when the relation table of the RDBMS inspector changed
-	 */
 	private class RowListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent event) {
 			if (event.getValueIsAdjusting()) {
@@ -343,11 +321,11 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}
 
 		Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
-		if (con == null)
+		if (con == null) {
 			throw new SQLException("Couldnt establish a connectino for the datsource: {}" + selectedSource.getSourceID());
-
+		}
+		
 		if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
-
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			String url = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 			// jdbc:db2://5.90.168.104:50000/MINIST:currentSchema=PROP;
@@ -359,12 +337,13 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 					+ "' AND TABLE_SCHEMA = '" + schema + "'");
 			return r;
 		}
-		if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
+		else if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
 			// select table_name from user_tables
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			ResultSet r = statement.executeQuery("select table_name from user_tables");
 			return r;
-		} else {
+		} 
+		else {
 			// postgres and mysql
 			DatabaseMetaData metdata = con.getMetaData();
 			String catalog = null;
@@ -376,7 +355,6 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			con.setAutoCommit(false);
 			return r;
 		}
-
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
@@ -410,7 +388,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		public void run() {
 			thread = new Thread() {
 				@Override
-        public void run() {
+				public void run() {
 					try {
 						Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
 						statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -434,23 +412,16 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}
 
 		@Override
-		public void actionCanceled() {
-			try {
-				if (thread != null) {
-					thread.interrupt();
-				}
-				if (statement != null && !statement.isClosed()) {
-					statement.cancel();
-					statement.close();
-				}
-				latch.countDown();
-			} catch (SQLException e) {
-				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while canceling action.\n Please refer to the log file for more information.");
-				log.error("Error while counting tuples.", e);
+		public void actionCanceled() throws Exception {
+			if (thread != null) {
+				thread.interrupt();
 			}
+			if (statement != null && !statement.isClosed()) {
+				statement.cancel();
+				statement.close();
+			}
+			latch.countDown();
 		}
-
 	}
 
 	private class CountAllTuplesAction implements OBDAProgressListener {
@@ -471,7 +442,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		public void run() {
 			thread = new Thread() {
 				@Override
-        public void run() {
+				public void run() {
 					try {
 						int rows = tblRelations.getRowCount();
 						result = new String[rows];
@@ -503,23 +474,16 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}
 
 		@Override
-		public void actionCanceled() {
-			try {
-				if (thread != null) {
-					thread.interrupt();
-				}
-				if (statement != null && !statement.isClosed()) {
-					statement.cancel();
-					statement.close();
-				}
-				latch.countDown();
-			} catch (SQLException e) {
-				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while canceling action.\n Please refer to the log file for more information.");
-				log.error("Error while counting tuples.", e);
+		public void actionCanceled() throws Exception {
+			if (thread != null) {
+				thread.interrupt();
 			}
+			if (statement != null && !statement.isClosed()) {
+				statement.cancel();
+				statement.close();
+			}
+			latch.countDown();
 		}
-
 	}
 
 	private class UpdateRelationTableAction implements OBDAProgressListener {
@@ -533,7 +497,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		}
 
 		@Override
-		public void actionCanceled() {
+		public void actionCanceled() throws Exception {
 			if (thread != null) {
 				thread.interrupt();
 			}

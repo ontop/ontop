@@ -32,39 +32,27 @@ import javax.swing.table.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author  mariano
- */
-public class SQLQueryPanel extends javax.swing.JPanel implements 
-    DatasourceSelectorListener {
-    	
-	/**
-	 * 
-	 */
+public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
+
 	private static final long serialVersionUID = 7600557919206933923L;
-	String execute_Query;
-	
-	Logger								log				= LoggerFactory.getLogger(SQLQueryPanel.class);
+		
+	private Logger log = LoggerFactory.getLogger(SQLQueryPanel.class);
 
 	private OBDADataSource selectedSource;
 
-    /** Creates new form SQLQueryPanel */
-    public SQLQueryPanel(OBDADataSource ds,String execute_Query) {
-    	
-    	this();
-    	this.execute_Query=execute_Query;
-    	txtSqlQuery.setText(execute_Query);
+    /** 
+     * Creates new form SQLQueryPanel
+     */
+    public SQLQueryPanel() {
+    	initComponents();
+    }
+    
+    public SQLQueryPanel(OBDADataSource ds, String query) {
+    	initComponents();
+    	txtSqlQuery.setText(query);
     	selectedSource = ds;
     	cmdExecuteActionPerformed(null);    
-    }
-    
-    
-    public SQLQueryPanel() {
-      initComponents();
-      cmdExecute.setMnemonic('x');
-    }
-    
+    }    
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -106,7 +94,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
         gridBagConstraints.weighty = 2.0;
         pnlSqlQuery.add(scrSqlQuery, gridBagConstraints);
 
-        cmdExecute.setText("Execute");
+        cmdExecute.setText("Execute Query");
         cmdExecute.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdExecuteActionPerformed(evt);
@@ -143,13 +131,13 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 
     private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {                                               
     	try {
-    		if(selectedSource == null){
+    		if (selectedSource == null){
     			JOptionPane.showMessageDialog(this, "Please select data source first", "Error", JOptionPane.ERROR_MESSAGE);
-    		}else{
-				OBDAProgessMonitor progMonitor = new OBDAProgessMonitor();
+    		}
+    		else {
+				OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
 				CountDownLatch latch = new CountDownLatch(1);
 				ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
-				progMonitor.addProgressListener(action);
 				progMonitor.addProgressListener(action);
 				progMonitor.start();
 				action.run();
@@ -162,8 +150,8 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 				}
     		}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error while executing query.\n Please refer to the log file for more information.");
-			log.error("Error while executing query.",e);
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			log.error("Error while executing query.", e);
 		}
 
     }                                             
@@ -186,33 +174,27 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
     private javax.swing.JTextArea txtSqlQuery;
     // End of variables declaration//GEN-END:variables
     
-    private class ExecuteSQLQueryAction implements OBDAProgressListener{
+    private class ExecuteSQLQueryAction implements OBDAProgressListener {
 
     	CountDownLatch latch = null;
     	Thread thread = null;
     	ResultSet result = null;
     	Statement statement = null;
     	
-    	private ExecuteSQLQueryAction (CountDownLatch latch){
+    	private ExecuteSQLQueryAction(CountDownLatch latch){
     		this.latch = latch;
     	}
     	
 		@Override
-		public void actionCanceled() {
-			try {
-				if(thread != null){
-					thread.interrupt();
-				}
-				if(statement != null && !statement.isClosed()){
-					statement.close();
-				}
-				result = null;
-				latch.countDown();
-			} catch (SQLException e) {
-				latch.countDown();
-				JOptionPane.showMessageDialog(null, "Error while canceling action.\n Please refer to the log file for more information.");
-				log.error("Error while counting tuples.",e);
-			}					
+		public void actionCanceled() throws SQLException {
+			if(thread != null){
+				thread.interrupt();
+			}
+			if(statement != null && !statement.isClosed()){
+				statement.close();
+			}
+			result = null;
+			latch.countDown();					
 		}
 		
 		public ResultSet getResult(){
@@ -235,10 +217,11 @@ public class SQLQueryPanel extends javax.swing.JPanel implements
 						statement = man.getStatement(selectedSource.getSourceID(), selectedSource); //EK
 						result = statement.executeQuery(txtSqlQuery.getText());
 						latch.countDown();
-					} catch (Exception e) {
+					} 
+					catch (Exception e) {
 						latch.countDown();
-						JOptionPane.showMessageDialog(null, "Error while executing query.\n Please refer to the log file for more information.");
-						log.error("Error while executing query.",e);
+						JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+						log.error("Error while executing query.", e);
 					}
 				}
 			};

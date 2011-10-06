@@ -13,7 +13,6 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-
 import it.unibz.krdb.obda.gui.swing.IconLoader;
 import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
 import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
@@ -59,94 +58,57 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	final String	PATH_MAPPINGBODY_ICON	= "images/body.png";
 
 	private OBDAModel controller = null;
-	private MappingEditorPanel me = null;
+	private MappingEditorPanel parent = null;
 	private Vector<CellEditorListener> listener = null;
 	private MappingManagerPanel mappingmanagerpanel = null;
 	private TargetQueryValidator validator = null;
 
-	private boolean editingCanceled = false;
+	private boolean bEditingCanceled = false;
 
 	DatalogProgramParser datalogParser = new DatalogProgramParser();
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public MappingTreeNodeCellEditor(JTree tree, MappingManagerPanel panel, OBDAModel apic) {
-//		super(tree, new MappingRenderer(apic));
-//		super(tree, renderer);
-////		this.renderer = new MappingRenderer(apic);
-//		this.renderer = renderer;
 		mappingmanagerpanel = panel;
 		controller = apic;
 		listener = new Vector<CellEditorListener>();
 		mappingIcon = IconLoader.getImageIcon(PATH_MAPPING_ICON);
 		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
-		me = new MappingEditorPanel(tree);
+		parent = new MappingEditorPanel(tree);
 
-    OWLOntology ontology = mappingmanagerpanel.getOntology();
-    validator = new TargetQueryValidator(ontology);
+	    OWLOntology ontology = mappingmanagerpanel.getOntology();
+	    validator = new TargetQueryValidator(ontology);
 	}
-//
-//	public HeadNodeTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer, TreeCellEditor editor, APIController apic) {
-////		super(tree, new MappingRenderer(apic), editor);
-//		controller = apic;
-////		this.renderer = new MappingRenderer(apic);
-//		mappingIcon = IconLoader.getImageIcon(PATH_MAPPING_ICON);
-//		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
-//		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
-//	}
 
+	@Override
 	public Component getTreeCellEditorComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
-//		this.renderer = new MappingRenderer(controller);
-
-//		Dimension d = this.editingContainer.getPreferredSize();
-//		this.editingContainer.setPreferredSize(new Dimension(800, d.height));
-//		this.editingContainer.setMaximumSize(new Dimension(800, d.height));
-//		this.editingContainer.setMinimumSize(new Dimension(800, d.height));
-//		this.editingContainer.setSize(new Dimension(800, d.height));
-//		Component editor = super.getTreeCellEditorComponent(tree, value, isSelected, expanded, leaf, row);
-//		System.out.println(editor.getClass());
-//		editingContainer.validate();
-//		this.renderer = new MappingRenderer(controller);
-
-//		if (value instanceof MappingNode) {
-//			this.editingIcon = mappingIcon;
-//
-//		} else if (value instanceof MappingBodyNode) {
-//			this.editingIcon = mappingbodyIcon;
-//
-//		} else if (value instanceof MappingHeadNode) {
-//			this.editingIcon = mappingheadIcon;
-//
-//		} else {
-//			this.editingIcon = null;
-//		}
-		me.setText(value);
-		return me;
+		parent.setText(value);
+		return parent;
 	}
 
-	public boolean isInputValid() {
-    final String text = me.getText().trim();
-    if (text.isEmpty()) {
-      JOptionPane.showMessageDialog(me, "The tree node can't be empty!", "Error", JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-
-    boolean isValid = true;
-		if (me.getEditingObject() instanceof MappingHeadNode) {
-  		final CQIE query = parse(text);
-  		isValid = validator.validate(query);
-  		if (!isValid) {
-  		  Vector<String> invalidPredicates = validator.getInvalidPredicates();
-  		  String invalidList = "";
-        for (String predicate : invalidPredicates) {
-          invalidList += "- " + predicate + "\n";
-        }
-        JOptionPane.showMessageDialog(me, "This list of predicates is unknown by the ontology: \n" + invalidList,
-            "New Mapping", JOptionPane.WARNING_MESSAGE);
-  		}
+	public void validate() throws Exception {
+	    final String text = parent.getText().trim();
+	    final Object node = parent.getEditingObject();
+	    
+	    if (text.isEmpty()) {
+	    	String msg = String.format("The %s cannot be empty!", node.toString());
+	    	throw new Exception(msg);
+	    }
+	
+		if (node instanceof MappingHeadNode) {
+			final CQIE query = parse(text);
+	  		if (!validator.validate(query)) {
+	  			Vector<String> invalidPredicates = validator.getInvalidPredicates();
+	  			String invalidList = "";
+		        for (String predicate : invalidPredicates) {
+		        	invalidList += "- " + predicate + "\n";
+		        }
+		        String msg = String.format("The below list of predicates is unknown by the ontology: \n %s", invalidList);
+		        throw new Exception(msg);
+	  		}
 		}
-		return isValid;
 	}
 
 	private CQIE parse(String query) {
@@ -164,113 +126,77 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 
 	private String prepareQuery(String input) {
 		String query = "";
-		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(controller.getPrefixManager());
+		DatalogQueryHelper queryHelper = new DatalogQueryHelper(controller.getPrefixManager());
 
 		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1)  // if no head
-			query = queryHelper.getDefaultHead() + " " +
-			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
-			 	input;
-
-		// Append the prefixes
-		query = queryHelper.getPrefixes() + query;
+		if (atoms.length == 1){ // if no head
+			query = String.format("%s %s %s", queryHelper.getDefaultHead(), DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, input);
+		}
+		query = queryHelper.getPrefixes() + query; // Append the prefixes
 
 		return query;
 	}
 
-//	private void checkValidityOfConjunctiveQuery(CQIE cq) throws Exception{
-//		List<Atom> atoms = cq.getBody();
-//		Iterator<Atom> it = atoms.iterator();
-//		APICoupler coup= controller.getCoupler();
-//		PrefixManager prefixman = controller.getPrefixManager();
-////		URI onto_uri = URI.create(prefixman.getDefaultNamespace());
-//		while(it.hasNext()){
-//			Atom atom = it.next();
-//			int arity = atom.getArity();
-//			if (arity == 1){  // concept query atom
-//				String name = controller.getEntityNameRenderer().getPredicateName(atom);
-//				boolean isConcept =coup.isNamedConcept(new URI(name));
-//				if(!isConcept){
-//					throw new Exception("Concept "+name+" not present in ontology.");
-//				}
-//
-//			} else if (arity == 2) {  // binary query atom
-//				String name = controller.getEntityNameRenderer().getPredicateName(atom);
-//				List<Term> terms = atom.getTerms();
-//				Term t2 = terms.get(1);
-//				boolean found = false;
-//				if(t2 instanceof FunctionalTermImpl){
-//					found =coup.isObjectProperty(new URI(name));
-//				}else{
-//					found =coup.isDatatypeProperty(new URI(name));
-//				}
-//				if(!found){
-//					throw new Exception("Property "+name+" not present in ontology.");
-//				}
-//			} else {
-//				log.error("Recieved an n-ary predicate.");
-//				throw new RuntimeException("Error, recieved an n-ary atom, only unary and binary atoms are accepted here");
-//			}
-//		}
-//	}
+	@Override
+	public void addCellEditorListener(CellEditorListener arg0) {
+		listener.add(arg0);
+	}
 
-		public void addCellEditorListener(CellEditorListener arg0) {
-			listener.add(arg0);
+	@Override
+	public void cancelCellEditing() {
+		if (!bEditingCanceled){
+			final String text = getCellEditorValue().toString().trim();
+			mappingmanagerpanel.applyChangedToNode(text);
 		}
+	}
 
-		public void cancelCellEditing() {
+	@Override
+	public Object getCellEditorValue() {
+		return parent.getText();
+	}
 
-			if(!editingCanceled){
-			  final String text = getCellEditorValue().toString().trim();
-			  mappingmanagerpanel.applyChangedToNode(text);
-			}
-		}
-
-		public Object getCellEditorValue() {
-			return  me.getText();
-
-		}
-
-		public boolean isCellEditable(EventObject eo) {
-			 if ((eo == null) || ((eo instanceof MouseEvent) && (((MouseEvent) eo)
-				            .isMetaDown()))) {
-				  	return true;
-			 	}
-			return false;
-		}
-
-		public void removeCellEditorListener(CellEditorListener arg0) {
-			listener.remove(arg0);
-		}
-
-		public boolean shouldSelectCell(EventObject arg0) {
+	public boolean isCellEditable(EventObject eo) {
+		if ((eo == null) || ((eo instanceof MouseEvent) && (((MouseEvent) eo).isMetaDown()))) {
 			return true;
 		}
+		return false;
+	}
 
-		public boolean stopCellEditing() {
+	public void removeCellEditorListener(CellEditorListener arg0) {
+		listener.remove(arg0);
+	}
 
-			return isInputValid();
+	public boolean shouldSelectCell(EventObject arg0) {
+		return true;
+	}
+
+	@Override
+	public boolean stopCellEditing() {
+		try {
+			validate();
 		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(parent.getParent(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		return true;
+	}
 
+	private class HeadInputVerifier extends InputVerifier {
+		@Override
+		public boolean verify(JComponent field) {
+			JTextPane pane = (JTextPane) field;
+			String txt = pane.getText();
+			CQIE cq = parse(txt);
 
-
-
-		private class HeadInputVerifier extends InputVerifier {
-
-			@Override
-			public boolean verify(JComponent field) {
-				JTextPane pane = (JTextPane) field;
-				String txt = pane.getText();
-				CQIE cq = parse(txt);
-
-				if (cq != null)
-					return true;
-				else
-					return false;
+			if (cq != null) {
+				return true;
 			}
-
+			else {
+				return false;
+			}
 		}
+	}
 
 		private class MappingEditorPanel extends JPanel{
 
@@ -308,19 +234,23 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		        add(jScrollPane1, gridBagConstraints);
 
 		        pane.addKeyListener(new KeyListener(){
-
+		        	@Override
 					public void keyPressed(KeyEvent e) {
-
 						if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK && e.getKeyCode() == KeyEvent.VK_ENTER) {
 							mappingmanagerpanel.stopTreeEditing();
-						}else if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
-							editingCanceled = true;
 						}
-
+						else if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+							bEditingCanceled = true;
+						}
+					}		        	
+		        	@Override
+					public void keyReleased(KeyEvent e) {
+						// Does nothing
+					}		        	
+		        	@Override
+					public void keyTyped(KeyEvent e) {
+						// Does nothing
 					}
-					public void keyReleased(KeyEvent e) {}
-					public void keyTyped(KeyEvent e) {}
-
 		        });
 			}
 

@@ -18,9 +18,7 @@ import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class MappingNode extends DefaultMutableTreeNode {
-	/**
-	 * 
-	 */
+	
 	private static final long	serialVersionUID	= -9116413704531119587L;
 
 	public MappingNode(String name) {
@@ -72,5 +70,10 @@ public class MappingNode extends DefaultMutableTreeNode {
 	
 	public void setMappingID(String newid) {
 		setUserObject(newid);
+	}
+	
+	@Override
+	public String toString() {
+		return "Mapping ID";
 	}
 }

@@ -149,15 +149,10 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void actionCanceled() {
-
-		try {
-			isCanceled = true;
-			statement.cancel();
-			statement.close();
-		} catch (SQLException e) {
-			log.warn(e.getMessage());
-		}
+	public void actionCanceled() throws SQLException {
+		isCanceled = true;
+		statement.cancel();
+		statement.close();
 	}
 
 	@Override
