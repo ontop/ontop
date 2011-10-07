@@ -224,12 +224,12 @@ public class DataManager {
 		String version;
 
 		if (!obdaFile.exists()) {
-			log.error("OBDA file not found: {}", obdaFile.toString());
-			throw new IOException("File not found: " + obdaFile.toString());
+			String msg = String.format("File not found: %s", obdaFile.toString());
+			throw new IOException(msg);
 		}
 		if (!obdaFile.canRead()) {
-			log.error("Cant read file: {}", obdaFile.toString());
-			throw new IOException("File not found: " + obdaFile.toString());
+			String msg = String.format("Error while reading the file %s", obdaFile.toString());
+			throw new IOException(msg);
 		}
 
 		Document doc = null;
@@ -239,15 +239,14 @@ public class DataManager {
 			doc = db.parse(obdaFile);
 			doc.getDocumentElement().normalize();
 		} catch (Exception e) {
-			log.error("OBDA info file could not be read.");
-			log.error(e.getLocalizedMessage());
-			return;
+			String msg = String.format("OBDA info file could not be read!\nREASON: %s", e.getLocalizedMessage());
+			throw new IOException(msg);
 		}
 
-		Element root = doc.getDocumentElement(); // OBDA
+		Element root = doc.getDocumentElement();
 		if (root.getNodeName() != "OBDA") {
-			log.error("OBDA info file should start with <OBDA> tag");
-			return;
+			String msg = "The OBDA file must be enclosed with <OBDA> tag";
+			throw new IOException(msg);
 		}
 
 		NamedNodeMap att = root.getAttributes();
@@ -298,19 +297,18 @@ public class DataManager {
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element node = (Element) children.item(i);
-				if (node.getNodeName().equals("mappings")) { // Found mapping
-					// block
-
+				if (node.getNodeName().equals("mappings")) {
+					// Found mapping block
 					URI source = URI.create(node.getAttribute("sourceuri"));
 					importMappingsFromXML(source, node);
-
 				}
 				if ((major < 0) && (node.getNodeName().equals("datasource"))) {
 					// Found old data-source block
-					System.err.println("WARNING: Loading a datasource using the old "
-							+ "deprecated method. Update your .obda file by saving " + "it again.");
 					OBDADataSource source = dsCodec.decode(node);
 					apic.addSource(source);
+					
+					String msg = "WARNING: Loading a deprecated OBDA file.";
+					throw new IOException(msg + "Update it by selecting \"Save as...\" option");
 				}
 				String newDatasourceTag = dsCodec.getElementTag();
 				if ((major > 0) && (node.getNodeName().equals(newDatasourceTag))) {
@@ -326,8 +324,6 @@ public class DataManager {
 					// Found queries block
 					importQueriesFromXML(node);
 				}
-
-
 			}
 		}
 	}
