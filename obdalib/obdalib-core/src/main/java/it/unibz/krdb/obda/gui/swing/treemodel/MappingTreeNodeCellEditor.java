@@ -93,7 +93,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	    final Object node = parent.getEditingObject();
 	    
 	    if (text.isEmpty()) {
-	    	String msg = String.format("The %s cannot be empty!", node.toString());
+	    	String msg = String.format("ERROR: The %s cannot be empty!", node.toString().toLowerCase());
 	    	throw new Exception(msg);
 	    }
 	
@@ -105,7 +105,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		        for (String predicate : invalidPredicates) {
 		        	invalidList += "- " + predicate + "\n";
 		        }
-		        String msg = String.format("The below list of predicates is unknown by the ontology: \n %s", invalidList);
+		        String msg = String.format("ERROR: The below list of predicates is unknown by the ontology: \n %s", invalidList);
 		        throw new Exception(msg);
 	  		}
 		}
@@ -176,7 +176,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 			validate();
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(parent.getParent(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(parent.getPane(), e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		return true;
