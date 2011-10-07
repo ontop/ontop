@@ -158,10 +158,7 @@ public class QueryPainter {
 				invalid = true;
 			}
 			// checkValidityOfConjunctiveQuery(query);
-
 		} catch (Exception e) {
-
-			// e.printStackTrace();
 			invalid = true;
 		}
 
@@ -270,7 +267,7 @@ public class QueryPainter {
 							FunctionalTermImpl f = (FunctionalTermImpl) terms.get(0);
 							String function = man.getShortForm(f.toString());
 							List<Term> para = f.getTerms();
-							Iterator para_it = para.iterator();
+							Iterator<Term> para_it = para.iterator();
 							while (para_it.hasNext()) {
 
 								VariableImpl p = (VariableImpl) para_it.next();

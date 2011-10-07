@@ -13,7 +13,7 @@ package it.unibz.krdb.obda.codec;
  */
 public interface IOCodec  <OutputClass, InputClass> {
 
-	public abstract OutputClass encode(InputClass input);
+	public abstract OutputClass encode(InputClass input) throws Exception;
 
-	public abstract InputClass decode(OutputClass input);
+	public abstract InputClass decode(OutputClass input) throws Exception;
 }

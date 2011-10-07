@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.antlr.runtime.RecognitionException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -53,10 +54,11 @@ public class MappingXMLCodec extends ObjectXMLCodec<OBDAMappingAxiom> {
 	}
 
 	/**
-	 * Decodes the given XML element into an obda mapping axiom
+	 * Decodes the given XML element into an OBDA mapping axiom
+	 * @throws RecognitionException 
 	 */
 	@Override
-	public OBDAMappingAxiom decode(Element mapping) {
+	public OBDAMappingAxiom decode(Element mapping) throws RecognitionException {
 
 		String id = mapping.getAttribute("id");
 		Element head = null;

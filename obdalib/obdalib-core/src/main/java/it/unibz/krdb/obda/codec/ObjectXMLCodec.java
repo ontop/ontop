@@ -4,6 +4,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -31,11 +32,11 @@ public abstract class ObjectXMLCodec<ObjectClass extends Object> implements IOCo
 		doc = db.newDocument();
 	}
 
-	public abstract Element encode(ObjectClass input);
+	public abstract Element encode(ObjectClass input) throws Exception;
 
-	public abstract ObjectClass decode(Element input);
+	public abstract ObjectClass decode(Element input) throws Exception;
 
-	protected Element createElement(String tagName) {
+	protected Element createElement(String tagName) throws DOMException {
 		return doc.createElement(tagName);
 	}
 
