@@ -151,9 +151,9 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrAttributesTable.setPreferredSize(new Dimension(250, 100));
 
 		tblAttributes.setModel(new DefaultTableModel(
-			new Object[][] {}, new String[] { "Field", "Type", "Null", "Key", "Default", "Extra" }) 
+			new Object[][] {}, new String[] { "Attribute", "Type", "Primary Key", "Nullable" }) 
 			{
-				boolean[] canEdit = new boolean[] { false, false, false, false, false, false };
+				boolean[] canEdit = new boolean[] { false, false, false, false };
 
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
