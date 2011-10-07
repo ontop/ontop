@@ -50,35 +50,20 @@ public class JDBCConnectionManager {
 	}
 
 	public void createConnection(OBDADataSource ds) throws ClassNotFoundException, SQLException {
-
 		if (ds == null) {
 			RuntimeException ex = new RuntimeException("Invalid datasource: null");
 			ex.fillInStackTrace();
 			throw ex;
 		}
-		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-		URI connID = ds.getSourceID();
-
-		Connection con = connectionPool.get(connID);
+		
+		Connection con = connectionPool.get(ds.getSourceID());
 		if (con == null) {
-			try {
-				Class.forName(driver);  // for registering the JDBC driver.
-			} catch (Exception e) {
-				log.warn("Driver class not found or it has already been loaded!");
-			}
-			con = DriverManager.getConnection(url, username, password);
-			Boolean b = (Boolean) properties.get(JDBC_AUTOCOMMIT);
-			con.setAutoCommit(b.booleanValue());
-			connectionPool.put(connID, con);
+			testConnection(ds);
 			collectMetadata(ds);
 		}
 	}
 	
 	public void testConnection(OBDADataSource ds) throws SQLException {
-		
 		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
 		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
@@ -91,8 +76,20 @@ public class JDBCConnectionManager {
 			// Does nothing because the SQLException handles this problem also.
 		}		
 		
-		Connection dummy = DriverManager.getConnection(url, username, password);
-		dummy.close();
+		Connection conn = DriverManager.getConnection(url, username, password);		
+		
+		boolean bAutoCommit = ((Boolean)properties.get(JDBC_AUTOCOMMIT)).booleanValue();
+		conn.setAutoCommit(bAutoCommit);
+
+		replaceConnectionFromPool(ds.getSourceID(), conn);	
+	}
+	
+	private void replaceConnectionFromPool(URI connID, Connection newConn) throws SQLException {
+		Connection oldConn = connectionPool.remove(connID);
+		if (oldConn != null) {
+			oldConn.close();
+		}
+		connectionPool.put(connID, newConn);
 	}
 	
 	public boolean isConnectionAlive(URI connID) throws SQLException {
