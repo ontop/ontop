@@ -80,7 +80,6 @@ public class TWrewritingExecutionTool {
 
 			ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 			p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "material");
-			p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, "inmemory");
 
 //			factory.setOBDAController(obdamodel);
 			factory.setPreferenceHolder(p);
