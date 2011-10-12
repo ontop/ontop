@@ -92,13 +92,9 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			if(value != null){
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
 				if (key.equals(ReformulationPlatformPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
-					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+//					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;
-				}else if(key.equals(ReformulationPlatformPreferences.DATA_LOCATION)){//if it is classic the data location is already set
-					if(!isCalssic){
-						refplatPref.put(key, value);
-					}
 				}else{
 					refplatPref.put(key, value);
 				}

@@ -37,13 +37,13 @@ public class ConfigPanel extends javax.swing.JPanel {
             classicModeSelected();
         }
 
-        value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION);
-        if (value.equals(QuestConstants.PROVIDED)) {
-            radRemoteDatabase.setSelected(true);
-        }
-        else if (value.equals(QuestConstants.INMEMORY)) {
+//        value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION);
+//        if (value.equals(QuestConstants.PROVIDED)) {
+//            radRemoteDatabase.setSelected(true);
+//        }
+//        else if (value.equals(QuestConstants.INMEMORY)) {
             radInMemoryDatabase.setSelected(true);
-        }
+//        }
 
         value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
         if (value.equals(QuestConstants.DIRECT)) {
@@ -478,7 +478,7 @@ public class ConfigPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
 
 private void radRemoteDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radRemoteDatabaseActionPerformed
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
+//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.PROVIDED);
 }//GEN-LAST:event_radRemoteDatabaseActionPerformed
 
 private void radVirtualObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVirtualObdaActionPerformed
@@ -499,7 +499,7 @@ private void radClassicObdaActionPerformed(java.awt.event.ActionEvent evt) {//GE
     classicModeSelected();
     preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
     preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 }//GEN-LAST:event_radClassicObdaActionPerformed
 
 private void radDirectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDirectActionPerformed
@@ -515,7 +515,7 @@ private void radSemanticIndexActionPerformed(java.awt.event.ActionEvent evt) {//
 }//GEN-LAST:event_radSemanticIndexActionPerformed
 
 private void radInMemoryDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radInMemoryDatabaseActionPerformed
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+//    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 }//GEN-LAST:event_radInMemoryDatabaseActionPerformed
 
 private void chkObtainFromOntologyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromOntologyActionPerformed
