@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
 
 public class JDBCEngine implements EvaluationEngine {
 
-	private OBDADataSource	datasource		= null;
-	private Connection	connection		= null;
-	private Statement	statement		= null;
-	private boolean		actionCanceled	= false;
+	private OBDADataSource datasource = null;
+	private Connection connection = null;
+	private Statement statement = null;
+	private boolean actionCanceled = false;
 
-	Logger				log				= LoggerFactory.getLogger(EvaluationEngine.class);
+	Logger log = LoggerFactory.getLogger(EvaluationEngine.class);
 
 	public JDBCEngine(OBDADataSource ds) throws SQLException {
 		datasource = ds;
@@ -66,7 +66,11 @@ public class JDBCEngine implements EvaluationEngine {
 	 */
 	public void disconnect() throws SQLException {
 		if (connection != null) {
-			connection.close();
+			try {
+				connection.close();
+			} catch (Exception e) {
+				log.debug(e.getMessage());
+			}
 		}
 	}
 
