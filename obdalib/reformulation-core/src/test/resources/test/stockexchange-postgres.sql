@@ -42,13 +42,6 @@ CREATE TABLE company (
     addressid integer
 );
 
-
-CREATE TABLE mapper (
-    uri character varying NOT NULL,
-    type character varying NOT NULL,
-    tablename character varying NOT NULL
-);
-
 CREATE TABLE stockbooklist (
     date date NOT NULL,
     stockid integer
@@ -100,8 +93,6 @@ INSERT INTO client VALUES (112, 'Joana', 'Lopatenkko', '1970-07-14', 'JLPTK54992
 
 INSERT INTO company VALUES (211, 'General Motors', 25000000, 7.5678766e+09, 995);
 INSERT INTO company VALUES (212, 'GnA Investments', 100000, 12555322, 996);
-
-INSERT INTO mapper VALUES ('http://www.semanticweb.org/ontologies/2011/4/Ontology1306220637249.owl#Cosa', 'CONCEPT', 'table_concept_1');
 
 INSERT INTO stockbooklist VALUES ('2008-04-01', 661);
 INSERT INTO stockbooklist VALUES ('2008-04-02', 662);
