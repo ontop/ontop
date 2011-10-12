@@ -22,11 +22,12 @@ public class ReformulationPlatformPreferences extends Properties {
 	public static final String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
 	public static final String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
 	public static final String	DBTYPE					= "org.obda.owlreformulationplatform.dbtype";
-	public static final String	DATA_LOCATION			= "org.obda.owlreformulationplatform.datalocation";
+//	public static final String	DATA_LOCATION			= "org.obda.owlreformulationplatform.datalocation";
 	public static final String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";
 	public static final String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
-	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
+	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
+//	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 	
 	private Logger				log						= LoggerFactory.getLogger(ReformulationPlatformPreferences.class);
 
@@ -111,11 +112,12 @@ public class ReformulationPlatformPreferences extends Properties {
 		keys.add(REFORMULATION_TECHNIQUE);
 		keys.add(ABOX_MODE);
 		keys.add(DBTYPE);
-		keys.add(DATA_LOCATION);
+//		keys.add(DATA_LOCATION);
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
 		keys.add(OPTIMIZE_EQUIVALENCES);
-		keys.add(CREATE_TEST_MAPPINGS);
+		keys.add(OPTIMIZE_TBOX_SIGMA);
+//		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;
 	}
