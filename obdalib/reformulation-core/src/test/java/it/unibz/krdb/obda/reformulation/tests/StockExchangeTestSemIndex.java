@@ -44,10 +44,10 @@ public class StockExchangeTestSemIndex extends TestCase {
 //		factory.setOBDAController(controller);
 		factory.setPreferenceHolder(p);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
+//		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
+//		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
 		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
