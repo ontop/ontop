@@ -23,33 +23,33 @@ import org.slf4j.LoggerFactory;
 
 public class OntologyImpl implements Ontology {
 
-	private Set<SubDescriptionAxiom>					assertions					= null;
+	private Set<SubDescriptionAxiom> assertions = null;
 
-	private Set<Predicate>								concepts					= null;
+	private Set<Predicate> concepts = null;
 
-	private Set<Predicate>								roles						= null;
+	private Set<Predicate> roles = null;
 
-	private URI											ontouri						= null;
+	private URI ontouri = null;
 
-	private Set<Axiom>									originalassertions			= null;
+	private Set<Axiom> originalassertions = null;
 
 	/* Assertions indexed by right side predicate */
-	private Map<Predicate, Set<SubDescriptionAxiom>>	rightAssertionIndex			= null;
+	private Map<Predicate, Set<SubDescriptionAxiom>> rightAssertionIndex = null;
 
-	private Map<Predicate, Set<SubDescriptionAxiom>>	rightNonExistentialIndex	= null;
+	private Map<Predicate, Set<SubDescriptionAxiom>> rightNonExistentialIndex = null;
 
-	private Map<Predicate, Set<SubDescriptionAxiom>>	rightExistentialIndex		= null;
+	private Map<Predicate, Set<SubDescriptionAxiom>> rightExistentialIndex = null;
 
 	/* Assertions indexed by left side predicate */
-	private Map<Predicate, Set<SubDescriptionAxiom>>	leftAssertionIndex			= null;
+	private Map<Predicate, Set<SubDescriptionAxiom>> leftAssertionIndex = null;
 
-	Logger												log							= LoggerFactory.getLogger(this.getClass());
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public boolean										isSaturated					= false;
+	public boolean isSaturated = false;
 
-	private final OntologyFactory						factory						= OntologyFactoryImpl.getInstance();
+	private final OntologyFactory factory = OntologyFactoryImpl.getInstance();
 
-	private Set<PropertyFunctionalAxiom>				functionalAxioms			= new HashSet<PropertyFunctionalAxiom>();
+	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
 
 	// private Set<PositiveInclusion> assertions = null;
 
@@ -62,7 +62,12 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public OntologyImpl clone() {
-		OntologyImpl clone = (OntologyImpl) factory.createOntology(URI.create(ontouri.toString()));
+		OntologyImpl clone = null;
+		if (ontouri != null)
+			clone = (OntologyImpl) factory.createOntology(URI.create(ontouri.toString()));
+		else
+			clone = (OntologyImpl) factory.createOntology();
+
 		clone.originalassertions.addAll(originalassertions);
 		clone.concepts.addAll(concepts);
 		clone.roles.addAll(roles);
