@@ -15,7 +15,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
@@ -40,8 +39,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtrac
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,42 +75,42 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, MonitorableOWLReasoner {
 
-	private static final String					NOT_IMPLEMENTED_STR		= "Service not available.";
+	private static final String NOT_IMPLEMENTED_STR = "Service not available.";
 
-	private OWLOntologyManager					ontoManager				= null;
+	private OWLOntologyManager ontoManager = null;
 
 	/* The merge and tranlsation of all loaded ontologies */
-	private Ontology							translatedOntologyMerge	= null;
+	private Ontology translatedOntologyMerge = null;
 
-	private TechniqueWrapper					techwrapper				= null;
-	private HashSet<OWLOntology>				loadedOntologies		= null;
-	private ProgressMonitor						progressMonitor			= new NullProgressMonitor();
+	private TechniqueWrapper techwrapper = null;
+	private HashSet<OWLOntology> loadedOntologies = null;
+	private ProgressMonitor progressMonitor = new NullProgressMonitor();
 
-	private OBDAModel							obdaModel				= null;
+	private OBDAModel obdaModel = null;
 
-	private Logger								log						= LoggerFactory.getLogger(QuestOWL.class);
+	private Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	private boolean								isClassified			= false;
+	private boolean isClassified = false;
 
-	private ReformulationPlatformPreferences	preferences				= null;
+	private ReformulationPlatformPreferences preferences = null;
 
-	private QueryVocabularyValidator			validator				= null;
+	private QueryVocabularyValidator validator = null;
 
 	// private Ontology aboxDependencies = null;
 
-	private Ontology							reducedOntology			= null;
+	private Ontology reducedOntology = null;
 
-	OWLAPI2VocabularyExtractor					vext					= new OWLAPI2VocabularyExtractor();
+	OWLAPI2VocabularyExtractor vext = new OWLAPI2VocabularyExtractor();
 
-	private OntologyFactory						ofac					= OntologyFactoryImpl.getInstance();
+	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/***
 	 * Optimization flags
 	 */
 
-//	private boolean								optimizeEquivalences	= true;
+	// private boolean optimizeEquivalences = true;
 
-	private boolean								optimizeSigma			= true;
+	private boolean optimizeSigma = false;
 
 	public QuestOWL(OWLOntologyManager manager) {
 		ontoManager = manager;
@@ -189,25 +190,48 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		 */
 		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
 		boolean bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES);
-		boolean bUseInMemoryDB = preferences.getCurrentValue(ReformulationPlatformPreferences.DATA_LOCATION).equals(QuestConstants.INMEMORY);
+		boolean bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES);
+		// boolean bUseInMemoryDB = preferences.getCurrentValue(
+		// ReformulationPlatformPreferences.DATA_LOCATION).equals(
+		// QuestConstants.INMEMORY);
 		boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY);
 		boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS);
 		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
 		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
-		
+
 		// For testing purposes.
-		boolean createMappings = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
-		
+		// boolean createMappings = preferences
+		// .getCurrentBooleanValueFor(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
+
 		log.debug("Initializing Quest query answering engine...");
 		log.debug("Active preferences:");
-		log.debug("{} = {}", ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, reformulationTechnique);
-		log.debug("{} = {}", ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, bOptimizeEquivalences);
-		log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION, bUseInMemoryDB);
-		log.debug("{} = {}", ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, bObtainFromOntology);
-		log.debug("{} = {}", ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, bObtainFromMappings);
-		log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE, unfoldingMode);
-		log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE, dbType);
-		log.debug("{} = {}", ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, createMappings);
+
+		for (Object key : preferences.keySet()) {
+			log.debug("{} = {}", key, preferences.get(key));
+		}
+
+		//
+		// log.debug("{} = {}",
+		// ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE,
+		// reformulationTechnique);
+		// log.debug("{} = {}",
+		// ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES,
+		// bOptimizeEquivalences);
+		// log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION,
+		// bUseInMemoryDB);
+		// log.debug("{} = {}",
+		// ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY,
+		// bObtainFromOntology);
+		// log.debug("{} = {}",
+		// ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS,
+		// bObtainFromMappings);
+		// log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE,
+		// unfoldingMode);
+		// log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE,
+		// dbType);
+		// log.debug("{} = {}",
+		// ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS,
+		// createMappings);
 
 		QueryRewriter rewriter = null;
 		UnfoldingMechanism unfMech = null;
@@ -249,88 +273,86 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			 */
 
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
-				
-				log.debug("Working in classic mode");
-				
-				if (bUseInMemoryDB || createMappings) {
 
-					log.debug("Using in an memory database");
-					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:aboxdump" + System.currentTimeMillis();
-					String username = "sa";
-					String password = "";
-	
-					OBDADataSource newsource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-					newsource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-					newsource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-					newsource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-					newsource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-					newsource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-					newsource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-	
-					// this.translatedOntologyMerge.saturate();
-	
-					RDBMSDataRepositoryManager dataRepository;
-	
-					// VocabularyExtractor extractor = new VocabularyExtractor();
-					// Set<Predicate> vocabulary =
-					// extractor.getVocabulary(reformulationOntology);
-					if (dbType.equals(QuestConstants.SEMANTIC)) {
-						dataRepository = new RDBMSSIRepositoryManager(newsource, reformulationOntology.getVocabulary());
-	
-					} else if (dbType.equals(QuestConstants.DIRECT)) {
-						dataRepository = new RDBMSDirectDataRepositoryManager(newsource, reformulationOntology.getVocabulary());
-	
-					} else {
-						throw new Exception(dbType
-								+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
-					}
-					dataRepository.setTBox(reformulationOntology);
-	
-					/* Creating the ABox repository */
-	
-					getProgressMonitor().setMessage("Creating database schema...");
-	
-					dataRepository.createDBSchema(true);
-					dataRepository.insertMetadata();				
-					
-					if (bObtainFromOntology) {
-						log.debug("Loading data from Ontology into the database");
-						OWLAPI2ABoxIterator aBoxIter = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
-						dataRepository.insertData(aBoxIter);
-					}
-					if (bObtainFromMappings) {
-						log.debug("Loading data from Mappings into the database");
-						VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
-						Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-						dataRepository.insertData(assertionIter);
-					}
-					
-					dataRepository.createIndexes();
-	
-					/* Setting up the OBDA model */
-	
-					unfoldingOBDAModel.addSource(newsource);
-					unfoldingOBDAModel.addMappings(newsource.getSourceID(), dataRepository.getMappings());
-	
-					for (Axiom axiom : dataRepository.getABoxDependencies().getAssertions()) {
-						sigma.addEntities(axiom.getReferencedEntities());
-						sigma.addAssertion(axiom);
-					}
+				log.debug("Working in classic mode");
+
+				// if (bUseInMemoryDB || createMappings) {
+
+				log.debug("Using in an memory database");
+				String driver = "org.h2.Driver";
+				String url = "jdbc:h2:mem:aboxdump" + System.currentTimeMillis();
+				String username = "sa";
+				String password = "";
+
+				OBDADataSource newsource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+				newsource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+				newsource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+				newsource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+				// this.translatedOntologyMerge.saturate();
+
+				RDBMSDataRepositoryManager dataRepository;
+
+				// VocabularyExtractor extractor = new
+				// VocabularyExtractor();
+				// Set<Predicate> vocabulary =
+				// extractor.getVocabulary(reformulationOntology);
+				if (dbType.equals(QuestConstants.SEMANTIC)) {
+					dataRepository = new RDBMSSIRepositoryManager(newsource, reformulationOntology.getVocabulary());
+
+				} else if (dbType.equals(QuestConstants.DIRECT)) {
+					dataRepository = new RDBMSDirectDataRepositoryManager(newsource, reformulationOntology.getVocabulary());
+
+				} else {
+					throw new Exception(dbType
+							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
 				}
-			}
-			else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
-				
+				dataRepository.setTBox(reformulationOntology);
+
+				/* Creating the ABox repository */
+
+				getProgressMonitor().setMessage("Creating database schema...");
+
+				dataRepository.createDBSchema(true);
+				dataRepository.insertMetadata();
+
+				if (bObtainFromOntology) {
+					log.debug("Loading data from Ontology into the database");
+					OWLAPI2ABoxIterator aBoxIter = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
+					dataRepository.insertData(aBoxIter);
+				}
+				if (bObtainFromMappings) {
+					log.debug("Loading data from Mappings into the database");
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
+					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
+					dataRepository.insertData(assertionIter);
+				}
+
+				dataRepository.createIndexes();
+
+				/* Setting up the OBDA model */
+
+				unfoldingOBDAModel.addSource(newsource);
+				unfoldingOBDAModel.addMappings(newsource.getSourceID(), dataRepository.getMappings());
+
+				for (Axiom axiom : dataRepository.getABoxDependencies().getAssertions()) {
+					sigma.addEntities(axiom.getReferencedEntities());
+					sigma.addAssertion(axiom);
+				}
+				// }
+			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
+
 				log.debug("Working in virtual mode");
 
 				Collection<OBDADataSource> sources = this.obdaModel.getSources();
 				if (sources == null || sources.size() == 0) {
 					throw new Exception("No datasource has been defined");
-				}
-				else if (sources.size() > 1) {
+				} else if (sources.size() > 1) {
 					throw new Exception("Currently the reasoner can only handle one datasource");
-				}
-				else {
+				} else {
 
 					/* Setting up the OBDA model */
 
@@ -374,7 +396,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			 * Setting up the ontology we will use for the reformulation
 			 */
 
-			if (optimizeSigma) {
+			if (bOptimizeTBoxSigma) {
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationOntology, sigma);
 				reformulationOntology = reducer.getReducedOntology();
 			}
@@ -425,7 +447,19 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	}
 
 	public void dispose() throws OWLReasonerException {
-		techwrapper.dispose();
+		// TODO fix this!
+		try {
+			techwrapper.dispose();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
+
+		try {
+			disconnect();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+
+		}
 	}
 
 	public Set<OWLOntology> getLoadedOntologies() {
@@ -775,5 +809,9 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		getProgressMonitor().setMessage(msg);
 		getProgressMonitor().setIndeterminate(true);
 		getProgressMonitor().setStarted();
+	}
+
+	public void disconnect() throws SQLException {
+		JDBCConnectionManager.getJDBCConnectionManager().closeConnections();
 	}
 }
