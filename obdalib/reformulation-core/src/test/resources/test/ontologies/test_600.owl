@@ -127,19 +127,19 @@
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;FinantialInstrument"/>
+        <rdfs:subClassOf rdf:resource="&test;Transaction"/>
         <owl:onProperty>
             <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;involvesInstrument"/>
+                <owl:inverseOf rdf:resource="&test;isTradedIn"/>
             </owl:ObjectProperty>
         </owl:onProperty>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;Transaction"/>
+        <rdfs:subClassOf rdf:resource="&test;FinantialInstrument"/>
         <owl:onProperty>
             <owl:ObjectProperty>
-                <owl:inverseOf rdf:resource="&test;isTradedIn"/>
+                <owl:inverseOf rdf:resource="&test;involvesInstrument"/>
             </owl:ObjectProperty>
         </owl:onProperty>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>

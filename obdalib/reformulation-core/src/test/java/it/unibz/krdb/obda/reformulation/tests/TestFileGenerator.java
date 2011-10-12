@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -596,6 +597,7 @@ public class TestFileGenerator {
 			out.append("import java.util.List;\n");
 			out.append("import org.slf4j.Logger;\n");
 			out.append("import org.slf4j.LoggerFactory;\n");
+			out.append("import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;\n");
 			out.append("import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;\n");
 
 			out.newLine();
@@ -608,53 +610,150 @@ public class TestFileGenerator {
 			out.append("\t\ttester = new Tester(propfile);\n");
 			out.append("\t}\n");
 
-			out.append("private void test_function(String ontoname) throws Exception {\n");
-			out.append("     log.debug(\"Test case: {}\", ontoname);\n");
-			out.append("     log.debug(\"Testing in-memory db/material abox\");\n");
-			out.append("     tester.load(ontoname, QuestConstants.CLASSIC);\n");
-			out.append("     for (String id : tester.getQueryIds()) {\n");
-			out.append("         log.debug(\"Testing query: {}\", id);\n");
-			out.append("         Set<String> exp = tester.getExpectedResult(id);\n");
-			out.append("         Set<String> res = tester.executeQuery(id);\n");
-			out.append("assertTrue(\"Expected \" + exp + \" Result \" + res, exp.size() == res.size());\n");
-			// out.append("         assertTrue(exp.size() == res.size());\n");
-			out.append("         for (String realResult : res) {\n");
-			out.append("             assertTrue(\"expeted: \" +exp.toString() + \" obtained: \" + res.toString(), exp.contains(realResult));\n");
-			out.append("         }\n");
-			out.append("     }\n");
-			out.append("\n");
-//			out.append("     log.debug(\"Testing in-memory db/vitual abox\");\n");
-//			out.append("     tester.load(ontoname, QuestConstants.VIRTUAL);\n");
-//			out.append("     for (String id : tester.getQueryIds()) {\n");
-//			out.append("         log.debug(\"Testing query: {}\", id);\n");
-//			out.append("         Set<String> exp = tester.getExpectedResult(id);\n");
-//			out.append("         Set<String> res = tester.executeQuery(id);\n");
-//			out.append("assertTrue(\"Expected \" + exp + \" Result \" + res, exp.size() == res.size());\n");
-//			// out.append("         assertTrue(exp.size() == res.size());\n");
-//			out.append("         for (String realResult : res) {\n");
-//			out.append("             assertTrue(\"expeted: \" +exp.toString() + \" obtained: \" + res.toString(),exp.contains(realResult));\n");
-//			out.append("         }\n");
-//			out.append("     }\n");
-			out.append("     log.debug(\"Testing in-memory db/SemanticIndex\");\n");
-			out.append("     tester.load(ontoname, QuestConstants.CLASSIC, QuestConstants.SEMANTIC);\n");
-			out.append("     for (String id : tester.getQueryIds()) {\n");
-			out.append("         log.debug(\"Testing query: {}\", id);\n");
-			out.append("         Set<String> exp = tester.getExpectedResult(id);\n");
-			out.append("         Set<String> res = tester.executeQuery(id);\n");
-			out.append("         List<String> exp_list = new LinkedList<String>(exp);\n");
-			out.append("         List<String> res_list = new LinkedList<String>(res);\n");
-			out.append("         Collections.sort(exp_list);\n");
-			out.append("         Collections.sort(res_list);\n");
-			out.append("         assertEquals(exp_list, res_list);\n");
-			out.append("     }\n");
-			out.append(" }\n");
-			out.append("\n");
+			out.append("        private void test_function(String ontoname, ReformulationPlatformPreferences pref) throws Exception {\n");
+			out.append("    \tlog.debug(\"Test case: {}\", ontoname);\n");
+			out.append("    \tlog.debug(\"Quest configuration: {}\", pref.toString());\n");
+			out.append("    \ttester.load(ontoname, pref);\n");
+			out.append("    \tfor (String id : tester.getQueryIds()) {\n");
+			out.append("    \t\tlog.debug(\"Testing query: {}\", id);\n");
+			out.append("    \t\tSet<String> exp = tester.getExpectedResult(id);\n");
+			out.append("    \t\tSet<String> res = tester.executeQuery(id);\n");
+			out.append("    \t\tassertTrue(\"Expected \" + exp + \" Result \" + res, exp.size() == res.size());\n");
+			out.append("    \t\tfor (String realResult : res) {\n");
+			out.append("    \t\t\tassertTrue(\"expeted: \" + exp.toString() + \" obtained: \" + res.toString(), exp.contains(realResult));\n");
+			out.append("    \t\t}\n");
+			out.append("    \t}\n");
+			out.append("    }\n");
+
 
 			for (int i = 0; i < tests.size(); i++) {
-				out.append("\tpublic void " + tests.get(i) + "() throws Exception {");
+				out.append("\tpublic void " + tests.get(i) + "DirectNoEqNoSig() throws Exception {");
 				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-				out.append("\t\ttest_function(ontoname);\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			}
+			for (int i = 0; i < tests.size(); i++) {
+
+				out.append("\tpublic void " + tests.get(i) + "DirectEqNoSig() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			}
+			
+			for (int i = 0; i < tests.size(); i++) {
+				
+				out.append("\tpublic void " + tests.get(i) + "DirectNoEqSigma() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			}
+			for (int i = 0; i < tests.size(); i++) {
+
+				out.append("\tpublic void " + tests.get(i) + "DirectEqSigma() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			}
+			
+			for (int i = 0; i < tests.size(); i++) {
+		
+				out.append("\tpublic void " + tests.get(i) + "SINoEqNoSig() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			}
+			for (int i = 0; i < tests.size(); i++) {
+	
+				out.append("\tpublic void " + tests.get(i) + "SIEqNoSig() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			
+			}
+
+			for (int i = 0; i < tests.size(); i++) {
+	
+				out.append("\tpublic void " + tests.get(i) + "SINoEqSigma() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
+				out.append("\t}");
+				out.newLine();
+			}
+			for (int i = 0; i < tests.size(); i++) {
+	
+				out.append("\tpublic void " + tests.get(i) + "SIEqSigma() throws Exception {");
+				out.newLine();
+				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
 				out.newLine();
 			}

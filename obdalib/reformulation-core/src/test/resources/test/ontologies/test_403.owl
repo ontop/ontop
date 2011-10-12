@@ -269,17 +269,27 @@
      -->
 
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;A1"/>
-        <owl:onProperty rdf:resource="&test;R"/>
-        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-    </owl:Restriction>
-    <owl:Restriction>
         <rdfs:subClassOf rdf:resource="&test;B1"/>
         <owl:onProperty>
             <owl:ObjectProperty>
                 <owl:inverseOf rdf:resource="&test;S"/>
             </owl:ObjectProperty>
         </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;A1"/>
+        <owl:onProperty rdf:resource="&test;R"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;C1"/>
+        <owl:onProperty rdf:resource="&test;M"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&test;C3"/>
+        <owl:onProperty rdf:resource="&test;M"/>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
@@ -292,18 +302,8 @@
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;C1"/>
-        <owl:onProperty rdf:resource="&test;M"/>
-        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-    </owl:Restriction>
-    <owl:Restriction>
         <rdfs:subClassOf rdf:resource="&test;A3"/>
         <owl:onProperty rdf:resource="&test;R"/>
-        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
-    </owl:Restriction>
-    <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&test;C3"/>
-        <owl:onProperty rdf:resource="&test;M"/>
         <owl:someValuesFrom rdf:resource="&owl;Thing"/>
     </owl:Restriction>
 </rdf:RDF>
