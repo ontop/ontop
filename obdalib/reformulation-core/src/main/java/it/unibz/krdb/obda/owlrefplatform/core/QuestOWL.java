@@ -177,9 +177,6 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		getProgressMonitor().setMessage("Classifying...");
 		getProgressMonitor().setStarted();
 
-		if (obdaModel == null) {
-			throw new NullPointerException("APIController not set");
-		}
 		if (preferences == null) {
 			throw new NullPointerException("ReformulationPlatformPreferences not set");
 		}
@@ -326,6 +323,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				}
 				if (bObtainFromMappings) {
 					log.debug("Loading data from Mappings into the database");
+					
+					if (obdaModel == null) {
+						throw new NullPointerException("APIController not set");
+					}
+					
 					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					dataRepository.insertData(assertionIter);
@@ -346,7 +348,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
 				log.debug("Working in virtual mode");
-
+				
+				if (obdaModel == null) {
+					throw new NullPointerException("APIController not set");
+				}
+				
 				Collection<OBDADataSource> sources = this.obdaModel.getSources();
 				if (sources == null || sources.size() == 0) {
 					throw new Exception("No datasource has been defined");
