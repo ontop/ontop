@@ -175,10 +175,7 @@ public class JDBCConnectionManager {
 	}
 
 	public static JDBCConnectionManager getJDBCConnectionManager() {
-		if (instance == null) {
-			instance = new JDBCConnectionManager();
-		}
-		return instance;
+		return new JDBCConnectionManager();
 	}
 
 	public void closeConnections() throws SQLException {
