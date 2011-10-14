@@ -1,10 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGEdgeIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
@@ -16,6 +18,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,10 +73,18 @@ public class EquivalenceTBoxOptimizer {
 		DAG impliedDAG = DAGConstructor.getISADAG(tbox);
 		impliedDAG.clean();
 
+		try {
+			GraphGenerator.dumpISA(impliedDAG, "input");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		/*
 		 * Processing all properties
 		 */
 		// Collection<Predicate> removedProperties = new HashSet<Predicate>();
+
 		Collection<Description> props = new HashSet<Description>(impliedDAG.getAllnodes().keySet());
 		HashSet<Property> removedNodes = new HashSet<Property>();
 
@@ -85,8 +96,18 @@ public class EquivalenceTBoxOptimizer {
 				continue;
 
 			Property prop = (Property) desc;
-
 			DAGNode propNode = impliedDAG.getAllnodes().get(prop);
+
+			/*
+			 * Clearing the equivalences of the domain and ranges of the cycle's
+			 * head
+			 */
+			DAGNode propNodeDomain = impliedDAG.allnodes.get(ofac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse()));
+			DAGNode propNodeRange = impliedDAG.allnodes.get(ofac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse()));
+			if (propNodeDomain != null)
+				propNodeDomain.equivalents.clear();
+			if (propNodeRange != null)
+				propNodeRange.equivalents.clear();
 
 			Collection<DAGNode> equivalents = propNode.getEquivalents();
 
@@ -107,7 +128,6 @@ public class EquivalenceTBoxOptimizer {
 					 * We need to invert the equivalent and the good property
 					 */
 					Property inverseProp = ofac.createProperty(prop.getPredicate(), !prop.isInverse());
-					Property directEquiProp = ofac.createProperty(equiProp.getPredicate(), false);
 					equivalenceMap.put(equiProp.getPredicate(), inverseProp);
 				} else {
 					equivalenceMap.put(equiProp.getPredicate(), prop);
@@ -163,64 +183,74 @@ public class EquivalenceTBoxOptimizer {
 		 */
 
 		for (Property prop : removedNodes) {
-
+			if (prop.isInverse())
+				continue;
+			System.out.print("removed" + prop);
 			Predicate redundantProp = prop.getPredicate();
+
 			Property equivalent = (Property) equivalenceMap.get(redundantProp);
+			System.out.println("         equivalent" + equivalent);
 
 			/* first for the domain */
 
-			DAGNode directRedundantNode = impliedDAG.getNode(ofac.getPropertySomeRestriction(redundantProp, false));
-			DAGNode equivalentNode = impliedDAG.getNode(ofac.getPropertySomeRestriction(equivalent.getPredicate(), equivalent.isInverse()));
-
-			equivalentNode.getEquivalents().remove(directRedundantNode);
-			impliedDAG.getClasses().remove(directRedundantNode);
-			impliedDAG.getAllnodes().remove(directRedundantNode);
-
+			DAGNode directRedundantNode = impliedDAG.allnodes.get(ofac.getPropertySomeRestriction(redundantProp, false));
 			if (directRedundantNode != null) {
-				for (DAGNode child : directRedundantNode.getChildren()) {
-					if (!equivalentNode.getChildren().contains(child)) {
-						equivalentNode.getChildren().add(child);
+				System.out.println("Removing node: " + directRedundantNode.toString());
+
+				DAGNode equivalentNode = impliedDAG.allnodes.get(ofac.getPropertySomeRestriction(equivalent.getPredicate(),
+						equivalent.isInverse()));
+
+				System.out.println("Replacement node: " + equivalentNode.toString());
+
+				equivalentNode.getEquivalents().remove(directRedundantNode);
+				impliedDAG.classes.remove(directRedundantNode.getDescription());
+				impliedDAG.allnodes.remove(directRedundantNode.getDescription());
+
+				if (directRedundantNode != null) {
+					for (DAGNode child : directRedundantNode.getChildren()) {
+						if (!equivalentNode.getChildren().contains(child)) {
+							equivalentNode.getChildren().add(child);
+						}
+					}
+
+					for (DAGNode parent : directRedundantNode.getParents()) {
+						if (!equivalentNode.getParents().contains(parent)) {
+							equivalentNode.getParents().add(parent);
+						}
 					}
 				}
 
-				for (DAGNode parent : directRedundantNode.getParents()) {
-					if (!equivalentNode.getParents().contains(parent)) {
-						equivalentNode.getParents().add(parent);
-					}
-				}
+				equivalentNode.getDescendants().remove(directRedundantNode);
 			}
-
-			equivalentNode.getDescendants().remove(directRedundantNode);
 
 			/* Now for the range */
 
-			directRedundantNode = impliedDAG.getNode(ofac.getPropertySomeRestriction(redundantProp, true));
-			equivalentNode = impliedDAG.getNode(ofac.getPropertySomeRestriction(equivalent.getPredicate(), !equivalent.isInverse()));
-
-			equivalentNode.getEquivalents().remove(directRedundantNode);
-			impliedDAG.getClasses().remove(directRedundantNode);
-			impliedDAG.getAllnodes().remove(directRedundantNode);
-
+			directRedundantNode = impliedDAG.allnodes.get(ofac.getPropertySomeRestriction(redundantProp, true));
 			if (directRedundantNode != null) {
+				DAGNode equivalentNode = impliedDAG.allnodes.get(ofac.getPropertySomeRestriction(equivalent.getPredicate(),
+						!equivalent.isInverse()));
 
-			for (DAGNode child : directRedundantNode.getChildren()) {
-				if (!equivalentNode.getChildren().contains(child)) {
-					equivalentNode.getChildren().add(child);
+				equivalentNode.getEquivalents().remove(directRedundantNode);
+				impliedDAG.classes.remove(directRedundantNode.getDescription());
+				impliedDAG.allnodes.remove(directRedundantNode.getDescription());
+
+				if (directRedundantNode != null) {
+
+					for (DAGNode child : directRedundantNode.getChildren()) {
+						if (!equivalentNode.getChildren().contains(child)) {
+							equivalentNode.getChildren().add(child);
+						}
+					}
+
+					for (DAGNode parent : directRedundantNode.getParents()) {
+						if (!equivalentNode.getParents().contains(parent)) {
+							equivalentNode.getParents().add(parent);
+						}
+					}
 				}
-			}
 
-			for (DAGNode parent : directRedundantNode.getParents()) {
-				if (!equivalentNode.getParents().contains(parent)) {
-					equivalentNode.getParents().add(parent);
-				}
+				equivalentNode.getDescendants().remove(directRedundantNode);
 			}
-			}
-
-			equivalentNode.getDescendants().remove(directRedundantNode);
-
-			// TODO we need todo something with the references to this node in
-			// the set "descenddants" of all the ancestors of this node,
-			// however, we dont have an ancestors set...
 		}
 
 		/*
@@ -276,15 +306,25 @@ public class EquivalenceTBoxOptimizer {
 
 		}
 
+		try {
+			GraphGenerator.dumpISA(impliedDAG, "output");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*
 		 * Done with the simplificatino of the vocabulary, now we create the
 		 * optimized ontology
 		 */
 
+		DAGOperations.buildDescendants(impliedDAG.roles);
+		DAGOperations.buildDescendants(impliedDAG.classes);
+
 		optimalTBox = ofac.createOntology();
 		DAGEdgeIterator it = new DAGEdgeIterator(impliedDAG);
 		while (it.hasNext()) {
 			Edge edge = it.next();
+			System.out.println(edge);
 			Axiom axiom = null;
 			/*
 			 * Creating subClassOf or subPropertyOf axioms

@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
+import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
@@ -549,7 +550,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				role_stm.setInt(3, idx);
 				role_stm.addBatch();
 
-				System.out.println(String.format("Inserted %s %s %s", uri1, uri2, idx));
+//				System.out.println(String.format("Inserted %s %s %s", uri1, uri2, idx));
 
 			} else if (ax instanceof ClassAssertion) {
 
@@ -696,6 +697,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Collecting relevant nodes for each role. For a Role P, the relevant
 		 * nodes are, the DAGNode for P, and the top most inverse children of P
 		 */
+		DAGOperations.buildDescendants(dag);
+		
+		try {
+			GraphGenerator.dumpISA(dag,"sidag");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Set<DAGNode> roleNodes = new HashSet<DAGNode>();
 		Map<DAGNode, List<DAGNode>> roleInverseMaps = new HashMap<DAGNode, List<DAGNode>>();
 
@@ -764,6 +774,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<DAGNode> classNodesMaps = new HashSet<DAGNode>();
 		Map<DAGNode, Set<DAGNode>> classExistsMaps = new HashMap<DAGNode, Set<DAGNode>>();
 		for (DAGNode node : dag.getClasses()) {
+			System.out.println("CLASS DAGNNODE: " + node);
 			// we only map named classes
 			if (!(node.getDescription() instanceof OClass)) {
 				continue;
@@ -778,6 +789,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			/* Collecting Exists R children */
 			for (DAGNode child : node.getDescendants()) {
+				System.out.println("DESCENDENT!: " + child);
 				if (child.getDescription() instanceof PropertySomeRestrictionImpl) {
 					existChildren.add(child);
 				}
@@ -957,6 +969,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 */
 
 		for (DAGNode classNode : classNodesMaps) {
+			System.out.println("MAKING MAPPING FOR: " + classNode);
 
 			Predicate classuri = ((OClass) classNode.getDescription()).getPredicate();
 
@@ -1017,7 +1030,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			boolean alreadyAppendedOneDirect = false;
 			boolean alreadyAppendedOneInverse = false;
 
+			System.out.println("MAP: " + classExistsMaps);
 			for (DAGNode existsSubNode : classExistsMaps.get(classNode)) {
+				
+				System.out.println("EXIST CHILD: " + existsSubNode);
 
 				boolean direct = false;
 				StringBuffer currentBuffer = null;

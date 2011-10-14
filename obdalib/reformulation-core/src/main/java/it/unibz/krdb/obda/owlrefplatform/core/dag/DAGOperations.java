@@ -28,6 +28,12 @@ import org.slf4j.LoggerFactory;
 public class DAGOperations {
 	private static final Logger	log	= LoggerFactory.getLogger(DAGOperations.class);
 
+	
+	public static void buildDescendants(DAG dag) {
+		buildDescendants(dag.roles);
+		buildDescendants(dag.classes);
+	}
+	
 	/**
 	 * Calculate the descendants for all nodes in the given DAG
 	 * 
@@ -40,6 +46,7 @@ public class DAGOperations {
 
 		// Start with bottom nodes, that don't have children
 		for (DAGNode n : dagnodes.values()) {
+			n.getDescendants().clear();
 			if (n.getChildren().isEmpty()) {
 				stack.add(n);
 			}
@@ -49,7 +56,7 @@ public class DAGOperations {
 		}
 		while (!stack.isEmpty()) {
 			DAGNode cur_el = stack.remove();
-
+			
 			for (DAGNode eq_node : cur_el.equivalents) {
 				if (!cur_el.getDescendants().contains(eq_node))
 					cur_el.getDescendants().add(eq_node);
