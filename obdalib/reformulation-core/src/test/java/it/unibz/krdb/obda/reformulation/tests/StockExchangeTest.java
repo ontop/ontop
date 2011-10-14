@@ -319,6 +319,11 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
+	/***
+	 * This is a very slow test, disable it if you are doing rutine checks.
+	 * 
+	 * @throws Exception
+	 */
 	public void testDiNoEqSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
@@ -331,6 +336,11 @@ public class StockExchangeTest extends TestCase {
 		runTests(p);
 	}
 
+	/***
+	 * This is a very slow test, disable it if you are doing rutine checks.
+	 * 
+	 * @throws Exception
+	 */
 	public void testDiNoEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
@@ -364,6 +374,11 @@ public class StockExchangeTest extends TestCase {
 		runTests(p);
 	}
 
+	/***
+	 * This is a very slow test, disable it if you are doing rutine checks.
+	 * 
+	 * @throws Exception
+	 */
 	public void testViNoEqSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
@@ -375,6 +390,11 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
+	/***
+	 * This is a very slow test, disable it if you are doing rutine checks.
+	 * 
+	 * @throws Exception
+	 */
 	public void testViNoEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
