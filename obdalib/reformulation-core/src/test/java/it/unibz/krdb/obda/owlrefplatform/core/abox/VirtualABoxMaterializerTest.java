@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import java.io.FileReader;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		 * Setting the database;
 		 */
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -124,7 +126,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -223,7 +225,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -332,7 +334,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source2.getSourceID(), map1);
 		model.addMapping(source3.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -403,7 +405,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source3.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source3);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -510,7 +512,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addMapping(source2.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -615,7 +617,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {

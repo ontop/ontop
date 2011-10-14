@@ -42,11 +42,11 @@ import org.coode.obo.parser.IsATagValueHandler;
  */
 public class EquivalenceTBoxOptimizer {
 
-	private Ontology					optimalTBox	= null;
-	private Map<Predicate, Description>	equivalenceMap;
-	private Ontology					tbox;
+	private Ontology optimalTBox = null;
+	private Map<Predicate, Description> equivalenceMap;
+	private Ontology tbox;
 
-	private final OntologyFactory		ofac		= OntologyFactoryImpl.getInstance();
+	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	public EquivalenceTBoxOptimizer(Ontology tbox) {
 		this.tbox = tbox;
@@ -88,8 +88,6 @@ public class EquivalenceTBoxOptimizer {
 
 			DAGNode propNode = impliedDAG.getAllnodes().get(prop);
 
-			if (propNode == null)
-				System.out.println("asdf");
 			Collection<DAGNode> equivalents = propNode.getEquivalents();
 
 			for (DAGNode equivalent : equivalents) {
@@ -178,15 +176,17 @@ public class EquivalenceTBoxOptimizer {
 			impliedDAG.getClasses().remove(directRedundantNode);
 			impliedDAG.getAllnodes().remove(directRedundantNode);
 
-			for (DAGNode child : directRedundantNode.getChildren()) {
-				if (!equivalentNode.getChildren().contains(child)) {
-					equivalentNode.getChildren().add(child);
+			if (directRedundantNode != null) {
+				for (DAGNode child : directRedundantNode.getChildren()) {
+					if (!equivalentNode.getChildren().contains(child)) {
+						equivalentNode.getChildren().add(child);
+					}
 				}
-			}
 
-			for (DAGNode parent : directRedundantNode.getParents()) {
-				if (!equivalentNode.getParents().contains(parent)) {
-					equivalentNode.getParents().add(parent);
+				for (DAGNode parent : directRedundantNode.getParents()) {
+					if (!equivalentNode.getParents().contains(parent)) {
+						equivalentNode.getParents().add(parent);
+					}
 				}
 			}
 
@@ -201,6 +201,8 @@ public class EquivalenceTBoxOptimizer {
 			impliedDAG.getClasses().remove(directRedundantNode);
 			impliedDAG.getAllnodes().remove(directRedundantNode);
 
+			if (directRedundantNode != null) {
+
 			for (DAGNode child : directRedundantNode.getChildren()) {
 				if (!equivalentNode.getChildren().contains(child)) {
 					equivalentNode.getChildren().add(child);
@@ -211,6 +213,7 @@ public class EquivalenceTBoxOptimizer {
 				if (!equivalentNode.getParents().contains(parent)) {
 					equivalentNode.getParents().add(parent);
 				}
+			}
 			}
 
 			equivalentNode.getDescendants().remove(directRedundantNode);

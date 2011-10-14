@@ -13,7 +13,10 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
@@ -33,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
+import javax.management.RuntimeErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,17 +62,19 @@ import org.slf4j.LoggerFactory;
  */
 public class VirtualABoxMaterializer {
 
-	OBDAModel									model;
+	OBDAModel model;
 
-	OBDADataFactory								obdafac				= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 
-	JDBCConnectionManager						jdbcMan				= JDBCConnectionManager.getJDBCConnectionManager();
+	JDBCConnectionManager jdbcMan = JDBCConnectionManager.getJDBCConnectionManager();
 
-	Map<OBDADataSource, ComplexMappingUnfolder>		unfoldersMap		= new HashMap<OBDADataSource, ComplexMappingUnfolder>();
+	Map<OBDADataSource, ComplexMappingUnfolder> unfoldersMap = new HashMap<OBDADataSource, ComplexMappingUnfolder>();
 
-	Map<OBDADataSource, ComplexMappingSQLGenerator>	sqlgeneratorsMap	= new HashMap<OBDADataSource, ComplexMappingSQLGenerator>();
+	Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgeneratorsMap = new HashMap<OBDADataSource, ComplexMappingSQLGenerator>();
 
-	Set<Predicate>								vocabulary			= new LinkedHashSet<Predicate>();
+	Set<Predicate> vocabulary = new LinkedHashSet<Predicate>();
+
+	private Map<Predicate, Description> equivalenceMap;
 
 	/***
 	 * Collects the vocabulary of this OBDA model and initializes unfodlers and
@@ -76,8 +83,9 @@ public class VirtualABoxMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public VirtualABoxMaterializer(OBDAModel model) throws Exception {
+	public VirtualABoxMaterializer(OBDAModel model, Map<Predicate, Description> equivalenceMap) throws Exception {
 		this.model = model;
+		this.equivalenceMap = equivalenceMap;
 
 		for (OBDADataSource source : model.getSources()) {
 			List<OBDAMappingAxiom> maps = model.getMappings(source.getSourceID());
@@ -189,16 +197,17 @@ public class VirtualABoxMaterializer {
 
 	public class VirtualTriplePredicateIterator implements Iterator<Assertion> {
 
-		private Iterator<Predicate>							predicates;
-		private Collection<OBDADataSource>						sources;
-		private Map<OBDADataSource, ComplexMappingUnfolder>		unfolders;
-		private Map<OBDADataSource, ComplexMappingSQLGenerator>	sqlgens;
+		private Iterator<Predicate> predicates;
+		private Collection<OBDADataSource> sources;
+		private Map<OBDADataSource, ComplexMappingUnfolder> unfolders;
+		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
 
-		private Predicate									currentPredicate	= null;
-		private VirtualTripleIterator						currentIterator		= null;
+		private Predicate currentPredicate = null;
+		private VirtualTripleIterator currentIterator = null;
 
 		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
-				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens) throws SQLException {
+				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
+				throws SQLException {
 			this.predicates = predicates;
 			this.sources = sources;
 			this.unfolders = unfolders;
@@ -272,28 +281,29 @@ public class VirtualABoxMaterializer {
 		 * Indicates that we have peeked to see if there are more rows and that
 		 * a call to next should not invoke res.next
 		 */
-		private boolean										peeked			= false;
+		private boolean peeked = false;
 
-		private boolean										hasnext			= false;
+		private boolean hasnext = false;
 
-		private Predicate									pred			= null;
+		private Predicate pred = null;
 
-		private DatalogProgram								query			= null;
+		private DatalogProgram query = null;
 
-		private Iterator<OBDADataSource>						sourceIterator	= null;
+		private Iterator<OBDADataSource> sourceIterator = null;
 
-		private ResultSet									currentResults	= null;
+		private ResultSet currentResults = null;
 
-		private LinkedList<String>							signature;
+		private LinkedList<String> signature;
 
-		private Map<OBDADataSource, ComplexMappingUnfolder>		unfolders;
+		private Map<OBDADataSource, ComplexMappingUnfolder> unfolders;
 
-		private Map<OBDADataSource, ComplexMappingSQLGenerator>	sqlgens;
+		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
 
-		private Logger										log				= LoggerFactory.getLogger(VirtualTripleIterator.class);
+		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources, Map<OBDADataSource, ComplexMappingUnfolder> unfolders,
-				Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens) throws SQLException {
+		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources,
+				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
+				throws SQLException {
 
 			this.pred = p;
 			this.unfolders = unfolders;
@@ -415,19 +425,43 @@ public class VirtualABoxMaterializer {
 		 */
 		private Assertion constructAssertion() throws SQLException {
 			Assertion assertion = null;
-			
+
+			Description replacementDescription = equivalenceMap.get(pred);
+
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 			if (pred.getArity() == 1) {
 				URIConstant c = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
-				assertion = ofac.createClassAssertion(pred, c);
+				if (replacementDescription == null) {
+					assertion = ofac.createClassAssertion(pred, c);
+				} else {
+					OClass replacementc = (OClass) replacementDescription;
+					assertion = ofac.createClassAssertion(replacementc.getPredicate(), c);
+				}
 			} else if (pred.getType(1) == Predicate.COL_TYPE.OBJECT) {
 				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
 				URIConstant c2 = obdafac.getURIConstant(URI.create(currentResults.getString(2)));
-				assertion = ofac.createObjectPropertyAssertion(pred, c1, c2);
-			} else {
+				if (replacementDescription == null) {
+					assertion = ofac.createObjectPropertyAssertion(pred, c1, c2);
+				} else {
+					Property replacementp = (Property) replacementDescription;
+					if (!replacementp.isInverse()) {
+						assertion = ofac.createObjectPropertyAssertion(replacementp.getPredicate(), c1, c2);
+					} else {
+						assertion = ofac.createObjectPropertyAssertion(replacementp.getPredicate(), c2, c1);
+					}
+				}
+			} else if (pred.getType(1) == Predicate.COL_TYPE.LITERAL) {
 				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
 				ValueConstant c2 = obdafac.getValueConstant(currentResults.getString(2));
-				assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
+				if (replacementDescription == null) {
+					assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
+				} else {
+					Property replacementp = (Property) replacementDescription;
+					assertion = ofac.createDataPropertyAssertion(replacementp.getPredicate(), c1, c2);
+
+				}
+			} else {
+				throw new RuntimeException("ERROR, Wrongly typd predicate: " + pred.toString());
 			}
 			return assertion;
 		}

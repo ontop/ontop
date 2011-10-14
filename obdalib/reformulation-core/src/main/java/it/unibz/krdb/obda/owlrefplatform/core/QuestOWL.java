@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingS
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
@@ -181,6 +182,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			throw new NullPointerException("ReformulationPlatformPreferences not set");
 		}
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		
+		log.debug("Initializing Quest query answering engine...");
+
+		MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
+		repairmodel.fixOBDAModel(obdaModel, this.translatedOntologyMerge.getVocabulary());
 
 		/***
 		 * Duplicating the OBDA model to avoid strange behavior.
@@ -200,35 +206,12 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		// boolean createMappings = preferences
 		// .getCurrentBooleanValueFor(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
 
-		log.debug("Initializing Quest query answering engine...");
 		log.debug("Active preferences:");
 
 		for (Object key : preferences.keySet()) {
 			log.debug("{} = {}", key, preferences.get(key));
 		}
 
-		//
-		// log.debug("{} = {}",
-		// ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE,
-		// reformulationTechnique);
-		// log.debug("{} = {}",
-		// ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES,
-		// bOptimizeEquivalences);
-		// log.debug("{} = {}", ReformulationPlatformPreferences.DATA_LOCATION,
-		// bUseInMemoryDB);
-		// log.debug("{} = {}",
-		// ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY,
-		// bObtainFromOntology);
-		// log.debug("{} = {}",
-		// ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS,
-		// bObtainFromMappings);
-		// log.debug("{} = {}", ReformulationPlatformPreferences.ABOX_MODE,
-		// unfoldingMode);
-		// log.debug("{} = {}", ReformulationPlatformPreferences.DBTYPE,
-		// dbType);
-		// log.debug("{} = {}",
-		// ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS,
-		// createMappings);
 
 		QueryRewriter rewriter = null;
 		UnfoldingMechanism unfMech = null;
@@ -324,11 +307,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				if (bObtainFromMappings) {
 					log.debug("Loading data from Mappings into the database");
 					
-					if (obdaModel == null) {
-						throw new NullPointerException("APIController not set");
-					}
-					
-					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel, equivalenceMaps);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					dataRepository.insertData(assertionIter);
 				}
@@ -348,11 +327,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
 				log.debug("Working in virtual mode");
-				
-				if (obdaModel == null) {
-					throw new NullPointerException("APIController not set");
-				}
-				
+
 				Collection<OBDADataSource> sources = this.obdaModel.getSources();
 				if (sources == null || sources.size() == 0) {
 					throw new Exception("No datasource has been defined");
@@ -817,7 +792,12 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		getProgressMonitor().setStarted();
 	}
 
-	public void disconnect() throws SQLException {
+	public void disconnect() throws SQLException { 
+		
+		try {
 		JDBCConnectionManager.getJDBCConnectionManager().closeConnections();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
 	}
 }

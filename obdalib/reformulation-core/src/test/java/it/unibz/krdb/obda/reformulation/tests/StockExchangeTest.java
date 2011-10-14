@@ -31,7 +31,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.omg.PortableInterceptor.SUCCESSFUL;
 import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
 import org.semanticweb.owl.model.OWLOntologyManager;
@@ -39,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * The following tests take the Stock exchnage scenario and execute the queries
+ * The following tests take the Stock exchange scenario and execute the queries
  * of the scenario to validate the results. The validation is simple, we only
  * count the number of distinct tuples returned by each query, which we know in
  * advance.
@@ -51,10 +50,14 @@ import org.slf4j.LoggerFactory;
  * tuples. If the scenario is run in classic, this data gets imported
  * automatically by the reasoner.
  * 
+ * 
  * @author mariano
  * 
  */
 public class StockExchangeTest extends TestCase {
+
+	// TODO We need to extend this test to import the contents of the mappings
+	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
 	private OBDADataSource stockDB;
@@ -91,27 +94,19 @@ public class StockExchangeTest extends TestCase {
 		String password = "";
 
 		fac = OBDADataFactoryImpl.getInstance();
-		stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"
-				+ System.currentTimeMillis()));
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER,
-				driver);
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD,
-				password);
+		stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME,
-				username);
+		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		stockDB.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-		stockDB.setParameter(
-				RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP,
-				"true");
+		stockDB.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(
-				stockDB);
+		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(stockDB);
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader(
-				"src/test/resources/test/stockexchange-postgres.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-postgres.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -132,14 +127,12 @@ public class StockExchangeTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile))
-				.toURI());
+		ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
 		DataManager ioManager = new DataManager(obdaModel);
-		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(),
-				ontology.getURI(), obdaModel.getPrefixManager());
+		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdaModel.getPrefixManager());
 
 		/*
 		 * Loading the queries (we have 11 queries)
@@ -173,7 +166,6 @@ public class StockExchangeTest extends TestCase {
 	}
 
 	private void runTests(ReformulationPlatformPreferences p) throws Exception {
-		
 
 		// Creating a new instance of the reasoner
 		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
@@ -194,7 +186,13 @@ public class StockExchangeTest extends TestCase {
 
 		List<Result> summaries = new LinkedList<StockExchangeTest.Result>();
 
+		int qc = 0;
 		for (TestQuery tq : testQueries) {
+			log.debug("Executing query: {}", qc);
+			log.debug("Query: {}", tq.query);
+			// if (qc == 7)
+			// continue;
+			qc += 1;
 
 			long start = System.currentTimeMillis();
 			OBDAResultSet rs = st.executeQuery(tq.query);
@@ -227,98 +225,163 @@ public class StockExchangeTest extends TestCase {
 			totaltime += summary.timeelapsed;
 			fail = fail | tq.distinctTuples != summary.distinctTuples;
 			String out = "Query: %3d   Tup. Ex.: %6d Tup. ret.: %6d    Time elapsed: %6.3f s";
-			log.debug(String.format(out, i, tq.distinctTuples,
-					summary.distinctTuples, (double) summary.timeelapsed
-							/ (double) 1000));
+			log.debug(String.format(out, i, tq.distinctTuples, summary.distinctTuples, (double) summary.timeelapsed / (double) 1000));
 
 		}
 		log.debug("==========================");
-		log.debug(String.format("Total time elapsed: %6.3f s",
-				(double) totaltime / (double) 1000));
+		log.debug(String.format("Total time elapsed: %6.3f s", (double) totaltime / (double) 1000));
 		assertFalse(fail);
 	}
 
-	public void disabledtestSemindexEquivalence() throws Exception {
+	public void testSiEqSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE,
-				QuestConstants.CLASSIC);
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE,
-				QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 
 	}
 
-	public void disabledtestSemindexNoEquivalence() throws Exception {
+	public void testSiEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE,
-				QuestConstants.CLASSIC);
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE,
-				QuestConstants.SEMANTIC);
-		runTests(p);
-	}
-	
-	public void disabledtestDirectEquivalence() throws Exception {
-
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE,
-				QuestConstants.CLASSIC);
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE,
-				QuestConstants.DIRECT);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 
 	}
 
-	public void disabledtestDirectNoEquivalence() throws Exception {
+	public void testSiNoEqSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE,
-				QuestConstants.CLASSIC);
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE,
-				QuestConstants.DIRECT);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 	}
 
-	public void disabledtestVirtualEquivalence() throws Exception {
+	public void testSiNoEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE,
-				QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		runTests(p);
+	}
+
+	/*
+	 * Direct
+	 */
+
+	public void testDiEqSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 
 	}
 
-	public void disabledtestVirtualNoEquivalence() throws Exception {
+	public void testDiEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE,
-				QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(
-				ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+		runTests(p);
+
+	}
+
+	public void testDiNoEqSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
+	public void testDiNoEqNoSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+		runTests(p);
+	}
+
+	public void testViEqSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+		runTests(p);
+
+	}
+
+	public void testViEqNoSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+
+		runTests(p);
+	}
+
+	public void testViNoEqSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+		runTests(p);
+
+	}
+
+	public void testViNoEqNoSig() throws Exception {
+
+		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+
+		runTests(p);
+	}
 }

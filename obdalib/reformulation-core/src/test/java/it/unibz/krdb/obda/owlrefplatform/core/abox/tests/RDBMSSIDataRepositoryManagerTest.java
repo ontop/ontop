@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
@@ -24,6 +25,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -107,7 +109,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -174,7 +176,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -241,7 +243,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -311,7 +313,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 

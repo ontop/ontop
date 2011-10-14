@@ -411,6 +411,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		int batchCount = 0;
 		while (data.hasNext()) {
 			Axiom assertion = data.next();
+
 			batchCount += 1;
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion cassertion = (ClassAssertion) assertion;

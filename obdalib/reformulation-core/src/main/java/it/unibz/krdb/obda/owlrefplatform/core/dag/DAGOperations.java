@@ -320,18 +320,32 @@ public class DAGOperations {
 				dagnodes.remove(equivnode.getDescription());
 				equi_mapp.put(equivnode.getDescription(), cycleheadNode.getDescription());
 				cycleheadNode.equivalents.add(equivnode);
+				dag.allnodes.remove(equivnode.getDescription());
+				dag.classes.remove(equivnode.getDescription());
+				dag.roles.remove(equivnode.getDescription());
 
 				processedNodes.add(equivnode);
 
 				if (description instanceof Property) {
 
+					
+					
+					
 					/*
 					 * we are dealing with properties, so we need to also
 					 * collapse the inverses and existentials
 					 */
 					Property equiprop = (Property) equivnode.getDescription();
+					
+					Property inverseequiprop = fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse());
+					Property cycleheadprop =(Property)cycleheadNode.getDescription(); 
+					Property invesenonredundantprop = fac.createProperty(cycleheadprop.getPredicate(), !cycleheadprop.isInverse());
+					equi_mapp.put(inverseequiprop, invesenonredundantprop);
+					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
+					
+					
 
-					DAGNode equivinverseNode = dag.getNode(fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse()));
+					DAGNode equivinverseNode = dag.getNode(inverseequiprop);
 					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), equiprop.isInverse()));
 					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse()));
 
@@ -350,6 +364,20 @@ public class DAGOperations {
 						dag.getRoles().remove(equivinverseNode.getDescription());
 						dag.getClasses().remove(equivDomainNode.getDescription());
 						dag.getClasses().remove(equivRangeNode.getDescription());
+						
+						dag.allnodes.remove(equivinverseNode.getDescription());
+						dag.classes.remove(equivinverseNode.getDescription());
+						dag.roles.remove(equivinverseNode.getDescription());
+						
+						dag.allnodes.remove(equivDomainNode.getDescription());
+						dag.classes.remove(equivDomainNode.getDescription());
+						dag.roles.remove(equivDomainNode.getDescription());
+
+						dag.allnodes.remove(equivRangeNode.getDescription());
+						dag.classes.remove(equivRangeNode.getDescription());
+						dag.roles.remove(equivRangeNode.getDescription());
+
+						
 
 						equi_mapp.put(equivinverseNode.getDescription(), cycleheadinverseNode.getDescription());
 						equi_mapp.put(equivDomainNode.getDescription(), cycleheaddomainNode.getDescription());

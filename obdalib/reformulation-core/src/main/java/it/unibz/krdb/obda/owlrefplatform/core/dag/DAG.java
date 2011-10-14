@@ -35,10 +35,10 @@ public class DAG {
 
 	public Map<Description, Description>	equi_mappings		= new HashMap<Description, Description>();
 
-	private final Map<Description, DAGNode>	classes;
-	private final Map<Description, DAGNode>	roles;
+	public final Map<Description, DAGNode>	classes;
+	public final Map<Description, DAGNode>	roles;
 
-	private final Map<Description, DAGNode>	allnodes;
+	public final Map<Description, DAGNode>	allnodes;
 
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
@@ -359,7 +359,11 @@ public class DAG {
 	 * @return
 	 */
 	public DAGNode getNode(Description description) {
-		return allnodes.get(description);
+		DAGNode n = allnodes.get(description);
+		if (n == null)
+			return allnodes.get(equi_mappings.get(description));
+		return n;	
+		
 	}
 
 	public Map<Description, DAGNode> getAllnodes() {
