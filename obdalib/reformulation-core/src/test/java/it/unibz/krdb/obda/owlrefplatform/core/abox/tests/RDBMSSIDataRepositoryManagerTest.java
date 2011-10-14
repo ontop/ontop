@@ -264,7 +264,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		conn.close();
 	}
 
-	public void testRestore() throws Exception {
+	public void disabledtestRestore() throws Exception {
 		String owlfile = "src/test/resources/test/ontologies/translation/onto2.owl";
 
 		// Loading the OWL file
