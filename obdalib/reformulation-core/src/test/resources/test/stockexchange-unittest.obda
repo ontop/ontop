@@ -83,7 +83,7 @@
       <SQLQuery string="SELECT id FROM transaction WHERE type=true"/>
     </mapping>                                                                                  
   </mappings>
-  <dataSource URI="RandBStockExchange" databaseDriver="org.postgresql.Driver" databasePassword="stock-09" databaseURL="jdbc:postgresql://obdalin.inf.unibz.it/stockclient1" databaseUsername="stock" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
+  <dataSource URI="RandBStockExchange" databaseDriver="org.h2.Driver" databasePassword="" databaseURL="jdbc:h2:mem:stockclient1" databaseUsername="sa" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
   <SavedQueries>
     <QueryGroup id="Simple queries">
       <Query id="Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address ; &#xa;&#x9;&#x9; :addressID $id; &#xa;&#x9;&#x9; :inStreet $street; &#xa;&#x9;&#x9; :inCity $city;&#xa;&#x9;&#x9; :inCountry $country; &#xa;&#x9;&#x9; :inState $state;&#xa;&#x9;&#x9; :hasNumber $number.&#xa;} "/>

@@ -57,6 +57,8 @@ public class DAGOperations {
 		while (!stack.isEmpty()) {
 			DAGNode cur_el = stack.remove();
 			
+//			cur_el.getDescendants().add(cur_el);
+			
 			for (DAGNode eq_node : cur_el.equivalents) {
 				if (!cur_el.getDescendants().contains(eq_node))
 					cur_el.getDescendants().add(eq_node);

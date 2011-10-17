@@ -33,6 +33,7 @@ public class DAGChain {
 			if (!(node.getDescription() instanceof PropertySomeRestriction) || processedNodes.contains(node)) {
 				continue;
 			}
+			System.out.println("++++++   " +node);
 
 			/*
 			 * Adding a cycle between exists R and exists R- for each R.
@@ -42,6 +43,8 @@ public class DAGChain {
 			PropertySomeRestriction existsRin = fac.createPropertySomeRestriction(existsR.getPredicate(), !existsR.isInverse());
 			DAGNode existsNode = node;
 			DAGNode existsInvNode = dag.getNode(existsRin);
+			
+			System.out.println(existsInvNode);
 
 			Set<DAGNode> childrenExist = new HashSet<DAGNode>(existsNode.getChildren());
 			Set<DAGNode> childrenExistInv = new HashSet<DAGNode>(existsInvNode.getChildren());
@@ -52,6 +55,16 @@ public class DAGChain {
 			for (DAGNode child : childrenExistInv) {
 				DAGOperations.addParentEdge(child, existsNode);
 			}
+			
+			Set<DAGNode> parentExist = new HashSet<DAGNode>(existsNode.getParents());
+			Set<DAGNode> parentsExistInv = new HashSet<DAGNode>(existsInvNode.getParents());
+
+			for (DAGNode parent : parentExist) {
+				DAGOperations.addParentEdge(existsInvNode, parent);
+			}
+			for (DAGNode parent : parentsExistInv) {
+				DAGOperations.addParentEdge(existsNode,parent);
+			}
 
 			processedNodes.add(existsInvNode);
 			processedNodes.add(existsNode);
@@ -60,8 +73,8 @@ public class DAGChain {
 		/* Collapsing the cycles */
 
 		dag.clean();
-		DAGOperations.computeTransitiveReduct(dag.getAllnodes());
-		DAGOperations.buildDescendants(dag.getAllnodes());
+//		DAGOperations.computeTransitiveReduct(dag.getAllnodes());
+//		DAGOperations.buildDescendants(dag.getAllnodes());
 	}
 
 }

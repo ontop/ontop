@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
@@ -38,6 +39,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -195,10 +197,37 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.config = config;
 	}
 
+	@Override 
+	public void disconnect() {
+		try {
+			conn.close();
+		} catch (Exception e) {
+			
+		}
+	}
+	
 	@Override
-	public void setDatabase(OBDADataSource db) throws SQLException, ClassNotFoundException {
+	public Connection getConnection() {
+		return conn;
+	}
+	
+
+	@Override
+	public void setDatabase(OBDADataSource ds) throws SQLException, ClassNotFoundException {
 		this.db = db;
-		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(db);
+		
+		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		
+		try {
+			Class.forName(driver);
+		}
+		catch (ClassNotFoundException e1) {
+			// Does nothing because the SQLException handles this problem also.
+		}		
+		conn = DriverManager.getConnection(url, username, password);		
 	}
 
 	@Override

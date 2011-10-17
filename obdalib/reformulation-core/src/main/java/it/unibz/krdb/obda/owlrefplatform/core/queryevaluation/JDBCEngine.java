@@ -109,8 +109,16 @@ public class JDBCEngine implements EvaluationEngine {
 	@Override
 	public void closeStatement() throws Exception {
 		if (statement != null && !statement.isClosed()) {
-			statement.cancel();
-			statement.close();
+			try {
+				statement.cancel();
+			} catch (Exception e) {
+
+			}
+			try {
+				statement.close();
+			} catch (Exception e) {
+
+			}
 		}
 	}
 

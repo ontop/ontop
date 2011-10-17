@@ -26,22 +26,22 @@ import org.slf4j.LoggerFactory;
 
 public class DAG {
 
-	private final Logger					log					= LoggerFactory.getLogger(DAG.class);
+	private final Logger log = LoggerFactory.getLogger(DAG.class);
 
-	private int								index_counter		= 1;
+	private int index_counter = 1;
 
-	public final static SemanticIndexRange	NULL_RANGE			= new SemanticIndexRange(-1, -1);
-	public final static int					NULL_INDEX			= -1;
+	public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
+	public final static int NULL_INDEX = -1;
 
-	public Map<Description, Description>	equi_mappings		= new HashMap<Description, Description>();
+	public Map<Description, Description> equi_mappings = new HashMap<Description, Description>();
 
-	public final Map<Description, DAGNode>	classes;
-	public final Map<Description, DAGNode>	roles;
+	public final Map<Description, DAGNode> classes;
+	public final Map<Description, DAGNode> roles;
 
-	public final Map<Description, DAGNode>	allnodes;
+	public final Map<Description, DAGNode> allnodes;
 
-	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
+	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
 	// public final static String thingStr =
 	// "http://www.w3.org/2002/07/owl#Thing";
@@ -80,6 +80,8 @@ public class DAG {
 			classes.put(concept, node);
 
 			allnodes.put(concept, node);
+			
+			System.out.println("here" + node);
 
 			// }
 		}
@@ -215,10 +217,10 @@ public class DAG {
 		 * also need to colapse some nodes in the class hierarchy, i.e., those
 		 * for \exists R and \exists R-
 		 */
-		DAGOperations.removeCycles(roles, equi_mappings,this);
+		DAGOperations.removeCycles(roles, equi_mappings, this);
 		DAGOperations.computeTransitiveReduct(roles);
 
-		DAGOperations.removeCycles(classes, equi_mappings,this);
+		DAGOperations.removeCycles(classes, equi_mappings, this);
 		DAGOperations.computeTransitiveReduct(classes);
 
 		DAGOperations.buildDescendants(roles);
@@ -317,10 +319,12 @@ public class DAG {
 	public Collection<DAGNode> getRoles() {
 		return roles.values();
 	}
-	
-	
+
 	public DAGNode get(Description desc) {
-		return allnodes.get(desc);
+		DAGNode node = allnodes.get(desc);
+		if (node == null)
+			return allnodes.get(equi_mappings.get(desc));
+		return node;
 	}
 
 	/***
@@ -339,6 +343,14 @@ public class DAG {
 
 	/***
 	 * Returns the nodes of this DAG considering the equivalence maps.
+	 * 
+	 * Note, this method is NOT SAFE with respecto equivalences of inverses. If
+	 * R- is equivalent to S, then R will be removed. Asking for R will give you
+	 * the S node, however, it should not be used directly, since its S- that
+	 * should be used. This method should return NULL in such cases, and the
+	 * caller should use the equi_mappings directly to get the proper
+	 * equivalence, realize that it must get the node for S and it must be used
+	 * in an inverse way.
 	 * 
 	 * @param conceptDescription
 	 * @return
@@ -362,8 +374,8 @@ public class DAG {
 		DAGNode n = allnodes.get(description);
 		if (n == null)
 			return allnodes.get(equi_mappings.get(description));
-		return n;	
-		
+		return n;
+
 	}
 
 	public Map<Description, DAGNode> getAllnodes() {

@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGChain;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
@@ -16,6 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
@@ -63,9 +65,9 @@ public class DAGChainTest extends TestCase {
 	public void test_exists_simple() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
-		Predicate a = predicateFactory.getPredicate(URI.create("a"), 1);
-		Predicate r = predicateFactory.getPredicate(URI.create("r"), 2);
-		Predicate c = predicateFactory.getPredicate(URI.create("c"), 1);
+		Predicate a = predicateFactory.getClassPredicate(URI.create("a"));
+		Predicate r = predicateFactory.getObjectPropertyPredicate(URI.create("r"));
+		Predicate c = predicateFactory.getClassPredicate(URI.create("c"));
 		OClass ac = descFactory.createClass(a);
 		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
 		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
@@ -76,14 +78,27 @@ public class DAGChainTest extends TestCase {
 
 		ontology.addRole(er.getPredicate());
 		ontology.addRole(ier.getPredicate());
+		
+		System.out.println(er);
+		System.out.println(ac);
+		System.out.println(cc);
+		System.out.println(ier);
 
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
+		
+		
 
 		DAG res = DAGConstructor.getISADAG(ontology);
-		res.clean();
+		for (DAGNode nodes: res.allnodes.values()) {
+			System.out.println("---- " + nodes);
+		}
+		
+//		res.clean();
 		DAGChain.getChainDAG(res);
 
+		
+		
 		assertTrue(res.get(ac).getDescendants().contains(res.get(er)));
 		assertTrue(res.get(ac).getDescendants().contains(res.get(ier)));
 		assertTrue(res.get(ac).getDescendants().contains(res.get(cc)));
@@ -179,8 +194,19 @@ public class DAGChainTest extends TestCase {
 		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ac, er));
 
 		DAG res = DAGConstructor.getISADAG(ontology);
-		res.clean();
+//		res.clean();
 		DAGChain.getChainDAG(res);
+		
+		try {
+			GraphGenerator.dumpISA(res,"chaindag");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println(res.get(ac).getDescendants());
+		
+		System.out.println(res.get(er));
 
 		assertTrue(res.get(ac).getDescendants().contains(res.get(er)));
 		assertTrue(res.get(ac).getDescendants().contains(res.get(ier)));

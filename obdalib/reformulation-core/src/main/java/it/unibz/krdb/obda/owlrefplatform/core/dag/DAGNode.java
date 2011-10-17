@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
@@ -14,25 +15,25 @@ import java.util.Set;
  */
 public class DAGNode {
 
-	private final Description	description;
+	private final Description description;
 
-	private SemanticIndexRange	range				= DAG.NULL_RANGE;
-	private int					index				= DAG.NULL_INDEX;
+	private SemanticIndexRange range = DAG.NULL_RANGE;
+	private int index = DAG.NULL_INDEX;
 
-	private Set<DAGNode>		parents				= new LinkedHashSet<DAGNode>();
-	private Set<DAGNode>		children			= new LinkedHashSet<DAGNode>();
+	private Set<DAGNode> parents = new LinkedHashSet<DAGNode>();
+	private Set<DAGNode> children = new LinkedHashSet<DAGNode>();
 
-	private Set<DAGNode>		descendans			= new LinkedHashSet<DAGNode>();
+	private Set<DAGNode> descendans = new LinkedHashSet<DAGNode>();
 
-	public Set<DAGNode>			equivalents			= new LinkedHashSet<DAGNode>();
+	public Set<DAGNode> equivalents = new LinkedHashSet<DAGNode>();
 
-	String						string				= "";
+	String string = "";
 
-	int							hashcode			= 0;
+	int hashcode = 0;
 
-	boolean						hashNeedsUpdate		= true;
+	boolean hashNeedsUpdate = true;
 
-	boolean						stringNeedsUpdate	= true;
+	boolean stringNeedsUpdate = true;
 
 	public DAGNode(Description description) {
 		this.description = description;
@@ -58,22 +59,40 @@ public class DAGNode {
 		bf.append("DAGNode{");
 		if (description instanceof PropertySomeRestriction) {
 			bf.append("E");
-			bf.append(((PropertySomeRestriction) description).getPredicate().getName().getFragment());
+			Predicate p = ((PropertySomeRestriction) description).getPredicate();
+			String fragment = p.getName().getFragment();
+			if (fragment != null)
+				bf.append(fragment);
+			else
+				bf.append(p.getName());
 			if (((PropertySomeRestriction) description).isInverse())
 				bf.append("^-");
-		}
-		
-		if (description instanceof OClass) {
-			bf.append(((OClass) description).getPredicate().getName().getFragment());
-		}
-		if (description instanceof Property) {
-			bf.append(((Property) description).getPredicate().getName().getFragment());
+		} else if (description instanceof OClass) {
+			
+			Predicate p = ((OClass) description).getPredicate();
+			String fragment = p.getName().getFragment();
+			if (fragment != null)
+				bf.append(fragment);
+			else
+				bf.append(p.getName());
+			
+		} else if (description instanceof Property) {
+			
+			Predicate p = ((Property) description).getPredicate();
+			String fragment = p.getName().getFragment();
+			if (fragment != null)
+				bf.append(fragment);
+			else
+				bf.append(p.getName());
+			
 			if (((Property) description).isInverse()) {
 				bf.append("^-");
 			}
+		} else {
+			throw new IllegalArgumentException("Invalid description for a node. Description: " + description);
 		}
 
-//		bf.append(description);
+		// bf.append(description);
 		bf.append(", range=");
 		bf.append(range);
 		bf.append(", index=");

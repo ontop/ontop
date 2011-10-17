@@ -22,11 +22,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,8 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import javax.management.RuntimeErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class VirtualABoxMaterializer {
 
 	OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 
-	JDBCConnectionManager jdbcMan = JDBCConnectionManager.getJDBCConnectionManager();
+//	JDBCConnectionManager jdbcMan = JDBCConnectionManager.getJDBCConnectionManager();
 
 	Map<OBDADataSource, ComplexMappingUnfolder> unfoldersMap = new HashMap<OBDADataSource, ComplexMappingUnfolder>();
 
@@ -221,8 +221,21 @@ public class VirtualABoxMaterializer {
 		}
 
 		private void advanceToNextPredicate() throws NoSuchElementException, SQLException {
+			try {
+				currentIterator.disconnect();
+			} catch (Exception e) {
+				
+			}
 			currentPredicate = predicates.next();
 			currentIterator = new VirtualTripleIterator(currentPredicate, sources, unfolders, sqlgens);
+		}
+		
+		public void disconnect() {
+			try {
+				currentIterator.disconnect();
+			} catch (Exception e) {
+				
+			}
 		}
 
 		@Override
@@ -300,7 +313,11 @@ public class VirtualABoxMaterializer {
 		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
 
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
+		
+		private Connection conn = null;
 
+		private Statement st;
+		
 		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources,
 				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
 				throws SQLException {
@@ -337,6 +354,24 @@ public class VirtualABoxMaterializer {
 			}
 
 		}
+		
+		public void disconnect() {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					
+				}
+			}
+		}
 
 		/***
 		 * Advances to the next sources, configures an unfolder using the
@@ -348,6 +383,23 @@ public class VirtualABoxMaterializer {
 		 */
 		private void advanceToNextSource() throws NoSuchElementException, Exception {
 
+			
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
 			String sql = "";
 			OBDADataSource source = null;
 
@@ -360,8 +412,14 @@ public class VirtualABoxMaterializer {
 				DatalogProgram unfolding = unfolder.unfold(query);
 				sql = sqlgen.generateSourceQuery(unfolding, signature).trim();
 			}
-
-			currentResults = jdbcMan.executeQuery(source, sql);
+			String url = source.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+			String username = source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+			String password = source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+			
+			conn = DriverManager.getConnection(url, username,password);
+			st = conn.createStatement();
+			
+			currentResults = st.executeQuery(sql);
 		}
 
 		@Override

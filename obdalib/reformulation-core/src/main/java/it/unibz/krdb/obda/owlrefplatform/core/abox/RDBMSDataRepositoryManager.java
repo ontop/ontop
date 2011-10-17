@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,6 +42,10 @@ public interface RDBMSDataRepositoryManager {
 	public static String	TYPE_UNIVERSAL	= "universaldbabox";
 
 	public void setConfig(Properties confi);
+	
+	public void disconnect();
+	
+	public Connection getConnection();
 
 	public void setDatabase(OBDADataSource db) throws SQLException, ClassNotFoundException;
 

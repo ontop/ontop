@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
@@ -43,6 +44,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -182,7 +184,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			throw new NullPointerException("ReformulationPlatformPreferences not set");
 		}
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		
+
 		log.debug("Initializing Quest query answering engine...");
 
 		MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
@@ -205,13 +207,14 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		// For testing purposes.
 		// boolean createMappings = preferences
 		// .getCurrentBooleanValueFor(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS);
+		
+		Connection conn = null;
 
 		log.debug("Active preferences:");
 
 		for (Object key : preferences.keySet()) {
 			log.debug("{} = {}", key, preferences.get(key));
 		}
-
 
 		QueryRewriter rewriter = null;
 		UnfoldingMechanism unfMech = null;
@@ -303,16 +306,21 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI2ABoxIterator aBoxIter = new OWLAPI2ABoxIterator(loadedOntologies, equivalenceMaps);
 					dataRepository.insertData(aBoxIter);
+					
 				}
 				if (bObtainFromMappings) {
 					log.debug("Loading data from Mappings into the database");
-					
+
 					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel, equivalenceMaps);
-					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
+					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator)materializer.getAssertionIterator();
 					dataRepository.insertData(assertionIter);
+					assertionIter.disconnect();
+					
 				}
 
 				dataRepository.createIndexes();
+				
+				conn = dataRepository.getConnection();
 
 				/* Setting up the OBDA model */
 
@@ -405,6 +413,17 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			QueryVocabularyValidator validator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
 
 			this.techwrapper = new QuestTechniqueWrapper(unfMech, rewriter, gen, validator, eval_engine, unfoldingOBDAModel);
+			
+			if (conn!= null) {
+				try {
+					// Closing the connection that was used by the repository manager
+					// to create the in-memory repository.
+					conn.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
 			log.debug("... Quest has been setup and is ready for querying");
 			isClassified = true;
 
@@ -792,12 +811,16 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		getProgressMonitor().setStarted();
 	}
 
-	public void disconnect() throws SQLException { 
-		
+	public void disconnect() throws SQLException {
 		try {
-		JDBCConnectionManager.getJDBCConnectionManager().closeConnections();
+			techwrapper.dispose();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
+//		try {
+//			JDBCConnectionManager.getJDBCConnectionManager().closeConnections();
+//		} catch (Exception e) {
+//			log.debug(e.getMessage());
+//		}
 	}
 }

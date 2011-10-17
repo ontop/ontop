@@ -1,10 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox.tests;
 
+import it.unibz.krdb.obda.owlrefplatform.core.GraphGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.SemanticIndexRange.Interval;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
@@ -177,14 +179,15 @@ public class DAGEquivalenceTests extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromPhysicalURI(new File(testEquivalenceRolesInverse).toURI());
 		Ontology onto = t.translate(owlonto);
 		DAG dag = DAGConstructor.getISADAG(onto);
-//		GraphGenerator.dumpISA(dag, "original");
+		
+		
 		dag.clean();
-//		GraphGenerator.dumpISA(dag, "simplified");
 
 		DAG pureIsa = DAGConstructor.filterPureISA(dag);
 		pureIsa.clean();
 		pureIsa.index();
-//		GraphGenerator.dumpISA(pureIsa, "isa");
+		
+		GraphGenerator.dumpISA(pureIsa, "isa");
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -194,64 +197,63 @@ public class DAGEquivalenceTests extends TestCase {
 		SemanticIndexRange range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);
 		Interval interval = range.getIntervals().get(0);
-		assertEquals(4,interval.getStart());
-		assertEquals(6,interval.getEnd());
-
-		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "A2")));
-		range = node.getRange();
-		assertEquals(range.getIntervals().size(), 1);
-		interval = range.getIntervals().get(0);
 		assertEquals(1,interval.getStart());
 		assertEquals(3,interval.getEnd());
+
+		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "A2")));
+		assertTrue(node == null);
+		
+		Description d = pureIsa.equi_mappings.get(ofac.createObjectProperty(URI.create(testURI + "A2")));
+		assertTrue(d.equals(ofac.createObjectProperty(URI.create(testURI + "A3"),true)));
+//		node = pureIsa.getRoleNode(d);
+//		range = node.getRange();
+//		assertEquals(range.getIntervals().size(), 1);
+//		interval = range.getIntervals().get(0);
+//		assertEquals(1,interval.getStart());
+//		assertEquals(3,interval.getEnd());
 		
 		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "A3")));
 		range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);
 		interval = range.getIntervals().get(0);
-		assertEquals(4,interval.getStart());
-		assertEquals(6,interval.getEnd());
+		assertEquals(1,interval.getStart());
+		assertEquals(3,interval.getEnd());
 
 		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "C1")));
-		range = node.getRange();
-		assertEquals(range.getIntervals().size(), 1);
-		interval = range.getIntervals().get(0);
-		assertEquals(6,interval.getStart());
-		assertEquals(6,interval.getEnd());
-
-		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "C2")));
 		range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);
 		interval = range.getIntervals().get(0);
 		assertEquals(3,interval.getStart());
 		assertEquals(3,interval.getEnd());
 
+		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "C2")));
+		d = pureIsa.equi_mappings.get(ofac.createObjectProperty(URI.create(testURI + "C2")));
+		assertTrue(d.equals(ofac.createObjectProperty(URI.create(testURI + "C3"),true)));
+		
 		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "C3")));
 		range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);
 		interval = range.getIntervals().get(0);
-		assertEquals(6,interval.getStart());
-		assertEquals(6,interval.getEnd());
+		assertEquals(3,interval.getStart());
+		assertEquals(3,interval.getEnd());
 
 		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "B1")));
-		range = node.getRange();
-		assertEquals(range.getIntervals().size(), 1);
-		interval = range.getIntervals().get(0);
-		assertEquals(5,interval.getStart());
-		assertEquals(6,interval.getEnd());
-
-		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "B2")));
 		range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);
 		interval = range.getIntervals().get(0);
 		assertEquals(2,interval.getStart());
 		assertEquals(3,interval.getEnd());
 
+		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "B2")));
+		d = pureIsa.equi_mappings.get(ofac.createObjectProperty(URI.create(testURI + "B2")));
+		assertTrue(d.equals(ofac.createObjectProperty(URI.create(testURI + "B1"),true)));
+
 		node = pureIsa.getRoleNode(ofac.createObjectProperty(URI.create(testURI + "B3")));
 		range = node.getRange();
 		assertEquals(range.getIntervals().size(), 1);
 		interval = range.getIntervals().get(0);
-		assertEquals(5,interval.getStart());
-		assertEquals(6,interval.getEnd());
+		assertEquals(2,interval.getStart());
+		assertEquals(3,interval.getEnd());
 
 	
 	}

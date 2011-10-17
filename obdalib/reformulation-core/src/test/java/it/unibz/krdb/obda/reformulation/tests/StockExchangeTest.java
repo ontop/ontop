@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -60,7 +61,7 @@ public class StockExchangeTest extends TestCase {
 	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
-	private OBDADataSource stockDB;
+//	private OBDADataSource stockDB;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -94,15 +95,16 @@ public class StockExchangeTest extends TestCase {
 		String password = "";
 
 		fac = OBDADataFactoryImpl.getInstance();
-		stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		stockDB.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-		stockDB.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+//		stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+//		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+//		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+//		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+//		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+//		stockDB.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+//		stockDB.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(stockDB);
+		
+		conn = DriverManager.getConnection(url, username, password);
 
 		Statement st = conn.createStatement();
 
@@ -161,7 +163,11 @@ public class StockExchangeTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		conn.close();
+		try {
+			conn.close();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
 
 	}
 
@@ -212,6 +218,7 @@ public class StockExchangeTest extends TestCase {
 		}
 
 		/* Closing resources */
+		st.close();
 		reasoner.disconnect();
 		reasoner.dispose();
 
@@ -224,8 +231,9 @@ public class StockExchangeTest extends TestCase {
 			Result summary = summaries.get(i);
 			totaltime += summary.timeelapsed;
 			fail = fail | tq.distinctTuples != summary.distinctTuples;
-			String out = "Query: %3d   Tup. Ex.: %6d Tup. ret.: %6d    Time elapsed: %6.3f s";
-			log.debug(String.format(out, i, tq.distinctTuples, summary.distinctTuples, (double) summary.timeelapsed / (double) 1000));
+			String out = "Query: %3d   Tup. Ex.: %6d Tup. ret.: %6d    Time elapsed: %6.3f s     ";
+			log.debug(String.format(out, i, tq.distinctTuples, summary.distinctTuples, (double) summary.timeelapsed / (double) 1000)
+					+ "   " + (tq.distinctTuples == summary.distinctTuples ? " " : "ERROR"));
 
 		}
 		log.debug("==========================");
@@ -324,7 +332,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testDiNoEqSig() throws Exception {
+	public void disabledtestDiNoEqSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -341,7 +349,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testDiNoEqNoSig() throws Exception {
+	public void disabledtestDiNoEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -379,7 +387,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testViNoEqSig() throws Exception {
+	public void disabledtestViNoEqSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -395,7 +403,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testViNoEqNoSig() throws Exception {
+	public void disabledtestViNoEqNoSig() throws Exception {
 
 		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
 		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
