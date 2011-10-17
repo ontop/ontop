@@ -80,10 +80,6 @@ public class DAG {
 			classes.put(concept, node);
 
 			allnodes.put(concept, node);
-			
-			System.out.println("here" + node);
-
-			// }
 		}
 
 		/*

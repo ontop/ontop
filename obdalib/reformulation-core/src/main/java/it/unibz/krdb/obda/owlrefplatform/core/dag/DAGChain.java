@@ -33,7 +33,6 @@ public class DAGChain {
 			if (!(node.getDescription() instanceof PropertySomeRestriction) || processedNodes.contains(node)) {
 				continue;
 			}
-			System.out.println("++++++   " +node);
 
 			/*
 			 * Adding a cycle between exists R and exists R- for each R.
@@ -43,9 +42,6 @@ public class DAGChain {
 			PropertySomeRestriction existsRin = fac.createPropertySomeRestriction(existsR.getPredicate(), !existsR.isInverse());
 			DAGNode existsNode = node;
 			DAGNode existsInvNode = dag.getNode(existsRin);
-			
-			System.out.println(existsInvNode);
-
 			Set<DAGNode> childrenExist = new HashSet<DAGNode>(existsNode.getChildren());
 			Set<DAGNode> childrenExistInv = new HashSet<DAGNode>(existsInvNode.getChildren());
 
