@@ -76,8 +76,7 @@ public class EquivalenceTBoxOptimizer {
 		try {
 			GraphGenerator.dumpISA(impliedDAG, "input");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 
 		/*
@@ -185,23 +184,14 @@ public class EquivalenceTBoxOptimizer {
 		for (Property prop : removedNodes) {
 			if (prop.isInverse())
 				continue;
-			System.out.print("removed" + prop);
 			Predicate redundantProp = prop.getPredicate();
-
 			Property equivalent = (Property) equivalenceMap.get(redundantProp);
-			System.out.println("         equivalent" + equivalent);
 
 			/* first for the domain */
-
 			DAGNode directRedundantNode = impliedDAG.allnodes.get(ofac.getPropertySomeRestriction(redundantProp, false));
 			if (directRedundantNode != null) {
-				System.out.println("Removing node: " + directRedundantNode.toString());
-
 				DAGNode equivalentNode = impliedDAG.allnodes.get(ofac.getPropertySomeRestriction(equivalent.getPredicate(),
 						equivalent.isInverse()));
-
-				System.out.println("Replacement node: " + equivalentNode.toString());
-
 				equivalentNode.getEquivalents().remove(directRedundantNode);
 				impliedDAG.classes.remove(directRedundantNode.getDescription());
 				impliedDAG.allnodes.remove(directRedundantNode.getDescription());
@@ -309,8 +299,7 @@ public class EquivalenceTBoxOptimizer {
 		try {
 			GraphGenerator.dumpISA(impliedDAG, "output");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		/*
 		 * Done with the simplificatino of the vocabulary, now we create the
@@ -324,7 +313,6 @@ public class EquivalenceTBoxOptimizer {
 		DAGEdgeIterator it = new DAGEdgeIterator(impliedDAG);
 		while (it.hasNext()) {
 			Edge edge = it.next();
-			System.out.println(edge);
 			Axiom axiom = null;
 			/*
 			 * Creating subClassOf or subPropertyOf axioms

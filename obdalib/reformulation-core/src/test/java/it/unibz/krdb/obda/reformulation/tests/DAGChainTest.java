@@ -200,8 +200,7 @@ public class DAGChainTest extends TestCase {
 		try {
 			GraphGenerator.dumpISA(res,"chaindag");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace(); This is to avoid trivial test failure "Cannot run program /usr/bin/dot".
 		}
 		
 		System.out.println(res.get(ac).getDescendants());

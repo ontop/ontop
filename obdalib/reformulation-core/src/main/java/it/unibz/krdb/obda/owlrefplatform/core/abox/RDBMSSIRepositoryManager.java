@@ -731,8 +731,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		try {
 			GraphGenerator.dumpISA(dag,"sidag");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		
 		Set<DAGNode> roleNodes = new HashSet<DAGNode>();

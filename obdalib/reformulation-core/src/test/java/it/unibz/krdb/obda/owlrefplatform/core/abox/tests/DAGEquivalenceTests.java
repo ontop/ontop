@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 
 import junit.framework.TestCase;
@@ -187,8 +188,12 @@ public class DAGEquivalenceTests extends TestCase {
 		pureIsa.clean();
 		pureIsa.index();
 		
-		GraphGenerator.dumpISA(pureIsa, "isa");
-
+		try {
+			GraphGenerator.dumpISA(pureIsa, "isa");
+		} catch (IOException ex) {
+			// Does nothing. This is to avoid trivial test failure "Cannot run program /usr/bin/dot".
+		}
+		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		DAGNode equi = pureIsa.getRoleNode((Property)pureIsa.equi_mappings.get(ofac.createObjectProperty(URI.create(testURI + "A1"))));
