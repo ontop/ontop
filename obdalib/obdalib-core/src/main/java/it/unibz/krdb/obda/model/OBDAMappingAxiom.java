@@ -26,7 +26,7 @@ public interface OBDAMappingAxiom extends Cloneable {
 
 	public OBDAQuery getTargetQuery();
 
-	public Object clone() throws CloneNotSupportedException;
+	public Object clone();
 
 	public void setId(String id);
 

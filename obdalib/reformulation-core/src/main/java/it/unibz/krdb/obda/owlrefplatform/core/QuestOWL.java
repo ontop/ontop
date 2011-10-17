@@ -130,7 +130,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	@Override
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
-		obdaModel = model;
+		obdaModel = (OBDAModel)model.clone();
 	}
 
 	public void loadDependencies(Ontology sigma) {

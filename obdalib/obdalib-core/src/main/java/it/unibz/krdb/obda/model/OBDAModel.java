@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
-public interface OBDAModel {
+public interface OBDAModel extends Cloneable {
 
 	public abstract QueryController getQueryController();
 
@@ -184,4 +184,5 @@ public interface OBDAModel {
 
 	public boolean containsMapping(URI datasourceUri, String mappingId);
 
+	public Object clone();
 }

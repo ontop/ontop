@@ -837,11 +837,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 						OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
 						OBDAMappingAxiom newmapping = null;
-						try {
-							newmapping = (OBDAMappingAxiom) oldmapping.clone();
-						} catch (CloneNotSupportedException e) {
-							throw new RuntimeException(e);
-						}
+						newmapping = (OBDAMappingAxiom) oldmapping.clone();
 						newmapping.setId(new_id);
 						controller.addMapping(current_srcuri, newmapping);
 

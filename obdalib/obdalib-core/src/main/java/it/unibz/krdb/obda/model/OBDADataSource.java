@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.model;
 import java.net.URI;
 import java.util.Set;
 
-public interface OBDADataSource {
+public interface OBDADataSource extends Cloneable {
 
 	public abstract void setParameter(String parameter_uri, String value);
 
@@ -22,5 +22,6 @@ public interface OBDADataSource {
 	public abstract void setRegistred(boolean registred);
 
 	public abstract boolean isRegistred();
-
+	
+	public Object clone();
 }

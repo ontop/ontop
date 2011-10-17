@@ -617,4 +617,21 @@ public class OBDAModelImpl implements OBDAModel {
 
 	}
 
+	@Override
+	public Object clone() {
+		OBDAModel clone = fac.getOBDAModel();
+		for (OBDADataSource source : datasources.values()) {
+			clone.addSource((OBDADataSource)source.clone());			
+			for (ArrayList<OBDAMappingAxiom> mappingList : mappings.values()) {
+				for (OBDAMappingAxiom mapping : mappingList) {
+					try {
+						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom)mapping.clone());
+					} catch (DuplicateMappingException e) {
+						// Does nothing
+					}
+				}
+			}
+		}		
+		return clone;
+	}
 }

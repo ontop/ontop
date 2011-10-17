@@ -218,4 +218,17 @@ public class DataSourceImpl implements OBDADataSource {
 	public boolean isRegistred() {
 		return registred;
 	}
+	
+	@Override
+	public Object clone() {
+		OBDADataSource clone = new DataSourceImpl(getSourceID());
+		for (Object parameter : parameters.keySet()) {
+			String key = (String)parameter;
+			clone.setParameter(key, parameters.getProperty(key));
+		}
+		clone.setEnabled(isEnabled());
+		clone.setRegistred(isRegistred());
+		
+		return clone;
+	}
 }
