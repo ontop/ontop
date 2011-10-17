@@ -107,7 +107,6 @@ public class LUBMExecutionHelper {
 			p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
 
 		} else {
-			System.err.println("Unsupported ABox mode. specify either \"classic\" or \"semindex\"");
 			throw new Exception("Unsupported ABox mode. specify either \"classic\" or \"semindex\"");
 		}
 

@@ -579,8 +579,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				role_stm.setInt(3, idx);
 				role_stm.addBatch();
 
-//				System.out.println(String.format("Inserted %s %s %s", uri1, uri2, idx));
-
 			} else if (ax instanceof ClassAssertion) {
 
 				String cls = ((ClassAssertion) ax).getConcept().getName().toString();
@@ -802,7 +800,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<DAGNode> classNodesMaps = new HashSet<DAGNode>();
 		Map<DAGNode, Set<DAGNode>> classExistsMaps = new HashMap<DAGNode, Set<DAGNode>>();
 		for (DAGNode node : dag.getClasses()) {
-			System.out.println("CLASS DAGNNODE: " + node);
 			// we only map named classes
 			if (!(node.getDescription() instanceof OClass)) {
 				continue;
@@ -817,7 +814,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			/* Collecting Exists R children */
 			for (DAGNode child : node.getDescendants()) {
-				System.out.println("DESCENDENT!: " + child);
 				if (child.getDescription() instanceof PropertySomeRestrictionImpl) {
 					existChildren.add(child);
 				}
@@ -997,7 +993,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 */
 
 		for (DAGNode classNode : classNodesMaps) {
-			System.out.println("MAKING MAPPING FOR: " + classNode);
 
 			Predicate classuri = ((OClass) classNode.getDescription()).getPredicate();
 
@@ -1058,11 +1053,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			boolean alreadyAppendedOneDirect = false;
 			boolean alreadyAppendedOneInverse = false;
 
-			System.out.println("MAP: " + classExistsMaps);
 			for (DAGNode existsSubNode : classExistsMaps.get(classNode)) {
-				
-				System.out.println("EXIST CHILD: " + existsSubNode);
-
 				boolean direct = false;
 				StringBuffer currentBuffer = null;
 				if (!((PropertySomeRestriction) existsSubNode.getDescription()).isInverse()) {

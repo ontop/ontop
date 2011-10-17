@@ -94,6 +94,8 @@ public class StockExchangeTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
+		System.out.println("Test");
+		
 		fac = OBDADataFactoryImpl.getInstance();
 //		stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 //		stockDB.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);

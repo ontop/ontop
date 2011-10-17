@@ -147,7 +147,6 @@ public class CSVLoader {
             try {
                 String line = reader.readLine();
                 while (line != null) {
-                    System.out.println(line);
                     line = reader.readLine();
                 }
                 reader.close();
