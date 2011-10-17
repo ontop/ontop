@@ -121,10 +121,12 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 	private OBDAResultSet executeConjunctiveQuery(String strquery) throws Exception {
 		// Contruct the datalog program object from the query string
+		log.debug("Input user query:\n" + strquery);
 		DatalogProgram program = getDatalogQuery(strquery);
 
 		// Check the datalog object
 		if (validator != null) {
+			log.debug("Validating the user query...");
 			boolean isValid = validator.validate(program);
 
 			if (!isValid) {
@@ -137,17 +139,24 @@ public class QuestOBDAStatement implements OBDAStatement {
 				throw new Exception("These predicates are missing from the ontology's vocabulary: \n" + msg);
 			}
 		}
+		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
 
 		// If the datalog is valid, proceed to the next process.
 		List<String> signature = getSignature(program);
 
+		log.debug("Start the rewriting process...");
 		OBDAQuery rewriting = rewriter.rewrite(program);
+		
+		log.debug("Start the unfolding process...");
 		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
+		
+		log.debug("Producing the SQL string...");
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, signature);
 
 		OBDAResultSet result;
 
+		log.debug("Executing the query and get the result...");
 		if (sql.equals("")) {
 			/***
 			 * Empty unfolding, constructing an empty resultset
@@ -165,6 +174,7 @@ public class QuestOBDAStatement implements OBDAStatement {
 			}
 		}
 
+		log.debug("Finish.\n");
 		return result;
 	}
 
