@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -868,6 +869,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		for (DAGNode roleNode : roleNodes) {
 
 			Predicate role = ((Property) roleNode.getDescription()).getPredicate();
+			
+			/*
+			 * We need to make sure we make no mappings for Auxiliary roles introduced
+			 * by the Ontology translation process.
+			 */
+			if (role.toString().contains(OWLAPI2Translator.AUXROLEURI))
+				continue;
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 

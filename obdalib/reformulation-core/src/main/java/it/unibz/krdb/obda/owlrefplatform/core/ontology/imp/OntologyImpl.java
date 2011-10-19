@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.Collection;
@@ -112,9 +113,18 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public boolean referencesPredicates(Collection<Predicate> preds) {
-		for (Predicate pred : preds)
+		for (Predicate pred : preds) {
+			
+			/***
+			 * Make sure we never validate against auxiliary roles introduced
+			 * by the translation of the OWL ontology
+			 */
+			if (preds.toString().contains(OWLAPI2Translator.AUXROLEURI))
+				continue;
+			
 			if (!(concepts.contains(pred) || roles.contains(pred)))
 				return false;
+		}
 		return true;
 	}
 

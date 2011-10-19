@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.LanguageProfile;
@@ -351,7 +352,7 @@ public class OWLAPI2Translator {
 				log.warn("NULL: {} {}", subDescription, superDescription);
 			}
 
-			if (superDescription instanceof ClassDescription) {
+			if (superDescription instanceof BasicClassDescription) {
 
 				/* We ignore TOP and BOTTOM (Thing and Nothing) */
 				if ((superDescription instanceof OClass)
