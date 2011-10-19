@@ -6,12 +6,12 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.6</version>
+		<version>1.6.1</version>
 	</parent>
 
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>reformulation-core</artifactId>
-	<version>1.6</version>
+	<version>1.6.1</version>
 	<name>reformulation-core</name>
 
 	<dependencies>

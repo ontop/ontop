@@ -4,13 +4,13 @@
 	<parent> 
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.6</version>
+		<version>1.6.1</version>
 	</parent>
 	
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
 	<name>obdalib-protege4</name>
-	<version>1.6</version>
+	<version>1.6.1</version>
 
 	<repositories>
 		<!-- This repository holds protege 4 and obdalib related dependencies, 
