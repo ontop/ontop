@@ -84,6 +84,15 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptors>
+             			<descriptor>obda-assembly-plugin.xml</descriptor>
+          			</descriptors>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
