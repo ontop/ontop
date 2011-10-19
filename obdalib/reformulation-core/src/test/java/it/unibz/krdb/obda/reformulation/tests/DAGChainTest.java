@@ -197,12 +197,12 @@ public class DAGChainTest extends TestCase {
 //		res.clean();
 		DAGChain.getChainDAG(res);
 		
-		try {
-			GraphGenerator.dumpISA(res,"chaindag");
-		} catch (IOException e) {
-			// e.printStackTrace(); This is to avoid trivial test failure "Cannot run program /usr/bin/dot".
-		}
-		
+//		try {
+//			GraphGenerator.dumpISA(res,"chaindag");
+//		} catch (IOException e) {
+//			// e.printStackTrace(); This is to avoid trivial test failure "Cannot run program /usr/bin/dot".
+//		}
+//		
 		System.out.println(res.get(ac).getDescendants());
 		
 		System.out.println(res.get(er));

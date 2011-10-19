@@ -187,12 +187,12 @@ public class DAGEquivalenceTests extends TestCase {
 		DAG pureIsa = DAGConstructor.filterPureISA(dag);
 		pureIsa.clean();
 		pureIsa.index();
-		
-		try {
-			GraphGenerator.dumpISA(pureIsa, "isa");
-		} catch (IOException ex) {
-			// Does nothing. This is to avoid trivial test failure "Cannot run program /usr/bin/dot".
-		}
+//		
+//		try {
+//			GraphGenerator.dumpISA(pureIsa, "isa");
+//		} catch (IOException ex) {
+//			// Does nothing. This is to avoid trivial test failure "Cannot run program /usr/bin/dot".
+//		}
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 

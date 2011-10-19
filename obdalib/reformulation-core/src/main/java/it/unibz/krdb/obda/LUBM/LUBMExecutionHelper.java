@@ -44,7 +44,7 @@ public class LUBMExecutionHelper {
 
 	public void run(String owlfile, String obdafile, String testmode, String aboxmode, String rewritingmode, boolean graph)
 			throws Exception {
-		GraphGenerator.debugInfoDump = graph;
+//		GraphGenerator.debugInfoDump = graph;
 
 		// abox mode: classic, semindex
 

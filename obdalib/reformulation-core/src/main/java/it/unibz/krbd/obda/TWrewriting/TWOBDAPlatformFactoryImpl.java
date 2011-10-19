@@ -81,16 +81,16 @@ public class TWOBDAPlatformFactoryImpl implements OBDAOWLReasonerFactory, OWLRea
 			DAG isa = DAGConstructor.getISADAG(ontology);
 			DAG pureIsa = DAGConstructor.filterPureISA(isa);
 			pureIsa.index();
-			if (GraphGenerator.debugInfoDump) {
-				GraphGenerator.dumpISA(isa, "general");
-				GraphGenerator.dumpISA(pureIsa, "simple");
-			}
+//			if (GraphGenerator.debugInfoDump) {
+//				GraphGenerator.dumpISA(isa, "general");
+//				GraphGenerator.dumpISA(pureIsa, "simple");
+//			}
 
 			SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(ontology, DAGConstructor.getSigmaOntology(ontology));
 			List<Axiom> reducedOnto = reducer.reduce();
-			if (GraphGenerator.debugInfoDump) {
-				GraphGenerator.dumpReducedOnto(reducedOnto);
-			}
+//			if (GraphGenerator.debugInfoDump) {
+//				GraphGenerator.dumpReducedOnto(reducedOnto);
+//			}
 
 			// Mappings
 			/*

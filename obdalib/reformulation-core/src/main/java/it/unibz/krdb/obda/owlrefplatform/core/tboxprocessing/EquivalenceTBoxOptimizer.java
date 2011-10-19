@@ -73,11 +73,11 @@ public class EquivalenceTBoxOptimizer {
 		DAG impliedDAG = DAGConstructor.getISADAG(tbox);
 		impliedDAG.clean();
 
-		try {
-			GraphGenerator.dumpISA(impliedDAG, "input");
-		} catch (IOException e) {
-//			e.printStackTrace();
-		}
+//		try {
+//			GraphGenerator.dumpISA(impliedDAG, "input");
+//		} catch (IOException e) {
+////			e.printStackTrace();
+//		}
 
 		/*
 		 * Processing all properties
@@ -296,11 +296,11 @@ public class EquivalenceTBoxOptimizer {
 
 		}
 
-		try {
-			GraphGenerator.dumpISA(impliedDAG, "output");
-		} catch (IOException e) {
-//			e.printStackTrace();
-		}
+//		try {
+//			GraphGenerator.dumpISA(impliedDAG, "output");
+//		} catch (IOException e) {
+////			e.printStackTrace();
+//		}
 		/*
 		 * Done with the simplificatino of the vocabulary, now we create the
 		 * optimized ontology
