@@ -72,9 +72,9 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	final String					strtablemetada				= "quest_metadata_direct_mapping";
 
-	final String					strcreate_table_class		= "CREATE TABLE " + strtabledata + " (term0 VARCHAR)";
+	final String					strcreate_table_class		= "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000))";
 
-	final String					strcreate_table_property	= "CREATE TABLE " + strtabledata + " (term0 VARCHAR, term1 VARCHAR)";
+	final String					strcreate_table_property	= "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000), term1 VARCHAR(1000))";
 
 	final String					strcreate_index_class		= "CREATE INDEX idx%s ON " + strtabledata + " (term0)";
 
@@ -84,7 +84,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	final String					strcreate_meta_table		= "CREATE TABLE "
 																		+ strtablemetada
-																		+ " (uri VARCHAR NOT NULL, type VARCHAR NOT NULL, tablename VARCHAR NOT NULL)";
+																		+ " (uri VARCHAR(1000) NOT NULL, type VARCHAR(1000) NOT NULL, tablename VARCHAR(1000) NOT NULL)";
 
 	final String					strinsert_meta_table		= "INSERT INTO " + strtablemetada + " VALUES ('%s', '%s', '%s')";
 
