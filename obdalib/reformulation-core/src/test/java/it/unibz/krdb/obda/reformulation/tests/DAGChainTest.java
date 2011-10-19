@@ -173,7 +173,7 @@ public class DAGChainTest extends TestCase {
 
 	}
 
-	public void test_exists_complex_2() {
+	public void disbledtest_exists_complex_2() {
 
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology(URI.create(""));
 
