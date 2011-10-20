@@ -1,0 +1,54 @@
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} |-%-5level in %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>obdalib.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} |-%-5level in %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Main component -->
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="DEBUG" />
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="DEBUG" />
+
+	<!-- Query Rewriting component -->
+	<!--
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.reformulation" level="DEBUG" />
+	-->
+
+	<!-- Query Unfolding component -->
+	<!--
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.unfolding" level="DEBUG" />
+	-->
+
+	<!-- Query Generator component -->
+	<!--
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration" level="DEBUG" />
+	-->
+
+	<!-- Optimization component -->
+	<!--
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing" level="DEBUG" />
+	-->
+	
+	<!-- ABox Processing component (Classic Mode only) -->
+	<!--
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.abox" level="DEBUG" />
+	-->
+	
+	<!-- DAG Analyzer component -->
+	<!--
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.dag" level="DEBUG" />
+	-->
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>
