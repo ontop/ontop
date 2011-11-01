@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.LUBM.TBoxLoader;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;

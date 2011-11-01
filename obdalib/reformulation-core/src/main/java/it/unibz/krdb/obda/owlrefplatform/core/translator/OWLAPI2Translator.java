@@ -21,6 +21,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 
 import java.net.URI;
 import java.util.Collection;
@@ -105,7 +106,7 @@ public class OWLAPI2Translator {
 		dataproperties = new HashSet<String>();
 	}
 
-	public Ontology translate(OWLOntology owl) throws Exception {
+	public Ontology translate(OWLOntology owl) throws PunningException {
 		// ManchesterOWLSyntaxOWLObjectRendererImpl rend = new
 		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
@@ -136,7 +137,7 @@ public class OWLAPI2Translator {
 				Predicate p = predicateFactory.getObjectPropertyPredicate(uri);
 				Property rd = descFactory.createProperty(p);
 				if (dataproperties.contains(uri.toString())) {
-					throw new Exception("Please avoid using the same name for object and data properties.");
+					throw new PunningException("Please avoid using the same name for object and data properties.");
 				} else {
 					dl_onto.addRole(p);
 				}
@@ -147,7 +148,7 @@ public class OWLAPI2Translator {
 				Predicate p = predicateFactory.getDataPropertyPredicate(uri);
 				Property rd = descFactory.createProperty(p);
 				if (objectproperties.contains(uri.toString())) {
-					throw new Exception("Please avoid using the same name for object and data properties.");
+					throw new PunningException("Please avoid using the same name for object and data properties.");
 				} else {
 					dl_onto.addRole(p);
 				}

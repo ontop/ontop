@@ -209,7 +209,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 
         treSavedQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         treSavedQuery.setForeground(new java.awt.Color(51, 51, 51));
-        treSavedQuery.setMaximumSize(new java.awt.Dimension(5000, 5000));
         treSavedQuery.setRootVisible(false);
         treSavedQuery.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -331,8 +330,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		}
 	}//GEN-LAST:event_reselectQueryNode
 
-	private void cmdRemoveActionPerformed
-	(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
+	private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
 		TreePath selected_path = treSavedQuery.getSelectionPath();
 		if (selected_path == null)
 			return;

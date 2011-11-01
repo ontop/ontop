@@ -18,9 +18,18 @@ public class PunningException extends Exception {
 	private Predicate			pred1				= null;
 	private Predicate			pred2				= null;
 
-	public PunningException(Predicate pred1, Predicate pred2) {
+	public PunningException(String message, Predicate pred1, Predicate pred2) {
+		super(message);
 		this.setPred1(pred1);
 		this.setPred2(pred2);
+	}
+	
+	public PunningException(String message) {
+		super(message);
+	}
+	
+	public PunningException(Predicate pred1, Predicate pred2) {
+		this("", pred1, pred2);
 	}
 
 	private void setPred1(Predicate pred1) {
