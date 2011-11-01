@@ -14,8 +14,8 @@
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.TablePrimary;
 
 import java.util.ArrayList;
 
@@ -38,8 +38,8 @@ public class ColumnInspectorTableModel implements TableModel {
 	private ArrayList<Attribute> attributes;
 	
 	public ColumnInspectorTableModel(DBMetadata metadata, String tableName) {
-		TablePrimary table = metadata.getTable(tableName);
-		attributes = table.getAttributes();
+		TableDefinition td = (TableDefinition)metadata.getDefinition(tableName);
+		attributes = td.getAttributes();
 	}
 
 	@Override
