@@ -81,18 +81,6 @@ private BooleanValueExpression booleanExp;
 /** The root of the query tree */
 private QueryTree queryTree;
 
-/** The metadata of the datasource (i.e., database) */
-private DBMetadata metadata;
-
-/** Asterisk select all flag */
-private boolean bSelectAll = false;
-
-
-public SQL99Parser(TokenStream input, DBMetadata metadata) {
-  this(input);
-  this.metadata = metadata;
-}
-
 /**
  * Retrieves the query tree object. The tree represents
  * the data structure of the SQL statement.
@@ -108,26 +96,8 @@ public QueryTree getQueryTree() {
  * object holds the information about the table columns in
  * the SELECT keyword.
  */
-private Projection createProjection(ArrayList<TablePrimary> tableList, ArrayList<DerivedColumn> columnList) {
-
+private Projection createProjection(ArrayList<DerivedColumn> columnList) {
   Projection prj = new Projection();
-  
-  if (bSelectAll) { // If Asterisk is identified
-    if (columnList == null) {
-      columnList = new ArrayList<DerivedColumn>();
-    }
-    for (TablePrimary tableObj : tableList) {
-      String schema = tableObj.getSchema();
-      String table = tableObj.getName();
-      ArrayList<Attribute> attributeList = tableObj.getAttributes();
-      for (Attribute attr : attributeList) {
-        String column = attr.name;
-        ReferenceValueExpression referenceExp = new ReferenceValueExpression();
-        referenceExp.add(schema, table, column);
-        columnList.add(new DerivedColumn(referenceExp));
-      }
-    }
-  }
   prj.addAll(columnList);
   return prj;
 }
@@ -240,8 +210,8 @@ int quantifier = 0;
       // Construct the projection
       ArrayList<TablePrimary> tableList = te.getFromClause();
       ArrayList<DerivedColumn> columnList = $select_list.value;
-      Projection prj = createProjection(tableList, columnList);
-      
+      Projection prj = createProjection(columnList);
+            
       quantifier = $set_quantifier.value;
       prj.setType(quantifier);
       
@@ -279,11 +249,9 @@ set_quantifier returns [int value]
   
 select_list returns [ArrayList<DerivedColumn> value]
 @init {
-  bSelectAll = false;
   $value = new ArrayList<DerivedColumn>();
 }
-  : ASTERISK { bSelectAll = true; $value = null; }
-  | a=select_sublist { $value.add($a.value); } (COMMA b=select_sublist { $value.add($b.value); })*
+  : a=select_sublist { $value.add($a.value); } (COMMA b=select_sublist { $value.add($b.value); })*
   ;
   
 select_sublist returns [DerivedColumn value]
@@ -496,8 +464,8 @@ boolean_factor
  
 predicate returns [IPredicate value]
   : comparison_predicate { $value = $comparison_predicate.value; }
-  | null_predicate
-  | in_predicate
+//  | null_predicate
+//  | in_predicate
   ;
   
 comparison_predicate returns [ComparisonPredicate value]
@@ -616,7 +584,7 @@ outer_join_type returns [int value]
 
 join_specification returns [BooleanValueExpression value]
   : join_condition { $value = $join_condition.value; }
-  | named_columns_join
+//  | named_columns_join
   ;
 
 join_condition returns [BooleanValueExpression value]
@@ -650,15 +618,13 @@ table_primary returns [TablePrimary value]
  
 table_name returns [TablePrimary value]
   : (schema_name PERIOD)? table_identifier {
-      String schema = $schema_name.value;
-      if (metadata != null) {
-	      if (schema != null && schema != "") {
-	        $value = metadata.getTable(schema, $table_identifier.value);
-	      }
-	      else {
-	        $value = metadata.getTable($table_identifier.value);
-	      }
+      String schema = $schema_name.value;      
+      if (schema != null && schema != "") {
+        $value = new TablePrimary(schema, $table_identifier.value);
       }
+      else {
+        $value = new TablePrimary($table_identifier.value);
+      }      
     }
   ;  
 
@@ -703,7 +669,11 @@ general_literal returns [Literal value]
   ;
 
 string_literal returns [StringLiteral value]
-  : STRING_WITH_QUOTE { $value = new StringLiteral($STRING_WITH_QUOTE.text); }
+  : STRING_WITH_QUOTE {
+      String str = $STRING_WITH_QUOTE.text;
+      str = str.substring(1, str.length()-1);
+      $value = new StringLiteral(str);
+    }
   ;
 
 boolean_literal returns [BooleanLiteral value]

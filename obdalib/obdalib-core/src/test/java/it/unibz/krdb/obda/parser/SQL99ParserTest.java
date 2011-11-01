@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.TableDefinition;
+import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 
@@ -22,7 +24,7 @@ public class SQL99ParserTest extends TestCase
   public void test_1_1_1() {
     final boolean result = parse("SELECT * FROM student");
     print("test_1_1_1");
-    assertTrue(result);
+    assertFalse(result);
   }
 
   //@Test
@@ -441,26 +443,46 @@ public class SQL99ParserTest extends TestCase
   
   private boolean parse(String input) {
         
-    DBMetadata metadata = new DBMetadata("db_test");
-    metadata.add("public", "student", "id", "integer", true, 0);
-    metadata.add("public", "student", "name", "string", false, 0);
-    metadata.add("public", "student", "address", "string", false, 0);
-    metadata.add("public", "grade", "sm_id", "integer", false, 0);
-    metadata.add("public", "grade", "st_id", "integer", false, 0);
-    metadata.add("public", "grade", "course", "varchar", false, 0);
-    metadata.add("public", "grade", "score", "byte", false, 0);
-    metadata.add("public", "grade", "mark", "char", false, 0);
-    metadata.add("public", "semester", "id", "integer", true, 0);
-    metadata.add("public", "semester", "semester", "integer", true, 0);
-    metadata.add("public", "erasmus", "id", "integer", true, 0);
-    metadata.add("public", "erasmus", "name", "string", false, 0);
-    metadata.add("public", "tax", "payee", "string", false, 0);
-    metadata.add("public", "tax", "amount", "double", false, 0);
+    DBMetadata metadata = new DBMetadata();
+    
+    TableDefinition tableStudent = new TableDefinition();
+    tableStudent.setName("student");
+    tableStudent.setAttribute(1, new Attribute("id", "integer", true, 0));
+    tableStudent.setAttribute(2, new Attribute("name", "string", false, 0));
+    tableStudent.setAttribute(3, new Attribute("address", "string", false, 0));
+    metadata.add(tableStudent);
+
+    TableDefinition tableGrade = new TableDefinition();
+    tableGrade.setName("grade");
+    tableGrade.setAttribute(1, new Attribute("sm_id", "integer", false, 0));
+    tableGrade.setAttribute(1, new Attribute("st_id", "integer", false, 0));
+    tableGrade.setAttribute(1, new Attribute("course", "varchar", false, 0));
+    tableGrade.setAttribute(1, new Attribute("score", "byte", false, 0));
+    tableGrade.setAttribute(1, new Attribute("mark", "char", false, 0));
+    metadata.add(tableGrade);
+
+    TableDefinition tableSemester = new TableDefinition();
+    tableSemester.setName("semester");
+    tableSemester.setAttribute(1, new Attribute("id", "integer", true, 0));
+    tableSemester.setAttribute(1, new Attribute("semester", "integer", true, 0));
+    metadata.add(tableSemester);
+    
+    TableDefinition tableErasmus = new TableDefinition();
+    tableErasmus.setName("erasmus");
+    tableErasmus.setAttribute(1, new Attribute("id", "integer", true, 0));
+    tableErasmus.setAttribute(1, new Attribute("name", "string", false, 0));
+    metadata.add(tableErasmus);
+    
+    TableDefinition tableTax = new TableDefinition();
+    tableTax.setName("tax");
+    tableTax.setAttribute(1, new Attribute("payee", "string", false, 0));
+    tableTax.setAttribute(1, new Attribute("amount", "double", false, 0));
+    metadata.add(tableTax);
 
     ANTLRStringStream inputStream = new ANTLRStringStream(input);
     SQL99Lexer lexer = new SQL99Lexer(inputStream);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-    parser = new SQL99Parser(tokenStream, metadata);
+    parser = new SQL99Parser(tokenStream);
 
     try {
     	query = parser.parse();
@@ -479,7 +501,7 @@ public class SQL99ParserTest extends TestCase
 	System.out.println(title + ": " + query.toString());
 	ArrayList<Relation> tableSet = query.getTableSet();
 	for (Relation table : tableSet) {
-		System.out.println(String.format("  Tables: %s(%s)", table.toString(), table.getAttributeNames()));
+		System.out.println(String.format("  Tables: %s", table.toString()));
 	}
 	System.out.println("  Aliases: " + query.getAliasMap());
 	System.out.println("  Join conditions: " + query.getJoinCondition());

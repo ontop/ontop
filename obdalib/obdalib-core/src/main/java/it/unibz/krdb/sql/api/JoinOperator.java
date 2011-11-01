@@ -37,7 +37,11 @@ public class JoinOperator extends Operator {
 		joinType = type;
 	}
 	
-	public String getType() {
+	public int getType() {
+		return joinType;
+	}
+	
+	public String getName() {
 		switch(joinType) {
 			case JOIN: return "join";
 			case INNER_JOIN: return "inner join";
@@ -141,9 +145,7 @@ public class JoinOperator extends Operator {
 	 * 			The specific order.
 	 */
 	public ComparisonPredicate getCondition(int index) {
-		if (index > 0) {
-			index = index + 1;
-		}
+		index = index * 2;
 		return (ComparisonPredicate)conditions.get(index);
 	}
 	
@@ -155,19 +157,17 @@ public class JoinOperator extends Operator {
 	 * 			The specific order.
 	 */
 	public String getLogicalOperator(int index) {
-		if (index == 0) {
-			index = 1;
-		}
-		index = index + 2;
+		index = (index * 2) + 1;
 		return (String)conditions.get(index);
 	}
 	
 	@Override
 	public String toString() {
-		String str = "%s " + getType() + " %s";
+		String str = "%s " + getName() + " %s";
 		
 		str += " ";
-		str += "on";		
+		str += (joinType != CROSS_JOIN) ? "on" : "";
+
 		for (Object obj : conditions) {
 			str += " ";
 			str += obj.toString();

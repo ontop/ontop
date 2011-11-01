@@ -50,8 +50,10 @@ public class Selection {
 			if (!(obj instanceof LogicalOperator)) {
 				conditions.add(op);
 			}
+			else {
+				throw new Exception("Illegal conditional expression!");
+			}
 		}
-		throw new Exception("Illegal conditional expression!");
 	}
 	
 	/**
@@ -102,9 +104,7 @@ public class Selection {
 	 * 			The specific order.
 	 */
 	public ComparisonPredicate getCondition(int index) {
-		if (index > 0) {
-			index = index + 1;
-		}
+		index = index * 2;
 		return (ComparisonPredicate)conditions.get(index);
 	}
 	
@@ -116,11 +116,19 @@ public class Selection {
 	 * 			The specific order.
 	 */
 	public String getLogicalOperator(int index) {
-		if (index == 0) {
-			index = 1;
-		}
-		index = index + 2;
+		index = (index * 2) + 1;
 		return (String)conditions.get(index);
+	}
+	
+	/**
+	 * Returns the object inside the condition expression list, 
+	 * it can be either a condition or a logical operator (e.g., and, or).
+	 * 
+	 * @param index
+	 * 			The index of the list.
+	 */
+	public Object getObject(int index) {
+		return conditions.get(index);
 	}
 	
 	@Override

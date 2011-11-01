@@ -5,4 +5,10 @@ package it.unibz.krdb.sql.api;
  */
 public class NumericLiteral extends Literal {
 
+	@Override
+	public Object get() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

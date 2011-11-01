@@ -1,6 +1,5 @@
 package it.unibz.krdb.sql.api;
 
-import java.util.ArrayList;
 
 /**
  * The Relation class is a wrapper class that make the
@@ -25,26 +24,6 @@ public class Relation extends RelationalAlgebra {
 	
 	public String getAlias() {
 		return table.getAlias();
-	}
-	
-	public Attribute getAttribute(int index) {
-		return table.getAttribute(index);
-	}
-	
-	public ArrayList<Attribute> getAttributes() {
-		return table.getAttributes();
-	}
-	
-	public ArrayList<String> getAttributeNames() {
-		return table.getAttributeNames();
-	}
-	
-	public int getAttributeIndex(String attributeName) {
-		return table.getAttributeIndex(attributeName);
-	}
-	
-	public int getAttributeCount() {
-		return table.getAttributeCount();
 	}
 	
 	@Override

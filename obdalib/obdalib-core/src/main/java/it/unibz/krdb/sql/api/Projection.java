@@ -107,7 +107,13 @@ public class Projection {
 		String str = getType();
 		
 		boolean bNeedComma = false;
+		
 		for (DerivedColumn column : selectList) {
+			if (column == null) {  // am asterisk was found
+				str += "*";
+				break;
+			}
+			
 			if (bNeedComma) {
 				str += ",";
 			}

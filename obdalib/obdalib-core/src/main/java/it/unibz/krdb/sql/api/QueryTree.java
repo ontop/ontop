@@ -3,9 +3,7 @@ package it.unibz.krdb.sql.api;
 import it.unibz.krdb.sql.util.BinaryTree;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Stack;
-import java.util.TreeSet;
 
 /**
  * A tree structure to represent SQL query string.
@@ -68,6 +66,9 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 		return print(this); 
 	}
 	
+	/**
+	 * Returns all the tables in this query tree.
+	 */
 	public ArrayList<Relation> getTableSet() {
 		ArrayList<Relation> tableList = new ArrayList<Relation>();
 		Stack<QueryTree> nodes = new Stack<QueryTree>();
@@ -91,8 +92,12 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
         return tableList;
 	}
 	
-	public HashMap<String, String> getAliasMap() {
-		HashMap<String, String> aliasMap = new HashMap<String, String>();
+	/**
+	 * Get the string construction of alias name. The string has the
+	 * format of "ALIAS_NAME=COLUMN_NAME"
+	 */
+	public ArrayList<String> getAliasMap() {
+		ArrayList<String> aliasMap = new ArrayList<String>();
 		Stack<QueryTree> nodes = new Stack<QueryTree>();
 		
 		nodes.push(this);		
@@ -112,11 +117,14 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	        if (prj != null) {
 	        	ArrayList<DerivedColumn> selectList = prj.getSelectList();
 	        	for (DerivedColumn selection : selectList) {
+	        		if (selection == null) {  // an asterisk was found
+	        			break;
+	        		}
 	        		if (selection.hasAlias()) {  // check if the column has an alias name
 		        		AbstractValueExpression exp = selection.getValueExpression();
 		        		if (exp instanceof ReferenceValueExpression) {
 		        			ColumnReference reference = exp.get(0);
-		        			aliasMap.put(selection.getAlias(), reference.toString());
+		        			aliasMap.add(String.format("%s=%s", selection.getAlias(), reference.toString()));
 		        		}
 	        		}
 	        	}
@@ -125,8 +133,12 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
         return aliasMap;
 	}
 	
-	public HashMap<String, String> getJoinCondition() {
-		HashMap<String, String> equalConditions = new HashMap<String, String>();
+	/**
+	 * Get the string construction of the join condition. The string has the
+	 * format of "VAR1=VAR2".
+	 */
+	public ArrayList<String> getJoinCondition() {
+		ArrayList<String> equalConditions = new ArrayList<String>();
 		Stack<QueryTree> nodes = new Stack<QueryTree>();
 		
 		nodes.push(this);		
@@ -149,19 +161,27 @@ public class QueryTree extends BinaryTree<RelationalAlgebra> {
 	        RelationalAlgebra operator = currentNode.value();
 	        if (operator instanceof JoinOperator) {
 	        	JoinOperator joinOp = (JoinOperator)operator;
-	        	for (int index = 0; index < joinOp.conditionSize(); index++) {
-	        		ComparisonPredicate predicate = joinOp.getCondition(index);
-	        		if (predicate.useEqualOperator()) {
-	        			IValueExpression[] expressions = predicate.getValueExpressions();
-	        			if (expressions[0] instanceof ReferenceValueExpression && 
-	        				expressions[1] instanceof ReferenceValueExpression) {
-	        				equalConditions.put(expressions[0].toString(), expressions[1].toString());
-	        			}
-	        		}
+	        	
+	        	// Cross join has a different approach to define conditions in which
+	        	// they are defined in the selection "where" clause.
+	        	if (joinOp.getType() != JoinOperator.CROSS_JOIN) {
+		        	for (int index = 0; index < joinOp.conditionSize(); index++) {
+		        		ComparisonPredicate predicate = joinOp.getCondition(index);
+		        		String leftReference = predicate.getValueExpressions()[0].toString();
+		        		String rightReference = predicate.getValueExpressions()[1].toString();
+		        		equalConditions.add(String.format("%s=%s", leftReference, rightReference));
+		        	}
 	        	}
 	        }
         }		
 		return equalConditions;
+	}
+	
+	/**
+	 * Get the object construction for the WHERE clause.
+	 */
+	public Selection getSelection() {
+        return this.value().getSelection();
 	}
 	
 	/**

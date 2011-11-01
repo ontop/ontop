@@ -18,12 +18,12 @@ public class StringLiteral extends Literal {
 		this.value = value;
 	}
 
-	public String get() {
+	public Object get() {
 		return value;
 	}
 
 	@Override
 	public String toString() {
-		return value;
+		return String.format("'%s'", value);
 	}
 }

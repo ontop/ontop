@@ -18,13 +18,12 @@ public class BooleanLiteral extends Literal {
 		this.value = value;
 	}
 
-	public boolean get() {
+	public Object get() {
 		return value;
 	}
 
 	@Override
 	public String toString() {
-		String result = get() ? "true" : "false";
-		return result;
+		return value ? "true" : "false";
 	}
 }
