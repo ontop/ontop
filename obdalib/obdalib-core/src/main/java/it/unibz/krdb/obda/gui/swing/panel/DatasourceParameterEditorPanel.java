@@ -409,7 +409,7 @@ private void cmdTestConnectionActionPerformed(java.awt.event.ActionEvent evt) {/
 	
 	JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
 	try {
-		conn.testConnection(selectedDataSource);
+		conn.setConnection(selectedDataSource);
 		lblConnectionStatus.setForeground(Color.GREEN);
 		lblConnectionStatus.setText("Connection is OK");
 	} 

@@ -147,6 +147,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 				if(set != null){
 					IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
 					tblQueryResult.setModel(model);
+					set.close();
 				}
     		}
 		} catch (Exception e) {
@@ -211,11 +212,8 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-						JDBCConnectionManager man =JDBCConnectionManager.getJDBCConnectionManager();
-						man.setProperty(JDBCConnectionManager.JDBC_AUTOCOMMIT, false);
-						man.setProperty(JDBCConnectionManager.JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);							
-						statement = man.getStatement(selectedSource.getSourceID(), selectedSource); //EK
-						result = statement.executeQuery(txtSqlQuery.getText());
+						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();						
+						result = man.executeQuery(selectedSource.getSourceID(), txtSqlQuery.getText());
 						latch.countDown();
 					} 
 					catch (Exception e) {

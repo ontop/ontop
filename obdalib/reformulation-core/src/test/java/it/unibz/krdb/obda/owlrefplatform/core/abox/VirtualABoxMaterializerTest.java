@@ -56,10 +56,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	public void testOneSource() throws Exception {
 
-		/*
-		 * Setting the database;
-		 */
-
+		/* Setting the database */
 		String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:aboxdump";
 		String username = "sa";
@@ -73,7 +70,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
@@ -162,7 +159,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
@@ -261,7 +258,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
@@ -370,7 +367,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
@@ -441,7 +438,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
@@ -546,7 +543,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");

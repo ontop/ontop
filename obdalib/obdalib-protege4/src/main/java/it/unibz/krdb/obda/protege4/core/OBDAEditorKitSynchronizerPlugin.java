@@ -67,6 +67,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	public void dispose() throws Exception {
 //		mmgr.removeListener(instance.getModelManagerListener());
 		storePreferences();
+		instance.dispose();
 	}
 	
 	private void loadPreferences(){

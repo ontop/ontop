@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
+import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -56,22 +57,21 @@ public class SourceQueryValidator {
 
 		try {
 			modelfactory = JDBCConnectionManager.getJDBCConnectionManager();
-			if(!modelfactory.isConnectionAlive(source.getSourceID())){
-				modelfactory.createConnection(source);
+			URI connID = source.getSourceID();
+			if(!modelfactory.isConnectionAlive(connID)){
+				modelfactory.getConnection(connID);
 			}
 			if (model != null) {
 
 				IncrementalResultSetTableModel rstm = model;
 				rstm.close();
 			}
-			ResultSet set = modelfactory.executeQuery(source.getSourceID(), sourceQuery.toString(), source);
+			ResultSet set = modelfactory.executeQuery(connID, sourceQuery.toString());
 			model = new IncrementalResultSetTableModel(set);
+			set.close();
 			return true;
 
 		} catch (SQLException e) {
-			reason = e;
-			return false;
-		} catch (ClassNotFoundException e) {
 			reason = e;
 			return false;
 		} catch (Exception e) {

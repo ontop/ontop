@@ -78,7 +78,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -162,7 +162,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -224,7 +224,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		log.debug("Creating schema and loading data...");
@@ -291,7 +291,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);

@@ -1,8 +1,9 @@
 package it.unibz.krdb.sql;
 
-import it.unibz.krdb.obda.gui.swing.exception.NoDatasourceSelectedException;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.sql.api.Attribute;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -13,167 +14,42 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JDBCConnectionManager {
 
-	public static final String				JDBC_AUTOCOMMIT			= "autocommit";
-	public static final String				JDBC_FETCHSIZE			= "fetchsize";
-	public static final String				JDBC_RESULTSETTYPE		= "resultsettype";
-	public static final String				JDBC_RESULTSETCONCUR	= "resultsetconcur";
+	public static final String JDBC_AUTOCOMMIT = "autocommit";
+	public static final String JDBC_FETCHSIZE = "fetchsize";
+	public static final String JDBC_RESULTSETTYPE = "resultsettype";
+	public static final String JDBC_RESULTSETCONCUR = "resultsetconcur";
 
-	private static JDBCConnectionManager	instance				= null;
+	private static JDBCConnectionManager instance = null;
 
-	private HashMap<String, Object>			properties				= null;
-	private HashMap<URI, Connection>		connectionPool			= null;
-	private HashMap<URI, DBMetadata>	    metadataCache			= null;
-	
-	private Vector<Statement>				statementList			= null;
-	private Statement						currentStatement		= null;
+	private HashMap<String, Object> properties = null;
+	private HashMap<URI, Connection> connectionPool = null;
 
-	Logger									log						= LoggerFactory.getLogger(JDBCConnectionManager.class);
+	private Logger log = LoggerFactory.getLogger(JDBCConnectionManager.class);
 
+	/**
+	 * Private constructor.
+	 */
 	private JDBCConnectionManager() {
+		connectionPool = new HashMap<URI, Connection>();
+
 		properties = new HashMap<String, Object>();
 		properties.put(JDBC_AUTOCOMMIT, false);
 		properties.put(JDBC_FETCHSIZE, 100);
 		properties.put(JDBC_RESULTSETCONCUR, ResultSet.CONCUR_READ_ONLY);
 		properties.put(JDBC_RESULTSETTYPE, ResultSet.TYPE_FORWARD_ONLY);
-		connectionPool = new HashMap<URI, Connection>();
-		metadataCache = new HashMap<URI, DBMetadata>();
-		statementList = new Vector<Statement>();
 	}
 
-	public void createConnection(OBDADataSource ds) throws ClassNotFoundException, SQLException {
-		if (ds == null) {
-			RuntimeException ex = new RuntimeException("Invalid datasource: null");
-			ex.fillInStackTrace();
-			throw ex;
-		}
-		
-		Connection con = connectionPool.get(ds.getSourceID());
-		if (con == null) {
-			testConnection(ds);
-			collectMetadata(ds);
-		}
-	}
-	
-	public void testConnection(OBDADataSource ds) throws SQLException {
-		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-		
-		try {
-			Class.forName(driver);
-		}
-		catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
-		}		
-		
-		Connection conn = DriverManager.getConnection(url, username, password);		
-		
-		boolean bAutoCommit = ((Boolean)properties.get(JDBC_AUTOCOMMIT)).booleanValue();
-		conn.setAutoCommit(bAutoCommit);
-
-		replaceConnectionFromPool(ds.getSourceID(), conn);	
-	}
-	
-	private void replaceConnectionFromPool(URI connID, Connection newConn) throws SQLException {
-		Connection oldConn = connectionPool.remove(connID);
-		if (oldConn != null) {
-			oldConn.close();
-		}
-		connectionPool.put(connID, newConn);
-	}
-	
-	public boolean isConnectionAlive(URI connID) throws SQLException {
-		Connection con = connectionPool.get(connID);
-		if (con == null) {
-			return false;
-		} else {
-			return !con.isClosed();
-		}
-	}
-
-	public Statement getStatement(URI connID, OBDADataSource ds) throws Exception {
-		Connection con = connectionPool.get(connID);
-		if (con == null || con.isClosed()) {
-			createConnection(ds);
-			con = connectionPool.get(connID);
-		}
-		if (currentStatement != null) {
-			currentStatement.close();
-			currentStatement = null;
-		}
-		int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
-		int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
-		Statement st = con.createStatement(type, concur);
-		int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
-		st.setFetchSize(fetchsize);
-		return st;
-	}
-
-	public ResultSet executeQuery(URI connID, String query, OBDADataSource ds) throws SQLException {
-		ResultSet result = null;
-		Connection con = connectionPool.get(connID);
-		if (con == null || con.isClosed()) {
-			try {
-				createConnection(ds);
-			} catch (ClassNotFoundException e) {
-				SQLException ex = new SQLException(e);
-				ex.fillInStackTrace();
-				throw ex;
-			}
-			con = connectionPool.get(ds.getSourceID());
-			throw new SQLException("No connection established for the given id: " + connID);
-		} else {
-			if (currentStatement != null) {
-				currentStatement.close();
-				currentStatement = null;
-			}
-			int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
-			int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
-			int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
-			try {
-				Statement st = con.createStatement(type, concur);
-				st.setFetchSize(fetchsize);
-				result = st.executeQuery(query);
-				statementList.add(st);
-				currentStatement = st;
-			} catch (SQLException e) {
-				con.rollback();
-				throw e;
-			}
-		}
-		return result;
-	}
-
-	public ResultSet executeQuery(OBDADataSource ds, String query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {
-		Connection con = connectionPool.get(ds.getSourceID());
-		if (con == null) {
-			createConnection(ds);
-			con = connectionPool.get(ds.getSourceID());
-		}
-		if (currentStatement != null) {
-			currentStatement.close();
-			currentStatement = null;
-		}
-		int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
-		int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
-		Statement st = con.createStatement(type, concur);
-		int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
-		st.setFetchSize(fetchsize);
-		statementList.add(st);
-		currentStatement = st;
-		return st.executeQuery(query);
-	}
-
+	/**
+	 * Returns a single connection manager.
+	 */
 	public static JDBCConnectionManager getJDBCConnectionManager() {
 		if (instance == null) {
 			instance = new JDBCConnectionManager();
@@ -181,153 +57,221 @@ public class JDBCConnectionManager {
 		return instance;
 	}
 
-	public void closeConnections() throws SQLException {
-
-		Iterator<Statement> sit = statementList.iterator();
-		while (sit.hasNext()) {
-			Statement s = sit.next();
-			if (!s.isClosed()) {
-				s.close();
-			}
-		}
-
-		Iterator<URI> it = connectionPool.keySet().iterator();
-
-		while (it.hasNext()) {
-			Connection con = connectionPool.get(it.next());
-			con.close();
-		}
-	}
-
-	public void setProperty(String key, Object value) throws SQLException {
-
-		if (currentStatement != null) {
+	/**
+	 * Creates all the database connections that are defined in the OBDA model.
+	 * Call this method to start filling the connection pool.
+	 * 
+	 * @param model
+	 *            The OBDA model.
+	 */
+	public void setupConnection(OBDAModel model) {
+		List<OBDADataSource> sources = model.getSources();
+		for (OBDADataSource ds : sources) {
 			try {
-				currentStatement.close();
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+				setConnection(ds);
+			} catch (SQLException e) {
+				String message = String.format("Fail to create a connection.\nReason: %s for data source %s", e.getMessage(), ds.getSourceID());
+				log.error(message);
 			}
-		}
-
-		properties.put(key, value);
-		Iterator<URI> it = connectionPool.keySet().iterator();
-		while (it.hasNext()) {
-			Connection c = connectionPool.get(it.next());
-			if (c != null) {
-				if (c.getAutoCommit()) {
-					try {
-						c.commit();
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-					}
-
-				}
-				try {
-					c.close();
-				} catch (Exception e) {
-					log.warn(e.getMessage(), e);
-				}
-			}
-		}
-		connectionPool.clear();
-	}
-
-	public String getApprimateRowCount(String name, OBDADataSource ds) throws NoDatasourceSelectedException, ClassNotFoundException,
-			SQLException {
-		Connection con = connectionPool.get(ds.getSourceID());
-		if (con == null) {
-			createConnection(ds);
-		}
-		con = connectionPool.get(ds.getSourceID());
-
-		if (ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("org.postgresql.Driver")) {
-			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-			String query = "select reltuples from pg_class where relname='" + name + "'";
-			ResultSet r = statement.executeQuery(query);
-			r.next();
-			if (r.first()) {
-				Object temp = r.getObject(1);
-				String count = temp.toString();
-				return count;
-			}
-		}
-		return "Count error";
-	}
-
-	public Connection getConnection(OBDADataSource source) throws ClassNotFoundException, SQLException {
-		if (source == null) {
-			throw new SQLException("No data source selected.");
-		}
-		Connection con = connectionPool.get(source.getSourceID());
-		if ((con == null) || (con.isClosed())) {
-			createConnection(source);
-		}
-		return connectionPool.get(source.getSourceID());
-
-	}
-
-	public void setPorperties(Properties p) {
-		Object auto = p.get(JDBC_AUTOCOMMIT);
-		if (auto != null) {
-			properties.put(JDBC_AUTOCOMMIT, auto);
-		}
-
-		Object size = p.get(JDBC_FETCHSIZE);
-		if (size != null) {
-			properties.put(JDBC_FETCHSIZE, size);
-		}
-
-		Object type = p.get(JDBC_RESULTSETTYPE);
-		if (type != null) {
-			properties.put(JDBC_RESULTSETTYPE, type);
-		}
-
-		Object concur = p.get(JDBC_RESULTSETCONCUR);
-		if (concur != null) {
-			properties.put(JDBC_RESULTSETCONCUR, concur);
 		}
 	}
 	
-	public void collectMetadata(OBDADataSource source) throws SQLException, ClassNotFoundException {
-		
-		if (source == null) {
-			throw new SQLException("No data source found!");
+	/**
+	 * Constructs a new database connection object and then registers it to the
+	 * connection pool.
+	 * 
+	 * @param dataSource
+	 * 			The data source object.
+	 * @throws SQLException
+	 */
+	public void setConnection(OBDADataSource dataSource) throws SQLException {
+		Connection conn = createConnection(dataSource);
+		registerConnection(dataSource.getSourceID(), conn);
+	}
+
+	/**
+	 * Constructs a new database connection object from a data source and retrieves
+	 * the object.
+	 * 
+	 * @param dataSource
+	 *            The data source object.
+	 * @return The connection object.
+	 * @throws SQLException
+	 */
+	public Connection createConnection(OBDADataSource dataSource) throws SQLException {
+		String url = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e1) {
+			// Does nothing because the SQLException handles this problem also.
 		}
 
-		URI sourceUri = source.getSourceID();
-		Connection conn = connectionPool.get(sourceUri);
+		Connection conn = DriverManager.getConnection(url, username, password);
+
+		boolean bAutoCommit = ((Boolean) properties.get(JDBC_AUTOCOMMIT)).booleanValue();
+		conn.setAutoCommit(bAutoCommit);
+		
+		return conn;
+	}
+	
+	/*
+	 * Store the connection object to the connection pool. Any existing
+	 * connection with the same ID will be replaced by the given connection.
+	 */
+	private void registerConnection(URI sourceId, Connection conn) {
+		boolean bRemoved = removeConnection(sourceId);
+		if (bRemoved) {
+			connectionPool.put(sourceId, conn);
+		} else {
+			log.error("Registration failed: Can't remove the existing connection.");
+		}
+	}
+
+	/**
+	 * Retrieves the connection object from the connection pool by its ID.
+	 * 
+	 * @param sourceId
+	 *            The connection ID (usually the same as the data source URI).
+	 */
+	public Connection getConnection(URI sourceId) throws NullPointerException {
+		Connection conn = connectionPool.get(sourceId);
 		if (conn == null) {
-			createConnection(source);
-			conn = connectionPool.get(sourceUri);
+			throw new NullPointerException("The system cannot find the required connection! Try to register it first to the system connection pool.");
 		}
-		
-		DatabaseMetaData md = conn.getMetaData();
-		ResultSet rsTables = md.getTables("metadata", null, null, null);
-		
-		DBMetadata metadata = new DBMetadata(sourceUri.toString()); // TODO: This should be the database name. The OBDADataSource must implement the database name setting.
-		
-		while(rsTables.next()) {
-			String tblName = rsTables.getString("TABLE_NAME");
-			String tblSchema = rsTables.getString("TABLE_SCHEM");
-			ResultSet rsColumns = md.getColumns("metadata", tblSchema, tblName, null);
-			ArrayList<String> pk = getPrimaryKey(md, tblSchema, tblName);
-            while(rsColumns.next()) {
-                String colName = rsColumns.getString("COLUMN_NAME");
-                String colType = rsColumns.getString("TYPE_NAME");
-                boolean bPrimaryKey = pk.contains(colName);
-                int canNull = rsColumns.getInt("NULLABLE");
-                
-                // Add this information to the DBMetadata
-                metadata.add(tblSchema, tblName, colName, colType, bPrimaryKey, canNull);
-            }                
-		}		
-		metadataCache.put(sourceUri, metadata);
+		return conn;
 	}
-	
-	public DBMetadata getMetadata(URI sourceUri) {
-		return metadataCache.get(sourceUri);
+
+	/**
+	 * Removes a connection object form the pool. The system will put the
+	 * connection back to the pool if an exception occurs.
+	 * 
+	 * @param sourceId
+	 *            The connection ID that wants to be removed.
+	 * @return Returns true if the removal is successful, or false otherwise.
+	 */
+	public boolean removeConnection(URI sourceId) {
+		boolean bStatus = true; // the status flag.
+		Connection existing = connectionPool.remove(sourceId);
+		if (existing != null) {
+			try {
+				existing.close();
+			} catch (SQLException e) {
+				connectionPool.put(sourceId, existing);
+				bStatus = false;
+				log.error("Fail to close the existing connection: The system puts back the connection into the pool.");
+			}
+		}
+		return bStatus;
 	}
-	
+
+	/**
+	 * Checks whether the connection is still alive.
+	 * 
+	 * @param sourceId
+	 *            The connection ID (usually the same as the data source URI).
+	 * @return Returns true if the connection exists and is still open.
+	 * 
+	 * @throws SQLException
+	 */
+	public boolean isConnectionAlive(URI sourceId) throws SQLException {
+		Connection conn = connectionPool.get(sourceId);
+		if (conn == null) {
+			return false;
+		}
+		return !conn.isClosed();
+	}
+
+	/**
+	 * Executes the query string using the given connection ID. If it is
+	 * successful, the method will return the result set.
+	 * 
+	 * @param sourceId
+	 *            The connection ID (usually the same as the data source URI).
+	 * @param query
+	 *            The SQL query string.
+	 * @return The Result Set object.
+	 * @throws SQLException
+	 */
+	public ResultSet executeQuery(URI sourceId, String query) throws SQLException {
+		ResultSet rs = null;
+		Statement st = null;
+		try {
+			Connection conn = getConnection(sourceId);
+
+			int type = (Integer) properties.get(JDBC_RESULTSETTYPE);
+			int concur = (Integer) properties.get(JDBC_RESULTSETCONCUR);
+			int fetchsize = (Integer) properties.get(JDBC_FETCHSIZE);
+
+			st = conn.createStatement(type, concur);
+			st.setFetchSize(fetchsize);
+			rs = st.executeQuery(query);
+		} catch (SQLException e) {
+			log.error(e.getMessage());
+		} finally {
+			// TODO: For the purpose of displaying only the query result, it is better
+			// not to return the ResultSet object. Instead, store all the result into 
+			// another object and return that object. In this way, we can close both
+			// the Statement and ResultSet in advanced.
+			//
+			// To reduce this memory leak, currently the solution is that we close the 
+			// ResultSet manually in the caller side.
+//			st.close();
+		}
+		return rs;
+	}
+
+	/**
+	 * Retrieves the database meta data about the table schema given
+	 * a particular data source id.
+	 * 
+	 * @param sourceId
+	 * 			The database id.
+	 * @return The database meta data object.
+	 */
+	public DBMetadata getMetaData(URI sourceId) {
+		try {
+			Connection conn = getConnection(sourceId);
+			DatabaseMetaData md = conn.getMetaData();
+			
+			ResultSet rsTables = md.getTables("metadata", null, null, null);
+			
+			DBMetadata metadata = new DBMetadata();
+			while(rsTables.next()) {
+				String tblName = rsTables.getString("TABLE_NAME");
+				String tblSchema = rsTables.getString("TABLE_SCHEM");
+				
+				ResultSet rsColumns = md.getColumns("metadata", tblSchema, tblName, null);
+				ArrayList<String> pk = getPrimaryKey(md, tblSchema, tblName);
+				
+				TableDefinition td = new TableDefinition();
+				td.setName(tblName);
+				for (int pos = 1; rsColumns.next(); pos++) {
+					td.setAttribute(pos, 
+							new Attribute(rsColumns.getString("COLUMN_NAME"), 
+									      rsColumns.getString("TYPE_NAME"),
+									      pk.contains(rsColumns.getString("COLUMN_NAME")), 
+									      rsColumns.getInt("NULLABLE")));
+				}
+				// Add this information to the DBMetadata
+				metadata.add(td);
+		 	}
+			return metadata;
+		}
+		catch (NullPointerException e) {
+			log.error(e.getMessage());
+			return null;
+		}
+		catch (SQLException e) {
+			log.error(e.getMessage());
+			return null;
+		}
+	}
+
+	/* Retrives the primary key(s) from a table */
 	private ArrayList<String> getPrimaryKey(DatabaseMetaData md, String schema, String table) throws SQLException {
 		ArrayList<String> pk = new ArrayList<String>();
 		ResultSet rsPrimaryKeys = md.getPrimaryKeys("metadata", schema, table);
@@ -339,5 +283,17 @@ public class JDBCConnectionManager {
 			}
 		}
 		return pk;
+	}
+	
+	/**
+	 * Removes all the connections in the connection pool.
+	 * 
+	 * @throws SQLException
+	 */
+	public void dispose() throws SQLException {
+		Set<URI> keys = connectionPool.keySet();
+		for (URI sourceId : keys) {
+			removeConnection(sourceId);
+		}
 	}
 }

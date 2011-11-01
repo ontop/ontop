@@ -30,11 +30,9 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
@@ -61,10 +59,10 @@ import org.slf4j.LoggerFactory;
 
 public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-	private static final long serialVersionUID	= 6497114195036386873L;
-	
-	private static final int TABLE_ROW_HEIGHT	= 17;
-	private static final int TABLE_COLUMN_WIDTH	= 200;
+	private static final long serialVersionUID = 6497114195036386873L;
+
+	private static final int TABLE_ROW_HEIGHT = 17;
+	private static final int TABLE_COLUMN_WIDTH = 200;
 
 	private OBDADataSource selectedSource;
 
@@ -74,7 +72,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 	public SQLSchemaInspectorPanel() {
 		initComponents();
 		addPopupMenu();
-		
+
 		tblRelations.getSelectionModel().setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
 		tblRelations.getSelectionModel().addListSelectionListener(new RowListener());
 	}
@@ -123,22 +121,20 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrRelationsTable.setOpaque(false);
 		scrRelationsTable.setPreferredSize(new Dimension(250, 100));
 
-		tblRelations.setModel(new DefaultTableModel(
-			new Object[][] {}, new String[] { "Relation Name", "Row Count" }) 
-			{
-				Class[] types = new Class[] { String.class, String.class };
-				boolean[] canEdit = new boolean[] { false, false };
+		tblRelations.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Relation Name", "Row Count" }) {
+			Class[] types = new Class[] { String.class, String.class };
+			boolean[] canEdit = new boolean[] { false, false };
 
-				@Override
-				public Class getColumnClass(int columnIndex) {
-					return types[columnIndex];
-				}
+			@Override
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
 
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					return canEdit[columnIndex];
-				}
-			});
+			@Override
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return canEdit[columnIndex];
+			}
+		});
 		tblRelations.setPreferredSize(new Dimension(150, 999999));
 		scrRelationsTable.setViewportView(tblRelations);
 
@@ -150,16 +146,14 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrAttributesTable.setMinimumSize(new Dimension(250, 100));
 		scrAttributesTable.setPreferredSize(new Dimension(250, 100));
 
-		tblAttributes.setModel(new DefaultTableModel(
-			new Object[][] {}, new String[] { "Attribute", "Type", "Primary Key", "Nullable" }) 
-			{
-				boolean[] canEdit = new boolean[] { false, false, false, false };
+		tblAttributes.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Attribute", "Type", "Primary Key", "Nullable" }) {
+			boolean[] canEdit = new boolean[] { false, false, false, false };
 
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					return canEdit[columnIndex];
-				}
-			});
+			@Override
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return canEdit[columnIndex];
+			}
+		});
 		tblAttributes.setPreferredSize(new Dimension(150, 2000));
 		scrAttributesTable.setViewportView(tblAttributes);
 
@@ -170,7 +164,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private void addPopupMenu() {
 		JPopupMenu menu = new JPopupMenu();
-		
+
 		JMenuItem countAll = new JMenuItem();
 		countAll.setText("Count All");
 		countAll.setToolTipText("Counts the number of rows in each table");
@@ -195,15 +189,14 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 							}
 						}
 					}
-				}
-				catch (InterruptedException e1) {
+				} catch (InterruptedException e1) {
 					JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
 					log.error("Error while counting.", e);
 				}
 			}
 		});
 		menu.add(countAll);
-		
+
 		JMenuItem countrow = new JMenuItem();
 		countrow.setText("Count");
 		countrow.setToolTipText("Counts the number of rows in the selected table");
@@ -227,15 +220,14 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 							tblRelations.getModel().setValueAt(count, row, 1);
 						}
 					}
-				} 
-				catch (InterruptedException e1) {
+				} catch (InterruptedException e1) {
 					JOptionPane.showMessageDialog(null, "Error while counting.\n Please refer to the log file for more information.");
 					log.error("Error while counting.", e);
 				}
 			}
 		});
 		menu.add(countrow);
-		
+
 		tblRelations.setComponentPopupMenu(menu);
 	}
 
@@ -256,10 +248,12 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 					if (set != null) {
 						RelationsResultSetTableModel model = new RelationsResultSetTableModel(set, selectedSource);
 						tblRelations.setModel(model);
-						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WIDTH, model.getRowCount() * TABLE_ROW_HEIGHT));
+						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WIDTH, model.getRowCount()
+								* TABLE_ROW_HEIGHT));
 					}
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(SQLSchemaInspectorPanel.this, "Error while updating table.\n Please refer to the log file for more information.");
+					JOptionPane.showMessageDialog(SQLSchemaInspectorPanel.this,
+							"Error while updating table.\n Please refer to the log file for more information.");
 					log.error("Error while updating table model.", e);
 				}
 			}
@@ -267,8 +261,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 		if (selectedSource == null) {
 			JOptionPane.showMessageDialog(this, "Select a datasource first!", "Error", JOptionPane.ERROR_MESSAGE);
-	    }
-		else {
+		} else {
 			SwingUtilities.invokeLater(run);
 		}
 	}// GEN-LAST:event_cmdRefreshActionPerformed
@@ -283,13 +276,13 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			if (event.getValueIsAdjusting()) {
 				return;
 			}
-			
+
 			final int row = tblRelations.getSelectedRow();
-			final String table = (String)tblRelations.getValueAt(row, 0);
+			final String table = (String) tblRelations.getValueAt(row, 0);
 			if (table.equals("")) {
 				return;
 			}
-			
+
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
@@ -299,13 +292,13 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-						URI sourceUri = selectedSource.getSourceID();
-						DBMetadata metadata = conn.getMetadata(sourceUri);
-						ColumnInspectorTableModel model = new ColumnInspectorTableModel(metadata, table);						
-						
+						DBMetadata metadata = conn.getMetaData(selectedSource.getSourceID());
+						ColumnInspectorTableModel model = new ColumnInspectorTableModel(metadata, table);
+
 						tblAttributes.setModel(model);
-						
-						Dimension dimension = new Dimension(model.getColumnCount()*TABLE_COLUMN_WIDTH, model.getRowCount()*TABLE_ROW_HEIGHT);
+
+						Dimension dimension = new Dimension(model.getColumnCount() * TABLE_COLUMN_WIDTH, model.getRowCount()
+								* TABLE_ROW_HEIGHT);
 						tblAttributes.setPreferredSize(dimension);
 					} catch (Exception e) {
 						e.printStackTrace(System.err);
@@ -316,17 +309,11 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 	}
 
 	private ResultSet getResultSetForRelations() throws Exception {
-		if (selectedSource == null) {
-			return null;
-		}
 
-		Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
-		if (con == null) {
-			throw new SQLException("Couldnt establish a connectino for the datsource: {}" + selectedSource.getSourceID());
-		}
-		
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource.getSourceID());
+
 		if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
-			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			String url = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
 			// jdbc:db2://5.90.168.104:50000/MINIST:currentSchema=PROP;
 			String[] sp1 = url.split("/");
@@ -336,45 +323,43 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			ResultSet r = statement.executeQuery("SELECT TABLE_NAME FROM SYSIBM.TABLES WHERE TABLE_CATALOG = '" + catalog
 					+ "' AND TABLE_SCHEMA = '" + schema + "'");
 			return r;
-		}
-		else if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
+		} else if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("oracle.jdbc.driver.OracleDriver")) {
 			// select table_name from user_tables
-			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			ResultSet r = statement.executeQuery("select table_name from user_tables");
 			return r;
-		} 
-		else {
+		} else {
 			// postgres and mysql
-			DatabaseMetaData metdata = con.getMetaData();
+			DatabaseMetaData metdata = conn.getMetaData();
 			String catalog = null;
 			String schemaPattern = "%";
 			String tableNamePattern = "%";
 			String types[] = { "TABLE" };
-			con.setAutoCommit(true);
+			conn.setAutoCommit(true);
 			ResultSet r = metdata.getTables(catalog, schemaPattern, tableNamePattern, types);
-			con.setAutoCommit(false);
+			conn.setAutoCommit(false);
 			return r;
 		}
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private JButton		cmdRefresh;
-	private JPanel		pnlButtons;
-	private JScrollPane	scrAttributesTable;
-	private JScrollPane	scrRelationsTable;
-	private JSplitPane	splRelationsColumns;
-	private JTable		tblAttributes;
-	private JTable		tblRelations;
+	private JButton cmdRefresh;
+	private JPanel pnlButtons;
+	private JScrollPane scrAttributesTable;
+	private JScrollPane scrRelationsTable;
+	private JSplitPane splRelationsColumns;
+	private JTable tblAttributes;
+	private JTable tblRelations;
 
 	// End of variables declaration//GEN-END:variables
 
 	private class CountTuplesAction implements OBDAProgressListener {
 
-		CountDownLatch	latch		= null;
-		Thread			thread		= null;
-		String			result		= "-1";
-		String			table		= null;
-		Statement		statement	= null;
+		CountDownLatch latch = null;
+		Thread thread = null;
+		String result = "-1";
+		String table = null;
+		Statement statement = null;
 
 		private CountTuplesAction(CountDownLatch latch, String table) {
 			this.latch = latch;
@@ -390,7 +375,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 				@Override
 				public void run() {
 					try {
-						Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
+						Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource.getSourceID());
 						statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 						ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + table.toUpperCase());
 						r.next();
@@ -426,10 +411,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private class CountAllTuplesAction implements OBDAProgressListener {
 
-		CountDownLatch	latch		= null;
-		Thread			thread		= null;
-		String[]		result		= null;
-		Statement		statement	= null;
+		CountDownLatch latch = null;
+		Thread thread = null;
+		String[] result = null;
+		Statement statement = null;
 
 		private CountAllTuplesAction(CountDownLatch latch) {
 			this.latch = latch;
@@ -448,7 +433,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						result = new String[rows];
 						for (int i = 0; i < rows; i++) {
 							String s = tblRelations.getModel().getValueAt(i, 0).toString();
-							Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
+							Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource.getSourceID());
 							statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 							ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + s.toUpperCase());
 							r.next();
@@ -488,9 +473,9 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private class UpdateRelationTableAction implements OBDAProgressListener {
 
-		CountDownLatch	latch	= null;
-		Thread			thread	= null;
-		ResultSet		result	= null;
+		CountDownLatch latch = null;
+		Thread thread = null;
+		ResultSet result = null;
 
 		private UpdateRelationTableAction(CountDownLatch latch) {
 			this.latch = latch;
@@ -515,8 +500,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 			} catch (Exception e) {
 				latch.countDown();
 				log.error("Error while retriving information from the data source.", e);
-				JOptionPane.showMessageDialog(null,
-						"Error while updating table.\n Please refer to the log file for more information.");
+				JOptionPane.showMessageDialog(null, "Error while updating table.\n Please refer to the log file for more information.");
 			}
 		}
 	}

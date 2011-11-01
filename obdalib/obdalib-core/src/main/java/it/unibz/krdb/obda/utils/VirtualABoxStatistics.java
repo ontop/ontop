@@ -128,7 +128,7 @@ public class VirtualABoxStatistics {
 				int triplesCount = 0;
 				try {
 					OBDASQLQuery sourceQuery = (OBDASQLQuery)mapping.getSourceQuery();
-					int tuples = getTuplesCount(database, sourceQuery);
+					int tuples = getTuplesCount(sourceUri, sourceQuery);
 
 					CQIEImpl targetQuery = (CQIEImpl)mapping.getTargetQuery();
 					int atoms = getAtomCount(targetQuery);
@@ -145,16 +145,17 @@ public class VirtualABoxStatistics {
 		}
 	}
 
-	private int getTuplesCount(OBDADataSource database, OBDASQLQuery query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {	
+	private int getTuplesCount(URI sourceId, OBDASQLQuery query) throws NoDatasourceSelectedException, ClassNotFoundException, SQLException {	
 		
 		String sql = String.format("select COUNT(*) %s", getSelectionString(query));
 
-		ResultSet rs = conn.executeQuery(database, sql);
+		ResultSet rs = conn.executeQuery(sourceId, sql);
 
 		int count = 0;
 		while (rs.next()){
 			count = rs.getInt(1);
 		}
+		rs.close();
 		return count;
 	}
 		

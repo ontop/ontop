@@ -76,7 +76,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		dbman.setVocabulary(preds);
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -155,7 +155,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source, preds);
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -215,7 +215,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source, preds);
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -285,7 +285,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		dbman.setVocabulary(preds);
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		log.debug("Creating schema and loading data...");

@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.obda.utils.OBDAModelRefactorer;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,8 @@ public class OBDAModelManager implements Disposable {
 
 	private List<OBDAModelManagerListener>			obdaManagerListeners	= null;
 
+	private JDBCConnectionManager					connectionManager		= JDBCConnectionManager.getJDBCConnectionManager();
+	
 	/***
 	 * This is the instance responsible for listening for Protege ontology
 	 * events (loading/saving/changing ontology)
@@ -102,9 +105,7 @@ public class OBDAModelManager implements Disposable {
 		if (ontology != null) {
 		URI uri = ontology.getURI();
 			return obdamodels.get(uri);
-			}
-		
-
+		}
 		return null;
 	}
 
@@ -207,6 +208,7 @@ public class OBDAModelManager implements Disposable {
 						if (file.canRead()) {
 							final OBDAModel obdaModel = getActiveOBDAModel();			
 							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), obdaModel.getPrefixManager());
+							connectionManager.setupConnection(obdaModel);  // fill in the connection pool.
 							OBDAModelRefactorer refactorer = new OBDAModelRefactorer(obdaModel, activeonto);
 							refactorer.run(); // adding type information to the mapping predicates.
 						}
@@ -230,6 +232,7 @@ public class OBDAModelManager implements Disposable {
 						if (file.canRead()) {
 							final OBDAModel obdaModel = getActiveOBDAModel();
 							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), getActiveOBDAModel().getPrefixManager());
+							connectionManager.setupConnection(obdaModel);  // fill in the connection pool.
 							OBDAModelRefactorer refactorer = new OBDAModelRefactorer(obdaModel, activeonto);
 							refactorer.run(); // adding type information to the mapping predicates.
 						}
@@ -325,6 +328,7 @@ public class OBDAModelManager implements Disposable {
 	public void dispose() throws Exception {
 		try {
 			owlEditorKit.getModelManager().removeListener(getModelManagerListener());
+			connectionManager.dispose();
 		} catch (Exception e) {
 			log.warn(e.getMessage());
 		}
