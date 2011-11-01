@@ -182,21 +182,25 @@ query returns [QueryTree value]
 @init {
 int quantifier = 0;
 }
-  : a=query_specification { 
-      queryTree = $a.value; 
+  : query_specification { 
+      queryTree = $query_specification.value; 
       $value = queryTree;
     }
-    (UNION set_quantifier? b=query_specification {
-      quantifier = $set_quantifier.value;
-      SetUnion union = new SetUnion(quantifier);
-          
-      QueryTree parent = new QueryTree(union);      
-      parent.attachLeft(queryTree);
-      parent.attachRight($b.value);
-       
-      queryTree = parent.root();
-      $value = queryTree;
-    })*
+//  : a=query_specification { 
+//      queryTree = $a.value; 
+//      $value = queryTree;
+//    }
+//    (UNION set_quantifier? b=query_specification {
+//      quantifier = $set_quantifier.value;
+//      SetUnion union = new SetUnion(quantifier);
+//          
+//      QueryTree parent = new QueryTree(union);      
+//      parent.attachLeft(queryTree);
+//      parent.attachRight($b.value);
+//       
+//      queryTree = parent.root();
+//      $value = queryTree;
+//    })*
   ;
   
 query_specification returns [QueryTree value]
@@ -255,8 +259,8 @@ select_list returns [ArrayList<DerivedColumn> value]
   ;
   
 select_sublist returns [DerivedColumn value]
-  : qualified_asterisk { $value = null; }
-  | derived_column { $value = $derived_column.value; }
+  : derived_column { $value = $derived_column.value; }
+//  | qualified_asterisk { $value = null; }
   ;
   
 qualified_asterisk
@@ -277,10 +281,10 @@ derived_column returns [DerivedColumn value]
   ;  
  
 value_expression returns [AbstractValueExpression value]
-  : numeric_value_expression { $value = $numeric_value_expression.value; }
-  | string_value_expression { $value = $string_value_expression.value; }
-  | reference_value_expression { $value = $reference_value_expression.value; }
-  | collection_value_expression { $value = $collection_value_expression.value; }
+  : reference_value_expression { $value = $reference_value_expression.value; }
+//  | numeric_value_expression { $value = $numeric_value_expression.value; }
+//  | string_value_expression { $value = $string_value_expression.value; }
+//  | collection_value_expression { $value = $collection_value_expression.value; }
   ;
 
 numeric_value_expression returns [NumericValueExpression value]
@@ -404,7 +408,7 @@ table_expression returns [TableExpression value]
       $value = new TableExpression($from_clause.value);
     }
     (where_clause { $value.setWhereClause($where_clause.value); })? 
-    (group_by_clause { $value.setGroupByClause($group_by_clause.value); })?
+//    (group_by_clause { $value.setGroupByClause($group_by_clause.value); })?
   ;
   
 from_clause returns [ArrayList<TablePrimary> value]
@@ -448,7 +452,8 @@ boolean_value_expression returns [BooleanValueExpression value]
 @init {
   booleanExp = new BooleanValueExpression();
 }
-  : boolean_term (OR { booleanExp.putSpecification(new OrOperator()); } boolean_term)* {
+  : //boolean_term (OR { booleanExp.putSpecification(new OrOperator()); } boolean_term)* {
+    boolean_term {
       $value = booleanExp;
     }
   ;

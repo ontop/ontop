@@ -24,7 +24,7 @@ public class SQL99ParserTest extends TestCase
   public void test_1_1_1() {
     final boolean result = parse("SELECT * FROM student");
     print("test_1_1_1");
-    assertFalse(result);
+    assertTrue(result);
   }
 
   //@Test
