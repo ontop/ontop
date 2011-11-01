@@ -191,14 +191,7 @@ public class MappingAnalyzer {
 			String[] reference = alias.split("=");
 			lookupTable.add(reference[0], reference[1]);
 		}
-
-		// Alter the table for the equality in the join condition
-//		ArrayList<String> comparisonList = queryTree.getJoinCondition();
-//		for (String predicate : comparisonList) {
-//			String[] reference = predicate.split("=");
-//			lookupTable.asEqualTo(reference[0], reference[1]);
-//		}
-
+		
 		return lookupTable;
 	}
 }
