@@ -17,7 +17,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
@@ -41,15 +40,17 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtrac
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
+import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -219,8 +220,8 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		QueryRewriter rewriter = null;
 		UnfoldingMechanism unfMech = null;
 		SourceQueryGenerator gen = null;
-		EvaluationEngine eval_engine;
-
+		EvaluationEngine eval_engine = null;
+		
 		Ontology sigma = ofac.createOntology(URI.create("sigmaontology"));
 		Ontology reformulationOntology = null;
 		OBDAModel unfoldingOBDAModel = fac.getOBDAModel();
@@ -364,22 +365,23 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			/*
 			 * Setting up the unfolder and SQL generation
 			 */
-
+			
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
-
-			// MappingValidator mappingValidator = new
-			// MappingValidator(loadedOntologies);
-			// boolean validmappings =
-			// mappingValidator.validate(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
-
-			MappingViewManager viewMan = new MappingViewManager(unfoldingOBDAModel.getMappings(datasource.getSourceID()));
-			unfMech = new ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(datasource.getSourceID()), viewMan);
+			URI sourceId = datasource.getSourceID();
+			
+			ArrayList<OBDAMappingAxiom> mappingList = unfoldingOBDAModel.getMappings(sourceId);			
+			DBMetadata dbMetaData = JDBCConnectionManager.getJDBCConnectionManager().getMetaData(sourceId);
+			
+			MappingAnalyzer mapAnalyzer = new MappingAnalyzer(mappingList, dbMetaData);
+			
+			MappingViewManager viewMan = new MappingViewManager(mappingList);
+			unfMech = new ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(sourceId), viewMan);
 
 			JDBCUtility util = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			gen = new ComplexMappingSQLGenerator(viewMan, util);
 
 			log.debug("Setting up the connection;");
-			eval_engine = new JDBCEngine(unfoldingOBDAModel.getSources().get(0));
+			eval_engine = new JDBCEngine(datasource);
 
 			/*
 			 * Setting up the ontology we will use for the reformulation
