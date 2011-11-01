@@ -6,6 +6,7 @@ package it.unibz.krdb.obda.parser;
 import java.util.Stack;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.EmptyStackException;
 
 import java.lang.Number;
 
@@ -228,15 +229,20 @@ int quantifier = 0;
       Aggregation agg = createAggregation(groupingList);
       
       // Construct the query tree
-      RelationalAlgebra root = relationStack.pop();
-      root.setProjection(prj);
-      if (slc != null) {
-        root.setSelection(slc);
-      }
-      if (agg != null) {
-        root.setAggregation(agg);
-      }
-      $value = constructQueryTree(root);   
+      try {
+	      RelationalAlgebra root = relationStack.pop();
+	      root.setProjection(prj);
+	      if (slc != null) {
+	        root.setSelection(slc);
+	      }
+	      if (agg != null) {
+	        root.setAggregation(agg);
+	      }
+	      $value = constructQueryTree(root);
+      } 
+      catch(EmptyStackException e) {
+        // Does nothing
+      } 
     }
   ;
 

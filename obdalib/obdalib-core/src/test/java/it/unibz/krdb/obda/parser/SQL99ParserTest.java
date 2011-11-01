@@ -498,13 +498,15 @@ public class SQL99ParserTest extends TestCase
   }
   
   private void print(String title) {
-	System.out.println(title + ": " + query.toString());
-	ArrayList<Relation> tableSet = query.getTableSet();
-	for (Relation table : tableSet) {
-		System.out.println(String.format("  Tables: %s", table.toString()));
+	if (query != null) {
+		System.out.println(title + ": " + query.toString());
+		ArrayList<Relation> tableSet = query.getTableSet();
+		for (Relation table : tableSet) {
+			System.out.println(String.format("  Tables: %s", table.toString()));
+		}
+		System.out.println("  Aliases: " + query.getAliasMap());
+		System.out.println("  Join conditions: " + query.getJoinCondition());
+		System.out.println();
 	}
-	System.out.println("  Aliases: " + query.getAliasMap());
-	System.out.println("  Join conditions: " + query.getJoinCondition());
-	System.out.println();
   }
 }
