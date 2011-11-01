@@ -8,5 +8,7 @@ package it.unibz.krdb.obda.model;
  */
 public interface Variable extends Term {
 
+	public void setName(String name);
+	
 	public String getName();
 }

@@ -30,6 +30,11 @@ public class AnonymousVariable implements Variable {
 	}
 
 	@Override
+	public void setName(String name){
+		this.name = name;
+	}
+	
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -37,10 +42,6 @@ public class AnonymousVariable implements Variable {
 	@Override
 	public Variable clone() {
 		return new AnonymousVariable();
-	}
-
-	public void setName(String n){
-		name = n;
 	}
 
 	@Override
