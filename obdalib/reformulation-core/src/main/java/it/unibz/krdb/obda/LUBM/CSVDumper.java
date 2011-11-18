@@ -161,16 +161,16 @@ public class CSVDumper {
     }
 
     public static void main(String args[]) throws Exception {
-        String path = args[0];
-        int universities = Integer.valueOf(args[1]);
-
-        TBoxLoader helper = new TBoxLoader(path);
-        DAG isa = new DAG(helper.loadOnto());
-//        isa.index();
-        DAG pureIsa = DAGConstructor.filterPureISA(isa);
-        pureIsa.index();
-        CSVDumper dumper = new CSVDumper(pureIsa, path);
-        dumper.dump(universities);
+//        String path = args[0];
+//        int universities = Integer.valueOf(args[1]);
+//
+//        TBoxLoader helper = new TBoxLoader(path);
+//        DAG isa = new DAG(helper.loadOnto());
+////        isa.index();
+//        DAG pureIsa = DAGConstructor.filterPureISA(isa);
+//        pureIsa.index();
+//        CSVDumper dumper = new CSVDumper(pureIsa, path);
+//        dumper.dump(universities);
     }
 
 

@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.LUBM;
 
 
-import it.unibz.krdb.obda.model.OBDAQueryReasoner;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -24,7 +24,9 @@ public class LUBMTester {
     static long starttime;
     static long endtime;
     static String dataDirectory = "./";
-    static TBoxLoader tboxHelper;
+    
+//    static TBoxLoader tboxHelper;
+//    
     static OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
     static OBDAModel apic = obdafac.getOBDAModel();
 
@@ -45,11 +47,13 @@ public class LUBMTester {
     public static void main(String[] args) throws Exception {
 
         // Prepare reasoner
-        tboxHelper = new TBoxLoader(dataDirectory);
+//        tboxHelper = new TBoxLoader(dataDirectory);
+    	
         OBDADataSource ds = obdafac.getJDBCDataSource(CSVLoader.url, CSVLoader.username, CSVLoader.password, CSVLoader.driver);
         apic.addSource(ds);
 
-        OBDAQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
+//        OBDAQueryReasoner reasoner = tboxHelper.loadReasoner(apic, TBoxLoader.manager);
+        OBDAQueryReasoner reasoner = null;
 
         for (String query : queries) {
             starttime = System.nanoTime();
@@ -66,7 +70,10 @@ public class LUBMTester {
         int universityCount = 1;
 
         starttime = System.nanoTime();
-        Ontology ontology = tboxHelper.loadOnto();
+        
+//        Ontology ontology = tboxHelper.loadOnto();
+        Ontology ontology = null;
+        
         DAG dag = new DAG(ontology);
         endtime = System.nanoTime();
         log.info("Building DAG took: {}", (endtime - starttime) * 1.0e-9);

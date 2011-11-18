@@ -65,7 +65,7 @@ public class TWrewritingExecutionTool {
             source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
             source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-            connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(source);
+            connection = JDBCConnectionManager.getJDBCConnectionManager().getConnection(null);
             
             obdamodel.addSource(source);
             
