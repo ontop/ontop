@@ -23,6 +23,7 @@
 		<module>obdalib-owlapi</module>
 		<module>obdalib-protege4</module>
 		<module>reformulation-core</module>
+		<module>quest-sesame</module>
 	</modules>
 
 	<properties>
@@ -39,6 +40,13 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>sesame-official-repository</id>
+			<url>http://repo.aduna-software.org/maven2/releases/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
 		</repository>
 	</repositories>
 
