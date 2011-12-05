@@ -221,7 +221,6 @@ public class StockExchangeTest extends TestCase {
 
 		/* Closing resources */
 		st.close();
-		reasoner.disconnect();
 		reasoner.dispose();
 
 		boolean fail = false;

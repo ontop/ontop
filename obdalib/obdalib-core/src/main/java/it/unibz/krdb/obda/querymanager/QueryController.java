@@ -13,6 +13,7 @@
 package it.unibz.krdb.obda.querymanager;
 
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -22,14 +23,14 @@ import org.slf4j.LoggerFactory;
 /***
  * Controller for the query manager
  */
-public class QueryController {
+public class QueryController implements Serializable {
 
 	private Vector<QueryControllerEntity>	collection		= null;
 	private Vector<QueryControllerListener>	listeners		= null;
 	private boolean							eventDisabled	= false;
 
 	/** The logger */
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static transient final Logger log = LoggerFactory.getLogger(QueryController.class);
 
 	public QueryController() {
 		collection = new Vector<QueryControllerEntity>();

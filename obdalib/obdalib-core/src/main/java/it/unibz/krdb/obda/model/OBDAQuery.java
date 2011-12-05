@@ -12,10 +12,12 @@
  */
 package it.unibz.krdb.obda.model;
 
+import java.io.Serializable;
 
 
 
-public interface OBDAQuery {
+
+public interface OBDAQuery extends Serializable {
 	
 	public OBDAQueryModifiers getQueryModifiers();
 	

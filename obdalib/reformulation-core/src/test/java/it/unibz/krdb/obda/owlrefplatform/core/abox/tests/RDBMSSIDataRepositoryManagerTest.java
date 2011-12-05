@@ -74,11 +74,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -155,14 +156,15 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
 		dbman.setVocabulary(preds);
 
 		log.debug("Test ontology: {}", trans.translate(ontology));
 
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -220,11 +222,11 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		log.debug("Creating schema and loading data...");
@@ -287,11 +289,11 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -304,7 +306,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		/*
 		 * Reseting the manager
 		 */
-		dbman = new RDBMSSIRepositoryManager(source);
+		dbman = new RDBMSSIRepositoryManager(conn);
 		assertTrue(dbman.checkMetadata());
 		dbman.loadMetadata();
 

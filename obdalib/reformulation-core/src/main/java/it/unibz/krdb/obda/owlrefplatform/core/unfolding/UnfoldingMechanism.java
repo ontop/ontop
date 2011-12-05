@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 
+import java.io.Serializable;
+
 import it.unibz.krdb.obda.model.DatalogProgram;
 
 
@@ -11,7 +13,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
  *
  */
 
-public interface UnfoldingMechanism {
+public interface UnfoldingMechanism extends Serializable {
 
 	/**
 	 * unfolds the the given datalog program

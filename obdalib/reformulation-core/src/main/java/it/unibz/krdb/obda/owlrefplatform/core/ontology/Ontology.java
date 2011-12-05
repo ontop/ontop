@@ -2,11 +2,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.ontology;
 
 import it.unibz.krdb.obda.model.Predicate;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 
-public interface Ontology extends Cloneable {
+public interface Ontology extends Cloneable, Serializable {
 
 	public void addAssertion(Axiom assertion);
 

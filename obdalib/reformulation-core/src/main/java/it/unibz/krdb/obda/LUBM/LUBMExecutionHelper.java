@@ -213,7 +213,7 @@ public class LUBMExecutionHelper {
 			} else if (testmode.equals("unfold")) {
 				String unfolding = st.getUnfolding(sparqlquery, false);
 			} else if (testmode.equals("execute")) {
-				OBDAResultSet res = st.executeQuery(sparqlquery);
+				OBDAResultSet res = st.executeqlquery);
 				log.debug("Result size: {}", res.getFetchSize());
 			} else {
 				System.err.println("Unsupported mode. specify either \"rewrite\" or \"unfold\" or \"execute\"");

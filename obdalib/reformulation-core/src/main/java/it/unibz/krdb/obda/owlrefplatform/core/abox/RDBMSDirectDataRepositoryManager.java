@@ -48,82 +48,92 @@ import com.hp.hpl.jena.reasoner.IllegalParameterException;
 
 public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryManager, OBDAProgressListener {
 
-	private Connection				conn						= null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6649716982554168637L;
+	
+	private transient Connection conn = null;
 	// private APIController apic = null;
-	private List<ABoxDumpListener>	listener					= null;
+	private transient List<ABoxDumpListener> listener = null;
 
-	private OBDADataSource				db							= null;
+	private OBDADataSource db = null;
 	// private int indexcounter = 1;
 	//
-	private boolean					isCanceled					= false;
-	private Statement				statement					= null;
+	private boolean isCanceled = false;
 
-	private final Logger			log							= LoggerFactory.getLogger(RDBMSDirectDataRepositoryManager.class);
+	// TODO remove this
+	private transient Statement statement = null;
 
-	private Map<Predicate, String>	predicatetableMap			= new HashMap<Predicate, String>();
+	private static final Logger log = LoggerFactory.getLogger(RDBMSDirectDataRepositoryManager.class);
 
-	private Map<String, Predicate>	uriPredicateMap				= new HashMap<String, Predicate>();
+	private Map<Predicate, String> predicatetableMap = new HashMap<Predicate, String>();
 
-	private Properties				config						= null;
+	private Map<String, Predicate> uriPredicateMap = new HashMap<String, Predicate>();
 
-	private final OBDADataFactory	obdaFactory					= OBDADataFactoryImpl.getInstance();
+	private Properties config = null;
 
-	private final String			strtabledata				= "quest_%s";
+	private static OBDADataFactory obdaFactory = OBDADataFactoryImpl.getInstance();
 
-	final String					strtablemetada				= "quest_metadata_direct_mapping";
+	private final String strtabledata = "quest_%s";
 
-	final String					strcreate_table_class		= "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000))";
+	final String strtablemetada = "quest_metadata_direct_mapping";
 
-	final String					strcreate_table_property	= "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000), term1 VARCHAR(1000))";
+	final String strcreate_table_class = "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000))";
 
-	final String					strcreate_index_class		= "CREATE INDEX idx%s ON " + strtabledata + " (term0)";
+	final String strcreate_table_property = "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000), term1 VARCHAR(1000))";
 
-	final String					strcreate_index_property_1	= "CREATE INDEX idx1%s ON " + strtabledata + " (term0, term1)";
+	final String strcreate_index_class = "CREATE INDEX idx%s ON " + strtabledata + " (term0)";
 
-	final String					strcreate_index_property_2	= "CREATE INDEX idx2%s ON " + strtabledata + " (term1, term0)";
+	final String strcreate_index_property_1 = "CREATE INDEX idx1%s ON " + strtabledata + " (term0, term1)";
 
-	final String					strcreate_meta_table		= "CREATE TABLE "
-																		+ strtablemetada
-																		+ " (uri VARCHAR(1000) NOT NULL, type VARCHAR(1000) NOT NULL, tablename VARCHAR(1000) NOT NULL)";
+	final String strcreate_index_property_2 = "CREATE INDEX idx2%s ON " + strtabledata + " (term1, term0)";
 
-	final String					strinsert_meta_table		= "INSERT INTO " + strtablemetada + " VALUES ('%s', '%s', '%s')";
+	final String strdrop_index_class = "DROP INDEX idx%s";
 
-	final String					strinsert_table_class		= "INSERT INTO " + strtabledata + " VALUES ('%s')";
+	final String strdrop_index_property_1 = "DROP INDEX idx1%s";
 
-	final String					strinsert_table_property	= "INSERT INTO " + strtabledata + " VALUES ('%s', '%s')";
+	final String strdrop_index_property_2 = "DROP INDEX idx2%s";
 
-	final String					strselect_table_class		= "SELECT term0 FROM " + strtabledata + "";
+	final String strcreate_meta_table = "CREATE TABLE " + strtablemetada
+			+ " (uri VARCHAR(1000) NOT NULL, type VARCHAR(1000) NOT NULL, tablename VARCHAR(1000) NOT NULL)";
 
-	final String					strselect_table_property	= "SELECT term0, term1 FROM " + strtabledata + "";
+	final String strinsert_meta_table = "INSERT INTO " + strtablemetada + " VALUES ('%s', '%s', '%s')";
 
-	final String					strdrop_table_class			= "DROP TABLE " + strtabledata + "";
+	final String strinsert_table_class = "INSERT INTO " + strtabledata + " VALUES ('%s')";
 
-	final String					strdrop_meta_table			= "DROP TABLE " + strtablemetada + "";
+	final String strinsert_table_property = "INSERT INTO " + strtabledata + " VALUES ('%s', '%s')";
 
-	final String					stranalyze					= "ANALYZE";
+	final String strselect_table_class = "SELECT term0 FROM " + strtabledata + "";
 
-	final String					strselect_meta_table		= "SELECT uri, type, tablename FROM " + strtablemetada + "";
+	final String strselect_table_property = "SELECT term0, term1 FROM " + strtabledata + "";
 
-	private Set<Predicate>			vocabulary;
-	
-	private OntologyFactory			ofac = OntologyFactoryImpl.getInstance();
+	final String strdrop_table_class = "DROP TABLE " + strtabledata + "";
 
-	public RDBMSDirectDataRepositoryManager(OBDADataSource ds) throws SQLException, PunningException {
+	final String strdrop_meta_table = "DROP TABLE " + strtablemetada + "";
+
+	final String stranalyze = "ANALYZE";
+
+	final String strselect_meta_table = "SELECT uri, type, tablename FROM " + strtablemetada + "";
+
+	private Set<Predicate> vocabulary;
+
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+
+	private boolean isIndexed;
+
+	public RDBMSDirectDataRepositoryManager(Connection ds) throws PunningException {
 		this(ds, null);
 	}
 
-	public RDBMSDirectDataRepositoryManager(OBDADataSource ds, Set<Predicate> vocabulary) throws SQLException, PunningException {
+	public RDBMSDirectDataRepositoryManager(Connection ds, Set<Predicate> vocabulary) throws PunningException {
 		this();
-		try {
-			if (vocabulary != null) {
-				setVocabulary(vocabulary);
-			}
-			setDatabase(ds);
-		} catch (ClassNotFoundException e) {
-			RuntimeException ex = new RuntimeException(e);
-			e.fillInStackTrace();
-			throw ex;
+
+		if (vocabulary != null) {
+			setVocabulary(vocabulary);
 		}
+		setDatabase(ds);
+
 	}
 
 	public RDBMSDirectDataRepositoryManager() {
@@ -161,38 +171,25 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	public void setConfig(Properties config) {
 		this.config = config;
 	}
-	
-	@Override 
+
+	@Override
 	public void disconnect() {
 		try {
 			conn.close();
 		} catch (Exception e) {
-			
+
 		}
 	}
-	
+
 	@Override
 	public Connection getConnection() {
 		return conn;
 	}
-	
 
 	@Override
-	public void setDatabase(OBDADataSource ds) throws SQLException, ClassNotFoundException {
-		this.db = db;
-		
-		String url = ds.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = ds.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = ds.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = ds.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-		
-		try {
-			Class.forName(driver);
-		}
-		catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
-		}		
-		conn = DriverManager.getConnection(url, username, password);		
+	public void setDatabase(Connection conn) {
+
+		this.conn = conn;
 	}
 
 	@Override
@@ -276,10 +273,12 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 				out.append(String.format(strinsert_meta_table, predicate.getName(), "CONCEPT", escaped(predicatetableMap.get(predicate))));
 				out.append(";\n");
 			} else if (predicate.getType(1) == COL_TYPE.OBJECT) {
-				out.append(String.format(strinsert_meta_table, predicate.getName(), "OBJECTPROPERTY", escaped(predicatetableMap.get(predicate))));
+				out.append(String.format(strinsert_meta_table, predicate.getName(), "OBJECTPROPERTY",
+						escaped(predicatetableMap.get(predicate))));
 				out.append(";\n");
 			} else if (predicate.getType(1) == COL_TYPE.LITERAL) {
-				out.append(String.format(strinsert_meta_table, predicate.getName(), "DATAPROPERTY", escaped(predicatetableMap.get(predicate))));
+				out.append(String.format(strinsert_meta_table, predicate.getName(), "DATAPROPERTY",
+						escaped(predicatetableMap.get(predicate))));
 				out.append(";\n");
 			} else {
 				throw new RuntimeException("Unsupported predicate: " + predicate);
@@ -301,15 +300,18 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			Axiom assertion = data.next();
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion cassertion = (ClassAssertion) assertion;
-				out.append(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), cassertion.getObject().getURI()));
+				out.append(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), cassertion.getObject()
+						.getURI()));
 				out.append(";\n");
 			} else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
-				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), rassertion.getFirstObject().getURI(), rassertion.getSecondObject().getURI()));
+				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), rassertion.getFirstObject()
+						.getURI(), rassertion.getSecondObject().getURI()));
 				out.append(";\n");
 			} else if (assertion instanceof DataPropertyAssertion) {
 				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
-				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()), rassertion.getObject().getURI(), escaped(rassertion.getValue().getValue())));
+				out.append(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()), rassertion.getObject()
+						.getURI(), escaped(rassertion.getValue().getValue())));
 				out.append(";\n");
 			}
 		}
@@ -326,6 +328,13 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	@Override
 	public void createDBSchema(boolean dropExisting) throws SQLException {
 
+		
+		if (isDBSchemaDefined()) {
+			log.debug("Schema already exists. Skipping creation");
+			return;
+		}
+
+		
 		if (dropExisting) {
 			try {
 				dropDBSchema();
@@ -375,6 +384,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		st.close();
 		conn.commit();
 
+		isIndexed = true;
+
 	}
 
 	@Override
@@ -417,9 +428,11 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			if (predicate.getArity() == 1) {
 				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "CONCEPT", escaped(predicatetableMap.get(predicate))));
 			} else if (predicate.getType(1) == COL_TYPE.OBJECT) {
-				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "OBJECTPROPERTY", escaped(predicatetableMap.get(predicate))));
+				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "OBJECTPROPERTY",
+						escaped(predicatetableMap.get(predicate))));
 			} else if (predicate.getType(1) == COL_TYPE.LITERAL) {
-				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "DATAPROPERTY", escaped(predicatetableMap.get(predicate))));
+				st.addBatch(String.format(strinsert_meta_table, predicate.getName(), "DATAPROPERTY",
+						escaped(predicatetableMap.get(predicate))));
 			} else {
 				throw new RuntimeException("Unsupported predicate: " + predicate);
 			}
@@ -430,55 +443,66 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void insertData(Iterator<Assertion> data) throws SQLException {
+	public int insertData(Iterator<Assertion> data) throws SQLException {
 		Statement st = conn.createStatement();
 		conn.setAutoCommit(false);
 		/*
 		 * Generating the inserts for the ABox data
 		 */
 
+		int totalcount = 0;
+
 		int batchCount = 0;
 		while (data.hasNext()) {
 			Axiom assertion = data.next();
-
+			totalcount += 1;
 			batchCount += 1;
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion cassertion = (ClassAssertion) assertion;
 				if (predicatetableMap.get(cassertion.getConcept()) == null) {
-					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", cassertion.getConcept());
+					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}",
+							cassertion.getConcept());
 					continue;
 				}
-				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), cassertion.getObject().getURI()));
+				st.addBatch(String.format(strinsert_table_class, predicatetableMap.get(cassertion.getConcept()), cassertion.getObject()
+						.getURI()));
 			} else if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion rassertion = (ObjectPropertyAssertion) assertion;
-				
+
 				if (predicatetableMap.get(rassertion.getRole()) == null) {
-					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", rassertion.getRole());
+					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}",
+							rassertion.getRole());
 					continue;
 				}
-				
-				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), rassertion.getFirstObject().getURI(), rassertion.getSecondObject().getURI()));
+
+				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getRole()), rassertion
+						.getFirstObject().getURI(), rassertion.getSecondObject().getURI()));
 
 			} else if (assertion instanceof DataPropertyAssertion) {
 				DataPropertyAssertion rassertion = (DataPropertyAssertion) assertion;
-				
+
 				if (predicatetableMap.get(rassertion.getAttribute()) == null) {
-					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}", rassertion.getAttribute());
+					log.warn("WARNING: Found reference to an unknown Class/Property. We will ignore the assertion. Entity: {}",
+							rassertion.getAttribute());
 					continue;
 				}
 
-				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()), rassertion.getObject().getURI(), escaped(rassertion.getValue().getValue())));
+				st.addBatch(String.format(strinsert_table_property, predicatetableMap.get(rassertion.getAttribute()), rassertion
+						.getObject().getURI(), escaped(rassertion.getValue().getValue())));
 			}
 
 			if (batchCount == 50000) {
 				st.executeBatch();
+				conn.commit();
 				st.clearBatch();
+				batchCount = 0;
 			}
 		}
 
 		st.executeBatch();
 		st.close();
 		conn.commit();
+		return totalcount;
 	}
 
 	@Override
@@ -661,7 +685,73 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	 * Utilities
 	 */
 	private static String escaped(String str) {
-		str = str.replace("\'", "\'\'");  // H2 requires two single quotes as the escaped character for a single quote.
+		str = str.replace("\'", "\'\'"); // H2 requires two single quotes as the
+											// escaped character for a single
+											// quote.
 		return str;
+	}
+
+	@Override
+	public void dropIndexes() throws SQLException {
+		Statement st = conn.createStatement();
+		conn.setAutoCommit(false);
+
+		for (Predicate predicate : predicatetableMap.keySet()) {
+			if (predicate.getArity() == 1) {
+				st.addBatch(String.format(strdrop_index_class, predicatetableMap.get(predicate)));
+			} else if (predicate.getArity() == 2) {
+				st.addBatch(String.format(strdrop_index_property_1, predicatetableMap.get(predicate)));
+				st.addBatch(String.format(strdrop_index_property_2, predicatetableMap.get(predicate)));
+			} else {
+				throw new RuntimeException("Unsupported predicate: " + predicate);
+			}
+		}
+
+		st.executeBatch();
+		st.close();
+		conn.commit();
+
+		isIndexed = false;
+
+	}
+
+	@Override
+	public boolean isIndexed() {
+		return isIndexed;
+	}
+
+	@Override
+	public boolean isDBSchemaDefined() throws SQLException {
+		Statement st = conn.createStatement();
+		boolean exists = true;
+		try {
+			
+			for (Predicate predicate : predicatetableMap.keySet()) {
+				if (predicate.getArity() == 1) {
+					st.addBatch(String.format("SELECT 1 FROM " + strtabledata + " WHERE 1=0", predicatetableMap.get(predicate)));
+				} else if (predicate.getArity() == 2) {
+					st.addBatch(String.format("SELECT 1 FROM " + strtabledata + " WHERE 1=0", predicatetableMap.get(predicate)));
+				} else {
+					throw new RuntimeException("Unsupported predicate: " + predicate);
+				}
+			}
+			st.executeBatch();
+		} catch (SQLException e) {
+			exists = false;
+			log.debug(e.getMessage());
+		} finally {
+			try {
+				st.close();
+			} catch (SQLException e) {
+
+			}
+		}
+		return exists;
+	}
+
+	@Override
+	public long loadWithFile(Iterator<Assertion> data) throws SQLException, IOException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

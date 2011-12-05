@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.ViewManager;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	private JDBCUtility					util					= null;
 	private Map<Integer, String>		localAliasMap			= null;
 
-	org.slf4j.Logger					log						= LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
+	private static final org.slf4j.Logger					log						= LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
 
 	public ComplexMappingSQLGenerator(MappingViewManager man, JDBCUtility util) {
 		viewManager = man;

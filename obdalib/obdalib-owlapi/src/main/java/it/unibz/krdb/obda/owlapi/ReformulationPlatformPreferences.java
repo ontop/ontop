@@ -29,6 +29,16 @@ public class ReformulationPlatformPreferences extends Properties {
 	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 	
+	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
+	
+	public static final String JDBC_URL = "JDBC_URL";
+	
+	public static final String DBUSER = "DBUSER";
+	
+	public static final String DBPASSWORD = "DBPASSWORD";
+	
+	public static final String JDBC_DRIVER = "JDBC_DRIVER";	
+	
 	private Logger				log						= LoggerFactory.getLogger(ReformulationPlatformPreferences.class);
 
 	public ReformulationPlatformPreferences() {

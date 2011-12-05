@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 
 
 public class MappingVocabularyRepair {
-	OntologyFactory fac = OntologyFactoryImpl.getInstance();
-	OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static OntologyFactory fac = OntologyFactoryImpl.getInstance();
+	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 

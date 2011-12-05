@@ -98,7 +98,7 @@ public class LUBMTester {
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
         OBDAStatement statement = reasoner.getStatement();
-        OBDAResultSet result = statement.executeQuery(fullquery);
+        OBDAResultSet result = statement.executequery);
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {

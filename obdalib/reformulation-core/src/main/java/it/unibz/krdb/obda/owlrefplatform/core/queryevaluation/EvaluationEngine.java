@@ -3,6 +3,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import it.unibz.krdb.obda.model.OBDADataSource;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * An interface representing the Evaluation engine for a Technique wrapper.
@@ -23,6 +25,8 @@ public interface EvaluationEngine {
 	 * @throws Exception
 	 */
 	public ResultSet execute(String sql) throws Exception;
+	
+	public Statement getStatement() throws SQLException;
 	
 	/**
 	 * Updates the current data source with the given one, i.e. after 

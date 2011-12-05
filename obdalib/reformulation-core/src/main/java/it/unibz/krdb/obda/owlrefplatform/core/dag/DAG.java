@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,23 +25,26 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DAG {
+public class DAG implements Serializable {
 
-	private final Logger log = LoggerFactory.getLogger(DAG.class);
+	private static final Logger log = LoggerFactory.getLogger(DAG.class);
 
 	private int index_counter = 1;
 
 	public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
+
 	public final static int NULL_INDEX = -1;
 
 	public Map<Description, Description> equi_mappings = new HashMap<Description, Description>();
 
 	public final Map<Description, DAGNode> classes;
+
 	public final Map<Description, DAGNode> roles;
 
 	public final Map<Description, DAGNode> allnodes;
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+
 	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
 	// public final static String thingStr =

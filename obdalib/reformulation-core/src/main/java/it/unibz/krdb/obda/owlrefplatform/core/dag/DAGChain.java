@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DAGChain {
 
-	private final Logger	log	= LoggerFactory.getLogger(this.getClass());
+	private final static Logger	log	= LoggerFactory.getLogger(DAGChain.class);
 
 	/***
 	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability

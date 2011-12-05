@@ -15,7 +15,7 @@ public class QuestConstants {
 	public static final String UNIVERSAL = "universal";
 	public static final String DIRECT = "direct";
 	
-	//data location
-	public static final String PROVIDED = "provided";
-	public static final String INMEMORY = "inmemory";
+	//storage location
+	public static final String JDBC = "jdbc";
+	public static final String INMEMORY = "h2-inmemory";
 }

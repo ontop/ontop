@@ -45,26 +45,29 @@ import org.slf4j.LoggerFactory;
 
 public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
-	List<OBDAMappingAxiom>			mappings			= new LinkedList<OBDAMappingAxiom>();
-	Set<OBDAMappingAxiom>			splitMappings		= null;
+	List<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>();
+
+	Set<OBDAMappingAxiom> splitMappings = null;
 
 	// private Map<String, LinkedList<OBDAMappingAxiom>> mappingsIndex = null;
 
-	private MappingViewManager		viewManager			= null;
-	private OBDADataFactory			termFactory			= null;
-	private ResolutionEngine		resolutionEngine	= null;
+	private MappingViewManager viewManager = null;
+
+	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
+
+	private static final ResolutionEngine resolutionEngine = new ResolutionEngine();
 
 	/*
 	 * A program that has rules of the form C(p(x)) :- Aux(x) to be used for the
 	 * computation of partial evaluations
 	 */
-	DatalogProgram					compilationOfM		= null;
+	DatalogProgram compilationOfM = null;
 
-	Logger							log					= LoggerFactory.getLogger(ComplexMappingUnfolder.class);
+	private static final Logger log = LoggerFactory.getLogger(ComplexMappingUnfolder.class);
 
-	private Map<String, Function>	functTermMap		= null;
+	private Map<String, Function> functTermMap = null;
 
-	URIToFunctionMatcher			uriFunctorMatcher;
+	URIToFunctionMatcher uriFunctorMatcher;
 
 	/***
 	 * 
@@ -81,9 +84,9 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 		log.debug("Mappings recreived: {}", mappings.size());
 
 		this.mappings.addAll(mappings);
-		this.termFactory = OBDADataFactoryImpl.getInstance();
+
 		this.viewManager = man;
-		resolutionEngine = new ResolutionEngine();
+
 		functTermMap = new HashMap<String, Function>();
 
 		splitMappings = new LinkedHashSet<OBDAMappingAxiom>();

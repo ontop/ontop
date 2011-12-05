@@ -40,14 +40,13 @@ public class MappingViewManager implements ViewManager {
 	private Map<String, Predicate>					mappingToNarysetMap			= null;
 	private Map<String, Integer>					globalAliases				= null;
 	private Map<URI, AuxSQLMapping>					predicateAuxMappingMap		= null;
-	private OBDADataFactory							predFactory					= null;
+	private static final OBDADataFactory							predFactory					= OBDADataFactoryImpl.getInstance();
 	private Map<URI, String>						predicateToSQLMap			= null;
 	private int										globalAlias					= 1;
 	private Atom							head						= null;
 
 	public MappingViewManager(Collection<OBDAMappingAxiom> mappings) {
 		this.mappings.addAll(mappings);
-		predFactory = OBDADataFactoryImpl.getInstance();
 		mappingswithsambodyIndex = new HashMap<String, Vector<OBDAMappingAxiom>>();
 		mappingToNarysetMap = new HashMap<String, Predicate>();
 		globalAliases = new HashMap<String, Integer>();

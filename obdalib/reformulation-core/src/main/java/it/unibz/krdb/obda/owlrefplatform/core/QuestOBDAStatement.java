@@ -1,16 +1,16 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import it.unibz.krdb.obda.codec.DatalogProgramToTextCodec;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -23,6 +23,7 @@ import it.unibz.krdb.obda.parser.SPARQLDatalogTranslator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,41 +40,42 @@ import com.hp.hpl.jena.query.QueryException;
  * The obda statement provides the implementations necessary to query the
  * reformulation platform reasoner from outside, i.e. protege
  * 
- * @author Manfred Gerstgrasser
  * 
  */
 
 public class QuestOBDAStatement implements OBDAStatement {
 
-	private QueryRewriter				rewriter			= null;
-	private UnfoldingMechanism			unfoldingmechanism	= null;
-	private SourceQueryGenerator		querygenerator		= null;
-	private EvaluationEngine			engine				= null;
-	private QueryVocabularyValidator	validator			= null;
-	// private DatalogProgram query = null;
-	private OBDAModel					apic				= null;
-	private boolean						canceled			= false;
+	private QueryRewriter rewriter = null;
 
-	// private DatalogProgram rewriting = null;
-	// private DatalogProgram unfolding = null;
-	// private QueryResultSet result = null;
+	private UnfoldingMechanism unfoldingmechanism = null;
 
-	Logger								log					= LoggerFactory.getLogger(QuestOBDAStatement.class);
+	private SourceQueryGenerator querygenerator = null;
+
+	private QueryVocabularyValidator validator = null;
+
+	private OBDAModel apic = null;
+
+	private boolean canceled = false;
+
+	Logger log = LoggerFactory.getLogger(QuestOBDAStatement.class);
+	private Statement statement;
+
+	private RDBMSDataRepositoryManager repository;
 
 	public QuestOBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val,
-			EvaluationEngine eng, OBDAModel apic) {
+			Statement st, OBDAModel apic, RDBMSDataRepositoryManager repository) {
+
+		this.repository = repository;
 
 		this.rewriter = rew;
 		this.unfoldingmechanism = unf;
 		this.querygenerator = gen;
-		this.engine = eng;
+		// this.engine = eng;
+
+		this.statement = st;
 		this.validator = val;
 		// this.query = query;
 		this.apic = apic;
-		// if (query.getRules().size() > 0) {
-		// Atom head = query.getRules().get(0).getHead();
-		// querygenerator.getViewManager().storeOrgQueryHead(head);
-		// }
 
 	}
 
@@ -106,16 +108,16 @@ public class QuestOBDAStatement implements OBDAStatement {
 		OBDAResultSet result;
 
 		String epistemicUnfolding = getUnfoldingEpistemic(strquery);
-		ResultSet set = engine.execute(epistemicUnfolding);
-		result = new OWLOBDARefResultSet(set);
+		ResultSet set = statement.executeQuery(epistemicUnfolding);
+		result = new OWLOBDARefResultSet(set, this);
 
 		return result;
 	}
 
 	private OBDAResultSet executeDirectQuery(String query) throws Exception {
 		OBDAResultSet result;
-		ResultSet set = engine.execute(query);
-		result = new OWLOBDARefResultSet(set);
+		ResultSet set = statement.executeQuery(query);
+		result = new OWLOBDARefResultSet(set, this);
 		return result;
 	}
 
@@ -147,10 +149,10 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 		log.debug("Start the rewriting process...");
 		OBDAQuery rewriting = rewriter.rewrite(program);
-		
+
 		log.debug("Start the unfolding process...");
 		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
-		
+
 		log.debug("Producing the SQL string...");
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, signature);
 
@@ -164,13 +166,13 @@ public class QuestOBDAStatement implements OBDAStatement {
 			if (program.getRules().size() < 1) {
 				throw new Exception("Error, empty query");
 			}
-			result = new EmptyQueryResultSet(signature);
+			result = new EmptyQueryResultSet(signature, this);
 		} else {
-			ResultSet set = engine.execute(sql);
+			ResultSet set = statement.executeQuery(sql);
 			if (isDPBoolean(program)) {
-				result = new BooleanOWLOBDARefResultSet(set);
+				result = new BooleanOWLOBDARefResultSet(set, this);
 			} else {
-				result = new OWLOBDARefResultSet(set);
+				result = new OWLOBDARefResultSet(set, this);
 			}
 		}
 
@@ -207,6 +209,11 @@ public class QuestOBDAStatement implements OBDAStatement {
 	@Override
 	public String getRewriting(String strquery) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
+		
+		log.debug("Replacing equivalences...");
+		program = validator.replaceEquivalences(program);
+
+		
 		OBDAQuery rewriting = rewriter.rewrite(program);
 		DatalogProgramToTextCodec codec = new DatalogProgramToTextCodec(apic);
 		return codec.encode((DatalogProgram) rewriting);
@@ -314,6 +321,10 @@ public class QuestOBDAStatement implements OBDAStatement {
 	@Override
 	public String getUnfolding(String strquery, boolean reformulate) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
+		
+		log.debug("Replacing equivalences...");
+		program = validator.replaceEquivalences(program);
+
 		OBDAQuery unfolding = null;
 		if (!reformulate) {
 			unfolding = unfoldingmechanism.unfold(program);
@@ -334,7 +345,7 @@ public class QuestOBDAStatement implements OBDAStatement {
 		String unf = getUnfolding(query);
 		String newsql = "SELECT count(*) FROM (" + unf + ") t1";
 		if (!canceled) {
-			ResultSet set = engine.execute(newsql);
+			ResultSet set = statement.executeQuery(newsql);
 			if (set.next()) {
 				return set.getInt(1);
 			} else {
@@ -369,7 +380,11 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 	@Override
 	public void close() throws Exception {
-		engine.closeStatement();
+		try {
+			statement.close();
+		} catch (SQLException e) {
+
+		}
 	}
 
 	private DatalogProgram getDatalogQuery(String query) throws Exception {
@@ -399,6 +414,66 @@ public class QuestOBDAStatement implements OBDAStatement {
 			throw new Exception("Unsupported syntax");
 
 		return queryProgram;
+	}
+
+	@Override
+	public void addBatch(String query) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void cancel() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void clearBatch() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int executeUpdate(String query) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getFetchSize() throws Exception {
+		return statement.getFetchSize();
+
+	}
+
+	@Override
+	public int getMaxRows() throws Exception {
+		return statement.getMaxRows();
+
+	}
+
+	@Override
+	public void getMoreResults() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setFetchSize(int rows) throws Exception {
+		statement.setFetchSize(rows);
+
+	}
+
+	@Override
+	public void setMaxRows(int max) throws Exception {
+		statement.setMaxRows(max);
+
+	}
+
+	@Override
+	public void setQueryTimeout(int seconds) throws Exception {
+		statement.setQueryTimeout(seconds);
+
 	}
 
 }

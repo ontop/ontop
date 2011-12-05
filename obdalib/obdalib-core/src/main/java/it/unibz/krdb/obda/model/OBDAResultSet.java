@@ -25,5 +25,7 @@ public interface OBDAResultSet {
 	public int getFetchSize() throws SQLException;
 
 	public void close() throws SQLException;
+	
+	public OBDAStatement getStatement();
 
 }

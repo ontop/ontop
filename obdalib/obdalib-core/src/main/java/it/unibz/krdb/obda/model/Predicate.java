@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.model;
 
+import java.io.Serializable;
 import java.net.URI;
 
 /**
@@ -10,7 +11,7 @@ import java.net.URI;
  * {@code P(x)} written <code>{x|P(x)</code> is just a collection of all the
  * objects for which {@code P} is true.
  */
-public interface Predicate extends Cloneable {
+public interface Predicate extends Cloneable, Serializable {
 
 	public enum COL_TYPE {OBJECT, LITERAL};
 	

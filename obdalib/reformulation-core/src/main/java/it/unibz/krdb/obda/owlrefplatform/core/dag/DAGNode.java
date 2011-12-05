@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -13,7 +14,7 @@ import java.util.Set;
 /**
  * @author Sergejs Pugacs
  */
-public class DAGNode {
+public class DAGNode implements Serializable {
 
 	private final Description description;
 

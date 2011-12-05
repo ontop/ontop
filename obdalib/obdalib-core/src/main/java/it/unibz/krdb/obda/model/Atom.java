@@ -1,8 +1,9 @@
 package it.unibz.krdb.obda.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface Atom extends Cloneable {
+public interface Atom extends Cloneable, Serializable {
 	
 	public Atom clone();
 

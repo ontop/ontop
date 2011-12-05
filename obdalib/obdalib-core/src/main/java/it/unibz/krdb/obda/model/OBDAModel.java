@@ -4,13 +4,14 @@ import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
-public interface OBDAModel extends Cloneable {
+public interface OBDAModel extends Cloneable, Serializable {
 
 	public abstract QueryController getQueryController();
 

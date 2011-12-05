@@ -519,7 +519,7 @@ public class VirtualABoxMaterializer {
 
 				}
 			} else {
-				throw new RuntimeException("ERROR, Wrongly typd predicate: " + pred.toString());
+				throw new RuntimeException("ERROR, Wrongly typed predicate: " + pred.toString());
 			}
 			return assertion;
 		}

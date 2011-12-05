@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -9,9 +10,11 @@ import java.util.List;
 public class EmptyQueryResultSet implements OBDAResultSet {
 
 	List<String> head = null;
+	private OBDAStatement st;
 	
-	public EmptyQueryResultSet(List<String> headvariables) {
+	public EmptyQueryResultSet(List<String> headvariables, OBDAStatement st) {
 		this.head = headvariables;
+		this.st = st;
 	}
 	
 	@Override
@@ -61,6 +64,11 @@ public class EmptyQueryResultSet implements OBDAResultSet {
 	@Override
 	public boolean nextRow() throws SQLException {
 		return false;
+	}
+
+	@Override
+	public OBDAStatement getStatement() {
+		return st;
 	}
 
 }

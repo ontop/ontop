@@ -21,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,12 +43,29 @@ import org.slf4j.LoggerFactory;
 
 public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
-	OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	Logger			log	= LoggerFactory.getLogger(RDBMSDirectDataRepositoryManagerTest.class);
+	Logger log = LoggerFactory.getLogger(RDBMSDirectDataRepositoryManagerTest.class);
 
 	protected void setUp() throws Exception {
 		super.setUp();
+	}
+
+	public Connection connect(OBDADataSource obdaSource) throws SQLException {
+		Connection conn;
+
+		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e1) {
+			// Does nothing because the SQLException handles this problem also.
+		}
+		conn = DriverManager.getConnection(url, username, password);
+		return conn;
 	}
 
 	public void testDBCreationFromString() throws Exception {
@@ -72,33 +91,36 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source);
+		
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		
+		
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn);
 
 		dbman.setVocabulary(preds);
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		dbman.getTablesDDL(out);
 		st.executeUpdate(out.toString());
-//		System.out.println(out.toString());
+		// System.out.println(out.toString());
 		out.reset();
 
 		dbman.getMetadataSQLInserts(out);
 		st.executeUpdate(out.toString());
-//		System.out.println(out.toString());
+		// System.out.println(out.toString());
 		out.reset();
 
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
 		dbman.getSQLInserts(ait, out);
 		st.executeUpdate(out.toString());
-//		System.out.println(out.toString());
+		// System.out.println(out.toString());
 		out.reset();
 
 		dbman.getIndexDDL(out);
 		st.executeUpdate(out.toString());
-//		System.out.println(out.toString());
+		// System.out.println(out.toString());
 		out.reset();
 
 		conn.commit();
@@ -107,20 +129,20 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
-//		System.out.println("###########################");
+		// System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-//			System.out.println(ass.toString());
+			// System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-//		System.out.println("###########################");
+		// System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -153,9 +175,11 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source, preds);
-
+		
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn, preds);
+
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -169,20 +193,20 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
-//		System.out.println("###########################");
+		// System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-//			System.out.println(ass.toString());
+			// System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-//		System.out.println("###########################");
+		// System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -213,9 +237,10 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source, preds);
-
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn, preds);
+
+
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(false);
@@ -228,7 +253,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		/*
 		 * Reseting the manager
 		 */
-		dbman = new RDBMSDirectDataRepositoryManager(source);
+		dbman = new RDBMSDirectDataRepositoryManager(conn);
 		assertTrue(dbman.checkMetadata());
 		dbman.loadMetadata();
 
@@ -237,20 +262,20 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
-//		System.out.println("###########################");
+		// System.out.println("###########################");
 
 		int count = 0;
 		for (Assertion ass : list) {
-//			System.out.println(ass.toString());
+			// System.out.println(ass.toString());
 			count += 1;
 		}
 		assertTrue("count: " + count, count == 9);
 
-//		System.out.println("###########################");
+		// System.out.println("###########################");
 
 		count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 9);
@@ -281,11 +306,12 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(source);
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn);
 
 		dbman.setVocabulary(preds);
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		Statement st = conn.createStatement();
 
 		log.debug("Creating schema and loading data...");
@@ -304,7 +330,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -327,13 +353,13 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 	public class ABoxAssertionGeneratorIterator implements Iterator<Assertion> {
 
-		final int				MAX_ASSERTIONS;
-		int						currentassertion	= 0;
-		final OBDADataFactory	fac					= OBDADataFactoryImpl.getInstance();
-		List<Predicate>			vocab				= new LinkedList<Predicate>();
-		final int				size;
+		final int MAX_ASSERTIONS;
+		int currentassertion = 0;
+		final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		List<Predicate> vocab = new LinkedList<Predicate>();
+		final int size;
 
-		final Random			rand;
+		final Random rand;
 
 		public ABoxAssertionGeneratorIterator(int numberofassertions, Collection<Predicate> vocabulary) {
 			MAX_ASSERTIONS = numberofassertions;

@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
+import java.io.Serializable;
+
 import it.unibz.krdb.obda.model.Atom;
 
 
@@ -12,7 +14,7 @@ import it.unibz.krdb.obda.model.Atom;
  *
  */
 
-public interface ViewManager {
+public interface ViewManager extends Serializable {
 	
 	/**
 	 * Translates the given atom into the alias which was used for it during

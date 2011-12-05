@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
+import java.io.Serializable;
+
 /**
  * A class representing a mapping between the variables of the CQIE and 
  * SQL query of a mapping. It is only based on the position
@@ -8,7 +10,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
  *
  */
 
-public class AuxSQLMapping {
+public class AuxSQLMapping implements Serializable {
 	
 	private String [] sqlVariables = null; 
 	

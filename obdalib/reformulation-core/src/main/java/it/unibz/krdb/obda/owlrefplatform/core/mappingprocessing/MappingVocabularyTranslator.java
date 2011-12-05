@@ -20,8 +20,8 @@ import java.util.Map;
 
 public class MappingVocabularyTranslator {
 
-	OntologyFactory	fac		= OntologyFactoryImpl.getInstance();
-	OBDADataFactory	dfac	= OBDADataFactoryImpl.getInstance();
+	private static OntologyFactory	fac		= OntologyFactoryImpl.getInstance();
+	private static OBDADataFactory	dfac	= OBDADataFactoryImpl.getInstance();
 
 	/***
 	 * Given a collection of mappings and an equivalence map for classes and

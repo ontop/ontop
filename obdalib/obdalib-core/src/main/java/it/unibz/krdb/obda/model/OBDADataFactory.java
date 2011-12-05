@@ -2,12 +2,13 @@ package it.unibz.krdb.obda.model;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-public interface OBDADataFactory {
+public interface OBDADataFactory extends Serializable {
 
 	public OBDAModel getOBDAModel();
 

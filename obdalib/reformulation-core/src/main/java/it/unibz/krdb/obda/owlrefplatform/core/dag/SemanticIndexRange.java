@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * Represents a set of continues intervals
  */
-public class SemanticIndexRange {
+public class SemanticIndexRange implements Serializable {
 
     private List<Interval> intervals = new LinkedList<Interval>();
 
@@ -92,7 +93,7 @@ public class SemanticIndexRange {
      *
      * @author Sergejs Pugacs
      */
-    public class Interval implements Comparable<Interval> {
+    public class Interval implements Comparable<Interval>, Serializable {
 
         private final int start, end;
 

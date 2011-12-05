@@ -85,6 +85,10 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					<excludes>
+						<exclude>**/TW*.java</exclude>
+						<exclude>**/LUBM*.java</exclude>
+					</excludes>
 					<testExcludes>
 						<exclude>**/MappingToRuleTester.java</exclude>
 						<exclude>**/PartialEvaluationTest.java</exclude>

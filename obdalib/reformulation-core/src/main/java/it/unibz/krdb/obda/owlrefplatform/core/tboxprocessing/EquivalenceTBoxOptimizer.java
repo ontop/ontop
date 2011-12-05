@@ -49,7 +49,7 @@ public class EquivalenceTBoxOptimizer {
 	private Map<Predicate, Description> equivalenceMap;
 	private Ontology tbox;
 
-	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	public EquivalenceTBoxOptimizer(Ontology tbox) {
 		this.tbox = tbox;

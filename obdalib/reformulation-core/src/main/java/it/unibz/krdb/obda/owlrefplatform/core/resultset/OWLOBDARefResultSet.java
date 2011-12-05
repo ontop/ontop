@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 
 import java.net.URI;
 import java.sql.ResultSet;
@@ -12,9 +13,11 @@ import java.util.Vector;
 public class OWLOBDARefResultSet implements OBDAResultSet{
 
 	private ResultSet set = null;
+	private OBDAStatement st;
 	
-	public OWLOBDARefResultSet(ResultSet set){
+	public OWLOBDARefResultSet(ResultSet set, OBDAStatement st){
 		this.set=set;
+		this.st = st;
 	}
 	
 	public double getAsDouble(int column) throws SQLException {
@@ -61,5 +64,10 @@ public class OWLOBDARefResultSet implements OBDAResultSet{
 
 	public void close() throws SQLException {
 		set.close();
+	}
+
+	@Override
+	public OBDAStatement getStatement() {
+		return st;
 	}
 }

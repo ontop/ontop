@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
-public class Edge {
+import java.io.Serializable;
+
+public class Edge implements Serializable  {
     private final DAGNode left;
     private final DAGNode right;
 

@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
@@ -25,19 +24,22 @@ import org.slf4j.LoggerFactory;
 
 public class DLRPerfectReformulator implements QueryRewriter {
 
-	private QueryAnonymizer				anonymizer		= null;
-	private AtomUnifier					unifier			= null;
-	private PositiveInclusionApplicator	piApplicator	= null;
-	private List<Axiom>				assertions		= new LinkedList<Axiom>();
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6641916058733198535L;
+	private final static QueryAnonymizer anonymizer = new QueryAnonymizer();
+	private final static AtomUnifier unifier = new AtomUnifier();
 
-	private OBDADataFactory				fac				= OBDADataFactoryImpl.getInstance();
+	private final static PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator();
+	private List<Axiom> assertions = new LinkedList<Axiom>();
 
-	Logger								log				= LoggerFactory.getLogger(DLRPerfectReformulator.class);
+	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+	Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
 	public DLRPerfectReformulator() {
-		piApplicator = new PositiveInclusionApplicator();
-		unifier = new AtomUnifier();
-		anonymizer = new QueryAnonymizer();
+
 	}
 
 	/***

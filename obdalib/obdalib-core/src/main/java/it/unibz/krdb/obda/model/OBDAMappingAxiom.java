@@ -13,10 +13,12 @@
  */
 package it.unibz.krdb.obda.model;
 
+import java.io.Serializable;
 
 
 
-public interface OBDAMappingAxiom extends Cloneable {
+
+public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
 	public void setSourceQuery(OBDAQuery query);
 

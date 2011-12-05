@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.ViewManager;
 
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -15,7 +16,7 @@ import java.util.List;
  *
  */
 
-public interface SourceQueryGenerator {
+public interface SourceQueryGenerator extends Serializable {
 
 	/**
 	 * Translates the given datalog program into a source query, which

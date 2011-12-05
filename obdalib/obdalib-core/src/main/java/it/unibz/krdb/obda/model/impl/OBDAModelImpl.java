@@ -59,7 +59,7 @@ public class OBDAModelImpl implements OBDAModel {
 	 * Datasources
 	 */
 
-	private final DatasourceXMLCodec					codec				= new DatasourceXMLCodec();
+	private static final DatasourceXMLCodec					codec				= new DatasourceXMLCodec();
 
 	private HashMap<URI, OBDADataSource>				datasources			= null;
 

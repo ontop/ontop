@@ -11,7 +11,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 
-import java.net.URI;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryVocabularyValidator {
+public class QueryVocabularyValidator implements Serializable {
 	/** The source ontology for validating the target query */
 
 	/** List of invalid predicates */

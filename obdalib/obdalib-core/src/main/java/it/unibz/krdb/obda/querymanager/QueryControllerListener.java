@@ -13,8 +13,10 @@
  */
 package it.unibz.krdb.obda.querymanager;
 
+import java.io.Serializable;
 
-public interface QueryControllerListener {
+
+public interface QueryControllerListener extends Serializable {
 
 	public void elementAdded(QueryControllerEntity element);
 

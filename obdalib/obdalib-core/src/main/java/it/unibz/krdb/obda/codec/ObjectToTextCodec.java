@@ -1,9 +1,11 @@
 package it.unibz.krdb.obda.codec;
 
+import java.io.Serializable;
+
 import it.unibz.krdb.obda.model.OBDAModel;
 
 
-public abstract class ObjectToTextCodec <ObjectClass extends Object> {
+public abstract class ObjectToTextCodec <ObjectClass extends Object> implements Serializable {
 
 	protected OBDAModel apic = null;
 

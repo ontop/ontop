@@ -29,40 +29,38 @@ import org.slf4j.LoggerFactory;
 
 public class TreeRedReformulator implements QueryRewriter {
 
-	private QueryAnonymizer				anonymizer		= null;
-	private AtomUnifier					unifier			= null;
-	private PositiveInclusionApplicator	piApplicator	= null;
+	private static final QueryAnonymizer anonymizer = new QueryAnonymizer();
+	private static final AtomUnifier unifier = new AtomUnifier();
 
-	Logger								log				= LoggerFactory.getLogger(TreeRedReformulator.class);
+	private static final Logger log = LoggerFactory.getLogger(TreeRedReformulator.class);
 
-	OBDADataFactory						fac				= OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	SemanticQueryOptimizer				sqoOptimizer	= null;
+	private static final SemanticQueryOptimizer sqoOptimizer = null;
+
+	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(sqoOptimizer);;
 
 	/***
 	 * The TBox used for reformulating.
 	 */
-	private Ontology					ontology		= null;
+	private Ontology ontology = null;
 
 	/***
 	 * The set of ABox dependencies that will be used to optimize the
 	 * reformulation.
 	 */
-	private Ontology				sigma			= null;
+	private Ontology sigma = null;
 
 	public TreeRedReformulator() {
 
-		unifier = new AtomUnifier();
-		anonymizer = new QueryAnonymizer();
 
 		// sqoOptimizer = new SemanticQueryOptimizer(fac, rightAssertionIndex);
 
-		piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
 
 	}
 
 	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
-		//		
+		//
 
 		log.debug("Query reformulation started...");
 
@@ -251,7 +249,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		// log.debug("Removing auxiliary queries...");
 		resultlist = cleanAuxiliaryQueries(resultlist);
 		log.debug("Removed auxiliary queries. New size: {}", resultlist.size());
-		
+
 		log.debug("Reformulation: {}", resultlist);
 
 		/* One last pass of the syntactic containment checker */
@@ -308,8 +306,8 @@ public class TreeRedReformulator implements QueryRewriter {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
 			for (Atom atom : body) {
-				if (atom.getPredicate().getName().toString().substring(0, OWLAPI2Translator.AUXROLEURI.length()).equals(
-						OWLAPI2Translator.AUXROLEURI)) {
+				if (atom.getPredicate().getName().toString().substring(0, OWLAPI2Translator.AUXROLEURI.length())
+						.equals(OWLAPI2Translator.AUXROLEURI)) {
 					auxiliary = true;
 					break;
 				}

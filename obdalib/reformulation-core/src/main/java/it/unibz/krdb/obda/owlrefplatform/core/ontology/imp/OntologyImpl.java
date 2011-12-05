@@ -24,6 +24,11 @@ import org.slf4j.LoggerFactory;
 
 public class OntologyImpl implements Ontology {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 758424053258299151L;
+
 	private Set<SubDescriptionAxiom> assertions = null;
 
 	private Set<Predicate> concepts = null;
@@ -48,7 +53,7 @@ public class OntologyImpl implements Ontology {
 
 	public boolean isSaturated = false;
 
-	private final OntologyFactory factory = OntologyFactoryImpl.getInstance();
+	private static final OntologyFactory factory = OntologyFactoryImpl.getInstance();
 
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
 

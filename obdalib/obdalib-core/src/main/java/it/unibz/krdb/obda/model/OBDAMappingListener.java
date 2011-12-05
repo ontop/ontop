@@ -13,10 +13,11 @@
  */
 package it.unibz.krdb.obda.model;
 
+import java.io.Serializable;
 import java.net.URI;
 
 
-public interface OBDAMappingListener {
+public interface OBDAMappingListener extends Serializable {
 	
 	/***
 	 * Called when a mapping has been inserted into the currently selected datasource.

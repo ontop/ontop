@@ -1,9 +1,10 @@
 package it.unibz.krdb.obda.model;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Set;
 
-public interface OBDADataSource extends Cloneable {
+public interface OBDADataSource extends Cloneable, Serializable {
 
 	public abstract void setParameter(String parameter_uri, String value);
 

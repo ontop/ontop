@@ -6,11 +6,12 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class URIToFunctionMatcher {
+public class URIToFunctionMatcher implements Serializable {
 
 	private Map<String, Function>	functTermMap	= null;
 

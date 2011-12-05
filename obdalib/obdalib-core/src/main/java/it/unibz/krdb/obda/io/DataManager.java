@@ -73,16 +73,16 @@ public class DataManager {
 	public static int													CURRENT_OBDA_FILE_VERSION_MINOR	= 0;
 
 	/** The XML codec to save/load data sources. */
-	protected DatasourceXMLCodec										dsCodec;
+	private static DatasourceXMLCodec										dsCodec = new DatasourceXMLCodec();
 
 	/** The XML codec to save/load mappings. */
 	protected MappingXMLCodec											mapCodec;
 
 	/** The XML codec to save queries. */
-	protected QueryGroupXMLRenderer												xmlRenderer;
+	private static final  QueryGroupXMLRenderer												xmlRenderer = new QueryGroupXMLRenderer();
 
 	/** The XML codec to load queries. */
-	 QueryGroupXMLReader													xmlReader;
+	private static final  QueryGroupXMLReader													xmlReader = new QueryGroupXMLReader();
 
 	// protected PrefixManager prefixManager = null;
 
@@ -90,16 +90,15 @@ public class DataManager {
 
 	protected Element													root;
 
-	private final Logger												log								= LoggerFactory.getLogger(this
-																												.getClass());
+	private static final Logger												log								= LoggerFactory.getLogger(DataManager.class);
 
 	public DataManager(OBDAModel apic) {
 		this.apic = apic;
 
-		dsCodec = new DatasourceXMLCodec();
+		
 		mapCodec = new MappingXMLCodec(apic);
-		xmlRenderer = new QueryGroupXMLRenderer();
-		xmlReader = new QueryGroupXMLReader();
+		
+		
 	}
 
 

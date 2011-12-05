@@ -12,7 +12,9 @@
  */
 package it.unibz.krdb.obda.model;
 
-public interface OBDAModelListener {
+import java.io.Serializable;
+
+public interface OBDAModelListener extends Serializable {
 
 	public void datasourceAdded(OBDADataSource source);
 

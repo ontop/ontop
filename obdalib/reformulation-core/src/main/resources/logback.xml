@@ -1,13 +1,15 @@
 <configuration>
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.sss} |-%-5level in %logger{36} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.sss} |-%-5level in %logger{25} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
 	<!-- Main component -->
+	<!--
 	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="DEBUG" />
-	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="DEBUG" />
+    <logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="DEBUG" />
+    -->
 
 	<!-- Query Rewriting component -->
 	<!--

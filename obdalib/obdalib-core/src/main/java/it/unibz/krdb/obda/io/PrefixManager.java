@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.io;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Map;
  * 
  * @author Josef Hardi <josef.hardi@gmail.com>
  */
-public interface PrefixManager
+public interface PrefixManager extends Serializable
 {
   public void addUri(String uri, String prefix);
   

@@ -8,9 +8,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.dialogs.SelectDB;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.awt.event.ActionEvent;
 import java.net.URI;
+import java.sql.Connection;
 import java.util.Set;
 
 import javax.swing.JFrame;
@@ -71,10 +73,14 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 					public void run() {
 						OBDAProgessMonitor monitor = new OBDAProgessMonitor("Loading data instances to database...");
 						monitor.start();
+						Connection conn = null;
 						try {
 
 							OWLAPI2VocabularyExtractor vext = new OWLAPI2VocabularyExtractor();
-							RDBMSDirectDataRepositoryManager dbmanager = new RDBMSDirectDataRepositoryManager(source,
+							
+							conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+
+							RDBMSDirectDataRepositoryManager dbmanager = new RDBMSDirectDataRepositoryManager(conn,
 									vext.getVocabulary(ontologies));
 							monitor.addProgressListener(dbmanager);
 
@@ -93,6 +99,12 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 							log.debug(e.getMessage(), e);
 							JOptionPane.showMessageDialog(null, "Error during the dumping. " + e.getMessage(), "FAILURE",
 									JOptionPane.ERROR_MESSAGE);
+						} finally {
+							try {
+								conn.close();
+							} catch (Exception e) {
+								log.debug(e.getMessage());
+							}
 						}
 					}
 				});

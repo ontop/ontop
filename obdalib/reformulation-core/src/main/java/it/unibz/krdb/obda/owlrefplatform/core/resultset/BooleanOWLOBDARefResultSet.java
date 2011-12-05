@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.OBDAStatement;
 
 import java.net.URI;
 import java.sql.ResultSet;
@@ -19,9 +20,11 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	private ResultSet set = null;
 	private boolean isTrue = false;
 	private int counter = 0;
+	private OBDAStatement st;
 	
-	public BooleanOWLOBDARefResultSet(ResultSet set){
+	public BooleanOWLOBDARefResultSet(ResultSet set, OBDAStatement st){
 		this.set=set;
+		this.st = st;
 		try {
 			isTrue = set.next();
 		} catch (SQLException e) {
@@ -132,6 +135,12 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 			counter++;
 			return true;
 		}
+	}
+
+
+	@Override
+	public OBDAStatement getStatement() {
+		return st;
 	}
 
 }

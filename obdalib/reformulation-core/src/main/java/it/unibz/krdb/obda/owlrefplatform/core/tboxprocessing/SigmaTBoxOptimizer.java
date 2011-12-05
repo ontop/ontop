@@ -34,8 +34,8 @@ public class SigmaTBoxOptimizer {
 	private final DAG				isaChain;
 	private final DAG				sigmaChain;
 
-	private final OBDADataFactory	predicateFactory;
-	private final OntologyFactory	descFactory;
+	private static final OBDADataFactory	predicateFactory = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory	descFactory = OntologyFactoryImpl.getInstance();
 
 	private Ontology				originalOntology	= null;
 
@@ -59,9 +59,6 @@ public class SigmaTBoxOptimizer {
 		this.sigmaChain = DAGConstructor.getISADAG(sigmat);
 		sigmaChain.clean();
 		DAGChain.getChainDAG(sigmaChain);
-
-		predicateFactory = OBDADataFactoryImpl.getInstance();
-		descFactory = new OntologyFactoryImpl();
 
 	}
 

@@ -1,9 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
+import java.io.Serializable;
+
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
-public interface QueryRewriter {
+public interface QueryRewriter extends Serializable {
 
 	public OBDAQuery rewrite(OBDAQuery input) throws Exception;
 

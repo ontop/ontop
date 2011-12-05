@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -33,21 +34,21 @@ import java.util.Set;
  * @author Mariano Rodriguez Muro
  * 
  */
-public interface RDBMSDataRepositoryManager {
+public interface RDBMSDataRepositoryManager extends Serializable {
 
-	public static String	TYPE_DIRECT		= "directdbabox";
+	public static String TYPE_DIRECT = "directdbabox";
 
-	public static String	TYPE_SI			= "semanticindexdbabox";
+	public static String TYPE_SI = "semanticindexdbabox";
 
-	public static String	TYPE_UNIVERSAL	= "universaldbabox";
+	public static String TYPE_UNIVERSAL = "universaldbabox";
 
 	public void setConfig(Properties confi);
-	
+
 	public void disconnect();
-	
+
 	public Connection getConnection();
 
-	public void setDatabase(OBDADataSource db) throws SQLException, ClassNotFoundException;
+	public void setDatabase(Connection conn);
 
 	public void setTBox(Ontology ontology);
 
@@ -64,8 +65,25 @@ public interface RDBMSDataRepositoryManager {
 	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
 
 	public void createDBSchema(boolean dropExisting) throws SQLException;
+	
+	public boolean isDBSchemaDefined() throws SQLException;
 
+	/***
+	 * Forces the repository to setup indexes for the data tables. Exactly which
+	 * indexes depends on the repository and the configuraiton of the
+	 * repository.
+	 * 
+	 * @throws SQLException
+	 */
 	public void createIndexes() throws SQLException;
+
+	/***
+	 * Drops any existing indexes in this repository. It will force "isIndexed"
+	 * to return false
+	 * 
+	 * @throws SQLException
+	 */
+	public void dropIndexes() throws SQLException;
 
 	/***
 	 * Drops completely existing table for this repository, including the
@@ -75,7 +93,14 @@ public interface RDBMSDataRepositoryManager {
 	 */
 	public void dropDBSchema() throws SQLException;
 
-	public void insertData(Iterator<Assertion> data) throws SQLException;
+	public int insertData(Iterator<Assertion> data) throws SQLException;
+
+	/***
+	 * Returns true if indexes are active in this repository.
+	 * 
+	 * @return
+	 */
+	public boolean isIndexed();
 
 	public Ontology getABoxDependencies();
 
@@ -115,5 +140,7 @@ public interface RDBMSDataRepositoryManager {
 	void getMetadataSQLInserts(OutputStream outstream) throws IOException;
 
 	void insertMetadata() throws SQLException;
+
+	public long loadWithFile(Iterator<Assertion> data) throws SQLException, IOException;
 
 }

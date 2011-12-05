@@ -77,33 +77,78 @@ import org.slf4j.LoggerFactory;
 
 public class OWLAPI2Translator {
 
-	private OBDADataFactory									predicateFactory	= null;
-	private OntologyFactory									descFactory			= null;
-	private HashSet<String>									objectproperties	= null;
-	private HashSet<String>									dataproperties		= null;
+	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();;
+	private HashSet<String> objectproperties = null;
+	private HashSet<String> dataproperties = null;
 
-	private final LanguageProfile							profile				= LanguageProfile.DLLITEA;
+	private final LanguageProfile profile = LanguageProfile.DLLITEA;
 
-	Logger													log					= LoggerFactory.getLogger(OWLAPI2Translator.class);
+	private static final Logger log = LoggerFactory.getLogger(OWLAPI2Translator.class);
 
-	public static String									AUXROLEURI			= "ER.A-AUXROLE";
+	public static final String AUXROLEURI = "ER.A-AUXROLE";
 
-	OntologyFactory											ofac				= OntologyFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/*
 	 * If we need to construct auxiliary subclass axioms for A ISA exists R.C we
 	 * put them in this map to avoid generating too many auxiliary
 	 * roles/classes.
 	 */
-	final Map<ClassDescription, List<SubDescriptionAxiom>>	auxiliaryAssertions	= new HashMap<ClassDescription, List<SubDescriptionAxiom>>();
+	final Map<ClassDescription, List<SubDescriptionAxiom>> auxiliaryAssertions = new HashMap<ClassDescription, List<SubDescriptionAxiom>>();
 
-	int														auxRoleCounter		= 0;
+	int auxRoleCounter = 0;
 
 	public OWLAPI2Translator() {
-		predicateFactory = OBDADataFactoryImpl.getInstance();
-		descFactory = new OntologyFactoryImpl();
+
 		objectproperties = new HashSet<String>();
 		dataproperties = new HashSet<String>();
+	}
+
+	/***
+	 * Load all the ontologies into a single translated merge.
+	 * 
+	 * @param ontologies
+	 * @return
+	 * @throws Exception
+	 */
+	public Ontology mergeTranslateOntologies(Set<OWLOntology> ontologies) throws Exception {
+		/*
+		 * We will keep track of the loaded ontologies and tranlsate the TBox
+		 * part of them into our internal represntation
+		 */
+		URI uri = URI.create("http://it.unibz.krdb.obda/Quest/auxiliaryontology");
+
+		Ontology translatedOntologyMerge = ofac.createOntology(uri);
+
+		log.debug("Load ontologies called. Translating ontologies.");
+		OWLAPI2Translator translator = new OWLAPI2Translator();
+		Set<URI> uris = new HashSet<URI>();
+
+		Ontology translation = ofac.createOntology(uri);
+		for (OWLOntology onto : ontologies) {
+			uris.add(onto.getURI());
+			Ontology aux;
+			aux = translator.translate(onto);
+			translation.addConcepts(aux.getConcepts());
+			translation.addRoles(aux.getRoles());
+			translation.addAssertions(aux.getAssertions());
+		}
+		/* we translated successfully, now we append the new assertions */
+
+		translatedOntologyMerge = translation;
+
+		// translatedOntologyMerge.addAssertions(translation.getAssertions());
+		// translatedOntologyMerge.addConcepts(new
+		// ArrayList<ClassDescription>(translation.getConcepts()));
+		// translatedOntologyMerge.addRoles(new
+		// ArrayList<Property>(translation.getRoles()));
+		// translatedOntologyMerge.saturate();
+
+		log.debug("Ontology loaded: {}", translatedOntologyMerge);
+
+		return translatedOntologyMerge;
+
 	}
 
 	public Ontology translate(OWLOntology owl) throws PunningException {
@@ -627,7 +672,7 @@ public class OWLAPI2Translator {
 		/**
 		 * 
 		 */
-		private static final long	serialVersionUID	= 7917688953760608030L;
+		private static final long serialVersionUID = 7917688953760608030L;
 
 		public TranslationException() {
 			super();

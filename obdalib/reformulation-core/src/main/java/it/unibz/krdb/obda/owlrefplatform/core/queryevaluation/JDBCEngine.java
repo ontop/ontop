@@ -134,4 +134,9 @@ public class JDBCEngine implements EvaluationEngine {
 		} catch (SQLException e) {
 		}
 	}
+
+	@Override
+	public Statement getStatement() throws SQLException {
+		return connection.createStatement();
+	}
 }
