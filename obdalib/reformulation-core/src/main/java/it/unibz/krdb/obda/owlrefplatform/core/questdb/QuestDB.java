@@ -46,6 +46,7 @@ public class QuestDB {
 		}
 
 		STORES_HOME = QUESTDB_HOME + "stores/";
+		System.out.println(STORES_HOME);
 
 		// CONFIG_HOME = QUESTDB_HOME + "config/";
 
