@@ -281,6 +281,17 @@ public class QuestDB {
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		cstore.createIndexes();
 	}
+	
+	public void analyze(String storename) throws Exception {
+		if (!stores.containsKey(storename))
+			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
+		QuestDBAbstractStore dbstore = stores.get(storename);
+		if (!(dbstore instanceof QuestDBClassicStore))
+			throw new Exception("Unsupported request");
+		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
+		cstore.analyze();
+		
+	}
 
 	public void dropIndexes(String storename) throws Exception {
 		if (!stores.containsKey(storename))

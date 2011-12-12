@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
@@ -59,6 +60,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import org.coode.obo.parser.IsATagValueHandler;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
@@ -93,26 +95,35 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static String select_query = "SELECT * FROM " + index_table;
 
-	public static final String class_table = "class";
+	public static final String class_table = "quest_class_assertion";
 
-	public static final String role_table = "role";
+	public static final String role_table = "quest_object_property_assertion";
+
+	public static final String attribute_table = "quest_data_property_assertion";
 
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(1000)," + "IDX SMALLINT" + ")";
 
 	public static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "URI1 VARCHAR(1000), " + "URI2 VARCHAR(1000), "
 			+ "IDX SMALLINT" + ")";
 
+	public static final String attribute_table_create = "CREATE TABLE " + attribute_table + " ( " + "URI1 VARCHAR(1000), "
+			+ "URI2 VARCHAR(1000), " + "IDX SMALLINT" + ")";
+
 	public static final String class_table_drop = "DROP TABLE " + class_table;
 
 	public static final String role_table_drop = "DROP TABLE " + role_table;
+
+	public static final String attribute_table_drop = "DROP TABLE " + attribute_table;
 
 	public static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX) VALUES (?, ?)";
 
 	public static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX) VALUES (?, ?, ?)";
 
-	public static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + "(URI)";
+	public static final String attribute_insert = "INSERT INTO " + attribute_table + " (URI1, URI2, IDX) VALUES (?, ?, ?)";
 
-	public static final String indexclass2 = "CREATE INDEX idxclass2 ON " + class_table + "(IDX)";
+	public static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + " (URI)";
+
+	public static final String indexclass2 = "CREATE INDEX idxclass2 ON " + class_table + " (IDX)";
 
 	// public static final String indexclass3 = "CREATE INDEX idxclass3 ON " +
 	// class_table + "(IDX, URI)";
@@ -120,11 +131,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// public static final String indexclass4 = "CREATE INDEX idxclass4 ON " +
 	// class_table + "(URI, IDX)";
 
-	public static final String indexrole1 = "CREATE INDEX idxrole1 ON " + role_table + "(URI1)";
+	public static final String indexrole1 = "CREATE INDEX idxrole1 ON " + role_table + " (URI1)";
 
-	public static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + "(IDX)";
+	public static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + " (IDX)";
 
-	public static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + "(URI2)";
+	public static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
+
+	public static final String indexattribute1 = "CREATE INDEX idxattribute1 ON " + attribute_table + " (URI1)";
+
+	public static final String indexattribute2 = "CREATE INDEX idxattribute2 ON " + attribute_table + " (IDX)";
+
+	public static final String indexattribute3 = "CREATE INDEX idxattribute3 ON " + attribute_table + " (URI2)";
 
 	// public static final String indexrole4 = "CREATE INDEX idxrole4 ON " +
 	// role_table + "(URI1, URI2)";
@@ -176,6 +193,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String dropindexrole3 = "DROP INDEX idxrole3";
 
+	public static final String dropindexattribute1 = "DROP INDEX idxattribute1";
+
+	public static final String dropindexattribute2 = "DROP INDEX idxattribute2";
+
+	public static final String dropindexattribute3 = "DROP INDEX idxattribute3";
+
 	// public static final String dropindexrole4 = "DROP INDEX idxrole4";
 	//
 	// public static final String dropindexrole5 = "DROP INDEX idxrole5";
@@ -208,9 +231,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String select_mapping_class_role_right = "SELECT URI2 as X FROM " + role_table;
 
+	public static final String select_mapping_class_attribute_left = "SELECT URI1 as X FROM " + attribute_table;
+
 	public static final String select_mapping_role = "SELECT URI1 as X, URI2 as Y FROM " + role_table;
 
 	public static final String select_mapping_role_inverse = "SELECT URI2 as X, URI1 as Y FROM " + role_table;
+
+	public static final String select_mapping_attribute = "SELECT URI1 as X, URI2 as Y FROM " + attribute_table;
 
 	public static final String whereSingleCondition = "(IDX = %d)";
 
@@ -338,6 +365,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(role_table_create);
 		out.append(";\n");
 
+		out.append(attribute_table_create);
+		out.append(";\n");
+
 		out.flush();
 	}
 
@@ -360,6 +390,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexrole3);
 		out.append(";\n");
+
+		out.append(indexattribute1);
+		out.append(";\n");
+		out.append(indexattribute2);
+		out.append(";\n");
+		out.append(indexattribute3);
+		out.append(";\n");
+
 		// out.append(indexrole4);
 		// out.append(";\n");
 		// out.append(indexrole5);
@@ -397,6 +435,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
 
 		String role_insert_str = role_insert.replace("?", "%s");
+		String attribute_insert_str = attribute_insert.replace("?", "%s");
 		String cls_insert_str = class_insert.replace("?", "%s");
 
 		int insertscount = 0;
@@ -422,7 +461,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				DAGNode node = pureIsa.getRoleNode(propDesc);
 				int idx = node.getIndex();
 
-				out.append(String.format(role_insert_str, getQuotedString(uri), getQuotedString(lit), idx));
+				out.append(String.format(attribute_insert_str, getQuotedString(uri), getQuotedString(lit), idx));
 
 			} else if (ax instanceof ObjectPropertyAssertion) {
 
@@ -471,132 +510,137 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.flush();
 	}
 
-	@Override
-	public void getCSVInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
-		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
-
-		int insertscount = 0;
-
-		int batchCount = 0;
-
-		HashMap<Predicate, Integer> indexes = new HashMap<Predicate, Integer>(this.ontology.getVocabulary().size() * 2);
-
-		while (data.hasNext()) {
-
-			Assertion ax = data.next();
-
-			insertscount += 1;
-			batchCount += 1;
-
-			if (ax instanceof DataPropertyAssertion) {
-
-				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
-				Predicate attribute = attributeABoxAssertion.getAttribute();
-
-				// String prop =
-				// attributeABoxAssertion.getAttribute().getName().toString();
-				String uri = attributeABoxAssertion.getObject().getURI().toString();
-				String lit = attributeABoxAssertion.getValue().getValue();
-
-				Integer idxc = indexes.get(attribute);
-				int idx = -1;
-				if (idxc == null) {
-					// Predicate propPred =
-					// attributeABoxAssertion.getAttribute();
-					Property propDesc = descFactory.createProperty(attribute);
-					DAGNode node = pureIsa.getRoleNode(propDesc);
-					idx = node.getIndex();
-					indexes.put(attribute, idx);
-				} else {
-					idx = idxc;
-				}
-				out.append(uri);
-				out.append('\t');
-				out.append(lit);
-				out.append('\t');
-				out.append(String.valueOf(idx));
-
-			} else if (ax instanceof ObjectPropertyAssertion) {
-
-				ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
-
-				// String prop =
-				// roleABoxAssertion.getRole().getName().toString();
-				String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
-				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
-
-				Predicate propPred = roleABoxAssertion.getRole();
-				Property propDesc = descFactory.createProperty(propPred);
-
-				if (dag.equi_mappings.containsKey(propDesc)) {
-					Property desc = (Property) dag.equi_mappings.get(propDesc);
-					if (desc.isInverse()) {
-						String tmp = uri1;
-						uri1 = uri2;
-						uri2 = tmp;
-					}
-				}
-
-				int idx = -1;
-				Integer idxc = indexes.get(propPred);
-				if (idxc == null) {
-
-					DAGNode node = pureIsa.getRoleNode(propDesc);
-					if (node == null) {
-						Property desc = (Property) dag.equi_mappings.get(propDesc);
-
-						if (desc == null) {
-							log.error("Property class without node: " + propDesc);
-						}
-						Property desinv = descFactory.createProperty(desc.getPredicate(), !desc.isInverse());
-						DAGNode node2 = (pureIsa.getRoleNode(desinv));
-						idx = node2.getIndex();
-					} else {
-						idx = node.getIndex();
-					}
-					indexes.put(roleABoxAssertion.getRole(), idx);
-				} else {
-					idx = idxc;
-				}
-
-				out.append(uri1);
-				out.append('\t');
-				out.append(uri2);
-				out.append('\t');
-				out.append(String.valueOf(idx));
-
-			} else if (ax instanceof ClassAssertion) {
-
-				ClassAssertion cassertion = (ClassAssertion) ax;
-				Predicate pred = cassertion.getConcept();
-
-				int idx = -1;
-				Integer idxc = indexes.get(cassertion.getConcept());
-				if (idxc == null) {
-					Predicate clsPred = cassertion.getConcept();
-					ClassDescription clsDesc = descFactory.createClass(clsPred);
-					DAGNode node = pureIsa.getClassNode(clsDesc);
-					if (node == null) {
-						String cls = cassertion.getConcept().getName().toString();
-						log.error("Found class without node: " + cls.toString());
-					}
-					idx = node.getIndex();
-					indexes.put(pred, idx);
-				} else {
-					idx = idxc;
-				}
-				String uri = cassertion.getObject().getURI().toString();
-
-				out.append(uri);
-				out.append('\t');
-				out.append(String.valueOf(idx));
-
-			}
-			out.append('\n');
-		}
-
-		out.flush();
-	}
+	// @Override
+	// public void getCSVInserts(Iterator<Assertion> data, OutputStream
+	// outstream) throws IOException {
+	// BufferedWriter out = new BufferedWriter(new
+	// OutputStreamWriter(outstream));
+	//
+	// int insertscount = 0;
+	//
+	// int batchCount = 0;
+	//
+	// HashMap<Predicate, Integer> indexes = new HashMap<Predicate,
+	// Integer>(this.ontology.getVocabulary().size() * 2);
+	//
+	// while (data.hasNext()) {
+	//
+	// Assertion ax = data.next();
+	//
+	// insertscount += 1;
+	// batchCount += 1;
+	//
+	// if (ax instanceof DataPropertyAssertion) {
+	//
+	// DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion)
+	// ax;
+	// Predicate attribute = attributeABoxAssertion.getAttribute();
+	//
+	// // String prop =
+	// // attributeABoxAssertion.getAttribute().getName().toString();
+	// String uri = attributeABoxAssertion.getObject().getURI().toString();
+	// String lit = attributeABoxAssertion.getValue().getValue();
+	//
+	// Integer idxc = indexes.get(attribute);
+	// int idx = -1;
+	// if (idxc == null) {
+	// // Predicate propPred =
+	// // attributeABoxAssertion.getAttribute();
+	// Property propDesc = descFactory.createProperty(attribute);
+	// DAGNode node = pureIsa.getRoleNode(propDesc);
+	// idx = node.getIndex();
+	// indexes.put(attribute, idx);
+	// } else {
+	// idx = idxc;
+	// }
+	// out.append(uri);
+	// out.append('\t');
+	// out.append(lit);
+	// out.append('\t');
+	// out.append(String.valueOf(idx));
+	//
+	// } else if (ax instanceof ObjectPropertyAssertion) {
+	//
+	// ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
+	//
+	// // String prop =
+	// // roleABoxAssertion.getRole().getName().toString();
+	// String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
+	// String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
+	//
+	// Predicate propPred = roleABoxAssertion.getRole();
+	// Property propDesc = descFactory.createProperty(propPred);
+	//
+	// if (dag.equi_mappings.containsKey(propDesc)) {
+	// Property desc = (Property) dag.equi_mappings.get(propDesc);
+	// if (desc.isInverse()) {
+	// String tmp = uri1;
+	// uri1 = uri2;
+	// uri2 = tmp;
+	// }
+	// }
+	//
+	// int idx = -1;
+	// Integer idxc = indexes.get(propPred);
+	// if (idxc == null) {
+	//
+	// DAGNode node = pureIsa.getRoleNode(propDesc);
+	// if (node == null) {
+	// Property desc = (Property) dag.equi_mappings.get(propDesc);
+	//
+	// if (desc == null) {
+	// log.error("Property class without node: " + propDesc);
+	// }
+	// Property desinv = descFactory.createProperty(desc.getPredicate(),
+	// !desc.isInverse());
+	// DAGNode node2 = (pureIsa.getRoleNode(desinv));
+	// idx = node2.getIndex();
+	// } else {
+	// idx = node.getIndex();
+	// }
+	// indexes.put(roleABoxAssertion.getRole(), idx);
+	// } else {
+	// idx = idxc;
+	// }
+	//
+	// out.append(uri1);
+	// out.append('\t');
+	// out.append(uri2);
+	// out.append('\t');
+	// out.append(String.valueOf(idx));
+	//
+	// } else if (ax instanceof ClassAssertion) {
+	//
+	// ClassAssertion cassertion = (ClassAssertion) ax;
+	// Predicate pred = cassertion.getConcept();
+	//
+	// int idx = -1;
+	// Integer idxc = indexes.get(cassertion.getConcept());
+	// if (idxc == null) {
+	// Predicate clsPred = cassertion.getConcept();
+	// ClassDescription clsDesc = descFactory.createClass(clsPred);
+	// DAGNode node = pureIsa.getClassNode(clsDesc);
+	// if (node == null) {
+	// String cls = cassertion.getConcept().getName().toString();
+	// log.error("Found class without node: " + cls.toString());
+	// }
+	// idx = node.getIndex();
+	// indexes.put(pred, idx);
+	// } else {
+	// idx = idxc;
+	// }
+	// String uri = cassertion.getObject().getURI().toString();
+	//
+	// out.append(uri);
+	// out.append('\t');
+	// out.append(String.valueOf(idx));
+	//
+	// }
+	// out.append('\n');
+	// }
+	//
+	// out.flush();
+	// }
 
 	@Override
 	public void createDBSchema(boolean dropExisting) throws SQLException {
@@ -622,6 +666,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(create_ddl);
 		st.addBatch(class_table_create);
 		st.addBatch(role_table_create);
+		st.addBatch(attribute_table_create);
 
 		st.executeBatch();
 		st.close();
@@ -643,6 +688,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexrole1);
 		st.addBatch(indexrole2);
 		st.addBatch(indexrole3);
+
+		st.addBatch(indexattribute1);
+		st.addBatch(indexattribute2);
+		st.addBatch(indexattribute3);
 		// st.addBatch(indexrole4);
 		// st.addBatch(indexrole5);
 		// st.addBatch(indexrole6);
@@ -675,6 +724,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		st.addBatch(class_table_drop);
 		st.addBatch(role_table_drop);
+		st.addBatch(attribute_table_drop);
 		st.executeBatch();
 		st.close();
 		conn.commit();
@@ -688,6 +738,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		PreparedStatement cls_stm = conn.prepareStatement(class_insert);
 		PreparedStatement role_stm = conn.prepareStatement(role_insert);
+		PreparedStatement attribute_stm = conn.prepareStatement(attribute_insert);
 
 		int insertscount = 0;
 
@@ -706,7 +757,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			commitCount += 1;
 
 			if (ax instanceof DataPropertyAssertion) {
-
 				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
 				Predicate attribute = attributeABoxAssertion.getAttribute();
 
@@ -728,10 +778,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					idx = idxc;
 				}
 
-				role_stm.setString(1, uri);
-				role_stm.setString(2, lit);
-				role_stm.setInt(3, idx);
-				role_stm.addBatch();
+				attribute_stm.setString(1, uri);
+				attribute_stm.setString(2, lit);
+				attribute_stm.setInt(3, idx);
+				attribute_stm.addBatch();
 
 			} else if (ax instanceof ObjectPropertyAssertion) {
 
@@ -813,10 +863,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				role_stm.executeBatch();
 				role_stm.clearBatch();
 
+				attribute_stm.executeBatch();
+				attribute_stm.clearBatch();
+
 				cls_stm.executeBatch();
 				cls_stm.clearBatch();
 			}
-			if (commitCount == 100) {
+			if (commitCount == 500) {
 				commitCount = 0;
 				conn.commit();
 			}
@@ -826,6 +879,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		role_stm.executeBatch();
 		role_stm.clearBatch();
 		role_stm.close();
+
+		attribute_stm.executeBatch();
+		attribute_stm.clearBatch();
+		attribute_stm.close();
 
 		cls_stm.executeBatch();
 		cls_stm.clearBatch();
@@ -1124,7 +1181,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 */
 
 			StringBuffer sql = new StringBuffer();
-			sql.append(select_mapping_role);
+
+			boolean isDataProperty = ((Property) roleNode.getDescription()).getPredicate().getType(1) == COL_TYPE.LITERAL;
+
+			/* different table for attributes or roles */
+			if (!isDataProperty) {
+				sql.append(select_mapping_role);
+			} else {
+				sql.append(select_mapping_attribute);
+			}
 
 			sql.append(" WHERE ");
 
@@ -1233,7 +1298,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			Atom body = predicateFactory.getAtom(classuri, predicateFactory.getVariable("X"));
 
 			/*
-			 * This target query is shared by all mappings for this role
+			 * This target query is shared by all mappings for this class
 			 */
 
 			CQIE targetQuery = predicateFactory.getCQIE(head, body);
@@ -1262,7 +1327,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			OBDAMappingAxiom basicmapping = predicateFactory.getRDBMSMappingAxiom(sql.toString(), targetQuery);
 			currentMappings.add(basicmapping);
 
-			/* Rest mappings 1: computing mappings for all exists R children */
+			/*
+			 * Rest mappings 1: computing mappings for all exists R children
+			 * such that R is a role (Object Property)
+			 */
 
 			// TODO this code is ugly because we are doing the direct and
 			// inverse mapping at the same time
@@ -1281,6 +1349,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			boolean alreadyAppendedOneInverse = false;
 
 			for (DAGNode existsSubNode : classExistsMaps.get(classNode)) {
+				boolean isDataProperty = ((PropertySomeRestriction) existsSubNode.getDescription()).getPredicate().getType(1) == COL_TYPE.LITERAL;
+				if (isDataProperty)
+					continue;
+
 				boolean direct = false;
 				StringBuffer currentBuffer = null;
 				if (!((PropertySomeRestriction) existsSubNode.getDescription()).isInverse()) {
@@ -1322,6 +1394,58 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 			if (alreadyAppendedOneInverse) {
 				OBDAMappingAxiom existsMapping = predicateFactory.getRDBMSMappingAxiom(sqlroleinverse.toString(), targetQuery);
+				currentMappings.add(existsMapping);
+			}
+
+			/*
+			 * Rest mappings 2: computing mappings for all exists R children
+			 * such that R is a attribute (Data Property)
+			 */
+
+			// TODO this code is ugly because we are doing the direct and
+			// inverse mapping at the same time
+			// we need to split this into two blocks for readability
+
+			sqlroledirect = new StringBuffer();
+
+			sqlroledirect.append(select_mapping_class_attribute_left);
+
+			sqlroledirect.append(" WHERE ");
+
+			alreadyAppendedOneDirect = false;
+
+			for (DAGNode existsSubNode : classExistsMaps.get(classNode)) {
+				boolean isDataProperty = ((PropertySomeRestriction) existsSubNode.getDescription()).getPredicate().getType(1) == COL_TYPE.LITERAL;
+				if (!isDataProperty)
+					continue;
+
+				StringBuffer currentBuffer = null;
+				currentBuffer = sqlroledirect;
+
+				/*
+				 * Getting the indexed node (from the pureIsa dag)
+				 */
+				PropertySomeRestriction existsDesc = (PropertySomeRestriction) existsSubNode.getDescription();
+				Property role = descFactory.createProperty(existsDesc.getPredicate(), false);
+
+				indexedNode = pureIsa.getRoleNode(role);
+
+				if (indexedNode != null) {
+					intervals = indexedNode.getRange().getIntervals();
+
+					for (int intervali = 0; intervali < intervals.size(); intervali++) {
+						if ((alreadyAppendedOneDirect)) {
+							currentBuffer.append(" OR ");
+						}
+						appendIntervalString(intervals.get(intervali), currentBuffer);
+						alreadyAppendedOneDirect = true;
+
+					}
+				}
+			}
+
+			if (alreadyAppendedOneDirect) {
+				OBDAMappingAxiom existsMapping = predicateFactory.getRDBMSMappingAxiom(sqlroledirect.toString(), targetQuery);
 				currentMappings.add(existsMapping);
 			}
 
@@ -1576,6 +1700,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexrole1);
 		st.addBatch(dropindexrole2);
 		st.addBatch(dropindexrole3);
+
+		st.addBatch(dropindexattribute1);
+		st.addBatch(dropindexattribute2);
+		st.addBatch(dropindexattribute3);
 		// st.addBatch(dropindexrole4);
 		// st.addBatch(dropindexrole5);
 		// st.addBatch(dropindexrole6);
@@ -1612,6 +1740,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", index_table));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", class_table));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", role_table));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table));
 		} catch (SQLException e) {
 			exists = false;
 			log.debug(e.getMessage());
@@ -1631,22 +1760,25 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		log.debug("Insert data into schemas using temporary files");
 
-		File tempFileProperties = File.createTempFile("quest-copy-prop",".tmp");
-//		if (tempFileProperties.exists())
-//			tempFileProperties.delete();
+		File tempFileDataProperties = File.createTempFile("quest-copy-dataprop", ".tmp");
+		File tempFileObjectProperties = File.createTempFile("quest-copy-oprop", ".tmp");
+		// if (tempFileProperties.exists())
+		// tempFileProperties.delete();
 
-		BufferedWriter outProperties = null;
+		BufferedWriter outObjectProperties = null;
+		BufferedWriter outDataProperties = null;
 		try {
-			outProperties = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFileProperties)));
+			outObjectProperties = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFileObjectProperties)));
+			outDataProperties = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFileDataProperties)));
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage());
 			log.debug(e.getMessage(), e);
 			return -1;
 		}
 
-		File tempFileType = File.createTempFile("quest-copy-type",".tmp");
-//		if (tempFileType.exists())
-//			tempFileType.delete();
+		File tempFileType = File.createTempFile("quest-copy-type", ".tmp");
+		// if (tempFileType.exists())
+		// tempFileType.delete();
 		BufferedWriter outType = null;
 		try {
 			outType = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFileType)));
@@ -1656,9 +1788,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			return -1;
 		}
 
-		final long[] counts = new long[2];
+		final long[] counts = new long[3];
 
-		final CopyManager cm = new CopyManager((BaseConnection) conn);
 		final HashMap<Predicate, Integer> indexes = new HashMap<Predicate, Integer>(this.ontology.getVocabulary().size() * 2);
 
 		int insertscount = 0;
@@ -1692,12 +1823,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					} else {
 						idx = idxc;
 					}
-					outProperties.append(uri);
-					outProperties.append('\t');
-					outProperties.append(lit);
-					outProperties.append('\t');
-					outProperties.append(String.valueOf(idx));
-					outProperties.append('\n');
+					outDataProperties.append(uri);
+					outDataProperties.append('\t');
+					outDataProperties.append(lit);
+					outDataProperties.append('\t');
+					outDataProperties.append(String.valueOf(idx));
+					outDataProperties.append('\n');
 
 				} else if (ax instanceof ObjectPropertyAssertion) {
 
@@ -1742,12 +1873,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 						idx = idxc;
 					}
 
-					outProperties.append(uri1);
-					outProperties.append('\t');
-					outProperties.append(uri2);
-					outProperties.append('\t');
-					outProperties.append(String.valueOf(idx));
-					outProperties.append('\n');
+					outObjectProperties.append(uri1);
+					outObjectProperties.append('\t');
+					outObjectProperties.append(uri2);
+					outObjectProperties.append('\t');
+					outObjectProperties.append(String.valueOf(idx));
+					outObjectProperties.append('\n');
 
 				} else if (ax instanceof ClassAssertion) {
 
@@ -1771,18 +1902,20 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					}
 					String uri = cassertion.getObject().getURI().toString();
 
-					 outType.append(uri);
-					 outType.append('\t');
-					 outType.append(String.valueOf(idx));
-					 outType.append('\n');
+					outType.append(uri);
+					outType.append('\t');
+					outType.append(String.valueOf(idx));
+					outType.append('\n');
 
 				}
 
 			}
 			outType.flush();
 			outType.close();
-			outProperties.flush();
-			outProperties.close();
+			outObjectProperties.flush();
+			outObjectProperties.close();
+			outDataProperties.flush();
+			outDataProperties.close();
 			log.debug("Finished reading input assertions.");
 		} catch (IOException e) {
 			log.error(e.getMessage());
@@ -1791,24 +1924,46 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		}
 
+		/*
+		 * All data has been generated. Sending the data to the database.
+		 */
+
+		final CopyManager cm = new CopyManager((BaseConnection) conn);
+
 		try {
-			log.debug("Inserting properties");
-			FileReader inprop = new FileReader(tempFileProperties);
-			counts[0] = cm.copyIn("COPY role FROM STDIN", inprop);
+			log.debug("Inserting object properties");
+			FileReader inprop = new FileReader(tempFileObjectProperties);
+			counts[0] = cm.copyIn("COPY " + role_table + " FROM STDIN", inprop);
 			conn.commit();
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		} finally {
 			try {
-				tempFileProperties.delete();
+				tempFileObjectProperties.delete();
 			} catch (Exception e) {
 
 			}
 		}
+
+		try {
+			log.debug("Inserting data properties");
+			FileReader inprop = new FileReader(tempFileDataProperties);
+			counts[1] = cm.copyIn("COPY " + attribute_table + " FROM STDIN", inprop);
+			conn.commit();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		} finally {
+			try {
+				tempFileDataProperties.delete();
+			} catch (Exception e) {
+
+			}
+		}
+
 		try {
 			log.debug("Inserting type assertions");
 			FileReader intype = new FileReader(tempFileType);
-			counts[1] = cm.copyIn("COPY class FROM STDIN", intype);
+			counts[2] = cm.copyIn("COPY " + class_table + " FROM STDIN", intype);
 			conn.commit();
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -1820,9 +1975,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 		}
 
-		if (insertscount != (counts[0] + counts[1])) {
-			log.warn("Warning, effective inserts are different than the elements in the stream: in {}, effective: {}", insertscount, counts[0] + counts[1]);
+		if (insertscount != (counts[0] + counts[1] + counts[2])) {
+			log.warn("Warning, effective inserts are different than the elements in the stream: in {}, effective: {}", insertscount,
+					counts[0] + counts[1] + counts[2]);
 		}
-		return counts[0] + counts[1];
+		return counts[0] + counts[1] + counts[2];
 	}
 }

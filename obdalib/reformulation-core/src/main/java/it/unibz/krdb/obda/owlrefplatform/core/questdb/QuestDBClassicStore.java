@@ -170,4 +170,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		questInstance.dispose();
 	}
 
+	public void analyze() throws Exception {
+		questInstance.analyze();
+		
+	}
+
 }

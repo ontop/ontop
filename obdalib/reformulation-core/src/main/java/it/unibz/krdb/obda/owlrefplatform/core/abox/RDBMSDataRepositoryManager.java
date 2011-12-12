@@ -62,7 +62,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 
 	public void getSQLInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
 
-	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
+//	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
 
 	public void createDBSchema(boolean dropExisting) throws SQLException;
 	

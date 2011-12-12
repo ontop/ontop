@@ -246,11 +246,11 @@ public class Quest implements Serializable {
 			result = dataRepository.insertData(data);
 		else {
 			try {
-//				File temporalFile = new File("quest-copy.tmp");
-//				FileOutputStream os = new FileOutputStream(temporalFile);
-				result = (int)dataRepository.loadWithFile(data);
-//				os.close();
-				
+				// File temporalFile = new File("quest-copy.tmp");
+				// FileOutputStream os = new FileOutputStream(temporalFile);
+				result = (int) dataRepository.loadWithFile(data);
+				// os.close();
+
 			} catch (IOException e) {
 				log.error(e.getMessage());
 			}
@@ -611,6 +611,11 @@ public class Quest implements Serializable {
 	public void createDB() throws SQLException {
 		dataRepository.createDBSchema(false);
 		dataRepository.insertMetadata();
+	}
+
+	public void analyze() throws Exception {
+		dataRepository.collectStatistics();
+
 	}
 
 }

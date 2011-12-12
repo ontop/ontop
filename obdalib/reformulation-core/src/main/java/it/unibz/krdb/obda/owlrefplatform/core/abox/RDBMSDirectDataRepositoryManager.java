@@ -319,11 +319,11 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		out.flush();
 	}
 
-	@Override
-	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
+//	@Override
+//	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	@Override
 	public void createDBSchema(boolean dropExisting) throws SQLException {
