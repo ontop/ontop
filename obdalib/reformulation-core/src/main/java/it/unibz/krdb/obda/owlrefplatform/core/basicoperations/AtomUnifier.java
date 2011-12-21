@@ -12,13 +12,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
@@ -130,12 +130,16 @@ public class AtomUnifier {
 	 * @param atom
 	 * @param unifier
 	 */
-	private void applyUnifier(Atom atom2, Map<Variable, Term> unifier) {
-		Atom atom = (Atom)atom2;
+	public void applyUnifier(Atom atom, Map<Variable, Term> unifier) {
 		applyUnifier(atom.getTerms(), unifier);
 	}
 	
-	private void applyUnifier(List<Term> terms, Map<Variable, Term> unifier) {
+	public void applyUnifier(Function term, Map<Variable, Term> unifier) {
+		List<Term> terms = term.getTerms();
+		applyUnifier(terms, unifier);
+	}
+
+	public void applyUnifier(List<Term> terms, Map<Variable, Term> unifier) {
 		for (int i = 0; i < terms.size(); i++) {
 			Term t = terms.get(i);
 			/*
@@ -146,23 +150,14 @@ public class AtomUnifier {
 				Term replacement = unifier.get(t);
 				if (replacement != null)
 					terms.set(i, replacement);
-			} else if (t instanceof FunctionalTermImpl) {
-				List<Term> innerterms = ((FunctionalTermImpl) t).getTerms();
-				for (int j = 0; j < innerterms.size(); j++) {
-					Term innert = innerterms.get(j);
-					/*
-					 * unifiers only apply to variables, simple or inside
-					 * functional terms
-					 */
-					if (innert instanceof VariableImpl) {
-						Term replacement = unifier.get(innert);
-						if (replacement != null)
-							innerterms.set(j, replacement);
-					}
-				}
+			} else if (t instanceof Function) {
+				applyUnifier((Function)t, unifier);
 			}
 		}
 	}
+	
+	
+	
 	
 	/***
 	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports

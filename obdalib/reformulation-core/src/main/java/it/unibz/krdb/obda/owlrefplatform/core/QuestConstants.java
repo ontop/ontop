@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
+import java.net.URI;
+
 public class QuestConstants {
 	
 	//Reformulation Techniques
@@ -18,4 +20,6 @@ public class QuestConstants {
 	//storage location
 	public static final String JDBC = "jdbc";
 	public static final String INMEMORY = "h2-inmemory";
+	
+	
 }

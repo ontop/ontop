@@ -62,6 +62,8 @@ public class QuestOBDAStatement implements OBDAStatement {
 
 	private RDBMSDataRepositoryManager repository;
 
+	private DatalogProgram unfoldingProgram;
+
 	public QuestOBDAStatement(UnfoldingMechanism unf, QueryRewriter rew, SourceQueryGenerator gen, QueryVocabularyValidator val,
 			Statement st, OBDAModel apic, RDBMSDataRepositoryManager repository) {
 
@@ -209,11 +211,10 @@ public class QuestOBDAStatement implements OBDAStatement {
 	@Override
 	public String getRewriting(String strquery) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
-		
+
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
 
-		
 		OBDAQuery rewriting = rewriter.rewrite(program);
 		DatalogProgramToTextCodec codec = new DatalogProgramToTextCodec(apic);
 		return codec.encode((DatalogProgram) rewriting);
@@ -321,7 +322,7 @@ public class QuestOBDAStatement implements OBDAStatement {
 	@Override
 	public String getUnfolding(String strquery, boolean reformulate) throws Exception {
 		DatalogProgram program = getDatalogQuery(strquery);
-		
+
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
 
@@ -474,6 +475,10 @@ public class QuestOBDAStatement implements OBDAStatement {
 	public void setQueryTimeout(int seconds) throws Exception {
 		statement.setQueryTimeout(seconds);
 
+	}
+
+	public void setUnfoldingProgram(DatalogProgram unfoldingProgram) {
+		this.unfoldingProgram = unfoldingProgram;
 	}
 
 }

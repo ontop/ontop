@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -32,9 +33,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
+import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
@@ -91,6 +93,9 @@ public class Quest implements Serializable {
 
 	/* The OBDA model used for query unfolding */
 	private OBDAModel unfoldingOBDAModel = null;
+	
+	/* As unfolding OBDAModel, but experimental */
+	private DatalogProgram unfoldingProgram = null;
 
 	/* The input OBDA model */
 	private OBDAModel inputOBDAModel = null;
@@ -303,7 +308,9 @@ public class Quest implements Serializable {
 	}
 
 	public OBDAStatement getStatement() throws Exception {
-		return new QuestOBDAStatement(unfMech, rewriter, gen, validator, conn.createStatement(), unfoldingOBDAModel, dataRepository);
+		QuestOBDAStatement st = new QuestOBDAStatement(unfMech, rewriter, gen, validator, conn.createStatement(), unfoldingOBDAModel, dataRepository);
+		st.setUnfoldingProgram(unfoldingProgram);
+		return st;
 	}
 
 	public boolean connect() throws SQLException {
@@ -564,6 +571,14 @@ public class Quest implements Serializable {
 			 */
 
 			validator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
+			
+			
+//			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
+//			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
+//			unfoldingProgram = analyzer.constructDatalogProgram();
+//			
+			
+			
 
 			log.debug("... Quest has been setup and is ready for querying");
 			isClassified = true;

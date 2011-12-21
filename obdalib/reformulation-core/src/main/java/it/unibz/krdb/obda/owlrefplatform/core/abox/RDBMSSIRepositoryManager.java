@@ -239,9 +239,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String select_mapping_attribute = "SELECT URI1 as X, URI2 as Y FROM " + attribute_table;
 
-	public static final String whereSingleCondition = "(IDX = %d)";
+	public static final String whereSingleCondition = "IDX = %d";
 
-	public static final String whereIntervalCondition = "(IDX >= %d AND IDX <= %d)";
+	public static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
 
 	private final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
@@ -265,7 +265,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	final static int ROLE_TYPE = 2;
 
-	private static final boolean mergeUniions = true;
+	private static final boolean mergeUniions = false;
 
 	public RDBMSSIRepositoryManager(Connection ds) throws PunningException {
 		this(ds, null);

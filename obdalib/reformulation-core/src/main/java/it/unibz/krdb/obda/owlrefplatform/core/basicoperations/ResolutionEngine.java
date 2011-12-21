@@ -38,7 +38,7 @@ public class ResolutionEngine {
 
 		newquery.getBody().remove(atomidx);
 		newquery.getBody().addAll(atomidx, rule.getBody());
-		newquery.getBody().set(atomidx, rule.getBody().get(0));
+//		newquery.getBody().set(atomidx, rule.getBody().get(0));
 		return unifier.applyUnifier(newquery, mgu);
 	}
 }
