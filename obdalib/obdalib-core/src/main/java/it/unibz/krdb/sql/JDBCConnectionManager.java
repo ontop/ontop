@@ -32,7 +32,7 @@ public class JDBCConnectionManager {
 	private HashMap<String, Object> properties = null;
 	private HashMap<URI, Connection> connectionPool = null;
 
-	private Logger log = LoggerFactory.getLogger(JDBCConnectionManager.class);
+	private static Logger log = LoggerFactory.getLogger(JDBCConnectionManager.class);
 
 	/**
 	 * Private constructor.
@@ -70,18 +70,19 @@ public class JDBCConnectionManager {
 			try {
 				setConnection(ds);
 			} catch (SQLException e) {
-				String message = String.format("Fail to create a connection.\nReason: %s for data source %s", e.getMessage(), ds.getSourceID());
+				String message = String.format("Fail to create a connection.\nReason: %s for data source %s", e.getMessage(),
+						ds.getSourceID());
 				log.error(message);
 			}
 		}
 	}
-	
+
 	/**
 	 * Constructs a new database connection object and then registers it to the
 	 * connection pool.
 	 * 
 	 * @param dataSource
-	 * 			The data source object.
+	 *            The data source object.
 	 * @throws SQLException
 	 */
 	public void setConnection(OBDADataSource dataSource) throws SQLException {
@@ -90,8 +91,8 @@ public class JDBCConnectionManager {
 	}
 
 	/**
-	 * Constructs a new database connection object from a data source and retrieves
-	 * the object.
+	 * Constructs a new database connection object from a data source and
+	 * retrieves the object.
 	 * 
 	 * @param dataSource
 	 *            The data source object.
@@ -114,10 +115,10 @@ public class JDBCConnectionManager {
 
 		boolean bAutoCommit = ((Boolean) properties.get(JDBC_AUTOCOMMIT)).booleanValue();
 		conn.setAutoCommit(bAutoCommit);
-		
+
 		return conn;
 	}
-	
+
 	/*
 	 * Store the connection object to the connection pool. Any existing
 	 * connection with the same ID will be replaced by the given connection.
@@ -140,7 +141,8 @@ public class JDBCConnectionManager {
 	public Connection getConnection(URI sourceId) throws NullPointerException {
 		Connection conn = connectionPool.get(sourceId);
 		if (conn == null) {
-			throw new NullPointerException("The system cannot find the required connection! Try to register it first to the system connection pool.");
+			throw new NullPointerException(
+					"The system cannot find the required connection! Try to register it first to the system connection pool.");
 		}
 		return conn;
 	}
@@ -212,70 +214,87 @@ public class JDBCConnectionManager {
 		} catch (SQLException e) {
 			log.error(e.getMessage());
 		} finally {
-			// TODO: For the purpose of displaying only the query result, it is better
-			// not to return the ResultSet object. Instead, store all the result into 
-			// another object and return that object. In this way, we can close both
+			// TODO: For the purpose of displaying only the query result, it is
+			// better
+			// not to return the ResultSet object. Instead, store all the result
+			// into
+			// another object and return that object. In this way, we can close
+			// both
 			// the Statement and ResultSet in advanced.
 			//
-			// To reduce this memory leak, currently the solution is that we close the 
+			// To reduce this memory leak, currently the solution is that we
+			// close the
 			// ResultSet manually in the caller side.
-//			st.close();
+			// st.close();
 		}
 		return rs;
 	}
 
 	/**
-	 * Retrieves the database meta data about the table schema given
-	 * a particular data source id.
+	 * Retrieves the database meta data about the table schema given a
+	 * particular data source id.
 	 * 
 	 * @param sourceId
-	 * 			The database id.
+	 *            The database id.
 	 * @return The database meta data object.
 	 */
 	public DBMetadata getMetaData(URI sourceId) {
+		Connection conn = getConnection(sourceId);
+		return getMetaData(conn);
+	}
+
+	/**
+	 * Retrieves the database meta data about the table schema given a
+	 * particular data source id.
+	 * 
+	 * @param sourceId
+	 *            The database id.
+	 * @return The database meta data object.
+	 */
+	public static DBMetadata getMetaData(Connection conn) {
 		try {
-			Connection conn = getConnection(sourceId);
+
 			DatabaseMetaData md = conn.getMetaData();
 			
-			ResultSet rsTables = md.getTables("metadata", null, null, null);
 			
+
+			ResultSet rsTables = md.getTables(null, null, null, null);
+
 			DBMetadata metadata = new DBMetadata();
-			while(rsTables.next()) {
+			while (rsTables.next()) {
+				String tblCatalog = rsTables.getString("TABLE_CAT");
 				String tblName = rsTables.getString("TABLE_NAME");
 				String tblSchema = rsTables.getString("TABLE_SCHEM");
-				
-				ResultSet rsColumns = md.getColumns("metadata", tblSchema, tblName, null);
+
+				ResultSet rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
 				ArrayList<String> pk = getPrimaryKey(md, tblSchema, tblName);
-				
+
 				TableDefinition td = new TableDefinition();
 				td.setName(tblName);
 				for (int pos = 1; rsColumns.next(); pos++) {
-					td.setAttribute(pos, 
-							new Attribute(rsColumns.getString("COLUMN_NAME"), 
-									      rsColumns.getString("TYPE_NAME"),
-									      pk.contains(rsColumns.getString("COLUMN_NAME")), 
-									      rsColumns.getInt("NULLABLE")));
+					td.setAttribute(
+							pos,
+							new Attribute(rsColumns.getString("COLUMN_NAME"), rsColumns.getString("TYPE_NAME"), pk.contains(rsColumns
+									.getString("COLUMN_NAME")), rsColumns.getInt("NULLABLE")));
 				}
 				// Add this information to the DBMetadata
 				metadata.add(td);
-		 	}
+			}
 			return metadata;
-		}
-		catch (NullPointerException e) {
+		} catch (NullPointerException e) {
 			log.error(e.getMessage());
 			return null;
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			log.error(e.getMessage());
 			return null;
 		}
 	}
 
 	/* Retrives the primary key(s) from a table */
-	private ArrayList<String> getPrimaryKey(DatabaseMetaData md, String schema, String table) throws SQLException {
+	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String schema, String table) throws SQLException {
 		ArrayList<String> pk = new ArrayList<String>();
 		ResultSet rsPrimaryKeys = md.getPrimaryKeys("metadata", schema, table);
-		while(rsPrimaryKeys.next()) {
+		while (rsPrimaryKeys.next()) {
 			String colName = rsPrimaryKeys.getString("COLUMN_NAME");
 			String pkName = rsPrimaryKeys.getString("PK_NAME");
 			if (pkName != null) {
@@ -284,7 +303,7 @@ public class JDBCConnectionManager {
 		}
 		return pk;
 	}
-	
+
 	/**
 	 * Removes all the connections in the connection pool.
 	 * 

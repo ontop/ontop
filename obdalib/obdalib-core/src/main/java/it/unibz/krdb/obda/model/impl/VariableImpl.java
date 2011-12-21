@@ -4,8 +4,6 @@ import it.unibz.krdb.obda.model.Variable;
 
 import com.sun.msv.datatype.xsd.XSDatatype;
 
-
-
 public class VariableImpl implements Variable {
 
 	private String name = null;
@@ -21,28 +19,31 @@ public class VariableImpl implements Variable {
 	@Override
 	public boolean equals(Object obj) {
 
-		if(obj == null || !(obj instanceof VariableImpl))
-			 return false;
+		if (obj == null || !(obj instanceof VariableImpl))
+			return false;
 
 		VariableImpl name2 = (VariableImpl) obj;
 		return this.identifier == name2.identifier;
-	 }
+	}
 
 	@Override
 	public int hashCode() {
-		 return identifier;
+		return identifier;
 	}
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
-	
+	// @Override
+	// public void setName(String name) {
+	// this.name = name;
+	// }
+
 	@Override
 	public String getName() {
 		return name;
 	}
 
+	// TODO this method seems to be tied to some semantics, if we modified it,
+	// things become slow and maybe wrong we must make sure that this is not the
+	// case
 	@Override
 	public String toString() {
 		return name;

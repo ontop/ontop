@@ -131,7 +131,7 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		} else if (predicate == OBDAVocabulary.NOT) {
 			bf.append("NOT");
 		} else if (predicate == OBDAVocabulary.AND) {
-			bf.append(" && ");
+			bf.append("AND");
 		} else if (predicate == OBDAVocabulary.OR) {
 			bf.append("OR");
 		} else {

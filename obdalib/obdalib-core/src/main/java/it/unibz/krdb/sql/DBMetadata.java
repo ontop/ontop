@@ -10,10 +10,23 @@ public class DBMetadata {
 		public String getAttributeName(int pos);
 		public int countAttribute();
 		public String toString();
+		
 	}
 	
 	private HashMap<String, DataDefinition> schema = new HashMap<String, DataDefinition>();
 		
+	
+	public String toString() {
+		StringBuffer bf = new StringBuffer();
+		for (String key: schema.keySet()) {
+			bf.append(key);
+			bf.append("=");
+			bf.append(schema.get(key).toString());
+			bf.append("\n");
+		}
+		return bf.toString();
+	}
+	
 	/**
 	 * Inserts a new data definition to this meta data object.
 	 * 

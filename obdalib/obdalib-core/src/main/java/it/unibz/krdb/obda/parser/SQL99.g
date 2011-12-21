@@ -459,9 +459,11 @@ boolean_value_expression returns [BooleanValueExpression value]
   booleanExp = new BooleanValueExpression();
 }
   : //boolean_term (OR { booleanExp.putSpecification(new OrOperator()); } boolean_term)* {
-    boolean_term {
-      $value = booleanExp;
-    }
+//    boolean_term {
+ //     $value = booleanExp;
+ //   } |
+    boolean_term (OR {booleanExp.putSpecification(new OrOperator()); } boolean_term)*
+    { $value = booleanExp; }
   ;
   
 boolean_term

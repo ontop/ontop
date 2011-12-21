@@ -316,7 +316,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getLTEFunction(Term firstTerm, Term secondTerm) {
-		return getFunctionalTerm(OBDAVocabulary.EQ, firstTerm, secondTerm);
+		return getFunctionalTerm(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override

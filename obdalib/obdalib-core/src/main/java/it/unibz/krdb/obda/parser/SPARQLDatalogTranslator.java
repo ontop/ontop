@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -102,7 +103,7 @@ public class SPARQLDatalogTranslator {
 			headTerms.add(term);
 		}
 		Predicate predicate =
-			predicateFactory.getPredicate(URI.create("q"), termSize);
+			predicateFactory.getPredicate(OBDALibConstants.QUERY_HEAD_URI, termSize);
 
 		return predicateFactory.getAtom(predicate, headTerms);
 	}

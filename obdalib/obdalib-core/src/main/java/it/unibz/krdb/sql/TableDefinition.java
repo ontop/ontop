@@ -45,6 +45,18 @@ public class TableDefinition implements DataDefinition {
 	
 	@Override
 	public String toString() {
-		return name;
+		StringBuffer bf = new StringBuffer();
+		bf.append(name);
+		bf.append("[");
+		boolean comma = false;
+		for (Integer i: attributes.keySet()) {
+			if (comma) {
+				bf.append(",");
+			}
+			bf.append(attributes.get(i));
+			comma = true;
+		}
+		bf.append("]");
+		return bf.toString();
 	}		
 }

@@ -108,7 +108,7 @@ public class LookupTable {
 			Integer index = log.get(entry);
 			return retrieve(index);
 		}
-		return "";
+		return null;
 	}
 	
 	/**

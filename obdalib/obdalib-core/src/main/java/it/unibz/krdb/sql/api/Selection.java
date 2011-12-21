@@ -1,6 +1,7 @@
 package it.unibz.krdb.sql.api;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Selection {
@@ -8,10 +9,10 @@ public class Selection {
 	/**
 	 * Collection of boolean conditions and boolean operators.
 	 */
-	private LinkedList<Object> conditions;
+	private LinkedList<ICondition> conditions;
 	
 	public Selection() { 
-		conditions = new LinkedList<Object>();
+		conditions = new LinkedList<ICondition>();
 	}
 	
 	/**
@@ -108,17 +109,21 @@ public class Selection {
 		return (ComparisonPredicate)conditions.get(index);
 	}
 	
-	/**
-	 * Returns the boolean operator in a specific order.
-	 * The initial order starts at 0 index.
-	 * 
-	 * @param index
-	 * 			The specific order.
-	 */
-	public String getLogicalOperator(int index) {
-		index = (index * 2) + 1;
-		return (String)conditions.get(index);
+	public List<ICondition> getRawConditions() {
+		return conditions;
 	}
+	
+//	/**
+//	 * Returns the boolean operator in a specific order.
+//	 * The initial order starts at 0 index.
+//	 * 
+//	 * @param index
+//	 * 			The specific order.
+//	 */
+//	public String getLogicalOperator(int index) {
+//		index = (index * 2) + 1;
+//		return (String)conditions.get(index);
+//	}
 	
 	/**
 	 * Returns the object inside the condition expression list, 

@@ -8,6 +8,11 @@ public class Attribute {
 	public final boolean bPrimaryKey;
 	public final int canNull;
 	
+	
+	public String toString() {
+		return name + ":" + type;
+	}
+	
 	public Attribute(String name) {
 		this(name, "", false, 0);
 	}

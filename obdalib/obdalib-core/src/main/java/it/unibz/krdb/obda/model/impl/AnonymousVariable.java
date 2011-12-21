@@ -29,10 +29,10 @@ public class AnonymousVariable implements Variable {
 		return identifier;
 	}
 
-	@Override
-	public void setName(String name){
-		this.name = name;
-	}
+//	@Override
+//	public void setName(String name){
+//		this.name = name;
+//	}
 	
 	@Override
 	public String getName() {

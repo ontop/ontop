@@ -7,17 +7,19 @@ import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.TablePrimary;
 
-import java.util.ArrayList;
-
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SQLQueryTranslator {
 
 	private DBMetadata dbMetaData;
 	
 	private static int id_counter;
+	
+	private static Logger log = LoggerFactory.getLogger(SQLQueryTranslator.class);
 	
 	public SQLQueryTranslator(DBMetadata dbMetaData) {
 		this.dbMetaData = dbMetaData;
@@ -38,13 +40,16 @@ public class SQLQueryTranslator {
 		}
 		
 		if (parser.getNumberOfSyntaxErrors() != 0) {
+			log.debug("Creating a view for query: {}", query);
 			queryTree = createView(query);
 		}		
 		return queryTree;
 	}
 	
 	private QueryTree createView(String query) {
-		final String viewName = String.format("view_%s", id_counter++);
+		String viewName = String.format("view_%s", id_counter++);
+		
+		viewName = viewName.toUpperCase();
 		
 		ViewDefinition vd = createViewDefintion(viewName, query);
 		dbMetaData.add(vd);
@@ -66,7 +71,7 @@ public class SQLQueryTranslator {
 		for (int i = 0; i < columns.length; i++) {
 			String columnName = columns[i].trim();
 			if (columnName.contains(" as ")) {
-				columnName = columnName.toLowerCase().split(" as ")[1].trim();
+				columnName = columnName.split(" as ")[1].trim();
 			}
 			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
 		}
