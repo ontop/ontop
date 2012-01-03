@@ -37,6 +37,7 @@ public interface Predicate extends Cloneable, Serializable {
 	 * @param column
 	 */
 	public COL_TYPE getType(int column);
+	
 
 	/**
 	 * Duplicate the object by performing a deep cloning.

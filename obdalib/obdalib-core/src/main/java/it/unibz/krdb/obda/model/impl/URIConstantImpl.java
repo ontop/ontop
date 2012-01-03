@@ -1,25 +1,26 @@
 package it.unibz.krdb.obda.model.impl;
 
-
-
 import it.unibz.krdb.obda.model.URIConstant;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-
 
 /**
  * Provides a storage to put the URI constant.
  */
 public class URIConstantImpl implements URIConstant {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1263974895010238519L;
 	private URI uri = null;
 	private int identifier = -1;
 
 	/**
 	 * The default constructor.
-	 *
-	 * @param uri URI from a term.
+	 * 
+	 * @param uri
+	 *            URI from a term.
 	 */
 	protected URIConstantImpl(URI uri) {
 		this.uri = uri;
@@ -27,9 +28,9 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public boolean equals(Object obj){
+	public boolean equals(Object obj) {
 
-		if(obj == null || !(obj instanceof URIConstantImpl))
+		if (obj == null || !(obj instanceof URIConstantImpl))
 			return false;
 
 		URIConstantImpl uri2 = (URIConstantImpl) obj;
@@ -37,7 +38,7 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return identifier;
 	}
 
@@ -46,19 +47,16 @@ public class URIConstantImpl implements URIConstant {
 		return uri;
 	}
 
-//	@Override
-//	public String getName() {
-//		return uri.toString();
-//	}
+	// @Override
+	// public String getName() {
+	// return uri.toString();
+	// }
 
 	@Override
 	public URIConstant clone() {
-		try {
-			return new URIConstantImpl(new URI(uri.toString()));
-		}
-		catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+		URIConstantImpl clone = new URIConstantImpl(uri);
+		clone.identifier = identifier;
+		return clone;
 	}
 
 	@Override

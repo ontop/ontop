@@ -67,7 +67,7 @@ public class MappingAnalyzer {
 			OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 			QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
-			LookupTable lookupTable = createLookupTable(queryTree);
+			LookupTable lookupTable = createLookupTable(queryTree, dbMetaData);
 
 			ArrayList<Relation> tableList = queryTree.getTableSet();
 
@@ -76,7 +76,7 @@ public class MappingAnalyzer {
 			for (Relation table : tableList) {
 				String tableName = table.getName();
 
-				tableName = tableName.toUpperCase();
+				tableName = tableName;
 
 				URI predicateName = URI.create(tableName);
 
@@ -87,6 +87,9 @@ public class MappingAnalyzer {
 				for (int i = 1; i <= arity; i++) {
 					String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
 					String termName = lookupTable.lookup(columnName);
+					if (termName == null) {
+						throw new RuntimeException("Column was not found in the lookup table: " + columnName);
+					}
 					Term term = dataFactory.getVariable(termName);
 					terms.add(term);
 				}
@@ -252,17 +255,17 @@ public class MappingAnalyzer {
 		return result;
 	}
 
-	private LookupTable createLookupTable(QueryTree queryTree) {
-		LookupTable lookupTable = new LookupTable();
+	private LookupTable createLookupTable(QueryTree queryTree, DBMetadata dbmetadata) {
+		LookupTable lookupTable = new LookupTable(dbmetadata);
 
 		// Collect all the possible column names from tables.
 		ArrayList<Relation> tableList = queryTree.getTableSet();
 		for (Relation table : tableList) {
 			String tableName = table.getName();
 
-			tableName = tableName.toUpperCase();
-
 			DBMetadata.DataDefinition def = dbMetaData.getDefinition(tableName);
+			if (def == null)
+				throw new RuntimeException("Definition not found for table: " + tableName);
 			int size = def.countAttribute();
 
 			String[] columnList = new String[2];

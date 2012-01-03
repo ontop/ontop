@@ -48,8 +48,7 @@ public class SQLQueryTranslator {
 	
 	private QueryTree createView(String query) {
 		String viewName = String.format("view_%s", id_counter++);
-		
-		viewName = viewName.toUpperCase();
+		viewName = dbMetaData.getFormattedIdentifier(viewName);
 		
 		ViewDefinition vd = createViewDefintion(viewName, query);
 		dbMetaData.add(vd);
@@ -73,6 +72,12 @@ public class SQLQueryTranslator {
 			if (columnName.contains(" as ")) {
 				columnName = columnName.split(" as ")[1].trim();
 			}
+			
+			columnName = dbMetaData.getFormattedIdentifier(columnName);
+			
+			
+
+			
 			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
 		}
 		return viewDefinition;

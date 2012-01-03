@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,18 +24,22 @@ import java.util.List;
  */
 public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 
-	private Predicate	predicate	= null;
-	private List<Term>	terms		= null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 610365346426681620L;
+	private Predicate predicate = null;
+	private List<Term> terms = null;
 
 	// true when the list of atoms has been modified or when a term inside a
 	// functional term has been modified
-	boolean				rehash		= true;
+	boolean rehash = true;
 
 	// null when the list of atoms has been modified or when a term inside a
 	// functional term has been modified
-	String				string		= null;
+	String string = null;
 
-	private int			hash		= 0;
+	private int hash = 0;
 
 	protected PredicateAtomImpl(Predicate predicate, List<Term> terms) {
 		if (predicate.getArity() != terms.size()) {
@@ -101,12 +106,15 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 	}
 
 	public Atom clone() {
-		EventGeneratingLinkedList<Term> v = new EventGeneratingLinkedList<Term>();
+		List<Term> v = new ArrayList<Term>(terms.size() + 10);
 		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {
 			v.add(it.next().clone());
 		}
-		return new PredicateAtomImpl(predicate.clone(), v);
+		PredicateAtomImpl clone = new PredicateAtomImpl(predicate, v);
+		clone.hash = hash;
+		clone.rehash = rehash;
+		return clone;
 	}
 
 	@Override

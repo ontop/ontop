@@ -2,38 +2,41 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Variable;
 
-import com.sun.msv.datatype.xsd.XSDatatype;
-
 public class AnonymousVariable implements Variable {
 
-	private String name= "_";
-	private final int identifier = -4000;
-	private final XSDatatype type = null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6099056787768897902L;
+	private static final String name = "_";
+	private static final int identifier = -4000;
+
+	// private static final XSDatatype type = null;
 
 	protected AnonymousVariable() {
 
 	}
 
 	@Override
-	public boolean equals(Object obj){
-		 if (obj == null || !(obj instanceof AnonymousVariable)) {
-			 return false;
-		 }
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof AnonymousVariable)) {
+			return false;
+		}
 
-		 AnonymousVariable var2 = (AnonymousVariable) obj;
-		 return this.identifier == var2.hashCode();
-	 }
+		AnonymousVariable var2 = (AnonymousVariable) obj;
+		return identifier == var2.hashCode();
+	}
 
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return identifier;
 	}
 
-//	@Override
-//	public void setName(String name){
-//		this.name = name;
-//	}
-	
+	// @Override
+	// public void setName(String name){
+	// this.name = name;
+	// }
+
 	@Override
 	public String getName() {
 		return name;

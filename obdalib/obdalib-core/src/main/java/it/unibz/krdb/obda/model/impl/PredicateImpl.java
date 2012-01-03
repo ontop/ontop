@@ -6,21 +6,27 @@ import java.net.URI;
 
 public class PredicateImpl implements Predicate {
 
-	private int			arity		= -1;
-	private URI			name		= null;
-	private int			identifier	= -1;
-	private COL_TYPE[]	types		= null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7096056207721170465L;
+	private int arity = -1;
+	private URI name = null;
+	private int identifier = -1;
+	private COL_TYPE[] types = null;
+	
 
 	protected PredicateImpl(URI name, int arity, COL_TYPE[] types) {
 		this.name = name;
 		this.identifier = name.toString().hashCode();
 		this.arity = arity;
 		this.types = types;
+		
 	}
 
-	public void setName(URI name) {
-		this.name = name;
-	}
+	// public void setName(URI name) {
+	// this.name = name;
+	// }
 
 	@Override
 	public int getArity() {
@@ -52,7 +58,9 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public Predicate clone() {
-		return new PredicateImpl(URI.create(this.name.toString()), this.arity, types);
+		PredicateImpl clone = new PredicateImpl(this.name, this.arity, types);
+		clone.identifier = identifier;		
+		return clone;
 	}
 
 	@Override
@@ -66,4 +74,6 @@ public class PredicateImpl implements Predicate {
 			return types[column];
 		return null;
 	}
+
+
 }

@@ -19,6 +19,10 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 
 public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5512895151633505075L;
 	private String id = "";
 	
 	public AbstractOBDAMappingAxiom(String id) {

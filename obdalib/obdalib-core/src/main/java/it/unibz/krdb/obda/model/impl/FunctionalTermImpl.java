@@ -6,20 +6,25 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class FunctionalTermImpl implements Function, ListListener {
 
-	private Predicate	functor		= null;
-	private List<Term>	terms		= null;
-	private int			identifier	= -1;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2832481815465364535L;
+	private Predicate functor = null;
+	private List<Term> terms = null;
+	private int identifier = -1;
 
 	// true when the list of terms has been modified
-	boolean				rehash		= true;
+	boolean rehash = true;
 
 	// null when the list of terms has been modified
-	String				string		= null;
+	String string = null;
 
 	/**
 	 * The default constructor.
@@ -76,12 +81,16 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public FunctionalTermImpl clone() {
-		EventGeneratingLinkedList<Term> copyTerms = new EventGeneratingLinkedList<Term>();
+		List<Term> copyTerms = new ArrayList<Term>(terms.size() + 10);
 		Iterator<Term> it = terms.iterator();
 		while (it.hasNext()) {
 			copyTerms.add(it.next().clone());
 		}
-		return new FunctionalTermImpl(functor.clone(), copyTerms);
+		FunctionalTermImpl clone = new FunctionalTermImpl(functor, copyTerms);
+		clone.identifier = identifier;
+		clone.string = string;
+		clone.rehash = rehash;
+		return clone;
 	}
 
 	@Override

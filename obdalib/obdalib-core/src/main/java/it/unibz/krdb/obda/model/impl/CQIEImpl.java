@@ -7,8 +7,8 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /***
@@ -20,20 +20,24 @@ import java.util.List;
  */
 public class CQIEImpl implements CQIE, ListListener {
 
-	private Atom				head		= null;
-	private List<Atom>			body		= null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5789854661851692098L;
+	private Atom head = null;
+	private List<Atom> body = null;
 	// private boolean isBoolean = false;
 
-	private int					hash		= -1;
+	private int hash = -1;
 
-	private boolean				rehash		= true;
+	private boolean rehash = true;
 
-	private String				string		= null;
+	private String string = null;
 
-	private static final String	SPACE		= " ";
-	private static final String	COMMA		= ",";
-	private static final String	INV_IMPLIES	= ":-";
-	
+	private static final String SPACE = " ";
+	private static final String COMMA = ",";
+	private static final String INV_IMPLIES = ":-";
+
 	private OBDAQueryModifiers modifiers = null;
 
 	// TODO Remove isBoolean from the signature and from any method
@@ -123,10 +127,12 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public CQIEImpl clone() {
-		Atom copyHead = (Atom)head.clone();
-		List<Atom> copyBody = new LinkedList<Atom>();
+		Atom copyHead = (Atom) head.clone();
+		List<Atom> copyBody = new ArrayList<Atom>(body.size()+10);
+
 		for (Atom atom : body) {
 			copyBody.add(atom.clone());
+
 		}
 
 		return new CQIEImpl(copyHead, copyBody);
@@ -151,7 +157,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	public OBDAQueryModifiers getQueryModifiers() {
 		return modifiers;
 	}
-	
+
 	@Override
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;

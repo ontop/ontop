@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/SQL99.g 2011-12-14 17:46:46
+// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/SQL99.g 2012-01-02 22:59:12
 
 package it.unibz.krdb.obda.parser;
 
@@ -4544,7 +4544,7 @@ public class SQL99Parser extends Parser {
             }
 
 
-             value = new BooleanLiteral(Boolean.getBoolean((t!=null?t.getText():null))); 
+             value = new BooleanLiteral(Boolean.parseBoolean((t!=null?t.getText():null))); 
 
             }
 

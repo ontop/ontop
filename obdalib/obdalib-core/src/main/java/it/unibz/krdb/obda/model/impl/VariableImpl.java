@@ -51,6 +51,8 @@ public class VariableImpl implements Variable {
 
 	@Override
 	public Variable clone() {
-		return new VariableImpl(new String(name), this.type);
+		VariableImpl clone = new VariableImpl(new String(name), this.type);
+		clone.identifier = identifier;
+		return clone;
 	}
 }

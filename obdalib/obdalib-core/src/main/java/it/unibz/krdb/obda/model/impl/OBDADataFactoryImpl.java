@@ -427,6 +427,23 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types) {
+		if (uri == OBDAVocabulary.strEQ) {
+			return OBDAVocabulary.EQ;
+		} else if (uri == OBDAVocabulary.strLT) {
+			return OBDAVocabulary.LT;
+		} else if (uri == OBDAVocabulary.strLTE) {
+			return OBDAVocabulary.LTE;
+		} else if (uri == OBDAVocabulary.strGT) {
+			return OBDAVocabulary.GT;
+		} else if (uri == OBDAVocabulary.strGTE) {
+			return OBDAVocabulary.GTE;
+		} else if (uri == OBDAVocabulary.strAND) {
+			return OBDAVocabulary.AND;
+		} else if (uri == OBDAVocabulary.strOR) {
+			return OBDAVocabulary.OR;
+		} else if (uri == OBDAVocabulary.strNEQ) {
+			return OBDAVocabulary.NEQ;
+		}
 		return getPredicate(URI.create(uri), arity, types);
 	}
 

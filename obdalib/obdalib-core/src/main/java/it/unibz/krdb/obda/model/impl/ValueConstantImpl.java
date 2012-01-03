@@ -6,9 +6,9 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class ValueConstantImpl implements ValueConstant {
 
-	private String		value		= null;
-	private XSDatatype	type		= null;
-	private int			identifier	= -1;
+	private String value = null;
+	private XSDatatype type = null;
+	private int identifier = -1;
 
 	/**
 	 * The default constructor.
@@ -41,7 +41,9 @@ public class ValueConstantImpl implements ValueConstant {
 
 	@Override
 	public ValueConstant clone() {
-		return new ValueConstantImpl(new String(value), this.type);
+		ValueConstantImpl clone = new ValueConstantImpl(value, this.type);
+		clone.identifier = identifier;
+		return clone;
 	}
 
 	@Override

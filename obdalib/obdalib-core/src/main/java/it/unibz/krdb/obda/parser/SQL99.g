@@ -690,7 +690,7 @@ string_literal returns [StringLiteral value]
   ;
 
 boolean_literal returns [BooleanLiteral value]
-  : (t=TRUE | t=FALSE) { $value = new BooleanLiteral(Boolean.getBoolean($t.text)); }
+  : (t=TRUE | t=FALSE) { $value = new BooleanLiteral(Boolean.parseBoolean($t.text)); }
   ;
 
 numeric_literal returns [NumericLiteral value]

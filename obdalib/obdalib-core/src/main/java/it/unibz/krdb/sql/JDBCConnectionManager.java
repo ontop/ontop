@@ -261,13 +261,25 @@ public class JDBCConnectionManager {
 			ResultSet rsTables = md.getTables(null, null, null, null);
 
 			DBMetadata metadata = new DBMetadata();
+			
+			metadata.setDriverName(md.getDriverName());
+			metadata.setDatabaseProductName(md.getDatabaseProductName());
+			
+			metadata.setStoresLowerCaseIdentifier(md.storesLowerCaseIdentifiers());
+			metadata.setStoresLowerCaseQuotedIdentifiers(md.storesLowerCaseQuotedIdentifiers());
+			metadata.setStoresMixedCaseIdentifiers(md.storesMixedCaseIdentifiers());
+			metadata.setStoresMixedCaseQuotedIdentifiers(md.storesMixedCaseQuotedIdentifiers());
+			metadata.setStoresUpperCaseIdentifiers(md.storesUpperCaseIdentifiers());
+			metadata.setStoresUpperCaseQuotedIdentifiers(md.storesUpperCaseQuotedIdentifiers());
+			
+			
 			while (rsTables.next()) {
 				String tblCatalog = rsTables.getString("TABLE_CAT");
 				String tblName = rsTables.getString("TABLE_NAME");
 				String tblSchema = rsTables.getString("TABLE_SCHEM");
 
 				ResultSet rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
-				ArrayList<String> pk = getPrimaryKey(md, tblSchema, tblName);
+				ArrayList<String> pk = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 
 				TableDefinition td = new TableDefinition();
 				td.setName(tblName);
@@ -281,19 +293,15 @@ public class JDBCConnectionManager {
 				metadata.add(td);
 			}
 			return metadata;
-		} catch (NullPointerException e) {
-			log.error(e.getMessage());
-			return null;
-		} catch (SQLException e) {
-			log.error(e.getMessage());
-			return null;
+		} catch (Exception e) {
+			throw new RuntimeException("Impossible to get DB metadata", e);
 		}
 	}
 
 	/* Retrives the primary key(s) from a table */
-	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String schema, String table) throws SQLException {
+	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		ArrayList<String> pk = new ArrayList<String>();
-		ResultSet rsPrimaryKeys = md.getPrimaryKeys("metadata", schema, table);
+		ResultSet rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table);
 		while (rsPrimaryKeys.next()) {
 			String colName = rsPrimaryKeys.getString("COLUMN_NAME");
 			String pkName = rsPrimaryKeys.getString("PK_NAME");

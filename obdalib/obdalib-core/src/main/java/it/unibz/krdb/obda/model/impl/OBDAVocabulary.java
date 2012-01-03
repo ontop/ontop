@@ -26,4 +26,24 @@ public class OBDAVocabulary {
 
 	public static final Predicate	OR	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#OR"), 2);
 
+	
+	/* Boolean predicate URIs */
+
+	public static final String	strAND	= "http://obdalib.org/predicates/boolean#AND";
+
+	public static final String	strEQ	= "http://obdalib.org/predicates/boolean#EQ";
+
+	public static final String	strGTE	= "http://obdalib.org/predicates/boolean#GTE";
+
+	public static final String	strGT	= "http://obdalib.org/predicates/boolean#GT";
+
+	public static final String	strLTE	= "http://obdalib.org/predicates/boolean#LTE";
+
+	public static final String	strLT	= "http://obdalib.org/predicates/boolean#LT";
+
+	public static final String	strNEQ	= "http://obdalib.org/predicates/boolean#NEQ";
+
+	public static final String	strNOT	= "http://obdalib.org/predicates/boolean#NOT";
+
+	public static final String	strOR	= "http://obdalib.org/predicates/boolean#OR";
 }

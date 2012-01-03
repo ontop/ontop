@@ -53,7 +53,10 @@ public class TableDefinition implements DataDefinition {
 			if (comma) {
 				bf.append(",");
 			}
-			bf.append(attributes.get(i));
+			Attribute at = attributes.get(i);
+			bf.append(at);
+			if (at.bPrimaryKey) 
+				bf.append(":PK");
 			comma = true;
 		}
 		bf.append("]");

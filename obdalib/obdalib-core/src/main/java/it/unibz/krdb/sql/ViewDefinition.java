@@ -40,6 +40,10 @@ public class ViewDefinition implements DataDefinition {
 		this.statement = statement;
 	}
 
+	public String getStatement() {
+		return statement;
+	}
+
 	@Override
 	public String toString() {
 		StringBuffer bf = new StringBuffer();
