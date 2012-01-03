@@ -29,8 +29,12 @@ import org.slf4j.LoggerFactory;
 
 public class TreeRedReformulator implements QueryRewriter {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5839664343260233946L;
 	private static final QueryAnonymizer anonymizer = new QueryAnonymizer();
-	private static final AtomUnifier unifier = new AtomUnifier();
+	// private static final AtomUnifier unifier = new AtomUnifier();
 
 	private static final Logger log = LoggerFactory.getLogger(TreeRedReformulator.class);
 
@@ -53,9 +57,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	public TreeRedReformulator() {
 
-
 		// sqoOptimizer = new SemanticQueryOptimizer(fac, rightAssertionIndex);
-
 
 	}
 
@@ -271,12 +273,12 @@ public class TreeRedReformulator implements QueryRewriter {
 		resultprogram.appendRule(resultlist);
 
 		double endtime = System.currentTimeMillis();
-		double seconds = (endtime - starttime) / 1000;
+		double milliseconds = (endtime - starttime) / 1000;
 
 		QueryUtils.copyQueryModifiers(input, resultprogram);
 
 		log.debug("Computed reformulation: \n{}", resultprogram);
-		log.debug("Fina size of reformulation: {}, Time elapse: {}s", resultlist.size(), seconds);
+		log.debug("Reformulation size: {}, Time elapse: {}ms", resultlist.size(), milliseconds);
 
 		// log.info("Time elapsed for reformulation: {}s", seconds);
 

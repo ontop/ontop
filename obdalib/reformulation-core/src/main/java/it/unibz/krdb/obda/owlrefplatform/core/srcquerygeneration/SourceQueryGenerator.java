@@ -35,5 +35,5 @@ public interface SourceQueryGenerator extends Serializable {
 	 */
 //	public void update(PrefixManager man, DLLiterOntology onto, Set<URI> uris);
 	
-	public ViewManager getViewManager();
+//	public ViewManager getViewManager();
 }

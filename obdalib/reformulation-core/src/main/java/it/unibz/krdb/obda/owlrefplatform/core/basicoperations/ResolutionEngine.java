@@ -6,23 +6,23 @@ import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Map;
 
-
 public class ResolutionEngine {
 
-	AtomUnifier	unifier	= null;
-	
+	AtomUnifier unifier = null;
+
 	public ResolutionEngine() {
 		unifier = new AtomUnifier();
 	}
-	
-	
 
 	/**
 	 * This method resolves a query atom (atomidx) against a rule's head,
-	 * producing as output a new query q'.
+	 * producing as output a new query q'. The original atom will be removed and
+	 * replaced with the body of the resolved rule, which is appended at the end
+	 * of original body.
 	 * 
-	 * Note, queries used as a rule can only have 1 atom in the body. Moreover,
-	 * all the restrictions specified in the class AtomUnifier about unification
+	 * 
+	 * 
+	 * All the restrictions specified in the class AtomUnifier about unification
 	 * apply here to.
 	 * 
 	 * @param rule
@@ -37,8 +37,9 @@ public class ResolutionEngine {
 			return null;
 
 		newquery.getBody().remove(atomidx);
-		newquery.getBody().addAll(atomidx, rule.getBody());
-//		newquery.getBody().set(atomidx, rule.getBody().get(0));
+		// newquery.getBody().addAll(atomidx, rule.getBody());
+		newquery.getBody().addAll(rule.getBody());
+
 		return unifier.applyUnifier(newquery, mgu);
 	}
 }

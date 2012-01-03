@@ -3,12 +3,10 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -17,14 +15,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URI;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -39,23 +37,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * The following tests take the Stock exchange scenario and execute the queries
- * of the scenario to validate the results. The validation is simple, we only
- * count the number of distinct tuples returned by each query, which we know in
- * advance.
+ * As the H2 in-memory StockExchange test but uses an Postgres database.
+ * Moreover, it requires the data to be already loaded in the database.
  * 
- * We execute the scenario in different modes, virtual, classic, with and
- * without optimizations.
- * 
- * The data is obtained from an inmemory database with the stock exchange
- * tuples. If the scenario is run in classic, this data gets imported
- * automatically by the reasoner.
- * 
+ * The test requires a postgres database, the JDBC access properties and an
+ * account that is able to create and drop tables on the database.
  * 
  * @author mariano
  * 
  */
-public class StockExchangeTest extends TestCase {
+public class StockExchangeTestMySQL extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -69,6 +60,10 @@ public class StockExchangeTest extends TestCase {
 	private OWLOntology ontology;
 
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
+	private String driver;
+	private String url;
+	private String username;
+	private String password;
 
 	public class TestQuery {
 		public String id = "";
@@ -89,12 +84,14 @@ public class StockExchangeTest extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:stockclient1";
-		String username = "sa";
-		String password = "";
-
-		System.out.println("Test");
+		driver = "com.mysql.jdbc.Driver";
+		url = "jdbc:mysql://obdalin.inf.unibz.it/questjunitdb";
+		username = "obda";
+		password = "obda09";
+		log.debug("Driver: {}", driver);
+		log.debug("Url: {}", url);
+		log.debug("Username: {}", username);
+		log.debug("Password: {}", password);
 
 		fac = OBDADataFactoryImpl.getInstance();
 		// stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"
@@ -115,24 +112,29 @@ public class StockExchangeTest extends TestCase {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-postgres.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-mysql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
 		while (line != null) {
-			bf.append(line);
+			bf.append(line + "\n");
+			
+			if (line.contains(";")) {
+				st.executeUpdate(bf.toString());
+				bf.setLength(0);
+			}
 			line = in.readLine();
 		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		System.out.println(bf);
+		
+//		conn.commit();
 
 		/*
 		 * Loading the ontology and obda model
 		 */
 
 		String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
-		String obdafile = "src/test/resources/test/stockexchange-unittest.obda";
+		String obdafile = "src/test/resources/test/stockexchange-mysql-unittest.obda";
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -171,11 +173,37 @@ public class StockExchangeTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		try {
+			dropTables();
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
+
+		try {
 			conn.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
 
+	}
+
+	private void dropTables() throws SQLException, IOException {
+
+		Statement st = conn.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-postgres.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			if (line.contains(";")) {
+				st.executeUpdate(bf.toString());
+				bf.setLength(0);
+			}
+			line = in.readLine();
+			
+		}
+		st.close();
 	}
 
 	private void runTests(ReformulationPlatformPreferences p) throws Exception {
@@ -197,7 +225,7 @@ public class StockExchangeTest extends TestCase {
 		// Now we are ready for querying
 		OBDAStatement st = reasoner.getStatement();
 
-		List<Result> summaries = new LinkedList<StockExchangeTest.Result>();
+		List<Result> summaries = new LinkedList<StockExchangeTestMySQL.Result>();
 
 		int qc = 0;
 		for (TestQuery tq : testQueries) {
@@ -208,21 +236,21 @@ public class StockExchangeTest extends TestCase {
 			qc += 1;
 
 			int count = 0;
-//			if (qc > 8) {
-				long start = System.currentTimeMillis();
-				OBDAResultSet rs = st.executeQuery(tq.query);
-				long end = System.currentTimeMillis();
-				while (rs.nextRow()) {
-					count += 1;
-				}
+			// if (qc > 8) {
+			long start = System.currentTimeMillis();
+			OBDAResultSet rs = st.executeQuery(tq.query);
+			long end = System.currentTimeMillis();
+			while (rs.nextRow()) {
+				count += 1;
+			}
 
-				Result summary = new Result();
-				summary.id = tq.id;
-				summary.query = tq.query;
-				summary.timeelapsed = end - start;
-				summary.distinctTuples = count;
-				summaries.add(summary);
-//			}
+			Result summary = new Result();
+			summary.id = tq.id;
+			summary.query = tq.query;
+			summary.timeelapsed = end - start;
+			summary.distinctTuples = count;
+			summaries.add(summary);
+			// }
 		}
 
 		/* Closing resources */

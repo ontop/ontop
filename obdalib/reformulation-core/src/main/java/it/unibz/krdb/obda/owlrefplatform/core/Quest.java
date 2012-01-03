@@ -25,14 +25,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulat
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
-import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -43,7 +42,6 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,7 +91,7 @@ public class Quest implements Serializable {
 
 	/* The OBDA model used for query unfolding */
 	private OBDAModel unfoldingOBDAModel = null;
-	
+
 	/* As unfolding OBDAModel, but experimental */
 	private DatalogProgram unfoldingProgram = null;
 
@@ -308,7 +306,8 @@ public class Quest implements Serializable {
 	}
 
 	public OBDAStatement getStatement() throws Exception {
-		QuestOBDAStatement st = new QuestOBDAStatement(unfMech, rewriter, gen, validator, conn.createStatement(), unfoldingOBDAModel, dataRepository);
+		QuestOBDAStatement st = new QuestOBDAStatement(unfMech, rewriter, gen, validator, conn.createStatement(), unfoldingOBDAModel,
+				dataRepository);
 		st.setUnfoldingProgram(unfoldingProgram);
 		return st;
 	}
@@ -524,19 +523,31 @@ public class Quest implements Serializable {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-			ArrayList<OBDAMappingAxiom> mappingList = unfoldingOBDAModel.getMappings(sourceId);
-
 			// DBMetadata dbMetaData =
 			// JDBCConnectionManager.getJDBCConnectionManager().getMetaData(sourceId);
 
 			// MappingAnalyzer mapAnalyzer = new MappingAnalyzer(mappingList,
 			// dbMetaData);
 
-			MappingViewManager viewMan = new MappingViewManager(mappingList);
-			unfMech = new ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(sourceId), viewMan);
+			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
+			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
+			unfoldingProgram = analyzer.constructDatalogProgram();
 
-			JDBCUtility util = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			gen = new ComplexMappingSQLGenerator(viewMan, util);
+			// ArrayList<OBDAMappingAxiom> mappingList =
+			// unfoldingOBDAModel.getMappings(sourceId);
+
+			// MappingViewManager viewMan = new
+			// MappingViewManager(unfoldingProgram.getRules());
+			// unfMech = new
+			// ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(sourceId),
+			// viewMan);
+
+			unfMech = new DatalogUnfolder(unfoldingProgram, metadata);
+
+			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			// gen = new ComplexMappingSQLGenerator(viewMan, util);
+
+			gen = new SQLGenerator(metadata, jdbcutil);
 
 			log.debug("Setting up the connection;");
 			// eval_engine = new JDBCEngine(datasource);
@@ -571,14 +582,6 @@ public class Quest implements Serializable {
 			 */
 
 			validator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
-			
-			
-//			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
-//			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
-//			unfoldingProgram = analyzer.constructDatalogProgram();
-//			
-			
-			
 
 			log.debug("... Quest has been setup and is ready for querying");
 			isClassified = true;

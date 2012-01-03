@@ -163,7 +163,7 @@ public class QuestOBDAStatement implements OBDAStatement {
 		log.debug("Executing the query and get the result...");
 		if (sql.equals("")) {
 			/***
-			 * Empty unfolding, constructing an empty resultset
+			 * Empty unfolding, constructing an empty result set
 			 */
 			if (program.getRules().size() < 1) {
 				throw new Exception("Error, empty query");

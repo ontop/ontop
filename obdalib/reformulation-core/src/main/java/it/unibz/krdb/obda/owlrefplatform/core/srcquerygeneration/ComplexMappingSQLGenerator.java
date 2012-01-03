@@ -558,12 +558,12 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 		return sb.toString();
 	}
 
-	/**
-	 * returns the current view manager
-	 */
-	@Override
-	public ViewManager getViewManager() {
-		return viewManager;
-	}
+//	/**
+//	 * returns the current view manager
+//	 */
+//	@Override
+//	public ViewManager getViewManager() {
+//		return viewManager;
+//	}
 
 }
