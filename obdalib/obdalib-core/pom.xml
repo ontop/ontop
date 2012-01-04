@@ -8,13 +8,13 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>inf.unibz.it.obda</groupId>
+	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>obdalib-core</artifactId>
 
 	<packaging>jar</packaging>
 	<name>obdalib-core</name>
 	<url>http://maven.apache.org</url>
-	<version>1.6.1</version>
+	<!-- <version>1.6.1</version> -->
 
 
 	<dependencies>

@@ -28,9 +28,6 @@ import java.util.Vector;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.StyleContext;
 
 import org.antlr.runtime.RecognitionException;

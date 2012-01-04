@@ -76,8 +76,6 @@ public class MappingAnalyzer {
 			for (Relation table : tableList) {
 				String tableName = table.getName();
 
-				tableName = tableName;
-
 				URI predicateName = URI.create(tableName);
 
 				int arity = dbMetaData.getDefinition(tableName).countAttribute();
