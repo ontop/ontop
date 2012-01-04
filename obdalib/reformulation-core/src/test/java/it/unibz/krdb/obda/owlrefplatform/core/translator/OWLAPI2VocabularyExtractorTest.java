@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
 
 import java.io.File;
 import java.util.Set;

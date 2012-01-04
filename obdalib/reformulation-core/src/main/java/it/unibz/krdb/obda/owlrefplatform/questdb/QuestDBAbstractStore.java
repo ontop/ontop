@@ -1,8 +1,8 @@
-package it.unibz.krdb.obda.owlrefplatform.core.questdb;
+package it.unibz.krdb.obda.owlrefplatform.questdb;
 
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.Properties;
 
 import org.semanticweb.owl.apibinding.OWLManager;
@@ -27,12 +26,24 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	protected Quest questInstance = null;
 
+	protected QuestConnection conn = null;
+
 	protected static transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
 	protected String name;
 
 	public QuestDBAbstractStore(String name) {
 		this.name = name;
+	}
+
+	/***
+	 * Throws an exception if the connection is null or is inactive.
+	 * 
+	 * @throws OBDAException
+	 */
+	protected void checkConnection() throws OBDAException {
+		if (conn == null && conn.isClosed())
+			throw new OBDAException("An active connection must exists before calling this method");
 	}
 
 	/* Serialize methods */
@@ -74,42 +85,40 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		return false;
 	}
 
-	public void disconnect() throws SQLException {
-		questInstance.disconnect();
+	public void disconnect() throws OBDAException {
+		conn.close();
 	}
 
-	public void connect() throws SQLException {
-		questInstance.connect();
+	public void connect() throws OBDAException {
+		if (conn != null && !conn.isClosed())
+			throw new OBDAException("Cannot connect when an active connection already exists.");
+		conn = questInstance.getConnection();
 	}
 
-	public boolean isConnected() throws SQLException {
-		return questInstance.isConnected();
+	public boolean isConnected() throws OBDAException {
+		return conn != null & !conn.isClosed();
 	}
 
-	public OBDAStatement getStatement() throws Exception {
-		return questInstance.getStatement();
+	public QuestConnection getConnection() {
+		return conn;
 	}
 
-	public void createDB() throws Exception {
-		questInstance.createDB();
-	}
-
-	public OBDAResultSet executeQuery(String query) throws Exception {
-		return questInstance.getStatement().executeQuery(query);
-	}
-
-	public String getSQL(String query) throws Exception {
-		OBDAStatement st = questInstance.getStatement();
-		String sql = st.getUnfolding(query);
-		st.close();
-		return sql;
-	}
-
-	public String getReformulation(String query) throws Exception {
-		OBDAStatement st = questInstance.getStatement();
-		String reformulation = st.getRewriting(query);
-		st.close();
-		return reformulation;
-	}
+	// public OBDAResultSet executeQuery(String query) throws Exception {
+	// return questInstance.getStatement().executeQuery(query);
+	// }
+	//
+	// public String getSQL(String query) throws Exception {
+	// OBDAStatement st = questInstance.getStatement();
+	// String sql = st.getUnfolding(query);
+	// st.close();
+	// return sql;
+	// }
+	//
+	// public String getReformulation(String query) throws Exception {
+	// OBDAStatement st = questInstance.getStatement();
+	// String reformulation = st.getRewriting(query);
+	// st.close();
+	// return reformulation;
+	// }
 
 }

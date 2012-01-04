@@ -4,10 +4,10 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.CQIEImpl;
@@ -205,9 +205,9 @@ public class MappingViewManager implements ViewManager {
 	 * @return the original variable name at the given position
 	 * @throws Exception
 	 */
-	public String getOrgHeadVariableName(int pos, List<String> signature) throws Exception {
+	public String getOrgHeadVariableName(int pos, List<String> signature) throws OBDAException {
 		if (pos < 0 || pos > signature.size()) {
-			throw new Exception("Invalid position for HeadVariable");
+			throw new OBDAException("Invalid position for HeadVariable");
 		} else {
 			return signature.get(pos);
 			// return head.getTerms().get(pos).getName();

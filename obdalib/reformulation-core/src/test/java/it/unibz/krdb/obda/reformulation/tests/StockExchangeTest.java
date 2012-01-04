@@ -3,26 +3,22 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -210,7 +206,8 @@ public class StockExchangeTest extends TestCase {
 			int count = 0;
 //			if (qc > 8) {
 				long start = System.currentTimeMillis();
-				OBDAResultSet rs = st.executeQuery(tq.query);
+				
+				OBDAResultSet rs = st.execute(tq.query);
 				long end = System.currentTimeMillis();
 				while (rs.nextRow()) {
 					count += 1;

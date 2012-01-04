@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
@@ -128,7 +129,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 	}
 
 	@Override
-	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception {
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
 		if (!isUCQ(query))
 			throw new InvalidParameterException("Only UCQs are supported at the moment");
 
@@ -374,7 +375,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(Atom head, List<Atom> body, List<String> signature, String[] tableName, String[] viewName,
-			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex) throws Exception {
+			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex) throws OBDAException {
 		List<Term> headterms = head.getTerms();
 		StringBuilder sb = new StringBuilder();
 		if (headterms.size() > 0) {

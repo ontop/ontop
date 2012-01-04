@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.LUBM;
 
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.questdb.QuestDBClassicStore;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,7 +64,7 @@ public class QuestRewritingBenchmarkTool {
 			out.println("Quest initialization time: " + format.format((stop - start) / 1000000.0) + " ms");
 
 			out.println("Query,Ref.Time (ms), Size");
-			final OBDAStatement st = store.getStatement();
+			final QuestStatement st = store.getConnection().createStatement();
 			for (int i = 0; i < queries.length; i++) {
 				System.out.println("Query " + (i + 1));
 				final CountDownLatch latch = new CountDownLatch(1);
@@ -104,6 +104,7 @@ public class QuestRewritingBenchmarkTool {
 				}
 
 			}
+			st.close();
 			out.flush();
 
 		} catch (Exception e) {

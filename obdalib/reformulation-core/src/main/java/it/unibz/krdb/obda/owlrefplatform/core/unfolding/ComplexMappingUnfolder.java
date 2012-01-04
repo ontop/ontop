@@ -5,10 +5,10 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -44,6 +44,11 @@ import org.slf4j.LoggerFactory;
  */
 
 public class ComplexMappingUnfolder implements UnfoldingMechanism {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7013379526100515645L;
 
 	List<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>();
 
@@ -272,7 +277,7 @@ public class ComplexMappingUnfolder implements UnfoldingMechanism {
 	}
 
 	@Override
-	public DatalogProgram unfold(DatalogProgram inputquery) throws Exception {
+	public DatalogProgram unfold(DatalogProgram inputquery) throws OBDAException {
 		log.debug("Computing unfolding for query of size: {}", inputquery.getRules().size());
 		long startime = System.currentTimeMillis();
 

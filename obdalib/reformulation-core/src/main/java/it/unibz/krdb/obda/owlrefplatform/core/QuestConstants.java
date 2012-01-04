@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import java.net.URI;
 
 public class QuestConstants {
 	

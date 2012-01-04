@@ -6,11 +6,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 
 import java.io.File;
 
@@ -68,7 +68,7 @@ public class StockExchangeTestSemIndex extends TestCase {
 		// Getting a prefix for the query
 		
 		OBDAStatement st = reasoner.getStatement();
-		OBDAResultSet r = st.executeQuery(sparqlstr);
+		OBDAResultSet r = st.execute(sparqlstr);
 		int ic = r.getColumCount();
 		while (r.nextRow()) {
 			for (int i = 0; i < ic; i++) {
@@ -85,7 +85,7 @@ public class StockExchangeTestSemIndex extends TestCase {
 		// Getting a prefix for the query
 		
 		st = reasoner.getStatement();
-		r = st.executeQuery(sparqlstr);
+		r = st.execute(sparqlstr);
 		ic = r.getColumCount();
 		int count = 0;
 		while (r.nextRow()) {

@@ -3,18 +3,17 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
@@ -36,7 +35,6 @@ import it.unibz.krdb.obda.utils.MappingAnalyzer;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -44,7 +42,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -53,55 +50,60 @@ import org.slf4j.LoggerFactory;
 
 public class Quest implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6074403119825754295L;
+
 	/***
 	 * Internal components
 	 */
 
 	/* The active ABox repository, might be null */
-	private RDBMSDataRepositoryManager dataRepository = null;
+	protected RDBMSDataRepositoryManager dataRepository = null;
 
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
 
-	private QueryVocabularyValidator validator;
+	protected QueryVocabularyValidator vocabularyValidator;
 
-	/* The active connection used to evaluate the queries */
-	private transient Connection conn = null;
+	/* The active connection used to get metadata from the DBMS */
+	private transient Connection localConnection = null;
 
 	/* The active query rewriter */
-	private QueryRewriter rewriter = null;
+	protected QueryRewriter rewriter = null;
 
 	/* The active unfolding engine */
-	private UnfoldingMechanism unfMech = null;
+	protected UnfoldingMechanism unfolder = null;
 
 	/* The active SQL generator */
-	private SourceQueryGenerator gen = null;
+	protected SourceQueryGenerator datasourceQueryGenerator = null;
 
 	/* The active query evaluation engine */
-	private EvaluationEngine eval_engine = null;
+	protected EvaluationEngine evaluationEngine = null;
 
 	/* The active ABox dependencies */
-	private Ontology sigma = null;
+	protected Ontology sigma = null;
 
 	/* The TBox used for query reformulation */
-	private Ontology reformulationOntology = null;
+	protected Ontology reformulationOntology = null;
 
 	/* The merge and tranlsation of all loaded ontologies */
-	private Ontology inputTBox = null;
+	protected Ontology inputTBox = null;
 
 	/* The OBDA model used for query unfolding */
-	private OBDAModel unfoldingOBDAModel = null;
+	protected OBDAModel unfoldingOBDAModel = null;
 
 	/* As unfolding OBDAModel, but experimental */
-	private DatalogProgram unfoldingProgram = null;
+	protected DatalogProgram unfoldingProgram = null;
 
 	/* The input OBDA model */
-	private OBDAModel inputOBDAModel = null;
+	protected OBDAModel inputOBDAModel = null;
 
 	/*
 	 * The equivalence map for the classes/properties that have been simplified
 	 */
-	private Map<Predicate, Description> equivalenceMaps = null;
+	protected Map<Predicate, Description> equivalenceMaps = null;
 
 	// private ReformulationPlatformPreferences preferences = null;
 
@@ -149,10 +151,6 @@ public class Quest implements Serializable {
 
 	private String aboxJdbcDriver;
 
-	public Ontology getABoxDependencies() {
-		return null;
-	}
-
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
 		inputOBDAModel = (OBDAModel) model.clone();
@@ -186,32 +184,22 @@ public class Quest implements Serializable {
 		return sigma;
 	}
 
-	/***
-	 * Gets the internal OBDA model, the one used for reasoning and query
-	 * answering.
-	 * 
-	 * @return
-	 */
-	public Ontology getOBDAModel() {
-		return sigma;
-	}
-
 	// TODO This method has to be fixed... shouldnt be visible
 	public Map<Predicate, Description> getEquivalenceMap() {
 		return equivalenceMaps;
 	}
 
-	public void dispose() throws Exception {
+	public void dispose() {
 		try {
-			this.eval_engine.dispose();
+			this.evaluationEngine.dispose();
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		try {
 			disconnect();
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 
@@ -221,55 +209,6 @@ public class Quest implements Serializable {
 	public void loadTBox(Ontology tbox) {
 		inputTBox = tbox;
 		isClassified = false;
-	}
-
-	public void createIndexes() throws Exception {
-		dataRepository.createIndexes();
-	}
-
-	public void dropIndexes() throws Exception {
-		dataRepository.dropIndexes();
-	}
-
-	/***
-	 * Inserts a stream of ABox assertions into the repository.
-	 * 
-	 * @param data
-	 * @param recreateIndexes
-	 *            Indicates if indexes (if any) should be droped before
-	 *            inserting the tuples and recreated afterwards. Note, if no
-	 *            index existed before the insert no drop will be done and no
-	 *            new index will be created.
-	 * @throws SQLException
-	 */
-	public int insertData(Iterator<Assertion> data, boolean useFile) throws SQLException {
-
-		int result = -1;
-		if (!useFile)
-			result = dataRepository.insertData(data);
-		else {
-			try {
-				// File temporalFile = new File("quest-copy.tmp");
-				// FileOutputStream os = new FileOutputStream(temporalFile);
-				result = (int) dataRepository.loadWithFile(data);
-				// os.close();
-
-			} catch (IOException e) {
-				log.error(e.getMessage());
-			}
-		}
-
-		return result;
-	}
-
-	/***
-	 * As before, but using recreateIndexes = false.
-	 * 
-	 * @param data
-	 * @throws SQLException
-	 */
-	public int insertData(Iterator<Assertion> data) throws SQLException {
-		return insertData(data, false);
 	}
 
 	public Properties getPreferences() {
@@ -305,15 +244,18 @@ public class Quest implements Serializable {
 		}
 	}
 
-	public OBDAStatement getStatement() throws Exception {
-		QuestOBDAStatement st = new QuestOBDAStatement(unfMech, rewriter, gen, validator, conn.createStatement(), unfoldingOBDAModel,
-				dataRepository);
-		st.setUnfoldingProgram(unfoldingProgram);
-		return st;
-	}
-
-	public boolean connect() throws SQLException {
-		if (conn != null && !conn.isClosed())
+	/***
+	 * Starts the local connection that Quest maintains to the DBMS. This
+	 * connection belongs only to Quest and is used to get information from the
+	 * DBMS. At the momemnt this connection is mainly used during
+	 * initialization, to get metadata about the DBMS or to create repositories
+	 * in classic mode.
+	 * 
+	 * @return
+	 * @throws SQLException
+	 */
+	private boolean connect() throws SQLException {
+		if (localConnection != null && !localConnection.isClosed())
 			return true;
 
 		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
@@ -326,29 +268,26 @@ public class Quest implements Serializable {
 		} catch (ClassNotFoundException e1) {
 			// Does nothing because the SQLException handles this problem also.
 		}
-		conn = DriverManager.getConnection(url, username, password);
-		if (dataRepository != null) {
-			dataRepository.setDatabase(conn);
-		}
+		localConnection = DriverManager.getConnection(url, username, password);
 
-		if (conn != null)
+		if (localConnection != null)
 			return true;
 		return false;
 	}
 
 	public void disconnect() throws SQLException {
 		try {
-			conn.close();
+			localConnection.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
 	}
 
-	public boolean isConnected() throws SQLException {
-		if (conn == null || conn.isClosed())
-			return false;
-		return true;
-	}
+	// public boolean isConnected() throws SQLException {
+	// if (conn == null || conn.isClosed())
+	// return false;
+	// return true;
+	// }
 
 	public void setupRepository() throws Exception {
 
@@ -412,7 +351,7 @@ public class Quest implements Serializable {
 				if (inmemory) {
 					log.debug("Using in an memory database");
 					String driver = "org.h2.Driver";
-					String url = "jdbc:h2:mem:aboxdump" + System.currentTimeMillis();
+					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis();
 					String username = "sa";
 					String password = "";
 
@@ -435,17 +374,12 @@ public class Quest implements Serializable {
 				}
 
 				connect();
-				// this.translatedOntologyMerge.saturate();
 
-				// VocabularyExtractor extractor = new
-				// VocabularyExtractor();
-				// Set<Predicate> vocabulary =
-				// extractor.getVocabulary(reformulationOntology);
 				if (dbType.equals(QuestConstants.SEMANTIC)) {
-					dataRepository = new RDBMSSIRepositoryManager(conn, reformulationOntology.getVocabulary());
+					dataRepository = new RDBMSSIRepositoryManager(reformulationOntology.getVocabulary());
 
 				} else if (dbType.equals(QuestConstants.DIRECT)) {
-					dataRepository = new RDBMSDirectDataRepositoryManager(conn, reformulationOntology.getVocabulary());
+					dataRepository = new RDBMSDirectDataRepositoryManager(reformulationOntology.getVocabulary());
 
 				} else {
 					throw new Exception(dbType
@@ -455,9 +389,9 @@ public class Quest implements Serializable {
 
 				/* Creating the ABox repository */
 
-				if (!dataRepository.isDBSchemaDefined()) {
-					dataRepository.createDBSchema(false);
-					dataRepository.insertMetadata();
+				if (!dataRepository.isDBSchemaDefined(localConnection)) {
+					dataRepository.createDBSchema(localConnection, false);
+					dataRepository.insertMetadata(localConnection);
 				}
 
 				/* Setting up the OBDA model */
@@ -469,8 +403,6 @@ public class Quest implements Serializable {
 					sigma.addEntities(axiom.getReferencedEntities());
 					sigma.addAssertion(axiom);
 				}
-
-				conn = dataRepository.getConnection();
 
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
@@ -498,7 +430,7 @@ public class Quest implements Serializable {
 						// Does nothing because the SQLException handles this
 						// problem also.
 					}
-					conn = DriverManager.getConnection(url, username, password);
+					localConnection = DriverManager.getConnection(url, username, password);
 
 					unfoldingOBDAModel.addSource(obdaSource);
 
@@ -529,7 +461,7 @@ public class Quest implements Serializable {
 			// MappingAnalyzer mapAnalyzer = new MappingAnalyzer(mappingList,
 			// dbMetaData);
 
-			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
+			DBMetadata metadata = JDBCConnectionManager.getMetaData(localConnection);
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
@@ -542,12 +474,12 @@ public class Quest implements Serializable {
 			// ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(sourceId),
 			// viewMan);
 
-			unfMech = new DatalogUnfolder(unfoldingProgram, metadata);
+			unfolder = new DatalogUnfolder(unfoldingProgram, metadata);
 
 			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			// gen = new ComplexMappingSQLGenerator(viewMan, util);
 
-			gen = new SQLGenerator(metadata, jdbcutil);
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil);
 
 			log.debug("Setting up the connection;");
 			// eval_engine = new JDBCEngine(datasource);
@@ -581,7 +513,7 @@ public class Quest implements Serializable {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 
-			validator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
+			vocabularyValidator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
 
 			log.debug("... Quest has been setup and is ready for querying");
 			isClassified = true;
@@ -589,7 +521,12 @@ public class Quest implements Serializable {
 		} catch (Exception e) {
 
 			log.error(e.getMessage(), e);
-			Exception ex = new Exception(e.getMessage(), e) {
+			OBDAException ex = new OBDAException(e.getMessage(), e) {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
 			};
 			e.fillInStackTrace();
 
@@ -608,31 +545,33 @@ public class Quest implements Serializable {
 		}
 	}
 
-	public boolean isIndexed() {
-		if (dataRepository == null)
-			return false;
-		return dataRepository.isIndexed();
-	}
-
-	public void dropRepository() throws SQLException {
-		if (dataRepository == null)
-			return;
-		dataRepository.dropDBSchema();
-	}
-
 	/***
-	 * In an ABox store (classic) this methods triggers the generation of the
-	 * schema and the insertion of the metadata.
+	 * Establishes a new connection to the data source.
 	 * 
-	 * @throws SQLException
+	 * @return
+	 * @throws OBDAException
 	 */
-	public void createDB() throws SQLException {
-		dataRepository.createDBSchema(false);
-		dataRepository.insertMetadata();
-	}
+	public QuestConnection getConnection() throws OBDAException {
 
-	public void analyze() throws Exception {
-		dataRepository.collectStatistics();
+		Connection conn;
+
+		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+
+		try {
+			Class.forName(driver);
+		} catch (ClassNotFoundException e1) {
+			log.debug(e1.getMessage());
+		}
+		try {
+			conn = DriverManager.getConnection(url, username, password);
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
+
+		return new QuestConnection(this, conn);
 
 	}
 

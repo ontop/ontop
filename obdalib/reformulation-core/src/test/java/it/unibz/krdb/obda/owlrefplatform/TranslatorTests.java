@@ -1,4 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
@@ -7,7 +8,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.Iterator;

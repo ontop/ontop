@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 
 import java.util.Hashtable;

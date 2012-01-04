@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
@@ -53,7 +54,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	 * @return
 	 * @throws Exception
 	 */
-	private DatalogProgram reformulate(DatalogProgram q) throws Exception {
+	private DatalogProgram reformulate(DatalogProgram q) throws OBDAException {
 
 		LinkedHashSet<CQIE> prog = new LinkedHashSet<CQIE>();
 		// List<CQIE> queries = q.getRules();
@@ -124,10 +125,10 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	// reformulates according to PerfectRef
 	// #############################
 
-	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
+	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
 
 		if (!(input instanceof DatalogProgram)) {
-			throw new Exception("Rewriting exception: The input must be a DatalogProgram instance");
+			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
 		}
 
 		DatalogProgram prog = (DatalogProgram) input;
@@ -135,7 +136,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 		log.debug("Starting query rewrting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
-			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
+			throw new OBDAException("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
 		/* Query preprocessing */

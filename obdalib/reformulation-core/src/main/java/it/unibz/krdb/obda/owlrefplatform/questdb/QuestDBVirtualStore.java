@@ -1,31 +1,16 @@
-package it.unibz.krdb.obda.owlrefplatform.core.questdb;
+package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
 
-import org.semanticweb.owl.apibinding.OWLManager;
 import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

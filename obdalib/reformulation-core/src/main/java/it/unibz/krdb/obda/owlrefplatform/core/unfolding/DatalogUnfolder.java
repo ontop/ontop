@@ -7,11 +7,11 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -132,7 +132,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param inputquery
 	 * @return
 	 */
-	private DatalogProgram unfoldToUCQ(DatalogProgram inputquery) throws Exception {
+	private DatalogProgram unfoldToUCQ(DatalogProgram inputquery) throws OBDAException {
 
 		LinkedHashSet<CQIE> evaluation = new LinkedHashSet<CQIE>();
 		evaluation.addAll(inputquery.getRules());
@@ -265,7 +265,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	@Override
-	public DatalogProgram unfold(DatalogProgram inputquery) throws Exception {
+	public DatalogProgram unfold(DatalogProgram inputquery) throws OBDAException {
 
 		log.debug("Unfolding mode: {}. Initial query size: {}", unfoldingMode, inputquery.getRules().size());
 

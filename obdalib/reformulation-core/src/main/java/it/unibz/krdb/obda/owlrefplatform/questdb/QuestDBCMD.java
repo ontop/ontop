@@ -1,7 +1,8 @@
-package it.unibz.krdb.obda.owlrefplatform.core.questdb;
+package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.questdb.QuestDB.StoreStatus;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB.StoreStatus;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,7 +53,7 @@ public class QuestDBCMD {
 	private static final String RX_STOP = "[Ss][Tt][Oo][Pp]";
 
 	private static final String RX_LIST = "[Ll][Ii][Ss][Tt]";
-	
+
 	private static final String RX_FAST = "[Ff][Aa][Ss][Tt]";
 
 	private static final String RX_LOAD = "[Ll][Oo][Aa][Dd]";
@@ -109,12 +110,11 @@ public class QuestDBCMD {
 	private static final String CMD_LOAD = RX_LOAD + RX_WS + RX_QUOTED_PARAMETER;
 
 	private static final Pattern PTR_LOAD = Pattern.compile(CMD_LOAD);
-	
+
 	/* LOAD "datafile" FAST */
 	private static final String CMD_LOAD_FAST = RX_LOAD + RX_WS + RX_QUOTED_PARAMETER + RX_WS + RX_FAST;
 
 	private static final Pattern PTR_LOAD_FAST = Pattern.compile(CMD_LOAD_FAST);
-
 
 	/* CREATE INDEX */
 	private static final String CMD_CREATE_INDEX = RX_CREATE + RX_WS + RX_INDEX;
@@ -209,7 +209,10 @@ public class QuestDBCMD {
 				System.out.println("\nYou must set an active store first using the command \"\\c storename\"");
 				return;
 			}
-			String sql = dbInstance.getSQL(currentstore, query.substring("GET SQL ".length()));
+
+			QuestStatement st = dbInstance.getStatement(currentstore);
+			String sql = st.getUnfolding(query.substring("GET SQL ".length()));
+			st.close();
 			System.out.println("SQL:");
 			System.out.println(sql);
 		} else if (query.startsWith("GET REF ")) {
@@ -217,7 +220,8 @@ public class QuestDBCMD {
 				System.out.println("\nYou must set an active store first using the command \"\\c storename\"");
 				return;
 			}
-			String rew = dbInstance.getReformulation(currentstore, query.substring("GET REF".length()));
+			QuestStatement st = dbInstance.getStatement(currentstore);
+			String rew = st.getRewriting(query.substring("GET REF".length()));
 			System.out.println("Reformulation:");
 			System.out.println(rew);
 		} else {
@@ -226,11 +230,12 @@ public class QuestDBCMD {
 				return;
 			}
 			try {
-				OBDAResultSet result = dbInstance.executeQuery(currentstore, query);
+				QuestStatement st = dbInstance.getStatement(currentstore);
+				OBDAResultSet result = st.execute(query);
 				int count = printResultSet(result);
 				System.out.println(count + " rows.");
 				result.close();
-				result.getStatement().close();
+				st.close();
 			} catch (Exception e) {
 				System.out.println("\nError executing query.");
 			}
@@ -306,7 +311,7 @@ public class QuestDBCMD {
 		String data = null;
 		Matcher m = PTR_LOAD.matcher(cmd);
 		if (m.find()) {
-		 data = m.group(1);
+			data = m.group(1);
 		} else {
 			Matcher m2 = PTR_LOAD_FAST.matcher(cmd);
 			data = m2.group(1);

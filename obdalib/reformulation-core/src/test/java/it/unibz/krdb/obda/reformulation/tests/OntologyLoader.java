@@ -6,9 +6,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
@@ -95,6 +95,8 @@ public class OntologyLoader {
 
 			Iterator<String> query_it = queryStrings.iterator();
 			Iterator<String> queryid = queryIds.iterator();
+			OBDAStatement statement = reasoner.getStatement();
+
 			while (query_it.hasNext()) {
 				int resultcount = 0;
 				String query = query_it.next();
@@ -103,8 +105,7 @@ public class OntologyLoader {
 				// System.out.println("ID: " + id);
 
 				String sparqlstr = prefix + query;
-				OBDAStatement statement = reasoner.getStatement();
-				OBDAResultSet result = statement.executeQuery(sparqlstr);
+				OBDAResultSet result = statement.execute(sparqlstr);
 
 				// Printing the results
 				// System.out.println("Results:");
@@ -120,10 +121,13 @@ public class OntologyLoader {
 						// System.out.println("");
 						resultcount += 1;
 					}
+					result.close();
+					
 					// System.out.println("Result count: " + resultcount);
 					// System.out.println("-------------------\n");
 				}
 			}
+			statement.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();

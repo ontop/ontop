@@ -47,7 +47,7 @@ public class AtomUnifier {
 	 *
 	 * @throws Exception
 	 */
-	public CQIE unify(CQIE q, int i, int j) throws Exception {
+	public CQIE unify(CQIE q, int i, int j)  {
 
 		Map<Variable, Term> mgu = getMGU(q.getBody().get(i), q.getBody().get(j));
 		if (mgu == null)

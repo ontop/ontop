@@ -1,13 +1,14 @@
 package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
-import java.io.Serializable;
-
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
+import java.io.Serializable;
+
 public interface QueryRewriter extends Serializable {
 
-	public OBDAQuery rewrite(OBDAQuery input) throws Exception;
+	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException;
 
 	/***
 	 * Sets the ontology that this rewriter should use to compute any
@@ -24,11 +25,10 @@ public interface QueryRewriter extends Serializable {
 	 * @param sigma
 	 */
 	public void setCBox(Ontology sigma);
-	
-	
+
 	/***
-	 * Initializes the rewriter. This method must be called before calling "rewrite"
-	 * and after the TBox and CBox have been updated.
+	 * Initializes the rewriter. This method must be called before calling
+	 * "rewrite" and after the TBox and CBox have been updated.
 	 */
 	public void initialize();
 

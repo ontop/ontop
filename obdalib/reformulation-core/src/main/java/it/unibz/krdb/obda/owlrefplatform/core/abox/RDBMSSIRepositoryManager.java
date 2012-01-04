@@ -27,9 +27,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PunningException;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,11 +37,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -58,13 +55,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
-import org.coode.obo.parser.IsATagValueHandler;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Store ABox assertions in the DB
@@ -79,7 +75,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
-	private transient Connection conn = null;
+	// private transient Connection conn = null;
 
 	private OBDADataSource db = null;
 
@@ -267,16 +263,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final boolean mergeUniions = false;
 
-	public RDBMSSIRepositoryManager(Connection ds) throws PunningException {
-		this(ds, null);
+	public RDBMSSIRepositoryManager() throws PunningException {
+		this(null);
 	}
 
-	public RDBMSSIRepositoryManager(Connection ds, Set<Predicate> vocabulary) throws PunningException {
+	public RDBMSSIRepositoryManager(Set<Predicate> vocabulary) throws PunningException {
 
 		if (vocabulary != null) {
 			setVocabulary(vocabulary);
 		}
-		setDatabase(ds);
 	}
 
 	@Override
@@ -284,24 +279,24 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.config = config;
 	}
 
-	@Override
-	public void disconnect() {
-		try {
-			conn.close();
-		} catch (Exception e) {
+	// @Override
+	// public void disconnect() {
+	// try {
+	// conn.close();
+	// } catch (Exception e) {
+	//
+	// }
+	// }
 
-		}
-	}
+	// @Override
+	// public Connection getConnection() {
+	// return conn;
+	// }
 
-	@Override
-	public Connection getConnection() {
-		return conn;
-	}
-
-	@Override
-	public void setDatabase(Connection ds) {
-		this.conn = ds;
-	}
+	// @Override
+	// public void setDatabase(Connection ds) {
+	// this.conn = ds;
+	// }
 
 	@Override
 	public void setTBox(Ontology ontology) {
@@ -510,154 +505,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.flush();
 	}
 
-	// @Override
-	// public void getCSVInserts(Iterator<Assertion> data, OutputStream
-	// outstream) throws IOException {
-	// BufferedWriter out = new BufferedWriter(new
-	// OutputStreamWriter(outstream));
-	//
-	// int insertscount = 0;
-	//
-	// int batchCount = 0;
-	//
-	// HashMap<Predicate, Integer> indexes = new HashMap<Predicate,
-	// Integer>(this.ontology.getVocabulary().size() * 2);
-	//
-	// while (data.hasNext()) {
-	//
-	// Assertion ax = data.next();
-	//
-	// insertscount += 1;
-	// batchCount += 1;
-	//
-	// if (ax instanceof DataPropertyAssertion) {
-	//
-	// DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion)
-	// ax;
-	// Predicate attribute = attributeABoxAssertion.getAttribute();
-	//
-	// // String prop =
-	// // attributeABoxAssertion.getAttribute().getName().toString();
-	// String uri = attributeABoxAssertion.getObject().getURI().toString();
-	// String lit = attributeABoxAssertion.getValue().getValue();
-	//
-	// Integer idxc = indexes.get(attribute);
-	// int idx = -1;
-	// if (idxc == null) {
-	// // Predicate propPred =
-	// // attributeABoxAssertion.getAttribute();
-	// Property propDesc = descFactory.createProperty(attribute);
-	// DAGNode node = pureIsa.getRoleNode(propDesc);
-	// idx = node.getIndex();
-	// indexes.put(attribute, idx);
-	// } else {
-	// idx = idxc;
-	// }
-	// out.append(uri);
-	// out.append('\t');
-	// out.append(lit);
-	// out.append('\t');
-	// out.append(String.valueOf(idx));
-	//
-	// } else if (ax instanceof ObjectPropertyAssertion) {
-	//
-	// ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
-	//
-	// // String prop =
-	// // roleABoxAssertion.getRole().getName().toString();
-	// String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
-	// String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
-	//
-	// Predicate propPred = roleABoxAssertion.getRole();
-	// Property propDesc = descFactory.createProperty(propPred);
-	//
-	// if (dag.equi_mappings.containsKey(propDesc)) {
-	// Property desc = (Property) dag.equi_mappings.get(propDesc);
-	// if (desc.isInverse()) {
-	// String tmp = uri1;
-	// uri1 = uri2;
-	// uri2 = tmp;
-	// }
-	// }
-	//
-	// int idx = -1;
-	// Integer idxc = indexes.get(propPred);
-	// if (idxc == null) {
-	//
-	// DAGNode node = pureIsa.getRoleNode(propDesc);
-	// if (node == null) {
-	// Property desc = (Property) dag.equi_mappings.get(propDesc);
-	//
-	// if (desc == null) {
-	// log.error("Property class without node: " + propDesc);
-	// }
-	// Property desinv = descFactory.createProperty(desc.getPredicate(),
-	// !desc.isInverse());
-	// DAGNode node2 = (pureIsa.getRoleNode(desinv));
-	// idx = node2.getIndex();
-	// } else {
-	// idx = node.getIndex();
-	// }
-	// indexes.put(roleABoxAssertion.getRole(), idx);
-	// } else {
-	// idx = idxc;
-	// }
-	//
-	// out.append(uri1);
-	// out.append('\t');
-	// out.append(uri2);
-	// out.append('\t');
-	// out.append(String.valueOf(idx));
-	//
-	// } else if (ax instanceof ClassAssertion) {
-	//
-	// ClassAssertion cassertion = (ClassAssertion) ax;
-	// Predicate pred = cassertion.getConcept();
-	//
-	// int idx = -1;
-	// Integer idxc = indexes.get(cassertion.getConcept());
-	// if (idxc == null) {
-	// Predicate clsPred = cassertion.getConcept();
-	// ClassDescription clsDesc = descFactory.createClass(clsPred);
-	// DAGNode node = pureIsa.getClassNode(clsDesc);
-	// if (node == null) {
-	// String cls = cassertion.getConcept().getName().toString();
-	// log.error("Found class without node: " + cls.toString());
-	// }
-	// idx = node.getIndex();
-	// indexes.put(pred, idx);
-	// } else {
-	// idx = idxc;
-	// }
-	// String uri = cassertion.getObject().getURI().toString();
-	//
-	// out.append(uri);
-	// out.append('\t');
-	// out.append(String.valueOf(idx));
-	//
-	// }
-	// out.append('\n');
-	// }
-	//
-	// out.flush();
-	// }
-
 	@Override
-	public void createDBSchema(boolean dropExisting) throws SQLException {
+	public void createDBSchema(Connection conn, boolean dropExisting) throws SQLException {
 
-		if (isDBSchemaDefined()) {
+		if (isDBSchemaDefined(conn)) {
 			log.debug("Schema already exists. Skipping creation");
 			return;
 		}
 
 		log.debug("Recreating data tables");
 
-		conn.setAutoCommit(false);
 		Statement st = conn.createStatement();
 
 		if (dropExisting) {
 			try {
-				dropDBSchema();
+				dropDBSchema(conn);
 			} catch (SQLException e) {
 				log.debug(e.getMessage(), e);
 			}
@@ -670,15 +532,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
+
 
 	}
 
 	@Override
-	public void createIndexes() throws SQLException {
+	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
 
-		conn.setAutoCommit(false);
+
 		Statement st = conn.createStatement();
 
 		st.addBatch(indexclass1);
@@ -709,15 +571,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
+
 
 		isIndexed = true;
 
 	}
 
 	@Override
-	public void dropDBSchema() throws SQLException {
-		conn.setAutoCommit(false);
+	public void dropDBSchema(Connection conn) throws SQLException {
+
 		Statement st = conn.createStatement();
 
 		st.addBatch(drop_dll);
@@ -727,14 +589,20 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_drop);
 		st.executeBatch();
 		st.close();
-		conn.commit();
+		
 	}
 
 	@Override
-	public int insertData(Iterator<Assertion> data) throws SQLException {
+	public int insertData(Connection conn, Iterator<Assertion> data, int commit, int batch) throws SQLException {
 		log.debug("Inserting data into DB");
 
-		conn.setAutoCommit(false);
+		if (commit < 1) {
+			commit = -1;
+		}
+		if (batch < 1) {
+			batch = -1;
+		}
+		
 
 		PreparedStatement cls_stm = conn.prepareStatement(class_insert);
 		PreparedStatement role_stm = conn.prepareStatement(role_insert);
@@ -858,7 +726,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// }
 			}
 
-			if (batchCount == 1000) {
+			if (batchCount == batch) {
 				batchCount = 0;
 				role_stm.executeBatch();
 				role_stm.clearBatch();
@@ -869,7 +737,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				cls_stm.executeBatch();
 				cls_stm.clearBatch();
 			}
-			if (commitCount == 500) {
+			if (commitCount == commit) {
 				commitCount = 0;
 				conn.commit();
 			}
@@ -888,7 +756,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		cls_stm.clearBatch();
 		cls_stm.close();
 
-		conn.commit();
+		if (commit != -1)
+			conn.commit();
 
 		log.debug("Total tuples inserted: {}", insertscount);
 		return insertscount;
@@ -901,7 +770,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void loadMetadata() throws SQLException {
+	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Checking if SemanticIndex exists in DB");
 
 		Map<Description, DAGNode> res_classes = new HashMap<Description, DAGNode>();
@@ -985,7 +854,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public boolean checkMetadata() throws SQLException {
+	public boolean checkMetadata(Connection conn) throws SQLException {
 		return true;
 	}
 
@@ -1150,7 +1019,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * We need to make sure we make no mappings for Auxiliary roles
 			 * introduced by the Ontology translation process.
 			 */
-			if (role.toString().contains(OWLAPI2Translator.AUXROLEURI))
+			if (role.toString().contains(OntologyImpl.AUXROLEURI))
 				continue;
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
@@ -1528,16 +1397,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void collectStatistics() throws SQLException {
+	public void collectStatistics(Connection conn) throws SQLException {
 
-		conn.setAutoCommit(false);
+
 		Statement st = conn.createStatement();
 
 		st.addBatch(analyze);
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
+
 	}
 
 	@Override
@@ -1599,8 +1468,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void insertMetadata() throws SQLException {
-		conn.setAutoCommit(false);
+	public void insertMetadata(Connection conn) throws SQLException {
+
 
 		PreparedStatement stm = conn.prepareStatement(insert_query);
 		for (DAGNode node : dag.getClasses()) {
@@ -1654,7 +1523,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 		stm.executeBatch();
 		stm.close();
-		conn.commit();
+
 
 	}
 
@@ -1687,10 +1556,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public void dropIndexes() throws SQLException {
+	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Droping indexes");
 
-		conn.setAutoCommit(false);
+
 		Statement st = conn.createStatement();
 
 		st.addBatch(dropindexclass1);
@@ -1721,19 +1590,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
+
 
 		isIndexed = false;
 
 	}
 
 	@Override
-	public boolean isIndexed() {
+	public boolean isIndexed(Connection conn) {
 		return isIndexed;
 	}
 
 	@Override
-	public boolean isDBSchemaDefined() throws SQLException {
+	public boolean isDBSchemaDefined(Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
 		boolean exists = true;
 		try {
@@ -1756,7 +1625,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public long loadWithFile(final Iterator<Assertion> data) throws SQLException, IOException {
+	public long loadWithFile(Connection conn, final Iterator<Assertion> data) throws SQLException, IOException {
 
 		log.debug("Insert data into schemas using temporary files");
 
@@ -1934,7 +1803,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			log.debug("Inserting object properties");
 			FileReader inprop = new FileReader(tempFileObjectProperties);
 			counts[0] = cm.copyIn("COPY " + role_table + " FROM STDIN", inprop);
-			conn.commit();
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		} finally {
@@ -1949,7 +1817,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			log.debug("Inserting data properties");
 			FileReader inprop = new FileReader(tempFileDataProperties);
 			counts[1] = cm.copyIn("COPY " + attribute_table + " FROM STDIN", inprop);
-			conn.commit();
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		} finally {
@@ -1964,7 +1831,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			log.debug("Inserting type assertions");
 			FileReader intype = new FileReader(tempFileType);
 			counts[2] = cm.copyIn("COPY " + class_table + " FROM STDIN", intype);
-			conn.commit();
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		} finally {

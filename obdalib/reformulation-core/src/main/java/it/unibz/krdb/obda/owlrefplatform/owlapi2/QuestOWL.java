@@ -1,21 +1,23 @@
-package it.unibz.krdb.obda.owlrefplatform.core;
+package it.unibz.krdb.obda.owlrefplatform.owlapi2;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQueryReasoner;
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.OBDAOWLReasoner;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.Quest;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +74,8 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 	private Quest questInstance = null;
 
+	private QuestConnection conn = null;
+
 	/***
 	 * Optimization flags
 	 */
@@ -88,8 +92,8 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	}
 
 	@Override
-	public OBDAStatement getStatement() throws Exception {
-		return questInstance.getStatement();
+	public QuestStatement getStatement() throws OBDAException {
+		return conn.createStatement();
 	}
 
 	public boolean isConsistent(OWLOntology ontology) throws OWLReasonerException {
@@ -135,6 +139,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		try {
 
 			questInstance.setupRepository();
+			conn = questInstance.getConnection();
 
 			/*
 			 * Preparing the data source
@@ -142,10 +147,12 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
 
+				QuestStatement st = conn.createStatement();
 				if (bObtainFromOntology) {
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI2ABoxIterator aBoxIter = new OWLAPI2ABoxIterator(loadedOntologies, questInstance.getEquivalenceMap());
-					questInstance.insertData(aBoxIter);
+
+					st.insertData(aBoxIter, 5000, 500);
 
 				}
 				if (bObtainFromMappings) {
@@ -153,11 +160,13 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel, questInstance.getEquivalenceMap());
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
-					questInstance.insertData(assertionIter);
+					st.insertData(assertionIter, 5000, 500);
 					assertionIter.disconnect();
 				}
 
-				questInstance.createIndexes();
+				st.createIndexes();
+				st.close();
+				conn.commit();
 
 			}
 
@@ -499,17 +508,17 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		return progressMonitor;
 	}
 
-	@Override
-	public void finishProgressMonitor() {
-		getProgressMonitor().setFinished();
-	}
-
-	@Override
-	public void startProgressMonitor(String msg) {
-		getProgressMonitor().setMessage(msg);
-		getProgressMonitor().setIndeterminate(true);
-		getProgressMonitor().setStarted();
-	}
+	// @Override
+	// public void finishProgressMonitor() {
+	// getProgressMonitor().setFinished();
+	// }
+	//
+	// @Override
+	// public void startProgressMonitor(String msg) {
+	// getProgressMonitor().setMessage(msg);
+	// getProgressMonitor().setIndeterminate(true);
+	// getProgressMonitor().setStarted();
+	// }
 
 	@Override
 	public void clearOntologies() throws OWLReasonerException {
@@ -524,6 +533,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	public void loadOBDAModel(OBDAModel model) {
 		isClassified = false;
 		obdaModel = (OBDAModel) model.clone();
+	}
+
+	@Override
+	public QuestConnection getConnection() throws OBDAException {
+		return conn;
 	}
 
 }

@@ -4,20 +4,19 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.SemanticQueryOptimizer;
 
 import java.util.Collection;
@@ -129,14 +128,14 @@ public class PositiveInclusionApplicator {
 		return newqueries;
 	}
 
-	public List<CQIE> apply(CQIE query, Collection<SubDescriptionAxiom> pis) throws Exception {
+	public List<CQIE> apply(CQIE query, Collection<SubDescriptionAxiom> pis)  {
 		int bodysize = query.getBody().size();
 		HashSet<CQIE> newqueries = new HashSet<CQIE>(bodysize * pis.size() * 2);
 		newqueries.add(query);
 
 		for (int atomindex = 0; atomindex < bodysize; atomindex++) {
 			
-			MemoryUtils.checkAvailableMemory();
+//			MemoryUtils.checkAvailableMemory();
 			
 			HashSet<CQIE> currentatomresults = new HashSet<CQIE>(bodysize * pis.size() * 2);
 			for (CQIE cq : newqueries) {
@@ -175,7 +174,7 @@ public class PositiveInclusionApplicator {
 	 * @throws Exception
 	 * @throws Exception
 	 */
-	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<SubDescriptionAxiom> pis) throws Exception {
+	public Collection<CQIE> applyExistentialInclusions(Collection<CQIE> cqs, Collection<SubDescriptionAxiom> pis) {
 
 		// HashSet<CQIE> result = new HashSet<CQIE>(6000);
 		if (pis == null || pis.isEmpty())
@@ -199,7 +198,7 @@ public class PositiveInclusionApplicator {
 
 		for (SubDescriptionAxiom pi : pis) {
 			
-			MemoryUtils.checkAvailableMemory();
+//			MemoryUtils.checkAvailableMemory();
 			
 			for (CQIE query : saturatedset) {
 				List<Atom> body = query.getBody();
@@ -242,7 +241,7 @@ public class PositiveInclusionApplicator {
 	 * @return
 	 * @throws Exception
 	 */
-	public Set<CQIE> saturateByUnification(Set<CQIE> initialset, Predicate predicate, boolean leftTermEqual) throws Exception {
+	public Set<CQIE> saturateByUnification(Set<CQIE> initialset, Predicate predicate, boolean leftTermEqual) {
 
 		HashSet<CQIE> saturatedset = new HashSet<CQIE>(2500);
 		saturatedset.addAll(initialset);
@@ -255,7 +254,7 @@ public class PositiveInclusionApplicator {
 		boolean loop = true;
 		while (loop) {
 			
-			MemoryUtils.checkAvailableMemory();
+//			MemoryUtils.checkAvailableMemory();
 			
 			loop = false;
 			newset = new HashSet<CQIE>();

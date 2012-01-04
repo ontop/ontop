@@ -10,8 +10,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -19,10 +19,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+
+
 public class DAGConstructor {
 
-	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
+	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
 
 	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);
@@ -155,7 +157,7 @@ public class DAGConstructor {
 		for (DAGNode node : dag.getRoles()) {
 			Property nodeDesc = (Property) node.getDescription();
 
-			if (nodeDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
+			if (nodeDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
 				continue;
 			}
 
@@ -180,7 +182,7 @@ public class DAGConstructor {
 			}
 			for (DAGNode child : node.getChildren()) {
 				Property childDesc = (Property) child.getDescription();
-				if (childDesc.getPredicate().getName().toString().startsWith(OWLAPI2Translator.AUXROLEURI)) {
+				if (childDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
 					continue;
 				}
 				if (childDesc.isInverse()) {

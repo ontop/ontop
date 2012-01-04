@@ -9,7 +9,6 @@ import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
@@ -18,8 +17,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.exception.PunningException;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PunningException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -27,7 +25,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -52,7 +49,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	 * 
 	 */
 	private static final long serialVersionUID = -6649716982554168637L;
-	
+
 	private transient Connection conn = null;
 	// private APIController apic = null;
 	private transient List<ABoxDumpListener> listener = null;
@@ -122,21 +119,14 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	private boolean isIndexed;
 
-	public RDBMSDirectDataRepositoryManager(Connection ds) throws PunningException {
-		this(ds, null);
+	public RDBMSDirectDataRepositoryManager() throws PunningException {
+		this(null);
 	}
 
-	public RDBMSDirectDataRepositoryManager(Connection ds, Set<Predicate> vocabulary) throws PunningException {
-		this();
-
+	public RDBMSDirectDataRepositoryManager(Set<Predicate> vocabulary) throws PunningException {
 		if (vocabulary != null) {
 			setVocabulary(vocabulary);
 		}
-		setDatabase(ds);
-
-	}
-
-	public RDBMSDirectDataRepositoryManager() {
 		listener = new Vector<ABoxDumpListener>();
 	}
 
@@ -170,26 +160,6 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	@Override
 	public void setConfig(Properties config) {
 		this.config = config;
-	}
-
-	@Override
-	public void disconnect() {
-		try {
-			conn.close();
-		} catch (Exception e) {
-
-		}
-	}
-
-	@Override
-	public Connection getConnection() {
-		return conn;
-	}
-
-	@Override
-	public void setDatabase(Connection conn) {
-
-		this.conn = conn;
 	}
 
 	@Override
@@ -319,31 +289,29 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		out.flush();
 	}
 
-//	@Override
-//	public void getCSVInserts(Iterator<Assertion> data, OutputStream out) throws IOException {
-//		// TODO Auto-generated method stub
-//
-//	}
+	// @Override
+	// public void getCSVInserts(Iterator<Assertion> data, OutputStream out)
+	// throws IOException {
+	// // TODO Auto-generated method stub
+	//
+	// }
 
 	@Override
-	public void createDBSchema(boolean dropExisting) throws SQLException {
+	public void createDBSchema(Connection conn, boolean dropExisting) throws SQLException {
 
-		
-		if (isDBSchemaDefined()) {
+		if (isDBSchemaDefined(conn)) {
 			log.debug("Schema already exists. Skipping creation");
 			return;
 		}
 
-		
 		if (dropExisting) {
 			try {
-				dropDBSchema();
+				dropDBSchema(conn);
 			} catch (SQLException e) {
 				log.debug(e.getMessage());
 			}
 		}
 
-		conn.setAutoCommit(false);
 		Statement st = conn.createStatement();
 
 		st.addBatch(strcreate_meta_table);
@@ -360,14 +328,12 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
 
 	}
 
 	@Override
-	public void createIndexes() throws SQLException {
+	public void createIndexes(Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
-		conn.setAutoCommit(false);
 
 		for (Predicate predicate : predicatetableMap.keySet()) {
 			if (predicate.getArity() == 1) {
@@ -382,24 +348,21 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
 
 		isIndexed = true;
 
 	}
 
 	@Override
-	public void dropDBSchema() throws SQLException {
+	public void dropDBSchema(Connection conn) throws SQLException {
 
 		log.debug("Droping existing tables");
 		Map<Predicate, String> tempPredicatetableMap = new HashMap<Predicate, String>();
 		Map<String, Predicate> tempUriPredicateMap = new HashMap<String, Predicate>();
 
-		this.loadMetadataFromDB(tempPredicatetableMap, tempUriPredicateMap);
+		this.loadMetadataFromDB(conn, tempPredicatetableMap, tempUriPredicateMap);
 
 		Statement st = conn.createStatement();
-
-		conn.setAutoCommit(false);
 
 		for (Predicate predicate : tempPredicatetableMap.keySet()) {
 			st.addBatch(String.format(strdrop_table_class, tempPredicatetableMap.get(predicate)));
@@ -413,14 +376,13 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		st.executeBatch();
 		st.clearBatch();
 		st.close();
-		conn.commit();
 
 	}
 
 	@Override
-	public void insertMetadata() throws SQLException {
+	public void insertMetadata(Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
-		conn.setAutoCommit(false);
+
 		/*
 		 * Generating the inserts for the metadata table
 		 */
@@ -439,23 +401,27 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		}
 		st.executeBatch();
 		st.close();
-		conn.commit();
+
 	}
 
 	@Override
-	public int insertData(Iterator<Assertion> data) throws SQLException {
+	public int insertData(Connection conn, Iterator<Assertion> data, int commit, int batch) throws SQLException {
+		if (commit < 1) {
+			commit = -1;
+		}
 		Statement st = conn.createStatement();
-		conn.setAutoCommit(false);
 		/*
 		 * Generating the inserts for the ABox data
 		 */
 
 		int totalcount = 0;
 
+		int commitcount = 0;
 		int batchCount = 0;
 		while (data.hasNext()) {
 			Axiom assertion = data.next();
 			totalcount += 1;
+			commitcount += 1;
 			batchCount += 1;
 			if (assertion instanceof ClassAssertion) {
 				ClassAssertion cassertion = (ClassAssertion) assertion;
@@ -491,17 +457,27 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 						.getObject().getURI(), escaped(rassertion.getValue().getValue())));
 			}
 
-			if (batchCount == 50000) {
+			if (batchCount == batch) {
 				st.executeBatch();
-				conn.commit();
 				st.clearBatch();
 				batchCount = 0;
 			}
-		}
 
+			
+			if (commitcount == commit) {
+				conn.commit();
+				commitcount = 0;
+			}
+		}
+		
+		
 		st.executeBatch();
+		st.clearBatch();
 		st.close();
-		conn.commit();
+		
+		if (commit != -1)
+			conn.commit();
+
 		return totalcount;
 	}
 
@@ -546,21 +522,12 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void collectStatistics() throws SQLException {
+	public void collectStatistics(Connection conn) throws SQLException {
 
 		Statement sqlst = conn.createStatement();
 		sqlst.executeUpdate(stranalyze);
 
-		try {
-			sqlst.close();
-		} catch (Exception e) {
-		}
-
-		try {
-			conn.commit();
-		} catch (Exception e) {
-
-		}
+		sqlst.close();
 	}
 
 	public void setVocabulary(Set<Predicate> vocabulary) throws PunningException {
@@ -603,17 +570,17 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void loadMetadata() throws SQLException {
+	public void loadMetadata(Connection conn) throws SQLException {
 		this.predicatetableMap.clear();
 		this.uriPredicateMap.clear();
 		/*
 		 * Reconstructing a predicate-table mapping
 		 */
-		this.loadMetadataFromDB(predicatetableMap, uriPredicateMap);
+		this.loadMetadataFromDB(conn, predicatetableMap, uriPredicateMap);
 	}
 
 	@Override
-	public boolean checkMetadata() throws SQLException {
+	public boolean checkMetadata(Connection conn) throws SQLException {
 
 		/*
 		 * Fetching the metadata from the DB
@@ -621,7 +588,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		Map<Predicate, String> dbPredicateTableMap = new HashMap<Predicate, String>();
 		Map<String, Predicate> dbUriPredicateMap = new HashMap<String, Predicate>();
 
-		loadMetadataFromDB(dbPredicateTableMap, dbUriPredicateMap);
+		loadMetadataFromDB(conn, dbPredicateTableMap, dbUriPredicateMap);
 
 		/*
 		 * Comparing with the current vocabulary
@@ -638,7 +605,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		return true;
 	}
 
-	private void loadMetadataFromDB(Map<Predicate, String> predicateTableMap, Map<String, Predicate> uriPredicateMap) throws SQLException {
+	private void loadMetadataFromDB(Connection conn, Map<Predicate, String> predicateTableMap, Map<String, Predicate> uriPredicateMap)
+			throws SQLException {
 		Statement sqlst = conn.createStatement();
 		ResultSet result = sqlst.executeQuery(strselect_meta_table);
 		log.debug("Restoring metadata from DB");
@@ -692,9 +660,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public void dropIndexes() throws SQLException {
+	public void dropIndexes(Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
-		conn.setAutoCommit(false);
 
 		for (Predicate predicate : predicatetableMap.keySet()) {
 			if (predicate.getArity() == 1) {
@@ -709,23 +676,21 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 		st.executeBatch();
 		st.close();
-		conn.commit();
-
 		isIndexed = false;
 
 	}
 
 	@Override
-	public boolean isIndexed() {
+	public boolean isIndexed(Connection conn) {
 		return isIndexed;
 	}
 
 	@Override
-	public boolean isDBSchemaDefined() throws SQLException {
+	public boolean isDBSchemaDefined(Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
 		boolean exists = true;
 		try {
-			
+
 			for (Predicate predicate : predicatetableMap.keySet()) {
 				if (predicate.getArity() == 1) {
 					st.addBatch(String.format("SELECT 1 FROM " + strtabledata + " WHERE 1=0", predicatetableMap.get(predicate)));
@@ -750,7 +715,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 	}
 
 	@Override
-	public long loadWithFile(Iterator<Assertion> data) throws SQLException, IOException {
+	public long loadWithFile(Connection conn, Iterator<Assertion> data) throws SQLException, IOException {
 		// TODO Auto-generated method stub
 		return 0;
 	}

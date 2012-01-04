@@ -1,9 +1,9 @@
-package it.unibz.krdb.obda.owlrefplatform.core;
+package it.unibz.krdb.obda.owlrefplatform.owlapi2;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlapi.OBDAOWLReasoner;
-import it.unibz.krdb.obda.owlapi.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.OBDAOWLReasoner;
+import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;

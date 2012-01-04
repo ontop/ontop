@@ -14,9 +14,9 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
@@ -442,7 +442,7 @@ public class CQCUtilities {
 	 * @param queries
 	 * @throws Exception
 	 */
-	public static HashSet<CQIE> removeDuplicateAtoms(Collection<CQIE> queries) throws Exception {
+	public static HashSet<CQIE> removeDuplicateAtoms(Collection<CQIE> queries) {
 		HashSet<CQIE> newqueries = new HashSet<CQIE>(queries.size() * 2);
 		for (CQIE cq : queries) {
 			List<Atom> body = cq.getBody();
@@ -471,7 +471,7 @@ public class CQCUtilities {
 	 * @param q
 	 * @throws Exception
 	 */
-	public static CQIE removeRundantAtoms(CQIE q) throws Exception {
+	public static CQIE removeRundantAtoms(CQIE q) {
 		CQIE result = q;
 		for (int i = 0; i < result.getBody().size(); i++) {
 			Atom currentAtom = result.getBody().get(i);

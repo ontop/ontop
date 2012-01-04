@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.LUBM;
 
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.questdb.QuestDB;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB;
 
 import java.io.File;
 import java.io.FileReader;
@@ -126,6 +126,8 @@ public class QuestDBBenchmarkFinal {
 
 				log.info("Executing queries");
 
+				QuestStatement st = db.getStatement("lubm50myisam");
+
 				for (int j = 0; j < 1; j++) {
 					log.info("Query performance. Run: " + j + "\n");
 					out.println("Query performance. Run: " + j + "\n");
@@ -133,7 +135,7 @@ public class QuestDBBenchmarkFinal {
 					for (int i = 0; i < queries.length; i++) {
 
 						start = System.nanoTime();
-						String sql = db.getSQL("lubm50myisam", queries[i]);
+						String sql = st.getUnfolding(queries[i]);
 						log.info("Query {} SQL:", i);
 						log.info(sql);
 //						OBDAResultSet results = db.executeQuery("lubm50myisam", queries[i]);
@@ -161,6 +163,7 @@ public class QuestDBBenchmarkFinal {
 					log.info("Total: {}", format.format((total) / 1000000.0));
 
 				}
+				st.close();
 			}
 
 		} catch (Exception e) {

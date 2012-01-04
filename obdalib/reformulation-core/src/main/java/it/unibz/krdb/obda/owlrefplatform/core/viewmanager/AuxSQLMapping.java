@@ -24,7 +24,7 @@ public class AuxSQLMapping implements Serializable {
 	 * @return the sql variable at the given position
 	 * @throws Exception if the position is out of the bounds of the array
 	 */
-	public String getSQLVariableAt(int pos) throws Exception{
+	public String getSQLVariableAt(int pos) {
 		return sqlVariables[pos]; 
 	}
 	

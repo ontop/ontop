@@ -7,6 +7,9 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
@@ -14,9 +17,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -76,7 +76,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager();
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
@@ -157,7 +157,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager();
 		dbman.setVocabulary(preds);
 
 		log.debug("Test ontology: {}", trans.translate(ontology));
@@ -167,11 +167,11 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		
 		Statement st = conn.createStatement();
 
-		dbman.createDBSchema(false);
+		dbman.createDBSchema(conn,false);
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
-		dbman.insertMetadata();
-		dbman.insertData(ait);
-		dbman.createIndexes();
+		dbman.insertMetadata(conn);
+		dbman.insertData(conn,ait,50000,5000);
+		dbman.createIndexes(conn);
 		conn.commit();
 
 		OBDAModel model = fac.getOBDAModel();
@@ -223,7 +223,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager();
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
@@ -231,11 +231,11 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		log.debug("Creating schema and loading data...");
 
-		dbman.createDBSchema(false);
+		dbman.createDBSchema(conn,false);
 		ABoxAssertionGeneratorIterator ait = new ABoxAssertionGeneratorIterator(100000, preds);
-		dbman.insertMetadata();
-		dbman.insertData(ait);
-		dbman.createIndexes();
+		dbman.insertMetadata(conn);
+		dbman.insertData(conn,ait,50000,5000);
+		dbman.createIndexes(conn);
 
 		conn.commit();
 
@@ -290,25 +290,25 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager(conn);
+		RDBMSDataRepositoryManager dbman = new RDBMSSIRepositoryManager();
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
 		Statement st = conn.createStatement();
 
-		dbman.createDBSchema(false);
+		dbman.createDBSchema(conn,false);
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
-		dbman.insertMetadata();
-		dbman.insertData(ait);
-		dbman.createIndexes();
+		dbman.insertMetadata(conn);
+		dbman.insertData(conn,ait,50000,5000);
+		dbman.createIndexes(conn);
 		conn.commit();
 
 		/*
 		 * Reseting the manager
 		 */
-		dbman = new RDBMSSIRepositoryManager(conn);
-		assertTrue(dbman.checkMetadata());
-		dbman.loadMetadata();
+		dbman = new RDBMSSIRepositoryManager();
+		assertTrue(dbman.checkMetadata(conn));
+		dbman.loadMetadata(conn);
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);

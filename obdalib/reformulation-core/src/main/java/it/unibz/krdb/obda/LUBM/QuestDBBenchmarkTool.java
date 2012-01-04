@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.LUBM;
 
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.questdb.QuestDB;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,8 +34,7 @@ public class QuestDBBenchmarkTool {
 	}
 
 	public static void main(String[] args) {
-		String[] stores = new String[] { "lubmQSIEOTB","lubmQSIooTB", "lubmQooEOoo","lubmQoooooo"
-				 };
+		String[] stores = new String[] { "lubmQSIEOTB", "lubmQSIooTB", "lubmQooEOoo", "lubmQoooooo" };
 
 		// String storename = args[0];
 		String queryFile = args[1];
@@ -230,30 +229,35 @@ public class QuestDBBenchmarkTool {
 		result.tuplesreturned = new long[repeats];
 		// result.queryplans = new String[repeats];
 		log.info("Computing sql and reformulations");
-		result.sql = dbInstance.getSQL(storename, query);
+
+		QuestStatement st = dbInstance.getStatement(storename);
+
+		result.sql = st.getUnfolding(query);
 		startTimer();
-		result.reformulation = dbInstance.getReformulation(storename, query);
-		//////
+		result.reformulation = st.getRewriting(query);
+		// ////
 		result.reftime[0] = stopTimer();
-		//////
+		// ////
 		result.query = query;
 		result.reformulations = result.reformulation.split("\n").length;
-//		for (int i = 0; i < this.repeats; i++) {
-//			log.info("Computing execution statistics. Iteration {}/{}", i, repeats);
-//			startTimer();
-//			dbInstance.getReformulation(storename, query);
-//			result.reftime[i] = stopTimer();
-//
-//			startTimer();
-//			OBDAResultSet resultset = dbInstance.executeQuery(storename, "/*direct*/ SELECT COUNT(*) as countbench FROM (" + result.sql
-//					+ ") tempbench");
-//			result.exectime[i] = stopTimer();
-//
-//			resultset.nextRow();
-//			result.tuplesreturned[i] = resultset.getAsInteger(1);
-//			resultset.close();
-//			resultset.getStatement().close();
-//		}
+		// for (int i = 0; i < this.repeats; i++) {
+		// log.info("Computing execution statistics. Iteration {}/{}", i,
+		// repeats);
+		// startTimer();
+		// dbInstance.getReformulation(storename, query);
+		// result.reftime[i] = stopTimer();
+		//
+		// startTimer();
+		// OBDAResultSet resultset = dbInstance.executeQuery(storename,
+		// "/*direct*/ SELECT COUNT(*) as countbench FROM (" + result.sql
+		// + ") tempbench");
+		// result.exectime[i] = stopTimer();
+		//
+		// resultset.nextRow();
+		// result.tuplesreturned[i] = resultset.getAsInteger(1);
+		// resultset.close();
+		// resultset.getStatement().close();
+		// }
 		// OBDAResultSet resultset = dbInstance.executeQuery(storename,
 		// "/*direct*/ EXPLAIN (ANALYZE TRUE, COSTS TRUE, BUFFERS TRUE) SELECT COUNT(*) as countbench FROM ("
 		// + result.sql
@@ -266,6 +270,9 @@ public class QuestDBBenchmarkTool {
 		// result.queryplans = queryplan.toString();
 		// resultset.close();
 		// resultset.getStatement().close();
+		
+		st.close();
+		
 		return result;
 	}
 

@@ -4,20 +4,18 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
-import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.ViewManager;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -151,7 +149,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	}
 
 	@Override
-	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws Exception {
+	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
 		log.debug("Generating source query");
 		List<CQIE> queries = query.getRules();
 
@@ -254,7 +252,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	 *            the query
 	 * @return the sql where clause
 	 */
-	private String getWhereClause(CQIE q) throws Exception {
+	private String getWhereClause(CQIE q) throws OBDAException {
 		List<Atom> atoms = q.getBody();
 		Iterator<Atom> atomIterator = atoms.iterator();
 		HashSet<String> equalities = new HashSet<String>();
@@ -270,7 +268,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 					if (!processedTerms.contains(((VariableImpl) term).getName())) {
 						List<Object[]> list = termoccurenceIndex.get(((VariableImpl) term).getName());
 						if (list == null) {
-							throw new Exception("Unknown term in body");
+							throw new OBDAException("Unknown term in body");
 						}
 						if (list.size() > 1) {
 							Object[] first_O = list.get(0);
@@ -362,7 +360,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 						if (!processedTerms.contains(((Variable) v).getName())) {
 							List<Object[]> list = termoccurenceIndex.get(((Variable) v).getName());
 							if (list == null) {
-								throw new Exception("Unknown term in body");
+								throw new OBDAException("Unknown term in body");
 							}
 							if (list.size() > 1) {
 								Object[] first_O = list.get(0);
@@ -453,7 +451,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 	 *            the query
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(CQIE q, List<String> signature) throws Exception {
+	private String getSelectClause(CQIE q, List<String> signature) throws OBDAException {
 		Atom head = q.getHead();
 		List<Term> headterms = head.getTerms();
 		StringBuilder sb = new StringBuilder();
@@ -469,7 +467,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 				if (ht instanceof VariableImpl) {
 					List<Object[]> list = termoccurenceIndex.get(((VariableImpl) ht).getName());
 					if (list == null) {
-						throw new Exception("Unknown term in head");
+						throw new OBDAException("Unknown term in head");
 					}
 					Object[] o = list.get(0);
 					Atom a = (Atom) o[0];
@@ -497,7 +495,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 						if (v instanceof VariableImpl) {
 							List<Object[]> list = termoccurenceIndex.get(((VariableImpl) v).getName());
 							if (list == null) {
-								throw new Exception("Unknown term in head:" + v + " The query was: " + q);
+								throw new OBDAException("Unknown term in head:" + v + " The query was: " + q);
 							}
 							Object[] o = list.get(0);
 							Atom a = (Atom) o[0];

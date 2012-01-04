@@ -4,9 +4,8 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -14,13 +13,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
@@ -66,7 +64,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	 * @throws Exception
 	 */
 
-	private DatalogProgram reformulate(CQIE cqie) throws Exception {
+	private DatalogProgram reformulate(CQIE cqie) throws ReformulationException {
 		
 		// compute the list of binary predicates, terms, variables and
 		// existential variables
@@ -320,15 +318,15 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
+	public OBDAQuery rewrite(OBDAQuery input) throws ReformulationException {
 		if (!(input instanceof DatalogProgram)) 
-			throw new Exception("Rewriting exception: The input must be a DatalogProgram instance");
+			throw new ReformulationException("Rewriting exception: The input must be a DatalogProgram instance");
 
 		DatalogProgram prog = (DatalogProgram) input;
 		log.debug("Starting query rewriting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) 
-			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
+			throw new ReformulationException("Rewriting exception: The input is not a valid union of conjuctive queries");
 
 		// TBD: CHECK WHETHER THE QUERY IS CONNECTED
 

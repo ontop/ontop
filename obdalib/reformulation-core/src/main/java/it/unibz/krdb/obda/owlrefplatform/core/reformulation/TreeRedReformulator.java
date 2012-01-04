@@ -4,19 +4,18 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.MemoryUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2Translator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.HashSet;
@@ -61,7 +60,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	}
 
-	public OBDAQuery rewrite(OBDAQuery input) throws Exception {
+	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
 		//
 
 		log.debug("Query reformulation started...");
@@ -73,7 +72,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		double starttime = System.currentTimeMillis();
 
 		if (!(input instanceof DatalogProgram)) {
-			throw new Exception("Rewriting exception: The input must be a DatalogProgram instance");
+			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
 		}
 
 		DatalogProgram prog = (DatalogProgram) input;
@@ -81,7 +80,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		// log.debug("Starting query rewrting. Received query: \n{}", prog);
 
 		if (!prog.isUCQ()) {
-			throw new Exception("Rewriting exception: The input is not a valid union of conjuctive queries");
+			throw new OBDAException("Rewriting exception: The input is not a valid union of conjuctive queries");
 		}
 
 		/* Query preprocessing */
@@ -107,11 +106,16 @@ public class TreeRedReformulator implements QueryRewriter {
 		boolean loop = true;
 		while (loop) {
 
-			/*
-			 * This is a safety check to avoid running out of memory during a
-			 * reformulation.
-			 */
-			MemoryUtils.checkAvailableMemory();
+//			/*
+//			 * This is a safety check to avoid running out of memory during a
+//			 * reformulation.
+//			 */
+//			try {
+//				MemoryUtils.checkAvailableMemory();
+//			} catch (MemoryLowException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
 			loop = false;
 			HashSet<CQIE> newqueriesbyPI = new HashSet<CQIE>(1000);
@@ -308,8 +312,8 @@ public class TreeRedReformulator implements QueryRewriter {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
 			for (Atom atom : body) {
-				if (atom.getPredicate().getName().toString().substring(0, OWLAPI2Translator.AUXROLEURI.length())
-						.equals(OWLAPI2Translator.AUXROLEURI)) {
+				if (atom.getPredicate().getName().toString().substring(0, OntologyImpl.AUXROLEURI.length())
+						.equals(OntologyImpl.AUXROLEURI)) {
 					auxiliary = true;
 					break;
 				}

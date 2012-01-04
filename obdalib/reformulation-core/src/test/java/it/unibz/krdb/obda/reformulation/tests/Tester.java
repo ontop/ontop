@@ -7,10 +7,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestOWLFactory;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -155,7 +154,7 @@ public class Tester {
         String prefix = getPrefix();
         String fullquery = prefix + "\n" + query;
         OBDAStatement statement = reasoner.getStatement();
-        OBDAResultSet result = statement.executeQuery(fullquery);
+        OBDAResultSet result = statement.execute(fullquery);
         int col = result.getColumCount();
         HashSet<String> tuples = new HashSet<String>();
         while (result.nextRow()) {

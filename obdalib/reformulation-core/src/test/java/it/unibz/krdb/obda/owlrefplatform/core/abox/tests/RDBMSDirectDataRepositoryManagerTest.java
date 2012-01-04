@@ -7,14 +7,14 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -95,7 +95,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		
 		
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn);
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager();
 
 		dbman.setVocabulary(preds);
 
@@ -178,15 +178,15 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 		
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn, preds);
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(preds);
 
 		Statement st = conn.createStatement();
 
-		dbman.createDBSchema(false);
+		dbman.createDBSchema(conn,false);
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
-		dbman.insertMetadata();
-		dbman.insertData(ait);
-		dbman.createIndexes();
+		dbman.insertMetadata(conn);
+		dbman.insertData(conn,ait,50000,5000);
+		dbman.createIndexes(conn);
 		conn.commit();
 
 		OBDAModel model = fac.getOBDAModel();
@@ -238,24 +238,25 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn, preds);
-
+		
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(preds);
 
 		Statement st = conn.createStatement();
 
-		dbman.createDBSchema(false);
+		dbman.createDBSchema(conn,false);
 		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
-		dbman.insertMetadata();
-		dbman.insertData(ait);
-		dbman.createIndexes();
+		dbman.insertMetadata(conn);
+		dbman.insertData(conn,ait,50000,5000);
+		dbman.createIndexes(conn);
 		conn.commit();
 
+		
 		/*
 		 * Reseting the manager
 		 */
-		dbman = new RDBMSDirectDataRepositoryManager(conn);
-		assertTrue(dbman.checkMetadata());
-		dbman.loadMetadata();
+		dbman = new RDBMSDirectDataRepositoryManager();
+		assertTrue(dbman.checkMetadata(conn));
+		dbman.loadMetadata(conn);
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
@@ -308,21 +309,17 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(conn);
-
-		dbman.setVocabulary(preds);
+		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(preds);
 
 		Statement st = conn.createStatement();
 
-		log.debug("Creating schema and loading data...");
-
-		dbman.createDBSchema(false);
-		ABoxAssertionGeneratorIterator ait = new ABoxAssertionGeneratorIterator(100000, preds);
-		dbman.insertMetadata();
-		dbman.insertData(ait);
-		dbman.createIndexes();
-
+		dbman.createDBSchema(conn,false);
+		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		dbman.insertMetadata(conn);
+		dbman.insertData(conn,ait,50000,5000);
+		dbman.createIndexes(conn);
 		conn.commit();
+
 
 		log.debug("Executing tests...");
 

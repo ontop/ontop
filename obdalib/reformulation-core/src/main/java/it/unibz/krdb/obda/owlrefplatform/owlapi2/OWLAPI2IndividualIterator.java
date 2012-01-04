@@ -1,7 +1,8 @@
-package it.unibz.krdb.obda.owlrefplatform.core.translator;
+package it.unibz.krdb.obda.owlrefplatform.owlapi2;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2IndividualTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
