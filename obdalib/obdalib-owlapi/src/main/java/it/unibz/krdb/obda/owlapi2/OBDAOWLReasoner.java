@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlapi;
+package it.unibz.krdb.obda.owlapi2;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 

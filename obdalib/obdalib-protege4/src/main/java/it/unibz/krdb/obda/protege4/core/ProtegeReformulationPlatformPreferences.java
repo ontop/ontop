@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.protege4.core;
 
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 
 import org.protege.editor.core.Disposable;
 

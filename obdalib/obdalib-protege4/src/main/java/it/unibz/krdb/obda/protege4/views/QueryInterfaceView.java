@@ -13,6 +13,8 @@ import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
@@ -396,8 +398,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
-							OBDAStatement st = dqr.getStatement();
+							QuestOWL dqr = (QuestOWL) reasoner;
+							QuestStatement st = dqr.getStatement();
 							result = st.getUnfolding(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -458,8 +460,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
-							OBDAStatement st = dqr.getStatement();
+							QuestOWL dqr = (QuestOWL) reasoner;
+							QuestStatement st = dqr.getStatement();
 							result = st.getRewriting(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -522,7 +524,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						try {
 							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
 							OBDAStatement st = dqr.getStatement();
-							result = st.executeQuery(query);
+							result = st.execute(query);
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
@@ -583,8 +585,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (reasoner instanceof OBDAQueryReasoner) {
 
 						try {
-							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
-							OBDAStatement st = dqr.getStatement();
+							QuestOWL dqr = (QuestOWL) reasoner;
+							QuestStatement st = dqr.getStatement();
 							result = st.getTupleCount(query);
 							latch.countDown();
 						} catch (Exception e) {

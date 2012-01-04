@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.protege4.panels;
 
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 public class ConfigPanel extends javax.swing.JPanel {

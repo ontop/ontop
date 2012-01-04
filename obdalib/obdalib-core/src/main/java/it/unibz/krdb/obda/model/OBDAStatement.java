@@ -2,32 +2,38 @@ package it.unibz.krdb.obda.model;
 
 public interface OBDAStatement {
 
-	public void addBatch(String query) throws Exception;
+	public void cancel() throws OBDAException;
 
-	public void cancel() throws Exception;
+	// public void clearBatch() throws OBDAException;
 
-	public void clearBatch() throws Exception;
+	public void close() throws OBDAException;
 
-	public void close() throws Exception;
+	public OBDAResultSet execute(String query) throws OBDAException;
 
-	public OBDAResultSet executeQuery(String query) throws Exception;
+	public int executeUpdate(String query) throws OBDAException;
 
-	public int executeUpdate(String query) throws Exception;
+	public OBDAConnection getConnection() throws OBDAException;
 
-	public int getFetchSize() throws Exception;
+	public int getFetchSize() throws OBDAException;
 
-	public int getMaxRows() throws Exception;
+	public int getMaxRows() throws OBDAException;
 
 	/***
 	 * To implement
 	 * 
 	 * @throws Exception
 	 */
-	public void getMoreResults() throws Exception;
+	public void getMoreResults() throws OBDAException;
 
-	public void setFetchSize(int rows) throws Exception;
+	public OBDAResultSet getResultSet() throws OBDAException;
 
-	public void setMaxRows(int max) throws Exception;
+	public int getQueryTimeout() throws OBDAException;
+
+	public void setFetchSize(int rows) throws OBDAException;
+
+	public void setMaxRows(int max) throws OBDAException;
+
+	public boolean isClosed() throws OBDAException;
 
 	/***
 	 * Sets the number of seconds the driver will wait for a Statement object to
@@ -40,16 +46,4 @@ public interface OBDAStatement {
 	 */
 	public void setQueryTimeout(int seconds) throws Exception;
 
-	/*
-	 * These should be removed and moved some where else
-	 */
-
-	public String getUnfolding(String query) throws Exception;
-
-	public String getUnfolding(String query, boolean noreformulation) throws Exception;
-
-	public String getRewriting(String query) throws Exception;
-
-	public int getTupleCount(String query) throws Exception;
-
-}
+	}

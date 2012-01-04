@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2IndividualIterator;
+import it.unibz.krdb.obda.owlrefplatform.owlapi2.OWLAPI2IndividualIterator;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 
 import java.awt.Container;

@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.protege4.gui.preferences;
 
 
-import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
 import it.unibz.krdb.obda.protege4.panels.ConfigPanel;
 
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;

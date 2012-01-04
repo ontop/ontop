@@ -3,9 +3,9 @@ package it.unibz.krdb.obda.protege4.gui.action;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.dialogs.SelectDB;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -32,10 +32,10 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 	/**
 	 * 
 	 */
-	private static final long	serialVersionUID	= -8210706765886897292L;
-	private SelectDB			selectDialog		= null;
+	private static final long serialVersionUID = -8210706765886897292L;
+	private SelectDB selectDialog = null;
 
-	Logger						log					= LoggerFactory.getLogger(LoadOWLIndividualsToDBAction.class);
+	Logger log = LoggerFactory.getLogger(LoadOWLIndividualsToDBAction.class);
 
 	public void initialise() throws Exception {
 
@@ -77,17 +77,16 @@ public class LoadOWLIndividualsToDBAction extends ProtegeAction {
 						try {
 
 							OWLAPI2VocabularyExtractor vext = new OWLAPI2VocabularyExtractor();
-							
+
 							conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-							RDBMSDirectDataRepositoryManager dbmanager = new RDBMSDirectDataRepositoryManager(conn,
-									vext.getVocabulary(ontologies));
+							RDBMSDirectDataRepositoryManager dbmanager = new RDBMSDirectDataRepositoryManager(vext.getVocabulary(ontologies));
 							monitor.addProgressListener(dbmanager);
 
-							dbmanager.createDBSchema(true);
-							dbmanager.insertMetadata();
+							dbmanager.createDBSchema(conn,true);
+							dbmanager.insertMetadata(conn);
 							OWLAPI2ABoxIterator aboxiterator = new OWLAPI2ABoxIterator(ontologies);
-							dbmanager.insertData(aboxiterator);
+							dbmanager.insertData(conn,aboxiterator,50000,5000);
 
 							monitor.stop();
 							if (!monitor.isCanceled()) {

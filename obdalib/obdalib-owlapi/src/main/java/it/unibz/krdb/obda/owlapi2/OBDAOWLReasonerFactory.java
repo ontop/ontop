@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlapi;
+package it.unibz.krdb.obda.owlapi2;
 
 import org.semanticweb.owl.inference.OWLReasonerFactory;
 import org.semanticweb.owl.model.OWLOntologyManager;
