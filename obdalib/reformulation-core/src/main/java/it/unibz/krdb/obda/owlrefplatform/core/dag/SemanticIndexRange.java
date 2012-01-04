@@ -10,7 +10,11 @@ import java.util.List;
  */
 public class SemanticIndexRange implements Serializable {
 
-    private List<Interval> intervals = new LinkedList<Interval>();
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8420832314126437803L;
+	private List<Interval> intervals = new LinkedList<Interval>();
 
     public SemanticIndexRange() {
     }

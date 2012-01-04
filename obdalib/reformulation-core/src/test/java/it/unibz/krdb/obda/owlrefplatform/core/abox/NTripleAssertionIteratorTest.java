@@ -1,11 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 import java.io.File;
 import java.io.IOException;

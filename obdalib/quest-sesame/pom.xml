@@ -6,9 +6,9 @@
 		<groupId>inf.unibz.it.obda</groupId>
 		<version>1.6.1</version>
 	</parent>
-	<groupId>inf.unibz.it.obda</groupId>
+<!-- 	<groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>quest-sesame</artifactId>
-	<version>1.6.1</version>
+	<!-- <version>1.6.1</version> -->
 	<name>Quest Sesame</name>
 	<description>This is the Sesame API implementation basedon Quest</description>
 

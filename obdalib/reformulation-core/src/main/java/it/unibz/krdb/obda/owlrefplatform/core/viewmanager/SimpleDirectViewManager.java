@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.viewmanager;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.Ontology;
 
 import java.net.URI;
 import java.util.HashMap;

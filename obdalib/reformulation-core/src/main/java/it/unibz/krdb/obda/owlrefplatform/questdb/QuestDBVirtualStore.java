@@ -1,11 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
 import java.net.URI;
 import java.util.Collections;
@@ -30,11 +30,11 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 	private static Logger log = LoggerFactory.getLogger(QuestDBVirtualStore.class);
 
-	public QuestDBVirtualStore(String name, URI tboxFile, OBDAModel obdaModel, ReformulationPlatformPreferences config) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, OBDAModel obdaModel, QuestPreferences config) throws Exception {
 
 		super(name);
 
-		if (!config.getProperty(ReformulationPlatformPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL))
+		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL))
 			throw new Exception("A virtual repository must be created with the VIRTUAL flag in the configuration.");
 
 		OWLAPI2Translator translator = new OWLAPI2Translator();

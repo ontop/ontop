@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collection;
 import java.util.HashSet;

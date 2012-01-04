@@ -1,13 +1,13 @@
 package it.unibz.krdb.obda.reformulation.tests;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.impl.ClassImpl;
+import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OClass;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.ClassImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.PropertySomeRestrictionImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubClassAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.SubPropertyAxiomImpl;
 
 import java.net.URI;
 import java.util.Iterator;

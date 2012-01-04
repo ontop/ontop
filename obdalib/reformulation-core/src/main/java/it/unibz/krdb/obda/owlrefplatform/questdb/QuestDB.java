@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
@@ -118,7 +118,7 @@ public class QuestDB {
 		if (stores.containsKey(name))
 			throw new Exception("A store already exists with the name" + name);
 
-		ReformulationPlatformPreferences config = new ReformulationPlatformPreferences();
+		QuestPreferences config = new QuestPreferences();
 		config.putAll(params);
 
 		QuestDBClassicStore store;
@@ -186,8 +186,8 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
 			dbstore.connect();
-			boolean classic = dbstore.getPreferences().get(ReformulationPlatformPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
-			boolean inmemory = dbstore.getPreferences().get(ReformulationPlatformPreferences.STORAGE_LOCATION)
+			boolean classic = dbstore.getPreferences().get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
+			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION)
 					.equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
 				((QuestDBClassicStore) dbstore).createDB();

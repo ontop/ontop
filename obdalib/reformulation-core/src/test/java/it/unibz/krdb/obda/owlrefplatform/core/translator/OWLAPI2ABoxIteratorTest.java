@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
 
 import java.io.File;
 import java.net.URI;

@@ -9,8 +9,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 
 import java.net.URI;
 import java.util.Collection;
@@ -22,12 +20,17 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
+/***
+ * This is a hack class that helps fix and OBDA model in which the mappings
+ * include predicates that have not been properly typed.
+ * 
+ * @author mariano
+ * 
+ */
 public class MappingVocabularyRepair {
-	private static OntologyFactory fac = OntologyFactoryImpl.getInstance();
+
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	
+
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
 	public void fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {

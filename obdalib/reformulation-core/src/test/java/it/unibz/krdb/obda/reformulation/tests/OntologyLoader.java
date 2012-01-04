@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
@@ -48,12 +48,12 @@ public class OntologyLoader {
 			// URI obdaUri = ioManager.getOBDAFile(new File(owlfile).toURI());
 			// ioManager.loadOBDADataFromURI(obdaUri);
 
-			ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
-			pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, "inmemory");
-			pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, "virtual");
-			pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, "improved");
-			pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+			QuestPreferences pref = new QuestPreferences();
+			pref.setCurrentValueOf(QuestPreferences.DBTYPE, "inmemory");
+			pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, "virtual");
+			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, "improved");
+			pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+			pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 
 			QuestOWLFactory factory = new QuestOWLFactory();
 			// factory.setOBDAController(controller);

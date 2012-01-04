@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.Ontology;
 
 import java.io.Serializable;
 

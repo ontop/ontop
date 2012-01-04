@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.protege4.core;
 
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 
 import org.protege.editor.core.Disposable;
 
-public class ProtegeReformulationPlatformPreferences extends ReformulationPlatformPreferences implements Disposable {
+public class ProtegeReformulationPlatformPreferences extends QuestPreferences implements Disposable {
 
 	/**
 	 * 

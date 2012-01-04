@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
@@ -95,7 +95,7 @@ public class Tester {
 
     }
 
-    public void load(String onto, ReformulationPlatformPreferences pref) throws Exception {
+    public void load(String onto, QuestPreferences pref) throws Exception {
         Runtime.getRuntime().gc();
 
         String owlfile = owlloc + onto + ".owl";

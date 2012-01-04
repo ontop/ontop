@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
@@ -203,7 +203,7 @@ public class StockExchangeTestPostgres extends TestCase {
 				
 	}
 
-	private void runTests(ReformulationPlatformPreferences p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
@@ -275,55 +275,55 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	public void testSiEqSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 
 	}
 
 	public void testSiEqNoSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 
 	}
 
 	public void testSiNoEqSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 	}
 
 	public void testSiNoEqNoSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 		runTests(p);
 	}
 
@@ -333,28 +333,28 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	public void testDiEqSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 
 	}
 
 	public void testDiEqNoSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
 
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 
 	}
@@ -366,13 +366,13 @@ public class StockExchangeTestPostgres extends TestCase {
 	 */
 	public void testDiNoEqSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
@@ -383,22 +383,22 @@ public class StockExchangeTestPostgres extends TestCase {
 	 */
 	public void testDiNoEqNoSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
 	public void testViEqSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 
@@ -406,10 +406,10 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	public void testViEqNoSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 
 		runTests(p);
 	}
@@ -421,10 +421,10 @@ public class StockExchangeTestPostgres extends TestCase {
 	 */
 	public void testViNoEqSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		runTests(p);
 
@@ -437,10 +437,10 @@ public class StockExchangeTestPostgres extends TestCase {
 	 */
 	public void testViNoEqNoSig() throws Exception {
 
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
 
 		runTests(p);
 	}

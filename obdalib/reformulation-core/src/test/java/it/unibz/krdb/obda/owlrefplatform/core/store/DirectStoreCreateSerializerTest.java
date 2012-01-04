@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.store;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
@@ -15,8 +15,8 @@ public class DirectStoreCreateSerializerTest extends TestCase {
 	public void disabledtestCreateSerialize() throws Exception {
 		String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 
-		ReformulationPlatformPreferences config = new ReformulationPlatformPreferences();
-		config.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		QuestPreferences config = new QuestPreferences();
+		config.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
 		QuestDBClassicStore store = new QuestDBClassicStore("name", (new File(owlfile)).toURI(), config);
 		QuestStatement st = store.getConnection().createStatement();

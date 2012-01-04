@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.owlapi2;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Description;
 
 import java.util.Collection;
 import java.util.Collections;

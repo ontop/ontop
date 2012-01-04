@@ -9,15 +9,15 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Axiom;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Description;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
@@ -139,7 +139,7 @@ public class Quest implements Serializable {
 
 	private OBDADataSource obdaSource;
 
-	private ReformulationPlatformPreferences preferences;
+	private QuestPreferences preferences;
 
 	private boolean inmemory;
 
@@ -215,26 +215,26 @@ public class Quest implements Serializable {
 		return preferences;
 	}
 
-	public void setPreferences(ReformulationPlatformPreferences preferences) {
+	public void setPreferences(QuestPreferences preferences) {
 		this.preferences = preferences;
 
-		reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-		bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES);
-		bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA);
+		reformulationTechnique = (String) preferences.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
+		bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_EQUIVALENCES);
+		bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_TBOX_SIGMA);
 		// boolean bUseInMemoryDB = preferences.getCurrentValue(
 		// ReformulationPlatformPreferences.DATA_LOCATION).equals(
 		// QuestConstants.INMEMORY);
-		bObtainFromOntology = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY);
-		bObtainFromMappings = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS);
-		unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
-		dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
-		inmemory = preferences.getProperty(ReformulationPlatformPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
+		bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
+		dbType = (String) preferences.getCurrentValue(QuestPreferences.DBTYPE);
+		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 
 		if (!inmemory) {
-			aboxJdbcURL = preferences.getProperty(ReformulationPlatformPreferences.JDBC_URL);
-			aboxJdbcUser = preferences.getProperty(ReformulationPlatformPreferences.DBUSER);
-			aboxJdbcPassword = preferences.getProperty(ReformulationPlatformPreferences.DBPASSWORD);
-			aboxJdbcDriver = preferences.getProperty(ReformulationPlatformPreferences.JDBC_DRIVER);
+			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
+			aboxJdbcUser = preferences.getProperty(QuestPreferences.DBUSER);
+			aboxJdbcPassword = preferences.getProperty(QuestPreferences.DBPASSWORD);
+			aboxJdbcDriver = preferences.getProperty(QuestPreferences.JDBC_DRIVER);
 		}
 
 		log.info("Active preferences:");
@@ -503,7 +503,7 @@ public class Quest implements Serializable {
 				rewriter = new TreeRedReformulator();
 			} else {
 				throw new IllegalArgumentException("Invalid value for argument: "
-						+ ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+						+ QuestPreferences.REFORMULATION_TECHNIQUE);
 			}
 
 			rewriter.setTBox(reformulationOntology);

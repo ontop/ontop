@@ -3,20 +3,20 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi2;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQueryReasoner;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi2.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.OntologyFactory;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.imp.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 	private boolean isClassified = false;
 
-	private ReformulationPlatformPreferences preferences = null;
+	private QuestPreferences preferences = null;
 
 	OWLAPI2VocabularyExtractor vext = new OWLAPI2VocabularyExtractor();
 
@@ -87,7 +87,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		questInstance = new Quest();
 	}
 
-	public void setPreferences(ReformulationPlatformPreferences preferences) {
+	public void setPreferences(QuestPreferences preferences) {
 		this.preferences = preferences;
 	}
 
@@ -104,13 +104,13 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 		log.debug("Initializing Quest query answering engine...");
 
-		String reformulationTechnique = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
-		boolean bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES);
-		boolean bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA);
-		boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY);
-		boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS);
-		String unfoldingMode = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
-		String dbType = (String) preferences.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
+		String reformulationTechnique = (String) preferences.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
+		boolean bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_EQUIVALENCES);
+		boolean bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_TBOX_SIGMA);
+		boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
+		String dbType = (String) preferences.getCurrentValue(QuestPreferences.DBTYPE);
 
 		getProgressMonitor().setIndeterminate(true);
 		getProgressMonitor().setMessage("Classifying...");

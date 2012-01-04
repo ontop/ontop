@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
@@ -165,7 +165,7 @@ public class OBDAModelManager implements Disposable {
 						OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
 						if (reasoner instanceof QuestOWL) {
 							QuestOWL quest = (QuestOWL) reasoner;
-							ProtegeReformulationPlatformPreferences reasonerPreference = owlEditorKit.get(ReformulationPlatformPreferences.class.getName());
+							ProtegeReformulationPlatformPreferences reasonerPreference = owlEditorKit.get(QuestPreferences.class.getName());
 							quest.setPreferences(reasonerPreference);
 							quest.loadOBDAModel(getActiveOBDAModel());
 						}

@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
@@ -39,16 +39,16 @@ public class StockExchangeTestSemIndex extends TestCase {
 		
 		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
 		
-		ReformulationPlatformPreferences p = new ReformulationPlatformPreferences();
+		QuestPreferences p = new QuestPreferences();
 		
 //		factory.setOBDAController(controller);
 		factory.setPreferenceHolder(p);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 //		p.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 //		p.setCurrentValueOf(ReformulationPlatformPreferences.CREATE_TEST_MAPPINGS, "true");
-		p.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
 		reasoner.setPreferences(p);

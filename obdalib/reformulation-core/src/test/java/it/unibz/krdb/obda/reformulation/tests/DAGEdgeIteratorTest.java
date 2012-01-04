@@ -1,11 +1,11 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGEdgeIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.Edge;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 import junit.framework.TestCase;
 
 public class DAGEdgeIteratorTest extends TestCase {

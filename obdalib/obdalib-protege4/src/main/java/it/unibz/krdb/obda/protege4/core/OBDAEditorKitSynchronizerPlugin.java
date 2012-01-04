@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
@@ -59,7 +59,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		 * Preferences for Quest
 		 */
 		refplatPref = new ProtegeReformulationPlatformPreferences();
-		getEditorKit().put(ReformulationPlatformPreferences.class.getName(),refplatPref);
+		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
 		loadPreferences();
 	}
 
@@ -92,7 +92,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String value = pref.getString(key, null);
 			if(value != null){
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(ReformulationPlatformPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
+				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;

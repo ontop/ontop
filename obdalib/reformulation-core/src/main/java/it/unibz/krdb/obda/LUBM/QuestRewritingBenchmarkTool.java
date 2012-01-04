@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.LUBM;
 
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
@@ -55,7 +55,7 @@ public class QuestRewritingBenchmarkTool {
 			long start;
 			long stop;
 
-			ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();
+			QuestPreferences pref = new QuestPreferences();
 			pref.putAll(config);
 
 			start = System.nanoTime();

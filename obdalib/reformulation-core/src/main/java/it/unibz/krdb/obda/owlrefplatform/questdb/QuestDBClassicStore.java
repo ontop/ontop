@@ -4,16 +4,16 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Ontology;
 
 import java.net.URI;
 import java.util.Collections;
@@ -40,11 +40,11 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private static Logger log = LoggerFactory.getLogger(QuestDBClassicStore.class);
 
-	public QuestDBClassicStore(String name, URI tboxFile, ReformulationPlatformPreferences config) throws Exception {
+	public QuestDBClassicStore(String name, URI tboxFile, QuestPreferences config) throws Exception {
 
 		super(name);
 
-		if (!config.getProperty(ReformulationPlatformPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC))
+		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC))
 			throw new Exception("A classic repository must be created with the CLASSIC flag in the configuration.");
 
 		OWLAPI2Translator translator = new OWLAPI2Translator();

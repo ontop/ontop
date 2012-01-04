@@ -1,24 +1,24 @@
 package it.unibz.krdb.obda.protege4.panels;
 
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 public class ConfigPanel extends javax.swing.JPanel {
 
-    private ReformulationPlatformPreferences preference;
+    private QuestPreferences preference;
 
     /**
      * The constructor.
      */
-    public ConfigPanel(ReformulationPlatformPreferences preference) {
+    public ConfigPanel(QuestPreferences preference) {
         this.preference = preference;
         initComponents();
         setSelections(preference);
     }
 
-    private void setSelections(ReformulationPlatformPreferences preference) {
+    private void setSelections(QuestPreferences preference) {
 
-        String value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE);
+        String value = (String) preference.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
         if (value.equals(QuestConstants.UCQBASED)) {
             cmbReformulationMethods.setSelectedIndex(0);
         }
@@ -26,10 +26,10 @@ public class ConfigPanel extends javax.swing.JPanel {
             cmbReformulationMethods.setSelectedIndex(1);
         }
 
-        boolean bChecked = preference.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES);
+        boolean bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_EQUIVALENCES);
         chkOptimizeEquivalences.setSelected(bChecked);
 
-        value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.ABOX_MODE);
+        value = (String) preference.getCurrentValue(QuestPreferences.ABOX_MODE);
         if (value.equals(QuestConstants.VIRTUAL)) {
             virtualModeSelected();
         }
@@ -45,7 +45,7 @@ public class ConfigPanel extends javax.swing.JPanel {
             radInMemoryDatabase.setSelected(true);
 //        }
 
-        value = (String) preference.getCurrentValue(ReformulationPlatformPreferences.DBTYPE);
+        value = (String) preference.getCurrentValue(QuestPreferences.DBTYPE);
         if (value.equals(QuestConstants.DIRECT)) {
             radDirect.setSelected(true);
         }
@@ -56,10 +56,10 @@ public class ConfigPanel extends javax.swing.JPanel {
             radSemanticIndex.setSelected(true);
         }
 
-        bChecked = preference.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY);
+        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
         chkObtainFromOntology.setSelected(bChecked);
 
-        bChecked = preference.getCurrentBooleanValueFor(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS);
+        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
         chkObtainFromMappings.setSelected(bChecked);
     }
 
@@ -470,10 +470,10 @@ public class ConfigPanel extends javax.swing.JPanel {
         javax.swing.JComboBox cb = (javax.swing.JComboBox) evt.getSource();
         String optValue = (String) cb.getSelectedItem();
         if (optValue.equals(QuestConstants.PERFECTREFORMULATION)) {
-            preference.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.PERFECTREFORMULATION);
+            preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.PERFECTREFORMULATION);
         }
         else {
-            preference.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+            preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
         }
     }//GEN-LAST:event_cmbReformulationMethodsActionPerformed
 
@@ -483,35 +483,35 @@ private void radRemoteDatabaseActionPerformed(java.awt.event.ActionEvent evt) {/
 
 private void radVirtualObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radVirtualObdaActionPerformed
     virtualModeSelected();
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+    preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 }//GEN-LAST:event_radVirtualObdaActionPerformed
 
 private void chkOptimizeEquivalencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOptimizeEquivalencesActionPerformed
     if (chkOptimizeEquivalences.isSelected()) {
-        preference.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        preference.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
     }
     else {
-        preference.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, "false");
+        preference.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
     }
 }//GEN-LAST:event_chkOptimizeEquivalencesActionPerformed
 
 private void radClassicObdaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radClassicObdaActionPerformed
     classicModeSelected();
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+    preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 //    preference.setCurrentValueOf(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 }//GEN-LAST:event_radClassicObdaActionPerformed
 
 private void radDirectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDirectActionPerformed
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);
+    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
 }//GEN-LAST:event_radDirectActionPerformed
 
 private void radUniversalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radUniversalActionPerformed
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.UNIVERSAL);
+    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.UNIVERSAL);
 }//GEN-LAST:event_radUniversalActionPerformed
 
 private void radSemanticIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radSemanticIndexActionPerformed
-    preference.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);
+    preference.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
 }//GEN-LAST:event_radSemanticIndexActionPerformed
 
 private void radInMemoryDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radInMemoryDatabaseActionPerformed
@@ -520,19 +520,19 @@ private void radInMemoryDatabaseActionPerformed(java.awt.event.ActionEvent evt) 
 
 private void chkObtainFromOntologyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromOntologyActionPerformed
     if (chkObtainFromOntology.isSelected()) {
-        preference.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
     }
     else {
-        preference.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
     }
 }//GEN-LAST:event_chkObtainFromOntologyActionPerformed
 
 private void chkObtainFromMappingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkObtainFromMappingsActionPerformed
     if (chkObtainFromMappings.isSelected()) {
-        preference.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "true");
+        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
     }
     else {
-        preference.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_MAPPINGS, "false");
+        preference.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
     }
 }//GEN-LAST:event_chkObtainFromMappingsActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

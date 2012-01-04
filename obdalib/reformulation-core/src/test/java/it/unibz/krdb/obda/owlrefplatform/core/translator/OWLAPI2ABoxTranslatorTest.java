@@ -1,10 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ClassAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.ontology.ObjectPropertyAssertion;
 
 import java.net.URI;
 

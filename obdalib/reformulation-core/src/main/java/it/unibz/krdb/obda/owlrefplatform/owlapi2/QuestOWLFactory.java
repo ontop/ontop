@@ -3,7 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi2;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlapi2.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi2.ReformulationPlatformPreferences;
+import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 
 import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 
 	private OBDAModel							apic;
-	private ReformulationPlatformPreferences	preferences	= null;
+	private QuestPreferences	preferences	= null;
 	private String								id;
 	private String								name;
 	private OWLOntologyManager					owlOntologyManager;
@@ -64,7 +64,7 @@ public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 //	}
 
 	@Override
-	public void setPreferenceHolder(ReformulationPlatformPreferences preference) {
+	public void setPreferenceHolder(QuestPreferences preference) {
 		this.preferences = preference;
 	}
 

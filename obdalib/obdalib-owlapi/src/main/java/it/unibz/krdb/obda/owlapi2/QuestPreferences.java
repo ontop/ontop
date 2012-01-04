@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A class that represents the preferences which can be modified by the user.
  */
-public class ReformulationPlatformPreferences extends Properties {
+public class QuestPreferences extends Properties {
 
 	// TODO create a configuration listener to handle changes in these values
 	private static final long	serialVersionUID		= -5954970472045517594L;
@@ -39,9 +39,9 @@ public class ReformulationPlatformPreferences extends Properties {
 	
 	public static final String JDBC_DRIVER = "JDBC_DRIVER";	
 	
-	private Logger				log						= LoggerFactory.getLogger(ReformulationPlatformPreferences.class);
+	private Logger				log						= LoggerFactory.getLogger(QuestPreferences.class);
 
-	public ReformulationPlatformPreferences() {
+	public QuestPreferences() {
 		try {
 			readDefaultPropertiesFile();
 		} catch (IOException e1) {
@@ -50,13 +50,13 @@ public class ReformulationPlatformPreferences extends Properties {
 		}
 	}
 
-	public ReformulationPlatformPreferences(Properties values) {
+	public QuestPreferences(Properties values) {
 		this();
 		this.putAll(values);
 	}
 
 	public void readDefaultPropertiesFile() throws IOException {
-		InputStream in = ReformulationPlatformPreferences.class.getResourceAsStream(DEFAULT_PROPERTIESFILE);
+		InputStream in = QuestPreferences.class.getResourceAsStream(DEFAULT_PROPERTIESFILE);
 		readDefaultPropertiesFile(in);
 	}
 
