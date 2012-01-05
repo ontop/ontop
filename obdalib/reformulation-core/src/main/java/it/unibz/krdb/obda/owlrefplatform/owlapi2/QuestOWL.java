@@ -187,6 +187,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	public void dispose() throws OWLReasonerException {
 		// TODO fix this!
 		try {
+			conn.close();
 			questInstance.dispose();
 		} catch (Exception e) {
 			log.debug(e.getMessage());

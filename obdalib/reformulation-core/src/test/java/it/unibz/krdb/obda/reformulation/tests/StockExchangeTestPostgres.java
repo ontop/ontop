@@ -287,7 +287,7 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	}
 
-	public void testSiEqNoSig() throws Exception {
+	public void disabledtestSiEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -301,7 +301,7 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	}
 
-	public void testSiNoEqSig() throws Exception {
+	public void disabledtestSiNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -314,7 +314,7 @@ public class StockExchangeTestPostgres extends TestCase {
 		runTests(p);
 	}
 
-	public void testSiNoEqNoSig() throws Exception {
+	public void disabledtestSiNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -345,7 +345,7 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	}
 
-	public void testDiEqNoSig() throws Exception {
+	public void disabledtestDiEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -364,7 +364,7 @@ public class StockExchangeTestPostgres extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testDiNoEqSig() throws Exception {
+	public void disabledtestDiNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -381,7 +381,7 @@ public class StockExchangeTestPostgres extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testDiNoEqNoSig() throws Exception {
+	public void disabledtestDiNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -404,7 +404,7 @@ public class StockExchangeTestPostgres extends TestCase {
 
 	}
 
-	public void testViEqNoSig() throws Exception {
+	public void disabledtestViEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -419,7 +419,7 @@ public class StockExchangeTestPostgres extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testViNoEqSig() throws Exception {
+	public void disabledtestViNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -435,7 +435,7 @@ public class StockExchangeTestPostgres extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testViNoEqNoSig() throws Exception {
+	public void disabledtestViNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

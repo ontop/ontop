@@ -168,6 +168,7 @@ public class StockExchangeTest extends TestCase {
 	public void tearDown() throws Exception {
 		try {
 			conn.close();
+			
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -245,7 +246,7 @@ public class StockExchangeTest extends TestCase {
 		assertFalse(fail);
 	}
 
-	public void testSiEqSig() throws Exception {
+	public void disabledtestSiEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -259,7 +260,7 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
-	public void testSiEqNoSig() throws Exception {
+	public void disabledtestSiEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -273,7 +274,7 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
-	public void testSiNoEqSig() throws Exception {
+	public void disabledtestSiNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -286,7 +287,7 @@ public class StockExchangeTest extends TestCase {
 		runTests(p);
 	}
 
-	public void testSiNoEqNoSig() throws Exception {
+	public void disabledtestSiNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -303,7 +304,7 @@ public class StockExchangeTest extends TestCase {
 	 * Direct
 	 */
 
-	public void testDiEqSig() throws Exception {
+	public void disabledTestDiEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -317,7 +318,7 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
-	public void testDiEqNoSig() throws Exception {
+	public void disabledTestDiEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -336,7 +337,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testDiNoEqSig() throws Exception {
+	public void disabledTestDiNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -353,7 +354,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void testDiNoEqNoSig() throws Exception {
+	public void disabledTestDiNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);

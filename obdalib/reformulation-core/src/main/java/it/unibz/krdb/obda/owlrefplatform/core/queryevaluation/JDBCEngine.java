@@ -65,7 +65,7 @@ public class JDBCEngine implements EvaluationEngine {
 	 * @throws SQLException
 	 */
 	public void disconnect() throws SQLException {
-		if (connection != null) {
+		if (connection != null && !connection.isClosed()) {
 			try {
 				connection.close();
 			} catch (Exception e) {

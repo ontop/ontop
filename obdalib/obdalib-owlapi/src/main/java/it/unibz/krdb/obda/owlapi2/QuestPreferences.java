@@ -17,7 +17,7 @@ public class QuestPreferences extends Properties {
 	// TODO create a configuration listener to handle changes in these values
 	private static final long	serialVersionUID		= -5954970472045517594L;
 
-	private static final String	DEFAULT_PROPERTIESFILE	= "default.properties";
+	private static final String	DEFAULT_PROPERTIESFILE	= "QuestDefaults.properties";
 
 	public static final String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
 	public static final String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
