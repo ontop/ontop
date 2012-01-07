@@ -17,12 +17,12 @@ import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
@@ -294,14 +294,19 @@ public class Quest implements Serializable {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 		log.debug("Initializing Quest's query answering engine...");
-
-		/***
-		 * Fixing the typing of predicates, in case they are not properly given.
+		
+		
+		/*
+		 * Input checking (we need to extend this)
 		 */
-
+		
 		if (unfoldingMode.equals(QuestConstants.VIRTUAL) && inputOBDAModel == null) {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
+
+		/*
+		 * Fixing the typing of predicates, in case they are not properly given.
+		 */
 
 		log.debug("Fixing vocabulary typing");
 
@@ -310,11 +315,13 @@ public class Quest implements Serializable {
 			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
 		}
 
+		
+		
 		unfoldingOBDAModel = fac.getOBDAModel();
-
 		sigma = OntologyFactoryImpl.getInstance().createOntology();
+		
 		/*
-		 * PART 0: Simplifying the vocabulary of the Ontology
+		 * Simplifying the vocabulary of the TBox
 		 */
 
 		if (bOptimizeEquivalences) {
@@ -448,44 +455,26 @@ public class Quest implements Serializable {
 
 			}
 
-			/*
-			 * Setting up the unfolder and SQL generation
-			 */
-
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
-
-			// DBMetadata dbMetaData =
-			// JDBCConnectionManager.getJDBCConnectionManager().getMetaData(sourceId);
-
-			// MappingAnalyzer mapAnalyzer = new MappingAnalyzer(mappingList,
-			// dbMetaData);
 
 			DBMetadata metadata = JDBCConnectionManager.getMetaData(localConnection);
 			MappingAnalyzer analyzer = new MappingAnalyzer(unfoldingOBDAModel.getMappings(sourceId), metadata);
 			unfoldingProgram = analyzer.constructDatalogProgram();
 
-			// ArrayList<OBDAMappingAxiom> mappingList =
-			// unfoldingOBDAModel.getMappings(sourceId);
-
-			// MappingViewManager viewMan = new
-			// MappingViewManager(unfoldingProgram.getRules());
-			// unfMech = new
-			// ComplexMappingUnfolder(unfoldingOBDAModel.getMappings(sourceId),
-			// viewMan);
-
-			unfolder = new DatalogUnfolder(unfoldingProgram, metadata);
-
-			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			// gen = new ComplexMappingSQLGenerator(viewMan, util);
-
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil);
-
-			log.debug("Setting up the connection;");
-			// eval_engine = new JDBCEngine(datasource);
+			/*
+			 * T-mappings implementation
+			 */
 
 			/*
-			 * Setting up the ontology we will use for the reformulation
+			 * Setting up the unfolder and SQL generation
+			 */
+			unfolder = new DatalogUnfolder(unfoldingProgram, metadata);
+			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil);
+
+			/*
+			 * Setting up the TBox we will use for the reformulation
 			 */
 
 			if (bOptimizeTBoxSigma) {
@@ -502,8 +491,7 @@ public class Quest implements Serializable {
 			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
 				rewriter = new TreeRedReformulator();
 			} else {
-				throw new IllegalArgumentException("Invalid value for argument: "
-						+ QuestPreferences.REFORMULATION_TECHNIQUE);
+				throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
 			}
 
 			rewriter.setTBox(reformulationOntology);

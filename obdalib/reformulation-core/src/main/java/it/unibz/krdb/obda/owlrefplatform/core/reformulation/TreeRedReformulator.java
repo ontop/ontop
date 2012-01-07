@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SemanticQueryOptimizer;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
+package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 public class QueryVocabularyValidator implements Serializable {
 	/** The source ontology for validating the target query */
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2901421485090507301L;
 
 	/** List of invalid predicates */
 	private Vector<String>				invalidPredicates	= new Vector<String>();

@@ -17,7 +17,6 @@ import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.SemanticQueryOptimizer;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
+package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
@@ -14,7 +14,6 @@ import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 
 import java.util.Collection;
 import java.util.HashSet;
