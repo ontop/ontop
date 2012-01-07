@@ -635,6 +635,7 @@ public class CQCUtilities {
 
 		Collections.sort(queries, lenghtComparator);
 
+		
 		for (int i = 0; i < queries.size(); i++) {
 			for (int j = queries.size() - 1; j > i; j--) {
 				if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
@@ -680,8 +681,13 @@ public class CQCUtilities {
 		if (!cq2.getHead().equals(cq1.getHead())) {
 			return false;
 		}
-
+		
+//		HashSet<Atom> body1 = new HashSet<Atom>(cq1.getBody().size());
+//		body1.addAll(cq1.getBody());
+		
 		for (Atom atom : cq2.getBody()) {
+//			if (!body1.contains(atom))
+//				return false;
 			if (!cq1.getBody().contains(atom))
 				return false;
 		}

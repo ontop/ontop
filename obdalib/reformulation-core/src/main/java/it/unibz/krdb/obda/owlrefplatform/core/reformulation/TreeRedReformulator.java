@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionA
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -248,7 +249,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		}
 
-		List<CQIE> resultlist = new LinkedList<CQIE>();
+		List<CQIE> resultlist = new ArrayList<CQIE>((int)(result.size()*1.5));
 		resultlist.addAll(result);
 		log.debug("Main loop ended. Queries produced: {}", resultlist.size());
 
@@ -307,7 +308,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * @return
 	 */
 	private List<CQIE> cleanAuxiliaryQueries(List<CQIE> originalQueries) {
-		List<CQIE> newQueries = new LinkedList<CQIE>();
+		List<CQIE> newQueries = new ArrayList<CQIE>((int)(originalQueries.size()*1.5));
 		for (CQIE query : originalQueries) {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
