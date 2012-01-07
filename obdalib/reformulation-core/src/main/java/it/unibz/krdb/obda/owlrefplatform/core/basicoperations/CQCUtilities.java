@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -535,7 +536,7 @@ public class CQCUtilities {
 					break;
 				currentQuery = queryStack.pop();
 				currentBody = currentQuery.getBody();
-				
+
 			} else {
 
 				if (currentAtomIdx == bodysize - 1) {
@@ -621,6 +622,7 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
+		
 		int initialsize = queries.size();
 		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
 		long startime = System.currentTimeMillis();
@@ -634,7 +636,21 @@ public class CQCUtilities {
 		};
 
 		Collections.sort(queries, lenghtComparator);
-
+//		queries = new LinkedList<CQIE>(queries);
+//
+//		
+//		Iterator<CQIE> forwardIt = queries.iterator();
+//		while (forwardIt.hasNext()) {
+//			CQIE cq = forwardIt.next();
+//			Iterator<CQIE> backwardIt = ((LinkedList)queries).descendingIterator();
+//			while (backwardIt.hasNext()) {
+//				if (isContainedInSyntactic(cq, backwardIt.next())) {
+//					forwardIt.remove();
+//					break;
+//				}
+//			}
+//		}
+			
 		
 		for (int i = 0; i < queries.size(); i++) {
 			for (int j = queries.size() - 1; j > i; j--) {
@@ -681,13 +697,13 @@ public class CQCUtilities {
 		if (!cq2.getHead().equals(cq1.getHead())) {
 			return false;
 		}
-		
-//		HashSet<Atom> body1 = new HashSet<Atom>(cq1.getBody().size());
-//		body1.addAll(cq1.getBody());
-		
+
+		// HashSet<Atom> body1 = new HashSet<Atom>(cq1.getBody().size());
+		// body1.addAll(cq1.getBody());
+
 		for (Atom atom : cq2.getBody()) {
-//			if (!body1.contains(atom))
-//				return false;
+			// if (!body1.contains(atom))
+			// return false;
 			if (!cq1.getBody().contains(atom))
 				return false;
 		}
@@ -731,10 +747,11 @@ public class CQCUtilities {
 	 * Removal of queries is done in two main double scans. The first scan goes
 	 * top-down/down-top, the second scan goes down-top/top-down
 	 * 
-	 * @param queries
+	 * @param querieslist
 	 */
 	public static void removeContainedQueries(List<CQIE> queries, boolean twopasses, Ontology sigma, boolean sort) {
 
+//		queries = new LinkedList<CQIE>(queries);
 		int initialsize = queries.size();
 		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 
@@ -753,28 +770,54 @@ public class CQCUtilities {
 			Collections.sort(queries, lenghtComparator);
 		}
 
-		for (int i = 0; i < queries.size(); i++) {
-			CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
-			for (int j = queries.size() - 1; j > i; j--) {
-				if (cqc.isContainedIn(queries.get(j))) {
-					queries.remove(i);
-					i -= 1;
-					break;
-				}
-			}
-		}
+//		Iterator<CQIE> forwardIt = queries.iterator();
+//		while (forwardIt.hasNext()) {
+//			CQCUtilities cqc = new CQCUtilities(forwardIt.next(), sigma);
+//			Iterator<CQIE> backwardIt = ((LinkedList)queries).descendingIterator();
+//			while (backwardIt.hasNext()) {
+//				if (cqc.isContainedIn(backwardIt.next())) {
+//					forwardIt.remove();
+//					break;
+//				}
+//			}
+//		}
+//
+//		if (twopasses) {
+//			Iterator<CQIE> backwardIterator = ((LinkedList)queries).descendingIterator();
+//			while (backwardIterator.hasNext()) {
+//				CQCUtilities cqc = new CQCUtilities(backwardIterator.next(), sigma);
+//				forwardIt = queries.iterator();
+//				while (forwardIt.hasNext()) {
+//					if (cqc.isContainedIn(forwardIt.next())) {
+//						backwardIterator.remove();
+//						break;
+//					}
+//				}
+//			}
+//		}
 
-		if (twopasses) {
-			for (int i = (queries.size() - 1); i >= 0; i--) {
-				CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
-				for (int j = 0; j < i; j++) {
-					if (cqc.isContainedIn(queries.get(j))) {
-						queries.remove(i);
-						break;
-					}
-				}
-			}
-		}
+		 for (int i = 0; i < queries.size(); i++) {
+		 CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
+		 for (int j = queries.size() - 1; j > i; j--) {
+		 if (cqc.isContainedIn(queries.get(j))) {
+		 queries.remove(i);
+		 i -= 1;
+		 break;
+		 }
+		 }
+		 }
+		
+		 if (twopasses) {
+		 for (int i = (queries.size() - 1); i >= 0; i--) {
+		 CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
+		 for (int j = 0; j < i; j++) {
+		 if (cqc.isContainedIn(queries.get(j))) {
+		 queries.remove(i);
+		 break;
+		 }
+		 }
+		 }
+		 }
 
 		int newsize = queries.size();
 		// int queriesremoved = initialsize - newsize;
