@@ -58,6 +58,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public Predicate clone() {
+//		return this;
 		PredicateImpl clone = new PredicateImpl(this.name, this.arity, types);
 		clone.identifier = identifier;		
 		return clone;

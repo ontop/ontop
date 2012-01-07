@@ -6,9 +6,16 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class ValueConstantImpl implements ValueConstant {
 
-	private String value = null;
-	private XSDatatype type = null;
-	private int identifier = -1;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8031338451909170400L;
+
+	private final String value;
+
+	private final XSDatatype type;
+
+	private final int identifier;
 
 	/**
 	 * The default constructor.
@@ -41,9 +48,10 @@ public class ValueConstantImpl implements ValueConstant {
 
 	@Override
 	public ValueConstant clone() {
-		ValueConstantImpl clone = new ValueConstantImpl(value, this.type);
-		clone.identifier = identifier;
-		return clone;
+		// ValueConstantImpl clone = new ValueConstantImpl(value, this.type);
+		// clone.identifier = identifier;
+		// return clone;
+		return this;
 	}
 
 	@Override

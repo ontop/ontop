@@ -13,8 +13,10 @@ public class URIConstantImpl implements URIConstant {
 	 * 
 	 */
 	private static final long serialVersionUID = -1263974895010238519L;
-	private URI uri = null;
-	private int identifier = -1;
+
+	private final URI uri;
+
+	private final int identifier;
 
 	/**
 	 * The default constructor.
@@ -54,9 +56,10 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public URIConstant clone() {
-		URIConstantImpl clone = new URIConstantImpl(uri);
-		clone.identifier = identifier;
-		return clone;
+		return this;
+		// URIConstantImpl clone = new URIConstantImpl(uri);
+		// clone.identifier = identifier;
+		// return clone;
 	}
 
 	@Override

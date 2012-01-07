@@ -6,9 +6,16 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class VariableImpl implements Variable {
 
-	private String name = null;
-	private XSDatatype type = null;
-	private int identifier = -1;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5723075311798541659L;
+	
+	private final String name;
+	
+	private final XSDatatype type;
+	
+	private final int identifier;
 
 	protected VariableImpl(String name, XSDatatype type) {
 		this.name = name;
@@ -51,8 +58,9 @@ public class VariableImpl implements Variable {
 
 	@Override
 	public Variable clone() {
-		VariableImpl clone = new VariableImpl(new String(name), this.type);
-		clone.identifier = identifier;
-		return clone;
+		 return this;
+		// VariableImpl clone = new VariableImpl(new String(name), this.type);
+		// clone.identifier = identifier;
+		// return clone;
 	}
 }

@@ -23,8 +23,9 @@ public class AnonymousVariable implements Variable {
 			return false;
 		}
 
-		AnonymousVariable var2 = (AnonymousVariable) obj;
-		return identifier == var2.hashCode();
+//		AnonymousVariable var2 = (AnonymousVariable) obj;
+//		return identifier == var2.hashCode();
+		return true;
 	}
 
 	@Override
@@ -44,7 +45,8 @@ public class AnonymousVariable implements Variable {
 
 	@Override
 	public Variable clone() {
-		return new AnonymousVariable();
+		return this;
+//		return new AnonymousVariable();
 	}
 
 	@Override
