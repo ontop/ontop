@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,25 +45,30 @@ import org.slf4j.LoggerFactory;
  */
 public class CQCUtilities {
 
-	private CQIE					canonicalQuery		= null;
+	private CQIE canonicalQuery = null;
 
-	private static AtomUnifier		unifier				= new AtomUnifier();
+	private static AtomUnifier unifier = new AtomUnifier();
 
-	private static QueryAnonymizer	anonymizer			= new QueryAnonymizer();
+	private static QueryAnonymizer anonymizer = new QueryAnonymizer();
 
-	private static OBDADataFactory	termFactory			= OBDADataFactoryImpl.getInstance();
+	private static OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-	List<Atom>						canonicalbody		= null;
+	List<Atom> canonicalbody = null;
 
-	Atom					canonicalhead		= null;
+	Atom canonicalhead = null;
 
-	Set<Predicate>					canonicalpredicates	= new HashSet<Predicate>(50);
+	Set<Predicate> canonicalpredicates = new HashSet<Predicate>(50);
 
-	static Logger					log					= LoggerFactory.getLogger(CQCUtilities.class);
+	/***
+	 * An index of all the facts obtained by freezing this query.
+	 */
+	private Map<Predicate, List<Atom>> factMap = new HashMap<Predicate, List<Atom>>();
 
-	private Ontology			sigma				= null;
+	static Logger log = LoggerFactory.getLogger(CQCUtilities.class);
 
-	final private OBDADataFactory	fac					= OBDADataFactoryImpl.getInstance();
+	private Ontology sigma = null;
+
+	final private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/***
 	 * Constructs a CQC utility using the given query.
@@ -92,9 +98,17 @@ public class CQCUtilities {
 		this.canonicalQuery = getCanonicalQuery(query);
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
+		factMap = new HashMap<Predicate, List<Atom>>(canonicalbody.size() * 2);
 		for (Atom atom : canonicalbody) {
-			Atom patom = (Atom) atom;
-			canonicalpredicates.add(patom.getPredicate());
+			Atom fact = (Atom) atom;
+			Predicate predicate = fact.getPredicate();
+			canonicalpredicates.add(predicate);
+			List<Atom> facts = factMap.get(predicate);
+			if (facts == null) {
+				facts = new LinkedList<Atom>();
+				factMap.put(predicate, facts);
+			}
+			facts.add(fact);
 		}
 	}
 
@@ -360,25 +374,29 @@ public class CQCUtilities {
 
 	/***
 	 * Returns true if the query can be answered using the ground atoms in the
-	 * body of our canonical query.
+	 * body of our canonical query. The method is recursive, hence expensive.
 	 * 
 	 * @param query
 	 * @return
 	 */
-	private boolean hasAnswer(CQIE query) {
+	private boolean hasAnswerRecursive(CQIE query) {
 
 		List<Atom> body = query.getBody();
-		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
-			Atom currentAtomTry = (Atom) body.get(atomidx);
 
-			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
-				Atom currentGroundAtom = (Atom) canonicalbody.get(groundatomidx);
+		int atomidx = -1;
+		for (Atom currentAtomTry : body) {
+			atomidx += 1;
+			List<Atom> relevantFacts = factMap.get(currentAtomTry.getPredicate());
+			if (relevantFacts == null)
+				return false;
+
+			for (Atom currentGroundAtom : relevantFacts) {
 
 				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu == null)
 					continue;
 
-				CQIE satisfiedquery = unifier.applyUnifier(query.clone(), mgu);
+				CQIE satisfiedquery = unifier.applyUnifier(query, mgu);
 				satisfiedquery.getBody().remove(atomidx);
 
 				if (satisfiedquery.getBody().size() == 0)
@@ -391,7 +409,7 @@ public class CQCUtilities {
 				if (unifier.getMGU(canonicalhead, satisfiedquery.getHead()) == null) {
 					continue;
 				}
-				if (hasAnswer(satisfiedquery))
+				if (hasAnswerRecursive(satisfiedquery))
 					return true;
 
 			}
@@ -399,7 +417,15 @@ public class CQCUtilities {
 		return false;
 	}
 
-	private boolean hasAnswer2(CQIE query2) {
+	/***
+	 * Implements a stack based, non-recursive query answering mechanism.
+	 * 
+	 * @param query2
+	 * @return
+	 */
+	private boolean hasAnswerNonRecursive1(CQIE query2) {
+
+		query2 = QueryAnonymizer.deAnonymize(query2);
 
 		LinkedList<CQIE> querystack = new LinkedList<CQIE>();
 		querystack.addLast(query2);
@@ -433,6 +459,102 @@ public class CQCUtilities {
 		}
 
 		return false;
+	}
+
+	public boolean hasAnswer(CQIE query) {
+		query = QueryAnonymizer.deAnonymize(query);
+
+		int bodysize = query.getBody().size();
+		int maxIdxReached = -1;
+		Stack<CQIE> queryStack = new Stack<CQIE>();
+		CQIE currentQuery = query;
+		List<Atom> currentBody = currentQuery.getBody();
+		Atom currentAtom = null;
+		queryStack.push(null);
+
+		HashMap<Integer, Stack<Atom>> choicesMap = new HashMap<Integer, Stack<Atom>>(bodysize * 2);
+
+		int currentAtomIdx = 0;
+		while (currentAtomIdx >= 0) {
+
+			if (currentAtomIdx > maxIdxReached)
+				maxIdxReached = currentAtomIdx;
+
+			currentAtom = currentBody.get(currentAtomIdx);
+			Predicate currentPredicate = currentAtom.getPredicate();
+
+			/* Looking for options for this atom */
+			Stack<Atom> factChoices = choicesMap.get(currentAtomIdx);
+			if (factChoices == null) {
+				/*
+				 * we have never reached this atom, setting up the initial list
+				 * of choices from the original fact list.
+				 */
+				factChoices = new Stack<Atom>();
+				factChoices.addAll(factMap.get(currentPredicate));
+				choicesMap.put(currentAtomIdx, factChoices);
+			}
+
+			boolean choiceMade = false;
+			CQIE newquery = null;
+			while (!factChoices.isEmpty()) {
+				Map<Variable, Term> mgu = unifier.getMGU(currentAtom, factChoices.pop());
+				if (mgu == null) {
+					/* No way to use the current fact */
+					continue;
+				}
+				newquery = unifier.applyUnifier(currentQuery, mgu);
+				/*
+				 * Stopping early if we have chosen an MGU that has no
+				 * possibility of being successful because of the head.
+				 */
+				if (unifier.getMGU(canonicalhead, newquery.getHead()) == null) {
+					/*
+					 * There is no chance to unifiy the two heads, hence this
+					 * fact is not good.
+					 */
+					continue;
+				}
+
+				/*
+				 * The current fact was applicable, no conflicts so far, we can
+				 * advance to the next atom
+				 */
+				choiceMade = true;
+				break;
+
+			}
+			if (!choiceMade) {
+				/*
+				 * Reseting choices state and backtracking and resetting the set
+				 * of choices for the current position
+				 */
+				factChoices.addAll(factMap.get(currentPredicate));
+				currentAtomIdx -= 1;
+				if (currentAtomIdx == -1)
+					break;
+				currentQuery = queryStack.pop();
+				currentBody = currentQuery.getBody();
+				
+			} else {
+
+				if (currentAtomIdx == bodysize - 1) {
+					/* we found a succesful set of facts */
+					return true;
+				}
+
+				/* Advancing to the next index */
+				queryStack.push(currentQuery);
+				currentAtomIdx += 1;
+				currentQuery = newquery;
+				currentBody = currentQuery.getBody();
+
+			}
+
+		}
+
+		return false;
+
 	}
 
 	/**
@@ -620,9 +742,8 @@ public class CQCUtilities {
 			}
 		};
 
-		if (sort)
-		{
-//			log.debug("Sorting...");
+		if (sort) {
+			// log.debug("Sorting...");
 			Collections.sort(queries, lenghtComparator);
 		}
 
@@ -650,12 +771,12 @@ public class CQCUtilities {
 		}
 
 		int newsize = queries.size();
-//		int queriesremoved = initialsize - newsize;
+		// int queriesremoved = initialsize - newsize;
 
 		double endtime = System.currentTimeMillis();
 		double time = (endtime - startime) / 1000;
-		
-		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time) ;		
+
+		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
 	}
 
 }

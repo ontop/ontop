@@ -22,6 +22,7 @@ import it.unibz.krdb.obda.model.impl.URIConstantImpl;
 import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -187,8 +188,8 @@ public class AtomUnifier {
 		/* Computing the disagreement set */
 
 		int arity = firstAtom.getPredicate().getArity();
-		List<Term> terms1 = new LinkedList<Term>(firstAtom.getTerms());
-		List<Term> terms2 = new LinkedList<Term>(secondAtom.getTerms());
+		List<Term> terms1 = new ArrayList<Term>(firstAtom.getTerms());
+		List<Term> terms2 = new ArrayList<Term>(secondAtom.getTerms());
 
 		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
 

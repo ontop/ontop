@@ -17,11 +17,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.lucene.index.TermFreqVector;
+
 // TODO This class needs to be restructured
 
 public class QueryAnonymizer {
 
-	private final OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
 
 	public DatalogProgram anonymize(DatalogProgram prog) {
 
@@ -175,5 +177,70 @@ public class QueryAnonymizer {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * method that enumerates all undistinguished variables in the given data
+	 * log program. This will also remove any instances of
+	 * UndisinguishedVariable and replace them by instance of Variable
+	 * (enumerated as mentioned before). This step is needed to ensure that the
+	 * algorithm treats each undistinguished variable as a unique variable.
+	 * 
+	 * @param dp
+	 */
+	public static DatalogProgram deAnonymize(DatalogProgram dp) {
+		DatalogProgram result = termFactory.getDatalogProgram();
+		Iterator<CQIE> it = dp.getRules().iterator();
+		while (it.hasNext()) {
+			CQIE query = it.next();
+			result.appendRule(deAnonymize(query));
+		}
+		result.setQueryModifiers(dp.getQueryModifiers());
+		return result;
+	}
+
+	public static CQIE deAnonymize(CQIE query) {
+		query = query.clone();
+		Atom head = query.getHead();
+		Iterator<Term> hit = head.getTerms().iterator();
+		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
+		int coutner = 1;
+		int i = 0;
+		LinkedList<Term> newTerms = new LinkedList<Term>();
+		while (hit.hasNext()) {
+			Term t = hit.next();
+			if (t instanceof AnonymousVariable) {
+				String newName = "_uv-" + coutner;
+				coutner++;
+				Term newT = factory.getVariable(newName);
+				newTerms.add(newT);
+			} else {
+				newTerms.add(t.clone());
+			}
+			i++;
+		}
+		head.updateTerms(newTerms);
+
+		Iterator<Atom> bit = query.getBody().iterator();
+		while (bit.hasNext()) {
+			Atom a = (Atom) bit.next();
+			Iterator<Term> hit2 = a.getTerms().iterator();
+			i = 0;
+			LinkedList<Term> vec = new LinkedList<Term>();
+			while (hit2.hasNext()) {
+				Term t = hit2.next();
+				if (t instanceof AnonymousVariable) {
+					String newName = "_uv-" + coutner;
+					coutner++;
+					Term newT = factory.getVariable(newName);
+					vec.add(newT);
+				} else {
+					vec.add(t.clone());
+				}
+				i++;
+			}
+			a.updateTerms(vec);
+		}
+		return query;
 	}
 }

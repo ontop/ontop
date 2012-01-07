@@ -246,7 +246,7 @@ public class StockExchangeTest extends TestCase {
 		assertFalse(fail);
 	}
 
-	public void disabledtestSiEqSig() throws Exception {
+	public void testSiEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
