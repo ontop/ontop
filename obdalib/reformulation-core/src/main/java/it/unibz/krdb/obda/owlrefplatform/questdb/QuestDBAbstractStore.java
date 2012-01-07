@@ -99,7 +99,9 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		return conn != null & !conn.isClosed();
 	}
 
-	public QuestConnection getConnection() {
+	public QuestConnection getConnection() throws OBDAException{
+		if (conn == null)
+			throw new OBDAException("No connection has been stablished, call connect()");
 		return conn;
 	}
 
