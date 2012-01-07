@@ -42,7 +42,7 @@ public class QuestRewritingBenchmarkTool {
 				"PREFIX : <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT DISTINCT ?x WHERE {?x a :UndergraduateStudent2xx}" };
 
 		try {
-			URI tboxuri = new File("/Users/mariano/Documents/Archive/Work/projects/semantic-index/lubm/benchmarks/quest/lubm-lite-2X.owl")
+			URI tboxuri = new File("/Users/mariano/Documents/Archive/Work/projects/semantic-index/lubm/benchmarks/quest/postgres/lubm3x-lite-rdfxml.owl")
 					.toURI();
 			Properties config = new Properties();
 
@@ -60,10 +60,12 @@ public class QuestRewritingBenchmarkTool {
 
 			start = System.nanoTime();
 			QuestDBClassicStore store = new QuestDBClassicStore("test", tboxuri, pref);
+			
 			stop = System.nanoTime();
 			out.println("Quest initialization time: " + format.format((stop - start) / 1000000.0) + " ms");
 
 			out.println("Query,Ref.Time (ms), Size");
+			store.connect();
 			final QuestStatement st = store.getConnection().createStatement();
 			for (int i = 0; i < queries.length; i++) {
 				System.out.println("Query " + (i + 1));
