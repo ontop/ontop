@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
 import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.tests.RDBMSSIDataRepositoryManagerTest.ABoxAssertionGeneratorIterator;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.ByteArrayOutputStream;
@@ -311,12 +312,12 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		RDBMSDirectDataRepositoryManager dbman = new RDBMSDirectDataRepositoryManager(preds);
 
-		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(conn,false);
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		ABoxAssertionGeneratorIterator ait = new ABoxAssertionGeneratorIterator(100000, preds);
 		dbman.insertMetadata(conn);
-		dbman.insertData(conn,ait,50000,5000);
+		int reportedcount = dbman.insertData(conn,ait,50000,5000);
+		log.info("Reported count: {}", reportedcount);
 		dbman.createIndexes(conn);
 		conn.commit();
 
