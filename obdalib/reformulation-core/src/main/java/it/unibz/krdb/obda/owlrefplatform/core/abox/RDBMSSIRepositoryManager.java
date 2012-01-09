@@ -297,6 +297,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// public void setDatabase(Connection ds) {
 	// this.conn = ds;
 	// }
+	
+	public DAG getDAG() {
+		return dag;
+	}
 
 	@Override
 	public void setTBox(Ontology ontology) {

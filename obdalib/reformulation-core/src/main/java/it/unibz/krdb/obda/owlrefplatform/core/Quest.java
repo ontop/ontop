@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryMana
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
@@ -294,12 +295,11 @@ public class Quest implements Serializable {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 		log.debug("Initializing Quest's query answering engine...");
-		
-		
+
 		/*
 		 * Input checking (we need to extend this)
 		 */
-		
+
 		if (unfoldingMode.equals(QuestConstants.VIRTUAL) && inputOBDAModel == null) {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
@@ -315,11 +315,9 @@ public class Quest implements Serializable {
 			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
 		}
 
-		
-		
 		unfoldingOBDAModel = fac.getOBDAModel();
 		sigma = OntologyFactoryImpl.getInstance().createOntology();
-		
+
 		/*
 		 * Simplifying the vocabulary of the TBox
 		 */
@@ -437,6 +435,7 @@ public class Quest implements Serializable {
 						// Does nothing because the SQLException handles this
 						// problem also.
 					}
+					log.debug("Establishing an internal connection for house-keeping");
 					localConnection = DriverManager.getConnection(url, username, password);
 
 					unfoldingOBDAModel.addSource(obdaSource);
@@ -465,6 +464,15 @@ public class Quest implements Serializable {
 			/*
 			 * T-mappings implementation
 			 */
+			if (unfoldingMode.equals(QuestConstants.VIRTUAL)
+					|| (unfoldingMode.equals(QuestConstants.CLASSIC) && dbType.equals(QuestConstants.DIRECT))) {
+				log.debug("Setting up T-Mappings");
+				TMappingProcessor tmappingProc = new TMappingProcessor(reformulationOntology);
+				unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram);
+				log.debug("Resulting mappings: {}", unfoldingProgram.getRules().size());
+				sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
+				sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
+			}
 
 			/*
 			 * Setting up the unfolder and SQL generation
