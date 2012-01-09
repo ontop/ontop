@@ -42,7 +42,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private static final ResolutionEngine resolutionEngine = new ResolutionEngine();
 
-	private static final Logger log = LoggerFactory.getLogger(ComplexMappingUnfolder.class);
+	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
 
 	URIToFunctionMatcher uriFunctorMatcher;
 

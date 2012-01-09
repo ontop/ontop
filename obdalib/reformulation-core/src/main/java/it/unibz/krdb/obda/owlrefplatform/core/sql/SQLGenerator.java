@@ -44,7 +44,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 	final private DBMetadata metadata;
 
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ComplexMappingSQLGenerator.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
 	private final JDBCUtility jdbcutil;
 
@@ -133,7 +133,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 		if (!isUCQ(query))
 			throw new InvalidParameterException("Only UCQs are supported at the moment");
 
-		log.debug("Generating source query. Initial query size: {}", query.getRules().size());
+		log.debug("Generating SQL. Initial query size: {}", query.getRules().size());
 		List<CQIE> cqs = query.getRules();
 
 		if (cqs.size() < 1)
@@ -156,7 +156,6 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 		LinkedList<String> sqls = new LinkedList<String>();
 		for (CQIE cq : cqs) {
-			System.out.println(cq);
 			StringBuffer sb = new StringBuffer();
 			int size = cq.getBody().size();
 			String[] viewName = new String[size];
@@ -362,8 +361,6 @@ public class SQLGenerator implements SourceQueryGenerator {
 			isMoreThanOne = true;
 
 		}
-
-		System.out.println(result);
 		return result.toString();
 	}
 

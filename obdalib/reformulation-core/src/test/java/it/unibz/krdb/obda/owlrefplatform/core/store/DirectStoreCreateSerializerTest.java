@@ -25,7 +25,6 @@ public class DirectStoreCreateSerializerTest extends TestCase {
 		while (s.nextRow()) {
 			i += 1;
 		}
-		System.out.println("Count " + i);
 
 		s.close();
 		st.close();
@@ -42,6 +41,5 @@ public class DirectStoreCreateSerializerTest extends TestCase {
 		while (s.nextRow()) {
 			i += 1;
 		}
-		System.out.println("Count " + i);
 	}
 }

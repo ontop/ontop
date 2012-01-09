@@ -258,7 +258,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		resultlist = cleanAuxiliaryQueries(resultlist);
 		log.debug("Removed auxiliary queries. New size: {}", resultlist.size());
 
-		log.debug("Reformulation: {}", resultlist);
+//		log.debug("Reformulation: {}", resultlist);
 
 		/* One last pass of the syntactic containment checker */
 
@@ -283,7 +283,8 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		QueryUtils.copyQueryModifiers(input, resultprogram);
 
-		log.debug("Computed reformulation: \n{}", resultprogram);
+//		if (showreformulation)
+//			log.debug("Computed reformulation: \n{}", resultprogram);
 		log.debug("Reformulation size: {}, Time elapse: {}ms", resultlist.size(), milliseconds);
 
 		// log.info("Time elapsed for reformulation: {}s", seconds);
