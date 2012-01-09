@@ -7,7 +7,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.io.BufferedReader;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private AtomUnifier					unifier		= null;
+	private Unifier					unifier		= null;
 	private AutomaticMGUTestDataGenerator	generator	= null;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
@@ -42,14 +42,14 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new AtomUnifier();
+		unifier = new Unifier();
 		generator = new AutomaticMGUTestDataGenerator();
 
 	}
 
 	/**
 	 * Test method for
-	 * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
+	 * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception
@@ -75,7 +75,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Atom> atoms = generator.getAtoms(atomsstr);
 			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
-			AtomUnifier unifier = new AtomUnifier();
+			Unifier unifier = new Unifier();
 			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 

@@ -8,10 +8,10 @@ import java.util.Map;
 
 public class ResolutionEngine {
 
-	AtomUnifier unifier = null;
+	Unifier unifier = null;
 
 	public ResolutionEngine() {
-		unifier = new AtomUnifier();
+		unifier = new Unifier();
 	}
 
 	/**

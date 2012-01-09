@@ -48,7 +48,7 @@ public class CQCUtilities {
 
 	private CQIE canonicalQuery = null;
 
-	private static AtomUnifier unifier = new AtomUnifier();
+	private static Unifier unifier = new Unifier();
 
 	private static QueryAnonymizer anonymizer = new QueryAnonymizer();
 

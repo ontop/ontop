@@ -28,7 +28,7 @@ import java.util.Set;
 
 public class PositiveInclusionApplicator {
 
-	AtomUnifier						unifier		= new AtomUnifier();
+	Unifier						unifier		= new Unifier();
 	QueryAnonymizer					anonymizer	= new QueryAnonymizer();
 	OBDADataFactory					termFactory	= OBDADataFactoryImpl.getInstance();
 	private SemanticQueryOptimizer	sqoOptimizer;

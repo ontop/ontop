@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -30,7 +30,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	 */
 	private static final long serialVersionUID = -6641916058733198535L;
 	private final static QueryAnonymizer anonymizer = new QueryAnonymizer();
-	private final static AtomUnifier unifier = new AtomUnifier();
+	private final static Unifier unifier = new Unifier();
 
 	private final static PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator();
 	private List<Axiom> assertions = new LinkedList<Axiom>();

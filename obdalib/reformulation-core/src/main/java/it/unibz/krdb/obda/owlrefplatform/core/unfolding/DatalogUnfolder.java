@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -187,7 +188,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		List<CQIE> result = new LinkedList<CQIE>();
 		result.addAll(evaluation);
-		return termFactory.getDatalogProgram(result);
+		
+		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
+		
+		log.debug("Initial unfolding size: {} cqs", resultdp.getRules().size());
+		// TODO make this a switch
+		CQCUtilities.removeContainedQueriesSorted(resultdp, true);
+		log.debug("Resulting unfolding size: {} cqs", resultdp.getRules().size());
+		
+		
+		log.debug(resultdp.toString());
+
+		return resultdp;
 	}
 
 	/***

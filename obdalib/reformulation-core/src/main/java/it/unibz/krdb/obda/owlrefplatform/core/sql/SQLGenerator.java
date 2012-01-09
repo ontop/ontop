@@ -361,6 +361,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			isMoreThanOne = true;
 
 		}
+		
 		return result.toString();
 	}
 

@@ -10,7 +10,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AtomUnifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.net.URI;
@@ -92,7 +92,7 @@ public class ThetaApplicationTest extends TestCase {
 		mgu.put((Variable) s2.getVariable(), s2.getTerm());
 		mgu.put((Variable) s3.getVariable(), s3.getTerm());
 
-		AtomUnifier unifier = new AtomUnifier();
+		Unifier unifier = new Unifier();
 		CQIE newquery = unifier.applyUnifier(query, mgu);
 
 		List<Atom> newbody = newquery.getBody();

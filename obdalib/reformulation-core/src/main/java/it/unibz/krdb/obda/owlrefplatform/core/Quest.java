@@ -17,6 +17,8 @@ import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
@@ -473,6 +475,16 @@ public class Quest implements Serializable {
 				sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
 				sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
 			}
+			
+			/*
+			 * Eliminating redundancy from the unfolding program
+			 */
+			unfoldingProgram = DatalogNormalizer.normalizeDatalogProgram(unfoldingProgram);
+					
+			int unprsz = unfoldingProgram.getRules().size();
+			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);			
+			log.debug("Optimizing unfolding program. Initial size: {} Final size: {}", unprsz, unfoldingProgram.getRules().size());
+			
 
 			/*
 			 * Setting up the unfolder and SQL generation
