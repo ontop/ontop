@@ -156,7 +156,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-				System.out.println(stroke.toString());
+//				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.ADD_MAPPING, stroke);
 				    lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
@@ -246,7 +246,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-				System.out.println(stroke.toString());
+//				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.EDIT_BODY, stroke);
 					lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
@@ -291,7 +291,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-				System.out.println(stroke.toString());
+//				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.EDIT_HEAD, stroke);
 					lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
@@ -336,7 +336,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 					return;
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
-				System.out.println(stroke.toString());
+//				System.out.println(stroke.toString());
 				if(!isKeyStrokeAlreadyAssigned(stroke)){
 					shortCuts.put(OBDAPreferences.EDIT_ID, stroke);
 					lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));

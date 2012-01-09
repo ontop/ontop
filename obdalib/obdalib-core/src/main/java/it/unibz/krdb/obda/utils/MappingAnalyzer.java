@@ -164,7 +164,7 @@ public class MappingAnalyzer {
 					newterms.add(updateTerm(term, lookupTable));
 				}
 				if (newterms.size() == 0) {
-					System.out.println(0);
+//					System.out.println(0);
 				}
 				Atom newhead = dataFactory.getAtom(atom.getPredicate(), newterms);
 				CQIE rule = dataFactory.getCQIE(newhead, atoms);
@@ -216,7 +216,6 @@ public class MappingAnalyzer {
 			funct = dataFactory.getNEQFunction(t1, t2);
 			break;
 		default:
-			System.out.println(" ##############   HERE!");
 			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
 		}
 		return funct;

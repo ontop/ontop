@@ -58,8 +58,9 @@ public class XMLUtils {
 		int line = 1;
 		int TARGET_LINE = 2;  // after then <?xml ... ?> declaration
 		while ((cursor = in.readLine()) != null) {
-			if (line == TARGET_LINE)
+			if (line == TARGET_LINE) {
 				out.println(entityFragment);
+			}
 
 		    out.println(cursor);
 
