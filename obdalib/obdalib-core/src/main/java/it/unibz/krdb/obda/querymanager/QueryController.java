@@ -25,6 +25,10 @@ import org.slf4j.LoggerFactory;
  */
 public class QueryController implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6456175226053526128L;
 	private Vector<QueryControllerEntity>	collection		= null;
 	private Vector<QueryControllerListener>	listeners		= null;
 	private boolean							eventDisabled	= false;

@@ -5,6 +5,10 @@ import it.unibz.krdb.obda.ontology.Property;
 
 public class PropertyImpl implements Property {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2514037755762973974L;
 	private boolean		inverse		= false;
 	private Predicate	predicate	= null;
 

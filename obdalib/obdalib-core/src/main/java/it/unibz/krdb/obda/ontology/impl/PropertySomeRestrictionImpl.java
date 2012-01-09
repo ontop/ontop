@@ -5,6 +5,10 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 
 public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 593821958539751283L;
 	private Predicate	predicate	= null;
 	private boolean		isInverse	= false;
 

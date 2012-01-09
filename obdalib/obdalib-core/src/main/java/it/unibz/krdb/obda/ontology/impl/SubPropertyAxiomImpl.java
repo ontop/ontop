@@ -4,6 +4,11 @@ import it.unibz.krdb.obda.ontology.Property;
 
 public class SubPropertyAxiomImpl extends AbstractSubDescriptionAxiom {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3020225654321319941L;
+
 	SubPropertyAxiomImpl(Property included, Property including) {
 
 		super(included, including);

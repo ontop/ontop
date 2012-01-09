@@ -196,6 +196,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		editID = KeyStroke.getKeyStroke(id);
 
 		AbstractAction addAction = new AbstractAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6534327279595000401L;
+
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				addMapping();
@@ -205,6 +210,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		actionmap.put(OBDAPreferences.ADD_MAPPING, addAction);
 
 		AbstractAction editBodyAction = new AbstractAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 5829816762114042796L;
+
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				TreePath path = mappingsTree.getSelectionPath();
@@ -218,6 +228,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		actionmap.put(OBDAPreferences.EDIT_BODY, editBodyAction);
 
 		AbstractAction editHeadAction = new AbstractAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2418619999144506977L;
+
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				TreePath path = mappingsTree.getSelectionPath();
@@ -231,6 +246,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		actionmap.put(OBDAPreferences.EDIT_HEAD, editHeadAction);
 
 		AbstractAction editIDAction = new AbstractAction() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1643902301281442494L;
+
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				TreePath path = mappingsTree.getSelectionPath();

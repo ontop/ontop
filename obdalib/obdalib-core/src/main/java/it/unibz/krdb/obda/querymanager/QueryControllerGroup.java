@@ -4,7 +4,11 @@ import java.util.Vector;
 
 public class QueryControllerGroup extends QueryControllerEntity {
 
-  private Vector<QueryControllerQuery> queries = null;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2932318255139254847L;
+private Vector<QueryControllerQuery> queries = null;
   private String group_id = "";
 
   public QueryControllerGroup(String group_id) {

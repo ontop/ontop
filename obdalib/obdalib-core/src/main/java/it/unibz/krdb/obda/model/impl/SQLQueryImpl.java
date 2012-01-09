@@ -18,6 +18,10 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 
 public class SQLQueryImpl implements OBDAQuery, OBDASQLQuery {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1910293716786132196L;
 	private final String	sqlQuery;
 
 

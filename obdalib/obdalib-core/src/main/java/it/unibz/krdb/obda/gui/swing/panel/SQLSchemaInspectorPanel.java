@@ -122,6 +122,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrRelationsTable.setPreferredSize(new Dimension(250, 100));
 
 		tblRelations.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Relation Name", "Row Count" }) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -7479998172725792338L;
 			Class[] types = new Class[] { String.class, String.class };
 			boolean[] canEdit = new boolean[] { false, false };
 
@@ -147,6 +151,10 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		scrAttributesTable.setPreferredSize(new Dimension(250, 100));
 
 		tblAttributes.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "Attribute", "Type", "Primary Key", "Nullable" }) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 8630764669972547241L;
 			boolean[] canEdit = new boolean[] { false, false, false, false };
 
 			@Override

@@ -107,7 +107,11 @@ public class DataSourceSelectorPanel extends javax.swing.JPanel {
                 "Datasource", "Quality", "Speed", "Availability", "# of mappings", "Enabled"
             }
         ) {
-            Class[] types = new Class [] {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 3510953183279307945L;
+			Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {

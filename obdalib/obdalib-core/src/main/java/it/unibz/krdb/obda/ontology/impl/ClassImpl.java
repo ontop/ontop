@@ -5,6 +5,11 @@ import it.unibz.krdb.obda.ontology.OClass;
 
 public class ClassImpl implements OClass {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4930755519806785384L;
+
 	private Predicate	predicate	= null;
 
 	String				str			= null;

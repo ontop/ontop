@@ -5,7 +5,11 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 public class ConfigPanel extends javax.swing.JPanel {
 
-    private QuestPreferences preference;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 602382682995021070L;
+	private QuestPreferences preference;
 
     /**
      * The constructor.

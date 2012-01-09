@@ -36,6 +36,11 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessReformulator implements QueryRewriter {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3313375076810409799L;
+
 	// private Set<Assertion> assertions;
 	private DAG									conceptDAG			= null;
 

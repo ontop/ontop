@@ -27,6 +27,10 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1851116693137470887L;
 	private static OBDADataFactoryImpl	instance	= null;
 
 	protected OBDADataFactoryImpl() {

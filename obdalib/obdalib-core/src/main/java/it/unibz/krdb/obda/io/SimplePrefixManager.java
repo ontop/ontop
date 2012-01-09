@@ -14,6 +14,10 @@ import java.util.HashMap;
 public class SimplePrefixManager extends AbstractPrefixManager {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2394283946895814071L;
+	/**
 	 * A simple map containing for each ontolgoy URI the correpsonding prefix
 	 */
 	private HashMap<String, String>	uriToPrefixMap		= null;

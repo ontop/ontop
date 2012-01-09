@@ -9,6 +9,11 @@ import java.util.Set;
 
 public class ClassAssertionImpl implements ClassAssertion {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5689712345023046811L;
+
 	URIConstant	object	= null;
 
 	Predicate	concept	= null;

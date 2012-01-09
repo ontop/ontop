@@ -43,6 +43,11 @@ import org.slf4j.LoggerFactory;
 
 public class OBDAModelImpl implements OBDAModel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -455389288391300717L;
+
 	protected URI										currentOntologyURI	= null;
 
 	// protected OBDAModelImpl dscontroller = null;

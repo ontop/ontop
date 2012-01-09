@@ -12,6 +12,10 @@ import java.util.Iterator;
 
 public abstract class AbstractPrefixManager implements PrefixManager {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2034866002642539028L;
 	private String					defaultNamespace	= null;
 	
 

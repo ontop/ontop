@@ -5,6 +5,12 @@ import it.unibz.krdb.obda.ontology.ClassDescription;
 public class SubClassAxiomImpl extends AbstractSubDescriptionAxiom {
 
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7590338987239580423L;
+
+
 	SubClassAxiomImpl(ClassDescription concept1, ClassDescription concept2) {
 		super(concept1, concept2);
 	}

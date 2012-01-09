@@ -26,6 +26,11 @@ import java.util.List;
 
 public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4888736510436022782L;
+
 	public CQIEToTextCodec(OBDAModel apic) {
 		super(apic);
 		// TODO Auto-generated constructor stub

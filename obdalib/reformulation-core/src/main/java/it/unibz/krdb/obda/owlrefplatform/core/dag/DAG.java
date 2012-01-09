@@ -27,6 +27,11 @@ import org.slf4j.LoggerFactory;
 
 public class DAG implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9208872698083322721L;
+
 	private static final Logger log = LoggerFactory.getLogger(DAG.class);
 
 	private int index_counter = 1;

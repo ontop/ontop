@@ -12,6 +12,10 @@ import java.io.Serializable;
 
 public class AuxSQLMapping implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8347044674081735636L;
 	private String [] sqlVariables = null; 
 	
 	public AuxSQLMapping (String[] vars){

@@ -13,6 +13,11 @@ import java.util.Set;
 
 public abstract class AbstractSubDescriptionAxiom implements SubDescriptionAxiom {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5901203153410196148L;
+
 	protected Description	including	= null; // righthand side
 
 	protected Description	included	= null;

@@ -19,6 +19,11 @@ import java.util.List;
  */
 public class DatalogProgramToTextCodec extends ObjectToTextCodec<DatalogProgram> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3709145508488320676L;
+
 	public DatalogProgramToTextCodec(OBDAModel apic) {
 		super(apic);
 	}

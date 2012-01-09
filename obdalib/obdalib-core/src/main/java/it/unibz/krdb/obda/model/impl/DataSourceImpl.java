@@ -24,6 +24,10 @@ import java.util.StringTokenizer;
 
 //TODO make this an entity too?
 public class DataSourceImpl implements OBDADataSource {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7903755268613089609L;
 	// private String uri = ""
 	private boolean		enabled		= true;
 	private boolean		registred	= false;

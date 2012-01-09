@@ -3,7 +3,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 import java.io.Serializable;
 
 public class Edge implements Serializable  {
-    private final DAGNode left;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1960603133619468795L;
+	private final DAGNode left;
     private final DAGNode right;
 
     public Edge(DAGNode left, DAGNode right) {

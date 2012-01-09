@@ -15,4 +15,9 @@ package it.unibz.krdb.obda.exception;
 
 public class NoConnectionException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5009626212594837528L;
+
 }

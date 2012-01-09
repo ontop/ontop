@@ -26,6 +26,11 @@ import org.slf4j.LoggerFactory;
  */
 public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -369873315771847935L;
+
 	private final DatalogProgramParser	datalogParser	= new DatalogProgramParser();
 
 	private final Logger				log				= LoggerFactory.getLogger(this.getClass());

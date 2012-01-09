@@ -36,6 +36,10 @@ import org.slf4j.LoggerFactory;
 
 public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4542611840949469080L;
 	private MappingViewManager			viewManager				= null;
 	private Map<String, List<Object[]>>	termoccurenceIndex		= null;
 	private Map<String, List<Object[]>>	constantoccurenceIndex	= null;

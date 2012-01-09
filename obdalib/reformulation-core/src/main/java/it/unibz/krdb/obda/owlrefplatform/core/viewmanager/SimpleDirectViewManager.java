@@ -21,6 +21,10 @@ import java.util.Set;
 
 public class SimpleDirectViewManager implements ViewManager {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6387967678286702723L;
 	private Ontology ontology = null;
 	private Set<URI> loadedURIs = null;
 	private HashMap<String, String> prefixMap = null;

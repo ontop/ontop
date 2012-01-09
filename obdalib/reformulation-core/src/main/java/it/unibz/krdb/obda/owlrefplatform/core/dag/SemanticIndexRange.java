@@ -99,7 +99,11 @@ public class SemanticIndexRange implements Serializable {
      */
     public class Interval implements Comparable<Interval>, Serializable {
 
-        private final int start, end;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 3982860811012207357L;
+		private final int start, end;
 
         public Interval(int start, int end) {
             this.start = start;

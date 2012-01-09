@@ -17,6 +17,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class QueryTreeElement extends DefaultMutableTreeNode implements
 		TreeElement {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5221902062065891204L;
 	private String id = "";
 	private String query = "";
 

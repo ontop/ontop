@@ -33,6 +33,11 @@ import java.util.Vector;
 
 public class MappingViewManager implements ViewManager {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5292913933385676528L;
+
 	private static final String						auxpreduri					= "http://obda.org/reformulation/auxPredicate#";
 
 	private List<OBDAMappingAxiom>					mappings					= new LinkedList<OBDAMappingAxiom>();

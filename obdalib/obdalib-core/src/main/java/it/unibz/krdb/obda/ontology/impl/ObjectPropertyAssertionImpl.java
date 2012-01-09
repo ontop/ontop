@@ -9,6 +9,10 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8834975903851540150L;
 	private Predicate	role;
 	private URIConstant	o2;
 	private URIConstant	o1;

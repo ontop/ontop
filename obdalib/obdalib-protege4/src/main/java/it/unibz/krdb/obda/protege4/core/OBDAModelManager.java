@@ -345,6 +345,11 @@ public class OBDAModelManager implements Disposable {
 	 */
 
 	private class ProtegeDatasourcesControllerListener implements OBDAModelListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1633463551656406417L;
+
 		public void datasourceUpdated(String oldname, OBDADataSource currendata) {
 			triggerOntologyChanged();
 		}
@@ -367,6 +372,11 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private class ProtegeMappingControllerListener implements OBDAMappingListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5794145688669702879L;
+
 		public void allMappingsRemoved() {
 			triggerOntologyChanged();
 		}
@@ -389,6 +399,11 @@ public class OBDAModelManager implements Disposable {
 	}
 
 	private class ProtegeQueryControllerListener implements QueryControllerListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4536639410306364312L;
+
 		public void elementAdded(QueryControllerEntity element) {
 			triggerOntologyChanged();
 		}

@@ -115,7 +115,11 @@ public class DataSourceSelectorDialogGUI extends javax.swing.JFrame {
                 "Datasource", "Quality", "Speed", "Availability", "# of mappings", "Enabled"
             }
         ) {
-            Class[] types = new Class [] {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 4355496067897739740L;
+			Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {

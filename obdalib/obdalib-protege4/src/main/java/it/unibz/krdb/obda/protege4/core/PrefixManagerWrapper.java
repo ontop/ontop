@@ -14,6 +14,10 @@ import org.protege.editor.owl.ui.prefix.PrefixMapper;
 
 public class PrefixManagerWrapper extends AbstractPrefixManager {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4599514975769563763L;
 	PrefixMapper	owlmapper;
 
 	public PrefixManagerWrapper(PrefixMapper owlmapper) {

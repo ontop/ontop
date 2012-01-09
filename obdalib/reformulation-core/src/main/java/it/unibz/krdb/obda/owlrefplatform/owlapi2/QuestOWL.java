@@ -176,6 +176,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			OWLReasonerException ex = new OWLReasonerException(e.getMessage(), e) {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 8546901292849186314L;
 			};
 			e.fillInStackTrace();
 			throw ex;
@@ -252,6 +257,11 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 			translatedOntologyMerge = translator.mergeTranslateOntologies(ontologies);
 		} catch (Exception e) {
 			throw new OWLReasonerException(e) {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = -745370766306607220L;
 			};
 		}
 

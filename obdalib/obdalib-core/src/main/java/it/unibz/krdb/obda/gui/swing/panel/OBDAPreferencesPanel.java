@@ -1098,7 +1098,11 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	        setLayout(new java.awt.GridBagLayout());
 
     	        fontNameChoice.setModel(new javax.swing.AbstractListModel() {
-    	            String[] strings = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+    	            /**
+					 * 
+					 */
+					private static final long serialVersionUID = -1794346954116474402L;
+					String[] strings = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     	            public int getSize() { return strings.length; }
     	            public Object getElementAt(int i) { return strings[i]; }
     	        });
@@ -1113,7 +1117,11 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	        add(scrFontNameList, gridBagConstraints);
 
     	        fontSizeChoice.setModel(new javax.swing.AbstractListModel() {
-    	            String[] strings = { "8", "10", "11", "12", "14", "16", "18", "20", "24", "30", "36", "40", "48", "60", "72" };
+    	            /**
+					 * 
+					 */
+					private static final long serialVersionUID = 4046867275908672992L;
+					String[] strings = { "8", "10", "11", "12", "14", "16", "18", "20", "24", "30", "36", "40", "48", "60", "72" };
     	            public int getSize() { return strings.length; }
     	            public Object getElementAt(int i) { return strings[i]; }
     	        });

@@ -7,6 +7,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 
 public abstract class ObjectToTextCodec <ObjectClass extends Object> implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3202717455816585910L;
 	protected OBDAModel apic = null;
 
 	public ObjectToTextCodec(OBDAModel apic){

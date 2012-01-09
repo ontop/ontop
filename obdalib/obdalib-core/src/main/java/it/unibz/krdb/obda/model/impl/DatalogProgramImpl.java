@@ -13,6 +13,11 @@ import java.util.Map;
 
 public class DatalogProgramImpl implements DatalogProgram {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1644491423712454150L;
+
 	private List<CQIE>					rules			= null;
 
 	private Map<Predicate, List<CQIE>>	predicateIndex	= null;

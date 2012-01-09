@@ -22,6 +22,10 @@ import java.security.InvalidParameterException;
 
 public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDARDBMappingAxiom {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5793656631843898419L;
 	private OBDASQLQuery sourceQuery = null;
 	private CQIEImpl targetQuery = null;
 

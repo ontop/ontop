@@ -6,6 +6,10 @@ import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
 
 public class PropertySomeClassRestrictionImpl implements PropertySomeClassRestriction{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8242919752579569694L;
 	private final  Predicate	predicate;
 	private final boolean		isInverse;
 	private final OClass filler;

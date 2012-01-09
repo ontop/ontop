@@ -15,6 +15,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
  */
 public class SourceQueryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4202155625234871648L;
 	OBDADataFactory fac= OBDADataFactoryImpl.getInstance();
 	/**
 	 * The constructor. Create a new instance of the SourceQueryToTextCodec

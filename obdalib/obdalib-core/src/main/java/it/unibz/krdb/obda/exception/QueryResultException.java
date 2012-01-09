@@ -2,6 +2,11 @@ package it.unibz.krdb.obda.exception;
 
 public class QueryResultException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6941970620516544365L;
+
 	public QueryResultException() {
 		// TODO Auto-generated constructor stub
 	}

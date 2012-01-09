@@ -16,6 +16,11 @@ import java.util.Set;
  */
 public class DAGNode implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3207267860221176982L;
+
 	private final Description description;
 
 	private SemanticIndexRange range = DAG.NULL_RANGE;

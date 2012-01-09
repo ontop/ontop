@@ -13,6 +13,10 @@ import java.util.Map;
 
 public class URIToFunctionMatcher implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3179193407457725565L;
 	private Map<String, Function>	functTermMap	= null;
 
 	public URIToFunctionMatcher(Map<String, Function> functionTermMap) {

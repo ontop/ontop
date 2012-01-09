@@ -17,6 +17,11 @@ import org.slf4j.LoggerFactory;
  */
 
 public class JDBCUtility implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5218570087742414646L;
+
 	private enum Driver {
 		PGSQL, MYSQL, H2, DB2, ORACLE, TEIID
 	}
