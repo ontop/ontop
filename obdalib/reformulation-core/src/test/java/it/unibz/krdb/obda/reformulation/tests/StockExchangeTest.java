@@ -168,7 +168,7 @@ public class StockExchangeTest extends TestCase {
 	public void tearDown() throws Exception {
 		try {
 			conn.close();
-			
+
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -198,29 +198,28 @@ public class StockExchangeTest extends TestCase {
 
 		int qc = 0;
 		for (TestQuery tq : testQueries) {
+			qc += 1;
+//			if (qc != 3)
+//				continue;
+
 			log.debug("Executing query: {}", qc);
 			log.debug("Query: {}", tq.query);
-			// if (qc == 7)
-			// continue;
-			qc += 1;
 
 			int count = 0;
-//			if (qc > 8) {
-				long start = System.currentTimeMillis();
-				
-				OBDAResultSet rs = st.execute(tq.query);
-				long end = System.currentTimeMillis();
-				while (rs.nextRow()) {
-					count += 1;
-				}
+			long start = System.currentTimeMillis();
 
-				Result summary = new Result();
-				summary.id = tq.id;
-				summary.query = tq.query;
-				summary.timeelapsed = end - start;
-				summary.distinctTuples = count;
-				summaries.add(summary);
-//			}
+			OBDAResultSet rs = st.execute(tq.query);
+			long end = System.currentTimeMillis();
+			while (rs.nextRow()) {
+				count += 1;
+			}
+
+			Result summary = new Result();
+			summary.id = tq.id;
+			summary.query = tq.query;
+			summary.timeelapsed = end - start;
+			summary.distinctTuples = count;
+			summaries.add(summary);
 		}
 
 		/* Closing resources */
@@ -232,6 +231,7 @@ public class StockExchangeTest extends TestCase {
 
 		int totaltime = 0;
 		for (int i = 0; i < testQueries.size(); i++) {
+
 			TestQuery tq = testQueries.get(i);
 			Result summary = summaries.get(i);
 			totaltime += summary.timeelapsed;
@@ -260,7 +260,7 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
-	public void disabledtestSiEqNoSig() throws Exception {
+	public void testSiEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -274,7 +274,7 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
-	public void disabledtestSiNoEqSig() throws Exception {
+	public void testSiNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -287,7 +287,7 @@ public class StockExchangeTest extends TestCase {
 		runTests(p);
 	}
 
-	public void disabledtestSiNoEqNoSig() throws Exception {
+	public void testSiNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -304,7 +304,7 @@ public class StockExchangeTest extends TestCase {
 	 * Direct
 	 */
 
-	public void disabledTestDiEqSig() throws Exception {
+	public void testDiEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -318,7 +318,7 @@ public class StockExchangeTest extends TestCase {
 
 	}
 
-	public void disabledTestDiEqNoSig() throws Exception {
+	public void testDiEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -337,7 +337,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void disabledTestDiNoEqSig() throws Exception {
+	public void testDiNoEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -354,7 +354,7 @@ public class StockExchangeTest extends TestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void disabledTestDiNoEqNoSig() throws Exception {
+	public void testDiNoEqNoSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);

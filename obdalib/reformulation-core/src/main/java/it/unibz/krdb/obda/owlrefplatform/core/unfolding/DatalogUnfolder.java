@@ -12,20 +12,25 @@ import it.unibz.krdb.obda.model.OperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.ResolutionEngine;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.utils.QueryUtils;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +62,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private DBMetadata metadata;
 
+	private final Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
+
 	// TODO deal with virtual mode and URI's in a proper way
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, DBMetadata metadata) throws Exception {
 		this.metadata = metadata;
@@ -87,7 +94,30 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			}
 		}
 		uriFunctorMatcher = new URIToFunctionMatcher(functTermMap);
+		collectPrimaryKeyData();
 
+	}
+
+	private void collectPrimaryKeyData() {
+		for (CQIE mapping : unfoldingProgram.getRules()) {
+			for (Atom newatom : mapping.getBody()) {
+				if (newatom.getPredicate() instanceof BooleanOperationPredicate)
+					continue;
+				DataDefinition def = this.metadata.getDefinition(newatom.getPredicate().toString());
+				List<Integer> pkeyIdx = new LinkedList<Integer>();
+				for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
+					Attribute column = def.getAttribute(columnidx);
+					if (column.bPrimaryKey) {
+						pkeyIdx.add(columnidx);
+					}
+
+				}
+				if (!pkeyIdx.isEmpty()) {
+					primaryKeys.put(newatom.getPredicate(), pkeyIdx);
+				}
+
+			}
+		}
 	}
 
 	/***
@@ -188,15 +218,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		List<CQIE> result = new LinkedList<CQIE>();
 		result.addAll(evaluation);
-		
+
 		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
-		
+
 		log.debug("Initial unfolding size: {} cqs", resultdp.getRules().size());
 		// TODO make this a switch
 		CQCUtilities.removeContainedQueriesSorted(resultdp, true);
 		log.debug("Resulting unfolding size: {} cqs", resultdp.getRules().size());
-		
-		
+
 		log.debug(resultdp.toString());
 
 		return resultdp;
@@ -312,6 +341,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * pos from the query, an for each rule in the unfoldingProgram that matches
 	 * the predicate of the atom, it will generate a new query in which the body
 	 * of the matching rule is appended to the input CQIE.
+	 * <p/>
+	 * Optimization, this method will use the Primary keys of the DB predicates
+	 * as follows: Given a primary Key on A, on columns 1,2, and an atom
+	 * A(x,y,z) added by the resolution engine (always added at the end of the
+	 * CQ body), we will look for other atom A(x,y,z') if the atom exists, we
+	 * can unify both atoms, apply the MGU to the query and remove one of the
+	 * atoms.
 	 * 
 	 * 
 	 * @param pos
@@ -342,7 +378,75 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			CQIE pev = resolutionEngine.resolve(freshMappingRule, currentQuery, pos);
 			if (pev != null) {
-				partialEvaluations.add(pev.clone());
+
+				// TODO Hack. The following is a small hack
+				/*
+				 * We now take into account Primary Key constraints on the
+				 * database to avoid adding redundant atoms to the query. This
+				 * could also be done as an afterstep, using unification and CQC
+				 * checks, however, its is much more expensive that way.
+				 */
+
+				/*
+				 * Given a primary Key on A, on columns 1,2, and an atom
+				 * A(x,y,z) added by the resolution engine (always added at the
+				 * end of the CQ body), we will look for other atom A(x,y,z') if
+				 * the atom exists, we can unify both atoms, apply the MGU to
+				 * the query and remove one of the atoms.
+				 */
+				List<Atom> newbody = pev.getBody();
+				int newatomcount = mappingRule.getBody().size();
+				int oldatoms = newbody.size() - newatomcount - 1;
+				for (int newatomidx = oldatoms + 1; newatomidx < newbody.size(); newatomidx++) {
+					Atom newatom = newbody.get(newatomidx);
+					if (newatom.getPredicate() instanceof BooleanOperationPredicate)
+						continue;
+
+					List<Integer> pkey = primaryKeys.get(newatom.getPredicate());
+					if (pkey == null || pkey.isEmpty()) {
+						continue;
+					}
+
+					/*
+					 * the predicate has a primary key, looking for candidates
+					 * for unification, when we find one we can stop, since the
+					 * application of this optimization at each step of the
+					 * derivation tree guarantees there wont be any other
+					 * redundant atom.
+					 */
+					Atom candidate = null;
+
+					for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
+						Atom tempatom = newbody.get(idx2);
+
+						if (tempatom.getPredicate().equals(newatom.getPredicate())) {
+
+							candidate = tempatom;
+							break;
+						}
+					}
+					if (candidate == null)
+						continue;
+
+					boolean redundant = true;
+					for (Integer termidx : pkey) {
+						if (!newatom.getTerm(termidx - 1).equals(candidate.getTerm(termidx - 1))) {
+							redundant = false;
+							break;
+						}
+					}
+
+					if (redundant) {
+						Map<Variable, Term> mgu = Unifier.getMGU(newatom, candidate);
+						pev = Unifier.applyUnifier(pev, mgu);
+						newbody = pev.getBody();
+						newbody.remove(newatomidx);
+						newatomidx -= 1;
+					}
+
+				}
+
+				partialEvaluations.add(pev);
 			}
 		}
 

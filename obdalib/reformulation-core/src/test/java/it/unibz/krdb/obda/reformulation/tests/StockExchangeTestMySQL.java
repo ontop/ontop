@@ -5,11 +5,11 @@ import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
@@ -36,8 +36,7 @@ import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/***
- * As the H2 in-memory StockExchange test but uses an Postgres database.
+/*
  * Moreover, it requires the data to be already loaded in the database.
  * 
  * The test requires a postgres database, the JDBC access properties and an
@@ -118,7 +117,7 @@ public class StockExchangeTestMySQL extends TestCase {
 		String line = in.readLine();
 		while (line != null) {
 			bf.append(line + "\n");
-			
+
 			if (line.contains(";")) {
 				st.executeUpdate(bf.toString());
 				bf.setLength(0);
@@ -126,8 +125,8 @@ public class StockExchangeTestMySQL extends TestCase {
 			line = in.readLine();
 		}
 		System.out.println(bf);
-		
-//		conn.commit();
+
+		// conn.commit();
 
 		/*
 		 * Loading the ontology and obda model
@@ -201,7 +200,7 @@ public class StockExchangeTestMySQL extends TestCase {
 				bf.setLength(0);
 			}
 			line = in.readLine();
-			
+
 		}
 		st.close();
 	}
@@ -223,7 +222,7 @@ public class StockExchangeTestMySQL extends TestCase {
 		reasoner.classify();
 
 		// Now we are ready for querying
-		OBDAStatement st = reasoner.getStatement();
+		QuestStatement st = reasoner.getStatement();
 
 		List<Result> summaries = new LinkedList<StockExchangeTestMySQL.Result>();
 
@@ -243,6 +242,8 @@ public class StockExchangeTestMySQL extends TestCase {
 			while (rs.nextRow()) {
 				count += 1;
 			}
+			rs.close();
+			log.debug("SQL Query: \n{}", st.getUnfolding(tq.query));
 
 			Result summary = new Result();
 			summary.id = tq.id;
