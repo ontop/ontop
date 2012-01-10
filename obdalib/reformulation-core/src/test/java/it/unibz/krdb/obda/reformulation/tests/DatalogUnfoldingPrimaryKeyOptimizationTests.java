@@ -28,7 +28,16 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	public void setUp() {
 		metadata = new DBMetadata();
 		TableDefinition table = new TableDefinition();
-		table.setName("datatable");
+		table.setName("TABLE");
+		table.setAttribute(1, new Attribute("col1", "INT", true));
+		table.setAttribute(2, new Attribute("col2", "INT", false));
+		table.setAttribute(3, new Attribute("col3", "INT", false));
+		table.setAttribute(4, new Attribute("col4", "INT", false));
+		metadata.add(table);
+		
+		
+		table = new TableDefinition();
+		table.setName("TABLE2");
 		table.setAttribute(1, new Attribute("col1", "INT", true));
 		table.setAttribute(2, new Attribute("col2", "INT", false));
 		table.setAttribute(3, new Attribute("col3", "INT", false));
@@ -43,7 +52,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
 		bodyTerms.add(fac.getVariable("m"));
-		Atom body = fac.getAtom(fac.getPredicate("datatable", 4), bodyTerms);
+		Atom body = fac.getAtom(fac.getPredicate("TABLE", 4), bodyTerms);
 		CQIE rule = fac.getCQIE(head, body);
 		unfoldingProgram.appendRule(rule);
 
@@ -53,7 +62,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
 		bodyTerms.add(fac.getVariable("m"));
-		body = fac.getAtom(fac.getPredicate("datatable", 4), bodyTerms);
+		body = fac.getAtom(fac.getPredicate("TABLE", 4), bodyTerms);
 		rule = fac.getCQIE(head, body);
 		unfoldingProgram.appendRule(rule);
 
@@ -63,7 +72,40 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		bodyTerms.add(fac.getVariable("y"));
 		bodyTerms.add(fac.getVariable("z"));
 		bodyTerms.add(fac.getVariable("m"));
-		body = fac.getAtom(fac.getPredicate("datatable", 4), bodyTerms);
+		body = fac.getAtom(fac.getPredicate("TABLE", 4), bodyTerms);
+		rule = fac.getCQIE(head, body);
+		unfoldingProgram.appendRule(rule);
+		
+		
+		
+		
+		head = fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
+		bodyTerms = new LinkedList<Term>();
+		bodyTerms.add(fac.getVariable("x"));
+		bodyTerms.add(fac.getVariable("y"));
+		bodyTerms.add(fac.getVariable("z"));
+		bodyTerms.add(fac.getVariable("m"));
+		body = fac.getAtom(fac.getPredicate("TABLE2", 4), bodyTerms);
+		rule = fac.getCQIE(head, body);
+		unfoldingProgram.appendRule(rule);
+
+		head = fac.getAtom(fac.getDataPropertyPredicate("lastname"), fac.getVariable("x"), fac.getVariable("z"));
+		bodyTerms = new LinkedList<Term>();
+		bodyTerms.add(fac.getVariable("x"));
+		bodyTerms.add(fac.getVariable("y"));
+		bodyTerms.add(fac.getVariable("z"));
+		bodyTerms.add(fac.getVariable("m"));
+		body = fac.getAtom(fac.getPredicate("TABLE2", 4), bodyTerms);
+		rule = fac.getCQIE(head, body);
+		unfoldingProgram.appendRule(rule);
+
+		head = fac.getAtom(fac.getDataPropertyPredicate("id"), fac.getVariable("x"), fac.getVariable("m"));
+		bodyTerms = new LinkedList<Term>();
+		bodyTerms.add(fac.getVariable("x"));
+		bodyTerms.add(fac.getVariable("y"));
+		bodyTerms.add(fac.getVariable("z"));
+		bodyTerms.add(fac.getVariable("m"));
+		body = fac.getAtom(fac.getPredicate("TABLE2", 4), bodyTerms);
 		rule = fac.getCQIE(head, body);
 		unfoldingProgram.appendRule(rule);
 	}
@@ -88,8 +130,44 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		DatalogProgram output = unfolder.unfold(input);
 		System.out.println("input " + input);
 
+		int atomcount = 0;
+		for (CQIE result: output.getRules()) {
+			for (Atom atom: result.getBody()) {
+				atomcount +=1;
+			}
+		}
+		
 		System.out.println("output " + output);
-		assertTrue(output.toString(), output.getRules().get(0).getBody().size() == 1);
+		assertTrue(output.toString(), atomcount == 14);
+		
+		
+		headterms = new LinkedList<Term>();
+		headterms.add(fac.getVariable("x"));
+		headterms.add(fac.getVariable("y"));
+		headterms.add(fac.getVariable("m"));
+		headterms.add(fac.getVariable("o"));
+
+		head = fac.getAtom(fac.getPredicate("q", 4), headterms);
+		body = new LinkedList<Atom>();
+		body.add(fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("s1"), fac.getVariable("x")));
+		body.add(fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("s2"), fac.getVariable("m")));
+		body.add(fac.getAtom(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s1"), fac.getVariable("y")));
+		body.add(fac.getAtom(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s2"), fac.getVariable("o")));
+		query = fac.getCQIE(head, body);
+
+		input = fac.getDatalogProgram(query);
+		output = unfolder.unfold(input);
+		System.out.println("input " + input);
+
+		atomcount = 0;
+		for (CQIE result: output.getRules()) {
+			for (Atom atom: result.getBody()) {
+				atomcount +=1;
+			}
+		}
+		
+		System.out.println("output " + output);
+		assertTrue(output.toString(), atomcount == 48);
 
 	}
 }

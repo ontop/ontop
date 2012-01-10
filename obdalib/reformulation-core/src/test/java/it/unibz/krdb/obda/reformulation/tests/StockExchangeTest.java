@@ -199,7 +199,7 @@ public class StockExchangeTest extends TestCase {
 		int qc = 0;
 		for (TestQuery tq : testQueries) {
 			qc += 1;
-//			if (qc != 3)
+//			if (qc != 6)
 //				continue;
 
 			log.debug("Executing query: {}", qc);

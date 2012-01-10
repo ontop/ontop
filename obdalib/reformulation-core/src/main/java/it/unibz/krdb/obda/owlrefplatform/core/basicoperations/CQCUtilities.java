@@ -799,9 +799,11 @@ public class CQCUtilities {
 		// }
 
 		for (int i = 0; i < queries.size(); i++) {
-			CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
+			CQIE query = queries.get(i);
+			CQCUtilities cqc = new CQCUtilities(query, sigma);
 			for (int j = queries.size() - 1; j > i; j--) {
-				if (cqc.isContainedIn(queries.get(j))) {
+				CQIE query2 = queries.get(j);
+				if (cqc.isContainedIn(query2)) {
 					queries.remove(i);
 					i -= 1;
 					break;

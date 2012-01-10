@@ -414,35 +414,36 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					 * derivation tree guarantees there wont be any other
 					 * redundant atom.
 					 */
-					Atom candidate = null;
+					Atom replacement = null;
 
 					for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
 						Atom tempatom = newbody.get(idx2);
 
 						if (tempatom.getPredicate().equals(newatom.getPredicate())) {
 
-							candidate = tempatom;
-							break;
+							boolean redundant = true;
+							for (Integer termidx : pkey) {
+								if (!newatom.getTerm(termidx - 1).equals(tempatom.getTerm(termidx - 1))) {
+									redundant = false;
+									break;
+								}
+							}
+							if (redundant) {
+								/* found a replacement atom */
+								replacement = tempatom;
+								break;
+							}
+
 						}
 					}
-					if (candidate == null)
+					if (replacement == null)
 						continue;
 
-					boolean redundant = true;
-					for (Integer termidx : pkey) {
-						if (!newatom.getTerm(termidx - 1).equals(candidate.getTerm(termidx - 1))) {
-							redundant = false;
-							break;
-						}
-					}
-
-					if (redundant) {
-						Map<Variable, Term> mgu = Unifier.getMGU(newatom, candidate);
-						pev = Unifier.applyUnifier(pev, mgu);
-						newbody = pev.getBody();
-						newbody.remove(newatomidx);
-						newatomidx -= 1;
-					}
+					Map<Variable, Term> mgu = Unifier.getMGU(newatom, replacement);
+					pev = Unifier.applyUnifier(pev, mgu);
+					newbody = pev.getBody();
+					newbody.remove(newatomidx);
+					newatomidx -= 1;
 
 				}
 
