@@ -5,16 +5,7 @@ import java.util.List;
 
 public class DBMetadata {
 
-	public interface DataDefinition {
-		public String getName();
 
-		public String getAttributeName(int pos);
-
-		public int countAttribute();
-
-		public String toString();
-
-	}
 
 	private HashMap<String, DataDefinition> schema = new HashMap<String, DataDefinition>();
 	private boolean storesLowerCaseIdentifiers = false;

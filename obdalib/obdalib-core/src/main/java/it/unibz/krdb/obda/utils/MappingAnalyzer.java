@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
 import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
@@ -126,12 +127,12 @@ public class MappingAnalyzer {
 						Term leftCondition = stack.pop();
 
 						ComparisonPredicate rightPred = (ComparisonPredicate) conditions.get(i + 1);
-						
+
 						Term rightCondition = getFunction(rightPred, lookupTable);
 
 						Function andFunct = dataFactory.getANDFunction(leftCondition, rightCondition);
 						stack.push(andFunct);
-						
+
 						i += 1;
 					} else if (element instanceof OrOperator) {
 						/* Do nothing */
@@ -164,7 +165,7 @@ public class MappingAnalyzer {
 					newterms.add(updateTerm(term, lookupTable));
 				}
 				if (newterms.size() == 0) {
-//					System.out.println(0);
+					// System.out.println(0);
 				}
 				Atom newhead = dataFactory.getAtom(atom.getPredicate(), newterms);
 				CQIE rule = dataFactory.getCQIE(newhead, atoms);
@@ -260,7 +261,7 @@ public class MappingAnalyzer {
 		for (Relation table : tableList) {
 			String tableName = table.getName();
 
-			DBMetadata.DataDefinition def = dbMetaData.getDefinition(tableName);
+			DataDefinition def = dbMetaData.getDefinition(tableName);
 			if (def == null)
 				throw new RuntimeException("Definition not found for table: " + tableName);
 			int size = def.countAttribute();
