@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlapi2;
+package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -23,9 +24,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class OWLAPI2VocabularyExtractor {
+public class OWLAPI3VocabularyExtractor {
 
-	OBDADataFactory	obdaFac	= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory obdaFac = OBDADataFactoryImpl.getInstance();
 
 	/***
 	 * Returns the vocabulary of classes and properties of a set of ontologies
@@ -50,16 +51,11 @@ public class OWLAPI2VocabularyExtractor {
 	 */
 	public Set<Predicate> getVocabulary(OWLOntology ontology) {
 		Set<OWLEntity> vocabulary = new HashSet<OWLEntity>();
-		for (OWLEntity e : ontology.getReferencedClasses()) {
-			vocabulary.add(e);
+		for (OWLAxiom axiom : ontology.getAxioms()) {
+			vocabulary.addAll(axiom.getClassesInSignature());
+			vocabulary.addAll(axiom.getDataPropertiesInSignature());
+			vocabulary.addAll(axiom.getObjectPropertiesInSignature());
 		}
-		for (OWLEntity e : ontology.getReferencedObjectProperties()) {
-			vocabulary.add(e);
-		}
-		for (OWLEntity e : ontology.getReferencedDataProperties()) {
-			vocabulary.add(e);
-		}
-
 		return getVocabulary(vocabulary);
 	}
 
@@ -106,13 +102,13 @@ public class OWLAPI2VocabularyExtractor {
 			OWLClass c = (OWLClass) entity;
 			if (c.isOWLThing() || c.isOWLNothing())
 				return null;
-			predicate = obdaFac.getPredicate(entity.getURI(), 1, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT });
+			predicate = obdaFac.getPredicate(entity.getIRI().toURI(), 1, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT });
 		} else if (entity instanceof OWLObjectProperty) {
-			predicate = obdaFac.getPredicate(entity.getURI(), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+			predicate = obdaFac.getPredicate(entity.getIRI().toURI(), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 		} else if (entity instanceof OWLDataProperty) {
-			predicate = obdaFac.getPredicate(entity.getURI(), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+			predicate = obdaFac.getPredicate(entity.getIRI().toURI(), 2, new Predicate.COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		}
 		return predicate;
 	}
-	
+
 }

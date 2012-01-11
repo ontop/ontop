@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlapi2;
+package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -15,11 +15,11 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
-public class OWLAPI2IndividualTranslator {
+public class OWLAPI3IndividualTranslator {
 
 	private OWLDataFactory dataFactory = null;
 	
-	public OWLAPI2IndividualTranslator() {
+	public OWLAPI3IndividualTranslator() {
 		dataFactory = new OWLDataFactoryImpl();
 	}
 	

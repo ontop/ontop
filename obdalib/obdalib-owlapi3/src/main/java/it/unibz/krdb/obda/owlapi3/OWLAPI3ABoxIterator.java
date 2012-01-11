@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlapi2;
+package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -22,21 +22,21 @@ import org.semanticweb.owlapi.model.OWLOntology;
  * @author Mariano Rodriguez Muro
  * 
  */
-public class OWLAPI2ABoxIterator implements Iterator<Assertion> {
+public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 
 	Iterator<OWLAxiom>		owlaxiomiterator	= null;
 	Iterator<OWLOntology>	ontologies			= null;
 
 	OWLIndividualAxiom		next				= null;
 
-	OWLAPI2Translator		translator			= new OWLAPI2Translator();
+	OWLAPI3Translator		translator			= new OWLAPI3Translator();
 	private Map<Predicate, Description>	equivalenceMap;
 
-	public OWLAPI2ABoxIterator(Collection<OWLOntology> ontologies) {
+	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies) {
 		this(ontologies, new HashMap<Predicate,Description>());
 	}
 	
-	public OWLAPI2ABoxIterator(Collection<OWLOntology> ontologies, Map<Predicate, Description> equivalenceMap) {
+	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies, Map<Predicate, Description> equivalenceMap) {
 		this.equivalenceMap = equivalenceMap;
 		if (ontologies.size() > 0) {
 			this.ontologies = ontologies.iterator();
@@ -44,30 +44,30 @@ public class OWLAPI2ABoxIterator implements Iterator<Assertion> {
 		}
 	}
 
-	public OWLAPI2ABoxIterator(OWLOntology ontology) {
+	public OWLAPI3ABoxIterator(OWLOntology ontology) {
 		this(ontology, new HashMap<Predicate,Description>());
 	}
 	
-	public OWLAPI2ABoxIterator(OWLOntology ontology, Map<Predicate, Description> equivalenceMap) {
+	public OWLAPI3ABoxIterator(OWLOntology ontology, Map<Predicate, Description> equivalenceMap) {
 		this.ontologies = Collections.singleton(ontology).iterator();
 		this.owlaxiomiterator = ontologies.next().getAxioms().iterator();
 	}
 
-	public OWLAPI2ABoxIterator(Iterable<OWLAxiom> axioms) {
+	public OWLAPI3ABoxIterator(Iterable<OWLAxiom> axioms) {
 		this(axioms, new HashMap<Predicate,Description>());
 	}
 	
 	
-	public OWLAPI2ABoxIterator(Iterable<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
+	public OWLAPI3ABoxIterator(Iterable<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
 		this.owlaxiomiterator = axioms.iterator();
 	}
 
 	
-	public OWLAPI2ABoxIterator(Iterator<OWLAxiom> axioms) {
+	public OWLAPI3ABoxIterator(Iterator<OWLAxiom> axioms) {
 		this(axioms, new HashMap<Predicate,Description>());
 	}
 	
-	public OWLAPI2ABoxIterator(Iterator<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
+	public OWLAPI3ABoxIterator(Iterator<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
 		this.owlaxiomiterator = axioms;
 	}
 
