@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent> 
+	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
 		<version>1.7</version>
 	</parent>
-	
+
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
 	<name>obdalib-protege4</name>
-	<!-- <version>1.6.1</version> -->
+	<!-- <version>1.7</version> -->
 
 	<repositories>
 		<!-- This repository holds protege 4 and obdalib related dependencies, 
@@ -49,12 +49,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.6.1</version>
+			<version>1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.6.1</version>
+			<version>1.7</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.6.1</version>
+			<version>1.7</version>
 		</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 
@@ -221,18 +221,19 @@
 	<build>
 		<plugins>
 			<plugin>
-				<!-- This plugin is required to assure that version 1.6 of the JDK is 
-					used during compilation -->
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
 					<excludes>
-						<exclude>**/codec/constraints/**/*.java</exclude>
-						<exclude>**/codec/dependencies/**/*.java</exclude>
+						<exclude>**/TW*.java</exclude>
+						<exclude>**/LUBM*.java</exclude>
 					</excludes>
-
+					<testExcludes>
+						<exclude>**/MappingToRuleTester.java</exclude>
+						<exclude>**/PartialEvaluationTest.java</exclude>
+					</testExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -259,7 +260,7 @@
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
-						<Embed-Dependency>obdalib*;groupId=inf.unibz.it.obda;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
+						<Embed-Dependency>obdalib*;groupId=it.unibz.krdb;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency>
 
 						<!-- necessary for protege 4 plugins -->
 						<Bundle-Category>protege</Bundle-Category>
@@ -272,7 +273,7 @@
 							Centre</Bundle-Vendor>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
-						<Bundle-Version>1.6</Bundle-Version>
+						<Bundle-Version>1.7</Bundle-Version>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
@@ -284,7 +285,8 @@
 							in the dependencies (even transitive ones) This will lead to class not found 
 							exceptions. It's very important to assure only the needed depdencies are 
 							imported. -->
-						<Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package>
+						<!-- <Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package> -->
+						<Import-Package>com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package>
 
 						<!-- This makes sure all OBDA classes are exported and available in 
 							dependent projects -->
