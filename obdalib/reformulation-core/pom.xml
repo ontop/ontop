@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.6.1</version>
+		<version>1.7</version>
 	</parent>
 
 	<!-- <groupId>inf.unibz.it.obda</groupId> -->
