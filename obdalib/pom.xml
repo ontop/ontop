@@ -5,7 +5,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>obdalib-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.6.1</version>
+	<version>1.7</version>
 	<name>obdalib-parent</name>
 
 	<dependencies>
@@ -24,10 +24,11 @@
 		<module>obdalib-protege4</module>
 		<module>reformulation-core</module>
 		<module>quest-sesame</module>
+		<module>obdalib-owlapi3</module>
 	</modules>
 
 	<properties>
-		<aversion>1.6</aversion>
+		<aversion>1.7</aversion>
 	</properties>
 
 	<repositories>
