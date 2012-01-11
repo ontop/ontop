@@ -19,16 +19,17 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.6.1</version>
-					</dependency>
+		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.6.1</version></dependency>
+			<version>1.6.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version> 
+			<version>3.8.1</version>
 			<!-- <version>4.8.2</version> -->
 			<scope>test</scope>
 		</dependency>
@@ -41,6 +42,13 @@
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi</artifactId>
 			<version>2.2.0-r1317</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi</artifactId>
+			<version>3.2.3-r1824</version>
+			<classifier>jar</classifier>
 		</dependency>
 
 		<dependency>
@@ -118,8 +126,8 @@
 				<version>2.2.1</version>
 				<configuration>
 					<descriptors>
-             			<descriptor>obda-assembly-plugin.xml</descriptor>
-          			</descriptors>
+						<descriptor>obda-assembly-plugin.xml</descriptor>
+					</descriptors>
 				</configuration>
 			</plugin>
 		</plugins>
