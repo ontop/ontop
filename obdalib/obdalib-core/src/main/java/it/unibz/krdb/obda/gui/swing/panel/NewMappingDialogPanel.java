@@ -11,10 +11,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi2.TargetQueryValidator;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.TargetQueryValidator;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

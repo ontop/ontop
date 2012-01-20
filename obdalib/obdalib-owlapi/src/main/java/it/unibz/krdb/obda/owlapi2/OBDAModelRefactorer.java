@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.utils;
+package it.unibz.krdb.obda.owlapi2;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;

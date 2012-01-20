@@ -19,9 +19,9 @@ import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
 import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.owlapi2.TargetQueryValidator;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
-import it.unibz.krdb.obda.utils.TargetQueryValidator;
 
 import java.awt.Component;
 import java.awt.Dimension;
