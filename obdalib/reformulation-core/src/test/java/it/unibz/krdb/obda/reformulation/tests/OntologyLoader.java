@@ -7,8 +7,8 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi2.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
@@ -18,9 +18,10 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class OntologyLoader {
 
@@ -33,7 +34,7 @@ public class OntologyLoader {
 
 			// Loading the OWL file
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+			OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 			// Loading the OBDA data (note, the obda file must be in the same
 			// folder as the owl file
@@ -41,7 +42,8 @@ public class OntologyLoader {
 			OBDAModel controller = obdafac.getOBDAModel();
 			String obdafile = owlfile.substring(0, owlfile.length() - 3) + ".obda";
 			DataManager ioManager = new DataManager(controller);
-			ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), controller.getPrefixManager());
+			ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
+					controller.getPrefixManager());
 			;
 
 			// DataManager ioManager = controller.getIOManager();
@@ -57,11 +59,11 @@ public class OntologyLoader {
 
 			QuestOWLFactory factory = new QuestOWLFactory();
 			// factory.setOBDAController(controller);
-			factory.setPreferenceHolder(pref);
+			// factory.setPreferenceHolder(pref);
 
-			reasoner = (QuestOWL) factory.createReasoner(manager);
-			reasoner.loadOntologies(manager.getOntologies());
-			reasoner.classify();
+			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+			// reasoner.loadOntologies(manager.getOntologies());
+			// reasoner.classify();
 
 			String prefix = "BASE <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n"
 					+ "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> \n"
@@ -122,7 +124,7 @@ public class OntologyLoader {
 						resultcount += 1;
 					}
 					result.close();
-					
+
 					// System.out.println("Result count: " + resultcount);
 					// System.out.println("-------------------\n");
 				}

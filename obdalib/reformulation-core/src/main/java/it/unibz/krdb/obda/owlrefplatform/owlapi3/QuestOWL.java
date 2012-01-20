@@ -6,11 +6,11 @@ import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.OBDAOWLReasoner;
-import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
+import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
+import it.unibz.krdb.obda.owlapi3.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -19,27 +19,39 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.owl.inference.MonitorableOWLReasoner;
 import org.semanticweb.owl.inference.OWLReasonerException;
-import org.semanticweb.owl.model.OWLClass;
-import org.semanticweb.owl.model.OWLConstant;
-import org.semanticweb.owl.model.OWLDataProperty;
-import org.semanticweb.owl.model.OWLDataPropertyExpression;
-import org.semanticweb.owl.model.OWLDataRange;
-import org.semanticweb.owl.model.OWLDescription;
-import org.semanticweb.owl.model.OWLEntity;
-import org.semanticweb.owl.model.OWLIndividual;
-import org.semanticweb.owl.model.OWLObjectProperty;
-import org.semanticweb.owl.model.OWLObjectPropertyExpression;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owl.util.NullProgressMonitor;
 import org.semanticweb.owl.util.ProgressMonitor;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLRuntimeException;
+import org.semanticweb.owlapi.reasoner.AxiomNotInProfileException;
+import org.semanticweb.owlapi.reasoner.BufferingMode;
+import org.semanticweb.owlapi.reasoner.ClassExpressionNotInProfileException;
+import org.semanticweb.owlapi.reasoner.FreshEntitiesException;
+import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
+import org.semanticweb.owlapi.reasoner.InferenceType;
+import org.semanticweb.owlapi.reasoner.Node;
+import org.semanticweb.owlapi.reasoner.NodeSet;
+import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
+import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.semanticweb.owlapi.reasoner.TimeOutException;
+import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
+import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
+import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, MonitorableOWLReasoner {
+public class QuestOWL extends org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase implements OBDAOWLReasoner, OBDAQueryReasoner {
 
 	private static final String NOT_IMPLEMENTED_STR = "Service not available.";
 
@@ -68,7 +80,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 	private QuestPreferences preferences = null;
 
-	OWLAPI2VocabularyExtractor vext = new OWLAPI2VocabularyExtractor();
+	OWLAPI3VocabularyExtractor vext = new OWLAPI3VocabularyExtractor();
 
 	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -82,12 +94,25 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 
 	// private boolean optimizeEquivalences = true;
 
-	public QuestOWL(OWLOntologyManager manager) {
-		ontoManager = manager;
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingModem, QuestPreferences preferences) {
+		
+		super(rootOntology, new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
+		this.preferences = preferences;
+		this.obdaModel = obdaModel;
 		questInstance = new Quest();
+		Set<OWLOntology> closure = rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology);
+		loadedOntologies = new HashSet<OWLOntology>();
+		loadedOntologies.addAll(closure);
+		try {
+			loadOntologies(closure);
+			classify();
+		} catch (Exception e) {
+			throw new OWLRuntimeException(e);
+		}
+
 	}
 
-	public void setPreferences(QuestPreferences preferences) {
+	private void setPreferences(QuestPreferences preferences) {
 		this.preferences = preferences;
 	}
 
@@ -96,11 +121,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		return conn.createStatement();
 	}
 
-	public boolean isConsistent(OWLOntology ontology) throws OWLReasonerException {
-		return true;
-	}
-
-	public void classify() throws OWLReasonerException {
+	private void classify() throws Exception {
 
 		log.debug("Initializing Quest query answering engine...");
 
@@ -150,7 +171,7 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				QuestStatement st = conn.createStatement();
 				if (bObtainFromOntology) {
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI2ABoxIterator aBoxIter = new OWLAPI2ABoxIterator(loadedOntologies, questInstance.getEquivalenceMap());
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(loadedOntologies, questInstance.getEquivalenceMap());
 
 					st.insertData(aBoxIter, 5000, 500);
 
@@ -189,45 +210,15 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		}
 	}
 
-	public void dispose() throws OWLReasonerException {
-		// TODO fix this!
+	@Override
+	public void dispose() {
+		super.dispose();
 		try {
 			conn.close();
 			questInstance.dispose();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
-	}
-
-	public Set<OWLOntology> getLoadedOntologies() {
-		return loadedOntologies;
-	}
-
-	public boolean isClassified() throws OWLReasonerException {
-		return isClassified;
-	}
-
-	public boolean isDefined(OWLClass cls) throws OWLReasonerException {
-		// TODO implement
-		return true;
-	}
-
-	public boolean isDefined(OWLObjectProperty prop) throws OWLReasonerException {
-		// TODO implement
-		return true;
-	}
-
-	public boolean isDefined(OWLDataProperty prop) throws OWLReasonerException {
-		// TODO implement
-		return true;
-	}
-
-	public boolean isDefined(OWLIndividual ind) throws OWLReasonerException {
-		return true;
-	}
-
-	public boolean isRealised() throws OWLReasonerException {
-		return isClassified;
 	}
 
 	/***
@@ -244,19 +235,19 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	 * are used later when classify() is called.
 	 * 
 	 */
-	public void loadOntologies(Set<OWLOntology> ontologies) throws OWLReasonerException {
+	private void loadOntologies(Set<OWLOntology> ontologies) throws Exception {
 		/*
 		 * We will keep track of the loaded ontologies and tranlsate the TBox
 		 * part of them into our internal represntation
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-		OWLAPI2Translator translator = new OWLAPI2Translator();
+		OWLAPI3Translator translator = new OWLAPI3Translator();
 
 		try {
 			translatedOntologyMerge = translator.mergeTranslateOntologies(ontologies);
 		} catch (Exception e) {
-			throw new OWLReasonerException(e) {
+			throw new Exception(e) {
 
 				/**
 				 * 
@@ -275,243 +266,32 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 		isClassified = false;
 	}
 
-	public void realise() throws OWLReasonerException {
-		classify();
-	}
+	// @Override
+	// public void realise() throws OWLReasonerException {
+	// classify();
+	// }
 
-	public void unloadOntologies(Set<OWLOntology> ontologies) throws OWLReasonerException {
-		boolean result = loadedOntologies.removeAll(ontologies);
-		// if no ontologies where removed
-		if (!result)
-			return;
-
-		// otherwise clear everything and update
-		Set<OWLOntology> resultSet = new HashSet<OWLOntology>();
-		resultSet.addAll(loadedOntologies);
-		clearOntologies();
-		loadOntologies(resultSet);
-	}
-
-	public Set<Set<OWLClass>> getAncestorClasses(OWLDescription clsC) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLClass>>();
-	}
-
-	public Set<Set<OWLClass>> getDescendantClasses(OWLDescription clsC) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLClass>>();
-	}
-
-	public Set<OWLClass> getEquivalentClasses(OWLDescription clsC) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLClass>();
-	}
-
-	public Set<OWLClass> getInconsistentClasses() throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLClass>();
-	}
-
-	public Set<Set<OWLClass>> getSubClasses(OWLDescription clsC) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLClass>>();
-	}
-
-	public Set<Set<OWLClass>> getSuperClasses(OWLDescription clsC) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLClass>>();
-	}
-
-	public boolean isEquivalentClass(OWLDescription clsC, OWLDescription clsD) throws OWLReasonerException {
-		// TODO implement owl
-		return true;
-	}
-
-	public boolean isSubClassOf(OWLDescription clsC, OWLDescription clsD) throws OWLReasonerException {
-		// TODO implement owl
-		return true;
-	}
-
-	public boolean isSatisfiable(OWLDescription description) throws OWLReasonerException {
-		// TODO implement owl
-		return true;
-	}
-
-	public Map<OWLDataProperty, Set<OWLConstant>> getDataPropertyRelationships(OWLIndividual individual) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashMap<OWLDataProperty, Set<OWLConstant>>();
-	}
-
-	public Set<OWLIndividual> getIndividuals(OWLDescription clsC, boolean direct) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLIndividual>();
-	}
-
-	public Map<OWLObjectProperty, Set<OWLIndividual>> getObjectPropertyRelationships(OWLIndividual individual) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashMap<OWLObjectProperty, Set<OWLIndividual>>();
-	}
-
-	public Set<OWLIndividual> getRelatedIndividuals(OWLIndividual subject, OWLObjectPropertyExpression property)
-			throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLIndividual>();
-	}
-
-	public Set<OWLConstant> getRelatedValues(OWLIndividual subject, OWLDataPropertyExpression property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLConstant>();
-	}
-
-	public Set<Set<OWLClass>> getTypes(OWLIndividual individual, boolean direct) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLClass>>();
-
-	}
-
-	public boolean hasDataPropertyRelationship(OWLIndividual subject, OWLDataPropertyExpression property, OWLConstant object)
-			throws OWLReasonerException {
-		// TODO implement
-		return false;
-	}
-
-	public boolean hasObjectPropertyRelationship(OWLIndividual subject, OWLObjectPropertyExpression property, OWLIndividual object)
-			throws OWLReasonerException {
-		// TODO implement
-		return false;
-	}
-
-	public boolean hasType(OWLIndividual individual, OWLDescription type, boolean direct) throws OWLReasonerException {
-		// TODO implement
-		return false;
-	}
-
-	public Set<Set<OWLObjectProperty>> getAncestorProperties(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLObjectProperty>>();
-
-	}
-
-	public Set<Set<OWLDataProperty>> getAncestorProperties(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLDataProperty>>();
-
-	}
-
-	public Set<Set<OWLObjectProperty>> getDescendantProperties(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLObjectProperty>>();
-
-	}
-
-	public Set<Set<OWLDataProperty>> getDescendantProperties(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLDataProperty>>();
-	}
-
-	public Set<Set<OWLDescription>> getDomains(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLDescription>>();
-	}
-
-	public Set<Set<OWLDescription>> getDomains(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLDescription>>();
-
-	}
-
-	public Set<OWLObjectProperty> getEquivalentProperties(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLObjectProperty>();
-
-	}
-
-	public Set<OWLDataProperty> getEquivalentProperties(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLDataProperty>();
-	}
-
-	public Set<Set<OWLObjectProperty>> getInverseProperties(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLObjectProperty>>();
-	}
-
-	public Set<OWLDescription> getRanges(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLDescription>();
-	}
-
-	public Set<OWLDataRange> getRanges(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<OWLDataRange>();
-	}
-
-	public Set<Set<OWLObjectProperty>> getSubProperties(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLObjectProperty>>();
-
-	}
-
-	public Set<Set<OWLDataProperty>> getSubProperties(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLDataProperty>>();
-	}
-
-	public Set<Set<OWLObjectProperty>> getSuperProperties(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLObjectProperty>>();
-	}
-
-	public Set<Set<OWLDataProperty>> getSuperProperties(OWLDataProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return new HashSet<Set<OWLDataProperty>>();
-	}
-
-	public boolean isAntiSymmetric(OWLObjectProperty property) throws OWLReasonerException {
-		// TODO implement owl
-		return false;
-	}
-
-	public boolean isFunctional(OWLObjectProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public boolean isFunctional(OWLDataProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public boolean isInverseFunctional(OWLObjectProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public boolean isIrreflexive(OWLObjectProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public boolean isReflexive(OWLObjectProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public boolean isSymmetric(OWLObjectProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public boolean isTransitive(OWLObjectProperty property) throws OWLReasonerException {
-		return false;
-	}
-
-	public OWLEntity getCurrentEntity() {
-		return null;
-		// return ontoManager.getOWLDataFactory().getOWLThing();
-	}
+	// public void unloadOntologies(Set<OWLOntology> ontologies) throws
+	// OWLReasonerException {
+	// boolean result = loadedOntologies.removeAll(ontologies);
+	// // if no ontologies where removed
+	// if (!result)
+	// return;
+	//
+	// // otherwise clear everything and update
+	// Set<OWLOntology> resultSet = new HashSet<OWLOntology>();
+	// resultSet.addAll(loadedOntologies);
+	// clearOntologies();
+	// loadOntologies(resultSet);
+	// }
 
 	/* The following methods need revision */
 
-	@Override
-	public void setProgressMonitor(ProgressMonitor progressMonitor) {
-		this.progressMonitor = progressMonitor;
-	}
-
+	// @Override
+	// public void setProgressMonitor(ProgressMonitor progressMonitor) {
+	// this.progressMonitor = progressMonitor;
+	// }
+	//
 	private ProgressMonitor getProgressMonitor() {
 		if (progressMonitor == null) {
 			progressMonitor = new NullProgressMonitor();
@@ -520,25 +300,13 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	}
 
 	// @Override
-	// public void finishProgressMonitor() {
-	// getProgressMonitor().setFinished();
+	// public void clearOntologies() throws OWLReasonerException {
+	// if (loadedOntologies != null) {
+	// loadedOntologies.clear();
 	// }
-	//
-	// @Override
-	// public void startProgressMonitor(String msg) {
-	// getProgressMonitor().setMessage(msg);
-	// getProgressMonitor().setIndeterminate(true);
-	// getProgressMonitor().setStarted();
+	// translatedOntologyMerge = null;
+	// isClassified = false;
 	// }
-
-	@Override
-	public void clearOntologies() throws OWLReasonerException {
-		if (loadedOntologies != null) {
-			loadedOntologies.clear();
-		}
-		translatedOntologyMerge = null;
-		isClassified = false;
-	}
 
 	@Override
 	public void loadOBDAModel(OBDAModel model) {
@@ -549,6 +317,275 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	@Override
 	public QuestConnection getConnection() throws OBDAException {
 		return conn;
+	}
+
+	@Override
+	public Node<OWLClass> getBottomClassNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLDataProperty> getBottomDataPropertyNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty arg0, boolean arg1) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<OWLLiteral> getDataPropertyValues(OWLNamedIndividual arg0, OWLDataProperty arg1) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual arg0) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return new OWLNamedIndividualNodeSet();
+	}
+
+	@Override
+	public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression arg0) throws ReasonerInterruptedException, TimeOutException,
+			FreshEntitiesException, InconsistentOntologyException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataPropertyExpression arg0) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(OWLObjectPropertyExpression arg0)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLClass> getEquivalentClasses(OWLClassExpression arg0) throws InconsistentOntologyException,
+			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLDataProperty> getEquivalentDataProperties(OWLDataProperty arg0) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(OWLObjectPropertyExpression arg0)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression arg0, boolean arg1) throws InconsistentOntologyException,
+			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return new OWLNamedIndividualNodeSet();
+	}
+
+	@Override
+	public Node<OWLObjectPropertyExpression> getInverseObjectProperties(OWLObjectPropertyExpression arg0)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLClass> getObjectPropertyDomains(OWLObjectPropertyExpression arg0, boolean arg1) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLClass> getObjectPropertyRanges(OWLObjectPropertyExpression arg0, boolean arg1) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual arg0, OWLObjectPropertyExpression arg1)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		return new OWLNamedIndividualNodeSet();
+	}
+
+	@Override
+	public Set<InferenceType> getPrecomputableInferenceTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getReasonerName() {
+		return "Quest";
+	}
+
+	@Override
+	public Version getReasonerVersion() {
+		return new Version(1, 7, 0, 0);
+	}
+
+	@Override
+	public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual arg0) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLClass> getSubClasses(OWLClassExpression arg0, boolean arg1) throws ReasonerInterruptedException, TimeOutException,
+			FreshEntitiesException, InconsistentOntologyException, ClassExpressionNotInProfileException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLDataProperty> getSubDataProperties(OWLDataProperty arg0, boolean arg1) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(OWLObjectPropertyExpression arg0, boolean arg1)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLClass> getSuperClasses(OWLClassExpression arg0, boolean arg1) throws InconsistentOntologyException,
+			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLDataProperty> getSuperDataProperties(OWLDataProperty arg0, boolean arg1) throws InconsistentOntologyException,
+			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(OWLObjectPropertyExpression arg0, boolean arg1)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLClass> getTopClassNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLDataProperty> getTopDataPropertyNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NodeSet<OWLClass> getTypes(OWLNamedIndividual arg0, boolean arg1) throws InconsistentOntologyException, FreshEntitiesException,
+			ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Node<OWLClass> getUnsatisfiableClasses() throws ReasonerInterruptedException, TimeOutException, InconsistentOntologyException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void interrupt() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isEntailed(OWLAxiom arg0) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
+			AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isEntailed(Set<? extends OWLAxiom> arg0) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException,
+			TimeOutException, AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isEntailmentCheckingSupported(AxiomType<?> arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isPrecomputed(InferenceType arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isSatisfiable(OWLClassExpression arg0) throws ReasonerInterruptedException, TimeOutException,
+			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void precomputeInferences(InferenceType... arg0) throws ReasonerInterruptedException, TimeOutException,
+			InconsistentOntologyException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void handleChanges(Set<OWLAxiom> arg0, Set<OWLAxiom> arg1) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

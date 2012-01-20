@@ -7,9 +7,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
+import it.unibz.krdb.obda.owlapi3.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -29,10 +29,10 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyCreationException;
-import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -40,273 +40,276 @@ import org.w3c.dom.NodeList;
 
 public class Tester {
 
-    private Map<String, Vector<String>> queryheads = null;
-    private Map<String, Set<String>> queryresults = null;
-    private OWLOntologyManager manager = null;
-    private OWLOntology ontology = null;
-    private OBDAModel apic = null;
-    private QuestOWL reasoner = null;
-    private String owlloc = null;
-    private String xmlLoc = null;
-    private Map<String, String> queryMap = null;
+	private Map<String, Vector<String>> queryheads = null;
+	private Map<String, Set<String>> queryresults = null;
+	private OWLOntologyManager manager = null;
+	private OWLOntology ontology = null;
+	private OBDAModel apic = null;
+	private QuestOWL reasoner = null;
+	private String owlloc = null;
+	private String xmlLoc = null;
+	private Map<String, String> queryMap = null;
 
-    /**
-     * A helper class that handles loading each test scenario and comparing the
-     * expected results with the results given by the reasoner.
-     * <p/>
-     * Loading of an scenario can be done using either direct or complex
-     * mappings.
-     *
-     * @param propfile A properties file that specifies the base location of the owl,
-     *                 obda and xml files that contain the scenarios, mappings and
-     *                 expected results.
-     */
-    public Tester(String propfile) {
-        queryheads = new HashMap<String, Vector<String>>();
-        queryresults = new HashMap<String, Set<String>>();
-        try {
-            loadProperties(propfile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	/**
+	 * A helper class that handles loading each test scenario and comparing the
+	 * expected results with the results given by the reasoner.
+	 * <p/>
+	 * Loading of an scenario can be done using either direct or complex
+	 * mappings.
+	 * 
+	 * @param propfile
+	 *            A properties file that specifies the base location of the owl,
+	 *            obda and xml files that contain the scenarios, mappings and
+	 *            expected results.
+	 */
+	public Tester(String propfile) {
+		queryheads = new HashMap<String, Vector<String>>();
+		queryresults = new HashMap<String, Set<String>>();
+		try {
+			loadProperties(propfile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    private void loadProperties(String propfile) throws Exception {
+	private void loadProperties(String propfile) throws Exception {
 
-        FileInputStream stream = new FileInputStream(new File(propfile));
-        Properties properties = new Properties();
-        properties.load(stream);
+		FileInputStream stream = new FileInputStream(new File(propfile));
+		Properties properties = new Properties();
+		properties.load(stream);
 
-        owlloc = properties.getProperty("location.of.owl.files");
-        if (owlloc == null) {
-            throw new Exception("Property location.of.owl.files not set!");
-        }
-        xmlLoc = properties.getProperty("location.of.result.files");
-        if (xmlLoc == null) {
-            throw new Exception("Property location.of.result.files not set!");
-        }
+		owlloc = properties.getProperty("location.of.owl.files");
+		if (owlloc == null) {
+			throw new Exception("Property location.of.owl.files not set!");
+		}
+		xmlLoc = properties.getProperty("location.of.result.files");
+		if (xmlLoc == null) {
+			throw new Exception("Property location.of.result.files not set!");
+		}
 
-        // Tester t = new Tester();
-        // for(int i=minNr; i<=maxNr; i++){
-        // String owlfile= owlLoc+filename+i+".owl";
-        // String resultfile = xmlLoc+filename+i+".xml";
-        // t.executeTestFor(owlfile, resultfile);
-        // }
+		// Tester t = new Tester();
+		// for(int i=minNr; i<=maxNr; i++){
+		// String owlfile= owlLoc+filename+i+".owl";
+		// String resultfile = xmlLoc+filename+i+".xml";
+		// t.executeTestFor(owlfile, resultfile);
+		// }
 
-    }
+	}
 
-    public void load(String onto, QuestPreferences pref) throws Exception {
-        Runtime.getRuntime().gc();
+	public void load(String onto, QuestPreferences pref) throws Exception {
+		Runtime.getRuntime().gc();
 
-        String owlfile = owlloc + onto + ".owl";
-        String resultfile = xmlLoc + onto + ".xml";
-        loadOntology(owlfile);
-        loadResults(resultfile);
+		String owlfile = owlloc + onto + ".owl";
+		String resultfile = xmlLoc + onto + ".xml";
+		loadOntology(owlfile);
+		loadResults(resultfile);
 
-        QuestOWLFactory fac = new QuestOWLFactory();
-        
-//        fac.setOBDAController(apic);
-        fac.setPreferenceHolder(pref);
+		QuestOWLFactory fac = new QuestOWLFactory();
+		fac.setOBDAController(apic);
 
-        reasoner = (QuestOWL) fac.createReasoner(manager);
-        
-        reasoner.loadOBDAModel(apic);
-        reasoner.loadOntologies(manager.getOntologies());
-        reasoner.setPreferences(pref);
-        reasoner.classify();
+		// fac.setOBDAController(apic);
+		fac.setPreferenceHolder(pref);
 
-        queryMap = new HashMap<String, String>();
-        Vector<QueryControllerEntity> vec = apic.getQueryController().getElements();
-        Iterator<QueryControllerEntity> it = vec.iterator();
-        while (it.hasNext()) {
-            QueryControllerEntity e = it.next();
-            if (e instanceof QueryControllerQuery) {
-                QueryControllerQuery qcq = (QueryControllerQuery) e;
-                queryMap.put(qcq.getID(), qcq.getQuery());
-            } else {
-                QueryControllerGroup group = (QueryControllerGroup) e;
-                Vector<QueryControllerQuery> q = group.getQueries();
-                Iterator<QueryControllerQuery> qit = q.iterator();
-                while (qit.hasNext()) {
-                    QueryControllerQuery qcq = qit.next();
-                    String id = group.getID() + "_" + qcq.getID();
-                    queryMap.put(id, qcq.getQuery());
-                }
-            }
-        }
-    }
+		reasoner = (QuestOWL) fac.createReasoner(ontology);
 
-    public Set<String> getQueryIds() {
-        return queryresults.keySet();
-    }
+//		reasoner.loadOBDAModel(apic);
+		// reasoner.loadOntologies(manager.getOntologies());
+//		reasoner.setPreferences(pref);
+//		reasoner.classify();
 
-    public Set<String> executeQuery(String id) throws Exception {
-        String query = queryMap.get(id);
-        return execute(query, id);
-    }
+		queryMap = new HashMap<String, String>();
+		Vector<QueryControllerEntity> vec = apic.getQueryController().getElements();
+		Iterator<QueryControllerEntity> it = vec.iterator();
+		while (it.hasNext()) {
+			QueryControllerEntity e = it.next();
+			if (e instanceof QueryControllerQuery) {
+				QueryControllerQuery qcq = (QueryControllerQuery) e;
+				queryMap.put(qcq.getID(), qcq.getQuery());
+			} else {
+				QueryControllerGroup group = (QueryControllerGroup) e;
+				Vector<QueryControllerQuery> q = group.getQueries();
+				Iterator<QueryControllerQuery> qit = q.iterator();
+				while (qit.hasNext()) {
+					QueryControllerQuery qcq = qit.next();
+					String id = group.getID() + "_" + qcq.getID();
+					queryMap.put(id, qcq.getQuery());
+				}
+			}
+		}
+	}
 
-    public Set<String> getExpectedResult(String id) {
-        return queryresults.get(id);
-    }
+	public Set<String> getQueryIds() {
+		return queryresults.keySet();
+	}
 
-    private Set<String> execute(String query, String id) throws Exception {
+	public Set<String> executeQuery(String id) throws Exception {
+		String query = queryMap.get(id);
+		return execute(query, id);
+	}
 
-        String prefix = getPrefix();
-        String fullquery = prefix + "\n" + query;
-        OBDAStatement statement = reasoner.getStatement();
-        OBDAResultSet result = statement.execute(fullquery);
-        int col = result.getColumCount();
-        HashSet<String> tuples = new HashSet<String>();
-        while (result.nextRow()) {
-            String tuple = "";
-            for (int i = 1; i <= col; i++) {
-                if (tuple.length() > 0) {
-                    tuple = tuple + ",";
-                }
-                if (isBooleanQuery(id)) {
-                    tuple = tuple + result.getAsString(i);
-                } else {
-                    URI uri = result.getAsURI(i);
-                    tuple = tuple + uri.getFragment();
-                }
-            }
-            tuples.add(tuple);
-        }
-        return tuples;
-    }
+	public Set<String> getExpectedResult(String id) {
+		return queryresults.get(id);
+	}
 
-    private void loadOntology(String owlfile) throws OWLOntologyCreationException, IOException {
+	private Set<String> execute(String query, String id) throws Exception {
 
-        manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		String prefix = getPrefix();
+		String fullquery = prefix + "\n" + query;
+		OBDAStatement statement = reasoner.getStatement();
+		OBDAResultSet result = statement.execute(fullquery);
+		int col = result.getColumCount();
+		HashSet<String> tuples = new HashSet<String>();
+		while (result.nextRow()) {
+			String tuple = "";
+			for (int i = 1; i <= col; i++) {
+				if (tuple.length() > 0) {
+					tuple = tuple + ",";
+				}
+				if (isBooleanQuery(id)) {
+					tuple = tuple + result.getAsString(i);
+				} else {
+					URI uri = result.getAsURI(i);
+					tuple = tuple + uri.getFragment();
+				}
+			}
+			tuples.add(tuple);
+		}
+		return tuples;
+	}
 
-        OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-        apic = obdafac.getOBDAModel();        String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
-        // apic.loadData(new File(owlfile).toURI());
+	private void loadOntology(String owlfile) throws OWLOntologyCreationException, IOException {
 
-        DataManager ioManager = new DataManager(apic);
-        ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), apic.getPrefixManager());
-        fillPrefixManager();
-    }
+		manager = OWLManager.createOWLOntologyManager();
+		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-    private void loadResults(String resultfile) {
+		OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+		apic = obdafac.getOBDAModel();
+		String obdafile = owlfile.substring(0, owlfile.length() - 3) + "obda";
+		// apic.loadData(new File(owlfile).toURI());
 
-        queryheads = new HashMap<String, Vector<String>>();
-        queryresults = new HashMap<String, Set<String>>();
+		DataManager ioManager = new DataManager(apic);
+		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(), apic.getPrefixManager());
+		fillPrefixManager();
+	}
 
-        File results = new File(resultfile);
+	private void loadResults(String resultfile) {
 
-        if (!results.exists()) {
-            System.err.println("result file not found.");
-            return;
-        }
-        if (!results.canRead()) {
-            System.err.print("WARNING: can't read the result file:" + results.toString());
-            return;
-        }
+		queryheads = new HashMap<String, Vector<String>>();
+		queryresults = new HashMap<String, Set<String>>();
 
-        Document doc = null;
-        try {
+		File results = new File(resultfile);
 
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            doc = db.parse(results);
-            doc.getDocumentElement().normalize();
+		if (!results.exists()) {
+			System.err.println("result file not found.");
+			return;
+		}
+		if (!results.canRead()) {
+			System.err.print("WARNING: can't read the result file:" + results.toString());
+			return;
+		}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
+		Document doc = null;
+		try {
 
-        Element root = doc.getDocumentElement();
-        if (root.getNodeName() != "results") {
-            System.err.println("WARNING: result file must start with tag <RESULTS>");
-            return;
-        }
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			doc = db.parse(results);
+			doc.getDocumentElement().normalize();
 
-        NodeList children = root.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                Element node = (Element) children.item(i);
-                if (node.getNodeName().equals("result")) {
-                    String queryid = node.getAttribute("queryid");
-                    Node head = node.getElementsByTagName("head").item(0);
-                    Node tuples = node.getElementsByTagName("tuples").item(0);
-                    queryheads.put(queryid, getVariables((Element) head));
-                    queryresults.put(queryid, getResults((Element) tuples));
-                }
-            }
-        }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 
-    }
+		Element root = doc.getDocumentElement();
+		if (root.getNodeName() != "results") {
+			System.err.println("WARNING: result file must start with tag <RESULTS>");
+			return;
+		}
 
-    private Vector<String> getVariables(Element node) {
-        Vector<String> v = new Vector<String>();
-        NodeList list = node.getElementsByTagName("variable");
-        for (int i = 0; i < list.getLength(); i++) {
-            Element n = (Element) list.item(i);
-            String s = n.getTextContent().trim();
-            if (s.length() > 0) {
-                v.add(s);
-            }
-        }
-        return v;
-    }
+		NodeList children = root.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
+				Element node = (Element) children.item(i);
+				if (node.getNodeName().equals("result")) {
+					String queryid = node.getAttribute("queryid");
+					Node head = node.getElementsByTagName("head").item(0);
+					Node tuples = node.getElementsByTagName("tuples").item(0);
+					queryheads.put(queryid, getVariables((Element) head));
+					queryresults.put(queryid, getResults((Element) tuples));
+				}
+			}
+		}
 
-    private Set<String> getResults(Element node) {
-        HashSet<String> set = new HashSet<String>();
-        NodeList list = node.getElementsByTagName("tuple");
-        for (int i = 0; i < list.getLength(); i++) {
-            Element n = (Element) list.item(i);
-            NodeList constants = n.getElementsByTagName("constant");
-            for (int j = 0; j < constants.getLength(); j++) {
-                Element con = (Element) constants.item(j);
-                String s = con.getTextContent().trim();
-                if (s.length() > 0) {
-                    set.add(s);
-                }
-            }
-        }
-        return set;
-    }
+	}
 
-    private String getPrefix() {
-        String queryString = "";
-        String defaultNamespace = ontology.getURI().toString();
-        if (defaultNamespace.endsWith("#")) {
-            queryString += "BASE <" + defaultNamespace.substring(0, defaultNamespace.length() - 1) + ">\n";
-        } else {
-            queryString += "BASE <" + defaultNamespace + ">\n";
-        }
-        queryString += "PREFIX :   <" + defaultNamespace + "#>\n";
+	private Vector<String> getVariables(Element node) {
+		Vector<String> v = new Vector<String>();
+		NodeList list = node.getElementsByTagName("variable");
+		for (int i = 0; i < list.getLength(); i++) {
+			Element n = (Element) list.item(i);
+			String s = n.getTextContent().trim();
+			if (s.length() > 0) {
+				v.add(s);
+			}
+		}
+		return v;
+	}
 
-        queryString += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n";
-        queryString += "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n";
-        queryString += "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n";
-        queryString += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n";
-        queryString += "PREFIX dllite: <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>\n";
-        queryString += "PREFIX ucq: <http://www.obda.org/ucq/predicate/queryonly#>\n";
+	private Set<String> getResults(Element node) {
+		HashSet<String> set = new HashSet<String>();
+		NodeList list = node.getElementsByTagName("tuple");
+		for (int i = 0; i < list.getLength(); i++) {
+			Element n = (Element) list.item(i);
+			NodeList constants = n.getElementsByTagName("constant");
+			for (int j = 0; j < constants.getLength(); j++) {
+				Element con = (Element) constants.item(j);
+				String s = con.getTextContent().trim();
+				if (s.length() > 0) {
+					set.add(s);
+				}
+			}
+		}
+		return set;
+	}
 
-        return queryString;
-    }
+	private String getPrefix() {
+		String queryString = "";
+		String defaultNamespace = ontology.getOntologyID().getOntologyIRI().toString();
+		if (defaultNamespace.endsWith("#")) {
+			queryString += "BASE <" + defaultNamespace.substring(0, defaultNamespace.length() - 1) + ">\n";
+		} else {
+			queryString += "BASE <" + defaultNamespace + ">\n";
+		}
+		queryString += "PREFIX :   <" + defaultNamespace + "#>\n";
 
-    private boolean isBooleanQuery(String queryid) {
-        Vector<String> head = queryheads.get(queryid);
-        if (head.size() > 0) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+		queryString += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n";
+		queryString += "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n";
+		queryString += "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n";
+		queryString += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n";
+		queryString += "PREFIX dllite: <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>\n";
+		queryString += "PREFIX ucq: <http://www.obda.org/ucq/predicate/queryonly#>\n";
 
-    private void fillPrefixManager() {
-        PrefixManager man = apic.getPrefixManager();
-        man.setDefaultNamespace(ontology.getURI().toString());
-        man.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs");
-        man.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf");
-        man.addUri("http://www.w3.org/2001/XMLSchema#", "xsd");
-        man.addUri("http://www.w3.org/2002/07/owl#", "owl");
-//        man.addUri(ontology.getURI().toString(), "xml:base");
-        man.addUri("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#", "dllite");
-    }
+		return queryString;
+	}
+
+	private boolean isBooleanQuery(String queryid) {
+		Vector<String> head = queryheads.get(queryid);
+		if (head.size() > 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private void fillPrefixManager() {
+		PrefixManager man = apic.getPrefixManager();
+		man.setDefaultNamespace(ontology.getOntologyID().getOntologyIRI().toString());
+		man.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs");
+		man.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf");
+		man.addUri("http://www.w3.org/2001/XMLSchema#", "xsd");
+		man.addUri("http://www.w3.org/2002/07/owl#", "owl");
+		// man.addUri(ontology.getURI().toString(), "xml:base");
+		man.addUri("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#", "dllite");
+	}
 }

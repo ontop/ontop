@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
+import it.unibz.krdb.obda.owlapi3.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 
 import java.util.Set;

@@ -7,11 +7,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.OBDAOWLReasonerFactory;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
+import it.unibz.krdb.obda.owlapi3.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
-import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi2.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
@@ -24,15 +23,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.owl.apibinding.OWLManager;
-import org.semanticweb.owl.model.OWLOntology;
-import org.semanticweb.owl.model.OWLOntologyManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,10 +87,10 @@ public class StockExchangeTestPostgres extends TestCase {
 		url = "jdbc:postgresql://obdalin.inf.unibz.it/quest-junit-db";
 		username = "obda";
 		password = "obda09";
-		log.debug("Driver: {}",driver);
-		log.debug("Url: {}",url);
-		log.debug("Username: {}",username);
-		log.debug("Password: {}",password);
+		log.debug("Driver: {}", driver);
+		log.debug("Url: {}", url);
+		log.debug("Username: {}", username);
+		log.debug("Password: {}", password);
 
 		fac = OBDADataFactoryImpl.getInstance();
 		// stockDB = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP"
@@ -133,14 +132,13 @@ public class StockExchangeTestPostgres extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
 		DataManager ioManager = new DataManager(obdaModel);
-		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getURI(), obdaModel.getPrefixManager());
-		
-		
+		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
+				obdaModel.getPrefixManager());
 
 		/*
 		 * Loading the queries (we have 11 queries)
@@ -174,7 +172,7 @@ public class StockExchangeTestPostgres extends TestCase {
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
-		
+
 		try {
 			conn.close();
 		} catch (Exception e) {
@@ -182,7 +180,7 @@ public class StockExchangeTestPostgres extends TestCase {
 		}
 
 	}
-	
+
 	private void dropTables() throws SQLException, IOException {
 
 		Statement st = conn.createStatement();
@@ -199,25 +197,22 @@ public class StockExchangeTestPostgres extends TestCase {
 		st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();
-		
-				
+
 	}
 
 	private void runTests(QuestPreferences p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		OBDAOWLReasonerFactory factory = new QuestOWLFactory();
+		QuestOWLFactory factory = new QuestOWLFactory();
+		factory.setOBDAController(obdaModel);
 
 		factory.setPreferenceHolder(p);
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(manager);
-		reasoner.setPreferences(p);
-		reasoner.loadOntologies(Collections.singleton(ontology));
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 		reasoner.loadOBDAModel(obdaModel);
 
-		// One time classification call.
-		reasoner.classify();
+		//
 
 		// Now we are ready for querying
 		OBDAStatement st = reasoner.getStatement();

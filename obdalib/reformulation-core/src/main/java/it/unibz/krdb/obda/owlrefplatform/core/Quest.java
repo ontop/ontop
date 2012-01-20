@@ -142,7 +142,7 @@ public class Quest implements Serializable {
 
 	private OBDADataSource obdaSource;
 
-	private QuestPreferences preferences;
+	private Properties preferences;
 
 	private boolean inmemory;
 
@@ -218,19 +218,19 @@ public class Quest implements Serializable {
 		return preferences;
 	}
 
-	public void setPreferences(QuestPreferences preferences) {
+	public void setPreferences(Properties preferences) {
 		this.preferences = preferences;
 
-		reformulationTechnique = (String) preferences.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
-		bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_EQUIVALENCES);
-		bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_TBOX_SIGMA);
+		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
+		bOptimizeEquivalences = Boolean.valueOf((String)preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
+		bOptimizeTBoxSigma = Boolean.valueOf((String)preferences.get(QuestPreferences.OPTIMIZE_TBOX_SIGMA));
 		// boolean bUseInMemoryDB = preferences.getCurrentValue(
 		// ReformulationPlatformPreferences.DATA_LOCATION).equals(
 		// QuestConstants.INMEMORY);
-		bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
-		dbType = (String) preferences.getCurrentValue(QuestPreferences.DBTYPE);
+		bObtainFromOntology = Boolean.valueOf((String)preferences.get(QuestPreferences.OBTAIN_FROM_ONTOLOGY));
+		bObtainFromMappings = Boolean.valueOf((String)preferences.get(QuestPreferences.OBTAIN_FROM_MAPPINGS));
+		unfoldingMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
+		dbType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 
 		if (!inmemory) {
