@@ -25,6 +25,7 @@
 		<module>reformulation-core</module>
 		<module>quest-sesame</module>
 		<module>obdalib-owlapi3</module>
+		<module>obdalib-protege41</module>
 	</modules>
 
 	<properties>
