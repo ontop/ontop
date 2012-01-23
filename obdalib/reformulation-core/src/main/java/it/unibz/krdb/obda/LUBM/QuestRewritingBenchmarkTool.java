@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.LUBM;
 
 import it.unibz.krdb.obda.owlapi2.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.QuestDBClassicStore;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
 import java.io.File;
 import java.io.FileInputStream;

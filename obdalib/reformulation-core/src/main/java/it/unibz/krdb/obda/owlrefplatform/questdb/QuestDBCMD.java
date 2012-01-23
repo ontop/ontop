@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.owlrefplatform.QuestDB.StoreStatus;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB.StoreStatus;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.io.File;

@@ -5,11 +5,9 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
-import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
@@ -20,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

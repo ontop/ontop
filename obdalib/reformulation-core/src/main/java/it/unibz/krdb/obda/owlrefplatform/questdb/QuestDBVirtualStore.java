@@ -2,15 +2,13 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi2.OWLAPI2Translator;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
 import java.net.URI;
 import java.util.Collections;
 
-import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
