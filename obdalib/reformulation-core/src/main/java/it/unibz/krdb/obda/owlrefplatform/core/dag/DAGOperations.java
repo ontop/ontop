@@ -24,10 +24,59 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sergejs Pugac
  */
-
 public class DAGOperations {
 	private static final Logger	log	= LoggerFactory.getLogger(DAGOperations.class);
 
+	public static void buildAncestors(DAG dag) {
+		buildAncestors(dag.roles);
+		buildAncestors(dag.classes);
+	}
+	
+	/**
+	 * Calculate the ancestors for all nodes in the given DAG
+	 * 
+	 * @param dagnodes
+	 *            a DAG
+	 * @return Map from uri to the Set of their ancestors
+	 */
+	public static void buildAncestors(Map<Description, DAGNode> dagnodes) {
+		Queue<DAGNode> stack = new LinkedList<DAGNode>();
+		
+		for (DAGNode n : dagnodes.values()) {
+			n.getAncestors().clear();
+			if (n.getParents().isEmpty()) {
+				stack.add(n);
+			}
+		}
+		
+		if (stack.isEmpty() && !dagnodes.isEmpty()) {
+			log.error("Can not build ancestors for graph with cycles");
+		}
+		
+		while (!stack.isEmpty()) {
+			DAGNode cur_el = stack.remove();
+				
+			for (DAGNode eq_node : cur_el.equivalents) {
+				if (!cur_el.getAncestors().contains(eq_node))
+					cur_el.getAncestors().add(eq_node);
+			}
+
+			for (DAGNode child_node : cur_el.getChildren()) {
+
+				// add child to ancestor list
+				if (!child_node.getAncestors().contains(cur_el)) {
+					child_node.getAncestors().add(cur_el);
+				}
+
+				// add child children to descendants list
+				for (DAGNode cur_el_ancestor : cur_el.getAncestors()) {
+					if (!child_node.getAncestors().contains(cur_el_ancestor))
+						child_node.getAncestors().add(cur_el_ancestor);
+				}
+				stack.add(child_node);
+			}
+		}
+	}
 	
 	public static void buildDescendants(DAG dag) {
 		buildDescendants(dag.roles);

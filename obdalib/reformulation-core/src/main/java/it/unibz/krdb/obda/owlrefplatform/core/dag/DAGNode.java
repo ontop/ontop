@@ -29,8 +29,9 @@ public class DAGNode implements Serializable {
 	private Set<DAGNode> parents = new LinkedHashSet<DAGNode>();
 	private Set<DAGNode> children = new LinkedHashSet<DAGNode>();
 
-	private Set<DAGNode> descendans = new LinkedHashSet<DAGNode>();
-
+	private Set<DAGNode> ancestors = new LinkedHashSet<DAGNode>();
+	private Set<DAGNode> descendants = new LinkedHashSet<DAGNode>();
+	
 	public Set<DAGNode> equivalents = new LinkedHashSet<DAGNode>();
 
 	String string = "";
@@ -167,12 +168,20 @@ public class DAGNode implements Serializable {
 		return equivalents;
 	}
 
-	public void setDescendants(Set<DAGNode> descendans) {
-		this.descendans = descendans;
+	public void setAncestors(Set<DAGNode> ancestors) {
+		this.ancestors = ancestors;
+	}
+	
+	public Set<DAGNode> getAncestors() {
+		return ancestors;
+	}
+	
+	public void setDescendants(Set<DAGNode> descendants) {
+		this.descendants = descendants;
 	}
 
 	public Set<DAGNode> getDescendants() {
-		return descendans;
+		return descendants;
 	}
 
 	public void setChildren(Set<DAGNode> children) {

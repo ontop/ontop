@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.abox.tests;
+package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
