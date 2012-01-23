@@ -19,7 +19,6 @@ import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
 import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlapi2.TargetQueryValidator;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
 
@@ -43,7 +42,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.tree.TreeCellEditor;
 
 import org.antlr.runtime.RecognitionException;
-import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +59,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 	private MappingEditorPanel parent = null;
 	private Vector<CellEditorListener> listener = null;
 	private MappingManagerPanel mappingmanagerpanel = null;
-	private TargetQueryValidator validator = null;
+	private TargetQueryVocabularyValidator validator = null;
 
 	private boolean bEditingCanceled = false;
 
@@ -69,7 +67,7 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public MappingTreeNodeCellEditor(JTree tree, MappingManagerPanel panel, OBDAModel apic) {
+	public MappingTreeNodeCellEditor(JTree tree, MappingManagerPanel panel, OBDAModel apic, TargetQueryVocabularyValidator validator) {
 		mappingmanagerpanel = panel;
 		controller = apic;
 		listener = new Vector<CellEditorListener>();
@@ -77,9 +75,9 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
 		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
 		parent = new MappingEditorPanel(tree);
-
-	    OWLOntology ontology = mappingmanagerpanel.getOntology();
-	    validator = new TargetQueryValidator(ontology);
+		this.validator = validator;
+//	    OWLOntology ontology = mappingmanagerpanel.getOntology();
+//	    validator = new TargetQueryValidator(ontology);
 	}
 
 	@Override

@@ -26,7 +26,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	protected Quest questInstance = null;
 
-	protected QuestConnection conn = null;
+//	protected QuestConnection conn = null;
 
 	protected static transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
@@ -36,15 +36,15 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		this.name = name;
 	}
 
-	/***
-	 * Throws an exception if the connection is null or is inactive.
-	 * 
-	 * @throws OBDAException
-	 */
-	protected void checkConnection() throws OBDAException {
-		if (conn == null && conn.isClosed())
-			throw new OBDAException("An active connection must exists before calling this method");
-	}
+//	/***
+//	 * Throws an exception if the connection is null or is inactive.
+//	 * 
+//	 * @throws OBDAException
+//	 */
+//	protected void checkConnection() throws OBDAException {
+//		if (conn == null && conn.isClosed())
+//			throw new OBDAException("An active connection must exists before calling this method");
+//	}
 
 	/* Serialize methods */
 
@@ -85,24 +85,22 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		return false;
 	}
 
-	public void disconnect() throws OBDAException {
-		conn.close();
-	}
+//	public void disconnect() throws OBDAException {
+//		conn.close();
+//	}
 
-	public void connect() throws OBDAException {
-		if (conn != null && !conn.isClosed())
-			throw new OBDAException("Cannot connect when an active connection already exists.");
-		conn = questInstance.getConnection();
-	}
+//	public void connect() throws OBDAException {
+//		if (conn != null && !conn.isClosed())
+//			throw new OBDAException("Cannot connect when an active connection already exists.");
+//		conn = questInstance.getConnection();
+//	}
 
-	public boolean isConnected() throws OBDAException {
-		return conn != null & !conn.isClosed();
-	}
+//	public boolean isConnected() throws OBDAException {
+//		return conn != null & !conn.isClosed();
+//	}
 
 	public QuestConnection getConnection() throws OBDAException{
-		if (conn == null)
-			throw new OBDAException("No connection has been stablished, call connect()");
-		return conn;
+		return questInstance.getConnection();
 	}
 
 	// public OBDAResultSet executeQuery(String query) throws Exception {

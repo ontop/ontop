@@ -65,7 +65,7 @@ public class QuestRewritingBenchmarkTool {
 			out.println("Quest initialization time: " + format.format((stop - start) / 1000000.0) + " ms");
 
 			out.println("Query,Ref.Time (ms), Size");
-			store.connect();
+//			store.connect();
 			final QuestStatement st = store.getConnection().createStatement();
 			for (int i = 0; i < queries.length; i++) {
 				System.out.println("Query " + (i + 1));

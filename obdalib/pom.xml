@@ -26,6 +26,8 @@
 		<module>quest-sesame</module>
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-protege41</module>
+		<module>quest-owlapi2</module>
+		<module>quest-owlapi3</module>
 	</modules>
 
 	<properties>

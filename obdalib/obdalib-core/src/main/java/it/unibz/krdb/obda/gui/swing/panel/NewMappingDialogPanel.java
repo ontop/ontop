@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
 import it.unibz.krdb.obda.model.CQIE;
@@ -11,7 +12,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi2.TargetQueryValidator;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
@@ -31,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.text.StyleContext;
 
 import org.antlr.runtime.RecognitionException;
-import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAPreferences			preferences			= null;
 	private OBDADataSource			dataSource			= null;
 	private JDialog					parent				= null;
-	private TargetQueryValidator	validator			= null;
+	private TargetQueryVocabularyValidator	validator			= null;
 	private DatalogProgramParser	datalogParser		= new DatalogProgramParser();
 	private OBDADataFactory			dataFactory			= OBDADataFactoryImpl.getInstance();
 
@@ -60,13 +59,14 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * @param dataSource
 	 * @param ontology
 	 */
-	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, OBDADataSource dataSource, OWLOntology ontology) {
+	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
 		this.controller = controller;
 		this.preferences = preference;
 		this.parent = parent;
 		this.dataSource = dataSource;
-
-		validator = new TargetQueryValidator(ontology);
+		this.validator = validator;
+		
+//		validator = new TargetQueryValidator(ontology);
 
 		initComponents();
 	}

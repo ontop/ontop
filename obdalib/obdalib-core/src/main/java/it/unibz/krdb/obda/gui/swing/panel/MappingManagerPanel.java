@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.gui.swing.treemodel.MappingNode;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeNodeCellEditor;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeSelectionModel;
+import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.MappingFilterLexer;
@@ -65,7 +66,6 @@ import javax.swing.tree.TreePath;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,12 +83,14 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	private Thread					validatorThread;
 
 	private SourceQueryValidator	validator;
+	
+	private TargetQueryVocabularyValidator validatortrg;
 
 	private OBDAModel				mapc;
 
 	protected OBDAModel				apic;
 
-	private OWLOntology				ontology;
+//	private OWLOntology				ontology;
 
 	private DatalogProgramParser	datalogParser;
 
@@ -108,12 +110,12 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(OBDAModel apic, OBDAPreferences preference, OWLOntology ontology) {
+	public MappingManagerPanel(OBDAModel apic, OBDAPreferences preference, TargetQueryVocabularyValidator validator) {
 
 		this.preference = preference;
 		datalogParser = new DatalogProgramParser();
-
-		setOntology(ontology);
+		this.validatortrg = validator;
+		
 
 		initComponents();
 		registerAction();
@@ -127,7 +129,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		MappingTreeCellRenderer map_renderer = new MappingTreeCellRenderer(apic, preference);
 		mappingsTree.setCellRenderer(map_renderer);
 		mappingsTree.setEditable(true);
-		mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(mappingsTree, this, apic));
+		mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(mappingsTree, this, apic, validatortrg));
 		mappingsTree.setSelectionModel(new MappingTreeSelectionModel());
 		mappingsTree.setRowHeight(0);
 		mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
@@ -149,13 +151,13 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		mappingsTree.setModel(maptreemodel);
 	}
 
-	public void setOntology(OWLOntology ontology) {
-		this.ontology = ontology;
+	public void setTargetQueryValidator(TargetQueryVocabularyValidator validator) {
+		this.validatortrg = validator;
 	}
-
-	public OWLOntology getOntology() {
-		return ontology;
-	}
+//
+//	public OWLOntology getOntology() {
+//		return ontology;
+//	}
 
 	private void registerAction() {
 
@@ -912,7 +914,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		JDialog dialog = new JDialog();
 		dialog.setTitle("Insert New Mapping");
 		dialog.setModal(true);
-		dialog.setContentPane(new NewMappingDialogPanel(apic, preference, dialog, selectedSource, ontology));
+		dialog.setContentPane(new NewMappingDialogPanel(apic, preference, dialog, selectedSource, validatortrg));
 		dialog.setSize(500, 300);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);

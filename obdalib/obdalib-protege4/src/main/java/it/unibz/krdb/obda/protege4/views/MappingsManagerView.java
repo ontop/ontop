@@ -2,7 +2,9 @@ package it.unibz.krdb.obda.protege4.views;
 
 import it.unibz.krdb.obda.gui.swing.panel.DatasourceSelector;
 import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
+import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.owlapi2.TargetQueryValidator;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
@@ -51,8 +53,10 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 		OWLOntology ontology = editor.getModelManager().getActiveOntology();
 
+		
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);		
 		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(controller.getActiveOBDAModel(), preference, ontology);
+		mappingPanel = new MappingManagerPanel(controller.getActiveOBDAModel(), preference, validator);
 
 		datasourceSelector = new DatasourceSelector(controller.getActiveOBDAModel());
 		datasourceSelector.addDatasourceListListener(mappingPanel);
@@ -95,7 +99,10 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 	@Override
 	public void activeOntologyChanged() {
 		mappingPanel.setOBDAModel(controller.getActiveOBDAModel());
-		mappingPanel.setOntology(getOWLModelManager().getActiveOntology());
+		
+		OWLOntology ontology = getOWLModelManager().getActiveOntology();
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);		
+		mappingPanel.setTargetQueryValidator(validator);
 		datasourceSelector.setDatasourceController(controller.getActiveOBDAModel());
 	}
 }

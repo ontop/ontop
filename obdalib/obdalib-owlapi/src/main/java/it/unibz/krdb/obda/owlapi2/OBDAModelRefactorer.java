@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlapi2;
 
+import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -13,7 +14,7 @@ import org.semanticweb.owl.model.OWLOntology;
 public class OBDAModelRefactorer {
 	
 	private OBDAModel obdaModel;
-	private TargetQueryValidator validator;
+	private TargetQueryVocabularyValidator validator;
 	
 	// TODO We should reduce the dependency to OWL-API to define the ontology.
 	public OBDAModelRefactorer(OBDAModel obdaModel, OWLOntology ontology) {

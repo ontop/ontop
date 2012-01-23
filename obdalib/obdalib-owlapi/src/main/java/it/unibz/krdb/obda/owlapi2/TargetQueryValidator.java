@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlapi2;
 
+import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -15,7 +16,7 @@ import org.semanticweb.owl.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TargetQueryValidator
+public class TargetQueryValidator implements TargetQueryVocabularyValidator
 {
   /** The source ontology for validating the target query */
   private OWLOntology ontology;
@@ -33,7 +34,11 @@ public class TargetQueryValidator
     this.ontology = ontology;
   }
   
-  public boolean validate(CQIE targetQuery) {
+  /* (non-Javadoc)
+ * @see it.unibz.krdb.obda.owlapi2.TargetQueryVocabularyValidator#validate(it.unibz.krdb.obda.model.CQIE)
+ */
+@Override
+public boolean validate(CQIE targetQuery) {
     // Reset the invalid list
     invalidPredicates.clear();
     
@@ -86,7 +91,11 @@ public class TargetQueryValidator
     return isValid;
   }
   
-  public Vector<String> getInvalidPredicates() {
+  /* (non-Javadoc)
+ * @see it.unibz.krdb.obda.owlapi2.TargetQueryVocabularyValidator#getInvalidPredicates()
+ */
+@Override
+public Vector<String> getInvalidPredicates() {
     return invalidPredicates;
   }
 }
