@@ -20,16 +20,6 @@
 			<artifactId>obdalib-core</artifactId>
 			<version>1.7</version>
 		</dependency>
-		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.7</version>
-		</dependency>
-		<dependency>
-			<groupId>inf.unibz.it.obda</groupId>
-			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7</version>
-		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -43,7 +33,7 @@
 			<artifactId>xsdlib</artifactId>
 			<version>20030225</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi</artifactId>
 			<version>2.2.0-r1317</version>
@@ -55,7 +45,7 @@
 			<version>3.2.3-r1824</version>
 			<classifier>jar</classifier>
 		</dependency>
-
+ -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
