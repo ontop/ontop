@@ -1,0 +1,351 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1207768242 "http://www.owl-ontologies.com/Ontology1207768242.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#"
+     xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:Ontology1207768242="http://www.owl-ontologies.com/Ontology1207768242.owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#belongsToCompany -->
+
+    <owl:ObjectProperty rdf:about="#belongsToCompany">
+        <rdfs:range rdf:resource="#Company"/>
+        <rdfs:domain rdf:resource="#Stock"/>
+        <owl:inverseOf rdf:resource="#hasStock"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#hasAddress -->
+
+    <owl:ObjectProperty rdf:about="#hasAddress">
+        <rdfs:range rdf:resource="#Address"/>
+        <rdfs:domain rdf:resource="#Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#hasStock -->
+
+    <owl:ObjectProperty rdf:about="#hasStock">
+        <rdfs:domain rdf:resource="#Company"/>
+        <rdfs:range rdf:resource="#Stock"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#inverseofhasAddress -->
+
+    <owl:ObjectProperty rdf:about="#inverseofhasAddress">
+        <rdfs:domain rdf:resource="#Address"/>
+        <rdfs:range rdf:resource="#Person"/>
+        <owl:inverseOf rdf:resource="#hasAddress"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument -->
+
+    <owl:ObjectProperty rdf:about="#involvesInstrument">
+        <rdfs:range rdf:resource="#FinantialInstrument"/>
+        <rdfs:domain rdf:resource="#Transaction"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#isExecutedBy -->
+
+    <owl:ObjectProperty rdf:about="#isExecutedBy">
+        <rdfs:range rdf:resource="#StockExchangeMember"/>
+        <rdfs:domain rdf:resource="#Transaction"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#isExecutedFor -->
+
+    <owl:ObjectProperty rdf:about="#isExecutedFor">
+        <rdfs:range rdf:resource="#Investor"/>
+        <rdfs:domain rdf:resource="#Transaction"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#isListedIn -->
+
+    <owl:ObjectProperty rdf:about="#isListedIn">
+        <rdfs:domain rdf:resource="#Stock"/>
+        <rdfs:range rdf:resource="#StockExchangeList"/>
+        <owl:inverseOf rdf:resource="#listsStock"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#isTradedIn -->
+
+    <owl:ObjectProperty rdf:about="#isTradedIn">
+        <rdfs:range rdf:resource="#Transaction"/>
+        <owl:inverseOf rdf:resource="#involvesInstrument"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#listsStock -->
+
+    <owl:ObjectProperty rdf:about="#listsStock">
+        <rdfs:range rdf:resource="#Stock"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#tradesOnBehalfOf -->
+
+    <owl:ObjectProperty rdf:about="#tradesOnBehalfOf"/>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#usesBroker -->
+
+    <owl:ObjectProperty rdf:about="#usesBroker">
+        <owl:inverseOf rdf:resource="#tradesOnBehalfOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Acquisition -->
+
+    <owl:Class rdf:about="#Acquisition">
+        <rdfs:subClassOf rdf:resource="#Transaction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Address -->
+
+    <owl:Class rdf:about="#Address">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#inverseofhasAddress"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Company -->
+
+    <owl:Class rdf:about="#Company">
+        <rdfs:subClassOf rdf:resource="#LegalPerson"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Dealer -->
+
+    <owl:Class rdf:about="#Dealer">
+        <owl:equivalentClass rdf:resource="#Trader"/>
+        <rdfs:subClassOf rdf:resource="#StockBroker"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#FinantialInstrument -->
+
+    <owl:Class rdf:about="#FinantialInstrument"/>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Investor -->
+
+    <owl:Class rdf:about="#Investor">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#LegalPerson -->
+
+    <owl:Class rdf:about="#LegalPerson">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Offer -->
+
+    <owl:Class rdf:about="#Offer">
+        <rdfs:subClassOf rdf:resource="#Transaction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Person -->
+
+    <owl:Class rdf:about="#Person">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#hasAddress"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#PhysicalPerson -->
+
+    <owl:Class rdf:about="#PhysicalPerson">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:complementOf rdf:resource="#LegalPerson"/>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Stock -->
+
+    <owl:Class rdf:about="#Stock">
+        <rdfs:subClassOf rdf:resource="#FinantialInstrument"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isListedIn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#belongsToCompany"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker -->
+
+    <owl:Class rdf:about="#StockBroker">
+        <rdfs:subClassOf rdf:resource="#StockExchangeMember"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#tradesOnBehalfOf"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#StockExchangeList -->
+
+    <owl:Class rdf:about="#StockExchangeList"/>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#StockExchangeMember -->
+
+    <owl:Class rdf:about="#StockExchangeMember">
+        <rdfs:subClassOf rdf:resource="#Person"/>
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#StockTrader -->
+
+    <owl:Class rdf:about="#StockTrader">
+        <owl:equivalentClass rdf:resource="#Trader"/>
+        <rdfs:subClassOf rdf:resource="#StockBroker"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Trader -->
+
+    <owl:Class rdf:about="#Trader">
+        <rdfs:subClassOf rdf:resource="#StockBroker"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#Transaction -->
+
+    <owl:Class rdf:about="#Transaction">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isExecutedFor"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isExecutedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#involvesInstrument"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.842) http://owlapi.sourceforge.net -->
+

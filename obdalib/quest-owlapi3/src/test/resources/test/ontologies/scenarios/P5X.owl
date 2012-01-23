@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1222256119496 "http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#"
+     xml:base="http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:Ontology1222256119496="http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#AUX0 -->
+
+    <owl:ObjectProperty rdf:about="#AUX0">
+        <rdfs:subPropertyOf rdf:resource="#edge"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#AUX1 -->
+
+    <owl:ObjectProperty rdf:about="#AUX1">
+        <rdfs:subPropertyOf rdf:resource="#edge"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#AUX2 -->
+
+    <owl:ObjectProperty rdf:about="#AUX2">
+        <rdfs:subPropertyOf rdf:resource="#edge"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#AUX3 -->
+
+    <owl:ObjectProperty rdf:about="#AUX3">
+        <rdfs:subPropertyOf rdf:resource="#edge"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#edge -->
+
+    <owl:ObjectProperty rdf:about="#edge"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#Path1 -->
+
+    <owl:Class rdf:about="#Path1">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#edge"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#Path2 -->
+
+    <owl:Class rdf:about="#Path2">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AUX0"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#Path3 -->
+
+    <owl:Class rdf:about="#Path3">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AUX1"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#Path4 -->
+
+    <owl:Class rdf:about="#Path4">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AUX2"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl#Path5 -->
+
+    <owl:Class rdf:about="#Path5">
+        <rdfs:subClassOf rdf:resource="&owl;Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#AUX3"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="#Path3"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="#AUX2"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="#Path2"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="#AUX1"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="#Path4"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="#AUX3"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="#Path1"/>
+        <owl:onProperty>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="#AUX0"/>
+            </owl:ObjectProperty>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.842) http://owlapi.sourceforge.net -->
+

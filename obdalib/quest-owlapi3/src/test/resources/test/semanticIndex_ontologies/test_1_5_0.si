@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<dag>
+    <classes>
+        <class uri="::__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#A" index="12"
+               range="12:12"/>
+        <class uri="::__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#B" index="8"
+               range="8:8"/>
+        <class uri="::__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#C" index="6"
+               range="6:6"/>
+        <class uri="::__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#D" index="10"
+               range="10:10"/>
+        <class uri="::__inverse__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#A"
+               index="13" range="13:13"/>
+        <class uri="::__inverse__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#B"
+               index="9" range="9:9"/>
+        <class uri="::__inverse__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#C"
+               index="7" range="7:7"/>
+        <class uri="::__inverse__exists__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#D"
+               index="11" range="11:11"/>
+    </classes>
+    <rolles>
+        <dataproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#A" index="1"
+                      range="1:4"/>
+        <dataproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#B" index="2"
+                      range="2:4"/>
+        <dataproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#C" index="3"
+                      range="3:4"/>
+        <dataproperty uri="http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#D" index="4"
+                      range="4:4"/>
+
+        <dataproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#A" index="1"
+                      range="1:4"/>
+        <dataproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#B" index="2"
+                      range="2:4"/>
+        <dataproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#C" index="3"
+                      range="3:4"/>
+        <dataproperty uri="::__inverse__::http://www.semanticweb.org/ontologies/2011/2/Ontology1299878022260.owl#D" index="4"
+                      range="4:4"/>
+    </rolles>
+</dag>
