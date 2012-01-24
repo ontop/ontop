@@ -1,15 +1,16 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.owlapi2.junit;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2VocabularyExtractor;
 
 import java.io.File;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class OWLAPI2VocabularyExtractorTest extends TestCase {
 

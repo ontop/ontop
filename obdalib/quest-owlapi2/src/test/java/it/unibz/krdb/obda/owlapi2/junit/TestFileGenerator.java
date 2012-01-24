@@ -1,9 +1,11 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.owlapi2.junit;
 
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression;
+import it.unibz.krdb.obda.reformulation.tests.XMLResultWriter;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -21,17 +23,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.DefaultOntologyFormat;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.io.DefaultOntologyFormat;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLClass;
+import org.semanticweb.owl.model.OWLDataFactory;
+import org.semanticweb.owl.model.OWLDescription;
+import org.semanticweb.owl.model.OWLEntity;
+import org.semanticweb.owl.model.OWLIndividual;
+import org.semanticweb.owl.model.OWLObjectProperty;
+import org.semanticweb.owl.model.OWLObjectPropertyExpression;
+import org.semanticweb.owl.model.OWLObjectPropertyInverse;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,15 +67,15 @@ public class TestFileGenerator {
 																																	.getLogger(this
 																																			.getClass());
 
-	public TestFileGenerator(String obdalocation, String xmllocation, String tl, String mode) {
+	public TestFileGenerator(String obdalocation, String xmllocation, String testlocation, String mode) {
 		this.obdalocation = obdalocation;
 		this.xmllocation = xmllocation;
-		this.testlocation = tl + "it/unibz/krdb/obda/reformulation/tests/";
+		this.testlocation = testlocation + "it/unibz/krdb/obda/owlapi2/junit/";
 		this.mode = mode;
 		tests = new Vector<String>();
 		expressions = new Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>();
 		// manager = OWLManager.createOWLOntologyManager();
-		log.info("Main Location: {}", tl);
+		log.info("Main Location: {}", testlocation);
 		log.info("Location for OBDA files: {}", obdalocation);
 		log.info("Location for XML files: {}", xmllocation);
 		log.info("Mode: {}", mode);
@@ -583,7 +587,7 @@ public class TestFileGenerator {
 
 			BufferedWriter out = new BufferedWriter(fstream);
 
-			out.append("package it.unibz.krdb.obda.reformulation.tests;\n");
+			out.append("package it.unibz.krdb.obda.owlapi2.junit;\n");
 			out.append("import junit.framework.TestCase;\n");
 			out.append("import java.util.Set;\n");
 			out.append("import java.util.Iterator;\n");

@@ -1,6 +1,7 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.owlapi2.junit;
 
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.owlapi2.OWLAPI2ABoxIterator;
 
 import java.io.File;
 import java.net.URI;
@@ -9,10 +10,10 @@ import java.util.Iterator;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owl.apibinding.OWLManager;
+import org.semanticweb.owl.model.OWLAxiom;
+import org.semanticweb.owl.model.OWLOntology;
+import org.semanticweb.owl.model.OWLOntologyManager;
 
 public class OWLAPI2ABoxIteratorTest extends TestCase {
 
