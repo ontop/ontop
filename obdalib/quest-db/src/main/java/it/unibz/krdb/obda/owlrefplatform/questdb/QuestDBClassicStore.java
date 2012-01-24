@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -13,11 +14,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +47,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC))
 			throw new Exception("A classic repository must be created with the CLASSIC flag in the configuration.");
 
-		OWLAPI2Translator translator = new OWLAPI2Translator();
-		OWLOntology owlontology = man.loadOntology(tboxFile);
+		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLOntology owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		Ontology tbox = translator.mergeTranslateOntologies(Collections.singleton(owlontology));
 		questInstance = new Quest();
 		questInstance.setPreferences(config);
@@ -56,7 +59,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	public void createDB() throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		try {
 			st.createDB();
@@ -69,7 +72,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	/* Move to query time ? */
 	public void createIndexes() throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		try {
 			st.createIndexes();
@@ -83,7 +86,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	/* Move to query time ? */
 	public void dropIndexes() throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		try {
 			st.dropIndexes();
@@ -96,7 +99,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	/* Move to query time ? */
 	public boolean isIndexed() throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		boolean result = st.isIndexed();
 		st.close();
@@ -105,7 +108,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	/* Move to query time ? */
 	public int load(URI rdffile, boolean useFile) throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		String pathstr = rdffile.toString();
 		int dotidx = pathstr.lastIndexOf('.');
 		String ext = pathstr.substring(dotidx);
@@ -169,7 +172,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	/* Move to query time ? */
 	public void loadOBDAModel(URI uri) throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		VirtualTriplePredicateIterator assertionIter = null;
 		try {
@@ -222,7 +225,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	@Override
 	public void drop() throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		try {
 			st.dropRepository();
@@ -235,7 +238,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	public void analyze() throws OBDAException {
-		checkConnection();
+		//checkConnection();
 		QuestStatement st = conn.createStatement();
 		try {
 			st.analyze();

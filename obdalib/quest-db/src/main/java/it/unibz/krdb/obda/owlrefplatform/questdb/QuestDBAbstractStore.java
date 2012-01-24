@@ -14,6 +14,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 public abstract class QuestDBAbstractStore implements Serializable {
 
 	/**
