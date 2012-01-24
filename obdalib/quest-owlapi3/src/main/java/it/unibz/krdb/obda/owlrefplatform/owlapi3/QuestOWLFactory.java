@@ -5,8 +5,8 @@ import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi3.OBDAOWLReasonerFactory;
 import it.unibz.krdb.obda.owlapi3.QuestPreferences;
 
-import org.semanticweb.owl.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
@@ -24,7 +24,6 @@ public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 	private QuestPreferences preferences = null;
 	private String id;
 	private String name;
-	private OWLOntologyManager owlOntologyManager;
 
 	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
 
@@ -113,7 +112,7 @@ public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 	}
 
 	@Override
-	public OBDAOWLReasoner createReasoner(org.semanticweb.owlapi.model.OWLOntologyManager manager) {
+	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
 		return new QuestOWL(null, apic, null, null, preferences);
 	}
 }

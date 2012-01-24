@@ -22,9 +22,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import java.util.HashSet;
 import java.util.Set;
 
-import org.semanticweb.owl.inference.OWLReasonerException;
-import org.semanticweb.owl.util.NullProgressMonitor;
-import org.semanticweb.owl.util.ProgressMonitor;
+//import org.semanticweb.owlapi.inference.OWLReasonerException;
+import org.semanticweb.owlapi.util.NullProgressMonitor;
+import org.semanticweb.owlapi.util.ProgressMonitor;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -94,8 +94,9 @@ public class QuestOWL extends org.semanticweb.owlapi.reasoner.impl.OWLReasonerBa
 
 	// private boolean optimizeEquivalences = true;
 
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingModem, QuestPreferences preferences) {
-		
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingModem,
+			QuestPreferences preferences) {
+
 		super(rootOntology, new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
 		this.preferences = preferences;
 		this.obdaModel = obdaModel;
@@ -196,15 +197,7 @@ public class QuestOWL extends org.semanticweb.owlapi.reasoner.impl.OWLReasonerBa
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			OWLReasonerException ex = new OWLReasonerException(e.getMessage(), e) {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 8546901292849186314L;
-			};
-			e.fillInStackTrace();
-			throw ex;
+			throw e;
 		} finally {
 			getProgressMonitor().setFinished();
 		}
