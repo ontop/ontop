@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY adolena 'http://ksg.meraka.co.za/adolena.owl#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#" xmlns="http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#" xmlns:adolena="http://ksg.meraka.co.za/adolena.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <SavedQueries>
+    <Query id="query-1" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x a :GraduateStudent. ?x :takesCourse &lt;http://www.Department0.University0.edu/GraduateCourse0> .}"/>
+    <Query id="query-2" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y WHERE { ?z a :Department. ?x a :GraduateStudent. ?x :memberOf ?z. ?z :subOrganizationOf ?y. ?x :undergraduateDegreeFrom ?y.}"/>
+    <Query id="query-3" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x a :Publication. ?x :publicationAuthor &lt;http://www.Department0.University0.edu/AssistantProfessor0> . }"/>
+    <Query id="query-4" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE {?x a :Professor. ?x :worksFor &lt;http://www.Department0.University0.edu>. }"/>
+    <Query id="query-5" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x :memberOf &lt;http://www.Department0.University0.edu> . }"/>
+    <Query id="query-6" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x a :Student . }"/>
+    <Query id="query-7" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y WHERE { ?x a :Student. &lt;http://www.Department0.University0.edu/AssociateProfessor0> :teacherOf ?y. ?x :takesCourse ?y }"/>
+    <Query id="query-8" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x a :Student. ?y a :Department. ?x :memberOf ?y. ?y :subOrganizationOf &lt;http://www.University0.edu> . ?x :emailAddress ?z . }"/>
+    <Query id="query-9" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x a :Student. ?x :advisor ?y. ?x :takesCourse ?z. ?y :teacherOf ?z . }"/>
+    <Query id="query-10" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x a :Student . ?x :takesCourse &lt;http://www.Department0.University0.edu/GraduateCourse0> }"/>
+    <Query id="query-11" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x a :ResearchGroup . ?x :subOrganizationOf &lt;http://www.University0.edu> }"/>
+    <Query id="query-12" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y WHERE {?x a :Chair . ?y a :Department . ?x :worksFor ?y . ?y :subOrganizationOf &lt;http://www.University0.edu> }"/>
+    <Query id="query-13" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE {?x :degreeFrom &lt;http://www.University0.edu>}"/>
+    <Query id="query-14" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE {?x a :UndergraduateStudent}"/>
+    <Query id="query-U-1" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x :worksFor ?y. ?y :affiliatedOrganizationOf ?z}"/>
+    <Query id="query-U-2" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y WHERE {  ?x :teacherOf ?y . }"/>
+    <Query id="query-U-3" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y ?z WHERE { ?x a :Student. ?x :advisor ?y . ?y a :FacultyStaff. ?x :takesCourse ?z. ?y :teacherOf ?z.}"/>
+    <Query id="query-U-4" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x ?y WHERE {  ?x :worksFor ?y.  }"/>
+    <Query id="query-U-5" text="PREFIX : &lt;http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>&#xa;PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>&#xa;SELECT ?x WHERE { ?x :worksFor ?y. ?x :degreeFrom ?y }"/>
+  </SavedQueries>
+</OBDA>

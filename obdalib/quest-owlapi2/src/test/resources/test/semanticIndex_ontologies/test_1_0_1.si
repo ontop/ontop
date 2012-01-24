@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<dag>
+    <classes>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#A" index="2" range="2:8"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#B" index="5" range="5:6"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#C" index="7" range="7:8"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#D" index="3" range="3:4"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#E" index="6" range="6:6"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#F" index="8" range="8:8"/>
+        <class uri="http://www.semanticweb.org/ontologies/2011/1/Ontology1298746790294.owl#G" index="4" range="4:4"/>
+    </classes>
+    <rolles/>
+</dag>

@@ -1,0 +1,594 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY BBK-new "http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#"
+     xml:base="http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:BBK-new="http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#">
+    <owl:Ontology rdf:about=""/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#administers -->
+
+    <owl:ObjectProperty rdf:about="#administers">
+        <rdfs:domain rdf:resource="#Admin"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#assists -->
+
+    <owl:ObjectProperty rdf:about="#assists">
+        <rdfs:domain rdf:resource="#ResearchStaff"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#isAdministeredBy -->
+
+    <owl:ObjectProperty rdf:about="#isAdministeredBy">
+        <owl:inverseOf rdf:resource="#administers"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#isAssistedBy -->
+
+    <owl:ObjectProperty rdf:about="#isAssistedBy">
+        <owl:inverseOf rdf:resource="#assists"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#isManagedBy -->
+
+    <owl:ObjectProperty rdf:about="#isManagedBy">
+        <owl:inverseOf rdf:resource="#manages"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#isMentoredBy -->
+
+    <owl:ObjectProperty rdf:about="#isMentoredBy">
+        <owl:inverseOf rdf:resource="#mentor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#isPaidBy -->
+
+    <owl:ObjectProperty rdf:about="#isPaidBy">
+        <rdfs:range rdf:resource="#ExternalProject"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#isSupervisedBy -->
+
+    <owl:ObjectProperty rdf:about="#isSupervisedBy">
+        <owl:inverseOf rdf:resource="#supervises"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#manages -->
+
+    <owl:ObjectProperty rdf:about="#manages">
+        <rdfs:domain rdf:resource="#AcademicStaff"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#mentor -->
+
+    <owl:ObjectProperty rdf:about="#mentor">
+        <rdfs:domain rdf:resource="#Senior"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#supervises -->
+
+    <owl:ObjectProperty rdf:about="#supervises">
+        <rdfs:domain rdf:resource="#AcademicStaff"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#supports -->
+
+    <owl:ObjectProperty rdf:about="#supports">
+        <rdfs:range rdf:resource="#Project"/>
+        <rdfs:domain rdf:resource="#Systems"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#teaches -->
+
+    <owl:ObjectProperty rdf:about="#teaches">
+        <rdfs:range rdf:resource="#Course"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#worksOn -->
+
+    <owl:ObjectProperty rdf:about="#worksOn">
+        <rdfs:range rdf:resource="#Project"/>
+        <rdfs:domain rdf:resource="#ResearchStaff"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#AcademicStaff -->
+
+    <owl:Class rdf:about="#AcademicStaff">
+        <rdfs:subClassOf rdf:resource="#Staff"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#teaches"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Admin -->
+
+    <owl:Class rdf:about="#Admin">
+        <rdfs:subClassOf rdf:resource="#NonAcademicStaff"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Collaboration -->
+
+    <owl:Class rdf:about="#Collaboration">
+        <rdfs:subClassOf rdf:resource="#InternalProject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Course -->
+
+    <owl:Class rdf:about="#Course">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isAdministeredBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#EUProject -->
+
+    <owl:Class rdf:about="#EUProject">
+        <rdfs:subClassOf rdf:resource="#ExternalProject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#ExternalProject -->
+
+    <owl:Class rdf:about="#ExternalProject">
+        <rdfs:subClassOf rdf:resource="#Project"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Impact -->
+
+    <owl:Class rdf:about="#Impact">
+        <rdfs:subClassOf rdf:resource="#InternalProject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#InternalProject -->
+
+    <owl:Class rdf:about="#InternalProject">
+        <rdfs:subClassOf rdf:resource="#Project"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Junior -->
+
+    <owl:Class rdf:about="#Junior">
+        <rdfs:subClassOf rdf:resource="#AcademicStaff"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isMentoredBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Lecturer -->
+
+    <owl:Class rdf:about="#Lecturer">
+        <rdfs:subClassOf rdf:resource="#Junior"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#NonAcademicStaff -->
+
+    <owl:Class rdf:about="#NonAcademicStaff">
+        <rdfs:subClassOf rdf:resource="#Staff"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Others -->
+
+    <owl:Class rdf:about="#Others">
+        <rdfs:subClassOf rdf:resource="#NonAcademicStaff"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#PG -->
+
+    <owl:Class rdf:about="#PG">
+        <rdfs:subClassOf rdf:resource="#Course"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#PGProject -->
+
+    <owl:Class rdf:about="#PGProject">
+        <rdfs:subClassOf rdf:resource="#PG"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#PGTaught -->
+
+    <owl:Class rdf:about="#PGTaught">
+        <rdfs:subClassOf rdf:resource="#PG"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isAssistedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#ProbationStaff -->
+
+    <owl:Class rdf:about="#ProbationStaff">
+        <rdfs:subClassOf rdf:resource="#Junior"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Professor -->
+
+    <owl:Class rdf:about="#Professor">
+        <rdfs:subClassOf rdf:resource="#Senior"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Project -->
+
+    <owl:Class rdf:about="#Project">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isAdministeredBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isManagedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#RA -->
+
+    <owl:Class rdf:about="#RA">
+        <rdfs:subClassOf rdf:resource="#ResearchStaff"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#worksOn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isPaidBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isSupervisedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#RF -->
+
+    <owl:Class rdf:about="#RF">
+        <rdfs:subClassOf rdf:resource="#ResearchStaff"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isSupervisedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#worksOn"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Reader -->
+
+    <owl:Class rdf:about="#Reader">
+        <rdfs:subClassOf rdf:resource="#Senior"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#ResearchStaff -->
+
+    <owl:Class rdf:about="#ResearchStaff">
+        <rdfs:subClassOf rdf:resource="#Staff"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Senior -->
+
+    <owl:Class rdf:about="#Senior">
+        <rdfs:subClassOf rdf:resource="#AcademicStaff"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#manages"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Staff -->
+
+    <owl:Class rdf:about="#Staff"/>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#Systems -->
+
+    <owl:Class rdf:about="#Systems">
+        <rdfs:subClassOf rdf:resource="#NonAcademicStaff"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#UG -->
+
+    <owl:Class rdf:about="#UG">
+        <rdfs:subClassOf rdf:resource="#Course"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#UGProject -->
+
+    <owl:Class rdf:about="#UGProject">
+        <rdfs:subClassOf rdf:resource="#UG"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#UGTaught -->
+
+    <owl:Class rdf:about="#UGTaught">
+        <rdfs:subClassOf rdf:resource="#UG"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="#isAssistedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#UKProject -->
+
+    <owl:Class rdf:about="#UKProject">
+        <rdfs:subClassOf rdf:resource="#ExternalProject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#VisitingStaff -->
+
+    <owl:Class rdf:about="#VisitingStaff">
+        <rdfs:subClassOf rdf:resource="#ResearchStaff"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#ac -->
+
+    <ProbationStaff rdf:about="#ac">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </ProbationStaff>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#exoda -->
+
+    <owl:Thing rdf:about="#exoda">
+        <rdf:type rdf:resource="#UKProject"/>
+        <administers rdf:resource="#exoda"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#foc -->
+
+    <owl:Thing rdf:about="#foc">
+        <rdf:type rdf:resource="#UGTaught"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#jl -->
+
+    <owl:Thing rdf:about="#jl">
+        <rdf:type rdf:resource="#Admin"/>
+        <administers rdf:resource="#exoda"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#ml -->
+
+    <owl:Thing rdf:about="#ml">
+        <rdf:type rdf:resource="#Professor"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#mz -->
+
+    <owl:Thing rdf:about="#mz">
+        <rdf:type rdf:resource="#Professor"/>
+        <mentor rdf:resource="#ac"/>
+        <manages rdf:resource="#exoda"/>
+        <teaches rdf:resource="#foc"/>
+        <supervises rdf:resource="#sk"/>
+        <teaches rdf:resource="#sw"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#pw -->
+
+    <owl:Thing rdf:about="#pw">
+        <rdf:type rdf:resource="#Reader"/>
+        <mentor rdf:resource="#rk"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#rk -->
+
+    <owl:Thing rdf:about="#rk">
+        <rdf:type rdf:resource="#Lecturer"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#sh -->
+
+    <Lecturer rdf:about="#sh">
+        <rdf:type rdf:resource="&owl;Thing"/>
+    </Lecturer>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#sk -->
+
+    <RA rdf:about="#sk">
+        <rdf:type rdf:resource="&owl;Thing"/>
+        <isPaidBy rdf:resource="#exoda"/>
+        <worksOn rdf:resource="#exoda"/>
+        <assists rdf:resource="#foc"/>
+    </RA>
+    
+
+
+    <!-- http://www.dcs.bbk.ac.uk/~michael/BBK-new.owl#sw -->
+
+    <owl:Thing rdf:about="#sw">
+        <rdf:type rdf:resource="#PGTaught"/>
+    </owl:Thing>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+
