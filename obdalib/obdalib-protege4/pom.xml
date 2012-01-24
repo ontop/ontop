@@ -66,6 +66,12 @@
 			<artifactId>reformulation-core</artifactId>
 			<version>1.7</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>inf.unibz.it.obda</groupId>
+			<artifactId>quest-owlapi2</artifactId>
+			<version>1.7</version>
+		</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 
 			and are not available in the OSGi, or Protege 4 classpath. They must be packed 

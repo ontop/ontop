@@ -1,8 +1,8 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.util.Iterator;
