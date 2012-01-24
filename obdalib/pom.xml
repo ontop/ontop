@@ -28,6 +28,7 @@
 		<module>obdalib-protege41</module>
 		<module>quest-owlapi2</module>
 		<module>quest-owlapi3</module>
+		<module>quest-db</module>
 	</modules>
 
 	<properties>
