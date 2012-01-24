@@ -1,9 +1,9 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 
 import java.io.File;
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -25,10 +25,10 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		Iterator<OWLAxiom> owliterator = ontology.getAxioms().iterator();
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(owliterator);
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(owliterator);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -42,9 +42,9 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(ontology.getAxioms());
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology.getAxioms());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -55,7 +55,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyIterable() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(new HashSet<OWLAxiom>());
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLAxiom>());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -73,9 +73,9 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(ontology);
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -87,9 +87,9 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 	public void testAssertionEmptyOntology() throws Exception {
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.createOntology(URI.create("emptyontology"));
+		OWLOntology ontology = manager.createOntology();
 
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(ontology);
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -105,11 +105,11 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		manager.loadOntologyFromPhysicalURI((new File(owlfile1)).toURI());
-		manager.loadOntologyFromPhysicalURI((new File(owlfile2)).toURI());
-		manager.loadOntologyFromPhysicalURI((new File(owlfile3)).toURI());
+		manager.loadOntologyFromOntologyDocument((new File(owlfile1)));
+		manager.loadOntologyFromOntologyDocument((new File(owlfile2)));
+		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(manager.getOntologies());
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(manager.getOntologies());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -120,7 +120,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyOntologySet() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPI2ABoxIterator(new HashSet<OWLOntology>());
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLOntology>());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;

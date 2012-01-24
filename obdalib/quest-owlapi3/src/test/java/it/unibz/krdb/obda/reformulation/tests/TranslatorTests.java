@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.ontology.impl.ClassImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
@@ -33,15 +35,15 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass class1 = factory.getOWLClass(URI.create("A"));
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(URI.create("prop1"));
+		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("A")));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("prop1")));
 		
 		OWLObjectPropertyRangeAxiom ax = factory.getOWLObjectPropertyRangeAxiom(prop, class1);
 		
-		OWLOntology onto = manager.createOntology(URI.create("testonto"));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI2Translator translator = new OWLAPI2Translator();
+		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
@@ -61,15 +63,15 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass class1 = factory.getOWLClass(URI.create("A"));
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(URI.create("prop1"));
+		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("A")));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("prop1")));
 		
 		OWLObjectPropertyDomainAxiom ax = factory.getOWLObjectPropertyDomainAxiom(prop, class1);
 		
-		OWLOntology onto = manager.createOntology(URI.create("testonto"));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI2Translator translator = new OWLAPI2Translator();
+		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
@@ -90,15 +92,15 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(URI.create("R"));
-		OWLObjectProperty invofprop =  factory.getOWLObjectProperty(URI.create("S"));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("R")));
+		OWLObjectProperty invofprop =  factory.getOWLObjectProperty(IRI.create(URI.create("S")));
 		
 		OWLInverseObjectPropertiesAxiom ax = factory.getOWLInverseObjectPropertiesAxiom(prop, invofprop);
 		
-		OWLOntology onto = manager.createOntology(URI.create("testonto"));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI2Translator translator = new OWLAPI2Translator();
+		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();
@@ -131,15 +133,15 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass clsA = factory.getOWLClass(URI.create("A"));
-		OWLClass clsB = factory.getOWLClass(URI.create("B"));
+		OWLClass clsA = factory.getOWLClass(IRI.create(URI.create("A")));
+		OWLClass clsB = factory.getOWLClass(IRI.create(URI.create("B")));
 		
 		OWLEquivalentClassesAxiom ax = factory.getOWLEquivalentClassesAxiom(clsA, clsB);
 				
-		OWLOntology onto = manager.createOntology(URI.create("testonto"));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI2Translator translator = new OWLAPI2Translator();
+		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<Axiom> ass = dlliteonto.getAssertions();

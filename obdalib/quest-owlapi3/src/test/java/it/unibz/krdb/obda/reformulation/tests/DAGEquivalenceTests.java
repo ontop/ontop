@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
@@ -48,9 +49,9 @@ public class DAGEquivalenceTests extends TestCase {
 	public void testIndexClasses() throws Exception {
 
 		String testURI = "http://it.unibz.krdb/obda/ontologies/test.owl#";
-		OWLAPI2Translator t = new OWLAPI2Translator();
+		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromPhysicalURI(new File(testEquivalenceClasses).toURI());
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testEquivalenceClasses));
 		Ontology onto = t.translate(owlonto);
 		DAG dag = DAGConstructor.getISADAG(onto);
 
@@ -109,9 +110,9 @@ public class DAGEquivalenceTests extends TestCase {
 	public void testIntervalsRoles() throws Exception {
 
 		String testURI = "http://it.unibz.krdb/obda/ontologies/Ontology1314774461138.owl#";
-		OWLAPI2Translator t = new OWLAPI2Translator();
+		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromPhysicalURI(new File(testEquivalenceRoles).toURI());
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testEquivalenceRoles));
 		Ontology onto = t.translate(owlonto);
 		DAG dag = DAGConstructor.getISADAG(onto);
 
@@ -172,9 +173,9 @@ public class DAGEquivalenceTests extends TestCase {
 	public void testIntervalsRolesWithInverse() throws Exception {
 
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		OWLAPI2Translator t = new OWLAPI2Translator();
+		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto = man.loadOntologyFromPhysicalURI(new File(testEquivalenceRolesInverse).toURI());
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testEquivalenceRolesInverse));
 		Ontology onto = t.translate(owlonto);
 		DAG dag = DAGConstructor.getISADAG(onto);
 		

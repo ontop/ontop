@@ -23,11 +23,14 @@ import java.util.Vector;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.DefaultOntologyFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLObjectInverseOf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -191,7 +194,7 @@ public class TestFileGenerator {
 			HashMap<String, String> ids = ex.getQueriesIds();
 			Set<String> queries = queriesMap.keySet();
 
-			String ontoname = onto.getURI().toString();
+			String ontoname = onto.getOntologyID().getOntologyIRI().toString();
 			int z = ontoname.lastIndexOf("/");
 			ontoname = ontoname.substring(z + 1, ontoname.length() - 4);
 			writer = new XMLResultWriter(ontoname);
@@ -225,7 +228,7 @@ public class TestFileGenerator {
 
 			/* we start from 7 because the location must start with file:// */
 			String owluri = obdalocation.substring(7) + ontoname + ".owl";
-			manager.saveOntology(onto, new DefaultOntologyFormat(), new File(owluri).toURI());
+			manager.saveOntology(onto, new DefaultOntologyFormat(), IRI.create(new File(owluri).toURI()));
 			String xmluri = xmllocation + ontoname + ".xml";
 			writer.saveXMLResults(xmluri);
 			tests.add(ontoname);
@@ -254,7 +257,7 @@ public class TestFileGenerator {
 		}
 	}
 
-	private OWLDescription getOWLEntity(URI ontouri, String e, OWLDataFactory dataFactory) {
+	private OWLClassExpression getOWLEntity(URI ontouri, String e, OWLDataFactory dataFactory) {
 		e = e.trim();
 		
 		if (e.length() == 0)
@@ -263,15 +266,15 @@ public class TestFileGenerator {
 			e = e.substring(1);
 			if (e.contains("-")) {
 				e = e.substring(0, e.length() - 5);// remove ^^-^^ from end
-				OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + e));
-				OWLObjectPropertyInverse inv = dataFactory.getOWLObjectPropertyInverse(op);
-				return dataFactory.getOWLObjectSomeRestriction(inv, dataFactory.getOWLThing());
+				OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + e)));
+				OWLObjectInverseOf inv = dataFactory.getOWLObjectInverseOf(op);
+				return dataFactory.getOWLObjectSomeValuesFrom(inv, dataFactory.getOWLThing());
 			} else {
-				OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + e));
-				return dataFactory.getOWLObjectSomeRestriction(op, dataFactory.getOWLThing());
+				OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + e)));
+				return dataFactory.getOWLObjectSomeValuesFrom(op, dataFactory.getOWLThing());
 			}
 		}
-		return dataFactory.getOWLClass(URI.create(ontouri.toString() + "#" + e));
+		return dataFactory.getOWLClass(IRI.create(URI.create(ontouri.toString() + "#" + e)));
 
 	}
 
@@ -280,10 +283,10 @@ public class TestFileGenerator {
 //		System.out.println(name);
 		if (name.contains("-")) {
 			name = name.substring(0, name.length() - 5);// remove ^^-^^ from end
-			OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + name));
-			return dataFactory.getOWLObjectPropertyInverse(op);
+			OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + name)));
+			return dataFactory.getOWLObjectInverseOf(op);
 		} else {
-			return dataFactory.getOWLObjectProperty(URI.create(ontouri.toString() + "#" + name));
+			return dataFactory.getOWLObjectProperty(IRI.create(URI.create(ontouri.toString() + "#" + name)));
 		}
 	}
 
@@ -315,23 +318,23 @@ public class TestFileGenerator {
 				axiom = null;
 				if (names.length == 2) {
 					String objprop = uri.toString() + "#" + entity;
-					OWLObjectProperty op = dataFactory.getOWLObjectProperty(URI.create(objprop));
-					String ind1uri = onto.getURI() + "#" + names[0];
-					String ind2uri = onto.getURI() + "#" + names[1];
-					OWLIndividual ind1 = dataFactory.getOWLIndividual(URI.create(ind1uri));
-					OWLIndividual ind2 = dataFactory.getOWLIndividual(URI.create(ind2uri));
+					OWLObjectProperty op = dataFactory.getOWLObjectProperty(IRI.create(URI.create(objprop)));
+					String ind1uri = uri + "#" + names[0];
+					String ind2uri = uri + "#" + names[1];
+					OWLIndividual ind1 = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(ind1uri)));
+					OWLIndividual ind2 = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(ind2uri)));
 					
-					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(ind1, op, ind2);
+					axiom = dataFactory.getOWLObjectPropertyAssertionAxiom(op, ind1, ind2);
 
 					// declaration
 					manager.addAxiom(onto, dataFactory.getOWLDeclarationAxiom(op));
 
 				} else {
 					String clazz = uri.toString() + "#" + entity;
-					OWLClass cl = dataFactory.getOWLClass(URI.create(clazz));
-					String induri = onto.getURI() + "#" + parameters;
-					OWLIndividual ind = dataFactory.getOWLIndividual(URI.create(induri));
-					axiom = dataFactory.getOWLClassAssertionAxiom(ind, cl);
+					OWLClass cl = dataFactory.getOWLClass(IRI.create(URI.create(clazz)));
+					String induri = uri + "#" + parameters;
+					OWLIndividual ind = dataFactory.getOWLNamedIndividual(IRI.create(URI.create(induri)));
+					axiom = dataFactory.getOWLClassAssertionAxiom( cl,ind);
 
 					
 				}
@@ -347,7 +350,7 @@ public class TestFileGenerator {
 	private OWLOntology getOntolgoies(List<OWLAxiom> axioms, String testid) throws Exception {
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology onto = manager.createOntology(URI.create(ONTOURI + "test_" + testid.trim() + ".owl"));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create(ONTOURI + "test_" + testid.trim() + ".owl")));
 
 		for (int i = 0; i < axioms.size(); i++) {
 			OWLAxiom vex = axioms.get(i);
@@ -380,7 +383,7 @@ public class TestFileGenerator {
 			if (isRoleInclusion) {
 				OWLObjectPropertyExpression role1 = getOWLObjectProperty(uri, s1, dataFactory);
 				OWLObjectPropertyExpression role2 = getOWLObjectProperty(uri, s2, dataFactory);
-				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyAxiom(role1, role2);
+				OWLAxiom ax = dataFactory.getOWLSubObjectPropertyOfAxiom(role1, role2);
 
 				for (OWLEntity ent : role1.getSignature()) {
 					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));
@@ -391,11 +394,11 @@ public class TestFileGenerator {
 
 				axioms.add(ax);
 			} else {
-				OWLDescription left = getOWLEntity(uri, s1, dataFactory);
-				OWLDescription right = getOWLEntity(uri, s2, dataFactory);
+				OWLClassExpression left = getOWLEntity(uri, s1, dataFactory);
+				OWLClassExpression right = getOWLEntity(uri, s2, dataFactory);
 				int c = 1;
 
-				OWLAxiom ax = dataFactory.getOWLSubClassAxiom(left, right);
+				OWLAxiom ax = dataFactory.getOWLSubClassOfAxiom(left, right);
 
 				for (OWLEntity ent : ax.getSignature()) {
 					axioms.add(dataFactory.getOWLDeclarationAxiom(ent));

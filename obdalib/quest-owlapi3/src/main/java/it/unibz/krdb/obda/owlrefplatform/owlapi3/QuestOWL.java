@@ -10,21 +10,19 @@ import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
-import it.unibz.krdb.obda.owlapi3.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
-//import org.semanticweb.owlapi.inference.OWLReasonerException;
-import org.semanticweb.owlapi.util.NullProgressMonitor;
-import org.semanticweb.owlapi.util.ProgressMonitor;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -51,6 +49,8 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
 import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
+import org.semanticweb.owlapi.util.NullProgressMonitor;
+import org.semanticweb.owlapi.util.ProgressMonitor;
 import org.semanticweb.owlapi.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,10 +95,12 @@ public class QuestOWL extends org.semanticweb.owlapi.reasoner.impl.OWLReasonerBa
 	// private boolean optimizeEquivalences = true;
 
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingModem,
-			QuestPreferences preferences) {
+			Properties preferences) {
 
 		super(rootOntology, new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
-		this.preferences = preferences;
+		this.preferences = new QuestPreferences();
+		this.preferences.putAll(preferences);
+
 		this.obdaModel = obdaModel;
 		questInstance = new Quest();
 		Set<OWLOntology> closure = rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology);

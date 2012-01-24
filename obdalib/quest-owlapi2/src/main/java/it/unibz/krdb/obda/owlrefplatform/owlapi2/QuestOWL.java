@@ -88,7 +88,8 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 	}
 
 	public void setPreferences(QuestPreferences preferences) {
-		this.preferences = preferences;
+		this.preferences = new QuestPreferences();
+		this.preferences.putAll(preferences);
 	}
 
 	@Override

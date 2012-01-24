@@ -11,6 +11,8 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDirectDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -71,9 +73,9 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -110,7 +112,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		// System.out.println(out.toString());
 		out.reset();
 
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.getSQLInserts(ait, out);
 		st.executeUpdate(out.toString());
 		// System.out.println(out.toString());
@@ -155,9 +157,9 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -181,7 +183,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(conn,false);
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.insertMetadata(conn);
 		dbman.insertData(conn,ait,50000,5000);
 		dbman.createIndexes(conn);
@@ -217,9 +219,9 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -242,7 +244,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(conn,false);
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.insertMetadata(conn);
 		dbman.insertData(conn,ait,50000,5000);
 		dbman.createIndexes(conn);
@@ -287,9 +289,9 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";

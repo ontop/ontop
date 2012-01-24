@@ -11,6 +11,9 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
@@ -53,9 +56,9 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-		OWLAPI2Translator trans = new OWLAPI2Translator();
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		OWLAPI3Translator trans = new OWLAPI3Translator();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -90,7 +93,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		st.executeUpdate(out.toString());
 		out.reset();
 
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.getSQLInserts(ait, out);
 //		//System.out.println(out.toString());
 		st.executeUpdate(out.toString());
@@ -135,9 +138,9 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-		OWLAPI2Translator trans = new OWLAPI2Translator();
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		OWLAPI3Translator trans = new OWLAPI3Translator();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -165,7 +168,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(conn,false);
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.insertMetadata(conn);
 		dbman.insertData(conn,ait,50000,5000);
 		dbman.createIndexes(conn);
@@ -201,9 +204,9 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-		OWLAPI2Translator trans = new OWLAPI2Translator();
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		OWLAPI3Translator trans = new OWLAPI3Translator();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -268,9 +271,9 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
-		OWLAPI2Translator trans = new OWLAPI2Translator();
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		OWLAPI3Translator trans = new OWLAPI3Translator();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 
 		String driver = "org.h2.Driver";
@@ -294,7 +297,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		Statement st = conn.createStatement();
 
 		dbman.createDBSchema(conn,false);
-		OWLAPI2ABoxIterator ait = new OWLAPI2ABoxIterator(ontology);
+		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.insertMetadata(conn);
 		dbman.insertData(conn,ait,50000,5000);
 		dbman.createIndexes(conn);

@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
 
 import java.io.File;
 import java.util.Set;
@@ -22,9 +23,9 @@ public class OWLAPI2VocabularyExtractorTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromPhysicalURI((new File(owlfile)).toURI());
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(ontology);
 		int countClass = 0;
 		int countProp = 0;
@@ -48,11 +49,11 @@ public class OWLAPI2VocabularyExtractorTest extends TestCase {
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		manager.loadOntologyFromPhysicalURI((new File(owlfile1)).toURI());
-		manager.loadOntologyFromPhysicalURI((new File(owlfile2)).toURI());
-		manager.loadOntologyFromPhysicalURI((new File(owlfile3)).toURI());
+		manager.loadOntologyFromOntologyDocument((new File(owlfile1)));
+		manager.loadOntologyFromOntologyDocument((new File(owlfile2)));
+		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
-		OWLAPI2VocabularyExtractor ext = new OWLAPI2VocabularyExtractor();
+		OWLAPI3VocabularyExtractor ext = new OWLAPI3VocabularyExtractor();
 		Set<Predicate> preds = ext.getVocabulary(manager.getOntologies());
 		int countClass = 0;
 		int countProp = 0;
