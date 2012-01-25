@@ -1,6 +1,5 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.reformulation.semindex.tests;
 
-import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;

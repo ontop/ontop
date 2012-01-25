@@ -1,7 +1,5 @@
-package it.unibz.krdb.obda.SemanticIndex;
+package it.unibz.krdb.obda.reformulation.semindex.tests;
 
-import it.unibz.krdb.obda.reformulation.tests.DAGChainTest;
-import it.unibz.krdb.obda.reformulation.tests.SemanticReductionTest;
 import it.unibz.krdb.obda.reformulation.tests.SigmaTest;
 import junit.framework.TestSuite;
 

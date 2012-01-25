@@ -1,6 +1,5 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.reformulation.semindex.tests;
 
-import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;

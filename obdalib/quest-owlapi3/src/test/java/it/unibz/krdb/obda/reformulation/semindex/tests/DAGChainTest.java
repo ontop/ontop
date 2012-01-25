@@ -1,6 +1,5 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.krdb.obda.reformulation.semindex.tests;
 
-import it.unibz.krdb.obda.SemanticIndex.SemanticIndexHelper;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
