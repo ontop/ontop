@@ -115,7 +115,7 @@ public class QuestOWL extends org.semanticweb.owlapi.reasoner.impl.OWLReasonerBa
 
 	}
 
-	private void setPreferences(QuestPreferences preferences) {
+	public void setPreferences(QuestPreferences preferences) {
 		this.preferences = preferences;
 	}
 

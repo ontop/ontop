@@ -12,19 +12,19 @@ import java.util.Iterator;
 
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
-public class OWLAPI2IndividualIterator implements Iterator<OWLIndividualAxiom> {
+public class OWLAPI3IndividualIterator implements Iterator<OWLIndividualAxiom> {
 
 	private Iterator<Assertion> assertions = null;
 
 	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
 	
-	public OWLAPI2IndividualIterator(OBDAModel model) throws Exception {
+	public OWLAPI3IndividualIterator(OBDAModel model) throws Exception {
 		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
 		Iterator<Assertion> assertions = materializer.getAssertionIterator();
 		setAssertions(assertions);
 	}
 	
-	public OWLAPI2IndividualIterator(Iterator<Assertion> assertions) {
+	public OWLAPI3IndividualIterator(Iterator<Assertion> assertions) {
 		setAssertions(assertions);
 	}
 	
