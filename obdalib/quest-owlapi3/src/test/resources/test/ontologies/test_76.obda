@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA version="1.0">
+  <SavedQueries>
+    <Query id="bc" text="SELECT $x WHERE {$x dllite:R:r1}"/>
+    <Query id="aa" text="SELECT $x WHERE {:s1 dllite:S$x}"/>
+    <Query id="ad" text="SELECT $x WHERE {$x dllite:S:s2}"/>
+    <Query id="ce" text="ASK WHERE {:s1 dllite:R:s2}"/>
+    <Query id="ca" text="SELECT $x WHERE {:s1 dllite:R$x}"/>
+    <Query id="a" text="SELECT $x WHERE {:r1 dllite:S$x}"/>
+    <Query id="cf" text="ASK WHERE {:s2 dllite:R:s1}"/>
+    <Query id="f" text="ASK WHERE {:r2 dllite:S:r1}"/>
+    <Query id="ae" text="ASK WHERE {:s1 dllite:S:s2}"/>
+    <Query id="d" text="SELECT $x WHERE {$x dllite:S:r2}"/>
+    <Query id="be" text="ASK WHERE {:r1 dllite:R:r2}"/>
+    <Query id="cc" text="SELECT $x WHERE {$x dllite:R:s1}"/>
+    <Query id="bf" text="ASK WHERE {:r2 dllite:R:r1}"/>
+    <Query id="e" text="ASK WHERE {:r1 dllite:S:r2}"/>
+    <Query id="bd" text="SELECT $x WHERE {$x dllite:R:r2}"/>
+    <Query id="af" text="ASK WHERE {:s2 dllite:S:s1}"/>
+    <Query id="ba" text="SELECT $x WHERE {:r1 dllite:R$x}"/>
+    <Query id="bb" text="SELECT $x WHERE {:r2 dllite:R$x}"/>
+    <Query id="cd" text="SELECT $x WHERE {$x dllite:R:s2}"/>
+    <Query id="ac" text="SELECT $x WHERE {$x dllite:S:s1}"/>
+    <Query id="cb" text="SELECT $x WHERE {:s2 dllite:R$x}"/>
+    <Query id="b" text="SELECT $x WHERE {:r2 dllite:S$x}"/>
+    <Query id="c" text="SELECT $x WHERE {$x dllite:S:r1}"/>
+    <Query id="ab" text="SELECT $x WHERE {:s2 dllite:S$x}"/>
+  </SavedQueries>
+</OBDA>

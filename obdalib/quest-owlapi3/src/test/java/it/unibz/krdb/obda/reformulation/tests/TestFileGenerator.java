@@ -66,15 +66,15 @@ public class TestFileGenerator {
 																																	.getLogger(this
 																																			.getClass());
 
-	public TestFileGenerator(String obdalocation, String xmllocation, String tl, String mode) {
-		this.obdalocation = obdalocation;
-		this.xmllocation = xmllocation;
-		this.testlocation = tl + "it/unibz/krdb/obda/reformulation/tests/";
+	public TestFileGenerator(String basefolder, String mode) {
+		this.obdalocation = "file://" + basefolder + "src/test/resources/test/ontologies/";
+		this.xmllocation =  basefolder + "src/test/resources/test/ontologies/";
+		this.testlocation =  basefolder + "src/test/java/it/unibz/krdb/obda/reformulation/tests/";
 		this.mode = mode;
 		tests = new Vector<String>();
 		expressions = new Vector<it.unibz.krdb.obda.reformulation.tests.OntologyGeneratorExpression>();
 		// manager = OWLManager.createOWLOntologyManager();
-		log.info("Main Location: {}", tl);
+		log.info("Main Location: {}", basefolder);
 		log.info("Location for OBDA files: {}", obdalocation);
 		log.info("Location for XML files: {}", xmllocation);
 		log.info("Mode: {}", mode);
@@ -83,19 +83,18 @@ public class TestFileGenerator {
 
 	public static void main(String[] args) throws Exception {
 
-		if (args.length != 5) {
-			throw new Exception("The program requires 5 parameter.\n" + "1. path to location of obda files\n"
-					+ "2. path to location of xml files\n" + "3. path to the location where to put the test files\n"
-					+ "4. path to the input file\n" + "5. the query mode. Can either be 'sparql' or 'datalog'");
+		if (args.length != 3) {
+			throw new Exception("The program requires 3 parameters.\n" + "1. root folder for the tests"
+					+  "2. the query mode. Can either be 'sparql' or 'datalog'" 
+					+ "3. path to the input file\n");
 		}
 
-		String obdaloc = args[0];
-		String xmlloc = args[1];
-		String tl = args[2];
-		String inputfile = args[3];
-		String mode = args[4];
+		String tl = args[0];
+		String mode = args[1];
+		String inputfile = args[2];
+		
 
-		TestFileGenerator gen = new TestFileGenerator(obdaloc, xmlloc, tl, mode);
+		TestFileGenerator gen = new TestFileGenerator(tl, mode);
 		gen.parseInputFile(inputfile);
 	}
 
@@ -293,7 +292,8 @@ public class TestFileGenerator {
 	private OWLOntology createOntology(String testid, String abox, String tbox, OWLOntologyManager manager, OWLDataFactory dataFactory) throws Exception {
 
 		
-		URI uri = URI.create(ONTOURI + "test.owl");
+//		URI uri = URI.create(ONTOURI + "test.owl");
+		URI uri = URI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl");
 
 		/*
 		 * Adding the TBox
@@ -351,6 +351,7 @@ public class TestFileGenerator {
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology onto = manager.createOntology(IRI.create(URI.create(ONTOURI + "test_" + testid.trim() + ".owl")));
+//		OWLOntology onto = manager.createOntology(IRI.create("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl"));
 
 		for (int i = 0; i < axioms.size(); i++) {
 			OWLAxiom vex = axioms.get(i);
@@ -595,8 +596,8 @@ public class TestFileGenerator {
 			out.append("import java.util.List;\n");
 			out.append("import org.slf4j.Logger;\n");
 			out.append("import org.slf4j.LoggerFactory;\n");
-			out.append("import it.unibz.krdb.obda.owlapi.ReformulationPlatformPreferences;\n");
 			out.append("import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;\n");
+			out.append("import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;\n");
 
 			out.newLine();
 			out.newLine();
@@ -608,7 +609,7 @@ public class TestFileGenerator {
 			out.append("\t\ttester = new Tester(propfile);\n");
 			out.append("\t}\n");
 
-			out.append("        private void test_function(String ontoname, ReformulationPlatformPreferences pref) throws Exception {\n");
+			out.append("        private void test_function(String ontoname, QuestPreferences pref) throws Exception {\n");
 			out.append("    \tlog.debug(\"Test case: {}\", ontoname);\n");
 			out.append("    \tlog.debug(\"Quest configuration: {}\", pref.toString());\n");
 			out.append("    \ttester.load(ontoname, pref);\n");
@@ -627,13 +628,13 @@ public class TestFileGenerator {
 			for (int i = 0; i < tests.size(); i++) {
 				out.append("\tpublic void " + tests.get(i) + "DirectNoEqNoSig() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -643,13 +644,13 @@ public class TestFileGenerator {
 
 				out.append("\tpublic void " + tests.get(i) + "DirectEqNoSig() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -660,13 +661,13 @@ public class TestFileGenerator {
 				
 				out.append("\tpublic void " + tests.get(i) + "DirectNoEqSigma() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -676,13 +677,13 @@ public class TestFileGenerator {
 
 				out.append("\tpublic void " + tests.get(i) + "DirectEqSigma() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -693,13 +694,13 @@ public class TestFileGenerator {
 		
 				out.append("\tpublic void " + tests.get(i) + "SINoEqNoSig() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -709,13 +710,13 @@ public class TestFileGenerator {
 	
 				out.append("\tpublic void " + tests.get(i) + "SIEqNoSig() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -727,13 +728,13 @@ public class TestFileGenerator {
 	
 				out.append("\tpublic void " + tests.get(i) + "SINoEqSigma() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");
@@ -743,13 +744,13 @@ public class TestFileGenerator {
 	
 				out.append("\tpublic void " + tests.get(i) + "SIEqSigma() throws Exception {");
 				out.newLine();
-				out.append("ReformulationPlatformPreferences pref = new ReformulationPlatformPreferences();\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
-				out.append("pref.setCurrentValueOf(ReformulationPlatformPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+				out.append("QuestPreferences pref = new QuestPreferences();\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n"); 
+				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
 				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
 				out.append("\t\ttest_function(ontoname,pref);\n");
 				out.append("\t}");

@@ -112,10 +112,10 @@ public class Tester {
 
 		reasoner = (QuestOWL) fac.createReasoner(ontology);
 
-//		reasoner.loadOBDAModel(apic);
+		// reasoner.loadOBDAModel(apic);
 		// reasoner.loadOntologies(manager.getOntologies());
-//		reasoner.setPreferences(pref);
-//		reasoner.classify();
+		// reasoner.setPreferences(pref);
+		// reasoner.classify();
 
 		queryMap = new HashMap<String, String>();
 		Vector<QueryControllerEntity> vec = apic.getQueryController().getElements();
@@ -188,7 +188,8 @@ public class Tester {
 		// apic.loadData(new File(owlfile).toURI());
 
 		DataManager ioManager = new DataManager(apic);
-		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(), apic.getPrefixManager());
+		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
+				apic.getPrefixManager());
 		fillPrefixManager();
 	}
 
@@ -275,13 +276,19 @@ public class Tester {
 
 	private String getPrefix() {
 		String queryString = "";
-		String defaultNamespace = ontology.getOntologyID().getOntologyIRI().toString();
-		if (defaultNamespace.endsWith("#")) {
-			queryString += "BASE <" + defaultNamespace.substring(0, defaultNamespace.length() - 1) + ">\n";
-		} else {
-			queryString += "BASE <" + defaultNamespace + ">\n";
-		}
-		queryString += "PREFIX :   <" + defaultNamespace + "#>\n";
+		// String defaultNamespace =
+		// ontology.getOntologyID().getOntologyIRI().toString();
+		// if (defaultNamespace.endsWith("#")) {
+		// queryString += "BASE <" + defaultNamespace.substring(0,
+		// defaultNamespace.length() - 1) + ">\n";
+		// } else {
+		// queryString += "BASE <" + defaultNamespace + ">\n";
+		// }
+		// queryString += "PREFIX :   <" + defaultNamespace + "#>\n";
+
+		String defaultNamespace = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
+		queryString += "BASE <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl>\n";
+		queryString += "PREFIX :   <http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#>\n";
 
 		queryString += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n";
 		queryString += "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n";

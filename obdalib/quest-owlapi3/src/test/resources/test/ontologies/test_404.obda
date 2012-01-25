@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA version="1.0">
+  <SavedQueries>
+    <Query id="i" text="SELECT $x $y WHERE {$x dllite:C3$y}"/>
+    <Query id="a" text="SELECT $x $y WHERE {$x dllite:A1$y}"/>
+    <Query id="d" text="SELECT $x $y WHERE {$x dllite:B1$y}"/>
+    <Query id="f" text="SELECT $x $y WHERE {$x dllite:B3$y}"/>
+    <Query id="c" text="SELECT $x $y WHERE {$x dllite:A3$y}"/>
+    <Query id="g" text="SELECT $x $y WHERE {$x dllite:C1$y}"/>
+    <Query id="e" text="SELECT $x $y WHERE {$y dllite:B2$x}"/>
+    <Query id="b" text="SELECT $x $y WHERE {$y dllite:A2$x}"/>
+    <Query id="h" text="SELECT $x $y WHERE {$y dllite:C2$x}"/>
+  </SavedQueries>
+</OBDA>

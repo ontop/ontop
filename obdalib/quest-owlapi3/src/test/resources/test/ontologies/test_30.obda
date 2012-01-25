@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+]>
+<OBDA version="1.0">
+  <SavedQueries>
+    <Query id="d" text="SELECT $x $y WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="k" text="SELECT $x $y $m WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="l" text="SELECT $x $z $y WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="n" text="SELECT $x $y $z $m WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="e" text="SELECT $x $z WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="j" text="SELECT $x $y $z WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="h" text="SELECT $y $z WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="g" text="SELECT $y $x WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="c" text="SELECT $z WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="m" text="SELECT $x $z $m WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="i" text="SELECT $y $m WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="a" text="SELECT $x WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="b" text="SELECT $y WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+    <Query id="f" text="SELECT $x $m WHERE {$x dllite:R$y . $x dllite:R$z . $y dllite:S$m . $z dllite:S$m}"/>
+  </SavedQueries>
+</OBDA>
