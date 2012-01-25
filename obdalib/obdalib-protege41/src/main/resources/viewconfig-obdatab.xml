@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+  <VSNode splits="1.0">
+		<CNode>
+		  <Component label="Datasources Selector">
+		    <Property id="pluginId"
+		      value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent"/>
+		  </Component>
+		  <Component label="Mappings Manager">
+		    <Property id="pluginId"
+		      value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent"/>
+		  </Component>
+		  <Component label="RDBMS source schema inspector">
+		    <Property id="pluginId"
+		      value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/>
+		  </Component>
+		  <Component label="SQL query interface">
+		    <Property id="pluginId"
+		      value="it.unibz.krdb.obda.protege4.SQLQueryInterfaceViewComponent"/>
+		  </Component>
+		</CNode>
+	</VSNode>
+</layout>
