@@ -275,7 +275,7 @@
 						<!-- general information -->
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
-						<Bundle-Description>The OBDA and Quest plugins for Protege 4.0</Bundle-Description>
+						<Bundle-Description>The OBDA plugin for Protege 4.1</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research
 							Centre</Bundle-Vendor>
 
