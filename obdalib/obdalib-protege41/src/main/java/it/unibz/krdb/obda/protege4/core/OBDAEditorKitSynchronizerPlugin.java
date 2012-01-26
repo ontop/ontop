@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
@@ -32,8 +33,15 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	ProtegeOBDAPreferences obdaPref = null;
 	ProtegeReformulationPlatformPreferences refplatPref = null;
 	
+	@Override
+	protected void setup(EditorKit editorKit) {
+        super.setup(editorKit);
+    } 
+	
+	@Override
 	public void initialise() throws Exception {
-
+		
+		
 		/***
 		 * Each editor kit has its own instance of the ProtegePluginController.
 		 * Note, the OBDA model is inside this object (do

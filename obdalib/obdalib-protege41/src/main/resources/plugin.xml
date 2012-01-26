@@ -111,6 +111,7 @@
 
   <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
   	<class value="it.unibz.krdb.obda.protege4.core.OBDAEditorKitSynchronizerPlugin"/>
+  	<editorKitId value="OWLEditorKit"/>
   </extension>
   
  	<!-- A type of plugin which defines a new assertion controller type which should 
