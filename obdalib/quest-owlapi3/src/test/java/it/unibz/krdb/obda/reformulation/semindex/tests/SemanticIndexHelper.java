@@ -51,20 +51,20 @@ public class SemanticIndexHelper {
     public final static Logger log = LoggerFactory
             .getLogger(SemanticIndexHelper.class);
 
-    public static final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+    public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
     //    public static OBDAModel apic;
     
-    public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+    public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     
     public transient Connection conn;
 
-    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+    private  OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     
-    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+    private  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
-    private final static String owl_exists = "::__exists__::";
-    private final static String owl_inverse_exists = "::__inverse__exists__::";
-    private final static String owl_inverse = "::__inverse__::";
+    private String owl_exists = "::__exists__::";
+    private String owl_inverse_exists = "::__inverse__exists__::";
+    private String owl_inverse = "::__inverse__::";
 
     public SemanticIndexHelper() {
         JdbcDataSource ds = new JdbcDataSource();

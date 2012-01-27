@@ -11,6 +11,6 @@ public interface OBDAOWLReasonerFactory extends OWLReasonerFactory {
 
 	public abstract void setPreferenceHolder(Properties preference);
 
-	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager);
+//	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager);
 
 }

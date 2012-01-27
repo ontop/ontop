@@ -8,9 +8,11 @@ import java.util.Properties;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +25,8 @@ public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 
 	private OBDAModel apic;
 	private Properties preferences = null;
-	private String id;
-	private String name;
+	private String id = "Quest";
+	private String name = "Quest";
 
 	private final Logger log = LoggerFactory.getLogger(QuestOWLFactory.class);
 
@@ -93,27 +95,27 @@ public class QuestOWLFactory implements OBDAOWLReasonerFactory {
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology arg0) {
-		return new QuestOWL(arg0, apic, null, null, preferences);
+	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
+		return new QuestOWL(ontology, apic, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology arg0, OWLReasonerConfiguration arg1) throws IllegalConfigurationException {
-		return new QuestOWL(arg0, apic, null, null, preferences);
+	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+		return new QuestOWL(ontology, apic, config, BufferingMode.NON_BUFFERING, preferences);
 	}
 
 	@Override
-	public OWLReasoner createReasoner(OWLOntology arg0) {
-		return new QuestOWL(arg0, apic, null, null, preferences);
+	public OWLReasoner createReasoner(OWLOntology ontology) {
+		return new QuestOWL(ontology, apic, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 	}
 
 	@Override
-	public OWLReasoner createReasoner(OWLOntology arg0, OWLReasonerConfiguration arg1) throws IllegalConfigurationException {
-		return new QuestOWL(arg0, apic, null, null, preferences);
+	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+		return new QuestOWL(ontology, apic, config, BufferingMode.BUFFERING, preferences);
 	}
 
-	@Override
-	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
-		return new QuestOWL(null, apic, null, null, preferences);
-	}
+//	@Override
+//	public OBDAOWLReasoner createReasoner(OWLOntologyManager manager) {
+//		return new QuestOWL(null, apic, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
+//	}
 }

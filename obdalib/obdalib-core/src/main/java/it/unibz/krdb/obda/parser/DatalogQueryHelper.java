@@ -46,6 +46,8 @@ public class DatalogQueryHelper {
 		Map<String, String> prefixMapping = prefixManager.getPrefixMap();
 		Set<String> prefixes = prefixMapping.keySet();
 		for (String prefix : prefixes) {
+			if (prefix.trim().equals(":"))
+				continue;
 //			if (prefix.equals("version"))  continue;
 
 //			if (prefix.equals("xml:base"))
@@ -55,8 +57,13 @@ public class DatalogQueryHelper {
 //				prefixString +=
 //					"PREFIX : <" + prefixMapping.get(prefix) + ">\n";
 //			else
+			if (prefix.trim().endsWith(":")) {
 				prefixString +=
-					"PREFIX " + prefix + ": <" + prefixMapping.get(prefix) + ">\n";
+					"PREFIX " + prefix + " <" + prefixMapping.get(prefix) + ">\n";
+			} else {
+				prefixString +=
+						"PREFIX " + prefix + ": <" + prefixMapping.get(prefix) + ">\n";
+			}
 		}
 		prefixString = baseString + prefixString; // the base prefix should always on top.
 		prefixString = prefixString+ "PREFIX "+ OBDA_PREFIX_MAPPING_PREDICATE + ": <" + OBDA_URI_MAPPING_PREDICATE +">\n";

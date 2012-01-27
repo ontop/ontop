@@ -194,7 +194,22 @@ public class OBDAModelManager implements Disposable {
 				setupNewOBDAModel();
 				getActiveOBDAModel().getPrefixManager().setDefaultNamespace(
 						source.getActiveOntology().getOntologyID().getOntologyIRI().toURI().toString());
+				
+				
+				ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+				if (factory instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
+					ProtegeOBDAOWLReformulationPlatformFactory questfactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
+					ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit
+							.get(QuestPreferences.class.getName());
+					questfactory.setPreferences(reasonerPreference);
+					questfactory.setOBDAModel(getActiveOBDAModel());
+				}
+				
 				fireActiveOBDAModelChange();
+				
+				
+				
+				
 				inititializing = false;
 				break;
 
@@ -259,6 +274,7 @@ public class OBDAModelManager implements Disposable {
 						refactorer.run(); // adding type information to the
 											// mapping predicates.
 					}
+					
 				} catch (Exception e) {
 					log.error(e.getMessage());
 				} finally {
@@ -296,9 +312,9 @@ public class OBDAModelManager implements Disposable {
 				log.info("REASONER CHANGED");
 				if ((!inititializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
 
-					ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
-					if (factory instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
-						ProtegeOBDAOWLReformulationPlatformFactory questfactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
+					ProtegeOWLReasonerInfo fac = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+					if (fac instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
+						ProtegeOBDAOWLReformulationPlatformFactory questfactory = (ProtegeOBDAOWLReformulationPlatformFactory) fac;
 						ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit
 								.get(QuestPreferences.class.getName());
 						questfactory.setPreferences(reasonerPreference);

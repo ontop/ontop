@@ -9,10 +9,12 @@ import junit.framework.TestCase;
 
 public class DAGEdgeIteratorTest extends TestCase {
 
-	SemanticIndexHelper	helper	= new SemanticIndexHelper();
+	SemanticIndexHelper	helper	= null;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		helper = new SemanticIndexHelper();
 	}
 
 	public void testEnumerationOfSubClass() throws Exception {
