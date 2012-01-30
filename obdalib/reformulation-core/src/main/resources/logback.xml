@@ -41,6 +41,8 @@
 	<logger name="it.unibz.krdb.obda.owlrefplatform.core.dag" level="DEBUG" />
 	-->
 	
+	<logger name="it.unibz.krdb.obda.owlapi3" level="INFO"/>
+	
 	<!-- Other -->
 	
 	<logger name="it.unibz.krdb.obda.model" level="DEBUG" />

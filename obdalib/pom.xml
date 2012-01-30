@@ -29,6 +29,7 @@
 		<module>quest-owlapi2</module>
 		<module>quest-owlapi3</module>
 		<module>quest-db</module>
+		<module>quest-benchmarks</module>
 	</modules>
 
 	<properties>

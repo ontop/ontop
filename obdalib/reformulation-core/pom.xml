@@ -33,19 +33,13 @@
 			<artifactId>xsdlib</artifactId>
 			<version>20030225</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>2.2.0-r1317</version>
-		</dependency>
 
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi</artifactId>
-			<version>3.2.3-r1824</version>
-			<classifier>jar</classifier>
-		</dependency>
- -->
+
+
+		<!-- <dependency> <groupId>net.sourceforge.owlapi</groupId> <artifactId>owlapi</artifactId> 
+			<version>2.2.0-r1317</version> </dependency> <dependency> <groupId>net.sourceforge.owlapi</groupId> 
+			<artifactId>owlapi</artifactId> <version>3.2.3-r1824</version> <classifier>jar</classifier> 
+			</dependency> -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -81,6 +75,19 @@
 			<version>5.1.18</version>
 			<!-- <scope>test</scope> -->
 		</dependency>
+
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgrapht</artifactId>
+			<version>0.8.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+			<version>0.8.3</version>
+		</dependency>
+
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
