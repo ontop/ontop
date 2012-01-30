@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -15,6 +16,7 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
+import it.unibz.krdb.obda.ontology.PropertySomeDataTypeRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
@@ -133,13 +135,25 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new PropertySomeRestrictionImpl(p, inverse);
 	}
 
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean inverse, OClass filler) {
+	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler) {
 		if (p.getArity() != 2) {
 			throw new IllegalArgumentException("Roles must have arity = 2");
 		}
-		if (filler == null)
+		if (filler == null) {
 			throw new IllegalArgumentException("Must provide an atomic concept as a filler");
-		return new PropertySomeClassRestrictionImpl(p, inverse, filler);
+		}
+		return new PropertySomeClassRestrictionImpl(p, isInverse, filler);
+	}
+
+	@Override
+	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler) {
+		if (p.getArity() != 2) {
+			throw new IllegalArgumentException("Roles must have arity = 2");
+		}
+		if (filler == null) {
+			throw new IllegalArgumentException("Must provide a data type object as the filler");
+		}
+		return new PropertySomeDataTypeRestrictionImpl(p, isInverse, filler);
 	}
 
 	public OClass createClass(Predicate p) {
@@ -202,4 +216,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return createDataProperty(URI.create(p));
 	}
 
+	@Override
+	public DataType createDataType(Predicate p) {
+		return new DataTypeImpl(p);
+	}
 }

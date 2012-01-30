@@ -32,6 +32,8 @@ public interface OntologyFactory {
 	
 	public Property createDataProperty(String uri);
 	
+	public DataType createDataType(Predicate p);
+	
 	public Ontology createOntology(URI uri);
 	
 	public Ontology createOntology();
@@ -44,6 +46,8 @@ public interface OntologyFactory {
 
 	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler);
 
+	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
+	
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
 
 	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, URIConstant o1, URIConstant o2);
@@ -51,8 +55,4 @@ public interface OntologyFactory {
 	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, URIConstant o1, ValueConstant o2);
 	
 	public ClassAssertion createClassAssertion(Predicate concept, URIConstant object);
-	
-	
-
-
 }

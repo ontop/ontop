@@ -29,7 +29,7 @@ public class ReformulationTest extends TestCase {
     		Set<String> res = tester.executeQuery(id);
     		assertTrue("Expected " + exp + " Result " + res, exp.size() == res.size());
     		for (String realResult : res) {
-    			assertTrue("expeted: " + exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
+    			assertTrue("expected: " + exp.toString() + " obtained: " + res.toString(), exp.contains(realResult));
     		}
     	}
     }

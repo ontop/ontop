@@ -1,32 +1,12 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.net.URI;
 
 public class OBDAVocabulary {
 
-	/* Boolean predicate URIs */
-
-	public static final Predicate	AND	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#AND"), 2);
-
-	public static final Predicate	EQ	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#EQ"), 2);
-
-	public static final Predicate	GTE	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#GTE"), 2);
-
-	public static final Predicate	GT	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#GT"), 2);
-
-	public static final Predicate	LTE	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#LTE"), 2);
-
-	public static final Predicate	LT	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#LT"), 2);
-
-	public static final Predicate	NEQ	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#NEQ"), 2);
-
-	public static final Predicate	NOT	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#NOT"), 1);
-
-	public static final Predicate	OR	= new BooleanOperationPredicateImpl(URI.create("http://obdalib.org/predicates/boolean#OR"), 2);
-
-	
 	/* Boolean predicate URIs */
 
 	public static final String	strAND	= "http://obdalib.org/predicates/boolean#AND";
@@ -46,4 +26,55 @@ public class OBDAVocabulary {
 	public static final String	strNOT	= "http://obdalib.org/predicates/boolean#NOT";
 
 	public static final String	strOR	= "http://obdalib.org/predicates/boolean#OR";
+	
+	
+	/* Boolean predicates */
+
+	public static final Predicate	AND	= new BooleanOperationPredicateImpl(URI.create(strAND), 2);
+
+	public static final Predicate	EQ	= new BooleanOperationPredicateImpl(URI.create(strEQ), 2);
+
+	public static final Predicate	GTE	= new BooleanOperationPredicateImpl(URI.create(strGTE), 2);
+
+	public static final Predicate	GT	= new BooleanOperationPredicateImpl(URI.create(strGT), 2);
+
+	public static final Predicate	LTE	= new BooleanOperationPredicateImpl(URI.create(strLTE), 2);
+
+	public static final Predicate	LT	= new BooleanOperationPredicateImpl(URI.create(strLT), 2);
+
+	public static final Predicate	NEQ	= new BooleanOperationPredicateImpl(URI.create(strNEQ), 2);
+
+	public static final Predicate	NOT	= new BooleanOperationPredicateImpl(URI.create(strNOT), 1);
+
+	public static final Predicate	OR	= new BooleanOperationPredicateImpl(URI.create(strOR), 2);
+	
+	
+	/* Data type predicate URIs */
+	
+	public static final String RDFS_LITERAL_URI = "http://www.w3.org/2000/01/rdf-schema#Literal";
+		
+	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
+	
+	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#int";
+	
+	public static final String XSD_DOUBLE_URI = "http://www.w3.org/2001/XMLSchema#double";
+	
+	public static final String XSD_DATE_URI = "http://www.w3.org/2001/XMLSchema#date";
+	
+	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
+	
+	
+	/* Data type predicates */
+	
+	public static final Predicate RDFS_LITERAL = new DataTypePredicateImpl(URI.create(RDFS_LITERAL_URI), COL_TYPE.LITERAL);
+	
+	public static final Predicate XSD_STRING = new DataTypePredicateImpl(URI.create(XSD_STRING_URI), COL_TYPE.STRING);
+	
+	public static final Predicate XSD_INTEGER = new DataTypePredicateImpl(URI.create(XSD_INTEGER_URI), COL_TYPE.INTEGER);
+	
+	public static final Predicate XSD_DOUBLE = new DataTypePredicateImpl(URI.create(XSD_DOUBLE_URI), COL_TYPE.DOUBLE);
+	
+	public static final Predicate XSD_DATE = new DataTypePredicateImpl(URI.create(XSD_DATE_URI), COL_TYPE.DATE);
+	
+	public static final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(URI.create(XSD_BOOLEAN_URI), COL_TYPE.BOOLEAN);
 }

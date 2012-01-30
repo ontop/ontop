@@ -1,8 +1,7 @@
 package it.unibz.krdb.obda.model.impl;
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
-
-import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class ValueConstantImpl implements ValueConstant {
 
@@ -13,7 +12,9 @@ public class ValueConstantImpl implements ValueConstant {
 
 	private final String value;
 
-	private final XSDatatype type;
+	private final String language;
+	
+	private final Predicate.COL_TYPE type;
 
 	private final int identifier;
 
@@ -25,8 +26,13 @@ public class ValueConstantImpl implements ValueConstant {
 	 * @param type
 	 *            the constant type.
 	 */
-	protected ValueConstantImpl(String value, XSDatatype type) {
+	protected ValueConstantImpl(String value, Predicate.COL_TYPE type) {
+		this(value, "", type);
+	}
+	
+	protected ValueConstantImpl(String value, String language, Predicate.COL_TYPE type) {
 		this.value = value;
+		this.language = language;
 		this.type = type;
 		this.identifier = value.hashCode();
 	}
@@ -60,13 +66,21 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public XSDatatype getType() {
+	public String getLanguage() {
+		return language;
+	}
+	
+	@Override
+	public Predicate.COL_TYPE getType() {
 		return type;
 	}
 
 	@Override
 	public String toString() {
-		// TODO add the data type support
-		return "\"" + getValue().toString() + "\"";
+		String template = "%s";
+		if (getType() == Predicate.COL_TYPE.LITERAL || getType() == Predicate.COL_TYPE.STRING) {
+			template = "\"" + template + "\""; // add double quotes
+		}		
+		return String.format(template, getValue().toString());
 	}
 }

@@ -10,21 +10,26 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.AndOperator;
+import it.unibz.krdb.sql.api.BooleanLiteral;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
-import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
+import it.unibz.krdb.sql.api.DecimalLiteral;
 import it.unibz.krdb.sql.api.ICondition;
 import it.unibz.krdb.sql.api.IValueExpression;
+import it.unibz.krdb.sql.api.IntegerLiteral;
 import it.unibz.krdb.sql.api.Literal;
 import it.unibz.krdb.sql.api.OrOperator;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.Selection;
+import it.unibz.krdb.sql.api.StringLiteral;
+import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -190,8 +195,22 @@ public class MappingAnalyzer {
 			t2 = dataFactory.getVariable(termRightName);
 		} else if (right instanceof Literal) {
 			Literal literal = (Literal) right;
-			termRightName = literal.get().toString();
-			t2 = dataFactory.getValueConstant(termRightName);
+			termRightName = literal.get().toString();			
+			if (literal instanceof StringLiteral) {
+				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.STRING);
+			} else if (literal instanceof IntegerLiteral) {
+				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.INTEGER);
+			} else if (literal instanceof DecimalLiteral) {
+				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DOUBLE);
+			} 
+//			else if (literal instanceof DateLiteral) {  TODO: Create the parsing rule for Date data type
+//				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DATE);
+//			} 
+			else if (literal instanceof BooleanLiteral) {
+				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.BOOLEAN);
+			} else {
+				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.LITERAL);
+			}
 		}
 
 		Operator op = pred.getOperator();

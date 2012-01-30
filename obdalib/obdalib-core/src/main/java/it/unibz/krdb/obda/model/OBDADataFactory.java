@@ -60,6 +60,22 @@ public interface OBDADataFactory extends Serializable {
 	public Predicate getClassPredicate(String  name);
 	
 	public Predicate getClassPredicate(URI name);
+
+	/*
+	 * Data types
+	 */
+	
+	public Predicate getDataTypePredicateLiteral(URI name);
+	
+	public Predicate getDataTypePredicateString(URI name);
+	
+	public Predicate getDataTypePredicateInteger(URI name);
+	
+	public Predicate getDataTypePredicateDouble(URI name);
+	
+	public Predicate getDataTypePredicateDate(URI name);
+	
+	public Predicate getDataTypePredicateBoolean(URI name);
 	
 	/*
 	 * Boolean atoms
@@ -179,7 +195,7 @@ public interface OBDADataFactory extends Serializable {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getValueConstant(String value, XSDatatype type);
+	public ValueConstant getValueConstant(String value, Predicate.COL_TYPE type);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a

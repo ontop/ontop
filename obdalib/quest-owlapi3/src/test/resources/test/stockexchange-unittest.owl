@@ -218,7 +218,7 @@
 
     <owl:DatatypeProperty rdf:about="#dateOfBirth">
         <rdfs:domain rdf:resource="#PhysicalPerson"/>
-        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
     
 
@@ -299,7 +299,7 @@
 
     <owl:DatatypeProperty rdf:about="#listdate">
         <rdfs:domain rdf:resource="#StockExchangeList"/>
-        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
     
 
@@ -316,7 +316,7 @@
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#membershipDate -->
 
     <owl:DatatypeProperty rdf:about="#membershipDate">
-        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
     
 
@@ -352,7 +352,7 @@
 
     <owl:DatatypeProperty rdf:about="#transactionDate">
         <rdfs:domain rdf:resource="#Transaction"/>
-        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
     
 
@@ -361,7 +361,7 @@
 
     <owl:DatatypeProperty rdf:about="#transactionID">
         <rdfs:domain rdf:resource="#Transaction"/>
-        <rdfs:range rdf:resource="&xsd;date"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
     
 

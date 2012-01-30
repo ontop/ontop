@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
@@ -95,6 +96,12 @@ public class DAGNode implements Serializable {
 			if (((Property) description).isInverse()) {
 				bf.append("^-");
 			}
+			
+		} else if (description instanceof DataType) {
+		
+			DataType datatype = (DataType) description;
+			bf.append(datatype.toString());
+			
 		} else {
 			throw new IllegalArgumentException("Invalid description for a node. Description: " + description);
 		}

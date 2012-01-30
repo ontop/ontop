@@ -121,12 +121,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 			//System.out.println(ass.toString());
 			count += 1;
 		}
-		assertTrue("count: " + count, count == 9);
+		assertTrue("count: " + count, count == 7);
 
 		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 9);
+		assertTrue("count: " + count, count == 7);
 
 		// dbman.getDropDDL(out);
 

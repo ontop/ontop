@@ -131,8 +131,9 @@ public class CQIEImpl implements CQIE, ListListener {
 		List<Atom> copyBody = new ArrayList<Atom>(body.size()+10);
 
 		for (Atom atom : body) {
-			copyBody.add(atom.clone());
-
+			if (atom != null) {
+				copyBody.add(atom.clone());
+			}
 		}
 
 		return new CQIEImpl(copyHead, copyBody);

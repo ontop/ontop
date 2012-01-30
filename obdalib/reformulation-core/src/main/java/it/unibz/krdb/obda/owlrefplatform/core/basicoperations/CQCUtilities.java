@@ -14,10 +14,12 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertySomeDataTypeRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
@@ -141,6 +143,10 @@ public class CQCUtilities {
 		while (loop) {
 			loop = false;
 			for (Atom atom : body) {
+				if (atom == null) {
+					continue;
+				}
+				
 				Atom patom = (Atom) atom;
 				Predicate predicate = atom.getPredicate();
 
@@ -235,7 +241,23 @@ public class CQCUtilities {
 							newTerm2 = fac.getNondistinguishedVariable();
 							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
 						}
-					} else {
+					} else if (right instanceof DataType) { 
+						// Does nothing
+					} else if (right instanceof PropertySomeDataTypeRestriction) { 
+						PropertySomeDataTypeRestriction rightExistential = (PropertySomeDataTypeRestriction) right;
+						newPredicate = rightExistential.getPredicate();
+						if (rightExistential.isInverse()) {
+							throw new RuntimeException("ERROR: The data property of some restriction should not have an inverse!");
+						} else {
+							if (newTerm1 instanceof AnonymousVariable)
+								continue;
+							newTerm1 = oldTerm1;
+							newTerm2 = fac.getNondistinguishedVariable();
+							newAtom = fac.getAtom(newPredicate, newTerm1, newTerm2);
+						}
+					}  
+					
+					else {
 						throw new RuntimeException("ERROR: Unsupported dependency: " + pi.toString());
 					}
 

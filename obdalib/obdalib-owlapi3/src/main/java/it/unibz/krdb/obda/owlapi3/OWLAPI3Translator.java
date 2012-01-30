@@ -5,9 +5,11 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.LanguageProfile;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -47,6 +49,7 @@ import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
+import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentDataPropertiesAxiom;
@@ -72,6 +75,7 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,8 +130,7 @@ public class OWLAPI3Translator {
 		Ontology translation = ofac.createOntology(uri);
 		for (OWLOntology onto : ontologies) {
 //			uris.add(onto.getIRI().toURI());
-			Ontology aux;
-			aux = translator.translate(onto);
+			Ontology aux = translator.translate(onto);
 			translation.addConcepts(aux.getConcepts());
 			translation.addRoles(aux.getRoles());
 			translation.addAssertions(aux.getAssertions());
@@ -235,15 +238,14 @@ public class OWLAPI3Translator {
 
 					OWLDataPropertyRangeAxiom aux = (OWLDataPropertyRangeAxiom) axiom;
 					Property role = getRoleExpression(aux.getProperty());
-					OWLDataRange range = aux.getRange();
-					if (!range.isDatatype()) {
-						throw new TranslationException("Unsupported data range: " + range.toString());
-					}
-					if (!range.isTopDatatype()) {
-						log.warn("WARNING: At the moment Quest only rdfs:Literal. Offending axiom: {}", axiom.toString());
-
-					}
-
+					
+					ClassDescription subclass = descFactory.getPropertySomeRestriction(role.getPredicate(), true);
+					OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();					
+					
+					Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
+					DataType datatype = ofac.createDataType(getDataTypePredicate(columnType));
+					addSubclassAxiom(dl_onto, subclass, datatype);
+					
 				} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
 
 					OWLSubDataPropertyOfAxiom aux = (OWLSubDataPropertyOfAxiom) axiom;
@@ -387,68 +389,69 @@ public class OWLAPI3Translator {
 		return dl_onto;
 	}
 
-	/**
-	 * @param dl_onto
-	 * @param subDescription
-	 * @param superDescriptions
-	 */
+	private void addSubclassAxiom(Ontology dl_onto, ClassDescription subDescription, ClassDescription superDescription) {
+		if (superDescription == null || subDescription == null) {
+			log.warn("NULL: {} {}", subDescription, superDescription);
+		}
+
+		if (superDescription instanceof BasicClassDescription) {
+
+			/* We ignore TOP and BOTTOM (Thing and Nothing) */
+			if (superDescription instanceof OClass) {
+				OClass classDescription = (OClass) superDescription;
+				if (classDescription.toString().equals("http://www.w3.org/2002/07/owl#Thing")) {
+					return;
+				}
+			}
+			SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, superDescription);
+			dl_onto.addAssertion(inc);
+		} 
+		else {
+			log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
+			
+			/*
+			 * We found an existential, we need to get an auxiliary set of
+			 * subClassAssertion
+			 */
+			List<SubDescriptionAxiom> aux = auxiliaryAssertions.get(superDescription);
+			if (aux == null) {
+				/*
+				 * no aux subclass assertions found for this exists R.A,
+				 * creating a new one
+				 */
+				PropertySomeClassRestriction eR = (PropertySomeClassRestriction) superDescription;
+				Predicate role = eR.getPredicate();
+				OClass filler = eR.getFiller();
+
+				Property auxRole = descFactory.createProperty(predicateFactory.getObjectPropertyPredicate(URI.create(OntologyImpl.AUXROLEURI
+						+ auxRoleCounter)));
+				auxRoleCounter += 1;
+
+				/* Creating the new subrole assertions */
+				SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(auxRole,
+						descFactory.createProperty(role, eR.isInverse()));
+				/* Creatin the range assertion */
+				SubClassAxiomImpl subclass = (SubClassAxiomImpl) descFactory.createSubClassAxiom(
+						descFactory.getPropertySomeRestriction(auxRole.getPredicate(), true), filler);
+				aux = new LinkedList<SubDescriptionAxiom>();
+				aux.add(subclass);
+				aux.add(subrole);
+
+				dl_onto.addAssertion(subclass);
+				dl_onto.addAssertion(subrole);
+			}
+
+			SubPropertyAxiomImpl roleinclusion = (SubPropertyAxiomImpl) aux.get(1);
+			Property role = roleinclusion.getSub();
+			PropertySomeRestriction domain = descFactory.getPropertySomeRestriction(role.getPredicate(), false);
+			/* Taking the domain of the aux role as the including */
+			SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, domain);
+		}
+	}
+	
 	private void addSubclassAxioms(Ontology dl_onto, ClassDescription subDescription, List<ClassDescription> superDescriptions) {
 		for (ClassDescription superDescription : superDescriptions) {
-			if (superDescription == null || subDescription == null) {
-				log.warn("NULL: {} {}", subDescription, superDescription);
-			}
-
-			if (superDescription instanceof BasicClassDescription) {
-
-				/* We ignore TOP and BOTTOM (Thing and Nothing) */
-				if ((superDescription instanceof OClass)
-						&& ((OClass) superDescription).toString().equals("http://www.w3.org/2002/07/owl#Thing")) {
-					continue;
-				}
-
-				SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, superDescription);
-				dl_onto.addAssertion(inc);
-			} else {
-				log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
-				/*
-				 * We found an existential, we need to get an auxiliary set of
-				 * subClassAssertion
-				 */
-				List<SubDescriptionAxiom> aux = auxiliaryAssertions.get(superDescription);
-				if (aux == null) {
-					/*
-					 * no aux subclass assertions found for this exists R.A,
-					 * creating a new one
-					 */
-					PropertySomeClassRestriction eR = (PropertySomeClassRestriction) superDescription;
-					Predicate role = eR.getPredicate();
-					OClass filler = eR.getFiller();
-
-					Property auxRole = descFactory.createProperty(predicateFactory.getObjectPropertyPredicate(URI.create(OntologyImpl.AUXROLEURI
-							+ auxRoleCounter)));
-					auxRoleCounter += 1;
-
-					/* Creating the new subrole assertions */
-					SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) descFactory.createSubPropertyAxiom(auxRole,
-							descFactory.createProperty(role, eR.isInverse()));
-					/* Creatin the range assertion */
-					SubClassAxiomImpl subclass = (SubClassAxiomImpl) descFactory.createSubClassAxiom(
-							descFactory.getPropertySomeRestriction(auxRole.getPredicate(), true), filler);
-					aux = new LinkedList<SubDescriptionAxiom>();
-					aux.add(subclass);
-					aux.add(subrole);
-
-					dl_onto.addAssertion(subclass);
-					dl_onto.addAssertion(subrole);
-				}
-
-				SubPropertyAxiomImpl roleinclusion = (SubPropertyAxiomImpl) aux.get(1);
-				Property role = roleinclusion.getSub();
-				PropertySomeRestriction domain = descFactory.getPropertySomeRestriction(role.getPredicate(), false);
-				/* Taking the domain of the aux role as the including */
-				SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, domain);
-
-			}
+			addSubclassAxiom(dl_onto, subDescription, superDescription);
 		}
 	}
 
@@ -535,24 +538,24 @@ public class OWLAPI3Translator {
 	private List<ClassDescription> getSuperclassExpressions(OWLClassExpression owlExpression) throws TranslationException {
 		List<ClassDescription> result = new LinkedList<ClassDescription>();
 		if (owlExpression instanceof OWLObjectIntersectionOf) {
-			if (profile.order() < LanguageProfile.OWL2QL.order())
+			if (profile.order() < LanguageProfile.OWL2QL.order()) {
 				throw new TranslationException();
+			}
 			OWLObjectIntersectionOf intersection = (OWLObjectIntersectionOf) owlExpression;
 			Set<OWLClassExpression> operands = intersection.getOperands();
 			for (OWLClassExpression operand : operands) {
 				result.addAll(getSuperclassExpressions(operand));
 			}
 		} else if (owlExpression instanceof OWLObjectSomeValuesFrom) {
-			if (profile.order() < LanguageProfile.OWL2QL.order())
+			if (profile.order() < LanguageProfile.OWL2QL.order()) {
 				throw new TranslationException();
-
+			}
 			OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) owlExpression;
 			OWLObjectPropertyExpression property = someexp.getProperty();
 			OWLClassExpression filler = someexp.getFiller();
 			if (!(filler instanceof OWLClass)) {
 				throw new TranslationException();
 			}
-
 			if (filler.isOWLThing()) {
 				result.add(getSubclassExpression(owlExpression));
 			} else {
@@ -561,27 +564,41 @@ public class OWLAPI3Translator {
 						(OClass) getSubclassExpression(filler));
 				result.add(cd);
 			}
-
 		} else if (owlExpression instanceof OWLDataSomeValuesFrom) {
-			if (profile.order() < LanguageProfile.OWL2QL.order())
+			if (profile.order() < LanguageProfile.OWL2QL.order()) {
 				throw new TranslationException();
-
+			}
 			OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) owlExpression;
 			OWLDataPropertyExpression property = someexp.getProperty();
-			OWLDataRange filler = someexp.getFiller();
-			if (!(filler.isTopDatatype())) {
-				log.warn("WARNING: Found typed existential data property. Typing will be ignored: {}", owlExpression.toString());
+			OWLDataRange filler = someexp.getFiller();			
+			
+			if (filler.isTopDatatype()) {				
+				Property role = getRoleExpression(property);
+				ClassDescription cd = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
+				result.add(cd);
+			} else if (filler instanceof OWLDatatype) {
+				Property role = getRoleExpression(property);
+				ClassDescription cd = descFactory.createPropertySomeDataTypeRestriction(role.getPredicate(), role.isInverse(), 
+						getDataTypeExpression(filler));
+				result.add(cd);
 			}
-			Property role = getRoleExpression(property);
-
-			ClassDescription cd = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
-			result.add(cd);
-
 		} else {
 			result.add(getSubclassExpression(owlExpression));
 		}
 		return result;
-
+	}
+	
+	private DataType getDataTypeExpression(OWLDataRange filler) throws TranslationException {
+		OWLDatatype datatype = (OWLDatatype) filler;
+		switch(getColumnType(datatype)) {
+			case LITERAL: return descFactory.createDataType(OBDAVocabulary.RDFS_LITERAL);
+			case STRING: return descFactory.createDataType(OBDAVocabulary.XSD_STRING);
+			case INTEGER: return descFactory.createDataType(OBDAVocabulary.XSD_INTEGER);
+			case DOUBLE: return descFactory.createDataType(OBDAVocabulary.XSD_DOUBLE);
+			case DATE: return descFactory.createDataType(OBDAVocabulary.XSD_DATE);
+			case BOOLEAN: return descFactory.createDataType(OBDAVocabulary.XSD_BOOLEAN);
+			default: return null;
+		}
 	}
 
 	private ClassDescription getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
@@ -658,7 +675,6 @@ public class OWLAPI3Translator {
 			URI uri = propExp.getIRI().toURI();
 			Predicate role = predicateFactory.getDataPropertyPredicate(uri);
 			cd = descFactory.getPropertySomeRestriction(role, false);
-
 		}
 
 		if (cd == null) {
@@ -807,29 +823,34 @@ public class OWLAPI3Translator {
 			OWLDataPropertyAssertionAxiom assertion = (OWLDataPropertyAssertionAxiom) axiom;
 			OWLDataProperty propertyExperssion = (OWLDataProperty) assertion.getProperty();
 
-			URI property = null;
-			OWLIndividual subject = null;
-			OWLLiteral object = null;
-
-			property = propertyExperssion.getIRI().toURI();
-			subject = assertion.getSubject();
-			object = assertion.getObject();
+			URI property = propertyExperssion.getIRI().toURI();
+			OWLIndividual subject = assertion.getSubject();
+			OWLLiteral object = assertion.getObject();
 			
 			if (subject.isAnonymous()) {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
 
+			Predicate.COL_TYPE type;
+			try {
+				 type = getColumnType(object.getDatatype());
+			} 
+			catch (TranslationException e) {
+				throw new RuntimeException(e.getMessage());
+			}
+			
 			Predicate p = predicateFactory.getDataPropertyPredicate(property);
 			URIConstant c1 = predicateFactory.getURIConstant(subject.asOWLNamedIndividual().getIRI().toURI());
-			ValueConstant c2 = predicateFactory.getValueConstant(object.getLiteral());
+			ValueConstant c2 = predicateFactory.getValueConstant(object.getLiteral(), type);
 
-			Description desc = ofac.createProperty(p);
 			Description equivalent = null;
-			if (equivalenceMap != null)
+			if (equivalenceMap != null) {
 				equivalent = equivalenceMap.get(p);
-
-			if (equivalent == null)
+			}
+			
+			if (equivalent == null) {
 				return descFactory.createDataPropertyAssertion(p, c1, c2);
+			}
 			else {
 				Property equiProp = (Property) equivalent;
 				return descFactory.createDataPropertyAssertion(equiProp.getPredicate(), c1, c2);
@@ -837,6 +858,63 @@ public class OWLAPI3Translator {
 
 		} else {
 			return null;
+		}
+	}
+	
+	private Predicate.COL_TYPE getColumnType(OWLDatatype datatype) throws TranslationException {
+		if (datatype == null) {
+			return Predicate.COL_TYPE.LITERAL;
+		}
+		
+		if (datatype.isString()
+				|| datatype. getBuiltInDatatype() == OWL2Datatype.XSD_STRING) {  // xsd:string
+			return Predicate.COL_TYPE.STRING;
+		}
+		else if (datatype.isRDFPlainLiteral()
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL  // rdf:PlainLiteral
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_XML_LITERAL    // rdf:XmlLiteral
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) {	// rdfs:Literal
+			return Predicate.COL_TYPE.LITERAL;
+		}
+		else if (datatype.isInteger() 
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER  // xsd:integer
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT	  // xsd:int	
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG     // xsd:long
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT 
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG) {
+			return Predicate.COL_TYPE.INTEGER;
+		}
+		else if (datatype.isFloat() || datatype.isDouble()
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE    // xsd:double
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) {  // xsd:float 
+			return Predicate.COL_TYPE.DOUBLE;
+		}
+		else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
+			return Predicate.COL_TYPE.DATE;
+		}
+		else if (datatype.isBoolean()
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) {  // xsd:boolean
+			return Predicate.COL_TYPE.BOOLEAN;
+		} 
+		else {
+			throw new TranslationException("Unsupported data range: " + datatype.toString());
+		}
+	}
+	
+	private Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
+		switch(type) {
+			case LITERAL: return OBDAVocabulary.RDFS_LITERAL;
+			case STRING: return OBDAVocabulary.XSD_STRING;
+			case INTEGER: return OBDAVocabulary.XSD_INTEGER;
+			case DOUBLE: return OBDAVocabulary.XSD_DOUBLE;
+			case DATE: return OBDAVocabulary.XSD_DATE;
+			case BOOLEAN: return OBDAVocabulary.XSD_BOOLEAN;
+			default: 
+				return OBDAVocabulary.RDFS_LITERAL;
 		}
 	}
 }

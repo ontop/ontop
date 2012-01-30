@@ -7,7 +7,10 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.net.URI;
 import java.util.LinkedList;
@@ -146,7 +149,7 @@ public class SPARQLDatalogTranslator {
 					/* Literals are no longer suppoerted with rdf:type, only URIs (objects) */
 //					throw new QueryException("Query translation error: literals are not supported as subjects with predicate rdf:type, use only URI's");
 					Node_Literal subject = (Node_Literal) s;
-					terms.add(termFactory.getValueConstant(subject.getLiteralValue().toString()));
+					terms.add(getValueConstant(subject));
 				}
 				else if (s instanceof Node_URI) { // Subject is a node URI
 					Node_URI subject = (Node_URI) s;
@@ -173,7 +176,7 @@ public class SPARQLDatalogTranslator {
 				}
 				else if (s instanceof Node_Literal) { // Subject is a node literal
 					Node_Literal subject = (Node_Literal) s;
-					terms.add(termFactory.getValueConstant(subject.getLiteralValue().toString()));
+					terms.add(getValueConstant(subject));
 				}
 				else if (s instanceof Node_URI) { // Subject is a node URI
 					Node_URI subject = (Node_URI) s;
@@ -187,7 +190,7 @@ public class SPARQLDatalogTranslator {
 				}
 				else if (o instanceof Node_Literal) { // Object is a node literal
 					Node_Literal object = (Node_Literal) o;
-					terms.add(termFactory.getValueConstant(object.getLiteralValue().toString()));
+					terms.add(getValueConstant(object));
 				}
 				else if (o instanceof Node_URI) { // Object is a node URI
 					Node_URI object = (Node_URI) o;
@@ -201,5 +204,29 @@ public class SPARQLDatalogTranslator {
 			body.add(atom);
 		}
 		return body;
+	}
+	
+	private ValueConstant getValueConstant(Node_Literal subject) {
+		String dataTypeURI = subject.getLiteralDatatypeURI();
+		if (dataTypeURI == null) {
+			return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.LITERAL);
+		}
+		else {		
+			if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.LITERAL);
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.STRING);
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.INTEGER);
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.DOUBLE);
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATE_URI)) {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.DATE);
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.BOOLEAN);
+			} else {
+				return termFactory.getValueConstant(subject.getLiteralValue().toString(), COL_TYPE.LITERAL); // TODO should throw an exception
+			}
+		}
 	}
 }

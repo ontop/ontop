@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -50,11 +51,11 @@ public class SQLGenerator implements SourceQueryGenerator {
 	private static final String qualifiedColumn = "%s.%s";
 
 	private static final String conditionEQCol = "%s.%s = %s.%s";
-	private static final String conditionEQConstant = "%s.%s = '%s'";
-	private static final String conditionGTConstant = "%s.%s > '%s'";
-	private static final String conditionGTEConstant = "%s.%s >= '%s'";
-	private static final String conditionLTConstant = "%s.%s < '%s'";
-	private static final String conditionLTEQConstant = "%s.%s <= '%s'";
+	private static final String conditionEQConstant = "%s.%s = %s";
+	private static final String conditionGTConstant = "%s.%s > %s";
+	private static final String conditionGTEConstant = "%s.%s >= %s";
+	private static final String conditionLTConstant = "%s.%s < %s";
+	private static final String conditionLTEQConstant = "%s.%s <= %s";
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil) {
 		this.metadata = metadata;
@@ -287,13 +288,18 @@ public class SQLGenerator implements SourceQueryGenerator {
 						Term term = terms.get(termj);
 						if (term instanceof ValueConstant) {
 							ValueConstant ct = (ValueConstant) term;
+							String value = ct.getValue();
+							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+								value = getQuotedString(value);
+							}
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
-							String condition = String.format(conditionEQConstant, viewName[i1], colname, ct.getValue());
+							String condition = String.format(conditionEQConstant, viewName[i1], colname, value);
 							whereConditions.add(condition);
 						} else if (term instanceof URIConstant) {
 							URIConstant ct = (URIConstant) term;
+							String value = ct.getURI().toString();
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
-							String condition = String.format(conditionEQConstant, viewName[i1], colname, ct.getURI());
+							String condition = String.format(conditionEQConstant, viewName[i1], colname, getQuotedString(value));
 							whereConditions.add(condition);
 						} else if (term instanceof Variable) {
 							/*
@@ -400,8 +406,15 @@ public class SQLGenerator implements SourceQueryGenerator {
 						if (v instanceof Variable) {
 							vex.add(getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 						} else if (v instanceof ValueConstant) {
+							ValueConstant ct = (ValueConstant) v;
 							StringBuilder var = new StringBuilder();
-							var.append("'" + ((ValueConstant) v).getValue() + "'");
+							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+								var.append("'");
+								var.append(ct.getValue());
+								var.append("'");
+							} else {
+								var.append(ct.getValue());
+							}
 							vex.add(var.toString());
 						} else if (v instanceof URIConstant) {
 							StringBuilder var = new StringBuilder();
@@ -416,9 +429,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 					sb.append(" as ");
 					sb.append(signature.get(hpos));
 				} else if (ht instanceof ValueConstant) {
-					sb.append("'");
-					sb.append(((ValueConstant) ht).getValue());
-					sb.append("'");
+					ValueConstant ct = (ValueConstant) ht;
+					if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+						sb.append("'");
+						sb.append(ct.getValue());
+						sb.append("'");
+					} else {
+						sb.append(ct.getValue());
+					}
 					sb.append(" as ");
 					sb.append(signature.get(hpos));
 				} else if (ht instanceof URIConstant) {
@@ -476,9 +494,13 @@ public class SQLGenerator implements SourceQueryGenerator {
 		StringBuffer result = new StringBuffer();
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			result.append("'");
-			result.append(ct.getValue());
-			result.append("'");
+			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+				result.append("'");
+				result.append(ct.getValue());
+				result.append("'");
+			} else {
+				result.append(ct.getValue());
+			}
 		} else if (term instanceof URIConstant) {
 			URIConstant ct = (URIConstant) term;
 			result.append("'");
@@ -606,4 +628,11 @@ public class SQLGenerator implements SourceQueryGenerator {
 		return isUCQ;
 	}
 
+	private String getQuotedString(String str) {
+		StringBuffer bf = new StringBuffer();
+		bf.append("'");
+		bf.append(str);
+		bf.append("'");
+		return bf.toString();
+	}
 }

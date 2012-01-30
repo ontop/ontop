@@ -10,11 +10,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -86,7 +86,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public ValueConstant getValueConstant(String value, XSDatatype type) {
+	public ValueConstant getValueConstant(String value, COL_TYPE type) {
 		return new ValueConstantImpl(value, type);
 	}
 
@@ -304,6 +304,51 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Predicate getObjectPropertyPredicate(String name) {
+		return getObjectPropertyPredicate(URI.create(name));
+	}
+
+	@Override
+	public Predicate getDataPropertyPredicate(String name) {
+		return getDataPropertyPredicate(URI.create(name));
+	}
+
+	@Override
+	public Predicate getClassPredicate(String name) {
+		return getClassPredicate(URI.create(name));
+	}
+
+	@Override
+	public Predicate getDataTypePredicateLiteral(URI name) {
+		return OBDAVocabulary.RDFS_LITERAL;
+	}
+
+	@Override
+	public Predicate getDataTypePredicateString(URI name) {
+		return OBDAVocabulary.XSD_STRING;
+	}
+	
+	@Override
+	public Predicate getDataTypePredicateInteger(URI name) {
+		return OBDAVocabulary.XSD_INTEGER;
+	}
+	
+	@Override
+	public Predicate getDataTypePredicateDouble(URI name) {
+		return OBDAVocabulary.XSD_DOUBLE;
+	}
+	
+	@Override
+	public Predicate getDataTypePredicateDate(URI name) {
+		return OBDAVocabulary.XSD_DATE;
+	}
+	
+	@Override
+	public Predicate getDataTypePredicateBoolean(URI name) {
+		return OBDAVocabulary.XSD_BOOLEAN;
+	}	
+	
+	@Override
 	public Function getEQFunction(Term firstTerm, Term secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
@@ -450,22 +495,4 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return getPredicate(URI.create(uri), arity, types);
 	}
-
-	@Override
-	public Predicate getObjectPropertyPredicate(String name) {
-		return getObjectPropertyPredicate(URI.create(name));
-	}
-
-	@Override
-	public Predicate getDataPropertyPredicate(String name) {
-		return getDataPropertyPredicate(URI.create(name));
-
-	}
-
-	@Override
-	public Predicate getClassPredicate(String name) {
-		return getClassPredicate(URI.create(name));
-
-	}
-
 }
