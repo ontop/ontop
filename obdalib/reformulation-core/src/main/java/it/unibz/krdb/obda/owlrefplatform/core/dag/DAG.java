@@ -228,6 +228,9 @@ public class DAG implements Serializable {
 		DAGOperations.removeCycles(classes, equi_mappings, this);
 		DAGOperations.computeTransitiveReduct(classes);
 
+		DAGOperations.buildAncestors(roles);
+		DAGOperations.buildAncestors(classes);
+		
 		DAGOperations.buildDescendants(roles);
 		DAGOperations.buildDescendants(classes);
 	}
