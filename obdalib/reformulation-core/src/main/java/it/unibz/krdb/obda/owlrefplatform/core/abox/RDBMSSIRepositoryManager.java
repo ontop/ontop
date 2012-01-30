@@ -901,7 +901,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				insertscount += 1;
 
-				log.debug(String.format("Insert data to table %s", role_table));
 				roleStm.setString(1, uri1);
 				roleStm.setString(2, uri2);
 				roleStm.setInt(3, idx);
@@ -930,7 +929,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				insertscount += 1;
 
-				log.debug(String.format("Insert data to table %s", class_table));
 				classStm.setString(1, uri);
 				classStm.setInt(2, idx);
 				classStm.addBatch();
