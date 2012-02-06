@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<assembly>
+	<id>bin</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+
+	<!-- <moduleSets> <moduleSet> <includes> <include>inf.unibz.it.obda:quest-owlapi3</include> 
+		</includes> <binaries> <outputDirectory>/</outputDirectory> <unpack>false</unpack> 
+		<includeDependencies>true</includeDependencies> <dependencySets> <dependencySet> 
+		<outputDirectory>/lib</outputDirectory> </dependencySet> </dependencySets> 
+		</binaries> </moduleSet> </moduleSets> -->
+
+	<fileSets>
+		<fileSet>
+			<directory>${project.basedir}/../obdalib-core/copyright</directory>
+			<outputDirectory>/copyright</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../reformulation-core/src/main/resources</directory>
+			<outputDirectory>/log</outputDirectory>
+			<includes>
+				<include>logback.xml</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/samples</directory>
+			<outputDirectory>/samples</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+
+	<dependencySets>
+		<!-- <dependencySet> <outputDirectory>/lib</outputDirectory> <includes> 
+			<include>inf.unibz.it.obda:quest-owlapi3</include> </includes> <useTransitiveDependencies>false</useTransitiveDependencies> 
+			<unpack>false</unpack> </dependencySet> -->
+		<dependencySet>
+			<outputDirectory>/lib</outputDirectory>
+			<excludes>
+				<exclude>quest-distribution*</exclude>
+				<exclude>antlr*</exclude>
+				<exclude>postgres*</exclude>
+				<exclude>mysql*</exclude>
+				<exclude>com.h2database:h2*</exclude>
+				<exclude>log4j*</exclude>
+			</excludes>
+
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/jdbc</outputDirectory>
+			<includes>
+				<include>com.h2database:h2*</include>
+				<include>postgres*</include>
+				<include>mysql*</include>
+			</includes>
+		</dependencySet>
+
+	</dependencySets>
+
+</assembly> 
