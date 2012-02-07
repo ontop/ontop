@@ -2,7 +2,7 @@
 CREATE TABLE address (
     id integer NOT NULL,
     street character varying(100),
-    number character varying(100),
+    number integer,
     city character varying(100),
     state character varying(100),
     country character varying(100)
@@ -38,7 +38,7 @@ CREATE TABLE company (
     id integer NOT NULL,
     name character varying(100),
     marketshares integer,
-    networth real,
+    networth double precision,
     addressid integer
 );
 
@@ -56,7 +56,7 @@ CREATE TABLE stockinformation (
 
 CREATE TABLE transaction (
     id integer NOT NULL,
-    date date,
+    date timestamp,
     stockid integer,
     type boolean,
     brokerid integer,
@@ -92,8 +92,8 @@ INSERT INTO brokerworksfor VALUES (114, NULL, 111);
 INSERT INTO client VALUES (111, 'John', 'Smith', '1950-03-21', 'JSRX229500321', 991);
 INSERT INTO client VALUES (112, 'Joana', 'Lopatenkko', '1970-07-14', 'JLPTK54992', 992);
 
-INSERT INTO company VALUES (211, 'General Motors', 25000000, 7.5678766e+09, 995);
-INSERT INTO company VALUES (212, 'GnA Investments', 100000, 12555322, 996);
+INSERT INTO company VALUES (211, 'General Motors', 25000000, 1.2345678e+03, 995);
+INSERT INTO company VALUES (212, 'GnA Investments', 100000, 1234.5678, 996);
 
 INSERT INTO stockbooklist VALUES ('2008-04-01', 661);
 INSERT INTO stockbooklist VALUES ('2008-04-02', 662);
