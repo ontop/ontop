@@ -55,11 +55,17 @@ public class OBDAVocabulary {
 		
 	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
 	
-	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#int";
+	public static final String XSD_INT_URI = "http://www.w3.org/2001/XMLSchema#int";
+	
+	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
+	
+	public static final String XSD_DECIMAL_URI = "http://www.w3.org/2001/XMLSchema#decimal";
+	
+	public static final String XSD_FLOAT_URI = "http://www.w3.org/2001/XMLSchema#float";
 	
 	public static final String XSD_DOUBLE_URI = "http://www.w3.org/2001/XMLSchema#double";
 	
-	public static final String XSD_DATE_URI = "http://www.w3.org/2001/XMLSchema#date";
+	public static final String XSD_DATETIME_URI = "http://www.w3.org/2001/XMLSchema#dateTime";
 	
 	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
 	
@@ -74,7 +80,7 @@ public class OBDAVocabulary {
 	
 	public static final Predicate XSD_DOUBLE = new DataTypePredicateImpl(URI.create(XSD_DOUBLE_URI), COL_TYPE.DOUBLE);
 	
-	public static final Predicate XSD_DATE = new DataTypePredicateImpl(URI.create(XSD_DATE_URI), COL_TYPE.DATE);
+	public static final Predicate XSD_DATETIME = new DataTypePredicateImpl(URI.create(XSD_DATETIME_URI), COL_TYPE.DATETIME);
 	
 	public static final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(URI.create(XSD_BOOLEAN_URI), COL_TYPE.BOOLEAN);
 }

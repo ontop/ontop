@@ -48,6 +48,7 @@ import it.unibz.krdb.sql.api.BooleanLiteral;
 import it.unibz.krdb.sql.api.NumericLiteral;
 import it.unibz.krdb.sql.api.IntegerLiteral;
 import it.unibz.krdb.sql.api.DecimalLiteral;
+import it.unibz.krdb.sql.api.DateTimeLiteral;
 }
 
 @lexer::header {
@@ -718,6 +719,10 @@ truth_value returns [boolean value]
   : (t=TRUE | t=FALSE) { $value = Boolean.getBoolean($t.text); }
   ;
 
+datetime_literal returns [DateTimeLiteral value]
+  : DATETIME { $value = new DateTimeLiteral($DATETIME.text); }
+  ;
+
 /*------------------------------------------------------------------
  * LEXER RULES
  *------------------------------------------------------------------*/
@@ -882,5 +887,9 @@ STRING_WITH_QUOTE
 STRING_WITH_QUOTE_DOUBLE
   : '"'  ( options {greedy=false  ;} : ~('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '"'
   ;
+  
+DATETIME
+  : '\'' DIGIT+ MINUS DIGIT+ MINUS DIGIT+ (WS DIGIT+ COLON DIGIT+ COLON DIGIT+ (PERIOD DIGIT+)?)? '\'' 
+  ;	
 
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};

@@ -437,6 +437,55 @@ public class SQL99ParserTest extends TestCase
 	  print("test_5_10");
 	  assertTrue(result);
   }
+  
+  //@Test
+  public void test_9_1() {
+	  final boolean result = parse("SELECT id, name, address from student where name = 'John'");
+	  print("test_9_1");
+	  assertTrue(result);
+  }
+  
+  //@Test
+  public void test_9_2() {
+	  final boolean result = parse("SELECT id, name, address from student where id = 20");
+	  print("test_9_2");
+	  assertTrue(result);
+  }
+  
+  //@Test
+  public void test_9_3() {
+	  final boolean result = parse("SELECT payee, amount from tax where amount = 12.345");
+	  print("test_9_3");
+	  assertTrue(result);
+  }
+  
+  //@Test
+  public void test_9_4_1() {
+	  final boolean result = parse("SELECT id, name, address from student where birth_date = '1984-01-22 00:02:01.234'");
+	  print("test_9_4_1");
+	  assertTrue(result);
+  }
+  
+  //@Test
+  public void test_9_4_2() {
+	  final boolean result = parse("SELECT id, name, address from student where birth_date = '1984-01-22 00:02:01'");
+	  print("test_9_4_2");
+	  assertTrue(result);
+  }
+  
+  //@Test
+  public void test_9_4_3() {
+	  final boolean result = parse("SELECT id, name, address from student where birth_date = '1984-01-22'");
+	  print("test_9_4_3");
+	  assertTrue(result);
+  }
+  
+  //@Test
+  public void test_9_5() {
+	  final boolean result = parse("SELECT st_id, course, score from student where passed = TRUE");
+	  print("test_9_5");
+	  assertTrue(result);
+  }
 
   private SQL99Parser parser;
   private QueryTree query;
@@ -450,33 +499,35 @@ public class SQL99ParserTest extends TestCase
     tableStudent.setAttribute(1, new Attribute("id", "integer", true, 0));
     tableStudent.setAttribute(2, new Attribute("name", "string", false, 0));
     tableStudent.setAttribute(3, new Attribute("address", "string", false, 0));
+    tableStudent.setAttribute(4, new Attribute("birth_date", "datetime", false, 0));
     metadata.add(tableStudent);
 
     TableDefinition tableGrade = new TableDefinition();
     tableGrade.setName("grade");
     tableGrade.setAttribute(1, new Attribute("sm_id", "integer", false, 0));
-    tableGrade.setAttribute(1, new Attribute("st_id", "integer", false, 0));
-    tableGrade.setAttribute(1, new Attribute("course", "varchar", false, 0));
-    tableGrade.setAttribute(1, new Attribute("score", "byte", false, 0));
-    tableGrade.setAttribute(1, new Attribute("mark", "char", false, 0));
+    tableGrade.setAttribute(2, new Attribute("st_id", "integer", false, 0));
+    tableGrade.setAttribute(3, new Attribute("course", "varchar", false, 0));
+    tableGrade.setAttribute(4, new Attribute("score", "byte", false, 0));
+    tableGrade.setAttribute(5, new Attribute("mark", "char", false, 0));
+    tableGrade.setAttribute(6, new Attribute("passed", "boolean", false, 0));
     metadata.add(tableGrade);
 
     TableDefinition tableSemester = new TableDefinition();
     tableSemester.setName("semester");
     tableSemester.setAttribute(1, new Attribute("id", "integer", true, 0));
-    tableSemester.setAttribute(1, new Attribute("semester", "integer", true, 0));
+    tableSemester.setAttribute(2, new Attribute("semester", "integer", true, 0));
     metadata.add(tableSemester);
     
     TableDefinition tableErasmus = new TableDefinition();
     tableErasmus.setName("erasmus");
     tableErasmus.setAttribute(1, new Attribute("id", "integer", true, 0));
-    tableErasmus.setAttribute(1, new Attribute("name", "string", false, 0));
+    tableErasmus.setAttribute(2, new Attribute("name", "string", false, 0));
     metadata.add(tableErasmus);
     
     TableDefinition tableTax = new TableDefinition();
     tableTax.setName("tax");
     tableTax.setAttribute(1, new Attribute("payee", "string", false, 0));
-    tableTax.setAttribute(1, new Attribute("amount", "double", false, 0));
+    tableTax.setAttribute(2, new Attribute("amount", "double", false, 0));
     metadata.add(tableTax);
 
     ANTLRStringStream inputStream = new ANTLRStringStream(input);

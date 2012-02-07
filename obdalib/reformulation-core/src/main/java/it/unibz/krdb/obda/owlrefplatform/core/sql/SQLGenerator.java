@@ -289,7 +289,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 						if (term instanceof ValueConstant) {
 							ValueConstant ct = (ValueConstant) term;
 							String value = ct.getValue();
-							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
 								value = getQuotedString(value);
 							}
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
@@ -408,7 +408,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 						} else if (v instanceof ValueConstant) {
 							ValueConstant ct = (ValueConstant) v;
 							StringBuilder var = new StringBuilder();
-							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
 								var.append("'");
 								var.append(ct.getValue());
 								var.append("'");
@@ -430,7 +430,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 					sb.append(signature.get(hpos));
 				} else if (ht instanceof ValueConstant) {
 					ValueConstant ct = (ValueConstant) ht;
-					if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+					if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
 						sb.append("'");
 						sb.append(ct.getValue());
 						sb.append("'");
@@ -494,7 +494,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 		StringBuffer result = new StringBuffer();
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
+			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
 				result.append("'");
 				result.append(ct.getValue());
 				result.append("'");

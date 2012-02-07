@@ -340,7 +340,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public Predicate getDataTypePredicateDate(URI name) {
-		return OBDAVocabulary.XSD_DATE;
+		return OBDAVocabulary.XSD_DATETIME;
 	}
 	
 	@Override

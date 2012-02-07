@@ -595,7 +595,7 @@ public class OWLAPI3Translator {
 			case STRING: return descFactory.createDataType(OBDAVocabulary.XSD_STRING);
 			case INTEGER: return descFactory.createDataType(OBDAVocabulary.XSD_INTEGER);
 			case DOUBLE: return descFactory.createDataType(OBDAVocabulary.XSD_DOUBLE);
-			case DATE: return descFactory.createDataType(OBDAVocabulary.XSD_DATE);
+			case DATETIME: return descFactory.createDataType(OBDAVocabulary.XSD_DATETIME);
 			case BOOLEAN: return descFactory.createDataType(OBDAVocabulary.XSD_BOOLEAN);
 			default: return null;
 		}
@@ -894,7 +894,7 @@ public class OWLAPI3Translator {
 			return Predicate.COL_TYPE.DOUBLE;
 		}
 		else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
-			return Predicate.COL_TYPE.DATE;
+			return Predicate.COL_TYPE.DATETIME;
 		}
 		else if (datatype.isBoolean()
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) {  // xsd:boolean
@@ -911,7 +911,7 @@ public class OWLAPI3Translator {
 			case STRING: return OBDAVocabulary.XSD_STRING;
 			case INTEGER: return OBDAVocabulary.XSD_INTEGER;
 			case DOUBLE: return OBDAVocabulary.XSD_DOUBLE;
-			case DATE: return OBDAVocabulary.XSD_DATE;
+			case DATETIME: return OBDAVocabulary.XSD_DATETIME;
 			case BOOLEAN: return OBDAVocabulary.XSD_BOOLEAN;
 			default: 
 				return OBDAVocabulary.RDFS_LITERAL;

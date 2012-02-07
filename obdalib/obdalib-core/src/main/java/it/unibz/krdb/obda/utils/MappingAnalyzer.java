@@ -32,6 +32,8 @@ import it.unibz.krdb.sql.api.StringLiteral;
 import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -197,16 +199,17 @@ public class MappingAnalyzer {
 			Literal literal = (Literal) right;
 			termRightName = literal.get().toString();			
 			if (literal instanceof StringLiteral) {
-				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.STRING);
+				boolean isString = containDateTimeString(termRightName);
+				if (isString) {
+					t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.STRING);
+				} else {
+					t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DATETIME);
+				}
 			} else if (literal instanceof IntegerLiteral) {
 				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.INTEGER);
 			} else if (literal instanceof DecimalLiteral) {
 				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DOUBLE);
-			} 
-//			else if (literal instanceof DateLiteral) {  TODO: Create the parsing rule for Date data type
-//				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DATE);
-//			} 
-			else if (literal instanceof BooleanLiteral) {
+			} else if (literal instanceof BooleanLiteral) {
 				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.BOOLEAN);
 			} else {
 				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.LITERAL);
@@ -239,6 +242,23 @@ public class MappingAnalyzer {
 			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
 		}
 		return funct;
+	}
+
+	private boolean containDateTimeString(String value) {
+		final String[] formatStrings = {
+				"yyyy-MM-dd HH:mm:ss.SS",
+				"yyyy-MM-dd HH:mm:ss",
+				"yyyy-MM-dd",
+				"yyyy-MM-ddTHH:mm:ssZ"
+		};
+		
+		for (String formatString : formatStrings) {
+	        try {
+	        	new SimpleDateFormat(formatString).parse(value);
+	        	return true;
+	        } catch (ParseException e) { }
+	    }
+    	return false; // the string doesn't contain date time info if none of the formats is suitable.
 	}
 
 	/***

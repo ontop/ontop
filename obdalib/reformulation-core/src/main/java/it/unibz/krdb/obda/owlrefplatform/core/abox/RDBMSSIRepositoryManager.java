@@ -47,6 +47,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -103,7 +104,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_string = "quest_data_property_string_assertion";
 	public static final String attribute_table_integer = "quest_data_property_integer_assertion";
 	public static final String attribute_table_double = "quest_data_property_double_assertion";
-	public static final String attribute_table_date = "quest_data_property_date_assertion";
+	public static final String attribute_table_datetime = "quest_data_property_datetime_assertion";
 	public static final String attribute_table_boolean = "quest_data_property_boolean_assertion";
 
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(1000), " + "IDX SMALLINT" + ")";
@@ -119,8 +120,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ "VALUE INT, " + "IDX SMALLINT" + ")";
 	public static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( " + "URI VARCHAR(1000), " 
 			+ "VALUE DOUBLE PRECISION, " + "IDX SMALLINT" + ")";
-	public static final String attribute_table_date_create = "CREATE TABLE " + attribute_table_date + " ( " + "URI VARCHAR(1000), " 
-			+ "VALUE DATE, " + "IDX SMALLINT" + ")";
+	public static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( " + "URI VARCHAR(1000), " 
+			+ "VALUE TIMESTAMP, " + "IDX SMALLINT" + ")";
 	public static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( " + "URI VARCHAR(1000), " 
 			+ "VALUE BOOLEAN, " + "IDX SMALLINT" + ")";
 
@@ -132,7 +133,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_string_drop = "DROP TABLE " + attribute_table_string;
 	public static final String attribute_table_integer_drop = "DROP TABLE " + attribute_table_integer;
 	public static final String attribute_table_double_drop = "DROP TABLE " + attribute_table_double;
-	public static final String attribute_table_date_drop = "DROP TABLE " + attribute_table_date;
+	public static final String attribute_table_datetime_drop = "DROP TABLE " + attribute_table_datetime;
 	public static final String attribute_table_boolean_drop = "DROP TABLE " + attribute_table_boolean;
 
 	public static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX) VALUES (?, ?)";
@@ -143,7 +144,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_string_insert = "INSERT INTO " + attribute_table_string + " (URI, VALUE, IDX) VALUES (?, ?, ?)";
 	public static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table_integer + " (URI, VALUE, IDX) VALUES (?, ?, ?)";
 	public static final String attribute_table_double_insert = "INSERT INTO " + attribute_table_double + " (URI, VALUE, IDX) VALUES (?, ?, ?)";
-	public static final String attribute_table_date_insert = "INSERT INTO " + attribute_table_date + " (URI, VALUE, IDX) VALUES (?, ?, ?)";
+	public static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table_datetime + " (URI, VALUE, IDX) VALUES (?, ?, ?)";
 	public static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean + " (URI, VALUE, IDX) VALUES (?, ?, ?)";
 
 	public static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + " (URI)";
@@ -163,28 +164,28 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_string_index = "idx_string_attribute";
 	public static final String attribute_integer_index = "idx_integer_attribute";
 	public static final String attribute_double_index = "idx_double_attribute";
-	public static final String attribute_date_index = "idx_date_attribute";
+	public static final String attribute_datetime_index = "idx_datetime_attribute";
 	public static final String attribute_boolean_index = "idx_boolean_attribute";
 	
 	public static final String indexattribute_literal1 = "CREATE INDEX " + attribute_literal_index + "1" + " ON " + attribute_table_literal + " (URI)";
 	public static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table_string + " (URI)";
 	public static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table_integer + " (URI)";
 	public static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table_double + " (URI)";
-	public static final String indexattribute_date1 = "CREATE INDEX " + attribute_date_index + "1" + " ON " + attribute_table_date + " (URI)";
+	public static final String indexattribute_datetime1 = "CREATE INDEX " + attribute_datetime_index + "1" + " ON " + attribute_table_datetime + " (URI)";
 	public static final String indexattribute_boolean1 = "CREATE INDEX " + attribute_boolean_index + "1" + " ON " + attribute_table_boolean + " (URI)";
 
 	public static final String indexattribute_literal2 = "CREATE INDEX " + attribute_literal_index + "2" + " ON " + attribute_table_literal + " (IDX)";
 	public static final String indexattribute_string2 = "CREATE INDEX " + attribute_string_index + "2" + " ON " + attribute_table_string + " (IDX)";
 	public static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table_integer + " (IDX)";
 	public static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table_double + " (IDX)";
-	public static final String indexattribute_date2 = "CREATE INDEX " + attribute_date_index + "2" + " ON " + attribute_table_date + " (IDX)";
+	public static final String indexattribute_datetime2 = "CREATE INDEX " + attribute_datetime_index + "2" + " ON " + attribute_table_datetime + " (IDX)";
 	public static final String indexattribute_boolean2 = "CREATE INDEX " + attribute_boolean_index + "2" + " ON " + attribute_table_boolean + " (IDX)";
 
 	public static final String indexattribute_literal3 = "CREATE INDEX " + attribute_literal_index + "3" + " ON " + attribute_table_literal + " (VALUE)";
 	public static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table_string + " (VALUE)";
 	public static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table_integer + " (VALUE)";
 	public static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table_double + " (VALUE)";
-	public static final String indexattribute_date3 = "CREATE INDEX " + attribute_date_index + "3" + " ON " + attribute_table_date + " (VALUE)";
+	public static final String indexattribute_datetime3 = "CREATE INDEX " + attribute_datetime_index + "3" + " ON " + attribute_table_datetime + " (VALUE)";
 	public static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table_boolean + " (VALUE)";
 
 	// public static final String indexrole4 = "CREATE INDEX idxrole4 ON " +
@@ -241,21 +242,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String dropindexattribute_string1 = "DROP INDEX " + attribute_string_index + "1";
 	public static final String dropindexattribute_integer1 = "DROP INDEX " + attribute_integer_index + "1";
 	public static final String dropindexattribute_double1 = "DROP INDEX " + attribute_double_index + "1";
-	public static final String dropindexattribute_date1 = "DROP INDEX " + attribute_date_index + "1";
+	public static final String dropindexattribute_datetime1 = "DROP INDEX " + attribute_datetime_index + "1";
 	public static final String dropindexattribute_boolean1 = "DROP INDEX " + attribute_boolean_index + "1";
 
 	public static final String dropindexattribute_literal2 = "DROP INDEX " + attribute_literal_index + "2";
 	public static final String dropindexattribute_string2 = "DROP INDEX " + attribute_string_index + "2";
 	public static final String dropindexattribute_integer2 = "DROP INDEX " + attribute_integer_index + "2";
 	public static final String dropindexattribute_double2 = "DROP INDEX " + attribute_double_index + "2";
-	public static final String dropindexattribute_date2 = "DROP INDEX " + attribute_date_index + "2";
+	public static final String dropindexattribute_datetime2 = "DROP INDEX " + attribute_datetime_index + "2";
 	public static final String dropindexattribute_boolean2 = "DROP INDEX " + attribute_boolean_index + "2";
 
 	public static final String dropindexattribute_literal3 = "DROP INDEX " + attribute_literal_index + "3";
 	public static final String dropindexattribute_string3 = "DROP INDEX " + attribute_string_index + "3";
 	public static final String dropindexattribute_integer3 = "DROP INDEX " + attribute_integer_index + "3";
 	public static final String dropindexattribute_double3 = "DROP INDEX " + attribute_double_index + "3";
-	public static final String dropindexattribute_date3 = "DROP INDEX " + attribute_date_index + "3";
+	public static final String dropindexattribute_datetime3 = "DROP INDEX " + attribute_datetime_index + "3";
 	public static final String dropindexattribute_boolean3 = "DROP INDEX " + attribute_boolean_index + "3";
 
 	// public static final String dropindexrole4 = "DROP INDEX idxrole4";
@@ -294,7 +295,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String select_mapping_class_attribute_string_left = "SELECT URI as X FROM " + attribute_table_string;
 	public static final String select_mapping_class_attribute_integer_left = "SELECT URI as X FROM " + attribute_table_integer;
 	public static final String select_mapping_class_attribute_double_left = "SELECT URI as X FROM " + attribute_table_double;
-	public static final String select_mapping_class_attribute_date_left = "SELECT URI as X FROM " + attribute_table_date;
+	public static final String select_mapping_class_attribute_datetime_left = "SELECT URI as X FROM " + attribute_table_datetime;
 	public static final String select_mapping_class_attribute_boolean_left = "SELECT URI as X FROM " + attribute_table_boolean;
 
 	public static final String select_mapping_role = "SELECT URI1 as X, URI2 as Y FROM " + role_table;
@@ -305,7 +306,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String select_mapping_attribute_string = "SELECT URI as X, VALUE as Y FROM " + attribute_table_string;
 	public static final String select_mapping_attribute_integer = "SELECT URI as X, VALUE as Y FROM " + attribute_table_integer;
 	public static final String select_mapping_attribute_double = "SELECT URI as X, VALUE as Y FROM " + attribute_table_double;
-	public static final String select_mapping_attribute_date = "SELECT URI as X, VALUE as Y FROM " + attribute_table_date;
+	public static final String select_mapping_attribute_datetime = "SELECT URI as X, VALUE as Y FROM " + attribute_table_datetime;
 	public static final String select_mapping_attribute_boolean = "SELECT URI as X, VALUE as Y FROM " + attribute_table_boolean;
 
 	public static final String whereSingleCondition = "IDX = %d";
@@ -351,25 +352,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public void setConfig(Properties config) {
 		this.config = config;
 	}
-
-	// @Override
-	// public void disconnect() {
-	// try {
-	// conn.close();
-	// } catch (Exception e) {
-	//
-	// }
-	// }
-
-	// @Override
-	// public Connection getConnection() {
-	// return conn;
-	// }
-
-	// @Override
-	// public void setDatabase(Connection ds) {
-	// this.conn = ds;
-	// }
 	
 	public DAG getDAG() {
 		return dag;
@@ -445,7 +427,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(attribute_table_double_create);
 		out.append(";\n");
-		out.append(attribute_table_date_create);
+		out.append(attribute_table_datetime_create);
 		out.append(";\n");
 		out.append(attribute_table_boolean_create);
 		out.append(";\n");
@@ -481,7 +463,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexattribute_double1);
 		out.append(";\n");
-		out.append(indexattribute_date1);
+		out.append(indexattribute_datetime1);
 		out.append(";\n");
 		out.append(indexattribute_boolean1);
 		out.append(";\n");
@@ -494,7 +476,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexattribute_double2);
 		out.append(";\n");
-		out.append(indexattribute_date2);
+		out.append(indexattribute_datetime2);
 		out.append(";\n");
 		out.append(indexattribute_boolean2);
 		out.append(";\n");
@@ -507,7 +489,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexattribute_double3);
 		out.append(";\n");
-		out.append(indexattribute_date3);
+		out.append(indexattribute_datetime3);
 		out.append(";\n");
 		out.append(indexattribute_boolean3);
 		out.append(";\n");
@@ -554,7 +536,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		String attribute_insert_string_str = attribute_table_string_insert.replace("?", "%s");
 		String attribute_insert_integer_str = attribute_table_integer_insert.replace("?", "%s");
 		String attribute_insert_double_str = attribute_table_double_insert.replace("?", "%s");
-		String attribute_insert_date_str = attribute_table_date_insert.replace("?", "%s");
+		String attribute_insert_date_str = attribute_table_datetime_insert.replace("?", "%s");
 		String attribute_insert_boolean_str = attribute_table_boolean_insert.replace("?", "%s");
 		
 		String cls_insert_str = class_insert.replace("?", "%s");
@@ -597,8 +579,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					case DOUBLE:
 						out.append(String.format(attribute_insert_double_str, getQuotedString(uri), Double.parseDouble(lit), idx));
 						break;
-					case DATE:
-						out.append(String.format(attribute_insert_date_str, getQuotedString(uri), parseDate(lit), idx));
+					case DATETIME:
+						out.append(String.format(attribute_insert_date_str, getQuotedString(uri), parseTimestamp(lit), idx));
 						break;
 					case BOOLEAN:
 						out.append(String.format(attribute_insert_boolean_str, getQuotedString(uri), Boolean.parseBoolean(lit), idx));
@@ -680,7 +662,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_string_create);
 		st.addBatch(attribute_table_integer_create);
 		st.addBatch(attribute_table_double_create);
-		st.addBatch(attribute_table_date_create);
+		st.addBatch(attribute_table_datetime_create);
 		st.addBatch(attribute_table_boolean_create);
 		
 		st.executeBatch();
@@ -705,21 +687,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexattribute_string1);
 		st.addBatch(indexattribute_integer1);
 		st.addBatch(indexattribute_double1);
-		st.addBatch(indexattribute_date1);
+		st.addBatch(indexattribute_datetime1);
 		st.addBatch(indexattribute_boolean1);
 		
 		st.addBatch(indexattribute_literal2);
 		st.addBatch(indexattribute_string2);
 		st.addBatch(indexattribute_integer2);
 		st.addBatch(indexattribute_double2);
-		st.addBatch(indexattribute_date2);
+		st.addBatch(indexattribute_datetime2);
 		st.addBatch(indexattribute_boolean2);
 		
 		st.addBatch(indexattribute_literal3);
 		st.addBatch(indexattribute_string3);
 		st.addBatch(indexattribute_integer3);
 		st.addBatch(indexattribute_double3);
-		st.addBatch(indexattribute_date3);
+		st.addBatch(indexattribute_datetime3);
 		st.addBatch(indexattribute_boolean3);
 		
 		// st.addBatch(indexrole4);
@@ -759,7 +741,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_string_drop);
 		st.addBatch(attribute_table_integer_drop);
 		st.addBatch(attribute_table_double_drop);
-		st.addBatch(attribute_table_date_drop);
+		st.addBatch(attribute_table_datetime_drop);
 		st.addBatch(attribute_table_boolean_drop);
 		
 		st.executeBatch();
@@ -785,7 +767,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		PreparedStatement attributeStringStm = conn.prepareStatement(attribute_table_string_insert);
 		PreparedStatement attributeIntegerStm = conn.prepareStatement(attribute_table_integer_insert);
 		PreparedStatement attributeDoubleStm = conn.prepareStatement(attribute_table_double_insert);
-		PreparedStatement attributeDateStm = conn.prepareStatement(attribute_table_date_insert);
+		PreparedStatement attributeDateStm = conn.prepareStatement(attribute_table_datetime_insert);
 		PreparedStatement attributeBooleanStm = conn.prepareStatement(attribute_table_boolean_insert);
 
 		int insertscount = 0;
@@ -848,11 +830,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					setInputStatement(attributeDoubleStm, uri, Double.parseDouble(value), idx);
 					attributeDoubleStm.addBatch();
 					break;
-				case DATE:
-					setInputStatement(attributeDateStm, uri, parseDate(value), idx);
+				case DATETIME:
+					setInputStatement(attributeDateStm, uri, parseTimestamp(value), idx);
 					attributeDateStm.addBatch();
 					break;
 				case BOOLEAN:
+					value = getBooleanString(value);  // PostgreSQL abbreviates the boolean value to 't' and 'f'
 					setInputStatement(attributeBooleanStm, uri, Boolean.parseBoolean(value), idx);
 					attributeBooleanStm.addBatch();
 					break;
@@ -1008,6 +991,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	}	
 
+	private String getBooleanString(String value) {
+		if (value.equalsIgnoreCase("t") || value.equals("1")) {
+			return "true";
+		} else if (value.equalsIgnoreCase("f") || value.equals("0")) {
+			return "false";
+		} else {
+			return value;  // nothing change
+		}
+	}
+
 	private void setInputStatement(PreparedStatement stm, String uri, String value, String lang, int idx) throws SQLException {
 		stm.setString(1, uri);
 		stm.setString(2, value);
@@ -1033,9 +1026,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.setInt(3, idx);
 	}
 	
-	private void setInputStatement(PreparedStatement stm, String uri, Date value, int idx) throws SQLException {
+	private void setInputStatement(PreparedStatement stm, String uri, Timestamp value, int idx) throws SQLException {
 		stm.setString(1, uri);										
-		stm.setDate(2, value);
+		stm.setTimestamp(2, value);
 		stm.setInt(3, idx);
 	}
 	
@@ -1044,16 +1037,26 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.setBoolean(2, value);
 		stm.setInt(3, idx);
 	}
-	
-	private Date parseDate(String lit) {
-		try {
-			return new java.sql.Date(new SimpleDateFormat().parse(lit).getTime());
-		} catch (ParseException e) {
-			log.debug("The record typed date cannot be parsed!");
-			return null;
-		}
-	}
 
+	private Timestamp parseTimestamp(String lit) {
+		final String[] formatStrings = {
+				"yyyy-MM-dd HH:mm:ss.SS",
+				"yyyy-MM-dd HH:mm:ss.S",
+				"yyyy-MM-dd HH:mm:ss",
+				"yyyy-MM-dd",
+				"yyyy-MM-dd'T'HH:mm:ssz",
+		};
+		
+		for (String formatString : formatStrings) {
+	        try {
+	        	long time = new SimpleDateFormat(formatString).parse(lit).getTime();
+	        	Timestamp ts = new Timestamp(time);
+	        	return ts;
+	        } catch (ParseException e) { }
+	    }
+    	return null; // the string can't be parsed to one of the datetime formats.
+	}
+	
 	private COL_TYPE getAttributeType(Predicate attribute) {		
 		PropertySomeRestriction role = descFactory.getPropertySomeRestriction(attribute, true);
 		DAGNode roleNode = dag.get(role);
@@ -1368,7 +1371,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					case STRING: sql.append(select_mapping_attribute_string); break;
 					case INTEGER: sql.append(select_mapping_attribute_integer); break;
 					case DOUBLE: sql.append(select_mapping_attribute_double); break;
-					case DATE: sql.append(select_mapping_attribute_date); break;
+					case DATETIME: sql.append(select_mapping_attribute_datetime); break;
 					case BOOLEAN: sql.append(select_mapping_attribute_boolean); break;
 				}
 			}
@@ -1940,7 +1943,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		boolean hasDateNode = false;  // A flag if there is  at least one DP with range xsd:date
 		
-		buffer.append(select_mapping_class_attribute_date_left);
+		buffer.append(select_mapping_class_attribute_datetime_left);
 		buffer.append(" WHERE ");
 
 		boolean multipleIntervals = false;  // A flag to tell there are more than one SI interval.
@@ -1949,7 +1952,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
 			if (!isObjectProperty) {
 				COL_TYPE dateType = getAttributeType(property);
-				if (dateType == COL_TYPE.DATE) {
+				if (dateType == COL_TYPE.DATETIME) {
 					PropertySomeRestriction existsDesc = (PropertySomeRestriction) node.getDescription();
 					Property role = descFactory.createProperty(existsDesc.getPredicate(), false);
 					DAGNode indexedNode = pureIsa.getRoleNode(role);  // Get the indexed node.
@@ -2202,21 +2205,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexattribute_string1);
 		st.addBatch(dropindexattribute_integer1);
 		st.addBatch(dropindexattribute_double1);
-		st.addBatch(dropindexattribute_date1);
+		st.addBatch(dropindexattribute_datetime1);
 		st.addBatch(dropindexattribute_boolean1);
 		
 		st.addBatch(dropindexattribute_literal2);
 		st.addBatch(dropindexattribute_string2);
 		st.addBatch(dropindexattribute_integer2);
 		st.addBatch(dropindexattribute_double2);
-		st.addBatch(dropindexattribute_date2);
+		st.addBatch(dropindexattribute_datetime2);
 		st.addBatch(dropindexattribute_boolean2);
 		
 		st.addBatch(dropindexattribute_literal3);
 		st.addBatch(dropindexattribute_string3);
 		st.addBatch(dropindexattribute_integer3);
 		st.addBatch(dropindexattribute_double3);
-		st.addBatch(dropindexattribute_date3);
+		st.addBatch(dropindexattribute_datetime3);
 		st.addBatch(dropindexattribute_boolean3);
 		
 		// st.addBatch(dropindexrole4);
@@ -2259,7 +2262,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_string));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_integer));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_double));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_date));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_datetime));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_boolean));			
 		} catch (SQLException e) {
 			exists = false;
@@ -2364,7 +2367,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 						case STRING: appendStringToPropertyFile(outDataPropertiesString, new String[] {uri, lit, String.valueOf(idx) }); break;
 						case INTEGER: appendStringToPropertyFile(outDataPropertiesString, new String[] {uri, lit, String.valueOf(idx) }); break;
 						case DOUBLE: appendStringToPropertyFile(outDataPropertiesString, new String[] {uri, lit, String.valueOf(idx) }); break;
-						case DATE: appendStringToPropertyFile(outDataPropertiesString, new String[] {uri, lit, String.valueOf(idx) }); break;
+						case DATETIME: appendStringToPropertyFile(outDataPropertiesString, new String[] {uri, lit, String.valueOf(idx) }); break;
 						case BOOLEAN: appendStringToPropertyFile(outDataPropertiesString, new String[] {uri, lit, String.valueOf(idx) }); break;
 					}
 
@@ -2516,7 +2519,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			counts[1] += cm.copyIn("COPY " + attribute_table_double + " FROM STDIN", inprop);
 			
 			inprop = new FileReader(tempFileDataPropertiesDate);
-			counts[1] += cm.copyIn("COPY " + attribute_table_date + " FROM STDIN", inprop);
+			counts[1] += cm.copyIn("COPY " + attribute_table_datetime + " FROM STDIN", inprop);
 			
 			inprop = new FileReader(tempFileDataPropertiesBoolean);
 			counts[1] += cm.copyIn("COPY " + attribute_table_boolean + " FROM STDIN", inprop);
