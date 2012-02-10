@@ -181,10 +181,8 @@ public class StockExchangeTestPostgres extends TestCase {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
-
 		factory.setPreferenceHolder(p);
 
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 		reasoner.loadOBDAModel(obdaModel);
 
