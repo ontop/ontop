@@ -216,20 +216,21 @@ public class StockExchangeTest extends TestCase {
 		assertFalse(fail);
 	}
 
+	/* These are the distinct tuples that we know each query returns */
+    final int[] tuplesForSemanticIndexTest = { 
+            7, -1, 4, 1,                                 // Simple queries group
+            1, 2, 2, 1, 4, 3, 3,                         // CQs group
+            -1, -1, 2,                                   // String
+            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Integer
+            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Decimal
+            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Double
+            -1, -1, -1, -1, -1, -1, -1, -1, 0,           // Date time 
+            -1, -1, -1, -1, 5, 5, -1, -1, 5, -1, -1, 5   // Boolean
+    };
+	
 	public void testSiEqSig() throws Exception {
-
-		/* These are the distinct tuples that we know each query returns */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		
+		prepareTestQueries(tuplesForSemanticIndexTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -243,19 +244,8 @@ public class StockExchangeTest extends TestCase {
 	}
 
 	public void testSiEqNoSig() throws Exception {
-		
-		/* These are the distinct tuples that we know each query returns */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+	    
+		prepareTestQueries(tuplesForSemanticIndexTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -270,18 +260,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testSiNoEqSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		prepareTestQueries(tuplesForSemanticIndexTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -296,18 +275,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testSiNoEqNoSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		prepareTestQueries(tuplesForSemanticIndexTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -383,26 +351,27 @@ public class StockExchangeTest extends TestCase {
 		runTests(p);
 	}
 
+	/* These are the distinct tuples that we know each query returns 
+     * 
+     * Note: 
+     * - H2 can't handle query: [...] WHERE number="+3"
+     * - H2 can't handle query: [...] WHERE date="2008-04-02T00:00:00Z"
+     * - H2 can handle query: [...] WHERE shareType=1
+     * */
+    final int[] tuplesForVirtualTest = { 
+            7, -1, 4, 1,                                 // Simple queries group
+            1, 2, 2, 1, 4, 3, 3,                         // CQs group
+            -1, -1, 2,                                   // String
+            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Integer
+            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Decimal
+            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Double
+            -1, -1, -1, -1, -1, -1, -1, -1, 0,           // Date time 
+            -1, -1, -1, -1, 5, 5, -1, -1, 5, -1, -1, 5   // Boolean
+    };
+	
 	public void testViEqSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns 
-		 * 
-		 * Note: 
-		 * - H2 can't handle query: [...] WHERE number="+3"
-		 * - H2 can't handle query: [...] WHERE date="2008-04-02T00:00:00Z"
-		 * - H2 can handle query: [...] WHERE shareType=1
-		 * */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		prepareTestQueries(tuplesForVirtualTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -414,24 +383,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testViEqNoSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns 
-		 * 
-		 * Note: 
-		 * - H2 can't handle query: [...] WHERE number="+3"
-		 * - H2 can't handle query: [...] WHERE date="2008-04-02T00:00:00Z"
-		 * - H2 can handle query: [...] WHERE shareType=1
-		 * */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		prepareTestQueries(tuplesForVirtualTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -448,24 +400,7 @@ public class StockExchangeTest extends TestCase {
 	 */
 	public void testViNoEqSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns 
-		 * 
-		 * Note: 
-		 * - H2 can't handle query: [...] WHERE number="+3"
-		 * - H2 can't handle query: [...] WHERE date="2008-04-02T00:00:00Z"
-		 * - H2 can handle query: [...] WHERE shareType=1
-		 * */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		prepareTestQueries(tuplesForVirtualTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -482,24 +417,7 @@ public class StockExchangeTest extends TestCase {
 	 */
 	public void testViNoEqNoSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns 
-		 * 
-		 * Note: 
-		 * - H2 can't handle query: [...] WHERE number="+3"
-		 * - H2 can't handle query: [...] WHERE date="2008-04-02T00:00:00Z"
-		 * - H2 can handle query: [...] WHERE shareType=1
-		 * */
-		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
-				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
-		};
-		prepareTestQueries(tuples);
+		prepareTestQueries(tuplesForVirtualTest);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

@@ -56,7 +56,7 @@ CREATE TABLE stockinformation (
 
 CREATE TABLE transaction (
     id integer NOT NULL,
-    date date,
+    date timestamp,
     stockid integer,
     type boolean,
     brokerid integer,

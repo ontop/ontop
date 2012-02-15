@@ -210,6 +210,7 @@ public class StockExchangeTestPostgres extends TestCase {
 			} catch (Exception e) {
 				end = System.currentTimeMillis();
 				count = -1;
+				log.error(e.getMessage());
 			}
 
 			Result summary = new Result();
@@ -247,14 +248,14 @@ public class StockExchangeTestPostgres extends TestCase {
 		
 		/* These are the distinct tuples that we know each query returns */
 		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
+				7, -1, 4, 1,							// Simple queries group
 				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, -1, 2, 2, 0, 0, 0, 			// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 0, -1, -1, -1, -1, -1, 0,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, 5, 5, -1, -1, 5   // Boolean
+				-1, -1, 2, 								// String
+				-1, 2, 2, -1, 2, 2, -1, 0, 0, 			// Integer
+				-1, 2, 2, -1, 2, 2, -1, 0, 0,  			// Decimal
+				-1, 2, 2, -1, 2, 2, -1, 0, 0,  			// Double
+				-1, -1, -1, -1, -1, -1, -1, -1, 0,  		// Date time 
+				-1, -1, -1, -1, 5, 5, -1, -1, 5, -1, -1, 5   // Boolean
 		};
 		prepareTestQueries(tuples);
 		
@@ -382,14 +383,14 @@ public class StockExchangeTestPostgres extends TestCase {
 		 * - Pgsql can't handle query: [...] WHERE shareType=1 (the DBMS stores boolean as 't' or 'f')
 		 * */
 		final int[] tuples = { 
-				7, 1, 4, 1,								// Simple queries group
+				7, -1, 4, 1,							// Simple queries group
 				1, 2, 2, 1, 4, 3, 3, 					// CQs group
-				2, -1, 2, 								// String
-				2, 2, 2, 2, 2, 2, 0, 0, 0, 				// Integer
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Decimal
-				2, 2, 2, 2, 2, 2, 0, 0, 0,  			// Double
-				1, 1, 1, -1, -1, -1, -1, -1, 1,  		// Date time 
-				5, 5, 5, 5, 5, 5, -1, -1, 5, -1, -1, 5  // Boolean
+				-1, -1, 2, 								// String
+				-1, 2, 2, -1, 2, 2, -1, 0, 0, 		    // Integer
+				-1, 2, 2, -1, 2, 2, -1, 0, 0,  			// Decimal
+				-1, 2, 2, -1, 2, 2, -1, 0, 0,  			// Double
+				-1, -1, -1, -1, -1, -1, -1, -1, 1,  		// Date time 
+				-1, -1, -1, -1, 5, 5, -1, -1, 5, -1, -1, 5  // Boolean
 		};
 		prepareTestQueries(tuples);
 		
