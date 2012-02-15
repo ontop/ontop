@@ -11,6 +11,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
+import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,19 +30,19 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		metadata = new DBMetadata();
 		TableDefinition table = new TableDefinition();
 		table.setName("TABLE");
-		table.setAttribute(1, new Attribute("col1", "INT", true));
-		table.setAttribute(2, new Attribute("col2", "INT", false));
-		table.setAttribute(3, new Attribute("col3", "INT", false));
-		table.setAttribute(4, new Attribute("col4", "INT", false));
+		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true));
+		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false));
+		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false));
+		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition();
 		table.setName("TABLE2");
-		table.setAttribute(1, new Attribute("col1", "INT", true));
-		table.setAttribute(2, new Attribute("col2", "INT", false));
-		table.setAttribute(3, new Attribute("col3", "INT", false));
-		table.setAttribute(4, new Attribute("col4", "INT", false));
+		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true));
+		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false));
+		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false));
+		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false));
 		metadata.add(table);
 
 		unfoldingProgram = fac.getDatalogProgram();

@@ -4,7 +4,7 @@ public class Attribute {
 	
 	/** Fields */
 	public final String name;
-	public final String type;
+	public final int type;
 	public final boolean bPrimaryKey;
 	public final int canNull;
 	
@@ -14,18 +14,18 @@ public class Attribute {
 	}
 	
 	public Attribute(String name) {
-		this(name, "", false, 0);
+		this(name, 0, false, 0);
 	}
 
-	public Attribute(String name, String type) {
+	public Attribute(String name, int type) {
 		this(name, type, false, 0);
 	}
 
-	public Attribute(String name, String type, boolean primaryKey) {
+	public Attribute(String name, int type, boolean primaryKey) {
 		this(name, type, primaryKey, 0);
 	}
 	
-	public Attribute(String name, String type, boolean primaryKey, int canNull) {
+	public Attribute(String name, int type, boolean primaryKey, int canNull) {
 		this.name = name;
 		this.type = type;
 		this.bPrimaryKey = primaryKey;

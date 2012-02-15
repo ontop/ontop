@@ -286,7 +286,7 @@ public class JDBCConnectionManager {
 				for (int pos = 1; rsColumns.next(); pos++) {
 					td.setAttribute(
 							pos,
-							new Attribute(rsColumns.getString("COLUMN_NAME"), rsColumns.getString("TYPE_NAME"), pk.contains(rsColumns
+							new Attribute(rsColumns.getString("COLUMN_NAME"), rsColumns.getInt("DATA_TYPE"), pk.contains(rsColumns
 									.getString("COLUMN_NAME")), rsColumns.getInt("NULLABLE")));
 				}
 				// Add this information to the DBMetadata
