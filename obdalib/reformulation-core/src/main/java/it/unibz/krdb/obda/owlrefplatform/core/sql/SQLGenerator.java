@@ -312,7 +312,8 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 * Do nothing, variable conditions have been set
 							 * already
 							 */
-
+						} else if (term instanceof Function) {
+						    // NO-OP
 						} else {
 							throw new RuntimeException("Found a non-supported term in the body while generating SQL");
 						}
