@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.AuxSQLMapping;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
@@ -130,9 +131,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 	@Override
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
-		if (!isUCQ(query))
+	    int ruleSize = query.getRules().size();
+	    if (ruleSize == 0) {
+		    throw new OBDAException("No axiom has been generated from the system! Please recheck your input query.");
+		}
+		
+	    if (!isUCQ(query)) {
 			throw new InvalidParameterException("Only UCQs are supported at the moment");
-
+		}
 		log.debug("Generating SQL. Initial query size: {}", query.getRules().size());
 		List<CQIE> cqs = query.getRules();
 
@@ -396,38 +402,51 @@ public class SQLGenerator implements SourceQueryGenerator {
 					sb.append(" as ");
 					sb.append(signature.get(hpos));
 				} else if (ht instanceof Function) {
+                    Vector<String> vex = new Vector<String>();
 					Function ov = (Function) ht;
-					String name = ov.getFunctionSymbol().toString();
-					List<Term> terms = ov.getTerms();
-					Iterator<Term> it = terms.iterator();
-					Vector<String> vex = new Vector<String>();
-					while (it.hasNext()) {
-						Term v = it.next();
-						if (v instanceof Variable) {
-							vex.add(getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-						} else if (v instanceof ValueConstant) {
-							ValueConstant ct = (ValueConstant) v;
-							StringBuilder var = new StringBuilder();
-							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
-								var.append("'");
-								var.append(ct.getValue());
-								var.append("'");
-							} else {
-								var.append(ct.getValue());
-							}
-							vex.add(var.toString());
-						} else if (v instanceof URIConstant) {
-							StringBuilder var = new StringBuilder();
-							var.append("'" + ((URIConstant) v).getURI().toString() + "'");
-							vex.add(var.toString());
-						} else {
-							throw new RuntimeException("Invalid term in the head");
-						}
-					}
-					String concat = jdbcutil.getConcatination(name, vex);
-					sb.append(concat);
-					sb.append(" as ");
-					sb.append(signature.get(hpos));
+					String name = ov.getFunctionSymbol().toString();					
+					if (name.equals(OBDAVocabulary.RDFS_LITERAL_URI) 
+                            || name.equals(OBDAVocabulary.XSD_STRING_URI)
+                            || name.equals(OBDAVocabulary.XSD_INTEGER_URI)
+                            || name.equals(OBDAVocabulary.XSD_DOUBLE_URI)
+                            || name.equals(OBDAVocabulary.XSD_DATETIME_URI)
+                            || name.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+                        Variable v = (Variable) ov.getTerms().get(0);
+                        String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+                        sb.append(column);
+                        sb.append(" as ");
+                        sb.append(signature.get(hpos));
+                    } else {
+    					List<Term> terms = ov.getTerms();
+    					Iterator<Term> it = terms.iterator();
+    					while (it.hasNext()) {
+    						Term v = it.next();
+    						if (v instanceof Variable) {
+    							vex.add(getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+    						} else if (v instanceof ValueConstant) {
+    							ValueConstant ct = (ValueConstant) v;
+    							StringBuilder var = new StringBuilder();
+    							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
+    								var.append("'");
+    								var.append(ct.getValue());
+    								var.append("'");
+    							} else {
+    								var.append(ct.getValue());
+    							}
+    							vex.add(var.toString());
+    						} else if (v instanceof URIConstant) {
+    							StringBuilder var = new StringBuilder();
+    							var.append("'" + ((URIConstant) v).getURI().toString() + "'");
+    							vex.add(var.toString());
+    						} else {
+    							throw new RuntimeException("Invalid term in the head");
+    						}
+    					}
+    					String concat = jdbcutil.getConcatination(name, vex);
+    					sb.append(concat);
+    					sb.append(" as ");
+    					sb.append(signature.get(hpos));
+                    }
 				} else if (ht instanceof ValueConstant) {
 					ValueConstant ct = (ValueConstant) ht;
 					if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {

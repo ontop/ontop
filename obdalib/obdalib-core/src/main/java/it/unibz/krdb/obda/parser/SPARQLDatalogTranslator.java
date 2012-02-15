@@ -3,12 +3,13 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
@@ -116,11 +117,12 @@ public class SPARQLDatalogTranslator {
 
 		ElementTriplesBlock triplesBlock = null; // initiate the triples
 
-		if (element instanceof ElementTriplesBlock)
+		if (element instanceof ElementTriplesBlock) {
 			triplesBlock = (ElementTriplesBlock) element;
-		else
+		} else {
 			// OPTIONAL, UNION and FILTER constraints are currently unsupported.
 			throw new QueryException("Unsupported query syntax");
+		}
 
 		BasicPattern triples = triplesBlock.getTriples();
 
@@ -140,16 +142,21 @@ public class SPARQLDatalogTranslator {
 			URI objectUri = null;
 			Predicate predicate = null;
 			if (p.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+			    COL_TYPE dataType = null;
 				if (s instanceof Var) { // Subject is a variable
 					Var subject = (Var) s;
 					terms.add(termFactory.getVariable(subject.getName()));
 				}
 				else if (s instanceof Node_Literal) { // Subject is a node literal
 					Node_Literal subject = (Node_Literal) s;
-					terms.add(getValueConstant(subject));
+					String value = subject.getLiteralValue().toString();
+					dataType = getDataType(subject);
+                    ValueConstant constant = termFactory.getValueConstant(value, dataType);
+                    terms.add(constant);
 				}
 				else if (s instanceof Node_URI) { // Subject is a node URI
 					Node_URI subject = (Node_URI) s;
+					dataType = COL_TYPE.OBJECT;
 					subjectUri = URI.create(subject.getURI());
 					terms.add(termFactory.getURIConstant(subjectUri));
 				}
@@ -162,40 +169,55 @@ public class SPARQLDatalogTranslator {
 				}
 				else if (o instanceof Node_URI) { // Object is a node URI
 					Node_URI object = (Node_URI) o;
+					dataType = COL_TYPE.OBJECT;
 					objectUri = URI.create(object.getURI());
 				}
-				predicate = predicateFactory.getPredicate(objectUri, 1);
+				predicate = predicateFactory.getPredicate(objectUri, 1, new COL_TYPE[] { dataType });
 			}
 			else { // not equal to "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+			    COL_TYPE subjectType = null;
 				if (s instanceof Var) { // Subject is a variable
 					Var subject = (Var) s;
 					terms.add(termFactory.getVariable(subject.getName()));
 				}
 				else if (s instanceof Node_Literal) { // Subject is a node literal
 					Node_Literal subject = (Node_Literal) s;
-					terms.add(getValueConstant(subject));
+					String value = subject.getLiteralValue().toString();
+					subjectType = getDataType(subject);
+					ValueConstant constant = termFactory.getValueConstant(value, subjectType);
+					terms.add(constant);
 				}
 				else if (s instanceof Node_URI) { // Subject is a node URI
 					Node_URI subject = (Node_URI) s;
+					subjectType = COL_TYPE.OBJECT;
 					subjectUri = URI.create(subject.getURI());
 					terms.add(termFactory.getURIConstant(subjectUri));
 				}
 
+                COL_TYPE objectType = null;
 				if (o instanceof Var) { // Object is a variable
 					Var object = (Var) o;
 					terms.add(termFactory.getVariable(object.getName()));
 				}
 				else if (o instanceof Node_Literal) { // Object is a node literal
 					Node_Literal object = (Node_Literal) o;
-					terms.add(getValueConstant(object));
+					String value = object.getLiteralValue().toString();
+					objectType = getDataType(object);
+                    ValueConstant constant = termFactory.getValueConstant(value, objectType);
+                    
+                    // v1.7: We extend the syntax such that the data type of a constant 
+                    // is defined using a functional symbol. 
+                    Function dataTypeFunction = termFactory.getFunctionalTerm(getDataTypePredicate(objectType), constant);
+                    terms.add(dataTypeFunction);
 				}
 				else if (o instanceof Node_URI) { // Object is a node URI
 					Node_URI object = (Node_URI) o;
+					objectType = COL_TYPE.OBJECT;
 					objectUri = URI.create(object.getURI());
 					terms.add(termFactory.getURIConstant(objectUri));
 				}
 				URI predicateUri = URI.create(p.getURI());
-				predicate = predicateFactory.getPredicate(predicateUri, 2);
+				predicate = predicateFactory.getPredicate(predicateUri, 2, new COL_TYPE[] { subjectType, objectType });
 			}
 			Atom atom = predicateFactory.getAtom(predicate, terms);
 			body.add(atom);
@@ -203,42 +225,61 @@ public class SPARQLDatalogTranslator {
 		return body;
 	}
 	
-	private ValueConstant getValueConstant(Node_Literal subject) {
-		final String dataTypeURI = subject.getLiteralDatatypeURI();
-		final String value = subject.getLiteralValue().toString();
-		
-		ValueConstant constant = null;
-		
-		if (dataTypeURI == null) {
-			return termFactory.getValueConstant(value, COL_TYPE.LITERAL);
-		}
-		else {		
-			if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				constant = termFactory.getValueConstant(value, COL_TYPE.LITERAL);
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
-				constant = termFactory.getValueConstant(value, COL_TYPE.STRING);
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)
-					|| dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
-				constant = termFactory.getValueConstant(value, COL_TYPE.INTEGER);
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				if (value.contains(".")) {
-					// We "override" the decimal to datatype double.
-					constant = termFactory.getValueConstant(value, COL_TYPE.DOUBLE);
-				} else {
-					// We "cast" the decimal to datatype integer.
-					constant = termFactory.getValueConstant(value, COL_TYPE.INTEGER);
-				}				
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)
-					|| dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				constant = termFactory.getValueConstant(value, COL_TYPE.DOUBLE);
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {
-				constant = termFactory.getValueConstant(value, COL_TYPE.DATETIME);
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-				constant = termFactory.getValueConstant(value, COL_TYPE.BOOLEAN);
-			} else {
-				constant = termFactory.getValueConstant(value, COL_TYPE.LITERAL); // TODO should throw an exception
-			}
-		}
-		return constant;
+	private COL_TYPE getDataType(Node_Literal node) {
+        COL_TYPE dataType = null;
+	    
+	    final String dataTypeURI = node.getLiteralDatatypeURI();
+	    if (dataTypeURI == null) {
+	        dataType = COL_TYPE.LITERAL;
+        }
+        else {      
+            if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {
+                dataType = COL_TYPE.LITERAL;
+            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
+                dataType = COL_TYPE.STRING;
+            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)
+                    || dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
+                dataType = COL_TYPE.INTEGER;
+            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {  // special case for decimal
+                String value = node.getLiteralValue().toString();
+                if (value.contains(".")) {
+                    // We "override" the decimal to double.
+                    dataType = COL_TYPE.DOUBLE;
+                } else {
+                    // We "cast" the decimal to integer.
+                    dataType = COL_TYPE.INTEGER;
+                }
+            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)
+                    || dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
+                dataType = COL_TYPE.DOUBLE;
+            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {
+                dataType = COL_TYPE.DATETIME;
+            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+                dataType = COL_TYPE.BOOLEAN;
+            } else {
+                dataType = COL_TYPE.LITERAL; // TODO should throw an exception
+            }
+        }
+	    return dataType;	    	    
+	}
+	
+	private Predicate getDataTypePredicate(COL_TYPE dataType) {
+	    Predicate predicate = null;
+	    
+	    switch (dataType) {
+	        case LITERAL: 
+	            predicate = termFactory.getPredicate(OBDAVocabulary.RDFS_LITERAL_URI, 1, new COL_TYPE[] { dataType }); break;
+	        case STRING:
+	            predicate = termFactory.getPredicate(OBDAVocabulary.XSD_STRING_URI, 1, new COL_TYPE[] { dataType }); break;
+	        case INTEGER:
+                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_INTEGER_URI, 1, new COL_TYPE[] { dataType }); break;
+	        case DOUBLE:
+                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DOUBLE_URI, 1, new COL_TYPE[] { dataType }); break;
+	        case DATETIME:
+                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DATETIME_URI, 1, new COL_TYPE[] { dataType }); break;
+	        case BOOLEAN:
+                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_BOOLEAN_URI, 1, new COL_TYPE[] { dataType }); break;
+	    }
+	    return predicate;
 	}
 }

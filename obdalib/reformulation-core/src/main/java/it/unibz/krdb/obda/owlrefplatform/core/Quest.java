@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -30,9 +31,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
+import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -44,6 +45,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -90,7 +92,7 @@ public class Quest implements Serializable {
 	/* The TBox used for query reformulation */
 	protected Ontology reformulationOntology = null;
 
-	/* The merge and tranlsation of all loaded ontologies */
+	/* The merge and translation of all loaded ontologies */
 	protected Ontology inputTBox = null;
 
 	/* The OBDA model used for query unfolding */
@@ -249,7 +251,7 @@ public class Quest implements Serializable {
 	/***
 	 * Starts the local connection that Quest maintains to the DBMS. This
 	 * connection belongs only to Quest and is used to get information from the
-	 * DBMS. At the momemnt this connection is mainly used during
+	 * DBMS. At the moment this connection is mainly used during
 	 * initialization, to get metadata about the DBMS or to create repositories
 	 * in classic mode.
 	 * 
@@ -305,16 +307,18 @@ public class Quest implements Serializable {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
 
-		/*
-		 * Fixing the typing of predicates, in case they are not properly given.
-		 */
-
-		log.debug("Fixing vocabulary typing");
-
-		if (inputOBDAModel != null) {
-			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
-		}
+//      TODO Remove this code as it has been done in QuestOWL class.
+//
+//		/*
+//		 * Fixing the typing of predicates, in case they are not properly given.
+//		 */
+//
+//		log.debug("Fixing vocabulary typing");
+//
+//		if (inputOBDAModel != null) {
+//			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
+//			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
+//		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
 		sigma = OntologyFactoryImpl.getInstance().createOntology();
@@ -455,6 +459,8 @@ public class Quest implements Serializable {
 
 			}
 
+			// NOTE: Currently the system only supports one data source.
+			//
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
@@ -484,6 +490,11 @@ public class Quest implements Serializable {
 			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);			
 			log.debug("Optimizing unfolding program. Initial size: {} Final size: {}", unprsz, unfoldingProgram.getRules().size());
 			
+			/*
+			 * Adding data typing on the mapping axioms.
+			 */
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+			typeRepair.insertDataTyping(unfoldingProgram);
 
 			/*
 			 * Setting up the unfolder and SQL generation
@@ -495,7 +506,6 @@ public class Quest implements Serializable {
 			/*
 			 * Setting up the TBox we will use for the reformulation
 			 */
-
 			if (bOptimizeTBoxSigma) {
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationOntology, sigma);
 				reformulationOntology = reducer.getReducedOntology();
@@ -504,7 +514,6 @@ public class Quest implements Serializable {
 			/*
 			 * Setting up the reformulation engine
 			 */
-
 			if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
 				rewriter = new DLRPerfectReformulator();
 			} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
@@ -519,7 +528,6 @@ public class Quest implements Serializable {
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-
 			vocabularyValidator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
 
 			log.debug("... Quest has been setup and is ready for querying");
@@ -528,15 +536,8 @@ public class Quest implements Serializable {
 		} catch (Exception e) {
 
 			log.error(e.getMessage(), e);
-			OBDAException ex = new OBDAException(e.getMessage(), e) {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-			};
+			OBDAException ex = new OBDAException(e.getMessage(), e);
 			e.fillInStackTrace();
-
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
 				SQLException e1 = sqle.getNextException();
@@ -548,7 +549,7 @@ public class Quest implements Serializable {
 			}
 			throw ex;
 		} finally {
-
+		    // NO-OP
 		}
 	}
 
@@ -579,7 +580,5 @@ public class Quest implements Serializable {
 		}
 
 		return new QuestConnection(this, conn);
-
 	}
-
 }
