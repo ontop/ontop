@@ -159,10 +159,10 @@ public class QuestOWL implements OBDAOWLReasoner, OBDAQueryReasoner, Monitorable
 				if (bObtainFromMappings) {
 					log.debug("Loading data from Mappings into the database");
 
-					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel, questInstance.getEquivalenceMap());
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 					st.insertData(assertionIter, 5000, 500);
-					assertionIter.disconnect();
+					materializer.disconnect();
 				}
 
 				st.createIndexes();

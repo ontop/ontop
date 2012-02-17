@@ -19,7 +19,7 @@ public class OWLAPI2IndividualIterator implements Iterator<OWLIndividualAxiom> {
 	private OWLAPI2IndividualTranslator translator = new OWLAPI2IndividualTranslator();
 	
 	public OWLAPI2IndividualIterator(OBDAModel model) throws Exception {
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 		Iterator<Assertion> assertions = materializer.getAssertionIterator();
 		setAssertions(assertions);
 	}
