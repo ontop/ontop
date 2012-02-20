@@ -3,8 +3,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -18,10 +20,15 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
-import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
+import it.unibz.krdb.obda.utils.MappingAnalyzer;
+import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -29,6 +36,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,17 +70,17 @@ import org.slf4j.LoggerFactory;
  */
 public class VirtualABoxMaterializer {
 
-	OBDAModel model;
+	private OBDAModel model;
 
-	OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+	private OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 
-//	JDBCConnectionManager jdbcMan = JDBCConnectionManager.getJDBCConnectionManager();
+	private Connection conn;
 
-	Map<OBDADataSource, ComplexMappingUnfolder> unfoldersMap = new HashMap<OBDADataSource, ComplexMappingUnfolder>();
+	private Map<OBDADataSource, DatalogUnfolder> unfoldersMap = new HashMap<OBDADataSource, DatalogUnfolder>();
 
-	Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgeneratorsMap = new HashMap<OBDADataSource, ComplexMappingSQLGenerator>();
+	private Map<OBDADataSource, SQLGenerator> sqlgeneratorsMap = new HashMap<OBDADataSource, SQLGenerator>();
 
-	Set<Predicate> vocabulary = new LinkedHashSet<Predicate>();
+	private Set<Predicate> vocabulary = new LinkedHashSet<Predicate>();
 
 	private Map<Predicate, Description> equivalenceMap;
 
@@ -88,18 +96,33 @@ public class VirtualABoxMaterializer {
 		this.equivalenceMap = equivalenceMap;
 
 		for (OBDADataSource source : model.getSources()) {
-			List<OBDAMappingAxiom> maps = model.getMappings(source.getSourceID());
+			
+			URI sourceUri = source.getSourceID();
+			ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 
 			/*
 			 * Preparing unfolders and sql generators for each source so that
 			 * this is only is done once
 			 */
-
-			MappingViewManager vewman = new MappingViewManager(maps);
-			ComplexMappingUnfolder unfolder = new ComplexMappingUnfolder(maps, vewman);
+			
+			setupConnection(source);
+			
+			// Construct the datalog program from the OBDA mappings
+			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
+	        MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, metadata);
+	        DatalogProgram datalog = analyzer.constructDatalogProgram();
+	        
+	        // Insert the data type information
+	        MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+	        typeRepair.insertDataTyping(datalog);
+	        
+	        // Setup the unfolder
+	        DatalogUnfolder unfolder = new DatalogUnfolder(datalog, metadata);
+	        
+	        // Setup the SQL generator
 			JDBCUtility util = new JDBCUtility(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			ComplexMappingSQLGenerator sqlgen = new ComplexMappingSQLGenerator(vewman, util);
-
+	        SQLGenerator sqlgen = new SQLGenerator(metadata, util);
+	        
 			unfoldersMap.put(source, unfolder);
 			sqlgeneratorsMap.put(source, sqlgen);
 
@@ -107,17 +130,28 @@ public class VirtualABoxMaterializer {
 			 * Collecting the vocabulary of the mappings
 			 */
 
-			for (OBDAMappingAxiom map : maps) {
-				CQIE targetq = (CQIE) map.getTargetQuery();
-				for (Atom atom : targetq.getBody()) {
-					if (!vocabulary.contains(atom.getPredicate())) {
-						vocabulary.add(atom.getPredicate());
-					}
-				}
+			for (CQIE rule : datalog.getRules()) {
+				Predicate predicate = rule.getHead().getPredicate();
+				vocabulary.add(predicate);
 			}
 		}
-
 	}
+	
+	private void setupConnection(OBDADataSource datasource) throws SQLException {
+	    if (conn == null || conn.isClosed()) {
+            String url = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+            String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+            String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+            String driver = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+    
+            try {
+                Class.forName(driver);
+            } catch (ClassNotFoundException e1) {
+                // Does nothing because the SQLException handles this problem also.
+            }
+            conn = DriverManager.getConnection(url, username, password);
+	    }      
+    }
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), unfoldersMap, sqlgeneratorsMap);
@@ -199,14 +233,14 @@ public class VirtualABoxMaterializer {
 
 		private Iterator<Predicate> predicates;
 		private Collection<OBDADataSource> sources;
-		private Map<OBDADataSource, ComplexMappingUnfolder> unfolders;
-		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
+		private Map<OBDADataSource, DatalogUnfolder> unfolders;
+		private Map<OBDADataSource, SQLGenerator> sqlgens;
 
 		private Predicate currentPredicate = null;
 		private VirtualTripleIterator currentIterator = null;
 
 		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
-				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
+				Map<OBDADataSource, DatalogUnfolder> unfolders, Map<OBDADataSource, SQLGenerator> sqlgens)
 				throws SQLException {
 			this.predicates = predicates;
 			this.sources = sources;
@@ -308,9 +342,9 @@ public class VirtualABoxMaterializer {
 
 		private LinkedList<String> signature;
 
-		private Map<OBDADataSource, ComplexMappingUnfolder> unfolders;
+		private Map<OBDADataSource, DatalogUnfolder> unfolders;
 
-		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
+		private Map<OBDADataSource, SQLGenerator> sqlgens;
 
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 		
@@ -319,7 +353,7 @@ public class VirtualABoxMaterializer {
 		private Statement st;
 		
 		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources,
-				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
+				Map<OBDADataSource, DatalogUnfolder> unfolders, Map<OBDADataSource, SQLGenerator> sqlgens)
 				throws SQLException {
 
 			this.pred = p;
@@ -333,11 +367,11 @@ public class VirtualABoxMaterializer {
 			Atom body = null;
 			signature = new LinkedList<String>();
 			if (p.getArity() == 1) {
-				head = obdafac.getAtom(obdafac.getPredicate(URI.create("q"), 1), obdafac.getVariable("col1"));
+				head = obdafac.getAtom(obdafac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 1), obdafac.getVariable("col1"));
 				body = obdafac.getAtom(p, obdafac.getVariable("col1"));
 				signature.add("col1");
 			} else if (p.getArity() == 2) {
-				head = obdafac.getAtom(obdafac.getPredicate(URI.create("q"), 2), obdafac.getVariable("col1"), obdafac.getVariable("col2"));
+				head = obdafac.getAtom(obdafac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 2), obdafac.getVariable("col1"), obdafac.getVariable("col2"));
 				body = obdafac.getAtom(p, obdafac.getVariable("col1"), obdafac.getVariable("col2"));
 				signature.add("col1");
 				signature.add("col2");
@@ -406,8 +440,8 @@ public class VirtualABoxMaterializer {
 			while (sql.equals("")) {
 				source = sourceIterator.next();
 
-				ComplexMappingUnfolder unfolder = unfolders.get(source);
-				ComplexMappingSQLGenerator sqlgen = sqlgens.get(source);
+				DatalogUnfolder unfolder = unfolders.get(source);
+				SQLGenerator sqlgen = sqlgens.get(source);
 
 				DatalogProgram unfolding = unfolder.unfold(query);
 				sql = sqlgen.generateSourceQuery(unfolding, signature).trim();

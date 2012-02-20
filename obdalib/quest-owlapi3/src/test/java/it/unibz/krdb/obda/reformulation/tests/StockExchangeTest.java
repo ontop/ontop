@@ -18,8 +18,10 @@ import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
@@ -121,10 +123,29 @@ public class StockExchangeTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 		try {
+			dropTables();
 			conn.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
+	}
+	
+	private void dropTables() throws SQLException, IOException {
+
+		Statement st = conn.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-postgres.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		st.close();
+		conn.commit();
 	}
 
 	private void prepareTestQueries(int[] answer) {
