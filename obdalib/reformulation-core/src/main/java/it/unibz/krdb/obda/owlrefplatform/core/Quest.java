@@ -500,8 +500,8 @@ public class Quest implements Serializable {
 			 * Setting up the unfolder and SQL generation
 			 */
 			unfolder = new DatalogUnfolder(unfoldingProgram, metadata);
-			datasourceQueryGenerator = new SQLGenerator(metadata);
-			datasourceQueryGenerator.setDatabaseSystem(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil);
 
 			/*
 			 * Setting up the TBox we will use for the reformulation

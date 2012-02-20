@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class JDBCUtility implements Serializable {
 	 *            The driver class name.
 	 * @throws Exception
 	 */
-	public JDBCUtility(String className) throws SQLException {
+	public JDBCUtility(String className) throws Exception {
 		if (className.equals("org.postgresql.Driver")) {
 			driver = Driver.PGSQL;
 		} else if (className.equals("com.mysql.jdbc.Driver")) {
@@ -58,7 +57,7 @@ public class JDBCUtility implements Serializable {
 			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
 			log.warn("WARNING: If you database is not fully compliant with SQL 99 you might experience problems using Quest.");
 			log.warn("WARNING: Contact the authors for further support.");
-			throw new SQLException("Unsupported database!");
+			throw new Exception("Unsupported database!");
 		}
 	}
 

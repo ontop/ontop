@@ -110,7 +110,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -178,7 +178,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -245,7 +245,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -315,7 +315,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> list = materializer.getAssertionList();
 

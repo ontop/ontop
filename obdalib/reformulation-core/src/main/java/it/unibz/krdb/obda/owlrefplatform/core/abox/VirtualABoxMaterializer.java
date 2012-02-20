@@ -1,30 +1,27 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.krdb.obda.utils.MappingAnalyzer;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.JDBCConnectionManager;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.ComplexMappingSQLGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ComplexMappingUnfolder;
+import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -32,11 +29,15 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,21 +62,19 @@ import org.slf4j.LoggerFactory;
  */
 public class VirtualABoxMaterializer {
 
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	OBDAModel model;
 
-	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	
-	private OBDADataSource datasource;
-	
-	private DatalogProgram datalog;
-	
-	private Connection conn;	
-	
-	private JDBCUtility utility;
-	
-	private DatalogUnfolder unfolder;
-	
-	private SQLGenerator sqlgen;
+	OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+
+//	JDBCConnectionManager jdbcMan = JDBCConnectionManager.getJDBCConnectionManager();
+
+	Map<OBDADataSource, ComplexMappingUnfolder> unfoldersMap = new HashMap<OBDADataSource, ComplexMappingUnfolder>();
+
+	Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgeneratorsMap = new HashMap<OBDADataSource, ComplexMappingSQLGenerator>();
+
+	Set<Predicate> vocabulary = new LinkedHashSet<Predicate>();
+
+	private Map<Predicate, Description> equivalenceMap;
 
 	/***
 	 * Collects the vocabulary of this OBDA model and initializes unfodlers and
@@ -84,66 +83,57 @@ public class VirtualABoxMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public VirtualABoxMaterializer(OBDAModel model) throws Exception {
+	public VirtualABoxMaterializer(OBDAModel model, Map<Predicate, Description> equivalenceMap) throws Exception {
+		this.model = model;
+		this.equivalenceMap = equivalenceMap;
 
-	    List<OBDADataSource> datasources = model.getSources();        
-        if (datasources.size() <= 0) {
-            throw new OBDAException("Cannot find the datasource!");
-        }
-        
-        // NOTE: Currently the system only supports one data source.
-        datasource = datasources.get(0);
-        
-	    setupConnection();
-		
-		URI sourceUri = datasource.getSourceID();
-		ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
-		
-		DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
-        MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, metadata);
-        datalog = analyzer.constructDatalogProgram();
-        
-        MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
-        typeRepair.insertDataTyping(datalog);
-        
-        unfolder = new DatalogUnfolder(datalog, metadata);
-        sqlgen = new SQLGenerator(metadata);
-        sqlgen.setDatabaseSystem(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+		for (OBDADataSource source : model.getSources()) {
+			List<OBDAMappingAxiom> maps = model.getMappings(source.getSourceID());
+
+			/*
+			 * Preparing unfolders and sql generators for each source so that
+			 * this is only is done once
+			 */
+
+			MappingViewManager vewman = new MappingViewManager(maps);
+			ComplexMappingUnfolder unfolder = new ComplexMappingUnfolder(maps, vewman);
+			JDBCUtility util = new JDBCUtility(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			ComplexMappingSQLGenerator sqlgen = new ComplexMappingSQLGenerator(vewman, util);
+
+			unfoldersMap.put(source, unfolder);
+			sqlgeneratorsMap.put(source, sqlgen);
+
+			/*
+			 * Collecting the vocabulary of the mappings
+			 */
+
+			for (OBDAMappingAxiom map : maps) {
+				CQIE targetq = (CQIE) map.getTargetQuery();
+				for (Atom atom : targetq.getBody()) {
+					if (!vocabulary.contains(atom.getPredicate())) {
+						vocabulary.add(atom.getPredicate());
+					}
+				}
+			}
+		}
+
 	}
 
-	private void setupConnection() throws SQLException {
-	    if (conn == null || conn.isClosed()) {
-            String url = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-            String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-            String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-            String driver = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-    
-            try {
-                Class.forName(driver);
-            } catch (ClassNotFoundException e1) {
-                // Does nothing because the SQLException handles this problem also.
-            }
-            conn = DriverManager.getConnection(url, username, password);
-	    }      
-    }
-
-    public Iterator<Assertion> getAssertionIterator() throws Exception {
-        List<CQIE> rules = datalog.getRules();
-		return new VirtualTriplePredicateIterator(rules.iterator(), sqlgen, conn);
+	public Iterator<Assertion> getAssertionIterator() throws Exception {
+		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), unfoldersMap, sqlgeneratorsMap);
 	}
 
 	public List<Assertion> getAssertionList() throws Exception {
 		Iterator<Assertion> it = getAssertionIterator();
 		List<Assertion> assertions = new LinkedList<Assertion>();
 		while (it.hasNext()) {
-		    Assertion assertion = it.next();
-		    assertions.add(assertion);
+			assertions.add(it.next());
 		}
 		return assertions;
 	}
 
-	public Iterator<Assertion> getAssertionIterator(CQIE rule) throws Exception {
-		return new VirtualTripleIterator(rule, sqlgen, conn);
+	public Iterator<Assertion> getAssertionIterator(Predicate p) throws Exception {
+		return new VirtualTripleIterator(p, this.model.getSources(), this.unfoldersMap, this.sqlgeneratorsMap);
 	}
 
 	/***
@@ -158,8 +148,8 @@ public class VirtualABoxMaterializer {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Assertion> getAssertionList(CQIE rule) throws Exception {
-		VirtualTripleIterator it = new VirtualTripleIterator(rule, sqlgen, conn);
+	public List<Assertion> getAssertionList(Predicate p) throws Exception {
+		VirtualTripleIterator it = new VirtualTripleIterator(p, this.model.getSources(), this.unfoldersMap, this.sqlgeneratorsMap);
 
 		List<Assertion> assertions = new LinkedList<Assertion>();
 		while (it.hasNext()) {
@@ -171,12 +161,15 @@ public class VirtualABoxMaterializer {
 
 	public int getTripleCount() throws Exception {
 		Iterator<Assertion> it = getAssertionIterator();
+
 		int tripleCount = 0;
 		while (it.hasNext()) {
 			it.next();
 			tripleCount += 1;
 		}
+
 		return tripleCount;
+
 	}
 
 	/***
@@ -189,9 +182,9 @@ public class VirtualABoxMaterializer {
 	 * @return
 	 * @throws Exception
 	 */
-	public int getTripleCount(CQIE rule) throws Exception {
+	public int getTripleCount(Predicate pred) throws Exception {
 
-		Iterator<Assertion> it = getAssertionIterator(rule);
+		Iterator<Assertion> it = getAssertionIterator(pred);
 
 		int tripleCount = 0;
 		while (it.hasNext()) {
@@ -201,58 +194,81 @@ public class VirtualABoxMaterializer {
 
 		return tripleCount;
 	}
-	
-	public void disconnect() throws SQLException {
-	    if (conn != null) {
-	        conn.close();
-	    }
-	}
 
 	public class VirtualTriplePredicateIterator implements Iterator<Assertion> {
 
-		private Iterator<CQIE> rules;
-		private SQLGenerator sqlgen;
-		private Connection conn;
-		
-		private CQIE currentRule;
-		private VirtualTripleIterator currentIterator;
+		private Iterator<Predicate> predicates;
+		private Collection<OBDADataSource> sources;
+		private Map<OBDADataSource, ComplexMappingUnfolder> unfolders;
+		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
 
-		public VirtualTriplePredicateIterator(Iterator<CQIE> rules, SQLGenerator sqlgen, Connection conn)
-				throws SQLException, OBDAException {
-		    this.rules = rules;
-			this.sqlgen = sqlgen;
-			this.conn = conn;
-			
+		private Predicate currentPredicate = null;
+		private VirtualTripleIterator currentIterator = null;
+
+		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
+				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
+				throws SQLException {
+			this.predicates = predicates;
+			this.sources = sources;
+			this.unfolders = unfolders;
+			this.sqlgens = sqlgens;
+
 			try {
-				advanceToNextRule();
+				advanceToNextPredicate();
 			} catch (NoSuchElementException e) {
-			    // NO-OP
+
 			}
 		}
 
-		private void advanceToNextRule() throws NoSuchElementException {
-		    
-			currentRule = rules.next();
-			currentIterator = new VirtualTripleIterator(currentRule, sqlgen, conn);
+		private void advanceToNextPredicate() throws NoSuchElementException, SQLException {
+			try {
+				currentIterator.disconnect();
+			} catch (Exception e) {
+				
+			}
+			currentPredicate = predicates.next();
+			currentIterator = new VirtualTripleIterator(currentPredicate, sources, unfolders, sqlgens);
+		}
+		
+		public void disconnect() {
+			try {
+				currentIterator.disconnect();
+			} catch (Exception e) {
+				
+			}
 		}
 
 		@Override
 		public boolean hasNext() {
-		    boolean hasNext = currentIterator.hasNext();
-			if (hasNext) {
-			    return true;
-			} else {
-			    try {
-                    advanceToNextRule();
-                    return hasNext();
-                } catch (NoSuchElementException e) {
-                    return false;
-                }
+			if (currentIterator == null)
+				return false;
+
+			boolean hasnext = currentIterator.hasNext();
+			while (!hasnext) {
+				try {
+					advanceToNextPredicate();
+					hasnext = currentIterator.hasNext();
+				} catch (Exception e) {
+					return false;
+				}
 			}
+			return hasnext;
 		}
 
 		@Override
 		public Assertion next() {
+			if (currentIterator == null)
+				throw new NoSuchElementException();
+
+			boolean hasnext = currentIterator.hasNext();
+			while (!hasnext) {
+				try {
+					advanceToNextPredicate();
+					hasnext = currentIterator.hasNext();
+				} catch (Exception e) {
+					throw new NoSuchElementException();
+				}
+			}
 			return currentIterator.next();
 		}
 
@@ -282,17 +298,19 @@ public class VirtualABoxMaterializer {
 
 		private boolean hasnext = false;
 
+		private Predicate pred = null;
+
 		private DatalogProgram query = null;
 
 		private Iterator<OBDADataSource> sourceIterator = null;
 
 		private ResultSet currentResults = null;
 
-		private List<String> signature;
+		private LinkedList<String> signature;
 
-		private CQIE rule;
+		private Map<OBDADataSource, ComplexMappingUnfolder> unfolders;
 
-		private SQLGenerator sqlgen;
+		private Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens;
 
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 		
@@ -300,70 +318,161 @@ public class VirtualABoxMaterializer {
 
 		private Statement st;
 		
-		public VirtualTripleIterator(CQIE rule, SQLGenerator sqlgen, Connection conn) {
+		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources,
+				Map<OBDADataSource, ComplexMappingUnfolder> unfolders, Map<OBDADataSource, ComplexMappingSQLGenerator> sqlgens)
+				throws SQLException {
 
-		    this.rule = rule;
-			this.sqlgen = sqlgen;
-			this.conn = conn;
+			this.pred = p;
+			this.unfolders = unfolders;
+			this.sqlgens = sqlgens;
+
+			/*
+			 * Generating the query that as for the content of this predicate
+			 */
+			Atom head = null;
+			Atom body = null;
+			signature = new LinkedList<String>();
+			if (p.getArity() == 1) {
+				head = obdafac.getAtom(obdafac.getPredicate(URI.create("q"), 1), obdafac.getVariable("col1"));
+				body = obdafac.getAtom(p, obdafac.getVariable("col1"));
+				signature.add("col1");
+			} else if (p.getArity() == 2) {
+				head = obdafac.getAtom(obdafac.getPredicate(URI.create("q"), 2), obdafac.getVariable("col1"), obdafac.getVariable("col2"));
+				body = obdafac.getAtom(p, obdafac.getVariable("col1"), obdafac.getVariable("col2"));
+				signature.add("col1");
+				signature.add("col2");
+			} else {
+				throw new IllegalArgumentException("Invalid arity " + p.getArity() + " " + p.toString());
+			}
+			query = obdafac.getDatalogProgram(obdafac.getCQIE(head, body));
+			sourceIterator = sources.iterator();
 
 			try {
-    			query = dfac.getDatalogProgram(rule);			
-    			signature = getSignature(query);
-    			
-    			String sql = sqlgen.generateSourceQuery(query, signature).trim();
-                
-                st = conn.createStatement();            
-                currentResults = st.executeQuery(sql);
-			} catch (SQLException e) {
-			    // NO-OP
-			} catch (OBDAException e) {
-			    // NO-OP
+				advanceToNextSource();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
+
 		}
 		
-		/**
-	     * Extracts the signature of a CQ query given as a DatalogProgram. Only
-	     * variables are accepted in the signature of queries.
-	     */
-	    private List<String> getSignature(DatalogProgram datalog) throws OBDAException {	        
-	        List<CQIE> rules = datalog.getRules();
-	        if (rules.size() < 1) {
-	            throw new OBDAException("Invalid query");
-	        }
-	        List<String> signature = new LinkedList<String>();
-	        for (Term term : rules.get(0).getHead().getTerms()) {
-	            if (term instanceof Variable) {
-	                signature.add(((Variable) term).getName());
-	            } else if (term instanceof Function) { 
-	                term = ((Function) term).getTerms().get(0);
-	                if (term instanceof Variable) {
-	                    signature.add(((Variable) term).getName());
-	                } else {
-	                    throw new OBDAException("Only variables are allowed in the head of queries");
-	                }
-	            } else {
-	                throw new OBDAException("Only variables and functions are allowed in the head of queries");
-	            }
-	        }
-	        return signature;
-	    }
+		public void disconnect() {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					
+				}
+			}
+		}
+
+		/***
+		 * Advances to the next sources, configures an unfolder using the
+		 * mappings for the source and executes the query related to the
+		 * predicate
+		 * 
+		 * @throws NoSuchElementException
+		 * @throws Exception
+		 */
+		private void advanceToNextSource() throws NoSuchElementException, Exception {
+
+			
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					
+				}
+			}
+			
+			String sql = "";
+			OBDADataSource source = null;
+
+			while (sql.equals("")) {
+				source = sourceIterator.next();
+
+				ComplexMappingUnfolder unfolder = unfolders.get(source);
+				ComplexMappingSQLGenerator sqlgen = sqlgens.get(source);
+
+				DatalogProgram unfolding = unfolder.unfold(query);
+				sql = sqlgen.generateSourceQuery(unfolding, signature).trim();
+			}
+			String url = source.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+			String username = source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+			String password = source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+			
+			conn = DriverManager.getConnection(url, username,password);
+			st = conn.createStatement();
+			
+			currentResults = st.executeQuery(sql);
+		}
 
 		@Override
 		public boolean hasNext() {
 			try {
-                return currentResults.next();
-            } catch (SQLException e) {
-                return false;
-            }			
+				if (peeked) {
+					return hasnext;
+				} else {
+
+					peeked = true;
+					hasnext = currentResults.next();
+					while (!hasnext) {
+						try {
+							advanceToNextSource();
+							hasnext = currentResults.next();
+						} catch (NoSuchElementException e) {
+							return false;
+						} catch (Exception e) {
+							log.error(e.getMessage());
+							return false;
+						}
+					}
+				}
+				return hasnext;
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		@Override
 		public Assertion next() {
 			try {
-                return constructAssertion();
-            } catch (SQLException e) {
-                return null;
-            }
+				if (peeked) {
+					peeked = false;
+					return constructAssertion();
+				} else {
+					boolean hasnext = currentResults.next();
+					while (!hasnext) {
+						try {
+							advanceToNextSource();
+							hasnext = currentResults.next();
+						} catch (NoSuchElementException e) {
+							throw e;
+						} catch (Exception e) {
+							log.error(e.getMessage());
+							throw new NoSuchElementException();
+						}
+					}
+					return constructAssertion();
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		/***
@@ -374,28 +483,43 @@ public class VirtualABoxMaterializer {
 		 */
 		private Assertion constructAssertion() throws SQLException {
 			Assertion assertion = null;
-			Predicate predicate = rule.getHead().getPredicate();
-			if (predicate.getArity() == 1) {
-				URIConstant c = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-				assertion = ofac.createClassAssertion(predicate, c);
-			} else if (predicate.getArity() == 2) {
-			    Term objectTerm = rule.getHead().getTerm(1);
-			    if (objectTerm != null) {
-    			    if (objectTerm instanceof Variable) {
-    			        URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-        				URIConstant c2 = dfac.getURIConstant(URI.create(currentResults.getString(2)));
-       					assertion = ofac.createObjectPropertyAssertion(predicate, c1, c2);
-        			} else if (objectTerm instanceof Function) {
-        				URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-        				Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
-        				ValueConstant c2 = dfac.getValueConstant(currentResults.getString(2), functionSymbol.getType(0));
-        				assertion = ofac.createDataPropertyAssertion(predicate, c1, c2);
-        			}
-			    } else {
-	                throw new RuntimeException("ERROR, The object shouldn't be a constant: " + predicate.toString());
-	            }
+
+			Description replacementDescription = equivalenceMap.get(pred);
+
+			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+			if (pred.getArity() == 1) {
+				URIConstant c = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
+				if (replacementDescription == null) {
+					assertion = ofac.createClassAssertion(pred, c);
+				} else {
+					OClass replacementc = (OClass) replacementDescription;
+					assertion = ofac.createClassAssertion(replacementc.getPredicate(), c);
+				}
+			} else if (pred.getType(1) == Predicate.COL_TYPE.OBJECT) {
+				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
+				URIConstant c2 = obdafac.getURIConstant(URI.create(currentResults.getString(2)));
+				if (replacementDescription == null) {
+					assertion = ofac.createObjectPropertyAssertion(pred, c1, c2);
+				} else {
+					Property replacementp = (Property) replacementDescription;
+					if (!replacementp.isInverse()) {
+						assertion = ofac.createObjectPropertyAssertion(replacementp.getPredicate(), c1, c2);
+					} else {
+						assertion = ofac.createObjectPropertyAssertion(replacementp.getPredicate(), c2, c1);
+					}
+				}
+			} else if (pred.getType(1) == Predicate.COL_TYPE.LITERAL) {
+				URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
+				ValueConstant c2 = obdafac.getValueConstant(currentResults.getString(2));
+				if (replacementDescription == null) {
+					assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
+				} else {
+					Property replacementp = (Property) replacementDescription;
+					assertion = ofac.createDataPropertyAssertion(replacementp.getPredicate(), c1, c2);
+
+				}
 			} else {
-				throw new RuntimeException("ERROR, Wrongly typed predicate: " + predicate.toString());
+				throw new RuntimeException("ERROR, Wrongly typed predicate: " + pred.toString());
 			}
 			return assertion;
 		}
@@ -403,6 +527,8 @@ public class VirtualABoxMaterializer {
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+
 		}
+
 	}
 }

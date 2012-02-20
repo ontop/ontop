@@ -152,10 +152,10 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 				if (bObtainFromMappings) {
 					log.debug("Loading data from Mappings into the database");
 
-					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel);
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel, questInstance.getEquivalenceMap());
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 					st.insertData(assertionIter, 5000, 500);
-					materializer.disconnect();
+					assertionIter.disconnect();
 				}
 
 				st.createIndexes();

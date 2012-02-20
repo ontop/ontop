@@ -33,27 +33,24 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		super.setUp();
 	}
 
-	public void testNoSource() {
+	public void testNoSource() throws Exception {
 
 		OBDAModel model = fac.getOBDAModel();
 
 		/*
 		 * Setting the database;
 		 */
-		try {
-    		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
-    
-    		List<Assertion> assertions = materializer.getAssertionList();
-    		for (Assertion a : assertions) {
-    //			System.out.println(a.toString());
-    		}
-    		assertTrue(assertions.size() == 0);
-    
-    		int count = materializer.getTripleCount();
-    		assertTrue("count: " + count, count == 0);
-		} catch (Exception e) {
-		    // NO-OP
+
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+
+		List<Assertion> assertions = materializer.getAssertionList();
+		for (Assertion a : assertions) {
+//			System.out.println(a.toString());
 		}
+		assertTrue(assertions.size() == 0);
+
+		int count = materializer.getTripleCount();
+		assertTrue("count: " + count, count == 0);
 
 	}
 
@@ -94,7 +91,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(URI.create("q"), 4, null);
+		Predicate q = fac.getPredicate(URI.create("q"), 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -126,23 +123,22 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
-			System.out.println(a.toString());
+//			System.out.println(a.toString());
 		}
 		assertTrue(assertions.size() == 18);
 
 		int count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 18);
 
-		materializer.disconnect();
 		conn.close();
 
 	}
 
-	public void disabletestTwoSources() throws Exception {
+	public void testTwoSources() throws Exception {
 
 		OBDAModel model = fac.getOBDAModel();
 
@@ -208,12 +204,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 				fac.getVariable("ln"));
 
 		List<Atom> body = new LinkedList<Atom>();
-		Predicate person = fac.getPredicate(URI.create("Person"), 1, null);
+		Predicate person = fac.getPredicate(URI.create("Person"), 1);
 		Predicate fn = fac.getPredicate(URI.create("fn"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate ln = fac.getPredicate(URI.create("ln"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate age = fac.getPredicate(URI.create("age"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 		Predicate hasschool = fac.getPredicate(URI.create("hasschool"), 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate(URI.create("School"), 1, null);
+		Predicate school = fac.getPredicate(URI.create("School"), 1);
 		body.add(fac.getAtom(person, objectTerm));
 		body.add(fac.getAtom(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getAtom(ln, objectTerm, fac.getVariable("ln")));
@@ -226,7 +222,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -241,7 +237,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	}
 
-	public void disabletestThreeSources() throws Exception {
+	public void testThreeSources() throws Exception {
 
 		OBDAModel model = fac.getOBDAModel();
 
@@ -335,7 +331,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source2.getSourceID(), map1);
 		model.addMapping(source3.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -350,7 +346,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	}
 
-	public void disabletestThreeSourcesNoMappings() throws Exception {
+	public void testThreeSourcesNoMappings() throws Exception {
 
 		OBDAModel model = fac.getOBDAModel();
 
@@ -406,7 +402,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source3.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source3);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -421,7 +417,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	}
 
-	public void disabletestThreeSourcesNoMappingsFor1And3() throws Exception {
+	public void testThreeSourcesNoMappingsFor1And3() throws Exception {
 
 		OBDAModel model = fac.getOBDAModel();
 
@@ -513,7 +509,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addMapping(source2.getSourceID(), map1);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -528,7 +524,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	}
 	
-	public void disabletestMultipleMappingsOneSource() throws Exception {
+	public void testMultipleMappingsOneSource() throws Exception {
 
 		/*
 		 * Setting the database;
@@ -618,7 +614,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {

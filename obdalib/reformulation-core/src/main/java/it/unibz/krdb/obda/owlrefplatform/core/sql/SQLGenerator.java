@@ -24,7 +24,6 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 
 import java.security.InvalidParameterException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,11 +43,11 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 	private static final String VIEW_NAME = "QVIEW%s";
 
-	private DBMetadata metadata;
+	final private DBMetadata metadata;
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
-	private JDBCUtility jdbcutil;
+	private final JDBCUtility jdbcutil;
 
 	private static final String qualifiedColumn = "%s.%s";
 
@@ -59,14 +58,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 	private static final String conditionLTConstant = "%s.%s < %s";
 	private static final String conditionLTEQConstant = "%s.%s <= %s";
 
-	public SQLGenerator(DBMetadata metadata) throws SQLException {
+	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil) {
 		this.metadata = metadata;
-		setDatabaseSystem("org.h2.Driver");  // default database system // TODO change this param not to use the driver string
-	}
-	
-	@Override
-    public void setDatabaseSystem(String driver) throws SQLException {
-	    jdbcutil = new JDBCUtility(driver);
+		this.jdbcutil = jdbcutil;
 	}
 
 	/***
@@ -142,9 +136,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 		    throw new OBDAException("No axiom has been generated from the system! Please recheck your input query.");
 		}
 		
-//	    if (!isUCQ(query)) {
-//			throw new InvalidParameterException("Only UCQs are supported at the moment");
-//		}
+	    if (!isUCQ(query)) {
+			throw new InvalidParameterException("Only UCQs are supported at the moment");
+		}
 		log.debug("Generating SQL. Initial query size: {}", query.getRules().size());
 		List<CQIE> cqs = query.getRules();
 
@@ -318,7 +312,8 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 * Do nothing, variable conditions have been set
 							 * already
 							 */
-
+						} else if (term instanceof Function) {
+						    // NO-OP
 						} else {
 							throw new RuntimeException("Found a non-supported term in the body while generating SQL");
 						}
@@ -578,6 +573,42 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 		return result.toString();
 	}
+
+	// /**
+	// * Returns the location of the first ocurrance of Variable var in the
+	// query
+	// * in a database atom (e.g., not in a comparison atom). The location is
+	// * given as a pair, where res[0] = the atom index that contains the
+	// * variable, and res[1] the term index.
+	// *
+	// * @param query
+	// * @param var
+	// * @return
+	// */
+	// private int[] firstDBAtomIndexOf(CQIE query, Variable var) {
+	// List<Atom> body = query.getBody();
+	// int[] result = new int[2];
+	// result[0] = -1;
+	// result[1] = -1;
+	//
+	// for (int i1 = 0; i1 < body.size(); i1++) {
+	// Atom atom = body.get(i1);
+	// if (atom.getPredicate() instanceof BooleanOperationPredicate)
+	// continue;
+	// for (int i2 = 0; i2 < atom.getTerms().size(); i2++) {
+	// Term term1 = atom.getTerm(i2);
+	// Variable var1 = (Variable) term1;
+	// if (var.equals(var1)) {
+	// result[0] = i1;
+	// result[1] = 12;
+	// }
+	// break;
+	// }
+	// if (result[0] != -1)
+	// break;
+	// }
+	// return result;
+	// }
 
 	/**
 	 * Checks whether a datalog program is a boolean query or not

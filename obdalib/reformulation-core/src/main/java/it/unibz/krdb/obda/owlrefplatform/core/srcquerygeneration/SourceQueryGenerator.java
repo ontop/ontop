@@ -4,7 +4,6 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -17,15 +16,6 @@ import java.util.List;
 
 public interface SourceQueryGenerator extends Serializable {
 
-    /**
-     * Each database system (DBMS) has different SQL syntax in itself. By having the
-     * generator knows which DBMS in use, it can choose the proper syntax vocabulary.
-     * 
-     * @param driver
-     *          The JDBC database driver string.
-     */
-    public void setDatabaseSystem(String driver) throws SQLException;
-    
 	/**
 	 * Translates the given datalog program into a source query, which can later
 	 * be evaluated by a evaluation engine.
