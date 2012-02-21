@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.codec;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Term;
@@ -70,9 +71,9 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 		String query = "";
 		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1) // if no head
-			query = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + input;
+			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;

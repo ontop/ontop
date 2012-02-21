@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.gui.swing.panel.MappingManagerPanel;
 import it.unibz.krdb.obda.gui.swing.utils.MappingStyledDocument;
 import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
@@ -126,9 +127,9 @@ public class MappingTreeNodeCellEditor implements TreeCellEditor {
 		String query = "";
 		DatalogQueryHelper queryHelper = new DatalogQueryHelper(controller.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1){ // if no head
-			query = String.format("%s %s %s", queryHelper.getDefaultHead(), DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, input);
+			query = String.format("%s %s %s", queryHelper.getDefaultHead(), OBDALibConstants.DATALOG_IMPLY_SYMBOL, input);
 		}
 		query = queryHelper.getPrefixes() + query; // Append the prefixes
 

@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.codec.SourceQueryToTextCodec;
 import it.unibz.krdb.obda.codec.TargetQeryToTextCodec;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -446,10 +447,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		DatalogQueryHelper queryHelper =
 			new DatalogQueryHelper(apic.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1)  // if no head
 			query = queryHelper.getDefaultHead() + " " +
-			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+				OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " +
 			 	input;
 
 		// Append the prefixes

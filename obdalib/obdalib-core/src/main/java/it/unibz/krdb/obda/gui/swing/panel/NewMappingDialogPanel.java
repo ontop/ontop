@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
@@ -332,9 +333,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		String query = "";
 		DatalogQueryHelper queryHelper = new DatalogQueryHelper(controller.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1) // if no head
-			input = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + input;
+			input = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
 
 		query += queryHelper.getPrefixes() + input;
 

@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.gui.swing.treemodel.MappingBodyNode;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadNode;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingNode;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
@@ -223,10 +224,10 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 		DatalogQueryHelper queryHelper =
 			new DatalogQueryHelper(apic.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1)  // if no head
 			query = queryHelper.getDefaultHead() + " " +
-			 	DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " +
+				OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " +
 			 	input;
 
 		// Append the prefixes

@@ -7,6 +7,7 @@
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 
 import java.util.Map;
 import java.util.Set;
@@ -20,11 +21,6 @@ import java.util.Set;
 
 public class DatalogQueryHelper {
 
-	public static final String OBDA_PREFIX_MAPPING_PREDICATE = "obdap";
-	public static final String OBDA_URI_MAPPING_PREDICATE =
-		"http://obda.org/mapping/predicates/";
-	public static final String DATALOG_IMPLY_SYMBOL = ":-";
-
 	private final PrefixManager prefixManager;
 
 	public DatalogQueryHelper(PrefixManager prefixManager) {
@@ -32,7 +28,7 @@ public class DatalogQueryHelper {
 	}
 
 	public String getDefaultHead() {
-		return OBDA_PREFIX_MAPPING_PREDICATE + ":q(*)";
+		return OBDALibConstants.OBDA_PREFIX_MAPPING_PREDICATE + ":" + OBDALibConstants.OBDA_QUERY_PREDICATE + "(*)";
 	}
 
 	public String getPrefixes() {
@@ -66,7 +62,7 @@ public class DatalogQueryHelper {
 			}
 		}
 		prefixString = baseString + prefixString; // the base prefix should always on top.
-		prefixString = prefixString+ "PREFIX "+ OBDA_PREFIX_MAPPING_PREDICATE + ": <" + OBDA_URI_MAPPING_PREDICATE +">\n";
+		prefixString = prefixString+ "PREFIX "+ OBDALibConstants.OBDA_PREFIX_MAPPING_PREDICATE + ": <" + OBDALibConstants.OBDA_URI_MAPPING_PREDICATE +">\n";
 		return prefixString;
 	}
 }

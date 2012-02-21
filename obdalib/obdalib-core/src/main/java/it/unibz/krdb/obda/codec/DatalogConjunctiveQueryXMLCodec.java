@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.codec;
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.parser.DatalogQueryHelper;
@@ -92,9 +93,9 @@ public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 		String query = input;
 		DatalogQueryHelper queryHelper = new DatalogQueryHelper(obdaModel.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1) // if no head
-			query = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + query;
+			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + query;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;

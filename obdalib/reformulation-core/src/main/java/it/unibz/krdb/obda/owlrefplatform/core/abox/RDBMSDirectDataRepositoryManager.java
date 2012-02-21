@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
@@ -492,8 +493,8 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		List<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>();
 		int mappingcounter = 0;
 
-		Predicate unaryq = obdaFactory.getPredicate(URI.create("q"), 1);
-		Predicate binaryq = obdaFactory.getPredicate(URI.create("q"), 2);
+		Predicate unaryq = obdaFactory.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 1);
+		Predicate binaryq = obdaFactory.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 2);
 
 		for (Predicate pred : predicatetableMap.keySet()) {
 

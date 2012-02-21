@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
@@ -1060,9 +1061,9 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		String query = "";
 		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
 
-		String[] atoms = input.split(DatalogQueryHelper.DATALOG_IMPLY_SYMBOL, 2);
+		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1) // if no head
-			query = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + input;
+			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;
