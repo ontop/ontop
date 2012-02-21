@@ -783,10 +783,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			commitCount += 1;
 
 			if (ax instanceof DataPropertyAssertion) {
+				// Data property coming from the TBox
 				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
 				Predicate attribute = attributeABoxAssertion.getAttribute();
 				Predicate.COL_TYPE attributeType = getAttributeType(attribute);
 				
+				// Data property coming from the ABox
 				String uri = attributeABoxAssertion.getObject().getURI().toString();
 				String value = attributeABoxAssertion.getValue().getValue();
 				String lang = attributeABoxAssertion.getValue().getLanguage();
