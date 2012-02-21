@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -92,7 +93,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(URI.create("q"), 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -192,7 +193,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(URI.create("q"), 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -300,7 +301,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(URI.create("q"), 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -480,7 +481,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT fn, ln, age, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(URI.create("q"), 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));
@@ -510,22 +511,17 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		model.addMapping(source2.getSourceID(), map1);
 		
-		VirtualABoxMaterializer materializer = null;
-		try {
-			materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate,Description>());
 	
-			List<Assertion> assertions = materializer.getAssertionList();
-			for (Assertion a : assertions) {
-	//			System.out.println(a.toString());
-			}
-			assertTrue(assertions.size() == 18);
-	
-			int count = materializer.getTripleCount();
-			assertTrue("count: " + count, count == 18);
-		} catch (Exception e) {
-			System.err.println("Cannot inisiate the materializer: " + e.toString());
+		List<Assertion> assertions = materializer.getAssertionList();
+		for (Assertion a : assertions) {
+//			System.out.println(a.toString());
 		}
+		assertTrue(assertions.size() == 18);
 
+		int count = materializer.getTripleCount();
+		assertTrue("count: " + count, count == 18);
+		
 		conn.close();
 
 	}
@@ -575,7 +571,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql5 = "SELECT fn, ln, schooluri FROM data";
 		String sql6 = "SELECT fn, ln, schooluri FROM data";
 
-		Predicate q = fac.getPredicate(URI.create("q"), 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(fac.getVariable("fn"));
 		headTerms.add(fac.getVariable("ln"));

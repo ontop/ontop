@@ -200,7 +200,7 @@
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#addressID">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
     
 
