@@ -33,18 +33,105 @@ import javax.swing.text.StyleConstants;
 
 public class QueryPainter {
 
-	private Vector<ColorTask>			tasks			= null;
-	private boolean						alreadyColoring	= false;
-	private OBDAPreferences	pref			= null;
-	private final OBDAModel			apic;
+	private Vector<ColorTask> tasks = null;
+	private boolean alreadyColoring = false;
+	private OBDAPreferences pref = null;
+	private final OBDAModel apic;
 
-	private boolean						isValidQuery	= false;
+	private boolean isValidQuery = false;
+
+	final DatalogConjunctiveQueryXMLCodec c;
+	private SimpleAttributeSet black;
+	private SimpleAttributeSet brackets;
+	private SimpleAttributeSet functor;
+	private SimpleAttributeSet parameters;
+	private SimpleAttributeSet dataProp;
+	private SimpleAttributeSet objectProp;
+	private SimpleAttributeSet clazz;
+	private SimpleAttributeSet variable;
 
 	public QueryPainter(OBDAModel apic, OBDAPreferences pref) {
 		this.apic = apic;
 		this.pref = pref;
+		c = new DatalogConjunctiveQueryXMLCodec(apic);
 
 		tasks = new Vector<ColorTask>();
+		
+		boolean useDefault = new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString());
+
+		black = new SimpleAttributeSet();
+		black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
+		if (!useDefault) {
+			black.addAttribute(StyleConstants.FontConstants.Family, "SansSerif");
+		}
+
+		brackets = new SimpleAttributeSet();
+		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
+		if (!useDefault) {
+			brackets.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
+			brackets.addAttribute(StyleConstants.FontConstants.Family, "SansSerif");
+		}
+
+		functor = new SimpleAttributeSet();
+		Color c_func = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
+		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, c_func);
+		if (!useDefault) {
+			Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
+			functor.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
+			functor.addAttribute(StyleConstants.FontConstants.Family, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
+			functor.addAttribute(StyleConstants.FontConstants.FontSize,
+					Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
+		}
+
+		Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
+		String font = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
+		Integer size = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+
+		parameters = new SimpleAttributeSet();
+		Color c_para = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
+		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, c_para);
+		if (!useDefault) {
+			parameters.addAttribute(StyleConstants.FontConstants.Family, font);
+			parameters.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
+			parameters.addAttribute(StyleConstants.FontConstants.FontSize, size);
+		}
+
+		 dataProp = new SimpleAttributeSet();
+		Color c_dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
+		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		if (!useDefault) {
+			dataProp.addAttribute(StyleConstants.FontConstants.Family, font);
+			dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
+			dataProp.addAttribute(StyleConstants.FontConstants.FontSize, size);
+		}
+
+		 objectProp = new SimpleAttributeSet();
+		Color c_op = new Color(Integer.parseInt(pref.get(OBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
+		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_op);
+		if (!useDefault) {
+			objectProp.addAttribute(StyleConstants.FontConstants.Family, font);
+			objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
+			objectProp.addAttribute(StyleConstants.FontConstants.FontSize, size);
+		}
+
+		 clazz = new SimpleAttributeSet();
+		Color c_clazz = new Color(Integer.parseInt(pref.get(OBDAPreferences.CLASS_COLOR).toString()));
+		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, c_clazz);
+		if (!useDefault) {
+			clazz.addAttribute(StyleConstants.FontConstants.Family, font);
+			clazz.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
+			clazz.addAttribute(StyleConstants.FontConstants.FontSize, size);
+		}
+
+		variable = new SimpleAttributeSet();
+		Color c_var = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
+		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, c_var);
+		if (!useDefault) {
+			variable.addAttribute(StyleConstants.FontConstants.Family, font);
+			variable.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
+			variable.addAttribute(StyleConstants.FontConstants.FontSize, size);
+		}
+
 	}
 
 	public boolean isAlreadyColoring() {
@@ -56,18 +143,17 @@ public class QueryPainter {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				recolorQuery(doc);
+				if (!alreadyColoring)
+					recolorQuery(doc);
 			}
 		});
 	}
 
 	public void doRecoloring(MappingStyledDocument doc) {
-
 		recolorQuery(doc);
 	}
 
 	private void recolorQuery(MappingStyledDocument doc) {
-
 		alreadyColoring = true;
 		String input = null;
 		boolean invalid = false;
@@ -76,83 +162,9 @@ public class QueryPainter {
 		PrefixManager man = apic.getPrefixManager();
 		// EntityNameRenderer erenderer = new EntityNameRenderer();
 
-		boolean useDefault =new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString());
-
-		SimpleAttributeSet black = new SimpleAttributeSet();
-		black.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.black);
-		if (!useDefault) {
-			black.addAttribute(StyleConstants.FontConstants.Family, "SansSerif");
-		}
-
-		SimpleAttributeSet brackets = new SimpleAttributeSet();
-		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
-		if (!useDefault) {
-			brackets.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
-			brackets.addAttribute(StyleConstants.FontConstants.Family, "SansSerif");
-		}
-
-		SimpleAttributeSet functor = new SimpleAttributeSet();
-		Color c_func = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
-		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, c_func);
-		if (!useDefault) {
-			Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
-			functor.addAttribute(StyleConstants.CharacterConstants.Bold,bold);
-			functor.addAttribute(StyleConstants.FontConstants.Family, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
-			functor.addAttribute(StyleConstants.FontConstants.FontSize, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
-		}
-
-		Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
-		String font = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
-		Integer size = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
-		
-		SimpleAttributeSet parameters = new SimpleAttributeSet();
-		Color c_para = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
-		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, c_para);
-		if (!useDefault) {
-			parameters.addAttribute(StyleConstants.FontConstants.Family, font);
-			parameters.addAttribute(StyleConstants.CharacterConstants.Bold,bold);
-			parameters.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		}
-
-		SimpleAttributeSet dataProp = new SimpleAttributeSet();
-		Color c_dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
-		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
-		if (!useDefault) {
-			dataProp.addAttribute(StyleConstants.FontConstants.Family, font);
-			dataProp.addAttribute(StyleConstants.CharacterConstants.Bold,bold);
-			dataProp.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		}
-
-		SimpleAttributeSet objectProp = new SimpleAttributeSet();
-		Color c_op = new Color(Integer.parseInt(pref.get(OBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
-		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground,c_op);
-		if (!useDefault) {
-			objectProp.addAttribute(StyleConstants.FontConstants.Family, font);
-			objectProp.addAttribute(StyleConstants.CharacterConstants.Bold,bold);
-			objectProp.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		}
-
-		SimpleAttributeSet clazz = new SimpleAttributeSet();
-		Color c_clazz = new Color(Integer.parseInt(pref.get(OBDAPreferences.CLASS_COLOR).toString()));
-		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, c_clazz);
-		if (!useDefault) {
-			clazz.addAttribute(StyleConstants.FontConstants.Family, font);
-			clazz.addAttribute(StyleConstants.CharacterConstants.Bold,bold);
-			clazz.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		}
-
-		SimpleAttributeSet variable = new SimpleAttributeSet();
-		Color c_var = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
-		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, c_var);
-		if (!useDefault) {
-			variable.addAttribute(StyleConstants.FontConstants.Family, font);
-			variable.addAttribute(StyleConstants.CharacterConstants.Bold,bold);
-			variable.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		}
 
 		try {
 			input = doc.getText(0, doc.getLength());
-			DatalogConjunctiveQueryXMLCodec c = new DatalogConjunctiveQueryXMLCodec(apic);
 			query = c.decode(input);
 			if (query == null) {
 				invalid = true;
@@ -211,8 +223,8 @@ public class QueryPainter {
 				Iterator<Atom> it = atoms.iterator();
 				while (it.hasNext()) {
 					Atom a1 = it.next();
-				      if (!(a1 instanceof Atom))
-				    	  continue;
+					if (!(a1 instanceof Atom))
+						continue;
 					Atom at = (Atom) a1;
 					int arity = at.getArity();
 					if (arity == 1) { // concept query atom
@@ -237,7 +249,7 @@ public class QueryPainter {
 							while (para_it.hasNext()) {
 
 								Term p = para_it.next();
-								//TODO NOT SAFE!
+								// TODO NOT SAFE!
 								String str = "$" + p.toString();
 								ColorTask task2 = new ColorTask(str, variable);
 								tasks.add(task2);
@@ -297,7 +309,7 @@ public class QueryPainter {
 							Iterator<Term> para_it = para.iterator();
 							while (para_it.hasNext()) {
 
-								VariableImpl p = (VariableImpl)para_it.next();
+								VariableImpl p = (VariableImpl) para_it.next();
 								String str = "$" + p.getName();
 
 								ColorTask task2 = new ColorTask(str, variable);
@@ -379,8 +391,8 @@ public class QueryPainter {
 
 	class ColorTask {
 
-		public String				text	= null;
-		public SimpleAttributeSet	set		= null;
+		public String text = null;
+		public SimpleAttributeSet set = null;
 
 		public ColorTask(String s, SimpleAttributeSet sas) {
 

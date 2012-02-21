@@ -1,10 +1,12 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
+
 /**
  * The DerivedColumn class stores the column expression
  * and the alternative name (its alias).
  */
-public class DerivedColumn {
+public class DerivedColumn implements Serializable{
 	
 	private AbstractValueExpression value;
 	private String alias = "";

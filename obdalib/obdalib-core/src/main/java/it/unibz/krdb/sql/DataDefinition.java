@@ -2,10 +2,11 @@ package it.unibz.krdb.sql;
 
 import it.unibz.krdb.sql.api.Attribute;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public abstract class DataDefinition {
+public abstract class DataDefinition implements Serializable {
 
 	protected String name;
 

@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB.StoreStatus;
 
 import java.io.BufferedReader;
@@ -64,6 +64,8 @@ public class QuestDBCMD {
 
 	private static final String RX_CREATE = "[Cc][Rr][Ee][Aa][Tt][Ee]";
 
+	private static final String RX_VIRTUAL = "[Vv][Ii][Rr][Tt][Uu][Aa][Ll]";
+
 	private static final String RX_INDEX = "[Ii][Nn][Dd][Ee][Xx]";
 
 	private static final String RX_TBOX = "[Tt][Bb][Oo][Xx]";
@@ -71,6 +73,8 @@ public class QuestDBCMD {
 	private static final String RX_WITH = "[Ww][Ii][Tt][Hh]";
 
 	private static final String RX_PARAMETERS = "[Pp][Aa][Rr][Aa][Mm][Ss]";
+
+	private static final String RX_MAP = "[Mm][Aa][Pp]";
 
 	private static final String RX_STORE = "[Ss][Tt][Oo][Rr][Ee]";
 
@@ -84,7 +88,13 @@ public class QuestDBCMD {
 	private static final String CMD_CREATE_STORE = RX_CREATE + RX_WS + RX_STORE + RX_WS + RX_NAME_PARAMETER + RX_WS + RX_WITH + RX_WS
 			+ RX_TBOX + RX_WS + RX_QUOTED_PARAMETER + RX_WS + RX_PARAMETERS + RX_WS + RX_QUOTED_PARAMETER;
 
+	/* CREATE VIRTUAL STORE name WITH TBOX "tboxfile" MAP "paramsfile" */
+	private static final String CMD_CREATE_VIRTUAL_STORE = RX_CREATE + RX_WS + RX_VIRTUAL + RX_WS + RX_STORE + RX_WS + RX_NAME_PARAMETER
+			+ RX_WS + RX_WITH + RX_WS + RX_TBOX + RX_WS + RX_QUOTED_PARAMETER + RX_WS + RX_MAP + RX_WS + RX_QUOTED_PARAMETER;
+
 	private static final Pattern PTR_CREATE_STORE = Pattern.compile(CMD_CREATE_STORE);
+
+	private static final Pattern PTR_CREATE_VIRTUAL_STORE = Pattern.compile(CMD_CREATE_VIRTUAL_STORE);
 
 	/* DROP STORE name */
 	private static final String CMD_DROP_STORE = RX_DROP + RX_WS + RX_STORE + RX_WS + RX_NAME_PARAMETER;
@@ -188,6 +198,8 @@ public class QuestDBCMD {
 	private void processQuery(String query) throws Exception {
 		if (PTR_CREATE_STORE.matcher(query).matches()) {
 			processCreateStore(query);
+		} else if (PTR_CREATE_VIRTUAL_STORE.matcher(query).matches()) {
+			processCreateVirtualStore(query);
 		} else if (PTR_DROP_STORE.matcher(query).matches()) {
 			processDropStore(query);
 		} else if (PTR_START_STORE.matcher(query).matches()) {
@@ -210,8 +222,8 @@ public class QuestDBCMD {
 				return;
 			}
 
-			QuestStatement st = dbInstance.getStatement(currentstore);
-			String sql = st.getUnfolding(query.substring("GET SQL ".length()));
+			QuestDBStatement st = dbInstance.getStatement(currentstore);
+			String sql = st.getSQL(query.substring("GET SQL ".length()));
 			st.close();
 			System.out.println("SQL:");
 			System.out.println(sql);
@@ -220,7 +232,7 @@ public class QuestDBCMD {
 				System.out.println("\nYou must set an active store first using the command \"\\c storename\"");
 				return;
 			}
-			QuestStatement st = dbInstance.getStatement(currentstore);
+			QuestDBStatement st = dbInstance.getStatement(currentstore);
 			String rew = st.getRewriting(query.substring("GET REF".length()));
 			System.out.println("Reformulation:");
 			System.out.println(rew);
@@ -230,14 +242,15 @@ public class QuestDBCMD {
 				return;
 			}
 			try {
-				QuestStatement st = dbInstance.getStatement(currentstore);
+
+				QuestDBStatement st = dbInstance.getStatement(currentstore);
 				OBDAResultSet result = st.execute(query);
 				int count = printResultSet(result);
 				System.out.println(count + " rows.");
 				result.close();
 				st.close();
 			} catch (Exception e) {
-				System.out.println("\nError executing query.");
+				System.out.println("\nError executing query: " + e.getMessage());
 			}
 
 		}
@@ -425,6 +438,26 @@ public class QuestDBCMD {
 			prop.load(new FileReader(new File(getFileURI(paramfile))));
 
 			dbInstance.createClassicStore(name, tboxURI, prop);
+			System.out.println("\nStore has been created.");
+
+		} catch (Exception e) {
+			System.out.println("\nUnable to create store.");
+			log.error(e.getMessage(), e);
+		}
+
+	}
+
+	private void processCreateVirtualStore(String cmd) {
+		Matcher m = PTR_CREATE_VIRTUAL_STORE.matcher(cmd);
+		m.find();
+		String name = m.group(1);
+		String tboxfile = m.group(2);
+		String obdaModel = m.group(3);
+		URI tboxURI = getFileURI(tboxfile);
+		URI obdaModelURI = getFileURI(obdaModel);
+		try {
+
+			dbInstance.createVirtualStore(name, tboxURI, obdaModelURI);
 			System.out.println("\nStore has been created.");
 
 		} catch (Exception e) {

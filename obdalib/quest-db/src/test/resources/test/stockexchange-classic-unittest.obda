@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY xsd: 'http://www.w3.org/2001/XMLSchema#'>
+   <!ENTITY owl: 'http://www.w3.org/2002/07/owl#'>
+   <!ENTITY owl2xml: 'http://www.w3.org/2006/12/owl2-xml#'>
+   <!ENTITY Ontology1207768242: 'http://www.owl-ontologies.com/Ontology1207768242.owl#'>
+   <!ENTITY : 'http://www.owl-ontologies.com/Ontology1207768242.owl#'>
+   <!ENTITY rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+   <!ENTITY rdfs: 'http://www.w3.org/2000/01/rdf-schema#'>
+]>
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns::="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:Ontology1207768242:="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:owl2xml:="http://www.w3.org/2006/12/owl2-xml#" xmlns:owl:="http://www.w3.org/2002/07/owl#" xmlns:rdf:="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs:="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd:="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
+    <mapping id="MAP1328576178907089000">
+      <CQ string="Address(getAddressObj($id)),addressID(getAddressObj($id),$id),inStreet(getAddressObj($id),$street),hasNumber(getAddressObj($id),$number),inCity(getAddressObj($id),$city),inState(getAddressObj($id),$state),inCountry(getAddressObj($id),$country)"/>
+      <SQLQuery string="select id, street, number, city, state, country from address"/>
+    </mapping>
+    <mapping id="MAP1328576178907169000">
+      <CQ string="StockBroker(getPersonObj($id)),firstName(getPersonObj($id),$name),lastName(getPersonObj($id),$lastname),dateOfBirth(getPersonObj($id),$dateofbirth),ssn(getPersonObj($id),$ssn)"/>
+      <SQLQuery string="select id, name, lastname, dateofbirth, ssn from broker"/>
+    </mapping>
+    <mapping id="MAP1328576178907194000">
+      <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+      <SQLQuery string="select id, addressid from broker"/>
+    </mapping>
+    <mapping id="MAP1328576178907260000">
+      <CQ string="Investor(getPersonObj($id)),firstName(getPersonObj($id),$name),lastName(getPersonObj($id),$lastname),dateOfBirth(getPersonObj($id),$dateofbirth),ssn(getPersonObj($id),$ssn)"/>
+      <SQLQuery string="select id, name, lastname, dateofbirth, ssn from client"/>
+    </mapping>
+    <mapping id="MAP1328576178907284000">
+      <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+      <SQLQuery string="select id, name, lastname, addressid from client"/>
+    </mapping>
+    <mapping id="MAP1328576178907341000">
+      <CQ string="Company(getCompanyObj($id)),companyName(getCompanyObj($id),$name),marketShares(getCompanyObj($id),$marketshares),netWorth(getCompanyObj($id),$networth)"/>
+      <SQLQuery string="select id, name, marketshares, networth from company"/>
+    </mapping>
+    <mapping id="MAP1328576178907365000">
+      <CQ string="hasAddress(getCompanyObj($id),getAddressObj($addressid))"/>
+      <SQLQuery string="select id, addressid from company"/>
+    </mapping>
+    <mapping id="MAP1328576178907424000">
+      <CQ string="Stock(getStockObj($id)),financialInstrumentID(getStockObj($id),$id),amountOfShares(getStockObj($id),$numberofshares),typeOfShares(getStockObj($id),$sharetype)"/>
+      <SQLQuery string="select id, numberofshares, sharetype from stockinformation"/>
+    </mapping>
+    <mapping id="MAP1328576178907462000">
+      <CQ string="StockExchangeList(getStockBookObj($date)),listdate(getStockBookObj($date),$date)"/>
+      <SQLQuery string="select distinct date from stockbooklist "/>
+    </mapping>
+    <mapping id="MAP1328576178907487000">
+      <CQ string="tradesOnBehalfOf(getPersonObj($brokerid),getPersonObj($clientid))"/>
+      <SQLQuery string="select brokerid, clientid from brokerworksfor where clientid IS NOT NULL"/>
+    </mapping>
+    <mapping id="MAP1328576178907512000">
+      <CQ string="tradesOnBehalfOf(getPersonObj($brokerid),getCompanyObj($companyid))"/>
+      <SQLQuery string="select brokerid, companyid from brokerworksfor where companyid IS NOT NULL"/>
+    </mapping>
+    <mapping id="MAP1328576178907572000">
+      <CQ string="Transaction(getTransactionObj($id)),transactionID(getTransactionObj($id),$id),transactionDate(getTransactionObj($id),$date)"/>
+      <SQLQuery string="select id, date from transaction"/>
+    </mapping>
+    <mapping id="MAP1328576178907628000">
+      <CQ string="isExecutedBy(getTransactionObj($id),getPersonObj($brokerid)),isExecutedFor(getTransactionObj($id),getPersonObj($forclientid)),involvesInstrument(getTransactionObj($id),getStockObj($stockid))"/>
+      <SQLQuery string="select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL"/>
+    </mapping>
+    <mapping id="MAP1328576178907675000">
+      <CQ string="isExecutedBy(getTransactionObj($id),getPersonObj($brokerid)),isExecutedFor(getTransactionObj($id),getCompanyObj($forcompanyid)),involvesInstrument(getTransactionObj($id),getStockObj($stockid))"/>
+      <SQLQuery string="select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL"/>
+    </mapping>
+    <mapping id="MAP1328576178907700000">
+      <CQ string="belongsToCompany(getStockObj($id),getCompanyObj($companyid))"/>
+      <SQLQuery string="select id, companyid from stockinformation"/>
+    </mapping>
+    <mapping id="MAP1328576178907725000">
+      <CQ string="listsStock(getStockBookObj($date),getStockObj($stockid))"/>
+      <SQLQuery string="select date, stockid from stockbooklist"/>
+    </mapping>
+    <mapping id="MAP1328576178907749000">
+      <CQ string="Dealer(getPersonObj($clientid))"/>
+      <SQLQuery string="select clientid from broker,client,brokerworksfor where client.id = broker.id and brokerid=broker.id and client.id=clientid"/>
+    </mapping>
+    <mapping id="MAP1328576178907772000">
+      <CQ string="Offer(getTransactionObj($id))"/>
+      <SQLQuery string="SELECT id FROM transaction WHERE type=true"/>
+    </mapping>
+  </mappings>
+  <dataSource URI="RandBStockExchange" databaseDriver="org.postgresql.Driver" databasePassword="obdaps83" databaseURL="jdbc:postgresql://localhost/stockclient1" databaseUsername="postgres" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
+  <SavedQueries>
+    <QueryGroup id="Simple queries">
+      <Query id="Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address ; &#xa;&#x9;&#x9; :addressID $id; &#xa;&#x9;&#x9; :inStreet $street; &#xa;&#x9;&#x9; :inCity $city;&#xa;&#x9;&#x9; :inCountry $country; &#xa;&#x9;&#x9; :inState $state;&#xa;&#x9;&#x9; :hasNumber $number.&#xa;} "/>
+      <Query id="Addresses-id991" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet 'Via Marconi'. &#xa;&#x9;&#x9;$x :inCity 'Bolzano'. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa;} "/>
+      <Query id="Persons-Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE { $x a :Person. &#xa;&#x9;&#x9;$x :firstName $fn. &#xa;&#x9;&#x9;$x :lastName $ln. &#xa;&#x9;&#x9;$x :hasAddress $address. &#xa;&#x9;&#x9;$address :inStreet $street. &#xa;&#x9;&#x9;$address :inCity $city. &#xa;&#x9;&#x9;$address :inCountry $country. } "/>
+      <Query id="StockTraders" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fn $ln $securitynumber WHERE {&#xa;&#x9;&#x9;$trader a :StockTrader. &#xa;&#x9;&#x9;$trader :firstName $fn. &#xa;&#x9;&#x9;$trader :lastName $ln. &#xa;&#x9;&#x9;$trader :ssn $securitynumber&#xa; } "/>
+    </QueryGroup>
+    <QueryGroup id="CQs">
+      <Query id="Brokers-Workfor-Themselfs" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum &#xa;WHERE { &#xa;$broker a :StockBroker;  &#xa;               :tradesOnBehalfOf $broker;&#xa;               :firstName $fname; &#xa;               :lastName $ln;&#xa;              :ssn $securitynum &#xa;} "/>
+      <Query id="Brokers-Workfor-Physical" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum WHERE { &#xa;&#x9;$member a :StockExchangeMember. &#xa;&#x9;$member :tradesOnBehalfOf $client1. &#xa;&#x9;$client1 a :PhysicalPerson. &#xa;&#x9;$member :firstName $fname. &#xa;&#x9;$member :lastName $ln. &#xa;&#x9;$member :ssn $securitynum&#xa; } "/>
+      <Query id="Brokers-Workfor-Legal" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum WHERE { &#xa;&#x9;$member a :StockExchangeMember. &#xa;&#x9;$member :tradesOnBehalfOf $client1. &#xa;&#x9;$client1 a :LegalPerson. &#xa;&#x9;$member :firstName $fname. &#xa;&#x9;$member :lastName $ln. &#xa;&#x9;$member :ssn $securitynum&#xa; } "/>
+      <Query id="Brokers-Workfor-Legal-Phisical" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum WHERE { &#xa;&#x9;$member a :StockExchangeMember. &#xa;&#x9;$member :tradesOnBehalfOf $client1. &#xa;&#x9;$client1 a :PhysicalPerson. &#xa;&#x9;$member :tradesOnBehalfOf $client2. &#xa;&#x9;$client2 a :LegalPerson. &#xa;&#x9;$member :firstName $fname. &#xa;&#x9;$member :lastName $ln. &#xa;&#x9;$member :ssn $securitynum &#xa;}&#xa;"/>
+      <Query id="Transactions-FinantialInstrument" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :FinantialInstrument.&#xa;} "/>
+      <Query id="transaction-stock-type" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $inst $type WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :Stock.&#xa;&#x9;&#x9;$inst :typeOfShares $type.&#xa;} "/>
+      <Query id="transaction-offer-stock" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $inst $type WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x a :Offer.&#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :Stock.&#xa;&#x9;&#x9;$inst :typeOfShares $type.&#xa;} "/>
+    </QueryGroup>
+  </SavedQueries>
+</OBDA>

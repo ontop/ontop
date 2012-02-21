@@ -8,11 +8,11 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -373,7 +373,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			isMoreThanOne = true;
 
 		}
-		
+
 		return result.toString();
 	}
 
@@ -485,21 +485,21 @@ public class SQLGenerator implements SourceQueryGenerator {
 		Predicate predicate = atom.getPredicate();
 		result.append("(");
 		result.append(getSQLString(atom.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-		if (predicate == OBDAVocabulary.EQ) {
+		if (predicate.equals(OBDAVocabulary.EQ)) {
 			result.append(" = ");
-		} else if (predicate == OBDAVocabulary.LT) {
+		} else if (predicate.equals(OBDAVocabulary.LT)) {
 			result.append(" < ");
-		} else if (predicate == OBDAVocabulary.LTE) {
+		} else if (predicate.equals(OBDAVocabulary.LTE)) {
 			result.append(" <= ");
-		} else if (predicate == OBDAVocabulary.GT) {
+		} else if (predicate.equals(OBDAVocabulary.GT)) {
 			result.append(" > ");
-		} else if (predicate == OBDAVocabulary.GTE) {
+		} else if (predicate.equals(OBDAVocabulary.GTE)) {
 			result.append(" >= ");
-		} else if (predicate == OBDAVocabulary.AND) {
+		} else if (predicate.equals(OBDAVocabulary.AND)) {
 			result.append(" AND ");
-		} else if (predicate == OBDAVocabulary.OR) {
+		} else if (predicate.equals(OBDAVocabulary.OR)) {
 			result.append(" OR ");
-		} else if (predicate == OBDAVocabulary.NEQ) {
+		} else if (predicate.equals(OBDAVocabulary.NEQ)) {
 			result.append(" <> ");
 		} else {
 			throw new RuntimeException("Unexpected function in the query: " + predicate);
@@ -549,24 +549,24 @@ public class SQLGenerator implements SourceQueryGenerator {
 			Predicate predicate = function.getFunctionSymbol();
 
 			result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-			if (predicate == OBDAVocabulary.EQ) {
+			if (predicate.equals(OBDAVocabulary.EQ)) {
 				result.append(" = ");
-			} else if (predicate == OBDAVocabulary.LT) {
+			} else if (predicate.equals(OBDAVocabulary.LT)) {
 				result.append(" < ");
-			} else if (predicate == OBDAVocabulary.LTE) {
+			} else if (predicate.equals(OBDAVocabulary.LTE)) {
 				result.append(" <= ");
-			} else if (predicate == OBDAVocabulary.GT) {
+			} else if (predicate.equals(OBDAVocabulary.GT)) {
 				result.append(" > ");
-			} else if (predicate == OBDAVocabulary.GTE) {
+			} else if (predicate.equals(OBDAVocabulary.GTE)) {
 				result.append(" >= ");
-			} else if (predicate == OBDAVocabulary.AND) {
+			} else if (predicate.equals(OBDAVocabulary.AND)) {
 				result.append(" AND ");
-			} else if (predicate == OBDAVocabulary.OR) {
+			} else if (predicate.equals(OBDAVocabulary.OR)) {
 				result.append(" OR ");
-			} else if (predicate == OBDAVocabulary.NEQ) {
+			} else if (predicate.equals(OBDAVocabulary.NEQ)) {
 				result.append(" <> ");
 			} else {
-
+				throw new RuntimeException("Unexpected function in the query: " + predicate);
 			}
 			result.append(getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 		}

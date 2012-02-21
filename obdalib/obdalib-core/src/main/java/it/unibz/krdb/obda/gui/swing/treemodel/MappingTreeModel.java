@@ -44,16 +44,14 @@ import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 // TODO Make the three model be based on the actual mapping collection
-public class MappingTreeModel extends DefaultTreeModel implements
-		OBDAMappingListener, FilteredTreeModel {
+public class MappingTreeModel extends DefaultTreeModel implements OBDAMappingListener, FilteredTreeModel {
 
 	private static final long serialVersionUID = -1151057670798439917L;
 
 	private OBDAModel controller = null;
 	private DefaultMutableTreeNode root = null;
-//	private DatasourcesController dsc = null; TODO Remove this ds?
+	// private DatasourcesController dsc = null; TODO Remove this ds?
 	private MappingNode mappingnode = null;
 	private URI currentDataSourceUri;
 	private final List<TreeModelFilter<OBDAMappingAxiom>> ListFilters = new ArrayList<TreeModelFilter<OBDAMappingAxiom>>();
@@ -71,14 +69,14 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	}
 
 	// TODO Remove this ds?
-//	 public MappingTreeModel(APIController apic, DatasourcesController dsc,
-//	      MappingController controller) {
-//	    super(new DefaultMutableTreeNode("Mappings"));
-//	    this.apic = apic;
-//	    this.dsc = dsc;
-//	    root = (DefaultMutableTreeNode) getRoot();
-//	    this.controller = controller;
-//	  }
+	// public MappingTreeModel(APIController apic, DatasourcesController dsc,
+	// MappingController controller) {
+	// super(new DefaultMutableTreeNode("Mappings"));
+	// this.apic = apic;
+	// this.dsc = dsc;
+	// root = (DefaultMutableTreeNode) getRoot();
+	// this.controller = controller;
+	// }
 
 	/***************************************************************************
 	 * Invoked when the model changes. It should be invoked only when it is
@@ -88,34 +86,30 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 */
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
-		DefaultMutableTreeNode oldmappingnode = (DefaultMutableTreeNode) path
-				.getLastPathComponent();
-		DefaultMutableTreeNode parentnode = (DefaultMutableTreeNode) oldmappingnode
-				.getParent();
+		DefaultMutableTreeNode oldmappingnode = (DefaultMutableTreeNode) path.getLastPathComponent();
+		DefaultMutableTreeNode parentnode = (DefaultMutableTreeNode) oldmappingnode.getParent();
 		Object oldmappingvalue = oldmappingnode.getUserObject();
 		super.valueForPathChanged(path, newValue);
 
 		// TODO Remove this ds?
-//		URI sourceName = dsc.getCurrentDataSource().getSourceID();
+		// URI sourceName = dsc.getCurrentDataSource().getSourceID();
 		URI sourceName = currentDataSourceUri;
 
 		if (oldmappingnode instanceof MappingNode) {
 			String query = (String) newValue;
 			int flag = controller.updateMapping(sourceName, (String) oldmappingvalue, query);
 			if (flag == -1) {
-	      JOptionPane.showMessageDialog(null, "The mapping ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
-			  oldmappingnode.setUserObject(oldmappingvalue);
+				JOptionPane.showMessageDialog(null, "The mapping ID already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+				oldmappingnode.setUserObject(oldmappingvalue);
 			}
 		} else if (oldmappingnode instanceof MappingHeadNode) {
 			String query = (String) newValue;
 			CQIE newquery = parse(query);
-			controller.updateTargetQueryMapping(sourceName, (String) parentnode
-					.getUserObject(), newquery);
+			controller.updateTargetQueryMapping(sourceName, (String) parentnode.getUserObject(), newquery);
 		} else if (oldmappingnode instanceof MappingBodyNode) {
 			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 			OBDASQLQuery query = fac.getSQLQuery((String) newValue);
-			controller.updateMappingsSourceQuery(sourceName, (String) parentnode
-					.getUserObject(), query);
+			controller.updateMappingsSourceQuery(sourceName, (String) parentnode.getUserObject(), query);
 		}
 	}
 
@@ -125,19 +119,20 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 * is srcuri.
 	 */
 	public void mappingDeleted(URI srcuri, String mappingId) {
-	  // TODO Remove this ds?
-//		if (dsc.getCurrentDataSource()== null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
-//			return;
-//		}
+		// TODO Remove this ds?
+		// if (dsc.getCurrentDataSource()== null ||
+		// !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
+		// return;
+		// }
 		Enumeration<MappingNode> mappingNodes = root.children();
 		MappingNode affectedNode = null;
 		while (mappingNodes.hasMoreElements()) {
-		  MappingNode currentNode = mappingNodes.nextElement();
-		  String currentNodeId = currentNode.getUserObject().toString();
-		  if (currentNodeId.equals(mappingId)) {
-		    affectedNode = currentNode;
-		    break;
-		  }
+			MappingNode currentNode = mappingNodes.nextElement();
+			String currentNodeId = currentNode.getUserObject().toString();
+			if (currentNodeId.equals(mappingId)) {
+				affectedNode = currentNode;
+				break;
+			}
 		}
 		removeNodeFromParent(affectedNode);
 		nodeStructureChanged(root);
@@ -150,14 +145,15 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	 */
 	public void mappingInserted(URI srcuri, String mapping_id) {
 		try {
-		  // TODO remove this ds?
-//  		DataSource currentsource = dsc.getCurrentDataSource();
-//  		if ((currentsource == null)|| !srcuri.equals(currentsource.getSourceID())) {
-//  			return;
-//  		}
-//  		URI src_uri = dsc.getCurrentDataSource().getSourceID();
-  		RDBMSMappingAxiomImpl mapping = (RDBMSMappingAxiomImpl) controller.getMapping(srcuri, mapping_id);
-  		MappingNode mappingNode = getMappingNodeFromMapping(mapping);
+			// TODO remove this ds?
+			// DataSource currentsource = dsc.getCurrentDataSource();
+			// if ((currentsource == null)||
+			// !srcuri.equals(currentsource.getSourceID())) {
+			// return;
+			// }
+			// URI src_uri = dsc.getCurrentDataSource().getSourceID();
+			RDBMSMappingAxiomImpl mapping = (RDBMSMappingAxiomImpl) controller.getMapping(srcuri, mapping_id);
+			MappingNode mappingNode = getMappingNodeFromMapping(mapping);
 
 			insertNodeInto(mappingNode, root, root.getChildCount());
 		} catch (Exception e) {
@@ -173,9 +169,10 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	public void mappingUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
 		// SYNCWITH EVERYBODY EXCEPT WITH THE CONTROLLER SINCE IT WAS THE SOURCE
 		// OF THIS EVENT
-//		if (dsc.getCurrentDataSource() == null || !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
-//			return;
-//		}
+		// if (dsc.getCurrentDataSource() == null ||
+		// !srcuri.equals(dsc.getCurrentDataSource().getSourceID())) {
+		// return;
+		// }
 		try {
 			MappingNode mappingnode = getMappingNode(mapping_id);
 			if (mappingnode == null) {
@@ -188,7 +185,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 			OBDAQuery trgq = mapping.getTargetQuery();
 			TargetQeryToTextCodec tttc = new TargetQeryToTextCodec(apic);
 			SourceQueryToTextCodec sttc = new SourceQueryToTextCodec(apic);
-			String newbodyquery =sttc.encode(srcq);
+			String newbodyquery = sttc.encode(srcq);
 			String newheadquery = tttc.encode(trgq);
 
 			body.setQuery(newbodyquery);
@@ -208,42 +205,38 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	public void currentSourceChanged(URI oldsrcuri, URI newsrcuri) {
 		// SYNCWITH EVERYBODY EXCEPT WITH THE CONTROLLER SINCE IT WAS THE SOURCE
 		// OF THIS EVENT
-	  this.currentDataSourceUri = newsrcuri;
+		this.currentDataSourceUri = newsrcuri;
 
 		try {
 			if (newsrcuri != null) {
-				root.setUserObject("Mappings for: " + newsrcuri);
+				root.setUserObject("Mappings");
 
-	      ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
-	      ArrayList<OBDAMappingAxiom> newmappings = controller
-	          .getMappings(newsrcuri);
+				ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
+				ArrayList<OBDAMappingAxiom> newmappings = controller.getMappings(newsrcuri);
 
-	      if (newmappings != null) {
-	        for (OBDAMappingAxiom dataSourceMapping : newmappings) {
-	          RDBMSMappingAxiomImpl mappingTest = (RDBMSMappingAxiomImpl) dataSourceMapping;
-	          if (testFilters(mappingTest))
-	            newnodes
-	                .add(getMappingNodeFromMapping(mappingTest));
-	        }
-	      }
-	      root.removeAllChildren();
-	      for (MappingNode newnode : newnodes) {
-	        root.insert(newnode, root.getChildCount());
-	      }
-	      nodeStructureChanged(root);
-			}
-			else {
+				if (newmappings != null) {
+					for (OBDAMappingAxiom dataSourceMapping : newmappings) {
+						RDBMSMappingAxiomImpl mappingTest = (RDBMSMappingAxiomImpl) dataSourceMapping;
+						if (testFilters(mappingTest))
+							newnodes.add(getMappingNodeFromMapping(mappingTest));
+					}
+				}
+				root.removeAllChildren();
+				for (MappingNode newnode : newnodes) {
+					root.insert(newnode, root.getChildCount());
+				}
+				nodeStructureChanged(root);
+			} else {
 				root.setUserObject("No src uri");
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 	}
 
 	/***************************************************************************
 	 * Gets the mapping node for the mapping identified by mappingid
-	 *
+	 * 
 	 * @param mappingid
 	 * @return
 	 */
@@ -259,7 +252,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	/***************************************************************************
 	 * Gets the mapping node that corresponds to the mapping.
-	 *
+	 * 
 	 * @param mapping
 	 * @return
 	 */
@@ -288,27 +281,29 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	}
 
 	public MappingNode getLastMappingNode() {
-	  return mappingnode;
+		return mappingnode;
 	}
 
 	/**
 	 * Synchronizes an array of mapping axioms to the tree node structure
 	 * following a particular data source URI. Each data source has a collection
-	 * of mapping axioms in which each axiom contains a source query and a target
-	 * query.
-	 *
-	 * @param datasourceUri a data source uri.
-	 * @param mappings an array of mapping axioms.
+	 * of mapping axioms in which each axiom contains a source query and a
+	 * target query.
+	 * 
+	 * @param datasourceUri
+	 *            a data source uri.
+	 * @param mappings
+	 *            an array of mapping axioms.
 	 * @see OBDAMappingAxiom
 	 * @see OBDASourceQuery
 	 * @see OBDATargetQuery
 	 */
 	public void synchronize(URI datasourceUri, ArrayList<OBDAMappingAxiom> mappings) {
-	  int size = mappings.size();
-	  for(int i = 0; i < size; i++) {
-	    String mappingId = mappings.get(i).getId();
-	    mappingInserted(datasourceUri, mappingId);
-	  }
+		int size = mappings.size();
+		for (int i = 0; i < size; i++) {
+			String mappingId = mappings.get(i).getId();
+			mappingInserted(datasourceUri, mappingId);
+		}
 	}
 
 	/*
@@ -325,28 +320,29 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		}
 	}
 
-//	@Override
-//	public void ontologyChanged() {
-//		try {
-//			DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
-//			if(ds!=null){
-//				ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
-//				ArrayList<OBDAMappingAxiom> newmappings = controller.getMappings(ds.getSourceID());
-//				if (newmappings != null) {
-//					for (OBDAMappingAxiom dataSourceMapping : newmappings) {
-//						newnodes.add(getMappingNodeFromMapping(dataSourceMapping));
-//					}
-//				}
-//				root.removeAllChildren();
-//				for (MappingNode newnode : newnodes) {
-//					root.insert(newnode, root.getChildCount());
-//				}
-//				nodeStructureChanged(root);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace(System.err);
-//		}
-//	}
+	// @Override
+	// public void ontologyChanged() {
+	// try {
+	// DataSource ds = apic.getDatasourcesController().getCurrentDataSource();
+	// if(ds!=null){
+	// ArrayList<MappingNode> newnodes = new ArrayList<MappingNode>();
+	// ArrayList<OBDAMappingAxiom> newmappings =
+	// controller.getMappings(ds.getSourceID());
+	// if (newmappings != null) {
+	// for (OBDAMappingAxiom dataSourceMapping : newmappings) {
+	// newnodes.add(getMappingNodeFromMapping(dataSourceMapping));
+	// }
+	// }
+	// root.removeAllChildren();
+	// for (MappingNode newnode : newnodes) {
+	// root.insert(newnode, root.getChildCount());
+	// }
+	// nodeStructureChanged(root);
+	// }
+	// } catch (Exception e) {
+	// e.printStackTrace(System.err);
+	// }
+	// }
 
 	/*
 	 * @see
@@ -415,16 +411,15 @@ public class MappingTreeModel extends DefaultTreeModel implements
 	/******
 	 * This function compares with all the elements of the list of filters
 	 * "ListFilters", if any of it doesn't match then it returns false
-	 *
+	 * 
 	 * @param mapping
 	 * @return allFiltersTrue
-	 *
+	 * 
 	 */
 	private boolean testFilters(RDBMSMappingAxiomImpl mapping) {
 		boolean allFiltersTrue = true;
 		for (int i = 0; i < ListFilters.size(); i++) {
-			allFiltersTrue = allFiltersTrue
-					&& ListFilters.get(i).match(mapping);
+			allFiltersTrue = allFiltersTrue && ListFilters.get(i).match(mapping);
 		}
 		return allFiltersTrue;
 	}
@@ -435,8 +430,7 @@ public class MappingTreeModel extends DefaultTreeModel implements
 		try {
 			datalogParser.parse(query);
 			cq = datalogParser.getRule(0);
-		}
-		catch (RecognitionException e) {
+		} catch (RecognitionException e) {
 			log.warn(e.getMessage());
 		}
 		return cq;
@@ -444,14 +438,11 @@ public class MappingTreeModel extends DefaultTreeModel implements
 
 	private String prepareQuery(String input) {
 		String query = "";
-		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(apic.getPrefixManager());
+		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
 
 		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1)  // if no head
-			query = queryHelper.getDefaultHead() + " " +
-				OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " +
-			 	input;
+		if (atoms.length == 1) // if no head
+			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;

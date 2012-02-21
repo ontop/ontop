@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.MappingFilterLexer;
 import it.unibz.krdb.obda.gui.swing.utils.MappingFilterParser;
-import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer;
+import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer2;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -59,6 +59,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellEditor;
@@ -72,36 +73,36 @@ import org.slf4j.LoggerFactory;
 
 public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeListener, DatasourceSelectorListener {
 
-	private static final long		serialVersionUID	= -486013653814714526L;
+	private static final long serialVersionUID = -486013653814714526L;
 
-	private DefaultMutableTreeNode	editedNode;
-	private OBDAPreferences			preference;
-	private KeyStroke				addMapping;
-	private KeyStroke				editBody;
-	private KeyStroke				editHead;
-	private KeyStroke				editID;
+	private DefaultMutableTreeNode editedNode;
+	private OBDAPreferences preference;
+	private KeyStroke addMapping;
+	private KeyStroke editBody;
+	private KeyStroke editHead;
+	private KeyStroke editID;
 
-	private Thread					validatorThread;
+	private Thread validatorThread;
 
-	private SourceQueryValidator	validator;
-	
+	private SourceQueryValidator validator;
+
 	private TargetQueryVocabularyValidator validatortrg;
 
-	private OBDAModel				mapc;
+	private OBDAModel mapc;
 
-	protected OBDAModel				apic;
+	protected OBDAModel apic;
 
-//	private OWLOntology				ontology;
+	// private OWLOntology ontology;
 
-	private DatalogProgramParser	datalogParser;
+	private DatalogProgramParser datalogParser;
 
-	private OBDADataSource			selectedSource;
+	private OBDADataSource selectedSource;
 
-	private boolean					canceled;
+	private boolean canceled;
 
-	private final Logger			log					= LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private OBDADataFactory			fac					= OBDADataFactoryImpl.getInstance();
+	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a new panel.
@@ -116,7 +117,6 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		this.preference = preference;
 		datalogParser = new DatalogProgramParser();
 		this.validatortrg = validator;
-		
 
 		initComponents();
 		registerAction();
@@ -125,17 +125,22 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		/***********************************************************************
 		 * Setting up the mappings tree
 		 */
-		mappingsTree.setRootVisible(false);
+//		mappingsTree.setRootVisible(false);
 
-		MappingTreeCellRenderer map_renderer = new MappingTreeCellRenderer(apic, preference);
+		// MappingTreeCellRenderer map_renderer = new
+		// MappingTreeCellRenderer(apic, preference);
+		
+		MappingTreeCellRenderer2 map_renderer = new MappingTreeCellRenderer2(preference);
+//		scrMappingsTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		mappingsTree.setCellRenderer(map_renderer);
 		mappingsTree.setEditable(true);
-		mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(mappingsTree, this, apic, validatortrg));
+		mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(apic, validatortrg, preference));
 		mappingsTree.setSelectionModel(new MappingTreeSelectionModel());
 		mappingsTree.setRowHeight(0);
-		mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
+//		mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
 		mappingsTree.setToggleClickCount(1);
-		mappingsTree.setInvokesStopCellEditing(true);
+		mappingsTree.setRootVisible(true);
+//		mappingsTree.setInvokesStopCellEditing(true);
 		cmdAddMapping.setToolTipText("Add a new mapping");
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
@@ -155,10 +160,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	public void setTargetQueryValidator(TargetQueryVocabularyValidator validator) {
 		this.validatortrg = validator;
 	}
-//
-//	public OWLOntology getOntology() {
-//		return ontology;
-//	}
+
+	//
+	// public OWLOntology getOntology() {
+	// return ontology;
+	// }
 
 	private void registerAction() {
 
@@ -363,7 +369,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			}
 		});
 		menuMappings.add(menuValidateHead);
-		
+
 		menuValidateBody = new JMenuItem();
 		menuValidateBody.setText("Validate Source Query");
 		menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
@@ -373,7 +379,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			}
 		});
 		menuMappings.add(menuValidateBody);
-		
+
 		menuExecuteBody = new JMenuItem();
 		menuExecuteBody.setText("Execute Source Query");
 		menuExecuteBody.addActionListener(new java.awt.event.ActionListener() {
@@ -808,19 +814,19 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
 		final TreePath path = mappingsTree.getSelectionPath();
-		final MappingNode mapping = (MappingNode)path.getLastPathComponent();
+		final MappingNode mapping = (MappingNode) path.getLastPathComponent();
 		final String sqlQuery = mapping.getBodyNode().getQuery();
-		
+
 		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);
 
-		JDialog dlgQueryResult = new JDialog();	
+		JDialog dlgQueryResult = new JDialog();
 		dlgQueryResult.setContentPane(pnlQueryResult);
 		dlgQueryResult.pack();
 		dlgQueryResult.setLocationRelativeTo(this);
 		dlgQueryResult.setVisible(true);
 		dlgQueryResult.setTitle("SQL Query Result");
 	}// GEN-LAST:event_menuExecuteBodyActionPerformed
-	
+
 	private void menuValidateHeadActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateHeadActionPerformed
 		// TODO add your handling code here:
 	}// GEN-LAST:event_menuValidateHeadActionPerformed
@@ -944,26 +950,26 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JCheckBox	chkFilter;
-	private javax.swing.JButton		cmdAddMapping;
-	private javax.swing.JButton		cmdCollapseAll;
-	private javax.swing.JButton		cmdDeselectAll;
-	private javax.swing.JButton		cmdDuplicateMapping;
-	private javax.swing.JButton		cmdExpandAll;
-	private javax.swing.JButton		cmdRemoveMapping;
-	private javax.swing.JButton		cmdSelectAll;
-	private javax.swing.JLabel		lblInsertFilter;
-	private javax.swing.JTree		mappingsTree;
-	private javax.swing.JPopupMenu	menuMappings;
-	private javax.swing.JMenuItem	menuValidateAll;
-	private javax.swing.JMenuItem	menuValidateBody;
-	private javax.swing.JMenuItem	menuValidateHead;
-	private javax.swing.JMenuItem   menuExecuteBody;
-	private javax.swing.JPanel		pnlExtraButtons;
-	private javax.swing.JPanel		pnlMappingButtons;
-	private javax.swing.JPanel		pnlMappingManager;
-	private javax.swing.JScrollPane	scrMappingsTree;
-	private javax.swing.JTextField	txtFilter;
+	private javax.swing.JCheckBox chkFilter;
+	private javax.swing.JButton cmdAddMapping;
+	private javax.swing.JButton cmdCollapseAll;
+	private javax.swing.JButton cmdDeselectAll;
+	private javax.swing.JButton cmdDuplicateMapping;
+	private javax.swing.JButton cmdExpandAll;
+	private javax.swing.JButton cmdRemoveMapping;
+	private javax.swing.JButton cmdSelectAll;
+	private javax.swing.JLabel lblInsertFilter;
+	private javax.swing.JTree mappingsTree;
+	private javax.swing.JPopupMenu menuMappings;
+	private javax.swing.JMenuItem menuValidateAll;
+	private javax.swing.JMenuItem menuValidateBody;
+	private javax.swing.JMenuItem menuValidateHead;
+	private javax.swing.JMenuItem menuExecuteBody;
+	private javax.swing.JPanel pnlExtraButtons;
+	private javax.swing.JPanel pnlMappingButtons;
+	private javax.swing.JPanel pnlMappingManager;
+	private javax.swing.JScrollPane scrMappingsTree;
+	private javax.swing.JTextField txtFilter;
 
 	// End of variables declaration//GEN-END:variables
 
@@ -997,12 +1003,14 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		if (editor.stopCellEditing()) {
 			String txt = editor.getCellEditorValue().toString();
 			updateNode(txt);
+
 		}
+
 	}
 
-	public void applyChangedToNode(String txt) {
-		updateNode(txt);
-	}
+	// public void applyChangedToNode(String txt) {
+	// updateNode(txt);
+	// }
 
 	/***
 	 * Parses the string in the search field.

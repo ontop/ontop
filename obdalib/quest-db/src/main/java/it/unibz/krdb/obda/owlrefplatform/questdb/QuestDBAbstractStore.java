@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,9 +14,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
 public abstract class QuestDBAbstractStore implements Serializable {
 
 	/**
@@ -26,30 +23,22 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	protected Quest questInstance = null;
 
-//	protected QuestConnection conn = null;
-
-	protected static transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-
 	protected String name;
 
 	public QuestDBAbstractStore(String name) {
 		this.name = name;
 	}
 
-//	/***
-//	 * Throws an exception if the connection is null or is inactive.
-//	 * 
-//	 * @throws OBDAException
-//	 */
-//	protected void checkConnection() throws OBDAException {
-//		if (conn == null && conn.isClosed())
-//			throw new OBDAException("An active connection must exists before calling this method");
-//	}
-
 	/* Serialize methods */
 
 	public static void saveState(String storePath, QuestDBAbstractStore store) throws IOException {
-		ObjectOutput out = new ObjectOutputStream(new FileOutputStream(storePath));
+		StringBuffer filename = new StringBuffer();
+		filename.append(storePath);
+		if (!storePath.endsWith(System.getProperty("file.separator")))
+			filename.append(System.getProperty("file.separator"));
+		filename.append(store.getName());
+		filename.append(".qst");
+		ObjectOutput out = new ObjectOutputStream(new FileOutputStream(filename.toString()));
 		out.writeObject(store);
 		out.close();
 
@@ -73,8 +62,6 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		this.name = name;
 	}
 
-	public abstract void drop() throws Exception;
-
 	/* Move to query time ? */
 	public Properties getPreferences() {
 		return questInstance.getPreferences();
@@ -85,40 +72,8 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		return false;
 	}
 
-//	public void disconnect() throws OBDAException {
-//		conn.close();
-//	}
-
-//	public void connect() throws OBDAException {
-//		if (conn != null && !conn.isClosed())
-//			throw new OBDAException("Cannot connect when an active connection already exists.");
-//		conn = questInstance.getConnection();
-//	}
-
-//	public boolean isConnected() throws OBDAException {
-//		return conn != null & !conn.isClosed();
-//	}
-
-	public QuestConnection getConnection() throws OBDAException{
-		return questInstance.getConnection();
+	public QuestDBConnection getConnection() throws OBDAException {
+		return new QuestDBConnection(questInstance.getConnection());
 	}
-
-	// public OBDAResultSet executeQuery(String query) throws Exception {
-	// return questInstance.getStatement().executeQuery(query);
-	// }
-	//
-	// public String getSQL(String query) throws Exception {
-	// OBDAStatement st = questInstance.getStatement();
-	// String sql = st.getUnfolding(query);
-	// st.close();
-	// return sql;
-	// }
-	//
-	// public String getReformulation(String query) throws Exception {
-	// OBDAStatement st = questInstance.getStatement();
-	// String reformulation = st.getRewriting(query);
-	// st.close();
-	// return reformulation;
-	// }
 
 }

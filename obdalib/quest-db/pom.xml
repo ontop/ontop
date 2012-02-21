@@ -32,6 +32,8 @@
 			<artifactId>quest-owlapi3</artifactId>
 			<version>1.7</version>
 		</dependency>
+		
+		
 
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -39,6 +41,14 @@
 			<version>3.2.3-r1824</version>
 			<classifier>jar</classifier>
 		</dependency>
+		
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.0-801.jdbc4</version>
+			<type>jar</type>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

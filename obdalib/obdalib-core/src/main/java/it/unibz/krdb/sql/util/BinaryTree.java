@@ -1,13 +1,13 @@
 package it.unibz.krdb.sql.util;
 
-import it.unibz.krdb.sql.util.BinaryTree;
+import java.io.Serializable;
 
 /**
  * This class implements a single node of a binary tree. The construction
  * follows a recursive structure. The relationship consists of left, right and
  * parent references.
  */
-public abstract class BinaryTree<T> implements Cloneable {
+public abstract class BinaryTree<T> implements Cloneable, Serializable {
 	
 	/**
 	 * The value associated with this node.

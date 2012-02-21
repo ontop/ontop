@@ -2,8 +2,9 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.io.File;
 import java.net.URI;
@@ -22,6 +23,8 @@ public class QuestDB {
 	private static Logger log = LoggerFactory.getLogger(QuestDB.class);
 
 	private Map<String, QuestDBAbstractStore> stores = new HashMap<String, QuestDBAbstractStore>();
+
+	private Map<String, QuestDBConnection> connections = new HashMap<String, QuestDBConnection>();
 
 	private final String QUESTDB_HOME;
 
@@ -127,7 +130,19 @@ public class QuestDB {
 
 		stores.put(name, store);
 
-		store.connect();
+		saveStore(name);
+	}
+
+	public void createVirtualStore(String name, URI tboxUri, URI obdaUri) throws Exception {
+
+		if (stores.containsKey(name))
+			throw new Exception("A store already exists with the name" + name);
+
+		QuestDBVirtualStore store;
+
+		store = new QuestDBVirtualStore(name, tboxUri, obdaUri);
+
+		stores.put(name, store);
 
 		saveStore(name);
 	}
@@ -163,13 +178,19 @@ public class QuestDB {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
 
-		QuestDBAbstractStore dbstore = stores.get(storename);
+		// QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
-			dbstore.drop();
+			QuestDBConnection conn = connections.get(storename);
+			QuestDBStatement st = conn.createStatement();
+			st.dropRepository();
+			st.close();
+			conn.commit();
+			conn.close();
 		} catch (Exception e) {
-			throw new Exception("Impossible to connect to the store. ", e);
+			throw new Exception("Impossible to drop the store. ", e);
 		}
 		stores.remove(storename);
+		connections.remove(storename);
 
 		/* Deleting the file */
 
@@ -185,13 +206,16 @@ public class QuestDB {
 
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
-			dbstore.connect();
+			QuestDBConnection conn = dbstore.getConnection();
 			boolean classic = dbstore.getPreferences().get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
-			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION)
-					.equals(QuestConstants.INMEMORY);
+			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
-				((QuestDBClassicStore) dbstore).createDB();
+				QuestDBStatement st = conn.createStatement();
+				st.createDB();
+				st.close();
+				conn.commit();
 			}
+			connections.put(storename, conn);
 		} catch (Exception e) {
 			throw new Exception("Impossible to connect to the store. ", e);
 		}
@@ -215,7 +239,8 @@ public class QuestDB {
 
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
-			dbstore.disconnect();
+			QuestDBConnection conn = connections.get(storename);
+			conn.close();
 		} catch (Exception e) {
 			throw new Exception("Impossible to disconnect to the store. ", e);
 		}
@@ -242,7 +267,8 @@ public class QuestDB {
 
 			QuestDBAbstractStore store = stores.get(storename);
 			try {
-				status.isOnline = store.isConnected();
+				QuestDBConnection conn = connections.get(storename);
+				status.isOnline = !conn.isClosed();
 			} catch (OBDAException e) {
 				log.error(e.getMessage());
 			}
@@ -278,7 +304,10 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		cstore.createIndexes();
+		QuestDBConnection conn = connections.get(storename);
+		QuestDBStatement st = conn.createStatement();
+		st.createIndexes();
+		st.close();
 	}
 
 	public void analyze(String storename) throws Exception {
@@ -288,7 +317,10 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		cstore.analyze();
+		QuestDBConnection conn = connections.get(storename);
+		QuestDBStatement st = conn.createStatement();
+		st.analyze();
+		st.close();
 
 	}
 
@@ -299,27 +331,37 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		cstore.dropIndexes();
+		QuestDBConnection conn = connections.get(storename);
+		QuestDBStatement st = conn.createStatement();
+		st.dropIndexes();
+		st.close();
 	}
 
-	public void isIndexed(String storename) throws Exception {
+	public boolean isIndexed(String storename) throws Exception {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		cstore.isIndexed();
+		QuestDBConnection conn = connections.get(storename);
+		QuestDBStatement st = conn.createStatement();
+		boolean response = st.isIndexed();
+		st.close();
+		return response;
 	}
 
-	public void loadOBDAModel(String storename, URI obdamodelURI) throws Exception {
+	public int loadOBDAModel(String storename, URI obdamodelURI) throws Exception {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
-		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		cstore.loadOBDAModel(obdamodelURI);
+		QuestDBConnection conn = connections.get(storename);
+		QuestDBStatement st = conn.createStatement();
+		int result = st.addFromOBDA(obdamodelURI);
+		st.close();
+		return result;
 	}
 
 	public int load(String storename, URI dataURI, boolean useFile) throws Exception {
@@ -328,8 +370,17 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
-		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		return cstore.load(dataURI, useFile);
+		QuestDBConnection conn = connections.get(storename);
+		QuestDBStatement st = conn.createStatement();
+		if (useFile) {
+			int result = st.addWithTempFile(dataURI);
+			st.close();
+			return result;
+		} else {
+			int result = st.add(dataURI);
+			st.close();
+			return result;
+		}
 	}
 
 	/***
@@ -342,37 +393,12 @@ public class QuestDB {
 		return stores.containsKey(storename);
 	}
 
-	// public OBDAResultSet executeQuery(String storename, String query) throws
-	// Exception {
-	// if (!stores.containsKey(storename))
-	// throw new Exception(String.format("The store \"%s\" does not exists.",
-	// storename));
-	// QuestDBAbstractStore dbstore = stores.get(storename);
-	// return dbstore.executeQuery(query);
-	// }
-	//
-	// public String getSQL(String storename, String query) throws Exception {
-	// if (!stores.containsKey(storename))
-	// throw new Exception(String.format("The store \"%s\" does not exists.",
-	// storename));
-	// QuestDBAbstractStore dbstore = stores.get(storename);
-	// return dbstore.getSQL(query);
-	// }
-	//
-	// public String getReformulation(String storename, String query) throws
-	// Exception {
-	// if (!stores.containsKey(storename))
-	// throw new Exception(String.format("The store \"%s\" does not exists.",
-	// storename));
-	// QuestDBAbstractStore dbstore = stores.get(storename);
-	// return dbstore.getReformulation(query);
-	// }
-
-	public QuestStatement getStatement(String storename) throws Exception {
+	public QuestDBStatement getStatement(String storename) throws Exception {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
 		QuestDBAbstractStore dbstore = stores.get(storename);
-		return dbstore.getConnection().createStatement();
+		QuestDBConnection conn = connections.get(storename);
+		return conn.createStatement();
 	}
 
 }

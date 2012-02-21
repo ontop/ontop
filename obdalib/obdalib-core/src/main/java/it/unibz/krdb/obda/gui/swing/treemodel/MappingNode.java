@@ -17,9 +17,9 @@ import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class MappingNode extends DefaultMutableTreeNode {
-	
-	private static final long	serialVersionUID	= -9116413704531119587L;
+public class MappingNode extends MappingTreeNode {
+
+	private static final long serialVersionUID = -9116413704531119587L;
 
 	public MappingNode(String name) {
 		super(name);
@@ -43,37 +43,41 @@ public class MappingNode extends DefaultMutableTreeNode {
 		node.add(body);
 		return node;
 	}
-	
+
 	public MappingHeadNode getHeadNode() {
 		for (int i = 0; i < getChildCount(); i++) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)getChildAt(i);
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) getChildAt(i);
 			if (node.getClass().equals(MappingHeadNode.class)) {
 				return (MappingHeadNode) node;
 			}
 		}
 		return null;
 	}
-	
+
 	public MappingBodyNode getBodyNode() {
 		for (int i = 0; i < getChildCount(); i++) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)getChildAt(i);
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) getChildAt(i);
 			if (node.getClass().equals(MappingBodyNode.class)) {
 				return (MappingBodyNode) node;
 			}
 		}
 		return null;
 	}
-	
+
 	public String getMappingID() {
-		return (String)getUserObject();
+		return (String) getUserObject();
 	}
-	
+
 	public void setMappingID(String newid) {
 		setUserObject(newid);
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Mapping ID";
+		StringBuffer str = new StringBuffer();
+		str.append(getMappingID());
+		str.trimToSize();
+		return str.toString();
+		// return this.getMappingID();
 	}
 }

@@ -1,6 +1,8 @@
 package it.unibz.krdb.sql.api;
 
-public class Attribute {
+import java.io.Serializable;
+
+public class Attribute implements Serializable{
 	
 	/** Fields */
 	public final String name;

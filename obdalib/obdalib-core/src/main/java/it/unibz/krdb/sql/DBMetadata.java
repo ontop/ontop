@@ -1,12 +1,15 @@
 package it.unibz.krdb.sql;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
-public class DBMetadata {
+public class DBMetadata implements Serializable {
 
-
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -806363154890865756L;
 	private HashMap<String, DataDefinition> schema = new HashMap<String, DataDefinition>();
 	private boolean storesLowerCaseIdentifiers = false;
 	private boolean storesLowerCaseQuotedIdentifiers = false;

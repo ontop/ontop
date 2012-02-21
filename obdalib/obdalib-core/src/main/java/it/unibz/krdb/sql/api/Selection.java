@@ -1,10 +1,11 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class Selection {
+public class Selection implements Serializable{
 	
 	/**
 	 * Collection of boolean conditions and boolean operators.

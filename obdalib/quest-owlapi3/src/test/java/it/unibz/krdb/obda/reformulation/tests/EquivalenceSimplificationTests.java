@@ -134,7 +134,7 @@ public class EquivalenceSimplificationTests extends TestCase {
 		Ontology simpleonto = optimizer.getOptimalTBox();
 		Map<Predicate, Description> eqMap = optimizer.getEquivalenceMap();
 
-		assertEquals(3, simpleonto.getConcepts().size());
+		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
 		assertEquals(9, simpleonto.getAssertions().size());
 		assertEquals(6, simpleonto.getVocabulary().size());

@@ -70,8 +70,11 @@ public class QuestStatement implements OBDAStatement {
 
 	private QuestConnection conn;
 
+	protected Quest questInstance;
+
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
 
+		this.questInstance = questinstance;
 		this.repository = questinstance.dataRepository;
 		this.conn = conn;
 		this.rewriter = questinstance.rewriter;
@@ -115,7 +118,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			OBDAResultSet result;
 
-			String epistemicUnfolding = getUnfoldingEpistemic(strquery);
+			String epistemicUnfolding = getSQLEpistemic(strquery);
 			ResultSet set = sqlstatement.executeQuery(epistemicUnfolding);
 			result = new OWLOBDARefResultSet(set, this);
 
@@ -136,11 +139,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
-	private OBDAResultSet executeConjunctiveQuery(String strquery) throws OBDAException {
-		// Contruct the datalog program object from the query string
-		log.debug("Input user query:\n" + strquery);
-		DatalogProgram program = getDatalogQuery(strquery);
-
+	private String getSQL(DatalogProgram program, List<String> signature) throws OBDAException {
 		// Check the datalog object
 		if (validator != null) {
 			log.debug("Validating the user query...");
@@ -160,7 +159,7 @@ public class QuestStatement implements OBDAStatement {
 		program = validator.replaceEquivalences(program);
 
 		// If the datalog is valid, proceed to the next process.
-		List<String> signature = getSignature(program);
+		signature.addAll(getSignature(program));
 
 		log.debug("Start the rewriting process...");
 		OBDAQuery rewriting = rewriter.rewrite(program);
@@ -170,6 +169,16 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Producing the SQL string...");
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, signature);
+		return sql;
+	}
+
+	private OBDAResultSet executeConjunctiveQuery(String strquery) throws OBDAException {
+		// Contruct the datalog program object from the query string
+		log.debug("Input user query:\n" + strquery);
+		DatalogProgram program = getDatalogQuery(strquery);
+
+		List<String> signature = new LinkedList<String>();
+		String sql = getSQL(program, signature);
 
 		OBDAResultSet result;
 
@@ -227,6 +236,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Returns the final rewriting of the given query
 	 */
 	public String getRewriting(String strquery) throws Exception {
+		// TODO FIX to limit to SPARQL input and output
 		DatalogProgram program = getDatalogQuery(strquery);
 
 		log.debug("Replacing equivalences...");
@@ -237,7 +247,7 @@ public class QuestStatement implements OBDAStatement {
 		return codec.encode((DatalogProgram) rewriting);
 	}
 
-	private String getUnfoldingEpistemic(String strquery) throws OBDAException {
+	private String getSQLEpistemic(String strquery) throws OBDAException {
 		// FIRST WE try to analyze the query to find the CQs and the SQL part
 
 		LinkedList<String> sql = new LinkedList<String>();
@@ -275,25 +285,8 @@ public class QuestStatement implements OBDAStatement {
 			String cq = cqs.get(i);
 			try {
 				DatalogProgram p = t.parse(cq);
-
-				p = validator.replaceEquivalences(p);
-
-				boolean isValid = validator.validate(p);
-
-				if (!isValid) {
-					Vector<String> invalidList = validator.getInvalidPredicates();
-
-					String msg = "";
-					for (String predicate : invalidList) {
-						msg += "- " + predicate + "\n";
-					}
-					throw new Exception("These predicates are missing from the ontology's vocabulary: \n" + msg);
-				}
-
-				DatalogProgram rew = (DatalogProgram) rewriter.rewrite(p);
-				DatalogProgram unf = unfoldingmechanism.unfold(rew);
-				// querygenerator.getViewManager().storeOrgQueryHead(p.getRules().get(0).getHead());
-				String finasql = querygenerator.generateSourceQuery(unf, getSignature(p));
+				List<String> signature = getSignature(p);
+				String finasql = getSQL(p, signature);
 				log.debug("SQL: {}", finasql);
 				sqlforcqs.add(finasql);
 			} catch (Exception e) {
@@ -329,26 +322,16 @@ public class QuestStatement implements OBDAStatement {
 	 * Returns the final rewriting of the given query
 	 */
 	public String getUnfolding(String strquery) throws Exception {
-		return getUnfolding(strquery, true);
-	}
-
-	/**
-	 * Returns the final rewriting of the given query
-	 */
-	public String getUnfolding(String strquery, boolean reformulate) throws Exception {
-		DatalogProgram program = getDatalogQuery(strquery);
-
-		log.debug("Replacing equivalences...");
-		program = validator.replaceEquivalences(program);
-
-		OBDAQuery unfolding = null;
-		if (!reformulate) {
-			unfolding = unfoldingmechanism.unfold(program);
-		} else {
-			OBDAQuery rewriting = rewriter.rewrite(program);
-			unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
+		String sql = null;
+		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
+			sql = getSQLEpistemic(strquery);
 		}
-		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, getSignature(program));
+		if (strquery.contains("/*direct*/")) {
+			sql = strquery;
+		} else {
+			DatalogProgram p = getDatalogQuery(strquery);
+			sql = getSQL(p, getSignature(p));
+		}
 		return sql;
 	}
 

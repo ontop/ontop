@@ -39,6 +39,7 @@ public class DatalogProgramParser {
 	 */
 	public DatalogProgram parse(String query) throws RecognitionException {
 
+		
 		ANTLRStringStream inputStream = new ANTLRStringStream(query);
 		DatalogLexer lexer = new DatalogLexer(inputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -49,6 +50,8 @@ public class DatalogProgramParser {
 		if (parser.getNumberOfSyntaxErrors() != 0) {
 			throw new RecognitionException();
 		}
+		
+		
 		return datalog;
 	}
 

@@ -22,23 +22,30 @@ public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 	/**
 	 * The tag used to represent a conjunctive query in XML
 	 */
-	private static final String	TAG	= "CQ";
+	private static final String TAG = "CQ";
 
 	private OBDAModel obdaModel = null;
+
+	DatalogProgramParser datalogParser = new DatalogProgramParser();
+
+	private DatalogQueryHelper queryHelper;
 
 	/**
 	 * Default constructor.
 	 * 
 	 * @param obdaModel
-	 * 			The OBDA model.
+	 *            The OBDA model.
 	 */
 	public DatalogConjunctiveQueryXMLCodec(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
+		queryHelper = new DatalogQueryHelper(obdaModel.getPrefixManager());
+
 	}
 
 	/**
 	 * Decodes the given XML element into an conjunctive query.
-	 * @throws RecognitionException 
+	 * 
+	 * @throws RecognitionException
 	 */
 	@Override
 	public CQIE decode(Element input) throws RecognitionException {
@@ -77,29 +84,39 @@ public class DatalogConjunctiveQueryXMLCodec extends ObjectXMLCodec<CQIE> {
 
 	/**
 	 * Decodes the given String into an conjunctive query.
-	 * @throws RecognitionException 
+	 * 
+	 * @throws RecognitionException
 	 */
 	public CQIE decode(String input) throws RecognitionException {
 		return parse(input);
 	}
 
 	private CQIE parse(String query) throws RecognitionException {
-		DatalogProgramParser datalogParser = new DatalogProgramParser();
 		datalogParser.parse(prepareQuery(query));
 		return datalogParser.getRule(0);
 	}
 
 	private String prepareQuery(String input) {
-		String query = input;
-		DatalogQueryHelper queryHelper = new DatalogQueryHelper(obdaModel.getPrefixManager());
+		
+		StringBuffer bf = new StringBuffer();
+		bf.append(input);
+//		String query = input;
 
 		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
 		if (atoms.length == 1) // if no head
-			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + query;
+		{
+			bf.insert(0, OBDALibConstants.DATALOG_IMPLY_SYMBOL );
+			bf.insert(0, " ");
+			bf.insert(0, queryHelper.getDefaultHead());
+//			query = queryHelper.getDefaultHead() + " " + DatalogQueryHelper.DATALOG_IMPLY_SYMBOL + " " + query;
+		}
+		
+		bf.insert(0, queryHelper.getPrefixes());
 
 		// Append the prefixes
-		query = queryHelper.getPrefixes() + query;
+//		query = queryHelper.getPrefixes() + query;
 
-		return query;
+		return bf.toString();
+//		return query;
 	}
 }

@@ -1801,9 +1801,12 @@ public class DatalogParser extends Parser {
                       uriref = directives.get(prefix);
                     else
                       uriref = directives.get(OBDA_DEFAULT_URI);
-                    
-                    String uri = uriref + (id37!=null?input.toString(id37.start,id37.stop):null); // creates the complete Uri string
-                    value = uri;
+                    StringBuffer uribf = new StringBuffer();
+                    uribf.append(uriref);
+                    uribf.append((id37!=null?input.toString(id37.start,id37.stop):null));
+//                    String uri = uriref + (id37!=null?input.toString(id37.start,id37.stop):null); // creates the complete Uri string
+                    value = uribf.toString();
+//                    value = uri;
                   
             }
 

@@ -13,26 +13,24 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+public class MappingHeadNode extends MappingTreeNode {
 
-public class MappingHeadNode extends DefaultMutableTreeNode {
-	
-	private static final long	serialVersionUID	= -172088331390892183L;
+	private static final long serialVersionUID = -172088331390892183L;
 
 	public MappingHeadNode(String name) {
 		super(name);
 	}
-	
+
 	public String getQuery() {
-		return (String)getUserObject();
+		return (String) getUserObject();
 	}
-	
+
 	public void setQuery(String query) {
 		setUserObject(query);
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Target Query";
+		return getQuery();
 	}
 }

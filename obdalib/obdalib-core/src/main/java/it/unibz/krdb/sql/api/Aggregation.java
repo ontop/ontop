@@ -1,8 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Aggregation {
+public class Aggregation implements Serializable{
 	
 	/**
 	 * Collection of grouping columns. Uses {@link GroupingElement}

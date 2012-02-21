@@ -1,0 +1,1496 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY Ontology1207768242 "http://www.owl-ontologies.com/Ontology1207768242.owl#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2006/12/owl2-xml#"
+     xml:base="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:Ontology1207768242="http://www.owl-ontologies.com/Ontology1207768242.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     URI="http://www.owl-ontologies.com/Ontology1207768242.owl">
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Acquisition"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Acquisition"/>
+        <ObjectComplementOf>
+            <Class URI="&Ontology1207768242;Offer"/>
+        </ObjectComplementOf>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;inverseofhasAddress"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;addressID"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;hasNumber"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;inCity"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;inCountry"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;inState"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;inStreet"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Company"/>
+        <Class URI="&Ontology1207768242;LegalPerson"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Company"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;companyName"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Company"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;marketShares"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Company"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;netWorth"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <EquivalentClasses>
+        <Class URI="&Ontology1207768242;Dealer"/>
+        <Class URI="&Ontology1207768242;Trader"/>
+    </EquivalentClasses>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Dealer"/>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;FinantialInstrument"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;FinantialInstrument"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Investor"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Investor"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;LegalPerson"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Offer"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Person"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Person"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Person"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;personID"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+        <ObjectComplementOf>
+            <Class URI="&Ontology1207768242;LegalPerson"/>
+        </ObjectComplementOf>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;firstName"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;lastName"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;ssn"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Class URI="&Ontology1207768242;FinantialInstrument"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;isListedIn"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+        <Class URI="&Ontology1207768242;StockExchangeMember"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;listdate"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockExchangeMember"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockExchangeMember"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <EquivalentClasses>
+        <Class URI="&Ontology1207768242;StockTrader"/>
+        <Class URI="&Ontology1207768242;Trader"/>
+    </EquivalentClasses>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;StockTrader"/>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Trader"/>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <Class URI="&owl;Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+            <Class URI="&owl;Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;transactionDate"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <DataSomeValuesFrom>
+            <DataProperty URI="&Ontology1207768242;transactionID"/>
+            <Datatype URI="&rdfs;Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Class URI="&Ontology1207768242;Stock"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Class URI="&Ontology1207768242;Company"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </ObjectPropertyRange>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;hasStock"/>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+    </InverseObjectProperties>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;hasStock"/>
+        <Class URI="&Ontology1207768242;Company"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;hasStock"/>
+        <Class URI="&Ontology1207768242;Stock"/>
+    </ObjectPropertyRange>
+    <SubObjectPropertyOf>
+        <ObjectProperty URI="&Ontology1207768242;inverse_of_test1"/>
+        <ObjectProperty URI="&Ontology1207768242;inverseofhasAddress"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty URI="&Ontology1207768242;inverse_test2"/>
+        <ObjectProperty URI="&Ontology1207768242;inverse_of_test1"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;inverse_test2"/>
+        <ObjectProperty URI="&Ontology1207768242;test2"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;inverseofhasAddress"/>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+    </InverseObjectProperties>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;inverseofhasAddress"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;inverseofhasAddress"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+        <Class URI="&Ontology1207768242;FinantialInstrument"/>
+    </ObjectPropertyRange>
+    <FunctionalObjectProperty>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+    </FunctionalObjectProperty>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+        <Class URI="&Ontology1207768242;StockExchangeMember"/>
+    </ObjectPropertyRange>
+    <FunctionalObjectProperty>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+    </FunctionalObjectProperty>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+        <Class URI="&Ontology1207768242;Investor"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyDomain>
+        <ObjectProperty URI="&Ontology1207768242;isListedIn"/>
+        <Class URI="&Ontology1207768242;Stock"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;isListedIn"/>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+    </ObjectPropertyRange>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;isTradedIn"/>
+        <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+    </InverseObjectProperties>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;isTradedIn"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </ObjectPropertyRange>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <ObjectProperty URI="&Ontology1207768242;isListedIn"/>
+    </InverseObjectProperties>
+    <ObjectPropertyRange>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Class URI="&Ontology1207768242;Stock"/>
+    </ObjectPropertyRange>
+    <SubObjectPropertyOf>
+        <ObjectProperty URI="&Ontology1207768242;test1"/>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;test1"/>
+        <ObjectProperty URI="&Ontology1207768242;inverse_of_test1"/>
+    </InverseObjectProperties>
+    <SubObjectPropertyOf>
+        <ObjectProperty URI="&Ontology1207768242;test2"/>
+        <ObjectProperty URI="&Ontology1207768242;test1"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <ObjectProperty URI="&Ontology1207768242;usesBroker"/>
+    </InverseObjectProperties>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Class URI="&Ontology1207768242;Stock"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Datatype URI="&xsd;int"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;companyName"/>
+        <Class URI="&Ontology1207768242;Company"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;companyName"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+        <Datatype URI="&xsd;date"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Class URI="&Ontology1207768242;FinantialInstrument"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Datatype URI="&xsd;int"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;firstName"/>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;firstName"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Datatype URI="&xsd;int"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Class URI="&Ontology1207768242;Address"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;lastName"/>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;lastName"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Datatype URI="&xsd;date"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;marketShares"/>
+        <Class URI="&Ontology1207768242;Company"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;marketShares"/>
+        <Datatype URI="&xsd;int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;membershipDate"/>
+        <Datatype URI="&xsd;date"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;netWorth"/>
+        <Class URI="&Ontology1207768242;Company"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;netWorth"/>
+        <Datatype URI="&xsd;float"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;personID"/>
+        <Class URI="&Ontology1207768242;Person"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;personID"/>
+        <Datatype URI="&xsd;int"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;ssn"/>
+        <Class URI="&Ontology1207768242;PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;ssn"/>
+        <Datatype URI="&xsd;string"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;transactionDate"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;transactionDate"/>
+        <Datatype URI="&xsd;date"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;transactionID"/>
+        <Class URI="&Ontology1207768242;Transaction"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;transactionID"/>
+        <Datatype URI="&xsd;date"/>
+    </DataPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Class URI="&Ontology1207768242;Stock"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Datatype URI="&xsd;boolean"/>
+    </DataPropertyRange>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+        <Constant datatypeURI="&xsd;string">991</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+        <Constant datatypeURI="&xsd;string">24</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+        <Constant datatypeURI="&xsd;string">Chonala</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+        <Constant datatypeURI="&xsd;string">Mexico</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+        <Constant datatypeURI="&xsd;string">Veracruz</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+        <Constant datatypeURI="&xsd;string">Road street</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+        <Constant datatypeURI="&xsd;string">992</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+        <Constant datatypeURI="&xsd;string">3</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+        <Constant datatypeURI="&xsd;string">Bolzano</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+        <Constant datatypeURI="&xsd;string">Italy</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+        <Constant datatypeURI="&xsd;string">Bolzano</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+        <Constant datatypeURI="&xsd;string">Via Marconi</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+        <Constant datatypeURI="&xsd;string">993</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+        <Constant datatypeURI="&xsd;string">32</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+        <Constant datatypeURI="&xsd;string">Malaga</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+        <Constant datatypeURI="&xsd;string">Spain</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+        <Constant datatypeURI="&xsd;string">Malaga</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+        <Constant datatypeURI="&xsd;string">Romer Street</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+        <Constant datatypeURI="&xsd;string">995</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+        <Constant datatypeURI="&xsd;string">3</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+        <Constant datatypeURI="&xsd;string">Bolzano</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+        <Constant datatypeURI="&xsd;string">Italy</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+        <Constant datatypeURI="&xsd;string">Bolzano</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+        <Constant datatypeURI="&xsd;string">Huberg Strasse</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+        <Constant datatypeURI="&xsd;string">996</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+        <Constant datatypeURI="&xsd;string">7</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+        <Constant datatypeURI="&xsd;string">Marconi</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+        <Constant datatypeURI="&xsd;string">Italy</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+        <Constant datatypeURI="&xsd;string">Trentino</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+        <Constant datatypeURI="&xsd;string"
+            >Via Piani di Bolzano</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Address"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;addressID"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+        <Constant datatypeURI="&xsd;string">997</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;hasNumber"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+        <Constant datatypeURI="&xsd;string">9976</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCity"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+        <Constant datatypeURI="&xsd;string">Puebla</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inCountry"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+        <Constant datatypeURI="&xsd;string">Mexico</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inState"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+        <Constant datatypeURI="&xsd;string">Puebla</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;inStreet"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+        <Constant datatypeURI="&xsd;string">Samara road</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Company"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-995"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;companyName"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+        <Constant datatypeURI="&xsd;string">General Motors</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;marketShares"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+        <Constant datatypeURI="&xsd;string">25000000</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;netWorth"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+        <Constant datatypeURI="&xsd;string">7.5678766e+09</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Company"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-996"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;companyName"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+        <Constant datatypeURI="&xsd;string">GnA Investments</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;marketShares"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+        <Constant datatypeURI="&xsd;string">100000</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;netWorth"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+        <Constant datatypeURI="&xsd;string">12555322</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Investor"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-991"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+        <Constant datatypeURI="&xsd;string">1950-03-21</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;firstName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+        <Constant datatypeURI="&xsd;string">John</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;lastName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+        <Constant datatypeURI="&xsd;string">Smith</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;ssn"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+        <Constant datatypeURI="&xsd;string">JSRX229500321</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Dealer"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Investor"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-992"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Constant datatypeURI="&xsd;string">1970-07-14</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;firstName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Constant datatypeURI="&xsd;string">Joana</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;lastName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Constant datatypeURI="&xsd;string">Lopatenkko</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;ssn"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+        <Constant datatypeURI="&xsd;string">JLPTK54992</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-993"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Constant datatypeURI="&xsd;string">1968-09-03</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;firstName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Constant datatypeURI="&xsd;string">Walter</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;lastName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Constant datatypeURI="&xsd;string">Schmidt</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;ssn"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-113"/>
+        <Constant datatypeURI="&xsd;string">WSCH9820783903</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockBroker"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;hasAddress"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Individual URI="&Ontology1207768242;getAddressObj-997"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;tradesOnBehalfOf"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;dateOfBirth"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Constant datatypeURI="&xsd;string">1975-02-22</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;firstName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Constant datatypeURI="&xsd;string">Patricia</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;lastName"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Constant datatypeURI="&xsd;string">Lombrardi</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;ssn"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-114"/>
+        <Constant datatypeURI="&xsd;string">PTLM8878767830</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-01"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-01"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-01"/>
+        <Constant datatypeURI="&xsd;string">2008-04-01</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-02"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-02"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-02"/>
+        <Constant datatypeURI="&xsd;string">2008-04-02</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-03"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-03"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-03"/>
+        <Constant datatypeURI="&xsd;string">2008-04-03</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-04"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-04"/>
+        <Individual URI="&Ontology1207768242;getStockObj-664"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-04"/>
+        <Constant datatypeURI="&xsd;string">2008-04-04</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-05"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-05"/>
+        <Individual URI="&Ontology1207768242;getStockObj-665"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-05"/>
+        <Constant datatypeURI="&xsd;string">2008-04-05</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-06"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-06"/>
+        <Individual URI="&Ontology1207768242;getStockObj-666"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-06"/>
+        <Constant datatypeURI="&xsd;string">2008-04-06</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-07"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-07"/>
+        <Individual URI="&Ontology1207768242;getStockObj-667"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-07"/>
+        <Constant datatypeURI="&xsd;string">2008-04-07</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-08"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-08"/>
+        <Individual URI="&Ontology1207768242;getStockObj-668"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-08"/>
+        <Constant datatypeURI="&xsd;string">2008-04-08</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;StockExchangeList"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-09"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;listsStock"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-09"/>
+        <Individual URI="&Ontology1207768242;getStockObj-669"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;listdate"/>
+        <Individual URI="&Ontology1207768242;getStockBookObj-2008-04-09"/>
+        <Constant datatypeURI="&xsd;string">2008-04-09</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-660"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-660"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-660"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-660"/>
+        <Constant datatypeURI="&xsd;string">660</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-660"/>
+        <Constant datatypeURI="&xsd;string">f</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+        <Constant datatypeURI="&xsd;string">661</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+        <Constant datatypeURI="&xsd;string">f</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+        <Constant datatypeURI="&xsd;string">662</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+        <Constant datatypeURI="&xsd;string">f</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+        <Constant datatypeURI="&xsd;string">663</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+        <Constant datatypeURI="&xsd;string">f</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-664"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-664"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-664"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-664"/>
+        <Constant datatypeURI="&xsd;string">664</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-664"/>
+        <Constant datatypeURI="&xsd;string">f</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-665"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-665"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-665"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-665"/>
+        <Constant datatypeURI="&xsd;string">665</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-665"/>
+        <Constant datatypeURI="&xsd;string">t</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-666"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-666"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-666"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-666"/>
+        <Constant datatypeURI="&xsd;string">666</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-666"/>
+        <Constant datatypeURI="&xsd;string">t</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-667"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-667"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-667"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-667"/>
+        <Constant datatypeURI="&xsd;string">667</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-667"/>
+        <Constant datatypeURI="&xsd;string">t</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-668"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-668"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-668"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-668"/>
+        <Constant datatypeURI="&xsd;string">668</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-668"/>
+        <Constant datatypeURI="&xsd;string">t</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Stock"/>
+        <Individual URI="&Ontology1207768242;getStockObj-669"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;belongsToCompany"/>
+        <Individual URI="&Ontology1207768242;getStockObj-669"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;amountOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-669"/>
+        <Constant datatypeURI="&xsd;string">100</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;financialInstrumentID"/>
+        <Individual URI="&Ontology1207768242;getStockObj-669"/>
+        <Constant datatypeURI="&xsd;string">669</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;typeOfShares"/>
+        <Individual URI="&Ontology1207768242;getStockObj-669"/>
+        <Constant datatypeURI="&xsd;string">t</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Offer"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+        <Individual URI="&Ontology1207768242;getStockObj-661"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionDate"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+        <Constant datatypeURI="&xsd;string">2008-04-01</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionID"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3331"/>
+        <Constant datatypeURI="&xsd;string">3331</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Offer"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+        <Individual URI="&Ontology1207768242;getStockObj-662"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionDate"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+        <Constant datatypeURI="&xsd;string">2008-04-02</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionID"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3332"/>
+        <Constant datatypeURI="&xsd;string">3332</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Offer"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;involvesInstrument"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+        <Individual URI="&Ontology1207768242;getStockObj-663"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedBy"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+        <Individual URI="&Ontology1207768242;getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty URI="&Ontology1207768242;isExecutedFor"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+        <Individual URI="&Ontology1207768242;getCompanyObj-212"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionDate"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+        <Constant datatypeURI="&xsd;string">2008-04-03</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionID"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3333"/>
+        <Constant datatypeURI="&xsd;string">3333</Constant>
+    </DataPropertyAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Offer"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3334"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class URI="&Ontology1207768242;Transaction"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3334"/>
+    </ClassAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionDate"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3334"/>
+        <Constant datatypeURI="&xsd;string">2008-04-14</Constant>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty URI="&Ontology1207768242;transactionID"/>
+        <Individual URI="&Ontology1207768242;getTransactionObj-3334"/>
+        <Constant datatypeURI="&xsd;string">3334</Constant>
+    </DataPropertyAssertion>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 2.2.1.1138) http://owlapi.sourceforge.net -->
+

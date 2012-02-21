@@ -1,9 +1,11 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
+
 /**
  * An abstract base class for each term in relational algebra.
  */
-public abstract class RelationalAlgebra implements Cloneable {
+public abstract class RelationalAlgebra implements Serializable, Cloneable {
 	
 	/**
 	 * The SELECT statement.

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-dllitea.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-incomplete.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-original.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-rdfs.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="duplicate:http://www.owl-ontologies.com/Ontology1207768242.owl" uri="S.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="duplicate:http://www.owl-ontologies.com/Ontology1207768242.owl" uri="stockexchange-workbench.owl"/>
-        <uri id="Automatically generated entry, Timestamp=1327574081767" name="http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl" uri="P5X.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-dllitea.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-incomplete.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-original.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="duplicate:http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl" uri="lubm/univ-bench-rdfs.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="duplicate:http://www.owl-ontologies.com/Ontology1207768242.owl" uri="S.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="duplicate:http://www.owl-ontologies.com/Ontology1207768242.owl" uri="stockexchange-workbench.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1329782510505" name="http://www.semanticweb.org/ontologies/2008/8/24/Ontology1222256119496.owl" uri="P5X.owl"/>
     </group>
 </catalog>

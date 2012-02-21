@@ -50,25 +50,14 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 	/**
 	 *
 	 */
-	private static final long			serialVersionUID				= -4636107842424616156L;
-	Icon								mappingIcon						= null;
-	Icon								invalidmappingIcon				= null;
-	Icon								mappingheadIcon					= null;
-	Icon								mappingbodyIcon					= null;
-	Icon								invalidmappingheadIcon			= null;
+	private static final long serialVersionUID = -4636107842424616156L;
 
-	final String						PATH_MAPPING_ICON				= "images/mapping.png";
-	final String						PATH_INVALIDMAPPING_ICON		= "images/mapping_invalid.png";
-
-	final String						PATH_MAPPINGHEAD_ICON			= "images/head.png";
-	final String						PATH_INVALIDMAPPINGHEAD_ICON	= "images/head_invalid.png";
-	final String						PATH_MAPPINGBODY_ICON			= "images/body.png";
-
-	private JLabel						label							= null;
-	private JTextPane					area							= null;
-	private JPanel						panel							= null;
-	private OBDAPreferences	pref							= null;
-	private final OBDAModel	apic;
+	// private JLabel label = null;
+	// private JTextPane area = null;
+	// private JPanel panel = null;
+	private OBDAPreferences pref = null;
+	private final OBDAModel apic;
+	private MappingTreeNodeCellRenderer editorComponent = null;
 
 	DatalogProgramParser datalogParser = new DatalogProgramParser();
 
@@ -76,12 +65,7 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	public MappingTreeCellRenderer(OBDAModel apic, OBDAPreferences preference) {
 		this.apic = apic;
-		mappingIcon = IconLoader.getImageIcon(PATH_MAPPING_ICON);
-		invalidmappingIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPING_ICON);
-		mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
-		invalidmappingheadIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPINGHEAD_ICON);
-		mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
-		pref =  preference;
+		pref = preference;
 	}
 
 	@Override
@@ -89,119 +73,181 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 			boolean hasFocus) {
 
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+//		if (editorComponent == null) {
+			editorComponent = new MappingTreeNodeCellRenderer(apic, pref);
+//		}
+		editorComponent.updateContent(node, sel, expanded, leaf, row, hasFocus);
 
-		return createComponent(node, tree, sel);
+		return editorComponent;
 	}
 
-	private JPanel createComponent(DefaultMutableTreeNode node, JTree t, boolean selected) {
+	public class MappingTreeNodeCellRenderer extends JPanel {
 
-		java.awt.GridBagConstraints grid;
-		GridBagLayout l = new GridBagLayout();
-		panel = new JPanel();
-		panel.setLayout(l);
-		label = new JLabel();
-		area = new JTextPane();
-		panel.setBackground(Color.white);
-		label.setBackground(Color.white);
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-		JLabel ph = new JLabel();
-		ph.setVisible(false);
-		ph.setHorizontalAlignment(SwingConstants.LEADING);
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7840766137171315837L;
 
-		StyleContext context = new StyleContext();
-		Style style = context.getStyle(StyleContext.DEFAULT_STYLE);
+		private JLabel label = null;
+		private JTextPane area = null;
+		private final OBDAModel apic;
+		private JPanel editorComponent = null;
 
-		Boolean useDefault = new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString());
-		
-		if (node instanceof MappingNode) {
-			if(!useDefault){
-				StyleConstants.setFontFamily(style, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
-				StyleConstants.setFontSize(style, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
-			}
-			label.setIcon(mappingIcon);
-			String txt = ((String) node.getUserObject());
-			DefaultStyledDocument doc = new DefaultStyledDocument();
-			try {
-				doc.insertString(0, txt, style);
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			area.setDocument(doc);
+		Icon mappingIcon = null;
+		Icon invalidmappingIcon = null;
+		Icon mappingheadIcon = null;
+		Icon mappingbodyIcon = null;
+		Icon invalidmappingheadIcon = null;
 
-		} else if (node instanceof MappingBodyNode) {
-			if(!useDefault){
-				StyleConstants.setFontFamily(style, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
-				StyleConstants.setFontSize(style, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
-			}
-			label.setIcon(mappingbodyIcon);
-			String txt = ((String) node.getUserObject());
-			DefaultStyledDocument doc = new DefaultStyledDocument();
-			try {
-				doc.insertString(0, txt, style);
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			area.setDocument(doc);
+		final String PATH_MAPPING_ICON = "images/mapping.png";
+		final String PATH_INVALIDMAPPING_ICON = "images/mapping_invalid.png";
 
-		} else if (node instanceof MappingHeadNode) {
+		final String PATH_MAPPINGHEAD_ICON = "images/head.png";
+		final String PATH_INVALIDMAPPINGHEAD_ICON = "images/head_invalid.png";
+		final String PATH_MAPPINGBODY_ICON = "images/body.png";
 
-			MappingHeadNode m = (MappingHeadNode) node;
-			String q = m.getQuery();
+		final QueryPainter p; // TODO change this to OBDAPreferences later
+		private final OBDAPreferences pref;
 
-			CQIE h = parse(q);
-			if (h != null)
-				label.setIcon(mappingheadIcon);
-			else
-				label.setIcon(invalidmappingheadIcon);
+		private Boolean useDefault;
 
-			String txt = ((String) node.getUserObject());
+		private StyleContext context;
 
-			MappingStyledDocument styledDoc = new MappingStyledDocument(context, apic, pref); // TODO change this to OBDAPreferences later
-			try {
-				styledDoc.insertString(0, txt, styledDoc.default_style);
-			} catch (BadLocationException e) {
-				e.printStackTrace();
-			}
-			QueryPainter p = new QueryPainter(apic, pref); // TODO change this to OBDAPreferences later
-			p.doRecoloring(styledDoc);
-			while (p.isAlreadyColoring()) {
-			}
-			area.setDocument(styledDoc);
+		private Style style;
+
+		public MappingTreeNodeCellRenderer(OBDAModel apic, OBDAPreferences pref) {
+			super();
+			this.apic = apic;
+			mappingIcon = IconLoader.getImageIcon(PATH_MAPPING_ICON);
+			invalidmappingIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPING_ICON);
+			mappingheadIcon = IconLoader.getImageIcon(PATH_MAPPINGHEAD_ICON);
+			invalidmappingheadIcon = IconLoader.getImageIcon(PATH_INVALIDMAPPINGHEAD_ICON);
+			mappingbodyIcon = IconLoader.getImageIcon(PATH_MAPPINGBODY_ICON);
+			this.pref = pref;
+			p = new QueryPainter(apic, pref);
+			useDefault = new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString());
+			setupLayout();
 
 		}
 
-		Color bg = new Color(220, 230, 240);
+		public void updateContent(DefaultMutableTreeNode node, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
-		if (selected) {
+			if (node instanceof MappingNode) {
+				if (!useDefault) {
+					StyleConstants.setFontFamily(style, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
+					StyleConstants.setFontSize(style, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
+				}
+				label.setIcon(mappingIcon);
+				String txt = ((String) node.getUserObject());
+				DefaultStyledDocument doc = new DefaultStyledDocument();
+				try {
+					doc.insertString(0, txt, style);
+				} catch (BadLocationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				area.setDocument(doc);
 
-			panel.setBackground(bg);
-			area.setBackground(bg);
-			label.setBackground(bg);
+			} else if (node instanceof MappingBodyNode) {
+				if (!useDefault) {
+					StyleConstants.setFontFamily(style, pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString());
+					StyleConstants.setFontSize(style, Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString()));
+				}
+				label.setIcon(mappingbodyIcon);
+				String txt = ((String) node.getUserObject());
+				DefaultStyledDocument doc = new DefaultStyledDocument();
+				try {
+					doc.insertString(0, txt, style);
+				} catch (BadLocationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				area.setDocument(doc);
+
+			} else if (node instanceof MappingHeadNode) {
+
+				MappingHeadNode m = (MappingHeadNode) node;
+				String q = m.getQuery();
+
+				CQIE h = parse(q);
+				if (h != null)
+					label.setIcon(mappingheadIcon);
+				else
+					label.setIcon(invalidmappingheadIcon);
+
+				String txt = ((String) node.getUserObject());
+				
+				
+				DefaultStyledDocument doc = new DefaultStyledDocument();
+
+				//				MappingStyledDocument doc = new MappingStyledDocument(context, apic, pref); // TODO																									// later
+				try {
+//					doc.insertString(0, txt, doc.default_style);
+					doc.insertString(0, txt, style);
+
+				} catch (BadLocationException e) {
+					e.printStackTrace();
+				}
+//				p.doRecoloring(doc);
+//				while (p.isAlreadyColoring()) {
+//				}
+				area.setDocument(doc);
+
+			}
+
+			Color bg = new Color(220, 230, 240);
+			if (selected) {
+
+				setBackground(bg);
+				area.setBackground(bg);
+				label.setBackground(bg);
+			}
+
 		}
 
-		grid = new java.awt.GridBagConstraints();
-		grid.gridx = 1;
-		grid.gridy = 0;
-		grid.gridwidth = 1;
-		grid.weightx = 0;
-		grid.weighty = 0;
-		grid.fill = java.awt.GridBagConstraints.VERTICAL;
-		panel.add(label, grid, 0);
+		public void setupLayout() {
+			java.awt.GridBagConstraints grid;
+			GridBagLayout l = new GridBagLayout();
 
-		grid = new java.awt.GridBagConstraints();
-		grid.gridx = 2;
-		grid.gridy = 0;
-		grid.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-		grid.fill = java.awt.GridBagConstraints.BOTH;
-		grid.weightx = 1.0;
-		grid.weighty = 1.0;
-		panel.add(area, grid, 1);
+			this.setLayout(l);
+			label = new JLabel();
+			area = new JTextPane();
+			setBackground(Color.white);
+			label.setBackground(Color.white);
+			label.setHorizontalAlignment(SwingConstants.LEFT);
+			JLabel ph = new JLabel();
+			ph.setVisible(false);
+			ph.setHorizontalAlignment(SwingConstants.LEADING);
 
-		return panel;
+			context = new StyleContext();
+			style = context.getStyle(StyleContext.DEFAULT_STYLE);
+
+			grid = new java.awt.GridBagConstraints();
+			grid.gridx = 1;
+			grid.gridy = 0;
+			grid.gridwidth = 1;
+			grid.weightx = 0;
+			grid.weighty = 0;
+			grid.fill = java.awt.GridBagConstraints.VERTICAL;
+			add(label, grid, 0);
+
+			grid = new java.awt.GridBagConstraints();
+			grid.gridx = 2;
+			grid.gridy = 0;
+			grid.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+			grid.fill = java.awt.GridBagConstraints.BOTH;
+			grid.weightx = 1.0;
+			grid.weighty = 1.0;
+			add(area, grid, 1);
+		}
 
 	}
+
+	//
+	// private JPanel createComponent(DefaultMutableTreeNode node, JTree t,
+	// boolean selected) {
+	//
+	// }
 
 	private CQIE parse(String query) {
 		CQIE cq = null;
@@ -209,11 +255,9 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 		try {
 			datalogParser.parse(query);
 			cq = datalogParser.getRule(0);
-		}
-		catch (RecognitionException e) {
+		} catch (RecognitionException e) {
 			log.warn(e.getMessage());
-		}
-		catch (NullPointerException e) {
+		} catch (NullPointerException e) {
 			log.warn(e.getMessage()); // Null for adding a new mapping
 		}
 		return cq;
@@ -221,14 +265,11 @@ public class MappingTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	private String prepareQuery(String input) {
 		String query = "";
-		DatalogQueryHelper queryHelper =
-			new DatalogQueryHelper(apic.getPrefixManager());
+		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
 
 		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1)  // if no head
-			query = queryHelper.getDefaultHead() + " " +
-				OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " +
-			 	input;
+		if (atoms.length == 1) // if no head
+			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
 
 		// Append the prefixes
 		query = queryHelper.getPrefixes() + query;

@@ -50,6 +50,7 @@ import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentDataPropertiesAxiom;
@@ -125,11 +126,11 @@ public class OWLAPI3Translator {
 
 		log.debug("Load ontologies called. Translating ontologies.");
 		OWLAPI3Translator translator = new OWLAPI3Translator();
-//		Set<URI> uris = new HashSet<URI>();
+		// Set<URI> uris = new HashSet<URI>();
 
 		Ontology translation = ofac.createOntology(uri);
 		for (OWLOntology onto : ontologies) {
-//			uris.add(onto.getIRI().toURI());
+			// uris.add(onto.getIRI().toURI());
 			Ontology aux = translator.translate(onto);
 			translation.addConcepts(aux.getConcepts());
 			translation.addRoles(aux.getRoles());
@@ -238,14 +239,14 @@ public class OWLAPI3Translator {
 
 					OWLDataPropertyRangeAxiom aux = (OWLDataPropertyRangeAxiom) axiom;
 					Property role = getRoleExpression(aux.getProperty());
-					
+
 					ClassDescription subclass = descFactory.getPropertySomeRestriction(role.getPredicate(), true);
-					OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();					
-					
+					OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
+
 					Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
 					DataType datatype = ofac.createDataType(getDataTypePredicate(columnType));
 					addSubclassAxiom(dl_onto, subclass, datatype);
-					
+
 				} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
 
 					OWLSubDataPropertyOfAxiom aux = (OWLSubDataPropertyOfAxiom) axiom;
@@ -373,12 +374,35 @@ public class OWLAPI3Translator {
 					 * Annotations axioms are intentionally ignored by the
 					 * translator
 					 */
-				} 
-//				else if (axiom instanceof OWLImportsDeclaration) {
-//					/*
-//					 * Imports
-//					 */
-//				} 
+				} else if (axiom instanceof OWLDeclarationAxiom) {
+					OWLDeclarationAxiom owld = (OWLDeclarationAxiom) axiom;
+					OWLEntity entity = owld.getEntity();
+					if (entity instanceof OWLClass) {
+						if (!entity.asOWLClass().isOWLThing()) {
+
+							String uri = entity.asOWLClass().getIRI().toString();
+							dl_onto.addConcept(predicateFactory.getClassPredicate(uri));
+						}
+					} else if (entity instanceof OWLObjectProperty) {
+						String uri = entity.asOWLObjectProperty().getIRI().toString();
+						dl_onto.addRole(predicateFactory.getObjectPropertyPredicate(uri));
+					} else if (entity instanceof OWLDataProperty) {
+						String uri = entity.asOWLDataProperty().getIRI().toString();
+						dl_onto.addRole(predicateFactory.getDataPropertyPredicate(uri));
+					} else {
+						log.warn("Ignoring declartion axiom: {}", axiom);
+					}
+
+					/*
+					 * Annotations axioms are intentionally ignored by the
+					 * translator
+					 */
+				}
+				// else if (axiom instanceof OWLImportsDeclaration) {
+				// /*
+				// * Imports
+				// */
+				// }
 				else {
 					log.warn("WARNING ignoring axiom: {}", axiom.toString());
 				}
@@ -405,10 +429,9 @@ public class OWLAPI3Translator {
 			}
 			SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, superDescription);
 			dl_onto.addAssertion(inc);
-		} 
-		else {
+		} else {
 			log.debug("Generating encoding for {} subclassof {}", subDescription, superDescription);
-			
+
 			/*
 			 * We found an existential, we need to get an auxiliary set of
 			 * subClassAssertion
@@ -423,8 +446,8 @@ public class OWLAPI3Translator {
 				Predicate role = eR.getPredicate();
 				OClass filler = eR.getFiller();
 
-				Property auxRole = descFactory.createProperty(predicateFactory.getObjectPropertyPredicate(URI.create(OntologyImpl.AUXROLEURI
-						+ auxRoleCounter)));
+				Property auxRole = descFactory.createProperty(predicateFactory.getObjectPropertyPredicate(URI
+						.create(OntologyImpl.AUXROLEURI + auxRoleCounter)));
 				auxRoleCounter += 1;
 
 				/* Creating the new subrole assertions */
@@ -448,7 +471,7 @@ public class OWLAPI3Translator {
 			SubClassAxiomImpl inc = (SubClassAxiomImpl) descFactory.createSubClassAxiom(subDescription, domain);
 		}
 	}
-	
+
 	private void addSubclassAxioms(Ontology dl_onto, ClassDescription subDescription, List<ClassDescription> superDescriptions) {
 		for (ClassDescription superDescription : superDescriptions) {
 			addSubclassAxiom(dl_onto, subDescription, superDescription);
@@ -570,15 +593,15 @@ public class OWLAPI3Translator {
 			}
 			OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) owlExpression;
 			OWLDataPropertyExpression property = someexp.getProperty();
-			OWLDataRange filler = someexp.getFiller();			
-			
-			if (filler.isTopDatatype()) {				
+			OWLDataRange filler = someexp.getFiller();
+
+			if (filler.isTopDatatype()) {
 				Property role = getRoleExpression(property);
 				ClassDescription cd = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
 				result.add(cd);
 			} else if (filler instanceof OWLDatatype) {
 				Property role = getRoleExpression(property);
-				ClassDescription cd = descFactory.createPropertySomeDataTypeRestriction(role.getPredicate(), role.isInverse(), 
+				ClassDescription cd = descFactory.createPropertySomeDataTypeRestriction(role.getPredicate(), role.isInverse(),
 						getDataTypeExpression(filler));
 				result.add(cd);
 			}
@@ -587,7 +610,7 @@ public class OWLAPI3Translator {
 		}
 		return result;
 	}
-	
+
 	private DataType getDataTypeExpression(OWLDataRange filler) throws TranslationException {
 		OWLDatatype datatype = (OWLDatatype) filler;
 		switch(getColumnType(datatype)) {
@@ -741,7 +764,7 @@ public class OWLAPI3Translator {
 
 			OWLClass namedclass = (OWLClass) classExpression;
 			OWLIndividual indv = assertion.getIndividual();
-			
+
 			if (indv.isAnonymous()) {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
@@ -786,11 +809,11 @@ public class OWLAPI3Translator {
 				subject = assertion.getObject();
 				object = assertion.getSubject();
 			}
-			
+
 			if (subject.isAnonymous()) {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
-			
+
 			if (object.isAnonymous()) {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
@@ -826,19 +849,18 @@ public class OWLAPI3Translator {
 			URI property = propertyExperssion.getIRI().toURI();
 			OWLIndividual subject = assertion.getSubject();
 			OWLLiteral object = assertion.getObject();
-			
+
 			if (subject.isAnonymous()) {
 				throw new RuntimeException("Found anonymous individual, this feature is not supported");
 			}
 
 			Predicate.COL_TYPE type;
 			try {
-				 type = getColumnType(object.getDatatype());
-			} 
-			catch (TranslationException e) {
+				type = getColumnType(object.getDatatype());
+			} catch (TranslationException e) {
 				throw new RuntimeException(e.getMessage());
 			}
-			
+
 			Predicate p = predicateFactory.getDataPropertyPredicate(property);
 			URIConstant c1 = predicateFactory.getURIConstant(subject.asOWLNamedIndividual().getIRI().toURI());
 			ValueConstant c2 = predicateFactory.getValueConstant(object.getLiteral(), type);
@@ -847,11 +869,10 @@ public class OWLAPI3Translator {
 			if (equivalenceMap != null) {
 				equivalent = equivalenceMap.get(p);
 			}
-			
+
 			if (equivalent == null) {
 				return descFactory.createDataPropertyAssertion(p, c1, c2);
-			}
-			else {
+			} else {
 				Property equiProp = (Property) equivalent;
 				return descFactory.createDataPropertyAssertion(equiProp.getPredicate(), c1, c2);
 			}
@@ -860,51 +881,41 @@ public class OWLAPI3Translator {
 			return null;
 		}
 	}
-	
+
 	private Predicate.COL_TYPE getColumnType(OWLDatatype datatype) throws TranslationException {
 		if (datatype == null) {
 			return Predicate.COL_TYPE.LITERAL;
 		}
-		
-		if (datatype.isString()
-				|| datatype. getBuiltInDatatype() == OWL2Datatype.XSD_STRING) {  // xsd:string
+
+		if (datatype.isString() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_STRING) { // xsd:string
 			return Predicate.COL_TYPE.STRING;
-		}
-		else if (datatype.isRDFPlainLiteral()
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL  // rdf:PlainLiteral
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_XML_LITERAL    // rdf:XmlLiteral
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) {	// rdfs:Literal
+		} else if (datatype.isRDFPlainLiteral() || datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL // rdf:PlainLiteral
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_XML_LITERAL // rdf:XmlLiteral
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) { // rdfs:Literal
 			return Predicate.COL_TYPE.LITERAL;
-		}
-		else if (datatype.isInteger() 
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER  // xsd:integer
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT	  // xsd:int	
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG     // xsd:long
+		} else if (datatype.isInteger()
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER // xsd:integer
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT // xsd:int
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG // xsd:long
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT 
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG) {
 			return Predicate.COL_TYPE.INTEGER;
-		}
-		else if (datatype.isFloat() || datatype.isDouble()
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE    // xsd:double
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) {  // xsd:float 
+		} else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE // xsd:double
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
 			return Predicate.COL_TYPE.DOUBLE;
-		}
-		else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
+		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
 			return Predicate.COL_TYPE.DATETIME;
-		}
-		else if (datatype.isBoolean()
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) {  // xsd:boolean
+		} else if (datatype.isBoolean() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) { // xsd:boolean
 			return Predicate.COL_TYPE.BOOLEAN;
-		} 
-		else {
+		} else {
 			throw new TranslationException("Unsupported data range: " + datatype.toString());
 		}
 	}
-	
+
 	private Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
 		switch(type) {
 			case LITERAL: return OBDAVocabulary.RDFS_LITERAL;

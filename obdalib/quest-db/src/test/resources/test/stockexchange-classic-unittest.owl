@@ -1,0 +1,1663 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     ontologyIRI="http://www.owl-ontologies.com/Ontology1207768242.owl">
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="owl2xml" IRI="http://www.w3.org/2006/12/owl2-xml#"/>
+    <Prefix name="Ontology1207768242" IRI="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
+    <Prefix name="" IRI="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="#Acquisition"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Address"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Company"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Dealer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#FinantialInstrument"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Investor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#LegalPerson"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Offer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Person"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#PhysicalPerson"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Stock"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#StockBroker"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#StockExchangeList"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#StockExchangeMember"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#StockTrader"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Trader"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Transaction"/>
+    </Declaration>
+    <Declaration>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#belongsToCompany"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasAddress"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasStock"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#inverse_of_test1"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#inverse_test2"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#inverseofhasAddress"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#involvesInstrument"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isExecutedBy"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isExecutedFor"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isListedIn"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isTradedIn"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#listsStock"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#test1"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#test2"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#usesBroker"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#addressID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#amountOfShares"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#companyName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#dateOfBirth"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#financialInstrumentID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#firstName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNumber"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#inCity"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#inCountry"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#inState"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#inStreet"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#lastName"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#listdate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#marketShares"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#membershipDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#netWorth"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#personID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#ssn"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#transactionDate"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#transactionID"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#typeOfShares"/>
+    </Declaration>
+    <EquivalentClasses>
+        <Class IRI="#Dealer"/>
+        <Class IRI="#Trader"/>
+    </EquivalentClasses>
+    <EquivalentClasses>
+        <Class IRI="#StockTrader"/>
+        <Class IRI="#Trader"/>
+    </EquivalentClasses>
+    <SubClassOf>
+        <Class IRI="#Acquisition"/>
+        <Class IRI="#Transaction"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Acquisition"/>
+        <ObjectComplementOf>
+            <Class IRI="#Offer"/>
+        </ObjectComplementOf>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#inverseofhasAddress"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#addressID"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#hasNumber"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#inCity"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#inCountry"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#inState"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Address"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#inStreet"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Company"/>
+        <Class IRI="#LegalPerson"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Company"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#companyName"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Company"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#marketShares"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Company"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#netWorth"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Dealer"/>
+        <Class IRI="#StockBroker"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#FinantialInstrument"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#FinantialInstrument"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#financialInstrumentID"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Investor"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Investor"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#LegalPerson"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Offer"/>
+        <Class IRI="#Transaction"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Person"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Person"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#hasAddress"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Person"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#personID"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#PhysicalPerson"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#PhysicalPerson"/>
+        <ObjectComplementOf>
+            <Class IRI="#LegalPerson"/>
+        </ObjectComplementOf>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#dateOfBirth"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#firstName"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#lastName"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#PhysicalPerson"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#ssn"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Stock"/>
+        <Class IRI="#FinantialInstrument"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Stock"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#belongsToCompany"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Stock"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#isListedIn"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Stock"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#amountOfShares"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Stock"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#typeOfShares"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockBroker"/>
+        <Class IRI="#StockExchangeMember"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockBroker"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#tradesOnBehalfOf"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockExchangeList"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockExchangeList"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#listdate"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockExchangeMember"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockExchangeMember"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#StockTrader"/>
+        <Class IRI="#StockBroker"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Trader"/>
+        <Class IRI="#StockBroker"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Transaction"/>
+        <Class abbreviatedIRI="owl:Thing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Transaction"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#involvesInstrument"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Transaction"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#isExecutedBy"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Transaction"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#isExecutedFor"/>
+            <Class abbreviatedIRI="owl:Thing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Transaction"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#transactionDate"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Transaction"/>
+        <DataSomeValuesFrom>
+            <DataProperty IRI="#transactionID"/>
+            <Datatype abbreviatedIRI="rdfs:Literal"/>
+        </DataSomeValuesFrom>
+    </SubClassOf>
+    <ClassAssertion>
+        <Class IRI="#Address"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Address"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Address"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Address"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Address"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Address"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Company"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Company"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Investor"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Dealer"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Investor"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockBroker"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockBroker"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockBroker"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-01"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-02"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-03"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-04"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-05"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-06"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-07"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-08"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#StockExchangeList"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-09"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-660"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-664"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-665"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-666"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-667"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-668"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Stock"/>
+        <NamedIndividual IRI="#getStockObj-669"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Offer"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Transaction"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Offer"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Transaction"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Offer"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Transaction"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Offer"/>
+        <NamedIndividual IRI="#getTransactionObj-3334"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Transaction"/>
+        <NamedIndividual IRI="#getTransactionObj-3334"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasAddress"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasAddress"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasAddress"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasAddress"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasAddress"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasAddress"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-01"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-02"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-03"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-04"/>
+        <NamedIndividual IRI="#getStockObj-664"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-05"/>
+        <NamedIndividual IRI="#getStockObj-665"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-06"/>
+        <NamedIndividual IRI="#getStockObj-666"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-07"/>
+        <NamedIndividual IRI="#getStockObj-667"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-08"/>
+        <NamedIndividual IRI="#getStockObj-668"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#listsStock"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-09"/>
+        <NamedIndividual IRI="#getStockObj-669"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-660"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-664"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-665"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-666"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-667"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-668"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <NamedIndividual IRI="#getStockObj-669"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#involvesInstrument"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#isExecutedBy"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#isExecutedFor"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#involvesInstrument"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#isExecutedBy"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#isExecutedFor"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#involvesInstrument"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#isExecutedBy"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#isExecutedFor"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#addressID"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+        <Literal datatypeIRI="&xsd;string">991</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasNumber"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+        <Literal datatypeIRI="&xsd;string">24</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCity"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+        <Literal datatypeIRI="&xsd;string">Chonala</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCountry"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+        <Literal datatypeIRI="&xsd;string">Mexico</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inState"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+        <Literal datatypeIRI="&xsd;string">Veracruz</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inStreet"/>
+        <NamedIndividual IRI="#getAddressObj-991"/>
+        <Literal datatypeIRI="&xsd;string">Road street</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#addressID"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+        <Literal datatypeIRI="&xsd;string">992</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasNumber"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+        <Literal datatypeIRI="&xsd;string">3</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCity"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+        <Literal datatypeIRI="&xsd;string">Bolzano</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCountry"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+        <Literal datatypeIRI="&xsd;string">Italy</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inState"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+        <Literal datatypeIRI="&xsd;string">Bolzano</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inStreet"/>
+        <NamedIndividual IRI="#getAddressObj-992"/>
+        <Literal datatypeIRI="&xsd;string">Via Marconi</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#addressID"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+        <Literal datatypeIRI="&xsd;string">993</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasNumber"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+        <Literal datatypeIRI="&xsd;string">32</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCity"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+        <Literal datatypeIRI="&xsd;string">Malaga</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCountry"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+        <Literal datatypeIRI="&xsd;string">Spain</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inState"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+        <Literal datatypeIRI="&xsd;string">Malaga</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inStreet"/>
+        <NamedIndividual IRI="#getAddressObj-993"/>
+        <Literal datatypeIRI="&xsd;string">Romer Street</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#addressID"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+        <Literal datatypeIRI="&xsd;string">995</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasNumber"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+        <Literal datatypeIRI="&xsd;string">3</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCity"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+        <Literal datatypeIRI="&xsd;string">Bolzano</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCountry"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+        <Literal datatypeIRI="&xsd;string">Italy</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inState"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+        <Literal datatypeIRI="&xsd;string">Bolzano</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inStreet"/>
+        <NamedIndividual IRI="#getAddressObj-995"/>
+        <Literal datatypeIRI="&xsd;string">Huberg Strasse</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#addressID"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+        <Literal datatypeIRI="&xsd;string">996</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasNumber"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+        <Literal datatypeIRI="&xsd;string">7</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCity"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+        <Literal datatypeIRI="&xsd;string">Marconi</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCountry"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+        <Literal datatypeIRI="&xsd;string">Italy</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inState"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+        <Literal datatypeIRI="&xsd;string">Trentino</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inStreet"/>
+        <NamedIndividual IRI="#getAddressObj-996"/>
+        <Literal datatypeIRI="&xsd;string">Via Piani di Bolzano</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#addressID"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+        <Literal datatypeIRI="&xsd;string">997</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasNumber"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+        <Literal datatypeIRI="&xsd;string">9976</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCity"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+        <Literal datatypeIRI="&xsd;string">Puebla</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inCountry"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+        <Literal datatypeIRI="&xsd;string">Mexico</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inState"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+        <Literal datatypeIRI="&xsd;string">Puebla</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#inStreet"/>
+        <NamedIndividual IRI="#getAddressObj-997"/>
+        <Literal datatypeIRI="&xsd;string">Samara road</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#companyName"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+        <Literal datatypeIRI="&xsd;string">General Motors</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#marketShares"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+        <Literal datatypeIRI="&xsd;string">25000000</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#netWorth"/>
+        <NamedIndividual IRI="#getCompanyObj-211"/>
+        <Literal datatypeIRI="&xsd;string">7.5678766e+09</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#companyName"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+        <Literal datatypeIRI="&xsd;string">GnA Investments</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#marketShares"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+        <Literal datatypeIRI="&xsd;string">100000</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#netWorth"/>
+        <NamedIndividual IRI="#getCompanyObj-212"/>
+        <Literal datatypeIRI="&xsd;string">12555322</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#dateOfBirth"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+        <Literal datatypeIRI="&xsd;string">1950-03-21</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#firstName"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+        <Literal datatypeIRI="&xsd;string">John</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#lastName"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+        <Literal datatypeIRI="&xsd;string">Smith</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#ssn"/>
+        <NamedIndividual IRI="#getPersonObj-111"/>
+        <Literal datatypeIRI="&xsd;string">JSRX229500321</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#dateOfBirth"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <Literal datatypeIRI="&xsd;string">1970-07-14</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#firstName"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <Literal datatypeIRI="&xsd;string">Joana</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#lastName"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <Literal datatypeIRI="&xsd;string">Lopatenkko</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#ssn"/>
+        <NamedIndividual IRI="#getPersonObj-112"/>
+        <Literal datatypeIRI="&xsd;string">JLPTK54992</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#dateOfBirth"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <Literal datatypeIRI="&xsd;string">1968-09-03</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#firstName"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <Literal datatypeIRI="&xsd;string">Walter</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#lastName"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <Literal datatypeIRI="&xsd;string">Schmidt</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#ssn"/>
+        <NamedIndividual IRI="#getPersonObj-113"/>
+        <Literal datatypeIRI="&xsd;string">WSCH9820783903</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#dateOfBirth"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <Literal datatypeIRI="&xsd;string">1975-02-22</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#firstName"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <Literal datatypeIRI="&xsd;string">Patricia</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#lastName"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <Literal datatypeIRI="&xsd;string">Lombrardi</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#ssn"/>
+        <NamedIndividual IRI="#getPersonObj-114"/>
+        <Literal datatypeIRI="&xsd;string">PTLM8878767830</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-01"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-01</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-02"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-02</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-03"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-03</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-04"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-04</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-05"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-05</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-06"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-06</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-07"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-07</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-08"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-08</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#listdate"/>
+        <NamedIndividual IRI="#getStockBookObj-2008-04-09"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-09</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-660"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-660"/>
+        <Literal datatypeIRI="&xsd;string">660</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-660"/>
+        <Literal datatypeIRI="&xsd;string">f</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+        <Literal datatypeIRI="&xsd;string">661</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-661"/>
+        <Literal datatypeIRI="&xsd;string">f</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+        <Literal datatypeIRI="&xsd;string">662</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-662"/>
+        <Literal datatypeIRI="&xsd;string">f</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+        <Literal datatypeIRI="&xsd;string">663</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-663"/>
+        <Literal datatypeIRI="&xsd;string">f</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-664"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-664"/>
+        <Literal datatypeIRI="&xsd;string">664</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-664"/>
+        <Literal datatypeIRI="&xsd;string">f</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-665"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-665"/>
+        <Literal datatypeIRI="&xsd;string">665</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-665"/>
+        <Literal datatypeIRI="&xsd;string">t</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-666"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-666"/>
+        <Literal datatypeIRI="&xsd;string">666</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-666"/>
+        <Literal datatypeIRI="&xsd;string">t</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-667"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-667"/>
+        <Literal datatypeIRI="&xsd;string">667</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-667"/>
+        <Literal datatypeIRI="&xsd;string">t</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-668"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-668"/>
+        <Literal datatypeIRI="&xsd;string">668</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-668"/>
+        <Literal datatypeIRI="&xsd;string">t</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#amountOfShares"/>
+        <NamedIndividual IRI="#getStockObj-669"/>
+        <Literal datatypeIRI="&xsd;string">100</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <NamedIndividual IRI="#getStockObj-669"/>
+        <Literal datatypeIRI="&xsd;string">669</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#typeOfShares"/>
+        <NamedIndividual IRI="#getStockObj-669"/>
+        <Literal datatypeIRI="&xsd;string">t</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionDate"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-01</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionID"/>
+        <NamedIndividual IRI="#getTransactionObj-3331"/>
+        <Literal datatypeIRI="&xsd;string">3331</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionDate"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-02</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionID"/>
+        <NamedIndividual IRI="#getTransactionObj-3332"/>
+        <Literal datatypeIRI="&xsd;string">3332</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionDate"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-03</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionID"/>
+        <NamedIndividual IRI="#getTransactionObj-3333"/>
+        <Literal datatypeIRI="&xsd;string">3333</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionDate"/>
+        <NamedIndividual IRI="#getTransactionObj-3334"/>
+        <Literal datatypeIRI="&xsd;string">2008-04-14</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#transactionID"/>
+        <NamedIndividual IRI="#getTransactionObj-3334"/>
+        <Literal datatypeIRI="&xsd;string">3334</Literal>
+    </DataPropertyAssertion>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#inverse_of_test1"/>
+        <ObjectProperty IRI="#inverseofhasAddress"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#inverse_test2"/>
+        <ObjectProperty IRI="#inverse_of_test1"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#test1"/>
+        <ObjectProperty IRI="#hasAddress"/>
+    </SubObjectPropertyOf>
+    <SubObjectPropertyOf>
+        <ObjectProperty IRI="#test2"/>
+        <ObjectProperty IRI="#test1"/>
+    </SubObjectPropertyOf>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#hasStock"/>
+        <ObjectProperty IRI="#belongsToCompany"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#inverseofhasAddress"/>
+        <ObjectProperty IRI="#hasAddress"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#test1"/>
+        <ObjectProperty IRI="#inverse_of_test1"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#inverse_test2"/>
+        <ObjectProperty IRI="#test2"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#isTradedIn"/>
+        <ObjectProperty IRI="#involvesInstrument"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#listsStock"/>
+        <ObjectProperty IRI="#isListedIn"/>
+    </InverseObjectProperties>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#tradesOnBehalfOf"/>
+        <ObjectProperty IRI="#usesBroker"/>
+    </InverseObjectProperties>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#isExecutedBy"/>
+    </FunctionalObjectProperty>
+    <FunctionalObjectProperty>
+        <ObjectProperty IRI="#isExecutedFor"/>
+    </FunctionalObjectProperty>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <Class IRI="#Stock"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasAddress"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasStock"/>
+        <Class IRI="#Company"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#inverseofhasAddress"/>
+        <Class IRI="#Address"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#involvesInstrument"/>
+        <Class IRI="#Transaction"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#isExecutedBy"/>
+        <Class IRI="#Transaction"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#isExecutedFor"/>
+        <Class IRI="#Transaction"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#isListedIn"/>
+        <Class IRI="#Stock"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#belongsToCompany"/>
+        <Class IRI="#Company"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasAddress"/>
+        <Class IRI="#Address"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasStock"/>
+        <Class IRI="#Stock"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#inverseofhasAddress"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#involvesInstrument"/>
+        <Class IRI="#FinantialInstrument"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isExecutedBy"/>
+        <Class IRI="#StockExchangeMember"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isExecutedFor"/>
+        <Class IRI="#Investor"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isListedIn"/>
+        <Class IRI="#StockExchangeList"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isTradedIn"/>
+        <Class IRI="#Transaction"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#listsStock"/>
+        <Class IRI="#Stock"/>
+    </ObjectPropertyRange>
+    <DataPropertyDomain>
+        <DataProperty IRI="#addressID"/>
+        <Class IRI="#Address"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#amountOfShares"/>
+        <Class IRI="#Stock"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#companyName"/>
+        <Class IRI="#Company"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#dateOfBirth"/>
+        <Class IRI="#PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <Class IRI="#FinantialInstrument"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#firstName"/>
+        <Class IRI="#PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#hasNumber"/>
+        <Class IRI="#Address"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#inCity"/>
+        <Class IRI="#Address"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#inCountry"/>
+        <Class IRI="#Address"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#inState"/>
+        <Class IRI="#Address"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#inStreet"/>
+        <Class IRI="#Address"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#lastName"/>
+        <Class IRI="#PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#listdate"/>
+        <Class IRI="#StockExchangeList"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#marketShares"/>
+        <Class IRI="#Company"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#netWorth"/>
+        <Class IRI="#Company"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#personID"/>
+        <Class IRI="#Person"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#ssn"/>
+        <Class IRI="#PhysicalPerson"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#transactionDate"/>
+        <Class IRI="#Transaction"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#transactionID"/>
+        <Class IRI="#Transaction"/>
+    </DataPropertyDomain>
+    <DataPropertyDomain>
+        <DataProperty IRI="#typeOfShares"/>
+        <Class IRI="#Stock"/>
+    </DataPropertyDomain>
+    <DataPropertyRange>
+        <DataProperty IRI="#addressID"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#amountOfShares"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#companyName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#dateOfBirth"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#financialInstrumentID"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#firstName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#hasNumber"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#inCity"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#inCountry"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#inState"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#inStreet"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#lastName"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#listdate"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#marketShares"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#membershipDate"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#netWorth"/>
+        <Datatype abbreviatedIRI="xsd:float"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#personID"/>
+        <Datatype abbreviatedIRI="xsd:int"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#ssn"/>
+        <Datatype abbreviatedIRI="xsd:string"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#transactionDate"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#transactionID"/>
+        <Datatype abbreviatedIRI="xsd:dateTime"/>
+    </DataPropertyRange>
+    <DataPropertyRange>
+        <DataProperty IRI="#typeOfShares"/>
+        <Datatype abbreviatedIRI="xsd:boolean"/>
+    </DataPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+

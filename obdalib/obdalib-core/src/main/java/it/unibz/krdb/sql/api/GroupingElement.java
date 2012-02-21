@@ -1,8 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GroupingElement {
+public class GroupingElement implements Serializable {
 	
 	/**
 	 * Collection of columns that is used for grouping.

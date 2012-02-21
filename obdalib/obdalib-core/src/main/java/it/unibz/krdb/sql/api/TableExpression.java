@@ -1,8 +1,9 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class TableExpression {
+public class TableExpression implements Serializable{
 
 	private ArrayList<TablePrimary> tableList;
 	private BooleanValueExpression booleanExp;

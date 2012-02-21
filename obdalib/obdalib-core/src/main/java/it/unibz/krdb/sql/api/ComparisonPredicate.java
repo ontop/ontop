@@ -1,10 +1,12 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
+
 /**
  * The ComparisonPredicate class stores the compared terms
  * and the operator.
  */
-public class ComparisonPredicate implements IPredicate, ICondition {
+public class ComparisonPredicate implements Serializable, IPredicate, ICondition {
 	
 	private IValueExpression left;
 	private IValueExpression right;

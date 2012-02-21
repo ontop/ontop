@@ -1,10 +1,12 @@
 package it.unibz.krdb.sql.api;
 
+import java.io.Serializable;
+
 /**
  * The ColumnReference class is the basic structure for 
  * representing a column in the SQL query.
  */
-public class ColumnReference {
+public class ColumnReference implements Serializable{
 	
 	private String schema;
 	private String table;
