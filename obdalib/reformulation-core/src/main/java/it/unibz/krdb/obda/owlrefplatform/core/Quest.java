@@ -31,9 +31,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
-import it.unibz.krdb.obda.owlrefplatform.core.viewmanager.MappingViewManager;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -45,7 +45,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -307,18 +306,16 @@ public class Quest implements Serializable {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
 
-//      TODO Remove this code as it has been done in QuestOWL class.
-//
-//		/*
-//		 * Fixing the typing of predicates, in case they are not properly given.
-//		 */
-//
-//		log.debug("Fixing vocabulary typing");
-//
-//		if (inputOBDAModel != null) {
-//			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-//			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
-//		}
+		/*
+		 * Fixing the typing of predicates, in case they are not properly given.
+		 */
+
+		log.debug("Fixing vocabulary typing");
+
+		if (inputOBDAModel != null) {
+			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
+			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
+		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
 		sigma = OntologyFactoryImpl.getInstance().createOntology();

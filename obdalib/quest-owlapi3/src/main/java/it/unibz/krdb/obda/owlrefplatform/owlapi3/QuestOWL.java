@@ -107,15 +107,6 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 		// getProgressMonitor().setMessage("Classifying...");
 		// getProgressMonitor().setStarted();
 
-		/***
-		 * Fixing the typing of predicates, in case they are not properly given.
-		 */
-
-		log.debug("Fixing vocabulary typing");
-
-		MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-		repairmodel.fixOBDAModel(obdaModel, this.translatedOntologyMerge.getVocabulary());
-
 		questInstance.loadTBox(translatedOntologyMerge);
 		questInstance.loadOBDAModel(obdaModel);
 
