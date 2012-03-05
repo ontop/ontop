@@ -159,6 +159,10 @@ public class Quest implements Serializable {
 		inputOBDAModel = (OBDAModel) model.clone();
 	}
 
+	public OBDAModel getOBDAModel() {
+		return inputOBDAModel;
+	}
+	
 	// TODO this method is buggy
 	public void loadDependencies(Ontology sigma) {
 		rewriter.setCBox(sigma);
