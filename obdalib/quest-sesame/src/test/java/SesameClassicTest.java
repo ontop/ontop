@@ -66,8 +66,6 @@ public class SesameClassicTest extends TestCase {
 			
 			  System.out.println("Add from file.");
 		     con.add(file, baseURI, RDFFormat.RDFXML);
-		 
-		    
 		     
 		    //  con.close();
 		   
@@ -77,6 +75,7 @@ public class SesameClassicTest extends TestCase {
 			e.printStackTrace();
 		}
 		
+		/*
 		ValueFactory f = repo.getValueFactory();
 
 		// create some resources and literals to make statements out of
@@ -107,7 +106,7 @@ public class SesameClassicTest extends TestCase {
 			   e.printStackTrace();
 		   }
 		
-		/*
+		*/
 		
 		///query repo
 		 try {
@@ -125,15 +124,16 @@ public class SesameClassicTest extends TestCase {
 		      finally {
 		         result.close();
 		      }
+			  
+		      con.close();
 		   }
-		   finally {
-		      con.close();}
-		
-		
-		   
+		 catch(Exception e)
+		 {
+			 e.printStackTrace();
+		 }
 		   ValueFactory fac = repo.getValueFactory();
 		   
-		  */ 
+		  
 	System.out.println("Done.");	
 	}
 
