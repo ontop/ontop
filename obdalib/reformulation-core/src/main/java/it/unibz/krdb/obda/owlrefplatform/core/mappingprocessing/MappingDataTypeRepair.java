@@ -45,13 +45,14 @@ public class MappingDataTypeRepair {
             prepareIndex(rule);
             Atom atom = rule.getHead();
             Predicate predicate = atom.getPredicate();
-            if (predicate.getArity() == 2) {  // if it's a property
-                if (predicate.getType(1) == COL_TYPE.LITERAL) {  // and if it's a data property
-                    Variable variable = (Variable) atom.getTerm(1);
-                    Predicate functor = getDataTypeFunctor(variable);
-                    Term newTerm = ofac.getFunctionalTerm(functor, variable);
-                    atom.setTerm(1, newTerm);
-                }
+            if (predicate.getArity() == 2 && predicate.getType(1) == COL_TYPE.LITERAL) {
+            	// if it's a data property
+                Variable variable = (Variable) atom.getTerm(1);
+                Predicate functor = getDataTypeFunctor(variable);
+                Term newTerm = ofac.getFunctionalTerm(functor, variable);
+                atom.setTerm(1, newTerm);
+            } else {
+            	// skip
             }
         }
     }
@@ -78,6 +79,7 @@ public class MappingDataTypeRepair {
             case Types.FLOAT:
             case Types.DOUBLE:
             case Types.REAL: return OBDAVocabulary.XSD_DOUBLE;
+            case Types.DATE: // H2 driver uses this type for timestamp type
             case Types.TIMESTAMP: return OBDAVocabulary.XSD_DATETIME;
             case Types.BOOLEAN: 
             case Types.BINARY:
