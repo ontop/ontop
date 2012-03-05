@@ -27,7 +27,25 @@ import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.E_Equals;
+import com.hp.hpl.jena.sparql.expr.E_GreaterThan;
+import com.hp.hpl.jena.sparql.expr.E_GreaterThanOrEqual;
+import com.hp.hpl.jena.sparql.expr.E_LessThan;
+import com.hp.hpl.jena.sparql.expr.E_LessThanOrEqual;
+import com.hp.hpl.jena.sparql.expr.E_NotEquals;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueDateTime;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueDecimal;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueDouble;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueFloat;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueString;
 import com.hp.hpl.jena.sparql.syntax.Element;
+import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
@@ -84,13 +102,12 @@ public class SPARQLDatalogTranslator {
 		List<Element> elements = root.getElements();
 
 		// Iterate for different element groups from the root.
+		List<Atom> body = new LinkedList<Atom>();
 		for (Element element : elements) {
-			List<Atom> body = getBodyAtoms(element); // Get the body atoms.
-
-			CQIE rule = predicateFactory.getCQIE(head, body);
-			datalog.appendRule(rule);
+			body.addAll(getBodyAtoms(element));
 		}
-
+		CQIE rule = predicateFactory.getCQIE(head, body);
+		datalog.appendRule(rule);
 		return datalog;
 	}
 
@@ -106,100 +123,112 @@ public class SPARQLDatalogTranslator {
 			Term term = termFactory.getVariable(name);
 			headTerms.add(term);
 		}
-		Predicate predicate =
-			predicateFactory.getPredicate(OBDALibConstants.QUERY_HEAD_URI, termSize);
+		Predicate predicate = predicateFactory.getPredicate(OBDALibConstants.QUERY_HEAD_URI, termSize);
 
 		return predicateFactory.getAtom(predicate, headTerms);
 	}
 
 	/** Extract the body atoms */
-	private LinkedList<Atom> getBodyAtoms(Element element) throws QueryException {
-
-		ElementTriplesBlock triplesBlock = null; // initiate the triples
-
+	private List<Atom> getBodyAtoms(Element element) throws QueryException {
 		if (element instanceof ElementTriplesBlock) {
-			triplesBlock = (ElementTriplesBlock) element;
+			return collectElementTriplesAtom((ElementTriplesBlock) element);
+		} else if (element instanceof ElementFilter) {
+			return collectElementFilterAtom((ElementFilter) element);
 		} else {
-			// OPTIONAL, UNION and FILTER constraints are currently unsupported.
+			// OPTIONAL and UNION constraints are currently unsupported.
 			throw new QueryException("Unsupported query syntax");
 		}
+	}
 
-		BasicPattern triples = triplesBlock.getTriples();
+	private List<Atom> collectElementTriplesAtom(ElementTriplesBlock elementTriples) {
+		// Get the triples object.
+		BasicPattern triples = elementTriples.getTriples();
 
-		LinkedList<Atom> body = new LinkedList<Atom>();
+		// Instantiate the atom list to stores the known triples
+		List<Atom> elementTriplesAtoms = new LinkedList<Atom>();
 		for (int j = 0; j < triples.size(); j++) {
-			Vector<Term> terms = new Vector<Term>();
 			Triple triple = triples.get(j);
 			Node o = triple.getObject();
 			Node p = triple.getPredicate();
 			Node s = triple.getSubject();
 
-			if (!(p instanceof Node_URI)) { // predicate is a variable or literal
-				throw new QueryException("Unsupported query");
+			if (!(p instanceof Node_URI)) {
+				// if predicate is a variable or literal
+				throw new QueryException("Unsupported query syntax");
 			}
 
+			// Instantiate the subject and object URI
 			URI subjectUri = null;
 			URI objectUri = null;
-			Predicate predicate = null;
-			if (p.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
-			    COL_TYPE dataType = null;
-				if (s instanceof Var) { // Subject is a variable
-					Var subject = (Var) s;
-					terms.add(termFactory.getVariable(subject.getName()));
-				}
-				else if (s instanceof Node_Literal) { // Subject is a node literal
-					Node_Literal subject = (Node_Literal) s;
-					String value = subject.getLiteralValue().toString();
-					dataType = getDataType(subject);
-                    ValueConstant constant = termFactory.getValueConstant(value, dataType);
-                    terms.add(constant);
-				}
-				else if (s instanceof Node_URI) { // Subject is a node URI
-					Node_URI subject = (Node_URI) s;
-					dataType = COL_TYPE.OBJECT;
-					subjectUri = URI.create(subject.getURI());
-					terms.add(termFactory.getURIConstant(subjectUri));
-				}
 
-				if (o instanceof Var) { // Object is a variable
-					throw new QueryException("Unsupported query syntax");
-				}
-				else if (o instanceof Node_Literal) { // Object is a node literal
-					throw new QueryException("Use class URI instead of node literal");
-				}
-				else if (o instanceof Node_URI) { // Object is a node URI
-					Node_URI object = (Node_URI) o;
-					dataType = COL_TYPE.OBJECT;
-					objectUri = URI.create(object.getURI());
-				}
-				predicate = predicateFactory.getPredicate(objectUri, 1, new COL_TYPE[] { dataType });
-			}
-			else { // not equal to "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-			    COL_TYPE subjectType = null;
-				if (s instanceof Var) { // Subject is a variable
+			// Instantiate the subject and object data type
+		    COL_TYPE subjectType = null;
+		    COL_TYPE objectType = null;
+		    
+		    /// Instantiate the atom components: predicate and terms.
+			Predicate predicate = null;
+			Vector<Term> terms = new Vector<Term>();
+		    
+			if (p.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {			    
+			    // Subject node
+				if (s instanceof Var) {
 					Var subject = (Var) s;
 					terms.add(termFactory.getVariable(subject.getName()));
 				}
-				else if (s instanceof Node_Literal) { // Subject is a node literal
+				else if (s instanceof Node_Literal) {
 					Node_Literal subject = (Node_Literal) s;
 					String value = subject.getLiteralValue().toString();
 					subjectType = getDataType(subject);
-					ValueConstant constant = termFactory.getValueConstant(value, subjectType);
-					terms.add(constant);
+                    terms.add(termFactory.getValueConstant(value, subjectType));
 				}
-				else if (s instanceof Node_URI) { // Subject is a node URI
+				else if (s instanceof Node_URI) {
+					Node_URI subject = (Node_URI) s;
+					subjectType = COL_TYPE.OBJECT;
+					subjectUri = URI.create(subject.getURI());
+					terms.add(termFactory.getURIConstant(subjectUri));
+				}
+				
+				// Object node
+				if (o instanceof Var) {
+					throw new QueryException("Unsupported query syntax");
+				}
+				else if (o instanceof Node_Literal) {
+					throw new QueryException("Unsupported query syntax");
+				}
+				else if (o instanceof Node_URI) {
+					Node_URI object = (Node_URI) o;
+					objectUri = URI.create(object.getURI());
+				}
+				
+				// Construct the predicate
+				URI predicateUri = objectUri;
+				predicate = predicateFactory.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
+			}
+			else {
+			    // Subject node
+				if (s instanceof Var) {
+					Var subject = (Var) s;
+					terms.add(termFactory.getVariable(subject.getName()));
+				}
+				else if (s instanceof Node_Literal) {
+					Node_Literal subject = (Node_Literal) s;
+					String value = subject.getLiteralValue().toString();
+					subjectType = getDataType(subject);
+					terms.add(termFactory.getValueConstant(value, subjectType));
+				}
+				else if (s instanceof Node_URI) {
 					Node_URI subject = (Node_URI) s;
 					subjectType = COL_TYPE.OBJECT;
 					subjectUri = URI.create(subject.getURI());
 					terms.add(termFactory.getURIConstant(subjectUri));
 				}
 
-                COL_TYPE objectType = null;
-				if (o instanceof Var) { // Object is a variable
+                // Object node
+				if (o instanceof Var) {
 					Var object = (Var) o;
 					terms.add(termFactory.getVariable(object.getName()));
 				}
-				else if (o instanceof Node_Literal) { // Object is a node literal
+				else if (o instanceof Node_Literal) {
 					Node_Literal object = (Node_Literal) o;
 					String value = object.getLiteralValue().toString();
 					objectType = getDataType(object);
@@ -210,19 +239,88 @@ public class SPARQLDatalogTranslator {
                     Function dataTypeFunction = termFactory.getFunctionalTerm(getDataTypePredicate(objectType), constant);
                     terms.add(dataTypeFunction);
 				}
-				else if (o instanceof Node_URI) { // Object is a node URI
+				else if (o instanceof Node_URI) {
 					Node_URI object = (Node_URI) o;
 					objectType = COL_TYPE.OBJECT;
 					objectUri = URI.create(object.getURI());
 					terms.add(termFactory.getURIConstant(objectUri));
 				}
+				
+				// Construct the predicate
 				URI predicateUri = URI.create(p.getURI());
 				predicate = predicateFactory.getPredicate(predicateUri, 2, new COL_TYPE[] { subjectType, objectType });
 			}
+			// Construct the atom
 			Atom atom = predicateFactory.getAtom(predicate, terms);
-			body.add(atom);
+			elementTriplesAtoms.add(atom);
 		}
-		return body;
+		return elementTriplesAtoms;
+	}
+	
+	private List<Atom> collectElementFilterAtom(ElementFilter elementFilter) {
+		
+		List<Atom> elementFilterAtoms = new LinkedList<Atom>();
+		
+		Expr expr = elementFilter.getExpr();
+		
+		if (expr instanceof ExprFunction2) {
+			// The expected function should be: (VAR) (OP) (VAR|LITERAL)
+			ExprFunction2 function = (ExprFunction2) expr;
+			Expr arg1 = function.getArg1();
+			Expr arg2 = function.getArg2();
+			
+			Term term1 = getTermOfRelationalArgument(arg1, 1);
+			Term term2 = getTermOfRelationalArgument(arg2, 2);			
+			
+			if (expr instanceof E_Equals) {
+				elementFilterAtoms.add(termFactory.getEQAtom(term1, term2));
+			} else if (expr instanceof E_NotEquals) {
+				elementFilterAtoms.add(termFactory.getNEQAtom(term1, term2));
+			} else if (expr instanceof E_GreaterThan) {
+				elementFilterAtoms.add(termFactory.getGTAtom(term1, term2));
+			} else if (expr instanceof E_GreaterThanOrEqual) {
+				elementFilterAtoms.add(termFactory.getGTEAtom(term1, term2));
+			} else if (expr instanceof E_LessThan) {
+				elementFilterAtoms.add(termFactory.getLTAtom(term1, term2));
+			} else if (expr instanceof E_LessThanOrEqual) {
+				elementFilterAtoms.add(termFactory.getLTEAtom(term1, term2));
+			} else {
+				throw new QueryException("Unsupported query syntax");
+			}
+		} else {
+			throw new QueryException("Unsupported query syntax");
+		}
+		return elementFilterAtoms;
+	}
+	
+	private Term getTermOfRelationalArgument(Expr arg, int index) {
+		Term term = null;
+		if (arg instanceof ExprVar) {
+			term = termFactory.getVariable(arg.getVarName());
+		} else if (arg instanceof NodeValue){
+			if (index == 1) {
+				// if the first argument is a constant.
+				throw new QueryException("Unsupported query syntax");
+			}
+			NodeValue node = (NodeValue) arg;
+			if (node instanceof NodeValueString) {
+				term = termFactory.getValueConstant(node.getString(), COL_TYPE.STRING);
+			} else if (node instanceof NodeValueInteger) {
+				term = termFactory.getValueConstant(node.getInteger()+"", COL_TYPE.INTEGER);
+			} else if (node instanceof NodeValueDecimal) {
+				// TODO: Change this into COL_TYPE.DECIMAL in the future
+				term = termFactory.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
+			} else if (node instanceof NodeValueDouble || node instanceof NodeValueFloat) {
+				term = termFactory.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
+			} else if (node instanceof NodeValueDateTime) {
+				term = termFactory.getValueConstant(node.getDateTime()+"", COL_TYPE.DATETIME);
+			} else if (node instanceof NodeValueBoolean) {
+				term = termFactory.getValueConstant(node.getBoolean()+"", COL_TYPE.BOOLEAN);
+			} else {
+				throw new QueryException("Unsupported data type");
+			}
+		}
+		return term;
 	}
 	
 	private COL_TYPE getDataType(Node_Literal node) {

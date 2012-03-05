@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 public class ValueConstantImpl implements ValueConstant {
 
@@ -78,8 +79,8 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public String toString() {
 		String template = "%s";
-		if (getType() == Predicate.COL_TYPE.LITERAL || getType() == Predicate.COL_TYPE.STRING) {
-			template = "\"" + template + "\""; // add double quotes
+		if (getType() == COL_TYPE.LITERAL || getType() == COL_TYPE.STRING || getType() == COL_TYPE.DATETIME) {
+			template = "'" + template + "'";
 		}		
 		return String.format(template, getValue().toString());
 	}

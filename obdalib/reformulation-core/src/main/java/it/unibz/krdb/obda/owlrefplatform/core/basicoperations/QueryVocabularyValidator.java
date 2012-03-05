@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -72,20 +73,20 @@ public class QueryVocabularyValidator implements Serializable {
 
 			Predicate predicate = atom.getPredicate();
 
-			// TODO Add a predicate type for better identification.
-
 			boolean isClass = false;
 			boolean isObjectProp = false;
 			boolean isDataProp = false;
-
+			boolean isBooleanOpFunction = false;
+			
 			isClass = isClass || ontology.getConcepts().contains(predicate) || (equivalences.get(predicate) != null);
 			isObjectProp = isObjectProp || ontology.getRoles().contains(predicate) || (equivalences.get(predicate) != null);
 			isDataProp = isDataProp || ontology.getRoles().contains(predicate) || (equivalences.get(predicate) != null);
-
+			isBooleanOpFunction = (predicate instanceof BooleanOperationPredicate);
+					
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data
 			// property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp;
+			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isBooleanOpFunction;
 
 			String debugMsg = "The predicate: [" + predicate.toString() + "]";
 			if (isPredicateValid) {
@@ -95,6 +96,8 @@ public class QueryVocabularyValidator implements Serializable {
 					debugMsg += " is an Object property.";
 				} else if (isDataProp) {
 					debugMsg += " is a Data property.";
+				} else if (isBooleanOpFunction) {
+					debugMsg += " is a Boolean operation function.";
 				}
 				log.debug(debugMsg);
 			} else {

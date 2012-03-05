@@ -69,7 +69,7 @@ public class MappingAnalyzer {
 		DatalogProgram datalog = dataFactory.getDatalogProgram();
 
 		for (OBDAMappingAxiom axiom : mappingList) {
-			log.debug("Analyzing SQL for the mapping: {}", axiom.toString());
+//			log.debug("Analyzing SQL for the mapping: {}", axiom.toString());
 
 			CQIE targetQuery = (CQIE) axiom.getTargetQuery();
 			OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
