@@ -13,62 +13,25 @@
  */
 package it.unibz.krdb.obda.gui.swing.utils;
 
+import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 
-public class MappingStyledDocument extends DefaultStyledDocument implements
-		DocumentListener {
-	
+public class MappingStyledDocument extends DefaultStyledDocument {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1541062682306964359L;
-//	private boolean				alreadyColoring	= false;
-	public StyleContext			context			= null;
-	MappingStyledDocument		myself			= this;
-	public Style				default_style	= null;
 
-	private QueryPainter painter = null;
-	
-	public MappingStyledDocument(StyleContext context, OBDAModel apic,
-			OBDAPreferences pref) {
-		super(context);
-		
-		
-		painter = new QueryPainter(apic, pref);
-		default_style = context.getStyle(StyleContext.DEFAULT_STYLE);
-		StyleConstants.setFontFamily(default_style, "Arial");
-		StyleConstants.setFontSize(default_style, 14);
-		addDocumentListener(this);
-	}
-	
-	public void changedUpdate(DocumentEvent arg0) {
-	}
+	public MappingStyledDocument(JTextPane parent, OBDAModel apic, TargetQueryVocabularyValidator validator, OBDAPreferences preference) {
+		super();
 
-	public void insertUpdate(DocumentEvent arg0) {
-		
-		if (painter.isAlreadyColoring())
-			return;
-		painter.startRecoloring(this);
-	}
+		QueryPainter painter = new QueryPainter(apic, preference, parent, validator);
 
-	public void removeUpdate(DocumentEvent arg0) {
-		
-		if (painter.isAlreadyColoring())
-			return;
-		painter.startRecoloring(this);
-	}
-	
-	public boolean isValidQuery() {
-		return painter.isValidQuery();
 	}
 
 }

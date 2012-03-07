@@ -12,28 +12,26 @@
  */
 package it.unibz.krdb.obda.utils;
 
-
-
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class SourceQueryValidator {
 
-	private OBDAQuery			sourceQuery		= null;
-	private IncrementalResultSetTableModel	model			= null;
+	private OBDAQuery sourceQuery = null;
+	private IncrementalResultSetTableModel model = null;
 
-	private Exception			reason			= null;
+	private Exception reason = null;
 
-	JDBCConnectionManager	modelfactory	= null;
+	JDBCConnectionManager modelfactory = null;
 
-	OBDADataSource					source			= null;
+	OBDADataSource source = null;
 
 	public SourceQueryValidator(OBDADataSource source, OBDAQuery q) {
 		this.source = source;
@@ -58,8 +56,8 @@ public class SourceQueryValidator {
 		try {
 			modelfactory = JDBCConnectionManager.getJDBCConnectionManager();
 			URI connID = source.getSourceID();
-			if(!modelfactory.isConnectionAlive(connID)){
-				modelfactory.getConnection(connID);
+			if (!modelfactory.isConnectionAlive(connID)) {
+				Connection conn = modelfactory.createConnection(source);
 			}
 			if (model != null) {
 
@@ -81,13 +79,14 @@ public class SourceQueryValidator {
 	}
 
 	public void cancelValidation() throws SQLException {
-//		modelfactory.cancelCurrentStatement();
-		model.close();
+		// modelfactory.cancelCurrentStatement();
+		if (model != null)
+			model.close();
 	}
 
 	/***
 	 * Returns the exception that cause the query to be invalid.
-	 *
+	 * 
 	 * @return Exception that caused invalidity. null if no reason was set or if
 	 *         the query is valid.
 	 */

@@ -116,6 +116,7 @@ public class JDBCConnectionManager {
 		boolean bAutoCommit = ((Boolean) properties.get(JDBC_AUTOCOMMIT)).booleanValue();
 		conn.setAutoCommit(bAutoCommit);
 
+		registerConnection(dataSource.getSourceID(), conn);
 		return conn;
 	}
 
@@ -140,10 +141,6 @@ public class JDBCConnectionManager {
 	 */
 	public Connection getConnection(URI sourceId) throws NullPointerException {
 		Connection conn = connectionPool.get(sourceId);
-		if (conn == null) {
-			throw new NullPointerException(
-					"The system cannot find the required connection! Try to register it first to the system connection pool.");
-		}
 		return conn;
 	}
 

@@ -91,9 +91,10 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 		if (input instanceof CQIE) {
 			List<Atom> list = ((CQIE) input).getBody();
 			Iterator<Atom> it = list.iterator();
+			
 			while (it.hasNext()) {
 				if (sb.length() > 0) {
-					sb.append(",");
+					sb.append(", ");
 				}
 				Atom at = (Atom) it.next();
 				String name = man.getShortForm(at.getPredicate().toString());

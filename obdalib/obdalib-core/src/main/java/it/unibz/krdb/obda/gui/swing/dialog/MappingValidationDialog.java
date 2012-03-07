@@ -52,12 +52,13 @@ public class MappingValidationDialog extends JDialog {
 	public MappingValidationDialog(JTree tree) {
 
 		super();
+		DialogUtils.installEscapeCloseOperation(this);
 		myself = this;
 		doc = new DefaultStyledDocument();
 		createStyles();
 		createContent();
 		this.setModal(true);
-		DialogUtils.centerDialogWRTParent(tree.getParent(), this);
+//		DialogUtils.centerDialogWRTParent(tree.getParent(), this);
 	}
 
 	private void createStyles() {

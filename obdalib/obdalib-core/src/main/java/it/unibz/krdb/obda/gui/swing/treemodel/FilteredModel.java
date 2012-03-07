@@ -8,7 +8,7 @@ import java.util.List;
  * Interface that implements a set of functions to add and remove filters of the TreeModel
  *
  */
-public interface FilteredTreeModel {
+public interface FilteredModel {
 
 	/**
 	 * @param T

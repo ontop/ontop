@@ -14,64 +14,53 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.dialog.MappingValidationDialog;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingBodyNode;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadNode;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingNode;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeModel;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeNodeCellEditor;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingTreeSelectionModel;
+import it.unibz.krdb.obda.gui.swing.treemodel.FilteredModel;
+import it.unibz.krdb.obda.gui.swing.treemodel.SynchronizedMappingListModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
+import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.MappingFilterLexer;
 import it.unibz.krdb.obda.gui.swing.utils.MappingFilterParser;
-import it.unibz.krdb.obda.gui.swing.utils.MappingTreeCellRenderer2;
-import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.gui.swing.utils.OBDAMappingListRenderer;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
-import it.unibz.krdb.obda.parser.DatalogQueryHelper;
-import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
-import it.unibz.krdb.obda.utils.RDBMSMappingValidator;
 import it.unibz.krdb.obda.utils.SourceQueryValidator;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTree;
 import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeCellEditor;
-import javax.swing.tree.TreePath;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeListener, DatasourceSelectorListener {
+public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = -486013653814714526L;
 
@@ -104,6 +93,16 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
+	private JTree mappingsTree;
+
+	private JMenuItem menuValidateAll;
+
+	private JMenuItem menuValidateHead;
+
+	private JMenuItem menuValidateBody;
+
+	private JMenuItem menuExecuteBody;
+
 	/**
 	 * Creates a new panel.
 	 * 
@@ -118,6 +117,8 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		datalogParser = new DatalogProgramParser();
 		this.validatortrg = validator;
 
+		mappingsTree = new JTree();
+
 		initComponents();
 		registerAction();
 		addMenu();
@@ -125,51 +126,138 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		/***********************************************************************
 		 * Setting up the mappings tree
 		 */
-//		mappingsTree.setRootVisible(false);
+		// mappingsTree.setRootVisible(false);
 
 		// MappingTreeCellRenderer map_renderer = new
 		// MappingTreeCellRenderer(apic, preference);
-		
-		MappingTreeCellRenderer2 map_renderer = new MappingTreeCellRenderer2(preference);
-//		scrMappingsTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		mappingsTree.setCellRenderer(map_renderer);
-		mappingsTree.setEditable(true);
-		mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(apic, validatortrg, preference));
-		mappingsTree.setSelectionModel(new MappingTreeSelectionModel());
-		mappingsTree.setRowHeight(0);
-//		mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth() - 50, 65000));
-		mappingsTree.setToggleClickCount(1);
-		mappingsTree.setRootVisible(true);
-//		mappingsTree.setInvokesStopCellEditing(true);
+
+		// MappingTreeCellRenderer2 map_renderer = new
+		// MappingTreeCellRenderer2(preference);
+		// scrMappingsTree.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		// mappingsTree = new JTree();
+		// mappingsTree.setCellRenderer(map_renderer);
+		// mappingsTree.setEditable(true);
+		// mappingsTree.setCellEditor(new MappingTreeNodeCellEditor(apic,
+		// validatortrg, preference));
+		// mappingsTree.setSelectionModel(new MappingTreeSelectionModel());
+		// mappingsTree.setRowHeight(0);
+		// mappingsTree.setMaximumSize(new Dimension(scrMappingsTree.getWidth()
+		// - 50, 65000));
+		// mappingsTree.setToggleClickCount(1);
+		// mappingsTree.setRootVisible(true);
+		// mappingsTree.setInvokesStopCellEditing(true);
+
+		mappingList.setCellRenderer(new OBDAMappingListRenderer(preference, apic, validator));
+		mappingList.setModel(new SynchronizedMappingListModel(apic));
+		mappingList.setFixedCellWidth(400);
+		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		mappingList.addMouseListener(new PopupListener());
+
+		mappingList.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// Do nothing
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// Do nothing
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					removeMapping();
+				} else if (e.getKeyCode() == KeyEvent.VK_INSERT) {
+					addMapping();
+				} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+					editMapping();
+				}
+
+			}
+		});
+
+		mappingList.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// do nothing
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// do nothing
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// do nothing
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// do nothing
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int count = e.getClickCount();
+				if (count == 2) {
+					editMapping();
+				}
+
+			}
+		});
+
 		cmdAddMapping.setToolTipText("Add a new mapping");
 		cmdRemoveMapping.setToolTipText("Remove selected mappings");
 		cmdDuplicateMapping.setToolTipText("Duplicate selected mappings");
-		preference.registerPreferenceChangedListener(this);
+		// preference.registerPreferenceChangedListener(this);
 
 		setOBDAModel(apic); // TODO Bad code! Change this later!
+	}
+
+	/***
+	 * A listener to trigger the context meny of the mapping list.
+	 * 
+	 * @author mariano
+	 * 
+	 */
+	class PopupListener extends MouseAdapter {
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
+
+		private void maybeShowPopup(MouseEvent e) {
+			if (e.isPopupTrigger()) {
+				menuMappings.show(e.getComponent(), e.getX(), e.getY());
+			}
+		}
 	}
 
 	public void setOBDAModel(OBDAModel omodel) {
 		this.apic = omodel;
 		this.mapc = apic;
-		MappingTreeModel maptreemodel = new MappingTreeModel(apic);
-		mapc.addMappingsListener(maptreemodel);
-		mappingsTree.setModel(maptreemodel);
+		ListModel model = new SynchronizedMappingListModel(omodel);
+		mappingList.setModel(model);
 	}
 
 	public void setTargetQueryValidator(TargetQueryVocabularyValidator validator) {
 		this.validatortrg = validator;
 	}
 
-	//
-	// public OWLOntology getOntology() {
-	// return ontology;
-	// }
-
 	private void registerAction() {
-
-		InputMap inputmap = mappingsTree.getInputMap();
-		ActionMap actionmap = mappingsTree.getActionMap();
 
 		lblInsertFilter.setBackground(new java.awt.Color(153, 153, 153));
 		lblInsertFilter.setFont(new java.awt.Font("Arial", 1, 11));
@@ -195,101 +283,23 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		cmdDuplicateMapping.setPreferredSize(new Dimension(60, 21));
 		cmdDuplicateMapping.setMinimumSize(new Dimension(60, 21));
 
-		String add = preference.get(OBDAPreferences.ADD_MAPPING).toString();
-		addMapping = KeyStroke.getKeyStroke(add);
-		String body = preference.get(OBDAPreferences.EDIT_BODY).toString();
-		editBody = KeyStroke.getKeyStroke(body);
-		String head = preference.get(OBDAPreferences.EDIT_HEAD).toString();
-		editHead = KeyStroke.getKeyStroke(head);
-		String id = preference.get(OBDAPreferences.EDIT_ID).toString();
-		editID = KeyStroke.getKeyStroke(id);
-
-		AbstractAction addAction = new AbstractAction() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -6534327279595000401L;
-
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				addMapping();
-			}
-		};
-		inputmap.put(addMapping, OBDAPreferences.ADD_MAPPING);
-		actionmap.put(OBDAPreferences.ADD_MAPPING, addAction);
-
-		AbstractAction editBodyAction = new AbstractAction() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 5829816762114042796L;
-
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				TreePath path = mappingsTree.getSelectionPath();
-				if (path == null) {
-					return;
-				}
-				startEditBodyOfMapping(path);
-			}
-		};
-		inputmap.put(editBody, OBDAPreferences.EDIT_BODY);
-		actionmap.put(OBDAPreferences.EDIT_BODY, editBodyAction);
-
-		AbstractAction editHeadAction = new AbstractAction() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = -2418619999144506977L;
-
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				TreePath path = mappingsTree.getSelectionPath();
-				if (path == null) {
-					return;
-				}
-				startEditHeadOfMapping(path);
-			}
-		};
-		inputmap.put(editHead, OBDAPreferences.EDIT_HEAD);
-		actionmap.put(OBDAPreferences.EDIT_HEAD, editHeadAction);
-
-		AbstractAction editIDAction = new AbstractAction() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1643902301281442494L;
-
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				TreePath path = mappingsTree.getSelectionPath();
-				if (path == null) {
-					return;
-				}
-				mappingsTree.setEditable(true);
-				editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-				mappingsTree.startEditingAtPath(path);
-			}
-		};
-		inputmap.put(editID, OBDAPreferences.EDIT_ID);
-		actionmap.put(OBDAPreferences.EDIT_ID, editIDAction);
 	}
 
 	private void addMenu() {
 		JMenuItem add = new JMenuItem();
-		add.setText("Add Mapping");
+		add.setText("Add mapping...");
 		add.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				addMapping();
 			}
 		});
-		add.setMnemonic(addMapping.getKeyCode());
-		add.setAccelerator(addMapping);
+		// add.setMnemonic(addMapping.getKeyCode());
+		// add.setAccelerator(addMapping);
 		menuMappings.add(add);
 
 		JMenuItem delete = new JMenuItem();
-		delete.setText("Remove Mapping");
+		delete.setText("Remove mapping(s)...");
 		delete.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -297,81 +307,23 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			}
 		});
 		menuMappings.add(delete);
+
+		JMenuItem editMapping = new JMenuItem();
+		editMapping.setText("Edit mapping...");
+		editMapping.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				editMapping();
+
+			}
+		});
+		menuMappings.add(editMapping);
+
 		menuMappings.addSeparator();
-
-		JMenuItem editID = new JMenuItem();
-		editID.setText("Edit Mapping ID");
-		editID.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				TreePath path = mappingsTree.getSelectionPath();
-				if (path == null) {
-					return;
-				}
-				startEditIdOfMapping(path);
-			}
-		});
-		editID.setMnemonic(this.editID.getKeyCode());
-		editID.setAccelerator(this.editID);
-		menuMappings.add(editID);
-
-		JMenuItem editHead = new JMenuItem();
-		editHead.setText("Edit Mapping Target Query");
-		editHead.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				TreePath path = mappingsTree.getSelectionPath();
-				if (path == null) {
-					return;
-				}
-				startEditHeadOfMapping(path);
-			}
-		});
-		editHead.setMnemonic(this.editHead.getKeyCode());
-		editHead.setAccelerator(this.editHead);
-		menuMappings.add(editHead);
-
-		JMenuItem editBody = new JMenuItem();
-		editBody.setText("Edit Mapping Source Query");
-		editBody.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				TreePath path = mappingsTree.getSelectionPath();
-				if (path == null) {
-					return;
-				}
-				startEditBodyOfMapping(path);
-			}
-		});
-		editBody.setMnemonic(this.editBody.getKeyCode());
-		editBody.setAccelerator(this.editBody);
-		menuMappings.add(editBody);
-		menuMappings.addSeparator();
-
-		menuValidateAll = new JMenuItem();
-		menuValidateAll.setText("Validate All");
-		menuValidateAll.setEnabled(false);
-		menuValidateAll.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuValidateAllActionPerformed(evt);
-			}
-		});
-		menuMappings.add(menuValidateAll);
-
-		menuValidateHead = new JMenuItem();
-		menuValidateHead.setText("Validate Target Query");
-		menuValidateHead.setEnabled(false);
-		menuValidateHead.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				menuValidateHeadActionPerformed(evt);
-			}
-		});
-		menuMappings.add(menuValidateHead);
 
 		menuValidateBody = new JMenuItem();
-		menuValidateBody.setText("Validate Source Query");
+		menuValidateBody.setText("Validate SQL");
 		menuValidateBody.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -381,7 +333,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		menuMappings.add(menuValidateBody);
 
 		menuExecuteBody = new JMenuItem();
-		menuExecuteBody.setText("Execute Source Query");
+		menuExecuteBody.setText("Execute SQL");
 		menuExecuteBody.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -391,6 +343,25 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		menuMappings.add(menuExecuteBody);
 	}
 
+	protected void editMapping() {
+
+		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
+		if (mapping == null)
+			return;
+
+		JDialog dialog = new JDialog();
+
+		dialog.setTitle("Edit mapping");
+		dialog.setModal(true);
+
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, preference, dialog, selectedSource, validatortrg);
+		panel.setMapping(mapping);
+		dialog.setContentPane(panel);
+		dialog.setSize(600, 400);
+		dialog.setLocationRelativeTo(this);
+		dialog.setVisible(true);
+	}
+
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -398,7 +369,9 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	 */
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-	// desc="Generated Code">//GEN-BEGIN:initComponents
+	// <editor-fold defaultstate="collapsed"
+	// <editor-fold defaultstate="collapsed"
+	// desc=" Generated Code ">//GEN-BEGIN:initComponents
 	private void initComponents() {
 		java.awt.GridBagConstraints gridBagConstraints;
 
@@ -411,23 +384,23 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		cmdAddMapping = new javax.swing.JButton();
 		cmdRemoveMapping = new javax.swing.JButton();
 		cmdDuplicateMapping = new javax.swing.JButton();
-		scrMappingsTree = new javax.swing.JScrollPane();
-		mappingsTree = new javax.swing.JTree();
 		pnlExtraButtons = new javax.swing.JPanel();
 		cmdSelectAll = new javax.swing.JButton();
 		cmdDeselectAll = new javax.swing.JButton();
-		cmdExpandAll = new javax.swing.JButton();
-		cmdCollapseAll = new javax.swing.JButton();
+		mappingScrollPane = new javax.swing.JScrollPane();
+		mappingList = new javax.swing.JList();
+
+		menuMappings.setLayout(null);
 
 		setLayout(new java.awt.GridBagLayout());
 
-		pnlMappingManager.setAutoscrolls(true);
-		pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
 		pnlMappingManager.setLayout(new java.awt.BorderLayout());
 
-		pnlMappingButtons.setEnabled(false);
+		pnlMappingManager.setAutoscrolls(true);
+		pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
 		pnlMappingButtons.setLayout(new java.awt.GridBagLayout());
 
+		pnlMappingButtons.setEnabled(false);
 		lblInsertFilter.setText("Insert Filter");
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -437,11 +410,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 		txtFilter.setPreferredSize(new java.awt.Dimension(250, 20));
 		txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-			@Override
 			public void keyPressed(java.awt.event.KeyEvent evt) {
 				sendFilters(evt);
 			}
 		});
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
@@ -456,6 +429,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				chkFilterItemStateChanged(evt);
 			}
 		});
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 2;
 		gridBagConstraints.gridy = 0;
@@ -474,13 +448,13 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				cmdAddMappingActionPerformed(evt);
 			}
 		});
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 3;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
 		pnlMappingButtons.add(cmdAddMapping, gridBagConstraints);
 
-		cmdRemoveMapping.setToolTipText("Remove mappings");
 		cmdRemoveMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		cmdRemoveMapping.setContentAreaFilled(false);
 		cmdRemoveMapping.setIconTextGap(0);
@@ -492,6 +466,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				cmdRemoveMappingActionPerformed(evt);
 			}
 		});
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 4;
 		gridBagConstraints.gridy = 0;
@@ -510,6 +485,7 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				cmdDuplicateMappingActionPerformed(evt);
 			}
 		});
+
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 5;
 		gridBagConstraints.gridy = 0;
@@ -518,16 +494,10 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 		pnlMappingManager.add(pnlMappingButtons, java.awt.BorderLayout.NORTH);
 
-		mappingsTree.setComponentPopupMenu(menuMappings);
-		mappingsTree.setEditable(true);
-		scrMappingsTree.setViewportView(mappingsTree);
-
-		pnlMappingManager.add(scrMappingsTree, java.awt.BorderLayout.CENTER);
+		pnlExtraButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 2));
 
 		pnlExtraButtons.setMinimumSize(new java.awt.Dimension(532, 25));
 		pnlExtraButtons.setPreferredSize(new java.awt.Dimension(532, 25));
-		pnlExtraButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 2));
-
 		cmdSelectAll.setText("Select All");
 		cmdSelectAll.setToolTipText("Select all");
 		cmdSelectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -539,10 +509,11 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				cmdSelectAllActionPerformed(evt);
 			}
 		});
+
 		pnlExtraButtons.add(cmdSelectAll);
 
-		cmdDeselectAll.setText("Deselect All");
-		cmdDeselectAll.setToolTipText("Deselect all");
+		cmdDeselectAll.setText("Select none");
+		cmdDeselectAll.setToolTipText("Select none");
 		cmdDeselectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		cmdDeselectAll.setMaximumSize(new java.awt.Dimension(70, 21));
 		cmdDeselectAll.setMinimumSize(new java.awt.Dimension(70, 21));
@@ -552,94 +523,41 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 				cmdDeselectAllActionPerformed(evt);
 			}
 		});
+
 		pnlExtraButtons.add(cmdDeselectAll);
 
-		cmdExpandAll.setText("Expand All");
-		cmdExpandAll.setToolTipText("Expand all the mapping nodes or the selected ones");
-		cmdExpandAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdExpandAll.setMaximumSize(new java.awt.Dimension(70, 21));
-		cmdExpandAll.setMinimumSize(new java.awt.Dimension(70, 21));
-		cmdExpandAll.setPreferredSize(new java.awt.Dimension(70, 21));
-		cmdExpandAll.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdExpandAllActionPerformed(evt);
-			}
-		});
-		pnlExtraButtons.add(cmdExpandAll);
-
-		cmdCollapseAll.setText("Collapse All");
-		cmdCollapseAll.setToolTipText("Collapse all the mapping nodes or the selected ones");
-		cmdCollapseAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdCollapseAll.setMaximumSize(new java.awt.Dimension(70, 21));
-		cmdCollapseAll.setMinimumSize(new java.awt.Dimension(70, 21));
-		cmdCollapseAll.setPreferredSize(new java.awt.Dimension(70, 21));
-		cmdCollapseAll.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdCollapseAllActionPerformed(evt);
-			}
-		});
-		pnlExtraButtons.add(cmdCollapseAll);
-
 		pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
+
+		mappingList.setModel(new javax.swing.AbstractListModel() {
+			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+
+			public int getSize() {
+				return strings.length;
+			}
+
+			public Object getElementAt(int i) {
+				return strings[i];
+			}
+		});
+		mappingScrollPane.setViewportView(mappingList);
+
+		pnlMappingManager.add(mappingScrollPane, java.awt.BorderLayout.CENTER);
 
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.weighty = 1.0;
 		add(pnlMappingManager, gridBagConstraints);
+
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void cmdSelectAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdSelectAllActionPerformed
-		TreePath[] paths = getAllMappingNodePaths();
-		mappingsTree.addSelectionPaths(paths);
+		mappingList.setSelectionInterval(0, mappingList.getModel().getSize());
 	}// GEN-LAST:event_cmdSelectAllActionPerformed
 
 	private void cmdDeselectAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdDeselectAllActionPerformed
-		TreePath[] paths = getAllMappingNodePaths();
-		mappingsTree.removeSelectionPaths(paths);
+		mappingList.clearSelection();
 	}// GEN-LAST:event_cmdDeselectAllActionPerformed
-
-	private void cmdExpandAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdExpandAllActionPerformed
-		final int nSelectedNode = mappingsTree.getSelectionCount();
-
-		TreePath[] paths = getAllMappingNodePaths();
-		if (nSelectedNode > 1) {
-			paths = mappingsTree.getSelectionPaths();
-		}
-
-		for (int i = 0; i < paths.length; i++) {
-			mappingsTree.expandPath(paths[i]);
-		}
-	}// GEN-LAST:event_cmdExpandAllActionPerformed
-
-	private void cmdCollapseAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdCollapseAllActionPerformed
-		final int nSelectedNode = mappingsTree.getSelectionCount();
-
-		TreePath[] paths = getAllMappingNodePaths();
-		if (nSelectedNode > 1) {
-			paths = mappingsTree.getSelectionPaths();
-		}
-
-		for (int i = 0; i < paths.length; i++) {
-			mappingsTree.collapsePath(paths[i]);
-		}
-	}// GEN-LAST:event_cmdCollapseAllActionPerformed
-
-	private TreePath[] getAllMappingNodePaths() {
-		final MappingTreeModel mapModel = (MappingTreeModel) mappingsTree.getModel();
-		final DefaultMutableTreeNode root = (DefaultMutableTreeNode) mapModel.getRoot();
-		final int nChild = root.getChildCount();
-
-		TreePath[] paths = new TreePath[nChild]; // initialize
-
-		if (nChild > 0) {
-			for (int i = 0; i < nChild; i++) {
-				MappingNode child = (MappingNode) root.getChildAt(i);
-				paths[i] = new TreePath(child.getPath());
-			}
-		}
-		return paths;
-	}
 
 	/***
 	 * The action for the search field and the search checkbox. If the checkbox
@@ -651,6 +569,12 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 			applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
 		}
 		if (chkFilter.isSelected()) {
+			if (txtFilter.getText().isEmpty()) {
+				chkFilter.setSelected(false);
+				applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
+				return;
+			}
+
 			try {
 				List<TreeModelFilter<OBDAMappingAxiom>> filters = parseSearchString(txtFilter.getText());
 				if (filters == null) {
@@ -693,87 +617,47 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	}// GEN-LAST:event_sendFilters
 
-	private void menuValidateAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateAllActionPerformed
-		MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
-		TreePath path[] = mappingsTree.getSelectionPaths();
-		if (path == null) {
-			return;
-		}
-
-		for (int i = 0; i < path.length; i++) {
-			Object o = path[i].getLastPathComponent();
-			if (o instanceof MappingNode) {
-				MappingNode node = (MappingNode) o;
-				String id = node.getMappingID();
-				MappingBodyNode body = node.getBodyNode();
-				MappingHeadNode head = node.getHeadNode();
-				RDBMSMappingValidator v;
-
-				OBDASQLQuery rdbmssqlQuery = fac.getSQLQuery(body.getQuery());
-				CQIE conjunctiveQuery = parse(head.getQuery());
-				v = new RDBMSMappingValidator(apic, selectedSource, rdbmssqlQuery, conjunctiveQuery);
-				Enumeration<String> errors = v.validate();
-				if (!errors.hasMoreElements()) {
-					String output = id + ": " + "valid  \n";
-					outputField.addText(output, outputField.VALID);
-				} else {
-					while (errors.hasMoreElements()) {
-						String ele = errors.nextElement();
-						String output = id + ": " + ele + "  \n";
-						if (ele.startsWith("N")) {
-							outputField.addText(output, outputField.NONCRITICAL_ERROR);
-						} else if (ele.startsWith("C")) {
-							outputField.addText(output, outputField.CRITICAL_ERROR);
-						} else {
-							outputField.addText(output, outputField.NORMAL);
-						}
-					}
-				}
-			}
-		}
-	}// GEN-LAST:event_menuValidateAllActionPerformed
-
 	private void menuValidateBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateBodyActionPerformed
 		final MappingValidationDialog outputField = new MappingValidationDialog(mappingsTree);
+
+		outputField.setLocationRelativeTo(this);
 		Runnable action = new Runnable() {
 			@Override
 			public void run() {
 				canceled = false;
-				final TreePath path[] = mappingsTree.getSelectionPaths();
+				final Object[] path = mappingList.getSelectedValues();
 				if (path == null) {
+					JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
 					return;
 				}
 				outputField.addText("Validating " + path.length + " SQL queries.\n", outputField.NORMAL);
 				for (int i = 0; i < path.length; i++) {
 					final int index = i;
-					Object o = path[index].getLastPathComponent();
-					if (o instanceof MappingNode) {
-						MappingNode node = (MappingNode) o;
-						String id = node.getMappingID();
-						MappingBodyNode body = node.getBodyNode();
-						outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-						validator = new SourceQueryValidator(selectedSource, fac.getSQLQuery(body.getQuery()));
-						long timestart = System.currentTimeMillis();
+					OBDAMappingAxiom o = (OBDAMappingAxiom) path[index];
+					String id = o.getId();
+					outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
+					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
+					long timestart = System.nanoTime();
 
-						if (canceled)
-							return;
+					if (canceled)
+						return;
 
-						if (validator.validate()) {
-							long timestop = System.currentTimeMillis();
-							String output = " valid  \n";
-							outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
-							outputField.addText(output, outputField.VALID);
-						} else {
-							long timestop = System.currentTimeMillis();
-							String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
-							outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
-							outputField.addText(output, outputField.CRITICAL_ERROR);
-						}
-						validator.dispose();
-
-						if (canceled)
-							return;
+					if (validator.validate()) {
+						long timestop = System.nanoTime();
+						String output = " valid  \n";
+						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
+						outputField.addText(output, outputField.VALID);
+					} else {
+						long timestop = System.nanoTime();
+						String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
+						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
+						outputField.addText(output, outputField.CRITICAL_ERROR);
 					}
+					validator.dispose();
+
+					if (canceled)
+						return;
+
 				}
 				outputField.setVisible(true);
 			}
@@ -813,13 +697,13 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}// GEN-LAST:event_menuValidateBodyActionPerformed
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
-		final TreePath path = mappingsTree.getSelectionPath();
-		final MappingNode mapping = (MappingNode) path.getLastPathComponent();
-		final String sqlQuery = mapping.getBodyNode().getQuery();
+		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
+		final String sqlQuery = mapping.getSourceQuery().toString();
 
 		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);
 
 		JDialog dlgQueryResult = new JDialog();
+		DialogUtils.installEscapeCloseOperation(dlgQueryResult);
 		dlgQueryResult.setContentPane(pnlQueryResult);
 		dlgQueryResult.pack();
 		dlgQueryResult.setLocationRelativeTo(this);
@@ -827,55 +711,52 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		dlgQueryResult.setTitle("SQL Query Result");
 	}// GEN-LAST:event_menuExecuteBodyActionPerformed
 
-	private void menuValidateHeadActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuValidateHeadActionPerformed
-		// TODO add your handling code here:
-	}// GEN-LAST:event_menuValidateHeadActionPerformed
-
 	private void cmdDuplicateMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_duplicateMappingButtonActionPerformed
-		TreePath[] currentSelection = mappingsTree.getSelectionPaths();
+		Object[] currentSelection = mappingList.getSelectedValues();
 		if (currentSelection == null) {
-			JOptionPane.showMessageDialog(this, "Please Select a Mapping first", "ERROR", JOptionPane.ERROR_MESSAGE);
-		} else {
-			if (JOptionPane.showConfirmDialog(this, "This will create copies of the selected mappings. \nNumber of mappings selected = "
-					+ mappingsTree.getSelectionPaths().length + "\n Continue? ", "Copy confirmation", JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE) == JOptionPane.NO_OPTION) {
-				return;
-			}
-			OBDAModel controller = mapc;
-			URI current_srcuri = selectedSource.getSourceID();
+			JOptionPane.showMessageDialog(this, "No mappings have been selected", "ERROR", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		int confirm = JOptionPane.showConfirmDialog(this,
+				"This will create copies of the selected mappings. \nNumber of mappings selected = " + currentSelection.length
+						+ "\nContinue? ", "Copy confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+			return;
+		}
+		OBDAModel controller = mapc;
+		URI current_srcuri = selectedSource.getSourceID();
 
-			if (currentSelection != null) {
-				for (int i = 0; i < currentSelection.length; i++) {
-					TreePath current_path = currentSelection[i];
-					MappingNode mapping = (MappingNode) current_path.getLastPathComponent();
-					String id = (String) mapping.getUserObject();
+		for (int i = 0; i < currentSelection.length; i++) {
+			OBDAMappingAxiom mapping = (OBDAMappingAxiom) currentSelection[i];
 
-					/* Computing the next available ID */
+			String id = mapping.getId();
 
-					int new_index = -1;
-					for (int index = 0; index < 999999999; index++) {
-						if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
-							new_index = index;
-							break;
-						}
-					}
-					String new_id = id + "(" + new_index + ")";
+			/* Computing the next available ID */
 
-					/* inserting the new mapping */
-					try {
-
-						OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
-						OBDAMappingAxiom newmapping = null;
-						newmapping = (OBDAMappingAxiom) oldmapping.clone();
-						newmapping.setId(new_id);
-						controller.addMapping(current_srcuri, newmapping);
-
-					} catch (DuplicateMappingException e) {
-						JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
-					}
+			int new_index = -1;
+			for (int index = 0; index < 999999999; index++) {
+				if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
+					new_index = index;
+					break;
 				}
 			}
+			String new_id = id + "(" + new_index + ")";
+
+			/* inserting the new mapping */
+			try {
+
+				OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
+				OBDAMappingAxiom newmapping = null;
+				newmapping = (OBDAMappingAxiom) oldmapping.clone();
+				newmapping.setId(new_id);
+				controller.addMapping(current_srcuri, newmapping);
+
+			} catch (DuplicateMappingException e) {
+				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
+				return;
+			}
 		}
+
 	}// GEN-LAST:event_duplicateMappingButtonActionPerformed
 
 	private void cmdRemoveMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeMappingButtonActionPerformed
@@ -883,33 +764,32 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	}// GEN-LAST:event_removeMappingButtonActionPerformed
 
 	private void removeMapping() {
-		if (JOptionPane.showConfirmDialog(this, "This will delete ALL the selected mappings. \nNumber of mappings selected = "
-				+ mappingsTree.getSelectionPaths().length + "\n Continue? ", "Delete confirmation", JOptionPane.WARNING_MESSAGE,
-				JOptionPane.YES_NO_OPTION) == JOptionPane.CANCEL_OPTION) {
+		int[] indexes = mappingList.getSelectedIndices();
+		if (indexes == null)
+			return;
+		int confirm = JOptionPane.showConfirmDialog(this, "Proceed deleting " + indexes.length + " mappings?", "Conform",
+				JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
+		if (confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
 		// The manager panel can handle multiple deletions.
-		TreePath[] currentSelection = mappingsTree.getSelectionPaths();
+
+		Object[] values = mappingList.getSelectedValues();
+
 		OBDAModel controller = mapc;
 		URI srcuri = selectedSource.getSourceID();
 
-		if (currentSelection != null) {
-			for (int i = 0; i < currentSelection.length; i++) {
-				TreePath current_path = currentSelection[i];
-				MappingNode mappingnode = (MappingNode) current_path.getLastPathComponent();
-				controller.removeMapping(srcuri, mappingnode.getMappingID());
-			}
+		for (int i = 0; i < values.length; i++) {
+			OBDAMappingAxiom mapping = (OBDAMappingAxiom) values[i];
+			controller.removeMapping(srcuri, mapping.getId());
 		}
+		mappingList.clearSelection();
+
 	}
 
 	private void cmdAddMappingActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addMappingButtonActionPerformed
 		if (selectedSource != null) {
 			addMapping();
-
-			// Make sure the user can see the new node.
-			MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
-			MappingNode newNode = model.getLastMappingNode();
-			mappingsTree.scrollPathToVisible(new TreePath(newNode.getPath()));
 		} else {
 			JOptionPane.showMessageDialog(this, "Select the data source first!", "Warning", JOptionPane.WARNING_MESSAGE);
 			return;
@@ -918,99 +798,50 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 
 	private void addMapping() {
 
+		URI sourceID = this.selectedSource.getSourceID();
+
+		/* Computing an ID for the new mapping */
+
+		int index = 0;
+		for (int i = 0; i < 99999999; i++) {
+			index = this.mapc.indexOf(sourceID, "M:" + Integer.toHexString(i));
+			if (index == -1) {
+				index = i;
+				break;
+			}
+		}
+		String id = "M:" + Integer.toHexString(index);
+
 		JDialog dialog = new JDialog();
-		dialog.setTitle("Insert New Mapping");
+
+		dialog.setTitle("Create mapping");
 		dialog.setModal(true);
-		dialog.setContentPane(new NewMappingDialogPanel(apic, preference, dialog, selectedSource, validatortrg));
-		dialog.setSize(500, 300);
-		dialog.setLocationRelativeTo(null);
+
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, preference, dialog, selectedSource, validatortrg);
+		panel.setID(id);
+		dialog.setContentPane(panel);
+		dialog.setSize(600, 400);
+		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
-	}
-
-	private void startEditIdOfMapping(TreePath path) {
-		mappingsTree.setEditable(true);
-		editedNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-		mappingsTree.startEditingAtPath(path);
-	}
-
-	private void startEditHeadOfMapping(TreePath path) {
-		mappingsTree.setEditable(true);
-		MappingNode mapping = (MappingNode) path.getLastPathComponent();
-		MappingHeadNode head = mapping.getHeadNode();
-		editedNode = head;
-		mappingsTree.startEditingAtPath(new TreePath(head.getPath()));
-	}
-
-	private void startEditBodyOfMapping(TreePath path) {
-		mappingsTree.setEditable(true);
-		MappingNode mapping = (MappingNode) path.getLastPathComponent();
-		MappingBodyNode body = mapping.getBodyNode();
-		editedNode = body;
-		mappingsTree.startEditingAtPath(new TreePath(body.getPath()));
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JCheckBox chkFilter;
 	private javax.swing.JButton cmdAddMapping;
-	private javax.swing.JButton cmdCollapseAll;
 	private javax.swing.JButton cmdDeselectAll;
 	private javax.swing.JButton cmdDuplicateMapping;
-	private javax.swing.JButton cmdExpandAll;
 	private javax.swing.JButton cmdRemoveMapping;
 	private javax.swing.JButton cmdSelectAll;
 	private javax.swing.JLabel lblInsertFilter;
-	private javax.swing.JTree mappingsTree;
+	private javax.swing.JList mappingList;
+	private javax.swing.JScrollPane mappingScrollPane;
 	private javax.swing.JPopupMenu menuMappings;
-	private javax.swing.JMenuItem menuValidateAll;
-	private javax.swing.JMenuItem menuValidateBody;
-	private javax.swing.JMenuItem menuValidateHead;
-	private javax.swing.JMenuItem menuExecuteBody;
 	private javax.swing.JPanel pnlExtraButtons;
 	private javax.swing.JPanel pnlMappingButtons;
 	private javax.swing.JPanel pnlMappingManager;
-	private javax.swing.JScrollPane scrMappingsTree;
 	private javax.swing.JTextField txtFilter;
 
 	// End of variables declaration//GEN-END:variables
-
-	// TODO NOTE: This method duplicates the valueForPathChanged(..) method in
-	// the MappingTreeModel class.
-	private void updateNode(String str) {
-		OBDAModel con = mapc;
-		URI sourceName = selectedSource.getSourceID();
-		String nodeContent = (String) editedNode.getUserObject();
-		if (editedNode instanceof MappingNode) {
-			// con.updateMapping(sourceName, nodeContent, str);
-		} else if (editedNode instanceof MappingBodyNode) {
-			MappingBodyNode node = (MappingBodyNode) editedNode;
-			MappingNode parent = (MappingNode) node.getParent();
-			OBDAQuery b = fac.getSQLQuery(str);
-			con.updateMappingsSourceQuery(sourceName, parent.getMappingID(), b);
-		} else if (editedNode instanceof MappingHeadNode) {
-			MappingHeadNode node = (MappingHeadNode) editedNode;
-			MappingNode parent = (MappingNode) node.getParent();
-			OBDAQuery h = parse(str);
-			con.updateTargetQueryMapping(sourceName, parent.getMappingID(), h);
-		}
-	}
-
-	public void shortCutChanged(String preference, String shortcut) {
-		registerAction();
-	}
-
-	public void stopTreeEditing() {
-		TreeCellEditor editor = mappingsTree.getCellEditor();
-		if (editor.stopCellEditing()) {
-			String txt = editor.getCellEditorValue().toString();
-			updateNode(txt);
-
-		}
-
-	}
-
-	// public void applyChangedToNode(String txt) {
-	// updateNode(txt);
-	// }
 
 	/***
 	 * Parses the string in the search field.
@@ -1047,44 +878,47 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 	 * @param ListOfMappings
 	 */
 	private void applyFilters(List<TreeModelFilter<OBDAMappingAxiom>> filters) {
-		MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
+		FilteredModel model = (FilteredModel) mappingList.getModel();
 		model.removeAllFilters();
 		model.addFilters(filters);
-		model.currentSourceChanged(selectedSource.getSourceID(), selectedSource.getSourceID());
+		// model.currentSourceChanged(selectedSource.getSourceID(),
+		// selectedSource.getSourceID());
 	}
 
-	private CQIE parse(String query) {
-		CQIE cq = null;
-		query = prepareQuery(query);
-		try {
-			datalogParser.parse(query);
-			cq = datalogParser.getRule(0);
-		} catch (RecognitionException e) {
-			log.warn(e.getMessage());
-		}
-		return cq;
-	}
-
-	private String prepareQuery(String input) {
-		String query = "";
-		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
-
-		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1) // if no head
-			query = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
-
-		// Append the prefixes
-		query = queryHelper.getPrefixes() + query;
-
-		return query;
-	}
+	// private CQIE parse(String query) {
+	// CQIE cq = null;
+	// query = prepareQuery(query);
+	// try {
+	// datalogParser.parse(query);
+	// cq = datalogParser.getRule(0);
+	// } catch (RecognitionException e) {
+	// log.warn(e.getMessage());
+	// }
+	// return cq;
+	// }
+	//
+	// private String prepareQuery(String input) {
+	// String query = "";
+	// DatalogQueryHelper queryHelper = new
+	// DatalogQueryHelper(apic.getPrefixManager());
+	//
+	// String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
+	// if (atoms.length == 1) // if no head
+	// query = queryHelper.getDefaultHead() + " " +
+	// OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
+	//
+	// // Append the prefixes
+	// query = queryHelper.getPrefixes() + query;
+	//
+	// return query;
+	// }
 
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
 		this.selectedSource = newSource;
 
 		// Update the mapping tree.
-		MappingTreeModel model = (MappingTreeModel) mappingsTree.getModel();
+		SynchronizedMappingListModel model = (SynchronizedMappingListModel) mappingList.getModel();
 		URI oldSourceUri = null;
 		if (oldSource != null) {
 			oldSourceUri = oldSource.getSourceID();
@@ -1093,12 +927,15 @@ public class MappingManagerPanel extends JPanel implements OBDAPreferenceChangeL
 		if (newSource != null) {
 			newSourceUri = newSource.getSourceID();
 		}
-		model.currentSourceChanged(oldSourceUri, newSourceUri);
+
+		model.setFocusedSource(newSourceUri);
+		mappingList.revalidate();
+		// repaint();
 	}
 
-	@Override
-	public void preferenceChanged() {
-		DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
-		model.reload();
-	}
+	// @Override
+	// public void preferenceChanged() {
+	// DefaultTreeModel model = (DefaultTreeModel) mappingsTree.getModel();
+	// model.reload();
+	// }
 }

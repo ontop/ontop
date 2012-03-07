@@ -13,6 +13,7 @@
  */
 package it.unibz.krdb.obda.gui.swing.treemodel;
 
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.RDBMSMappingAxiomImpl;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -21,8 +22,25 @@ public class MappingNode extends MappingTreeNode {
 
 	private static final long serialVersionUID = -9116413704531119587L;
 
+	OBDAMappingAxiom mapping = null;
+
 	public MappingNode(String name) {
 		super(name);
+	}
+
+	
+	
+	public MappingNode(OBDAMappingAxiom mapping) {
+		super(mapping.getId());
+		this.mapping = mapping;
+	}
+
+	public OBDAMappingAxiom getMapping() {
+		return mapping;
+	}
+
+	public void setMapping(OBDAMappingAxiom mapping) {
+		this.mapping = mapping;
 	}
 
 	public static MappingNode getMappingNodeFromMapping(RDBMSMappingAxiomImpl mapping) {

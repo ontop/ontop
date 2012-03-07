@@ -90,9 +90,6 @@ public class MappingTreeNodeCellEditor extends AbstractCellEditor implements Tre
 	final String PATH_MAPPINGBODY_ICON = "images/body.png";
 
 	private DefaultMutableTreeNode node = null;
-	private Font plainFont;
-	private int plainFontHeight;
-	private Font boldFont;
 	private OBDAPreferences preferences;
 	private JLabel iconLabel;
 	private JTextPane textPane;
@@ -102,6 +99,9 @@ public class MappingTreeNodeCellEditor extends AbstractCellEditor implements Tre
 	private Icon mappingheadIcon;
 	private Icon invalidmappingheadIcon;
 	private Icon mappingbodyIcon;
+	private Font plainFont;
+	private int plainFontHeight;
+	private Font boldFont;
 	private Style plainStyle;
 	private Style boldStyle;
 	private Style nonBoldStyle;
@@ -278,11 +278,7 @@ public class MappingTreeNodeCellEditor extends AbstractCellEditor implements Tre
 
 		StyledDocument doc = textPane.getStyledDocument();
 		resetStyles(doc);
-//
-//		if (invalid) {
-//			doc.setParagraphAttributes(0, doc.getLength(), invalidQuery, false);
-//		} else 
-			if (selected) {
+		if (selected) {
 			doc.setParagraphAttributes(0, doc.getLength(), selectionForeground, false);
 		} else {
 			doc.setParagraphAttributes(0, doc.getLength(), foreground, false);
@@ -475,7 +471,7 @@ public class MappingTreeNodeCellEditor extends AbstractCellEditor implements Tre
 			validate();
 			setError(null);
 		} catch (Exception e) {
-			setError(e);			
+			setError(e);
 			return false;
 		}
 		fireEditingStopped();

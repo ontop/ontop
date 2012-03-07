@@ -45,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO Make the three model be based on the actual mapping collection
-public class MappingTreeModel extends DefaultTreeModel implements OBDAMappingListener, FilteredTreeModel {
+public class MappingTreeModel extends DefaultTreeModel implements OBDAMappingListener, FilteredModel {
 
 	private static final long serialVersionUID = -1151057670798439917L;
 
