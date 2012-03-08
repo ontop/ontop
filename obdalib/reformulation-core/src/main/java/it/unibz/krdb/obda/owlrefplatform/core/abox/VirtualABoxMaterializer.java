@@ -576,6 +576,7 @@ public class VirtualABoxMaterializer {
 			if (functionSymbol.equals(OBDAVocabulary.RDFS_LITERAL)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_STRING)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_INTEGER)
+					|| functionSymbol.equals(OBDAVocabulary.XSD_DECIMAL)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_DOUBLE)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_DATETIME)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_BOOLEAN)) {

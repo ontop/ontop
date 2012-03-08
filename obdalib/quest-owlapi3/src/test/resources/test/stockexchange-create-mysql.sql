@@ -61,7 +61,8 @@ CREATE TABLE transaction (
     type boolean,
     brokerid integer,
     forclientid integer,
-    forcompanyid integer
+    forcompanyid integer,
+    amount decimal(10, 4)
 );
 
 INSERT INTO address VALUES (991, 'Road street', 24, 'Chonala', 'Veracruz', 'Mexico');
@@ -116,10 +117,10 @@ INSERT INTO stockinformation VALUES (667, 100, true, 211);
 INSERT INTO stockinformation VALUES (669, 100, true, 211);
 INSERT INTO stockinformation VALUES (668, 100, true, 211);
 
-INSERT INTO transaction VALUES (3331, '2008-04-01', 661, true, 112, 111, NULL);
-INSERT INTO transaction VALUES (3332, '2008-04-02', 662, true, 112, 111, NULL);
-INSERT INTO transaction VALUES (3333, '2008-04-03', 663, true, 112, NULL, 212);
-INSERT INTO transaction VALUES (3334, '2008-04-14', 663, true, 113, NULL, NULL);
+INSERT INTO transaction VALUES (3331, '2008-04-01', 661, true, 112, 111, NULL, 12.6);
+INSERT INTO transaction VALUES (3332, '2008-04-02', 662, true, 112, 111, NULL, 108.34);
+INSERT INTO transaction VALUES (3333, '2008-04-03', 663, true, 112, NULL, 212, -2.349);
+INSERT INTO transaction VALUES (3334, '2008-04-14', 663, true, 113, NULL, NULL, 1667.0092);
 
 
 ALTER TABLE address

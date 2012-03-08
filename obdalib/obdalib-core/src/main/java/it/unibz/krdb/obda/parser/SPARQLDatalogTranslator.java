@@ -308,8 +308,7 @@ public class SPARQLDatalogTranslator {
 			} else if (node instanceof NodeValueInteger) {
 				term = termFactory.getValueConstant(node.getInteger()+"", COL_TYPE.INTEGER);
 			} else if (node instanceof NodeValueDecimal) {
-				// TODO: Change this into COL_TYPE.DECIMAL in the future
-				term = termFactory.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
+				term = termFactory.getValueConstant(node.getDecimal()+"", COL_TYPE.DECIMAL);
 			} else if (node instanceof NodeValueDouble || node instanceof NodeValueFloat) {
 				term = termFactory.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
 			} else if (node instanceof NodeValueDateTime) {
@@ -341,10 +340,10 @@ public class SPARQLDatalogTranslator {
             } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {  // special case for decimal
                 String value = node.getLiteralValue().toString();
                 if (value.contains(".")) {
-                    // We "override" the decimal to double.
-                    dataType = COL_TYPE.DOUBLE;
+                    // Put the type as decimal (with fractions).
+                    dataType = COL_TYPE.DECIMAL;
                 } else {
-                    // We "cast" the decimal to integer.
+                    // Put the type as integer (decimal without fractions).
                     dataType = COL_TYPE.INTEGER;
                 }
             } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)
@@ -371,6 +370,8 @@ public class SPARQLDatalogTranslator {
 	            predicate = termFactory.getPredicate(OBDAVocabulary.XSD_STRING_URI, 1, new COL_TYPE[] { dataType }); break;
 	        case INTEGER:
                 predicate = termFactory.getPredicate(OBDAVocabulary.XSD_INTEGER_URI, 1, new COL_TYPE[] { dataType }); break;
+	        case DECIMAL:
+	        	predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DECIMAL_URI, 1, new COL_TYPE[] { dataType }); break;
 	        case DOUBLE:
                 predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DOUBLE_URI, 1, new COL_TYPE[] { dataType }); break;
 	        case DATETIME:

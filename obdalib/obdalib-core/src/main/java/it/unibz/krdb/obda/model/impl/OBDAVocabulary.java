@@ -78,6 +78,8 @@ public class OBDAVocabulary {
 	
 	public static final Predicate XSD_INTEGER = new DataTypePredicateImpl(URI.create(XSD_INTEGER_URI), COL_TYPE.INTEGER);
 	
+	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(URI.create(XSD_DECIMAL_URI), COL_TYPE.DECIMAL);
+	
 	public static final Predicate XSD_DOUBLE = new DataTypePredicateImpl(URI.create(XSD_DOUBLE_URI), COL_TYPE.DOUBLE);
 	
 	public static final Predicate XSD_DATETIME = new DataTypePredicateImpl(URI.create(XSD_DATETIME_URI), COL_TYPE.DATETIME);

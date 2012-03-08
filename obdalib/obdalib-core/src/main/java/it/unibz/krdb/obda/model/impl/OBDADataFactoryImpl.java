@@ -334,6 +334,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Predicate getDataTypePredicateDecimal(URI name) {
+		return OBDAVocabulary.XSD_DECIMAL;
+	}
+	
+	@Override
 	public Predicate getDataTypePredicateDouble(URI name) {
 		return OBDAVocabulary.XSD_DOUBLE;
 	}
@@ -495,4 +500,5 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return getPredicate(URI.create(uri), arity, types);
 	}
+
 }

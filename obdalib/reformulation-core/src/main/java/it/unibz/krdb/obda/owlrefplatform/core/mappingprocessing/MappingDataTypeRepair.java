@@ -76,10 +76,12 @@ public class MappingDataTypeRepair {
             case Types.INTEGER:
             case Types.BIGINT:
             case Types.SMALLINT: return OBDAVocabulary.XSD_INTEGER;
+            case Types.NUMERIC: // Decimal type for PgSQL
+            case Types.DECIMAL: return OBDAVocabulary.XSD_DECIMAL;
             case Types.FLOAT:
             case Types.DOUBLE:
             case Types.REAL: return OBDAVocabulary.XSD_DOUBLE;
-            case Types.DATE: // H2 driver uses this type for timestamp type
+            case Types.DATE: // Date time type for H2
             case Types.TIMESTAMP: return OBDAVocabulary.XSD_DATETIME;
             case Types.BOOLEAN: 
             case Types.BINARY:

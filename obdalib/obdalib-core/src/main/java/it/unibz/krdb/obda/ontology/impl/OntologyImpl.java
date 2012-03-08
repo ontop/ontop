@@ -72,6 +72,7 @@ public class OntologyImpl implements Ontology {
 			add(OBDAVocabulary.RDFS_LITERAL);
 			add(OBDAVocabulary.XSD_STRING);
 			add(OBDAVocabulary.XSD_INTEGER);
+			add(OBDAVocabulary.XSD_DECIMAL);
 			add(OBDAVocabulary.XSD_DOUBLE);
 			add(OBDAVocabulary.XSD_DATETIME);
 			add(OBDAVocabulary.XSD_BOOLEAN);

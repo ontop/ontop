@@ -71,6 +71,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Predicate getDataTypePredicateInteger(URI name);
 	
+	public Predicate getDataTypePredicateDecimal(URI name);
+	
 	public Predicate getDataTypePredicateDouble(URI name);
 	
 	public Predicate getDataTypePredicateDate(URI name);
