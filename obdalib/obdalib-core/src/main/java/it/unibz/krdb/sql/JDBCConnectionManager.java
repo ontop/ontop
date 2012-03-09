@@ -105,6 +105,8 @@ public class JDBCConnectionManager {
 		String password = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
+		if (driver == null || driver.trim().equals(""))
+			throw new SQLException("Invalid driver");
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
@@ -112,6 +114,8 @@ public class JDBCConnectionManager {
 		}
 
 		Connection conn = DriverManager.getConnection(url, username, password);
+		
+		
 
 		boolean bAutoCommit = ((Boolean) properties.get(JDBC_AUTOCOMMIT)).booleanValue();
 		conn.setAutoCommit(bAutoCommit);

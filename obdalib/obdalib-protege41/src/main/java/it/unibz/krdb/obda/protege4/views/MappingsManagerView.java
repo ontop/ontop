@@ -66,9 +66,9 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		selectorPanel.setLayout(new GridBagLayout());
 
 		JLabel label = new JLabel("Select datasource: ");
-		label.setBackground(new java.awt.Color(153, 153, 153));
-		label.setFont(new java.awt.Font("Arial", 1, 11));
-		label.setForeground(new java.awt.Color(153, 153, 153));
+//		label.setBackground(new java.awt.Color(153, 153, 153));
+//		label.setFont(new java.awt.Font("Arial", 1, 11));
+//		label.setForeground(new java.awt.Color(153, 153, 153));
 		label.setPreferredSize(new Dimension(119, 14));
 
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
@@ -86,14 +86,14 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
 		selectorPanel.add(datasourceSelector, gridBagConstraints);
 
-		selectorPanel.setBorder(new TitledBorder("Datasource Selection"));
-		mappingPanel.setBorder(new TitledBorder("Mapping Inspector"));
+		selectorPanel.setBorder(new TitledBorder("Datasource selection"));
+		mappingPanel.setBorder(new TitledBorder("Mapping manager"));
 
 		setLayout(new BorderLayout());
 		add(mappingPanel, BorderLayout.CENTER);
 		add(selectorPanel, BorderLayout.NORTH);
 
-		log.debug("Mappings manager initialized");
+//		log.debug("Mappings manager initialized");
 	}
 
 	@Override
