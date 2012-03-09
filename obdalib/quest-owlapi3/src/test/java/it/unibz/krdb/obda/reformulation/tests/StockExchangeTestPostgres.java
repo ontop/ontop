@@ -265,7 +265,7 @@ public class StockExchangeTestPostgres extends TestCase {
             2, 5, 5, 7, 0, 2,							 // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
             1, 3, 2, 3, 1, 2,							 // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
             2, 0, 0, 2, 0, 2,							 // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-            0, 0, 0, 0, 0, 0,							 // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
+            0, 4, 2, 2, 2, 2,							 // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
             5, 5									 	 // FILTER: Boolean (EQ, NEQ)
 		};
 		prepareTestQueries(tuples);
