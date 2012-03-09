@@ -208,7 +208,7 @@ public class OBDAModelManager implements Disposable {
 						if (file.canRead()) {
 							final OBDAModel obdaModel = getActiveOBDAModel();			
 							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), obdaModel.getPrefixManager());
-							connectionManager.setupConnection(obdaModel);  // fill in the connection pool.
+//							connectionManager.setupConnection(obdaModel);  // fill in the connection pool.
 							OBDAModelRefactorer refactorer = new OBDAModelRefactorer(obdaModel, activeonto);
 							refactorer.run(); // adding type information to the mapping predicates.
 						}
@@ -232,7 +232,7 @@ public class OBDAModelManager implements Disposable {
 						if (file.canRead()) {
 							final OBDAModel obdaModel = getActiveOBDAModel();
 							ioManager.loadOBDADataFromURI(obdafile, activeonto.getURI(), getActiveOBDAModel().getPrefixManager());
-							connectionManager.setupConnection(obdaModel);  // fill in the connection pool.
+//							connectionManager.setupConnection(obdaModel);  // fill in the connection pool.
 							OBDAModelRefactorer refactorer = new OBDAModelRefactorer(obdaModel, activeonto);
 							refactorer.run(); // adding type information to the mapping predicates.
 						}
