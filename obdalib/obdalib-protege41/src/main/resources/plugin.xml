@@ -24,7 +24,7 @@
 		<category value="OBDA"></category>
 	</extension>
 	
-	<extension id="RDBMSInspectorViewComponent"
+	<!-- <extension id="RDBMSInspectorViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="RDBMS inspector"></label>
 		<class
@@ -32,7 +32,7 @@
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="OBDA"></category>
-	</extension>
+	</extension> -->
 	
 	<extension id="SQLQueryInterfaceViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">

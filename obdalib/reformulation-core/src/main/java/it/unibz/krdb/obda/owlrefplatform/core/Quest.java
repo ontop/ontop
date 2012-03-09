@@ -162,7 +162,7 @@ public class Quest implements Serializable {
 	public OBDAModel getOBDAModel() {
 		return inputOBDAModel;
 	}
-	
+
 	// TODO this method is buggy
 	public void loadDependencies(Ontology sigma) {
 		rewriter.setCBox(sigma);
@@ -226,13 +226,13 @@ public class Quest implements Serializable {
 		this.preferences = preferences;
 
 		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
-		bOptimizeEquivalences = Boolean.valueOf((String)preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
-		bOptimizeTBoxSigma = Boolean.valueOf((String)preferences.get(QuestPreferences.OPTIMIZE_TBOX_SIGMA));
+		bOptimizeEquivalences = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_EQUIVALENCES));
+		bOptimizeTBoxSigma = Boolean.valueOf((String) preferences.get(QuestPreferences.OPTIMIZE_TBOX_SIGMA));
 		// boolean bUseInMemoryDB = preferences.getCurrentValue(
 		// ReformulationPlatformPreferences.DATA_LOCATION).equals(
 		// QuestConstants.INMEMORY);
-		bObtainFromOntology = Boolean.valueOf((String)preferences.get(QuestPreferences.OBTAIN_FROM_ONTOLOGY));
-		bObtainFromMappings = Boolean.valueOf((String)preferences.get(QuestPreferences.OBTAIN_FROM_MAPPINGS));
+		bObtainFromOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FROM_ONTOLOGY));
+		bObtainFromMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FROM_MAPPINGS));
 		unfoldingMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 		dbType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
@@ -254,9 +254,8 @@ public class Quest implements Serializable {
 	/***
 	 * Starts the local connection that Quest maintains to the DBMS. This
 	 * connection belongs only to Quest and is used to get information from the
-	 * DBMS. At the moment this connection is mainly used during
-	 * initialization, to get metadata about the DBMS or to create repositories
-	 * in classic mode.
+	 * DBMS. At the moment this connection is mainly used during initialization,
+	 * to get metadata about the DBMS or to create repositories in classic mode.
 	 * 
 	 * @return
 	 * @throws SQLException
@@ -435,14 +434,8 @@ public class Quest implements Serializable {
 					String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 					String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-					try {
-						Class.forName(driver);
-					} catch (ClassNotFoundException e1) {
-						// Does nothing because the SQLException handles this
-						// problem also.
-					}
 					log.debug("Establishing an internal connection for house-keeping");
-					localConnection = DriverManager.getConnection(url, username, password);
+					connect();
 
 					unfoldingOBDAModel.addSource(obdaSource);
 
@@ -481,16 +474,16 @@ public class Quest implements Serializable {
 				sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
 				sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
 			}
-			
+
 			/*
 			 * Eliminating redundancy from the unfolding program
 			 */
 			unfoldingProgram = DatalogNormalizer.normalizeDatalogProgram(unfoldingProgram);
-					
+
 			int unprsz = unfoldingProgram.getRules().size();
-			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);			
+			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
 			log.debug("Optimizing unfolding program. Initial size: {} Final size: {}", unprsz, unfoldingProgram.getRules().size());
-			
+
 			/*
 			 * Adding data typing on the mapping axioms.
 			 */
@@ -550,7 +543,13 @@ public class Quest implements Serializable {
 			}
 			throw ex;
 		} finally {
-		    // NO-OP
+			if (!(unfoldingMode.equals(QuestConstants.CLASSIC) && (inmemory))) {
+				/*
+				 * If we are not in classic + inmemory mode we can discconect
+				 * the house-keeping connection, it has already been used.
+				 */
+				disconnect();
+			}
 		}
 	}
 

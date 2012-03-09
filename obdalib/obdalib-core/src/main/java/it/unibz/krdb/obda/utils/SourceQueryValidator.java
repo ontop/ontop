@@ -12,7 +12,6 @@
  */
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -21,11 +20,12 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SourceQueryValidator {
 
 	private OBDAQuery sourceQuery = null;
-	private IncrementalResultSetTableModel model = null;
+	// private IncrementalResultSetTableModel model = null;
 
 	private Exception reason = null;
 
@@ -33,40 +33,43 @@ public class SourceQueryValidator {
 
 	OBDADataSource source = null;
 
+	private Statement st;
+
+	private Connection c;
+
 	public SourceQueryValidator(OBDADataSource source, OBDAQuery q) {
 		this.source = source;
 		sourceQuery = q;
 	}
 
-	public Object execute() {
-
-		if (model != null) {
-			return model;
-		} else {
-			if (validate()) {
-				return model;
-			} else {
-				return null;
-			}
-		}
-	}
+	// public Object execute() {
+	//
+	// if (model != null) {
+	// return model;
+	// } else {
+	// if (validate()) {
+	// return model;
+	// } else {
+	// return null;
+	// }
+	// }
+	// }
 
 	public boolean validate() {
-
+		ResultSet set = null;
 		try {
 			modelfactory = JDBCConnectionManager.getJDBCConnectionManager();
-			URI connID = source.getSourceID();
-			if (!modelfactory.isConnectionAlive(connID)) {
-				Connection conn = modelfactory.createConnection(source);
-			}
-			if (model != null) {
 
-				IncrementalResultSetTableModel rstm = model;
-				rstm.close();
-			}
-			ResultSet set = modelfactory.executeQuery(connID, sourceQuery.toString());
-			model = new IncrementalResultSetTableModel(set);
-			set.close();
+			// if (model != null) {
+			//
+			// IncrementalResultSetTableModel rstm = model;
+			// rstm.close();
+			// }
+			c = modelfactory.getConnection(source);
+			st = c.createStatement();
+			set = st.executeQuery(sourceQuery.toString());
+			// model = new IncrementalResultSetTableModel(set);
+
 			return true;
 
 		} catch (SQLException e) {
@@ -75,13 +78,22 @@ public class SourceQueryValidator {
 		} catch (Exception e) {
 			reason = e;
 			return false;
+		} finally {
+			try {
+				set.close();
+			} catch (Exception e) {
+			}
+			try {
+				st.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
 	public void cancelValidation() throws SQLException {
-		// modelfactory.cancelCurrentStatement();
-		if (model != null)
-			model.close();
+
+		st.cancel();
+
 	}
 
 	/***
@@ -94,10 +106,10 @@ public class SourceQueryValidator {
 		return reason;
 	}
 
-	public void dispose() {
-
-		if (model != null)
-			model.close();
-	}
+	// public void dispose() {
+	//
+	// if (model != null)
+	// model.close();
+	// }
 
 }

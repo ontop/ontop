@@ -236,7 +236,7 @@ public class OBDAModelManager implements Disposable {
 						final OBDAModel obdaModel = getActiveOBDAModel();
 						ioManager.loadOBDADataFromURI(obdafile, activeonto.getOntologyID().getOntologyIRI().toURI(),
 								obdaModel.getPrefixManager());
-						connectionManager.setupConnection(obdaModel); // fill in
+//						connectionManager.setupConnection(obdaModel); // fill in
 																		// the
 																		// connection
 																		// pool.
@@ -266,7 +266,7 @@ public class OBDAModelManager implements Disposable {
 						final OBDAModel obdaModel = getActiveOBDAModel();
 						ioManager.loadOBDADataFromURI(obdafile, activeonto.getOntologyID().getOntologyIRI().toURI(),
 								obdaModel.getPrefixManager());
-						connectionManager.setupConnection(obdaModel); // fill in
+//						connectionManager.setupConnection(obdaModel); // fill in
 																		// the
 																		// connection
 																		// pool.

@@ -32,7 +32,6 @@ import it.unibz.krdb.obda.parser.DatalogProgramParser;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.obda.utils.SourceQueryValidator;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -50,12 +49,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
-import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -66,12 +63,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private static final long serialVersionUID = -486013653814714526L;
 
-	private DefaultMutableTreeNode editedNode;
 	private OBDAPreferences preference;
-	private KeyStroke addMapping;
-	private KeyStroke editBody;
-	private KeyStroke editHead;
-	private KeyStroke editID;
 
 	private Thread validatorThread;
 
@@ -83,10 +75,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	protected OBDAModel apic;
 
-	// private OWLOntology ontology;
-
-	private DatalogProgramParser datalogParser;
-
 	private OBDADataSource selectedSource;
 
 	private boolean canceled;
@@ -96,10 +84,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	private JTree mappingsTree;
-
-	private JMenuItem menuValidateAll;
-
-	private JMenuItem menuValidateHead;
 
 	private JMenuItem menuValidateBody;
 
@@ -116,7 +100,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	public MappingManagerPanel(OBDAModel apic, OBDAPreferences preference, TargetQueryVocabularyValidator validator) {
 
 		this.preference = preference;
-		datalogParser = new DatalogProgramParser();
+//		datalogParser = new DatalogProgramParser();
 		this.validatortrg = validator;
 
 		mappingsTree = new JTree();
@@ -695,15 +679,14 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 					if (validator.validate()) {
 						long timestop = System.nanoTime();
 						String output = " valid  \n";
-						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
+						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
 						outputField.addText(output, outputField.VALID);
 					} else {
 						long timestop = System.nanoTime();
 						String output = " invalid Reason: " + validator.getReason().getMessage() + " \n";
-						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ms. Result: ", outputField.NORMAL);
+						outputField.addText("Time to query: " + ((timestop - timestart) / 1000) + " ns. Result: ", outputField.NORMAL);
 						outputField.addText(output, outputField.CRITICAL_ERROR);
 					}
-					validator.dispose();
 
 					if (canceled)
 						return;
@@ -748,6 +731,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
 		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
+		if (mapping == null)
+			return;
 		final String sqlQuery = mapping.getSourceQuery().toString();
 
 		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);

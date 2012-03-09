@@ -29,11 +29,11 @@ public class DataSourceImpl implements OBDADataSource {
 	 */
 	private static final long serialVersionUID = 7903755268613089609L;
 	// private String uri = ""
-	private boolean		enabled		= true;
-	private boolean		registred	= false;
-	private URI			id = null;
+	private boolean enabled = true;
+	private boolean registred = false;
+	private URI id = null;
 
-	private Properties	parameters	= null;
+	private Properties parameters = null;
 
 	/***************************************************************************
 	 * Creates a new DataSource object
@@ -48,33 +48,40 @@ public class DataSourceImpl implements OBDADataSource {
 		parameters = new Properties();
 	}
 
-
-	/* (non-Javadoc)
-	 * @see inf.unibz.it.obda.model.DataSource#setParameter(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see inf.unibz.it.obda.model.DataSource#setParameter(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void setParameter(String parameter_uri, String value) {
 		this.parameters.setProperty(parameter_uri, value);
 	}
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#getSourceID()
 	 */
 	@Override
-	public URI getSourceID(){
+	public URI getSourceID() {
 		return id;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#setNewID(java.net.URI)
 	 */
 	@Override
-	public void setNewID(URI newid){
+	public void setNewID(URI newid) {
 		this.id = newid;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#getParameter(java.lang.String)
 	 */
 	@Override
@@ -82,7 +89,9 @@ public class DataSourceImpl implements OBDADataSource {
 		return parameters.getProperty(parameter_uri);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#getParameters()
 	 */
 	@Override
@@ -92,7 +101,7 @@ public class DataSourceImpl implements OBDADataSource {
 
 	public String toString() {
 		StringBuffer buff = new StringBuffer();
-		buff.append("DatasourceURI=" +  id.toString() + "\n");
+		buff.append("DatasourceURI=" + id.toString() + "\n");
 		Enumeration<Object> keys = parameters.keys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
@@ -141,14 +150,15 @@ public class DataSourceImpl implements OBDADataSource {
 			 * check if they are the same, if the are, it means its an old file
 			 * and the URI is set to the current ontlogy's URI
 			 */
-//			if (!name.equals(ontouri)) {
-//				new_src.setOntoUri(URI.create(ontouri));
-//			} else {
-//				throw new IllegalArgumentException("ERROR: data source name = URI. Fix the URI value to point to the ontology URI to which this data sources is associated");
-////				APIController controller = APIController.getController();
-////				URI currentOntologyURI = controller.getCurrentOntologyURI();
-////				new_src.setUri(currentOntologyURI.toString());
-//			}
+			// if (!name.equals(ontouri)) {
+			// new_src.setOntoUri(URI.create(ontouri));
+			// } else {
+			// throw new
+			// IllegalArgumentException("ERROR: data source name = URI. Fix the URI value to point to the ontology URI to which this data sources is associated");
+			// // APIController controller = APIController.getController();
+			// // URI currentOntologyURI = controller.getCurrentOntologyURI();
+			// // new_src.setUri(currentOntologyURI.toString());
+			// }
 			while (tokenizer.hasMoreTokens()) {
 				StringTokenizer tok2 = new StringTokenizer(tokenizer.nextToken(), "=");
 				new_src.setParameter(tok2.nextToken(), tok2.nextToken());
@@ -158,7 +168,6 @@ public class DataSourceImpl implements OBDADataSource {
 		}
 		return new_src;
 	}
-
 
 	public static String encodeDataSources(HashMap<String, DataSourceImpl> datasources) {
 		StringBuffer encoded = new StringBuffer();
@@ -176,6 +185,21 @@ public class DataSourceImpl implements OBDADataSource {
 		return encoded.toString();
 	}
 
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof DataSourceImpl)) {
+			return false;
+		}
+		DataSourceImpl d2 = (DataSourceImpl) o;
+		return d2.id.equals(this.id);
+
+	}
+
 	public static HashMap<URI, DataSourceImpl> decodeDataSources(String enc_srcs) {
 		if ((enc_srcs == null) || (enc_srcs.equals("")))
 			return null;
@@ -191,7 +215,9 @@ public class DataSourceImpl implements OBDADataSource {
 		return sources;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#setEnabled(boolean)
 	 */
 	@Override
@@ -199,7 +225,9 @@ public class DataSourceImpl implements OBDADataSource {
 		this.enabled = enabled;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#isEnabled()
 	 */
 	@Override
@@ -207,7 +235,9 @@ public class DataSourceImpl implements OBDADataSource {
 		return enabled;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#setRegistred(boolean)
 	 */
 	@Override
@@ -215,24 +245,26 @@ public class DataSourceImpl implements OBDADataSource {
 		this.registred = registred;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see inf.unibz.it.obda.model.DataSource#isRegistred()
 	 */
 	@Override
 	public boolean isRegistred() {
 		return registred;
 	}
-	
+
 	@Override
 	public Object clone() {
 		OBDADataSource clone = new DataSourceImpl(getSourceID());
 		for (Object parameter : parameters.keySet()) {
-			String key = (String)parameter;
+			String key = (String) parameter;
 			clone.setParameter(key, parameters.getProperty(key));
 		}
 		clone.setEnabled(isEnabled());
 		clone.setRegistred(isRegistred());
-		
+
 		return clone;
 	}
 }

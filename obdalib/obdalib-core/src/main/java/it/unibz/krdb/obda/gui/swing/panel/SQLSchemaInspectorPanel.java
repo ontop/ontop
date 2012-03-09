@@ -239,7 +239,20 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		tblRelations.setComponentPopupMenu(menu);
 	}
 
+	// private void releaseResultset() {
+	// // TableModel model = tblRelations.getModel();
+	// // if (model == null)
+	// // return;
+	// // if (!(model instanceof RelationsResultSetTableModel))
+	// // return;
+	// // RelationsResultSetTableModel imodel =
+	// (RelationsResultSetTableModel)model;
+	// // imodel.close();
+	//
+	// }
+
 	private void cmdRefreshActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdRefreshActionPerformed
+
 		Runnable run = new Runnable() {
 			@Override
 			public void run() {
@@ -258,6 +271,17 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						tblRelations.setModel(model);
 						tblRelations.setPreferredSize(new Dimension(model.getColumnCount() * TABLE_COLUMN_WIDTH, model.getRowCount()
 								* TABLE_ROW_HEIGHT));
+					}
+					try {
+						set.close();
+					} catch (Exception e) {
+
+					}
+
+					try {
+						set.getStatement().close();
+					} catch (Exception e) {
+
 					}
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(SQLSchemaInspectorPanel.this,
@@ -300,7 +324,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-						DBMetadata metadata = conn.getMetaData(selectedSource.getSourceID());
+						DBMetadata metadata = conn.getMetaData(selectedSource);
 						ColumnInspectorTableModel model = new ColumnInspectorTableModel(metadata, table);
 
 						tblAttributes.setModel(model);
@@ -318,7 +342,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 
 	private ResultSet getResultSetForRelations() throws Exception {
 
-		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource.getSourceID());
+		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
 
 		if (selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER).equals("com.ibm.db2.jcc.DB2Driver")) {
 			Statement statement = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -368,6 +392,7 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 		String result = "-1";
 		String table = null;
 		Statement statement = null;
+		ResultSet r = null;
 
 		private CountTuplesAction(CountDownLatch latch, String table) {
 			this.latch = latch;
@@ -383,9 +408,9 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 				@Override
 				public void run() {
 					try {
-						Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource.getSourceID());
+						Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource);
 						statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-						ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + table.toUpperCase());
+						r = statement.executeQuery("SELECT COUNT(*) FROM " + table.toUpperCase());
 						r.next();
 						if (r.first()) {
 							Object temp = r.getObject(1);
@@ -398,6 +423,17 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						JOptionPane.showMessageDialog(null, "Error while counting tuples in " + table
 								+ ".\n Please refer to the log file for more information.");
 						log.error("Error while counting tuples in " + table, e);
+					} finally {
+						try {
+							r.close();
+						} catch (Exception e) {
+
+						}
+						try {
+							statement.close();
+						} catch (Exception e) {
+
+						}
 					}
 				}
 			};
@@ -440,19 +476,13 @@ public class SQLSchemaInspectorPanel extends javax.swing.JPanel implements Datas
 						int rows = tblRelations.getRowCount();
 						result = new String[rows];
 						for (int i = 0; i < rows; i++) {
+							CountDownLatch latch = new CountDownLatch(1);
 							String s = tblRelations.getModel().getValueAt(i, 0).toString();
-							Connection con = JDBCConnectionManager.getJDBCConnectionManager().getConnection(selectedSource.getSourceID());
-							statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-							ResultSet r = statement.executeQuery("SELECT COUNT(*) FROM " + s.toUpperCase());
-							r.next();
-							if (r.first()) {
-								Object temp = r.getObject(1);
-								String count = temp.toString();
-								result[i] = count;
-							} else {
-								result[i] = "count error";
-							}
-							statement.close();
+							CountTuplesAction count = new CountTuplesAction(latch, s);
+							count.run();
+							latch.await();
+							result[i] = count.result;
+
 						}
 						latch.countDown();
 					} catch (Exception e) {

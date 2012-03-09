@@ -21,6 +21,7 @@ import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.obda.utils.ResultSetToFileWriter;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -89,11 +90,15 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		OBDAPreferences preference = (OBDAPreferences) getOWLEditorKit().get(OBDAPreferences.class.getName());
 		panel_query_interface = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), this.getOWLModelManager().getActiveOntology()
 				.getOntologyID().getOntologyIRI().toURI(), preference);
-
+		panel_query_interface.setPreferredSize(new Dimension(400,250));
+		panel_query_interface.setMinimumSize(new Dimension(400,250));
 		panel_view_results = new ResultViewTablePanel(panel_query_interface);
 		panel_right_main.setLayout(new java.awt.BorderLayout());
 		split_right_horizontal.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-		split_right_horizontal.setResizeWeight(0.25);
+		split_right_horizontal.setResizeWeight(0.5);
+		split_right_horizontal.setDividerLocation(0.5);
+		
+		
 		split_right_horizontal.setOneTouchExpandable(true);
 		split_right_horizontal.setTopComponent(panel_query_interface);
 		panel_view_results.setMinimumSize(new java.awt.Dimension(400, 250));

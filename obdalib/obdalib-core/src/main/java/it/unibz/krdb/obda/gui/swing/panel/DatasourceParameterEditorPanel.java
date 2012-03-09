@@ -15,6 +15,7 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
@@ -25,6 +26,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.net.URI;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
@@ -140,14 +142,14 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		pnlDataSourceInfo.add(lblDataSourceName, gridBagConstraints);
 
 		pnlDataSourceSelector.setLayout(new java.awt.BorderLayout());
-		pnlDataSourceSelector.setPreferredSize(new Dimension(300,25));
-		pnlDataSourceSelector.setMinimumSize(new Dimension(300,25));
+		pnlDataSourceSelector.setPreferredSize(new Dimension(300, 25));
+		pnlDataSourceSelector.setMinimumSize(new Dimension(300, 25));
 		gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.anchor = gridBagConstraints.WEST;
-//		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-//		gridBagConstraints.weightx = 1;
+		// gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		// gridBagConstraints.weightx = 1;
 		pnlDataSourceInfo.add(pnlDataSourceSelector, gridBagConstraints);
 
 		lblDataSourceType.setBackground(new java.awt.Color(153, 153, 153));
@@ -211,7 +213,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		pnlDataSourceParameters.setAlignmentX(5.0F);
 		pnlDataSourceParameters.setAlignmentY(5.0F);
 		pnlDataSourceParameters.setAutoscrolls(true);
-//		pnlDataSourceParameters.setFocusTraversalPolicyProvider(true);
+		// pnlDataSourceParameters.setFocusTraversalPolicyProvider(true);
 		pnlDataSourceParameters.setMaximumSize(new java.awt.Dimension(6404444, 34452345));
 		pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(540, 110));
 		pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(540, 110));
@@ -255,7 +257,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 		pnlDataSourceParameters.add(lblDatabaseUsername, gridBagConstraints);
 
-//		txtDatabaseUsername.setFocusTraversalPolicy(getFocusTraversalPolicy());
+		// txtDatabaseUsername.setFocusTraversalPolicy(getFocusTraversalPolicy());
 		txtDatabaseUsername.setMaximumSize(new java.awt.Dimension(25, 2147483647));
 		txtDatabaseUsername.setMinimumSize(new java.awt.Dimension(180, 19));
 		txtDatabaseUsername.setName("somename"); // NOI18N
@@ -377,10 +379,8 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		gridBagConstraints.weightx = 2;
 		gridBagConstraints.anchor = gridBagConstraints.WEST;
 		pnlDataSourceInfo.add(pnlCommandButton, gridBagConstraints);
-		
-		
-		
-//		add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
+
+		// add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void cmdNewActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdNewActionPerformed
@@ -429,9 +429,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			return;
 		}
 
-		JDBCConnectionManager conn = JDBCConnectionManager.getJDBCConnectionManager();
+		JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
 		try {
-			conn.setConnection(selectedDataSource);
+			Connection conn = connm.getConnection(selectedDataSource);
+			if (conn == null)
+				throw new SQLException("Error connecting to the database");
 			lblConnectionStatus.setForeground(Color.GREEN);
 			lblConnectionStatus.setText("Connection is OK");
 		} catch (SQLException e) { // if fails
@@ -456,6 +458,16 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
+		
+		JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
+		try {
+			man.closeConnection(selectedDataSource);
+		} catch (OBDAException e) {
+			//do nothing
+		} catch (SQLException e) {
+			//do nothing
+		}
+		
 		// currentsrc.setUri(fieldURI.getText());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, txtDatabaseUsername.getText());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, new String(txtDatabasePassword.getPassword()));

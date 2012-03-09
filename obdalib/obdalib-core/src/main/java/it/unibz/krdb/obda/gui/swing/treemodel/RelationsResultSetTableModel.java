@@ -37,31 +37,31 @@ public class RelationsResultSetTableModel implements TableModel {
 	// to
 	// interpret
 
-	ResultSetMetaData			metadata;	// Additional
+	ResultSetMetaData metadata; // Additional
 	// information
 	// about
 	// the
 	// results
 
-	int							numcols, numrows;	// How
+	int numcols, numrows; // How
 	// many
 	// rows
 	// and
 	// columns
 	// in the table
 
-	ResultSetTableModelFactory	f;
+	ResultSetTableModelFactory f;
 
 	// HashMap<String, Integer> rowCount = new HashMap<String, Integer>();
 
 	// HashMap<Integer, String> tableNames = new HashMap<Integer, String>();
 
-	String[]					rowCount	= null;
+	String[] rowCount = null;
 
-	String[]					tableNames	= null;
-	
+	String[] tableNames = null;
+
 	private Vector<TableModelListener> listeners = null;
-	
+
 	OBDADataSource source = null;
 
 	/**
@@ -82,11 +82,11 @@ public class RelationsResultSetTableModel implements TableModel {
 		numrows = 0;
 		while (results.next()) {
 			numrows = numrows + 1;
-//			if (!driver.equals("com.ibm.db2.jcc.DB2Driver")) {
-				tempNames.add(results.getString("TABLE_NAME"));
-//			} else {
-//				tempNames.add(results.getString("NAME"));
-//			}
+			// if (!driver.equals("com.ibm.db2.jcc.DB2Driver")) {
+			tempNames.add(results.getString("TABLE_NAME"));
+			// } else {
+			// tempNames.add(results.getString("NAME"));
+			// }
 		}
 		tableNames = new String[numrows];
 		Iterator<String> it = tempNames.iterator();
@@ -100,34 +100,49 @@ public class RelationsResultSetTableModel implements TableModel {
 
 		rowCount = new String[numrows];
 		for (i = 0; i < numrows; i++) {
-//			// results.absolute(i + 1); // Go to the specified row
-			 rowCount[i] = "???";
-//			// Integer.valueOf(factory.getRelationsRowCount(results.getString("TABLE_NAME")));
-//			try {
-//				rowCount[i] = Integer.valueOf(JDBCConnectionManager.getJDBCConnectionManager().getRelationsRowCount(tableNames[i], source));
-//			} catch (NumberFormatException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			// // results.absolute(i + 1); // Go to the specified row
+			rowCount[i] = "???";
+			// //
+			// Integer.valueOf(factory.getRelationsRowCount(results.getString("TABLE_NAME")));
+			// try {
+			// rowCount[i] =
+			// Integer.valueOf(JDBCConnectionManager.getJDBCConnectionManager().getRelationsRowCount(tableNames[i],
+			// source));
+			// } catch (NumberFormatException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// } catch (Exception e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 		}
+//		try {
+//			results.close();
+//		} catch (Exception e) {
+//
+//		}
+//		
+//		try {
+//			results.getStatement().close();
+//		} catch (Exception e) {
+//
+//		}
+
 
 	}
 
-	/**
-	 * Call this when done with the table model. It closes the ResultSet and the
-	 * Statement object used to create it.
-	 */
-	public void close() {
-		try {
-			// results.getStatement().close();
-		} catch (Exception e) {
-			// e.printStackTrace(System.err);
-		}
-		;
-	}
+//	/**
+//	 * Call this when done with the table model. It closes the ResultSet and the
+//	 * Statement object used to create it.
+//	 */
+//	public void close() {
+//		try {
+//			this.results.getStatement().close();
+//		} catch (Exception e) {
+//			e.printStackTrace(System.err);
+//		}
+//		;
+//	}
 
 	/** Automatically close when we're garbage collected */
 	protected void finalize() {
@@ -192,7 +207,6 @@ public class RelationsResultSetTableModel implements TableModel {
 		return false;
 	}
 
-
 	public void setValueAt(Object value, int row, int column) {
 		rowCount[row] = value.toString();
 		fireTableChanged(row);
@@ -205,10 +219,10 @@ public class RelationsResultSetTableModel implements TableModel {
 	public void removeTableModelListener(TableModelListener l) {
 		listeners.remove(l);
 	}
-	
-	private void fireTableChanged(int row){
+
+	private void fireTableChanged(int row) {
 		Iterator<TableModelListener> it = listeners.iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			it.next().tableChanged(new TableModelEvent(this, row));
 		}
 	}
