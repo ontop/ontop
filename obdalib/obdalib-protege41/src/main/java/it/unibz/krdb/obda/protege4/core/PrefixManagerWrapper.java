@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.io.AbstractPrefixManager;
 
 import java.util.Map;
 
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
@@ -32,7 +33,9 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 
 	@Override
 	public String getPrefixForURI(String uri) {
-		return owlmapper.getPrefix(uri);
+		String prefix = owlmapper.getPrefixIRI(IRI.create(uri));
+		//we use -1 since OWL API return colon with prefxies, e.g., test:
+		return prefix.substring(0,prefix.length()-1);
 	}
 
 	@Override

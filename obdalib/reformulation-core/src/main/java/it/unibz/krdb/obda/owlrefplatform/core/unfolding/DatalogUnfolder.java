@@ -78,17 +78,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (term instanceof FunctionalTermImpl) {
 					FunctionalTermImpl function = (FunctionalTermImpl) term;
 					String predicateName = function.getFunctionSymbol().getName().toString();
-					if (functTermMap.containsKey(predicateName)) {
-						/*
-						 * We found an existing fucntional term that has the
-						 * same predicate, these must have the same airity,
-						 * otherwise we cannt match URI constants with
-						 * functional terms.
-						 */
-						Function existing = functTermMap.get(predicateName);
-						if (function.getTerms().size() != existing.getTerms().size())
-							throw new Exception("The model contains two URI building functions with the same base but different arity");
-					}
+//					if (functTermMap.containsKey(predicateName)) {
+//						/*
+//						 * We found an existing fucntional term that has the
+//						 * same predicate, these must have the same airity,
+//						 * otherwise we cannt match URI constants with
+//						 * functional terms.
+//						 */
+//						Function existing = functTermMap.get(predicateName);
+//						if (function.getTerms().size() != existing.getTerms().size())
+//							throw new Exception("The model contains two URI building functions with the same base but different arity");
+//					}
 					functTermMap.put(predicateName, function);
 				}
 			}

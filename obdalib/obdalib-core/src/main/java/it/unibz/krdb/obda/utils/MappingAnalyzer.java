@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -168,7 +169,7 @@ public class MappingAnalyzer {
 			for (Atom atom : atomList) {
 				List<Term> terms = atom.getTerms();
 				List<Term> newterms = new LinkedList<Term>();
-				for (Term term : terms) {
+				for (Term term : terms) {					
 					newterms.add(updateTerm(term, lookupTable));
 				}
 				if (newterms.size() == 0) {
@@ -274,7 +275,7 @@ public class MappingAnalyzer {
 			Variable var = (Variable) term;
 			String termName = lookupTable.lookup(var.getName());
 			if (termName == null)
-				throw new RuntimeException(String.format("Variable %s not found.", var));
+				throw new RuntimeException(String.format("Variable %s not found. Make sure not to use wildecard in your SQL query, e.g., star *", var));
 
 			result = this.dataFactory.getVariable(termName);
 			// System.out.println(termName);
@@ -288,6 +289,8 @@ public class MappingAnalyzer {
 				// updateTerm(innerTerm, lookupTable);
 			}
 			result = dataFactory.getFunctionalTerm(func.getFunctionSymbol(), newterms);
+		} else if (term instanceof ValueConstant) {
+			result = term.clone();
 		}
 		return result;
 	}

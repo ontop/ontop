@@ -80,7 +80,7 @@ public class ValueConstantImpl implements ValueConstant {
 	public String toString() {
 		String template = "%s";
 		if (getType() == COL_TYPE.LITERAL || getType() == COL_TYPE.STRING || getType() == COL_TYPE.DATETIME) {
-			template = "'" + template + "'";
+			template = "\"" + template + "\"";
 		}		
 		return String.format(template, getValue().toString());
 	}

@@ -95,8 +95,9 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public String toString() {
-		if (string != null)
+		if (string != null && !rehash)
 			return string;
+		
 
 		StringBuffer sb_t = new StringBuffer();
 
@@ -104,7 +105,10 @@ public class FunctionalTermImpl implements Function, ListListener {
 			if (sb_t.length() > 0) {
 				sb_t.append(",");
 			}
-			sb_t.append(terms.get(i).toString());
+			Term t = terms.get(i);
+			if (t ==  null)
+				System.out.println("Null");
+			sb_t.append(t.toString());
 		}
 		StringBuffer sb_name = new StringBuffer();
 

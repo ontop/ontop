@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.io;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -49,7 +50,8 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 				return result.toString();
 			}
 		}
-		Iterator<String> longnamespaces = this.getPrefixMap().values().iterator();
+		Collection<String> longnamespacesset = this.getPrefixMap().values();
+		Iterator<String> longnamespaces = longnamespacesset.iterator();
 		while (longnamespaces.hasNext()) {
 			String longnamespace = longnamespaces.next();
 			if (uri.length() > longnamespace.length())

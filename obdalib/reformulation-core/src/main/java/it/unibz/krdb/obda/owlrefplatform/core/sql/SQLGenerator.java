@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 	private static final String AND_OPERATOR = "AND";
 	private static final String OR_OPERATOR = "OR";
 	private static final String NOT_OPERATOR = "NOT";
-	
+
 	/**
 	 * Formatting template
 	 */
@@ -64,7 +65,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 	private final DBMetadata metadata;
 	private final JDBCUtility jdbcutil;
-	
+
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil) {
@@ -139,11 +140,11 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 	@Override
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
-	    int ruleSize = query.getRules().size();
-	    if (ruleSize == 0) {
-		    throw new OBDAException("No axiom has been generated from the system! Please recheck your input query.");
+		int ruleSize = query.getRules().size();
+		if (ruleSize == 0) {
+			throw new OBDAException("No axiom has been generated from the system! Please recheck your input query.");
 		}
-	    if (!isUCQ(query)) {
+		if (!isUCQ(query)) {
 			throw new InvalidParameterException("Only UCQs are supported at the moment");
 		}
 		log.debug("Generating SQL. Initial query size: {}", query.getRules().size());
@@ -309,7 +310,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 						} else if (term instanceof Variable) {
 							// NO-OP
 						} else if (term instanceof Function) {
-						    // NO-OP
+							// NO-OP
 						} else {
 							throw new RuntimeException("Found a non-supported term in the body while generating SQL");
 						}
@@ -397,39 +398,64 @@ public class SQLGenerator implements SourceQueryGenerator {
 					String column = getSQLString(ht, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
 					sb.append(column);
 				} else if (ht instanceof Function) {
-                    Vector<String> vex = new Vector<String>();
+					Vector<String> vex = new Vector<String>();
 					Function ov = (Function) ht;
 					Predicate functionSymbol = ov.getFunctionSymbol();
 					String functionString = functionSymbol.toString();
 					if (functionSymbol instanceof DataTypePredicate) {
-                        Variable v = (Variable) ov.getTerms().get(0);
-                        String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
-                        sb.append(column);
-                    } else {
-    					List<Term> terms = ov.getTerms();
-    					Iterator<Term> it = terms.iterator();
-    					while (it.hasNext()) {
-    						Term v = it.next();
-    						if (v instanceof Variable) {
-    							Variable var = (Variable) v;
-    							vex.add(getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-    						} else if (v instanceof ValueConstant) {
-    							ValueConstant ct = (ValueConstant) v;
-    							StringBuilder var = new StringBuilder();
-    							var.append(ct.toString());
-    							vex.add(var.toString());
-    						} else if (v instanceof URIConstant) {
-    							URIConstant uc = (URIConstant) v;
-    							StringBuilder var = new StringBuilder();
-    							var.append(getQuotedString(uc.toString()));
-    							vex.add(var.toString());
-    						} else {
-    							throw new RuntimeException("Invalid term in the head");
-    						}
-    					}
-    					String concat = jdbcutil.getConcatination(functionString, vex);
-    					sb.append(concat);
-                    }
+						Variable v = (Variable) ov.getTerms().get(0);
+						String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+						sb.append(column);
+					} else {
+						if (functionString.equals("http://obda.org/quest#uri")) {
+							/***
+							 * New template based URI building functions
+							 */
+							ValueConstant c = (ValueConstant) ov.getTerms().get(0);
+							StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
+							functionString = tokenizer.nextToken();
+							int currentTerm = 1;
+							do {
+								Variable var = (Variable) ov.getTerms().get(currentTerm);
+								vex.add(getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+								if (tokenizer.hasMoreTokens())
+									vex.add("'" + tokenizer.nextToken() + "'" );
+								currentTerm += 1;
+							} while (tokenizer.hasMoreElements() || currentTerm < ov.getTerms().size());
+							String concat = jdbcutil.getConcatination(functionString, vex);
+							sb.append(concat);
+
+						} else {
+							/***
+							 * OLD URI building function
+							 */
+							List<Term> terms = ov.getTerms();
+							Iterator<Term> it = terms.iterator();
+							while (it.hasNext()) {
+								Term v = it.next();
+								if (v instanceof Variable) {
+									Variable var = (Variable) v;									
+									vex.add("-" + getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+								} else if (v instanceof ValueConstant) {
+									ValueConstant ct = (ValueConstant) v;
+									StringBuilder var = new StringBuilder();
+									var.append("'");
+									var.append(ct.toString());
+									var.append("'");
+									vex.add(var.toString());
+								} else if (v instanceof URIConstant) {
+									URIConstant uc = (URIConstant) v;
+									StringBuilder var = new StringBuilder();
+									var.append(getQuotedString(uc.toString()));
+									vex.add(var.toString());
+								} else {
+									throw new RuntimeException("Invalid term in the head");
+								}
+							}
+							String concat = jdbcutil.getConcatination(functionString, vex);
+							sb.append(concat);
+						}
+					}
 				} else if (ht instanceof ValueConstant) {
 					ValueConstant ct = (ValueConstant) ht;
 					sb.append(ct.toString());
@@ -480,7 +506,11 @@ public class SQLGenerator implements SourceQueryGenerator {
 			result.append(getQuotedString(uc.toString()));
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			List<Integer> posList = varAtomIndex.get(var); // locating the first occurrence of the variable in a DB atom (using the indexes)
+			List<Integer> posList = varAtomIndex.get(var); // locating the first
+															// occurrence of the
+															// variable in a DB
+															// atom (using the
+															// indexes)
 			if (posList == null) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
@@ -494,7 +524,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			result.append(columnName);
 		} else if (term instanceof Function) {
 			Function function = (Function) term;
-			Predicate functionSymbol = function.getFunctionSymbol();			
+			Predicate functionSymbol = function.getFunctionSymbol();
 			int arity = function.getArity();
 			if (arity == 1) {
 				// if unary functions
@@ -509,13 +539,12 @@ public class SQLGenerator implements SourceQueryGenerator {
 				}
 			} else if (arity == 2) {
 				// if binary functions
-				result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));				
+				result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 				if (functionSymbol instanceof BooleanOperationPredicate) {
 					result.append(" ");
 					result.append(getBooleanOperatorString(functionSymbol));
 					result.append(" ");
-				}
-				else {
+				} else {
 					throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 				}
 				result.append(getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
@@ -546,7 +575,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 		bf.append("'");
 		return bf.toString();
 	}
-	
+
 	private String getBooleanOperatorString(Predicate functionSymbol) {
 		String operator = null;
 		if (functionSymbol.equals(OBDAVocabulary.EQ)) {
@@ -565,7 +594,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			operator = AND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.OR)) {
 			operator = OR_OPERATOR;
-		}  else if (functionSymbol.equals(OBDAVocabulary.NOT)) {
+		} else if (functionSymbol.equals(OBDAVocabulary.NOT)) {
 			operator = NOT_OPERATOR;
 		}
 		return operator;

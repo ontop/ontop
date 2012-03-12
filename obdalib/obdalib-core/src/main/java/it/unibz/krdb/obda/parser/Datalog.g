@@ -40,7 +40,7 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
 
 import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.PredicateAtom;
+import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -123,13 +123,13 @@ prog returns [DatalogProgram value]
         variableList.addAll(variables); // Import all the data from the Set to a Vector.
          
         // Get the head atom
-        PredicateAtom head = rule.getHead();
+        Atom head = rule.getHead();
         URI name = head.getPredicate().getName();
         int size = variableList.size(); 
         
         // Get the predicate atom
         Predicate predicate = dataFactory.getPredicate(name, size);
-        PredicateAtom newhead = dataFactory.getAtom(predicate, variableList);
+        Atom newhead = dataFactory.getAtom(predicate, variableList);
         rule.updateHead(newhead);
         
         isSelectAll = false;  
@@ -212,7 +212,7 @@ swirl_syntax_alt returns [CQIE value]
     }
   ;
 
-head returns [PredicateAtom value]
+head returns [Atom value]
 @init {
   $value = null;
 }
@@ -228,7 +228,7 @@ body returns [List<Atom> value]
   : a1=atom { $value.add($a1.value); } ((COMMA|CARET) a2=atom { $value.add($a2.value); })*
   ;
 
-atom returns [PredicateAtom value]
+atom returns [Atom value]
   : predicate LPAREN terms? RPAREN  {
       URI uri = URI.create($predicate.value);
       
@@ -289,7 +289,13 @@ literal_term returns [ValueConstant value]
   
 object_term returns [Function value]
   : function LPAREN terms RPAREN {
-      URI uri = URI.create($function.value);
+  URI uri = null;
+      try {
+      uri = new URI($function.value);
+      } catch (Exception e) {
+        System.out.println("Invalid URI: " + $function.value);
+      	throw new RecognitionException();
+      }
       Predicate fs = dataFactory.getPredicate(uri, $terms.elements.size());
       $value = dataFactory.getFunctionalTerm(fs, $terms.elements);
     }
@@ -324,6 +330,10 @@ qualified_name returns [String value]
         uriref = directives.get(prefix);
       else
         uriref = directives.get(OBDA_DEFAULT_URI);
+      if (uriref == null) {
+      	  System.out.println("Unknown prefix");          
+          throw new RecognitionException();
+      }
       
       String uri = uriref + $id.text; // creates the complete Uri string
       $value = uri;
