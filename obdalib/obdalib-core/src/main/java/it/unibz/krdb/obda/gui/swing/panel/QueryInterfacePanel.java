@@ -150,7 +150,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 
 		sparqlPopupMenu.setComponentPopupMenu(sparqlPopupMenu);
 
-		getSPARQLExpansion.setText("Get expansion this UCQ...");
+		getSPARQLExpansion.setText("(Quest) Get query rewriting...");
 		getSPARQLExpansion.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				getSPARQLExpansionActionPerformed(evt);
@@ -158,7 +158,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		});
 		sparqlPopupMenu.add(getSPARQLExpansion);
 
-		getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
+		getSPARQLSQLExpansion.setText("(Quest) Get SQL query...");
 		getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				getSPARQLSQLExpansionActionPerformed(evt);
@@ -344,6 +344,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		saveDialog.getContentPane().add(savePanel, java.awt.BorderLayout.CENTER);
 		saveDialog.pack();
 		DialogUtils.centerDialogWRTParent(this, saveDialog);
+		DialogUtils.installEscapeCloseOperation(saveDialog);
 		saveDialog.setVisible(true);
 	}// GEN-LAST:event_buttonSaveActionPerformed
 

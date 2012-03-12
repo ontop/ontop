@@ -1,5 +1,8 @@
 package it.unibz.krdb.obda.gui.swing.utils;
 
+import java.awt.Color;
+import java.awt.Font;
+
 
 /*
  * To change this template, choose Tools | Templates
@@ -16,7 +19,7 @@ package it.unibz.krdb.obda.gui.swing.utils;
  *
  * @author Manfred Gerstgrasser
  */
-public class TextMessageFrame extends javax.swing.JFrame {
+public class TextMessageFrame extends javax.swing.JDialog {
 
     /**
 	 * 
@@ -26,10 +29,14 @@ public class TextMessageFrame extends javax.swing.JFrame {
     public TextMessageFrame() {
     	super();
         initComponents();
+        jTextArea1.setWrapStyleWord(true);
+        jTextArea1.setBackground(Color.white);
+        jTextArea1.setFont(new Font("Dialog", Font.PLAIN, 12));
     }
     
     public void displaySQL(String sql){
     	jTextArea1.setText(sql);
+    	
     }
     
     public void updateStatus(String time){

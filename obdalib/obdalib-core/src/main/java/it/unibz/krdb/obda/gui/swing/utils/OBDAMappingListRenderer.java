@@ -200,7 +200,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		plainStyle = doc.addStyle("PLAIN_STYLE", null);
 		// StyleConstants.setForeground(plainStyle, Color.BLACK);
 		StyleConstants.setItalic(plainStyle, false);
-		StyleConstants.setSpaceAbove(plainStyle, 0);
+//		StyleConstants.setSpaceAbove(plainStyle, 0);
 		// StyleConstants.setFontFamily(plainStyle,
 		// textPane.getFont().getFamily());
 

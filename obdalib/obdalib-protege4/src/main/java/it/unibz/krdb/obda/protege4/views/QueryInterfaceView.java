@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.gui.swing.panel.QueryInterfacePanel;
 import it.unibz.krdb.obda.gui.swing.panel.ResultViewTablePanel;
 import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
 import it.unibz.krdb.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableModel;
+import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.gui.swing.utils.TextMessageFrame;
@@ -278,8 +279,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (result != null) {
 						TextMessageFrame panel = new TextMessageFrame();
 						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+//						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
+//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+						DialogUtils.centerDialogWRTParent(protegeFrame, panel);
+						DialogUtils.installEscapeCloseOperation(panel);
+						panel.setModal(true);
 						panel.displaySQL(result);
 						panel.setTitle("Query Unfolding");
 						double aux = time;
