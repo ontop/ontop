@@ -142,7 +142,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException {
 		int ruleSize = query.getRules().size();
 		if (ruleSize == 0) {
-			throw new OBDAException("No axiom has been generated from the system! Please recheck your input query.");
+			throw new OBDAException("Cannot generate SQL for an empty query");
 		}
 		if (!isUCQ(query)) {
 			throw new InvalidParameterException("Only UCQs are supported at the moment");

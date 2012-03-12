@@ -91,7 +91,7 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 				atomString.append(pm.getShortForm(f.getFunctionSymbol().toString()));
 				Iterator<Term> innerterms = f.getTerms().iterator();
 				while (innerterms.hasNext()) {
-					atomvar.append(innerterms.next().toString());
+					atomvar.append(pm.getShortForm(innerterms.next().toString(),true,true));
 					if (innerterms.hasNext())
 						atomvar.append(",");
 				}
@@ -100,7 +100,7 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 				atomvar.append(((Variable)t).getName());
 			} else if (t instanceof ValueConstant){
 				atomvar.append("'");
-				atomvar.append(((ValueConstant)t).getValue());
+				pm.getShortForm(((ValueConstant)t).getValue(),true,true);
 				atomvar.append("'");
 			}else if (t instanceof URIConstant){
 				atomvar.append("<");

@@ -25,4 +25,6 @@ public interface PrefixManager extends Serializable
   public String getShortForm(String uri, boolean useDefaultPrefix);
   
   public String getShortForm(String uri);
+  
+  public String getShortForm(String uri, boolean useDefaultPrefix, boolean isLiteral);
 }

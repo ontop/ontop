@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g 2012-03-12 10:08:59
+// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g 2012-03-12 14:10:58
 
 package it.unibz.krdb.obda.parser;
 
@@ -1654,6 +1654,15 @@ public class DatalogParser extends Parser {
             if ( state.backtracking==0 ) {
                   literal = (string29!=null?input.toString(string29.start,string29.stop):null);
                   literal = literal.substring(1, literal.length()-1); // removes the quote signs.
+                  
+                  if (literal.charAt(0) == '<' && literal.charAt(literal.length()-1) == '>') {
+                  	literal = directives.get("") + literal.substring(1,literal.length()-1);
+                  } else {
+                  for (String prefix: directives.keySet()) {
+                  	literal = literal.replaceAll("&" + prefix + ";", directives.get(prefix));
+                  	}
+                  }
+                  
                   value = dataFactory.getValueConstant(literal);
                 }
 
@@ -1675,7 +1684,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "object_term"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:290:1: object_term returns [Function value] : function LPAREN terms RPAREN ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:299:1: object_term returns [Function value] : function LPAREN terms RPAREN ;
     public final Function object_term() throws RecognitionException {
         Function value = null;
 
@@ -1686,8 +1695,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:291:3: ( function LPAREN terms RPAREN )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:291:5: function LPAREN terms RPAREN
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:300:3: ( function LPAREN terms RPAREN )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:300:5: function LPAREN terms RPAREN
             {
             pushFollow(FOLLOW_function_in_object_term653);
             function30=function();
@@ -1735,7 +1744,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "uri_term"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:304:1: uri_term returns [URIConstant value] : uri ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:313:1: uri_term returns [URIConstant value] : uri ;
     public final URIConstant uri_term() throws RecognitionException {
         URIConstant value = null;
 
@@ -1747,8 +1756,8 @@ public class DatalogParser extends Parser {
           String uriText = "";
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:308:3: ( uri )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:308:5: uri
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:317:3: ( uri )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:317:5: uri
             {
             pushFollow(FOLLOW_uri_in_uri_term685);
             uri32=uri();
@@ -1780,7 +1789,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "function"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:315:1: function returns [String value] : ( full_name | plain_name | qualified_name );
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:324:1: function returns [String value] : ( full_name | plain_name | qualified_name );
     public final String function() throws RecognitionException {
         String value = null;
 
@@ -1793,7 +1802,7 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:316:3: ( full_name | plain_name | qualified_name )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:325:3: ( full_name | plain_name | qualified_name )
             int alt15=3;
             switch ( input.LA(1) ) {
             case STRING_URI:
@@ -1823,7 +1832,7 @@ public class DatalogParser extends Parser {
 
             switch (alt15) {
                 case 1 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:316:5: full_name
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:325:5: full_name
                     {
                     pushFollow(FOLLOW_full_name_in_function706);
                     full_name33=full_name();
@@ -1836,7 +1845,7 @@ public class DatalogParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:317:5: plain_name
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:326:5: plain_name
                     {
                     pushFollow(FOLLOW_plain_name_in_function719);
                     plain_name34=plain_name();
@@ -1849,7 +1858,7 @@ public class DatalogParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:318:5: qualified_name
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:327:5: qualified_name
                     {
                     pushFollow(FOLLOW_qualified_name_in_function731);
                     qualified_name35=qualified_name();
@@ -1879,7 +1888,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "qualified_name"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:321:1: qualified_name returns [String value] : prefix id ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:330:1: qualified_name returns [String value] : prefix id ;
     public final String qualified_name() throws RecognitionException {
         String value = null;
 
@@ -1894,8 +1903,8 @@ public class DatalogParser extends Parser {
           String uriref = "";
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:326:3: ( prefix id )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:326:5: prefix id
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:335:3: ( prefix id )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:335:5: prefix id
             {
             pushFollow(FOLLOW_prefix_in_qualified_name755);
             prefix36=prefix();
@@ -1943,7 +1952,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "plain_name"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:343:1: plain_name returns [String value] : id ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:352:1: plain_name returns [String value] : id ;
     public final String plain_name() throws RecognitionException {
         String value = null;
 
@@ -1952,8 +1961,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:344:3: ( id )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:344:5: id
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:353:3: ( id )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:353:5: id
             {
             pushFollow(FOLLOW_id_in_plain_name776);
             id38=id();
@@ -1985,7 +1994,7 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "full_name"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:351:1: full_name returns [String value] : uri ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:360:1: full_name returns [String value] : uri ;
     public final String full_name() throws RecognitionException {
         String value = null;
 
@@ -1994,8 +2003,8 @@ public class DatalogParser extends Parser {
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:352:3: ( uri )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:352:5: uri
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:361:3: ( uri )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:361:5: uri
             {
             pushFollow(FOLLOW_uri_in_full_name795);
             uri39=uri();
@@ -2028,15 +2037,15 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "uri"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:357:1: uri : STRING_URI ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:366:1: uri : STRING_URI ;
     public final DatalogParser.uri_return uri() throws RecognitionException {
         DatalogParser.uri_return retval = new DatalogParser.uri_return();
         retval.start = input.LT(1);
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:358:3: ( STRING_URI )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:358:5: STRING_URI
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:367:3: ( STRING_URI )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:367:5: STRING_URI
             {
             match(input,STRING_URI,FOLLOW_STRING_URI_in_uri810); if (state.failed) return retval;
 
@@ -2064,15 +2073,15 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "uriref"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:361:1: uriref : STRING_URI ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:370:1: uriref : STRING_URI ;
     public final DatalogParser.uriref_return uriref() throws RecognitionException {
         DatalogParser.uriref_return retval = new DatalogParser.uriref_return();
         retval.start = input.LT(1);
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:362:3: ( STRING_URI )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:362:5: STRING_URI
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:371:3: ( STRING_URI )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:371:5: STRING_URI
             {
             match(input,STRING_URI,FOLLOW_STRING_URI_in_uriref823); if (state.failed) return retval;
 
@@ -2100,15 +2109,15 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "id"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:365:1: id : ID_PLAIN ;
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:374:1: id : ID_PLAIN ;
     public final DatalogParser.id_return id() throws RecognitionException {
         DatalogParser.id_return retval = new DatalogParser.id_return();
         retval.start = input.LT(1);
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:366:3: ( ID_PLAIN )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:366:5: ID_PLAIN
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:375:3: ( ID_PLAIN )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:375:5: ID_PLAIN
             {
             match(input,ID_PLAIN,FOLLOW_ID_PLAIN_in_id836); if (state.failed) return retval;
 
@@ -2136,14 +2145,14 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "prefix"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:369:1: prefix : ( STRING_PREFIX | COLON );
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:378:1: prefix : ( STRING_PREFIX | COLON );
     public final DatalogParser.prefix_return prefix() throws RecognitionException {
         DatalogParser.prefix_return retval = new DatalogParser.prefix_return();
         retval.start = input.LT(1);
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:370:3: ( STRING_PREFIX | COLON )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:379:3: ( STRING_PREFIX | COLON )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( input.LA(1)==COLON||input.LA(1)==STRING_PREFIX ) {
@@ -2182,14 +2191,14 @@ public class DatalogParser extends Parser {
 
 
     // $ANTLR start "string"
-    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:374:1: string : ( STRING_LITERAL | STRING_LITERAL2 );
+    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:383:1: string : ( STRING_LITERAL | STRING_LITERAL2 );
     public final DatalogParser.string_return string() throws RecognitionException {
         DatalogParser.string_return retval = new DatalogParser.string_return();
         retval.start = input.LT(1);
 
 
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:375:3: ( STRING_LITERAL | STRING_LITERAL2 )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:384:3: ( STRING_LITERAL | STRING_LITERAL2 )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( (input.LA(1) >= STRING_LITERAL && input.LA(1) <= STRING_LITERAL2) ) {

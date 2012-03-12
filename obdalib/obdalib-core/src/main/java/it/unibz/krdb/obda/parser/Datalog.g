@@ -283,6 +283,15 @@ literal_term returns [ValueConstant value]
   : string {
       literal = $string.text;
       literal = literal.substring(1, literal.length()-1); // removes the quote signs.
+      
+      if (literal.charAt(0) == '<' && literal.charAt(literal.length()-1) == '>') {
+      	literal = directives.get("") + literal.substring(1,literal.length()-1);
+      } else {
+      for (String prefix: directives.keySet()) {
+      	literal = literal.replaceAll("&" + prefix + ";", directives.get(prefix));
+      	}
+      }
+      
       $value = dataFactory.getValueConstant(literal);
     }
   ; 

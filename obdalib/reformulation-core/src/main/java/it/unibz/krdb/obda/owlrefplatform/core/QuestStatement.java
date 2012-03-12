@@ -167,8 +167,11 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Start the unfolding process...");
 		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
 
+		if (((DatalogProgram) unfolding).getRules().size() == 0)
+			return "";
 		log.debug("Producing the SQL string...");
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, signature);
+
 		return sql;
 	}
 
@@ -188,7 +191,7 @@ public class QuestStatement implements OBDAStatement {
 			 * Empty unfolding, constructing an empty result set
 			 */
 			if (program.getRules().size() < 1) {
-				throw new OBDAException("Error, empty query");
+				throw new OBDAException("Error, invalid query");
 			}
 			result = new EmptyQueryResultSet(signature, this);
 		} else {

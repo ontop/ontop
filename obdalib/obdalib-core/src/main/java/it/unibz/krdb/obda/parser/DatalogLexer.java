@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g 2012-03-12 10:08:59
+// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g 2012-03-12 14:10:58
 
 package it.unibz.krdb.obda.parser;
 
@@ -97,8 +97,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = PREFIX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:383:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:383:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:392:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:392:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
                 input.consume();
@@ -176,8 +176,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = BASE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:385:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:385:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:394:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:394:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
@@ -235,8 +235,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = IMPLIES;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:387:8: ( '->' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:387:16: '->'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:396:8: ( '->' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:396:16: '->'
             {
             match("->"); 
 
@@ -258,8 +258,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = INV_IMPLIES;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:388:12: ( ':-' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:388:16: ':-'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:397:12: ( ':-' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:397:16: ':-'
             {
             match(":-"); 
 
@@ -281,8 +281,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = REFERENCE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:389:10: ( '^^' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:389:16: '^^'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:398:10: ( '^^' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:398:16: '^^'
             {
             match("^^"); 
 
@@ -304,8 +304,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:390:5: ( ';' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:390:16: ';'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:399:5: ( ';' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:399:16: ';'
             {
             match(';'); 
 
@@ -325,8 +325,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:391:4: ( '.' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:391:16: '.'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:400:4: ( '.' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:400:16: '.'
             {
             match('.'); 
 
@@ -346,8 +346,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:392:6: ( ',' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:392:16: ','
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:401:6: ( ',' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:401:16: ','
             {
             match(','); 
 
@@ -367,8 +367,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:393:12: ( '[' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:393:16: '['
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:402:12: ( '[' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:402:16: '['
             {
             match('['); 
 
@@ -388,8 +388,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:394:12: ( ']' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:394:16: ']'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:403:12: ( ']' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:403:16: ']'
             {
             match(']'); 
 
@@ -409,8 +409,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:395:7: ( '(' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:395:16: '('
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:404:7: ( '(' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:404:16: '('
             {
             match('('); 
 
@@ -430,8 +430,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:396:7: ( ')' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:396:16: ')'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:405:7: ( ')' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:405:16: ')'
             {
             match(')'); 
 
@@ -451,8 +451,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:397:9: ( '?' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:397:16: '?'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:406:9: ( '?' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:406:16: '?'
             {
             match('?'); 
 
@@ -472,8 +472,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:398:7: ( '$' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:398:16: '$'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:407:7: ( '$' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:407:16: '$'
             {
             match('$'); 
 
@@ -493,8 +493,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:399:13: ( '\"' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:399:16: '\"'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:408:13: ( '\"' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:408:16: '\"'
             {
             match('\"'); 
 
@@ -514,8 +514,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:400:13: ( '\\'' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:400:16: '\\''
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:409:13: ( '\\'' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:409:16: '\\''
             {
             match('\''); 
 
@@ -535,8 +535,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:401:11: ( '`' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:401:16: '`'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:410:11: ( '`' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:410:16: '`'
             {
             match('`'); 
 
@@ -556,8 +556,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:402:11: ( '_' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:402:16: '_'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:411:11: ( '_' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:411:16: '_'
             {
             match('_'); 
 
@@ -577,8 +577,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:403:5: ( '-' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:403:16: '-'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:412:5: ( '-' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:412:16: '-'
             {
             match('-'); 
 
@@ -598,8 +598,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:404:9: ( '*' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:404:16: '*'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:413:9: ( '*' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:413:16: '*'
             {
             match('*'); 
 
@@ -619,8 +619,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:405:10: ( '&' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:405:16: '&'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:414:10: ( '&' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:414:16: '&'
             {
             match('&'); 
 
@@ -640,8 +640,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:406:3: ( '@' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:406:16: '@'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:415:3: ( '@' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:415:16: '@'
             {
             match('@'); 
 
@@ -661,8 +661,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:407:12: ( '!' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:407:16: '!'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:416:12: ( '!' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:416:16: '!'
             {
             match('!'); 
 
@@ -682,8 +682,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:408:5: ( '#' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:408:16: '#'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:417:5: ( '#' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:417:16: '#'
             {
             match('#'); 
 
@@ -703,8 +703,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:409:8: ( '%' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:409:16: '%'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:418:8: ( '%' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:418:16: '%'
             {
             match('%'); 
 
@@ -724,8 +724,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:410:5: ( '+' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:410:16: '+'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:419:5: ( '+' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:419:16: '+'
             {
             match('+'); 
 
@@ -745,8 +745,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:411:7: ( '=' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:411:16: '='
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:420:7: ( '=' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:420:16: '='
             {
             match('='); 
 
@@ -766,8 +766,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:412:6: ( ':' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:412:16: ':'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:421:6: ( ':' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:421:16: ':'
             {
             match(':'); 
 
@@ -787,8 +787,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:413:5: ( '<' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:413:16: '<'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:422:5: ( '<' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:422:16: '<'
             {
             match('<'); 
 
@@ -808,8 +808,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:414:8: ( '>' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:414:16: '>'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:423:8: ( '>' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:423:16: '>'
             {
             match('>'); 
 
@@ -829,8 +829,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:415:6: ( '/' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:415:16: '/'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:424:6: ( '/' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:424:16: '/'
             {
             match('/'); 
 
@@ -850,8 +850,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:416:13: ( '//' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:416:16: '//'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:425:13: ( '//' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:425:16: '//'
             {
             match("//"); 
 
@@ -873,8 +873,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:417:10: ( '\\\\' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:417:16: '\\\\'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:426:10: ( '\\\\' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:426:16: '\\\\'
             {
             match('\\'); 
 
@@ -894,8 +894,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:418:6: ( '~' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:418:16: '~'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:427:6: ( '~' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:427:16: '~'
             {
             match('~'); 
 
@@ -915,8 +915,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:419:6: ( '^' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:419:16: '^'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:428:6: ( '^' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:428:16: '^'
             {
             match('^'); 
 
@@ -934,7 +934,7 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:421:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:430:15: ( ( 'a' .. 'z' | 'A' .. 'Z' ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -960,7 +960,7 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:423:15: ( '0' .. '9' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:432:15: ( '0' .. '9' )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -986,7 +986,7 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:425:18: ( ( ALPHA | DIGIT ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:434:18: ( ( ALPHA | DIGIT ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1012,7 +1012,7 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ID_START"
     public final void mID_START() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:427:18: ( ( ALPHA | UNDERSCORE ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:436:18: ( ( ALPHA | UNDERSCORE ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1038,7 +1038,7 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ID_CORE"
     public final void mID_CORE() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:429:17: ( ( ID_START | DIGIT ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:438:17: ( ( ID_START | DIGIT ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1064,13 +1064,13 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "SCHEMA"
     public final void mSCHEMA() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:431:16: ( ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:431:18: ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:16: ( ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:18: ALPHA ( ALPHA | DIGIT | PLUS | DASH | DOT )*
             {
             mALPHA(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:431:24: ( ALPHA | DIGIT | PLUS | DASH | DOT )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:24: ( ALPHA | DIGIT | PLUS | DASH | DOT )*
             loop1:
             do {
                 int alt1=2;
@@ -1117,7 +1117,7 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "URI_PATH"
     public final void mURI_PATH() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:433:18: ( ( ALPHANUM | UNDERSCORE | DASH | COLON | DOT | HASH | QUESTION | SLASH ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:442:18: ( ( ALPHANUM | UNDERSCORE | DASH | COLON | DOT | HASH | QUESTION | SLASH ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:
             {
             if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1143,13 +1143,13 @@ public class DatalogLexer extends Lexer {
     // $ANTLR start "ID"
     public final void mID() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:435:12: ( ID_START ( ID_CORE )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:435:14: ID_START ( ID_CORE )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:12: ( ID_START ( ID_CORE )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:14: ID_START ( ID_CORE )*
             {
             mID_START(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:435:23: ( ID_CORE )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:23: ( ID_CORE )*
             loop2:
             do {
                 int alt2=2;
@@ -1198,13 +1198,13 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = ID_PLAIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:437:9: ( ID_START ( ID_CORE )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:437:11: ID_START ( ID_CORE )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:446:9: ( ID_START ( ID_CORE )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:446:11: ID_START ( ID_CORE )*
             {
             mID_START(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:437:20: ( ID_CORE )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:446:20: ( ID_CORE )*
             loop3:
             do {
                 int alt3=2;
@@ -1254,13 +1254,13 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_LITERAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:3: ( QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:5: QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:449:3: ( QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:449:5: QUOTE_DOUBLE ( options {greedy=false; } : . )* QUOTE_DOUBLE
             {
             mQUOTE_DOUBLE(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:18: ( options {greedy=false; } : . )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:449:18: ( options {greedy=false; } : . )*
             loop4:
             do {
                 int alt4=2;
@@ -1276,7 +1276,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt4) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:440:45: .
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:449:45: .
             	    {
             	    matchAny(); 
 
@@ -1308,13 +1308,13 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_LITERAL2;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:3: ( QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:5: QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:453:3: ( QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:453:5: QUOTE_SINGLE ( options {greedy=false; } : . )* QUOTE_SINGLE
             {
             mQUOTE_SINGLE(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:18: ( options {greedy=false; } : . )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:453:18: ( options {greedy=false; } : . )*
             loop5:
             do {
                 int alt5=2;
@@ -1330,7 +1330,7 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt5) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:444:45: .
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:453:45: .
             	    {
             	    matchAny(); 
 
@@ -1362,8 +1362,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_URI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:448:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:448:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:457:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:457:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
             {
             mSCHEMA(); 
 
@@ -1374,7 +1374,7 @@ public class DatalogLexer extends Lexer {
             mDOUBLE_SLASH(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:448:31: ( URI_PATH )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:457:31: ( URI_PATH )*
             loop6:
             do {
                 int alt6=2;
@@ -1424,8 +1424,8 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = STRING_PREFIX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:452:3: ( ID COLON )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:452:5: ID COLON
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:461:3: ( ID COLON )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:461:5: ID COLON
             {
             mID(); 
 
@@ -1449,10 +1449,10 @@ public class DatalogLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt8=0;
             loop8:
             do {
@@ -1479,23 +1479,23 @@ public class DatalogLexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:6: ' '
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:10: '\\t'
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt7=2;
             	    int LA7_0 = input.LA(1);
 
@@ -1514,19 +1514,19 @@ public class DatalogLexer extends Lexer {
             	    }
             	    switch (alt7) {
             	        case 1 :
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:16: '\\n'
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:21: '\\r' ( '\\n' )
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
 
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:25: ( '\\n' )
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:455:26: '\\n'
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:25: ( '\\n' )
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Datalog.g:464:26: '\\n'
             	            {
             	            match('\n'); 
 

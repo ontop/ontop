@@ -154,7 +154,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 			term_sb.append(term.toString());
 		} else if (term instanceof ValueConstant) {
 			term_sb.append("\"");
-			term_sb.append(term.toString());
+			term_sb.append(man.getShortForm(term.toString(),true,true));
 			term_sb.append("\"");
 		}
 		return term_sb.toString();
