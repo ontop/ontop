@@ -166,9 +166,9 @@ public class Tester {
 					tuple = tuple + ",";
 				}
 				if (isBooleanQuery(id)) {
-					tuple = tuple + result.getAsString(i);
+					tuple = tuple + result.getString(i);
 				} else {
-					URI uri = result.getAsURI(i);
+					URI uri = result.getURI(i);
 					tuple = tuple + uri.getFragment();
 				}
 			}

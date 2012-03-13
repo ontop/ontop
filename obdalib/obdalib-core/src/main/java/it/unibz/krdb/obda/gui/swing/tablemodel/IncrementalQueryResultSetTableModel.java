@@ -57,7 +57,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 
 					String[] crow = new String[numcols];
 					for (int j = 0; j < numcols; j++) {
-						crow[j] = results.getAsString(j + 1);
+						crow[j] = results.getString(j + 1);
 					}
 					resultsTable.add(crow);
 					i += 1;
@@ -191,7 +191,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 				if (results.nextRow()) {
 					String[] crow = new String[numcols];
 					for (int j = 0; j < numcols; j++) {
-						crow[j] = results.getAsString(j + 1);
+						crow[j] = results.getString(j + 1);
 					}
 					resultsTable.add(crow);
 					i += 1;

@@ -13,7 +13,7 @@ import java.net.URI;
  */
 public interface Predicate extends Cloneable, Serializable {
 
-	public enum COL_TYPE {OBJECT, LITERAL, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN};
+	public enum COL_TYPE {OBJECT, BNODE, LITERAL, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN};
 	
 	/**
 	 * Get the name of the predicate. In practice, the predicate name is

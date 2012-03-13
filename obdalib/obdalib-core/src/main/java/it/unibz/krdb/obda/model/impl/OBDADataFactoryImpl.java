@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -31,7 +32,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	 * 
 	 */
 	private static final long serialVersionUID = 1851116693137470887L;
-	private static OBDADataFactoryImpl	instance	= null;
+	private static OBDADataFactoryImpl instance = null;
 
 	protected OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
@@ -51,7 +52,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Deprecated
 	public PredicateImpl getPredicate(URI name, int arity) {
 		if (arity == 1) {
-			return new PredicateImpl(name, arity, new COL_TYPE[] {COL_TYPE.OBJECT});
+			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
 		} else {
 			return new PredicateImpl(name, arity, null);
 		}
@@ -60,19 +61,17 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public PredicateImpl getPredicate(URI name, int arity, COL_TYPE[] types) {
 		return new PredicateImpl(name, arity, types);
 	}
-	
+
 	public Predicate getObjectPropertyPredicate(URI name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] {COL_TYPE.OBJECT, COL_TYPE.OBJECT});
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	}
 
-	
 	public Predicate getDataPropertyPredicate(URI name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] {COL_TYPE.OBJECT, COL_TYPE.LITERAL});
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 	}
 
-	
 	public Predicate getClassPredicate(URI name) {
-		return new PredicateImpl(name, 1, new COL_TYPE[] {COL_TYPE.OBJECT});
+		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
 	}
 
 	@Override
@@ -327,32 +326,32 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Predicate getDataTypePredicateString(URI name) {
 		return OBDAVocabulary.XSD_STRING;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateInteger(URI name) {
 		return OBDAVocabulary.XSD_INTEGER;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateDecimal(URI name) {
 		return OBDAVocabulary.XSD_DECIMAL;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateDouble(URI name) {
 		return OBDAVocabulary.XSD_DOUBLE;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateDate(URI name) {
 		return OBDAVocabulary.XSD_DATETIME;
 	}
-	
+
 	@Override
 	public Predicate getDataTypePredicateBoolean(URI name) {
 		return OBDAVocabulary.XSD_BOOLEAN;
-	}	
-	
+	}
+
 	@Override
 	public Function getEQFunction(Term firstTerm, Term secondTerm) {
 		return getFunctionalTerm(OBDAVocabulary.EQ, firstTerm, secondTerm);
@@ -499,6 +498,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return OBDAVocabulary.NEQ;
 		}
 		return getPredicate(URI.create(uri), arity, types);
+	}
+
+	@Override
+	public BNode getBNodeConstant(String name) {
+		return new BNodeConstantImpl(name);
 	}
 
 }

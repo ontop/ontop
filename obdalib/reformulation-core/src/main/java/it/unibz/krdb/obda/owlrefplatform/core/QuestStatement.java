@@ -5,13 +5,15 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAConnection;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,7 +123,10 @@ public class QuestStatement implements OBDAStatement {
 
 			String epistemicUnfolding = getSQLEpistemic(strquery);
 			ResultSet set = sqlstatement.executeQuery(epistemicUnfolding);
-			result = new OWLOBDARefResultSet(set, this);
+
+			int columnCount = set.getMetaData().getColumnCount();
+			List<Term> typing = getDefaultTypingSignature(columnCount);
+			result = new OWLOBDARefResultSet(set, typing, this);
 
 			return result;
 		} catch (Exception e) {
@@ -132,14 +138,66 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			OBDAResultSet result;
 			ResultSet set = sqlstatement.executeQuery(query);
-			result = new OWLOBDARefResultSet(set, this);
+
+			int columnCount = set.getMetaData().getColumnCount();
+			List<Term> typing = getDefaultTypingSignature(columnCount);
+			result = new OWLOBDARefResultSet(set, typing, this);
 			return result;
 		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
 	}
 
-	private String getSQL(DatalogProgram program, List<String> signature) throws OBDAException {
+	private List<Term> getDefaultTypingSignature(int columnCount) {
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+		List<Term> signatureTyping = new ArrayList<Term>();
+		for (int i = 0; i < columnCount; i++) {
+			signatureTyping.add(fac.getFunctionalTerm(OBDAVocabulary.RDFS_LITERAL, fac.getVariable("x")));
+		}
+		return signatureTyping;
+	}
+
+	// private DatalogProgram getRewriting(DatalogProgram) {
+	//
+	// }
+	//
+	/***
+	 * Translates a SPARQL query into Datalog dealing with equivalences and
+	 * verifying that the vocabulary of the query matches the one in the
+	 * ontology. If there are equivalences to handle, this is where its done
+	 * (i.e., renaming atoms that use predicates that have been replaced by a
+	 * canonical one.
+	 * 
+	 * @param query
+	 * @return
+	 */
+	private DatalogProgram translateAndPreProcess(String strquery) throws OBDAException {
+		// Contruct the datalog program object from the query string
+		log.debug("Input user query:\n" + strquery);
+
+		SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
+
+		DatalogProgram program = null;
+		try {
+			program = sparqlTranslator.parse(strquery);
+		} catch (QueryException e) {
+			log.warn(e.getMessage());
+		}
+
+		if (program == null) { // if the SPARQL translator doesn't work,
+			// use the Datalog parser.
+			DatalogProgramParser datalogParser = new DatalogProgramParser();
+			try {
+				program = datalogParser.parse(strquery);
+			} catch (RecognitionException e) {
+				log.warn(e.getMessage());
+				program = null;
+			} catch (IllegalArgumentException e2) {
+				log.warn(e2.getMessage());
+			}
+		}
+
 		// Check the datalog object
 		if (validator != null) {
 			log.debug("Validating the user query...");
@@ -152,36 +210,37 @@ public class QuestStatement implements OBDAStatement {
 				for (String predicate : invalidList) {
 					msg += "- " + predicate + "\n";
 				}
-				throw new OBDAException("These predicates are missing from the ontology's vocabulary: \n" + msg);
+				throw new OBDAException("Unknown Classes/Properties in the query: \n" + msg);
 			}
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
+		return program;
+	}
 
-		// If the datalog is valid, proceed to the next process.
-		signature.addAll(getSignature(program));
-
-		log.debug("Start the rewriting process...");
-		OBDAQuery rewriting = rewriter.rewrite(program);
-
+	private DatalogProgram getUnfolding(DatalogProgram query) throws OBDAException {
 		log.debug("Start the unfolding process...");
-		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) rewriting);
+		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) query);
+		return (DatalogProgram)unfolding;
+	}
 
-		if (((DatalogProgram) unfolding).getRules().size() == 0)
+	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
+		if (((DatalogProgram) query).getRules().size() == 0)
 			return "";
 		log.debug("Producing the SQL string...");
-		String sql = querygenerator.generateSourceQuery((DatalogProgram) unfolding, signature);
-
+		String sql = querygenerator.generateSourceQuery((DatalogProgram) query, signature);
 		return sql;
 	}
 
 	private OBDAResultSet executeConjunctiveQuery(String strquery) throws OBDAException {
-		// Contruct the datalog program object from the query string
-		log.debug("Input user query:\n" + strquery);
-		DatalogProgram program = getDatalogQuery(strquery);
+		List<String> signature = getSignature(strquery);
+		DatalogProgram program = translateAndPreProcess(strquery);
 
-		List<String> signature = new LinkedList<String>();
-		String sql = getSQL(program, signature);
+		log.debug("Start the rewriting process...");
+		DatalogProgram rewriting = getRewriting(program);
+
+		DatalogProgram unfolding = getUnfolding(rewriting);
+		String sql = getSQL(unfolding, signature);
 
 		OBDAResultSet result;
 
@@ -204,7 +263,12 @@ public class QuestStatement implements OBDAStatement {
 			if (isDPBoolean(program)) {
 				result = new BooleanOWLOBDARefResultSet(set, this);
 			} else {
-				result = new OWLOBDARefResultSet(set, this);
+				List<Term> typingSignature = unfolding.getRules().get(0).getHead().getTerms();
+				try {
+					result = new OWLOBDARefResultSet(set, typingSignature, this);
+				} catch (SQLException e) {
+					throw new OBDAException(e.getMessage());
+				}
 			}
 		}
 
@@ -213,41 +277,24 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	/**
-	 * Extracts the signature of a CQ query given as a DatalogProgram. Only
-	 * variables are accepted in the signature of queries.
-	 * 
-	 * @param program
-	 * @return
-	 * @throws Exception
+	 * Returns the final rewriting of the given query
 	 */
-	private List<String> getSignature(DatalogProgram program) throws OBDAException {
-		if (program.getRules().size() < 1)
-			throw new OBDAException("Invalid query");
+	public String getRewriting(String strquery) throws Exception {
+		// TODO FIX to limit to SPARQL input and output
+		DatalogProgram program = translateAndPreProcess(strquery);
 
-		List<String> signature = new LinkedList<String>();
-		for (Term term : program.getRules().get(0).getHead().getTerms()) {
-			if (term instanceof Variable) {
-				signature.add(((Variable) term).getName());
-			} else {
-				throw new OBDAException("Only variables are allowed in the head of queries");
-			}
-		}
-		return signature;
+		OBDAQuery rewriting = rewriter.rewrite(program);
+		DatalogProgramToTextCodec codec = new DatalogProgramToTextCodec(unfoldingOBDAModel);
+		return codec.encode((DatalogProgram) rewriting);
 	}
 
 	/**
 	 * Returns the final rewriting of the given query
 	 */
-	public String getRewriting(String strquery) throws Exception {
-		// TODO FIX to limit to SPARQL input and output
-		DatalogProgram program = getDatalogQuery(strquery);
-
-		log.debug("Replacing equivalences...");
-		program = validator.replaceEquivalences(program);
-
+	public DatalogProgram getRewriting(DatalogProgram program) throws OBDAException {
 		OBDAQuery rewriting = rewriter.rewrite(program);
-		DatalogProgramToTextCodec codec = new DatalogProgramToTextCodec(unfoldingOBDAModel);
-		return codec.encode((DatalogProgram) rewriting);
+		return (DatalogProgram) rewriting;
+
 	}
 
 	private String getSQLEpistemic(String strquery) throws OBDAException {
@@ -288,7 +335,7 @@ public class QuestStatement implements OBDAStatement {
 			String cq = cqs.get(i);
 			try {
 				DatalogProgram p = t.parse(cq);
-				List<String> signature = getSignature(p);
+				List<String> signature = getSignature(cq);
 				String finasql = getSQL(p, signature);
 				log.debug("SQL: {}", finasql);
 				sqlforcqs.add(finasql);
@@ -332,8 +379,9 @@ public class QuestStatement implements OBDAStatement {
 		if (strquery.contains("/*direct*/")) {
 			sql = strquery;
 		} else {
-			DatalogProgram p = getDatalogQuery(strquery);
-			sql = getSQL(p, getSignature(p));
+			DatalogProgram p = translateAndPreProcess(strquery);
+			DatalogProgram rewriting = getRewriting(p);
+			sql = getSQL(p, getSignature(strquery));
 		}
 		return sql;
 	}
@@ -388,33 +436,40 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
-	private DatalogProgram getDatalogQuery(String query) throws OBDAException {
+	// private DatalogProgram getDatalogQuery(String query) throws OBDAException
+	// {
+	// SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
+	//
+	// DatalogProgram queryProgram = null;
+	// try {
+	// queryProgram = sparqlTranslator.parse(query);
+	// } catch (QueryException e) {
+	// log.warn(e.getMessage());
+	// }
+	//
+	// if (queryProgram == null) { // if the SPARQL translator doesn't work,
+	// // use the Datalog parser.
+	// DatalogProgramParser datalogParser = new DatalogProgramParser();
+	// try {
+	// queryProgram = datalogParser.parse(query);
+	// } catch (RecognitionException e) {
+	// log.warn(e.getMessage());
+	// queryProgram = null;
+	// } catch (IllegalArgumentException e2) {
+	// log.warn(e2.getMessage());
+	// }
+	// }
+	//
+	// if (queryProgram == null) // if it is still null
+	// throw new OBDAException("Unsupported syntax");
+	//
+	// return queryProgram;
+	// }
+
+	private List<String> getSignature(String query) throws OBDAException {
 		SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
-
-		DatalogProgram queryProgram = null;
-		try {
-			queryProgram = sparqlTranslator.parse(query);
-		} catch (QueryException e) {
-			log.warn(e.getMessage());
-		}
-
-		if (queryProgram == null) { // if the SPARQL translator doesn't work,
-			// use the Datalog parser.
-			DatalogProgramParser datalogParser = new DatalogProgramParser();
-			try {
-				queryProgram = datalogParser.parse(query);
-			} catch (RecognitionException e) {
-				log.warn(e.getMessage());
-				queryProgram = null;
-			} catch (IllegalArgumentException e2) {
-				log.warn(e2.getMessage());
-			}
-		}
-
-		if (queryProgram == null) // if it is still null
-			throw new OBDAException("Unsupported syntax");
-
-		return queryProgram;
+		List<String> signature = sparqlTranslator.getSignature(query);
+		return signature;
 	}
 
 	@Override

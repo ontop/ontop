@@ -49,10 +49,9 @@ import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
 import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
 
-
 /**
  * Provides the translation from a query string to Java objects.
- *
+ * 
  * @see DatalogProgram
  */
 public class SPARQLDatalogTranslator {
@@ -66,25 +65,33 @@ public class SPARQLDatalogTranslator {
 	/**
 	 * The default constructor.
 	 */
-	public SPARQLDatalogTranslator() { }
+	public SPARQLDatalogTranslator() {
+	}
 
 	/**
-	 * Returns the datalog object from the parsing process. The syntax
-	 * of the query string has the following form:
+	 * Returns the datalog object from the parsing process. The syntax of the
+	 * query string has the following form:
+	 * 
 	 * <pre>
 	 * {@code
 	 * <head> :- <body>
-	 * } </pre>
-	 * where {@code<head>} is a single predicate and the {@code<body>} is a
-	 * list of predicates. An example:
+	 * }
+	 * </pre>
+	 * 
+	 * where {@code<head>} is a single predicate and the {@code<body>} is a list
+	 * of predicates. An example:
+	 * 
 	 * <pre>
 	 * {@code
 	 * result(Name, Code, Phone) :- student(Name, Phone), enrolledIn(Name, Code).
-	 * } </pre>
-	 *
-	 * @param query a string of SPARQL query.
+	 * }
+	 * </pre>
+	 * 
+	 * @param query
+	 *            a string of SPARQL query.
 	 * @return the datalog object.
-	 * @throws QueryException the syntax is not supported yet.
+	 * @throws QueryException
+	 *             the syntax is not supported yet.
 	 */
 	public DatalogProgram parse(String query) throws QueryException {
 
@@ -109,6 +116,11 @@ public class SPARQLDatalogTranslator {
 		CQIE rule = predicateFactory.getCQIE(head, body);
 		datalog.appendRule(rule);
 		return datalog;
+	}
+
+	public List<String> getSignature(String query) {
+		Query queryObject = QueryFactory.create(query);
+		return queryObject.getResultVars();
 	}
 
 	/** Extract the head atom */
@@ -162,90 +174,82 @@ public class SPARQLDatalogTranslator {
 			URI objectUri = null;
 
 			// Instantiate the subject and object data type
-		    COL_TYPE subjectType = null;
-		    COL_TYPE objectType = null;
-		    
-		    /// Instantiate the atom components: predicate and terms.
+			COL_TYPE subjectType = null;
+			COL_TYPE objectType = null;
+
+			// / Instantiate the atom components: predicate and terms.
 			Predicate predicate = null;
 			Vector<Term> terms = new Vector<Term>();
-		    
-			if (p.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {			    
-			    // Subject node
+
+			if (p.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+				// Subject node
 				if (s instanceof Var) {
 					Var subject = (Var) s;
 					terms.add(termFactory.getVariable(subject.getName()));
-				}
-				else if (s instanceof Node_Literal) {
-					Node_Literal subject = (Node_Literal) s;
-					String value = subject.getLiteralValue().toString();
-					subjectType = getDataType(subject);
-                    terms.add(termFactory.getValueConstant(value, subjectType));
-				}
-				else if (s instanceof Node_URI) {
-					Node_URI subject = (Node_URI) s;
-					subjectType = COL_TYPE.OBJECT;
-					subjectUri = URI.create(subject.getURI());
-					terms.add(termFactory.getURIConstant(subjectUri));
-				}
-				
-				// Object node
-				if (o instanceof Var) {
-					throw new QueryException("Unsupported query syntax");
-				}
-				else if (o instanceof Node_Literal) {
-					throw new QueryException("Unsupported query syntax");
-				}
-				else if (o instanceof Node_URI) {
-					Node_URI object = (Node_URI) o;
-					objectUri = URI.create(object.getURI());
-				}
-				
-				// Construct the predicate
-				URI predicateUri = objectUri;
-				predicate = predicateFactory.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
-			}
-			else {
-			    // Subject node
-				if (s instanceof Var) {
-					Var subject = (Var) s;
-					terms.add(termFactory.getVariable(subject.getName()));
-				}
-				else if (s instanceof Node_Literal) {
+				} else if (s instanceof Node_Literal) {
 					Node_Literal subject = (Node_Literal) s;
 					String value = subject.getLiteralValue().toString();
 					subjectType = getDataType(subject);
 					terms.add(termFactory.getValueConstant(value, subjectType));
-				}
-				else if (s instanceof Node_URI) {
+				} else if (s instanceof Node_URI) {
 					Node_URI subject = (Node_URI) s;
 					subjectType = COL_TYPE.OBJECT;
 					subjectUri = URI.create(subject.getURI());
 					terms.add(termFactory.getURIConstant(subjectUri));
 				}
 
-                // Object node
+				// Object node
+				if (o instanceof Var) {
+					throw new QueryException("Unsupported query syntax");
+				} else if (o instanceof Node_Literal) {
+					throw new QueryException("Unsupported query syntax");
+				} else if (o instanceof Node_URI) {
+					Node_URI object = (Node_URI) o;
+					objectUri = URI.create(object.getURI());
+				}
+
+				// Construct the predicate
+				URI predicateUri = objectUri;
+				predicate = predicateFactory.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
+			} else {
+				// Subject node
+				if (s instanceof Var) {
+					Var subject = (Var) s;
+					terms.add(termFactory.getVariable(subject.getName()));
+				} else if (s instanceof Node_Literal) {
+					Node_Literal subject = (Node_Literal) s;
+					String value = subject.getLiteralValue().toString();
+					subjectType = getDataType(subject);
+					terms.add(termFactory.getValueConstant(value, subjectType));
+				} else if (s instanceof Node_URI) {
+					Node_URI subject = (Node_URI) s;
+					subjectType = COL_TYPE.OBJECT;
+					subjectUri = URI.create(subject.getURI());
+					terms.add(termFactory.getURIConstant(subjectUri));
+				}
+
+				// Object node
 				if (o instanceof Var) {
 					Var object = (Var) o;
 					terms.add(termFactory.getVariable(object.getName()));
-				}
-				else if (o instanceof Node_Literal) {
+				} else if (o instanceof Node_Literal) {
 					Node_Literal object = (Node_Literal) o;
 					String value = object.getLiteralValue().toString();
 					objectType = getDataType(object);
-                    ValueConstant constant = termFactory.getValueConstant(value, objectType);
-                    
-                    // v1.7: We extend the syntax such that the data type of a constant 
-                    // is defined using a functional symbol. 
-                    Function dataTypeFunction = termFactory.getFunctionalTerm(getDataTypePredicate(objectType), constant);
-                    terms.add(dataTypeFunction);
-				}
-				else if (o instanceof Node_URI) {
+					ValueConstant constant = termFactory.getValueConstant(value, objectType);
+
+					// v1.7: We extend the syntax such that the data type of a
+					// constant
+					// is defined using a functional symbol.
+					Function dataTypeFunction = termFactory.getFunctionalTerm(getDataTypePredicate(objectType), constant);
+					terms.add(dataTypeFunction);
+				} else if (o instanceof Node_URI) {
 					Node_URI object = (Node_URI) o;
 					objectType = COL_TYPE.OBJECT;
 					objectUri = URI.create(object.getURI());
 					terms.add(termFactory.getURIConstant(objectUri));
 				}
-				
+
 				// Construct the predicate
 				URI predicateUri = URI.create(p.getURI());
 				predicate = predicateFactory.getPredicate(predicateUri, 2, new COL_TYPE[] { subjectType, objectType });
@@ -256,22 +260,22 @@ public class SPARQLDatalogTranslator {
 		}
 		return elementTriplesAtoms;
 	}
-	
+
 	private List<Atom> collectElementFilterAtom(ElementFilter elementFilter) {
-		
+
 		List<Atom> elementFilterAtoms = new LinkedList<Atom>();
-		
+
 		Expr expr = elementFilter.getExpr();
-		
+
 		if (expr instanceof ExprFunction2) {
 			// The expected function should be: (VAR) (OP) (VAR|LITERAL)
 			ExprFunction2 function = (ExprFunction2) expr;
 			Expr arg1 = function.getArg1();
 			Expr arg2 = function.getArg2();
-			
+
 			Term term1 = getTermOfRelationalArgument(arg1, 1);
-			Term term2 = getTermOfRelationalArgument(arg2, 2);			
-			
+			Term term2 = getTermOfRelationalArgument(arg2, 2);
+
 			if (expr instanceof E_Equals) {
 				elementFilterAtoms.add(termFactory.getEQAtom(term1, term2));
 			} else if (expr instanceof E_NotEquals) {
@@ -292,12 +296,12 @@ public class SPARQLDatalogTranslator {
 		}
 		return elementFilterAtoms;
 	}
-	
+
 	private Term getTermOfRelationalArgument(Expr arg, int index) {
 		Term term = null;
 		if (arg instanceof ExprVar) {
 			term = termFactory.getVariable(arg.getVarName());
-		} else if (arg instanceof NodeValue){
+		} else if (arg instanceof NodeValue) {
 			if (index == 1) {
 				// if the first argument is a constant.
 				throw new QueryException("Unsupported query syntax");
@@ -306,79 +310,88 @@ public class SPARQLDatalogTranslator {
 			if (node instanceof NodeValueString) {
 				term = termFactory.getValueConstant(node.getString(), COL_TYPE.STRING);
 			} else if (node instanceof NodeValueInteger) {
-				term = termFactory.getValueConstant(node.getInteger()+"", COL_TYPE.INTEGER);
+				term = termFactory.getValueConstant(node.getInteger() + "", COL_TYPE.INTEGER);
 			} else if (node instanceof NodeValueDecimal) {
-				term = termFactory.getValueConstant(node.getDecimal()+"", COL_TYPE.DECIMAL);
+				term = termFactory.getValueConstant(node.getDecimal() + "", COL_TYPE.DECIMAL);
 			} else if (node instanceof NodeValueDouble || node instanceof NodeValueFloat) {
-				term = termFactory.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
+				term = termFactory.getValueConstant(node.getDouble() + "", COL_TYPE.DOUBLE);
 			} else if (node instanceof NodeValueDateTime) {
-				term = termFactory.getValueConstant(node.getDateTime()+"", COL_TYPE.DATETIME);
+				term = termFactory.getValueConstant(node.getDateTime() + "", COL_TYPE.DATETIME);
 			} else if (node instanceof NodeValueBoolean) {
-				term = termFactory.getValueConstant(node.getBoolean()+"", COL_TYPE.BOOLEAN);
+				term = termFactory.getValueConstant(node.getBoolean() + "", COL_TYPE.BOOLEAN);
 			} else {
 				throw new QueryException("Unsupported data type");
 			}
 		}
 		return term;
 	}
-	
+
 	private COL_TYPE getDataType(Node_Literal node) {
-        COL_TYPE dataType = null;
-	    
-	    final String dataTypeURI = node.getLiteralDatatypeURI();
-	    if (dataTypeURI == null) {
-	        dataType = COL_TYPE.LITERAL;
-        }
-        else {      
-            if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {
-                dataType = COL_TYPE.LITERAL;
-            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
-                dataType = COL_TYPE.STRING;
-            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)
-                    || dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
-                dataType = COL_TYPE.INTEGER;
-            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {  // special case for decimal
-                String value = node.getLiteralValue().toString();
-                if (value.contains(".")) {
-                    // Put the type as decimal (with fractions).
-                    dataType = COL_TYPE.DECIMAL;
-                } else {
-                    // Put the type as integer (decimal without fractions).
-                    dataType = COL_TYPE.INTEGER;
-                }
-            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)
-                    || dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
-                dataType = COL_TYPE.DOUBLE;
-            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {
-                dataType = COL_TYPE.DATETIME;
-            } else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-                dataType = COL_TYPE.BOOLEAN;
-            } else {
-                dataType = COL_TYPE.LITERAL; // TODO should throw an exception
-            }
-        }
-	    return dataType;	    	    
+		COL_TYPE dataType = null;
+
+		final String dataTypeURI = node.getLiteralDatatypeURI();
+		if (dataTypeURI == null) {
+			dataType = COL_TYPE.LITERAL;
+		} else {
+			if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {
+				dataType = COL_TYPE.LITERAL;
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
+				dataType = COL_TYPE.STRING;
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)
+					|| dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
+				dataType = COL_TYPE.INTEGER;
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) { // special
+																						// case
+																						// for
+																						// decimal
+				String value = node.getLiteralValue().toString();
+				if (value.contains(".")) {
+					// Put the type as decimal (with fractions).
+					dataType = COL_TYPE.DECIMAL;
+				} else {
+					// Put the type as integer (decimal without fractions).
+					dataType = COL_TYPE.INTEGER;
+				}
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)
+					|| dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
+				dataType = COL_TYPE.DOUBLE;
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {
+				dataType = COL_TYPE.DATETIME;
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+				dataType = COL_TYPE.BOOLEAN;
+			} else {
+				dataType = COL_TYPE.LITERAL; // TODO should throw an exception
+			}
+		}
+		return dataType;
 	}
-	
+
 	private Predicate getDataTypePredicate(COL_TYPE dataType) {
-	    Predicate predicate = null;
-	    
-	    switch (dataType) {
-	        case LITERAL: 
-	            predicate = termFactory.getPredicate(OBDAVocabulary.RDFS_LITERAL_URI, 1, new COL_TYPE[] { dataType }); break;
-	        case STRING:
-	            predicate = termFactory.getPredicate(OBDAVocabulary.XSD_STRING_URI, 1, new COL_TYPE[] { dataType }); break;
-	        case INTEGER:
-                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_INTEGER_URI, 1, new COL_TYPE[] { dataType }); break;
-	        case DECIMAL:
-	        	predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DECIMAL_URI, 1, new COL_TYPE[] { dataType }); break;
-	        case DOUBLE:
-                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DOUBLE_URI, 1, new COL_TYPE[] { dataType }); break;
-	        case DATETIME:
-                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DATETIME_URI, 1, new COL_TYPE[] { dataType }); break;
-	        case BOOLEAN:
-                predicate = termFactory.getPredicate(OBDAVocabulary.XSD_BOOLEAN_URI, 1, new COL_TYPE[] { dataType }); break;
-	    }
-	    return predicate;
+		Predicate predicate = null;
+
+		switch (dataType) {
+		case LITERAL:
+			predicate = termFactory.getPredicate(OBDAVocabulary.RDFS_LITERAL_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		case STRING:
+			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_STRING_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		case INTEGER:
+			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_INTEGER_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		case DECIMAL:
+			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DECIMAL_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		case DOUBLE:
+			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DOUBLE_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		case DATETIME:
+			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DATETIME_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		case BOOLEAN:
+			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_BOOLEAN_URI, 1, new COL_TYPE[] { dataType });
+			break;
+		}
+		return predicate;
 	}
 }

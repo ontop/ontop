@@ -1,7 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 
+import it.unibz.krdb.obda.model.BNode;
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.net.URI;
 import java.sql.ResultSet;
@@ -21,6 +27,8 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	private boolean isTrue = false;
 	private int counter = 0;
 	private OBDAStatement st;
+	
+	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	public BooleanOWLOBDARefResultSet(ResultSet set, OBDAStatement st){
 		this.set=set;
@@ -42,7 +50,7 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	 * return 1 if true 0 otherwise
 	 */
 	@Override
-	public double getAsDouble(int column) throws SQLException {
+	public double getDouble(int column) throws SQLException {
 		if(isTrue){
 			return 1;
 		}else{
@@ -54,7 +62,7 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	 * return 1 if true 0 otherwise
 	 */
 	@Override
-	public int getAsInteger(int column) throws SQLException {
+	public int getInt(int column) throws SQLException {
 		if(isTrue){
 			return 1;
 		}else{
@@ -66,7 +74,7 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	 * returns the true value as object
 	 */
 	@Override
-	public Object getAsObject(int column) throws SQLException {
+	public Object getObject(int column) throws SQLException {
 		if(isTrue){
 			return "true";
 		}else{
@@ -78,7 +86,7 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	 * returns the true value as string
 	 */
 	@Override
-	public String getAsString(int column) throws SQLException {
+	public String getString(int column) throws SQLException {
 		if(isTrue){
 			return "true";
 		}else{
@@ -90,7 +98,7 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	 * returns the true value as URI
 	 */
 	@Override
-	public URI getAsURI(int column) throws SQLException {
+	public URI getURI(int column) throws SQLException {
 		if(isTrue){
 			return URI.create("true");
 		}else{
@@ -141,6 +149,48 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet{
 	@Override
 	public OBDAStatement getStatement() {
 		return st;
+	}
+
+
+	@Override
+	public Constant getConstant(int column) throws SQLException {
+		return this.fac.getValueConstant(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+	}
+
+
+	@Override
+	public ValueConstant getLiteral(int column) throws SQLException {
+		return this.fac.getValueConstant(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+	}
+
+
+	@Override
+	public BNode getBNode(int column) throws SQLException {
+		return null;
+	}
+
+
+	@Override
+	public Constant getConstant(String name) throws SQLException {
+		return this.fac.getValueConstant(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+	}
+
+
+	@Override
+	public URI getURI(String name) throws SQLException {		
+		return null;
+	}
+
+
+	@Override
+	public ValueConstant getLiteral(String name) throws SQLException {
+		return this.fac.getValueConstant(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+	}
+
+
+	@Override
+	public BNode getBNode(String name) throws SQLException {		
+		return null;
 	}
 
 }

@@ -43,7 +43,7 @@ public class ResultSetToFileWriter {
         		if(line.length() >0){
         			line.append(",");
         		}
-        		line.append(result.getAsString(i));
+        		line.append(result.getString(i));
         	}
         	out.append(line+"\n");
         }

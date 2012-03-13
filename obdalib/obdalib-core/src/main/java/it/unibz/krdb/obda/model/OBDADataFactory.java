@@ -41,44 +41,44 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	@Deprecated
 	public Predicate getPredicate(URI name, int arity);
-	
+
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
-	
+
 	public Predicate getPredicate(URI name, int arity, COL_TYPE[] types);
-	
+
 	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types);
-	
+
 	public Predicate getObjectPropertyPredicate(URI name);
-	
+
 	public Predicate getObjectPropertyPredicate(String name);
-	
+
 	public Predicate getDataPropertyPredicate(URI name);
-	
+
 	public Predicate getDataPropertyPredicate(String name);
-	
-	public Predicate getClassPredicate(String  name);
-	
+
+	public Predicate getClassPredicate(String name);
+
 	public Predicate getClassPredicate(URI name);
 
 	/*
 	 * Data types
 	 */
-	
+
 	public Predicate getDataTypePredicateLiteral(URI name);
-	
+
 	public Predicate getDataTypePredicateString(URI name);
-	
+
 	public Predicate getDataTypePredicateInteger(URI name);
-	
+
 	public Predicate getDataTypePredicateDecimal(URI name);
-	
+
 	public Predicate getDataTypePredicateDouble(URI name);
-	
+
 	public Predicate getDataTypePredicateDate(URI name);
-	
+
 	public Predicate getDataTypePredicateBoolean(URI name);
-	
+
 	/*
 	 * Boolean atoms
 	 */
@@ -112,7 +112,7 @@ public interface OBDADataFactory extends Serializable {
 	/*
 	 * Boolean fuctional terms
 	 */
-	
+
 	/*
 	 * Boolean atoms
 	 */
@@ -142,9 +142,9 @@ public interface OBDADataFactory extends Serializable {
 	public Function getORFunction(Term term1, Term term2, Term term3);
 
 	public Function getORFunction(List<Term> terms);
-	
+
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass);
-	
+
 	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, String username, String password, String driverclass);
 
 	/**
@@ -171,6 +171,8 @@ public interface OBDADataFactory extends Serializable {
 	 * @return a URI constant.
 	 */
 	public URIConstant getURIConstant(URI uri);
+
+	public BNode getBNodeConstant(String name);
 
 	/**
 	 * Construct a {@link ValueConstant} object.
