@@ -78,9 +78,9 @@ public class JDBCUtility implements Serializable {
 		switch (driver) {
 		case MYSQL:
 		case DB2:
-			sql = String.format("CONCAT('%s'", uribase);
+			sql = String.format("CONCAT(%s", uribase);
 			for (int i = 0; i < list.size(); i++) {
-				sql += String.format(", '%s", list.get(i));
+				sql += String.format(", %s", list.get(i));
 			}
 			sql += ")";
 			break;
@@ -88,7 +88,7 @@ public class JDBCUtility implements Serializable {
 		case ORACLE:
 		case H2:
 		case TEIID:
-			sql = String.format("('%s'", uribase);
+			sql = String.format("(%s", uribase);
 			for (int i = 0; i < list.size(); i++) {
 				sql += String.format(" || %s", list.get(i));
 			}

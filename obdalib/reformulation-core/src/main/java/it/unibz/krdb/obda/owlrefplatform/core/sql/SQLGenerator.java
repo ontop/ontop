@@ -299,8 +299,10 @@ public class SQLGenerator implements SourceQueryGenerator {
 						if (term instanceof ValueConstant) {
 							ValueConstant ct = (ValueConstant) term;
 							String value = null;
-							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
+							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
 								value = getQuotedString(ct.getValue());
+							} else if (ct.getType() == COL_TYPE.DATETIME) {
+								value = getQuotedString(getSQLtimestampFromXSDDatetime(ct.getValue()));
 							} else {
 								value = ct.getValue();
 							}
@@ -420,7 +422,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 */
 							ValueConstant c = (ValueConstant) ov.getTerms().get(0);
 							StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
-							functionString = tokenizer.nextToken();
+							functionString = "'" + tokenizer.nextToken() + "'";
 							int currentTerm = 1;
 							do {
 								Variable var = (Variable) ov.getTerms().get(currentTerm);
@@ -442,7 +444,8 @@ public class SQLGenerator implements SourceQueryGenerator {
 								Term v = it.next();
 								if (v instanceof Variable) {
 									Variable var = (Variable) v;
-									vex.add("-" + getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+									vex.add("'-'");
+									vex.add(getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 								} else if (v instanceof ValueConstant) {
 									ValueConstant ct = (ValueConstant) v;
 									StringBuilder var = new StringBuilder();
@@ -459,7 +462,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 									throw new RuntimeException("Invalid term in the head");
 								}
 							}
-							String concat = jdbcutil.getConcatination(functionString, vex);
+							String concat = jdbcutil.getConcatination("'" + functionString + "'", vex);
 							sb.append(concat);
 						}
 					}
@@ -502,14 +505,26 @@ public class SQLGenerator implements SourceQueryGenerator {
 		return result.toString();
 	}
 
+	private String getSQLtimestampFromXSDDatetime(String datetime) {
+		StringBuffer bf = new StringBuffer();
+		int indexofT = datetime.indexOf('T');
+		bf.append(datetime.substring(0,indexofT));
+		bf.append(" ");
+		bf.append(datetime.subSequence(indexofT +1, indexofT + 1 + 8));
+		return bf.toString();
+	}
+	
 	public String getSQLString(Term term, List<Atom> body, String[] tableName, String[] viewName,
 			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex) {
 		StringBuffer result = new StringBuffer();
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
 
-			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING || ct.getType() == COL_TYPE.DATETIME) {
+			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
 				result.append(getQuotedString(ct.getValue()));
+			} else if (ct.getType() == COL_TYPE.DATETIME) {
+				result.append(getQuotedString(getSQLtimestampFromXSDDatetime(ct.getValue())));
+
 			} else {
 				result.append(ct.getValue());
 			}
