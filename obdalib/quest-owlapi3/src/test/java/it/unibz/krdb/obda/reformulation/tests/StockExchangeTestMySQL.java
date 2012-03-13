@@ -65,6 +65,24 @@ public class StockExchangeTestMySQL extends TestCase {
 	final String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 	final String obdafile = "src/test/resources/test/stockexchange-mysql-unittest.obda";
 	
+	/* These are the distinct tuples that we know each query returns */
+	final int[] tuples = { 
+			7, 0, 4, 1,								// Simple queries group
+			1, 2, 2, 1, 4, 3, 3, 					// CQs group
+			0, -1, 2, 								// String: Incompatible, Invalid, OK
+			0, 2, 2, 0, 2, 2, 0, 0, 0, 		    	// Integer: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
+			0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)
+			0, 2, 2, 0, 2, 2, 0, 0, 0,  			// Double: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
+			0, 0, 0, -1, -1, -1, -1, -1, 1,  	 	// Date time: (Incompatible, Incompatible, Incompatible); (Invalid, Invalid, Invalid); (Invalid, Invalid, OK)
+			0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,  // Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (OK, OK, Invalid, Invalid); (OK, Invalid, Invalid, OK)
+            2, 5,								    // FILTER: String (EQ, NEQ)
+            2, 5, 5, 7, 0, 2,					    // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
+            1, 3, 2, 3, 1, 2,					    // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
+            2, 0, 0, 2, 0, 2,					    // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
+            1, 3, 2, 3, 1, 2,					    // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
+            5, 5								    // FILTER: Boolean (EQ, NEQ)
+		};
+	
 	public class TestQuery {
 		public String id = "";
 		public String query = "";
@@ -252,23 +270,7 @@ public class StockExchangeTestMySQL extends TestCase {
 
 	public void testSiEqSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns */
-		final int[] tuples = { 
-			7, 0, 4, 1,								// Simple queries group
-			1, 2, 2, 1, 4, 3, 3, 					// CQs group
-			0, 0, 2, 								// String: Incompatible, Invalid, OK
-			0, 2, 2, 0, 2, 2, 0, 0, 0, 		    	// Integer: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
-			0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)
-			0, 2, 2, 0, 2, 2, 0, 0, 0,  			// Double: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
-			0, 0, 0, 0, 0, 0, 0, 0, 0,  		 	// Date time: (Incompatible, Incompatible, Incompatible); (Invalid, Invalid, Invalid); (Invalid, Invalid, No result*) *H2 doesn't store date time in YYYY-MM-HH'T'hh:mm:ssZ
-			0, 0, 0, 0, 5, 5, 0, 0, 5, 0, 0, 5,  	// Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (OK, OK, Invalid, Invalid); (OK, Invalid, Invalid, OK)
-            2, 5,									// FILTER: String (EQ, NEQ)
-            2, 5, 5, 7, 0, 2,						// FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
-            1, 3, 2, 3, 1, 2,						// FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
-            2, 0, 0, 2, 0, 2,						// FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-            0, 4, 2, 2, 2, 2,						// FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-            5, 5									// FILTER: Boolean (EQ, NEQ)
-		};
+
 		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
@@ -387,29 +389,7 @@ public class StockExchangeTestMySQL extends TestCase {
 
 	public void testViEqSig() throws Exception {
 
-		/* These are the distinct tuples that we know each query returns 
-		 * 
-		 * Note: 
-		 * - MySQL can handle query: [...] WHERE number="+3"
-		 * - MySQL can handle query: [...] WHERE date="2008-04-02T00:00:00Z"
-		 * - MySQL can handle query: [...] WHERE shareType=1
-		 * */
-		final int[] tuples = { 
-			7, 0, 4, 1,								// Simple queries group
-			1, 2, 2, 1, 4, 3, 3, 					// CQs group
-			0, -1, 2, 								// String: Incompatible, Invalid, OK
-			0, 2, 2, 0, 2, 2, 0, 0, 0, 		    	// Integer: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
-			0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)
-			0, 2, 2, 0, 2, 2, 0, 0, 0,  			// Double: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
-			0, 0, 0, -1, -1, -1, -1, -1, 1,  	 	// Date time: (Incompatible, Incompatible, Incompatible); (Invalid, Invalid, Invalid); (Invalid, Invalid, OK)
-			0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,  // Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (OK, OK, Invalid, Invalid); (OK, Invalid, Invalid, OK)
-            2, 5,								    // FILTER: String (EQ, NEQ)
-            2, 5, 5, 7, 0, 2,					    // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
-            1, 3, 2, 3, 1, 2,					    // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
-            2, 0, 0, 2, 0, 2,					    // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-            1, 3, 2, 3, 1, 2,					    // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-            5, 5								    // FILTER: Boolean (EQ, NEQ)
-		};
+
 		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();

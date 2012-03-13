@@ -70,6 +70,24 @@ public class StockExchangeTest extends TestCase {
 	final String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 	final String obdafile = "src/test/resources/test/stockexchange-unittest.obda";
 	
+	/* These are the distinct tuples that we know each query returns */
+	final int[] tuples = { 
+			7, 0, 4, 1,								// Simple queries group
+			1, 2, 2, 1, 4, 3, 3, 					// CQs group
+			0, -1, 2, 								// String: Incompatible, Invalid, OK
+			0, 2, 2, 0, 2, 2, 0, 0, 0, 		    	// Integer: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
+			0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)
+			0, 2, 2, 0, 2, 2, 0, 0, 0,  			// Double: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
+			0, 0, 0, -1, -1, -1, -1, -1, 1,  	 	// Date time: (Incompatible, Incompatible, Incompatible); (Invalid, Invalid, Invalid); (Invalid, Invalid, OK)
+			0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,  // Boolean: (Incompatible, Incompatible, Incompatible, Incompatible); (OK, OK, Invalid, Invalid); (OK, Invalid, Invalid, OK)
+            2, 5,								    // FILTER: String (EQ, NEQ)
+            2, 5, 5, 7, 0, 2,					    // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
+            1, 3, 2, 3, 1, 2,					    // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
+            2, 0, 0, 2, 0, 2,					    // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
+            1, 3, 2, 3, 1, 2,					    // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
+            5, 5								    // FILTER: Boolean (EQ, NEQ)
+		};
+	
 	public class TestQuery {
 		public String id = "";
 		public String query = "";
@@ -237,40 +255,11 @@ public class StockExchangeTest extends TestCase {
 		assertFalse(fail);
 	}
 
-	/* These are the distinct tuples that we know each query returns 
-	 * 
-	 * Note: 
-	 * - H2 stores DOUBLE values with rounding (e.g., inserting data 1234.5678 will become 1234.5677)
-	 * - H2 doesn't understand input data using scientific notation (e.g., 1.2345678e+03 will become 1.2345678e8).
-	 * - There is an issue for datatime format between H2 dan JENA. H2 always stores the data using the format
-     *   YYYY-MM-dd hh:mm:ss.s. And JENA always parse the datetime string as YYYY-MM-ddThh:mm:ssZ. Both are
-     *   incompatible for comparison.
-	 *   For example:
-	 *      Input '2008-01-01' will be converted into '2008-01-01 00:00:00.0' in H2 table. 
-     *      Input "2008-01-01T00:00:00Z"^^xsd:dateTime or "2008-01-01T00:00:00.0Z"^^xsd:dateTime will be
-     *      converted into 2008-01-01T00:00:00Z by JENA.
-     *      The SQL comparison '2008-01-01 00:00:00.0' <-> '2008-01-01T00:00:00Z' will always return null.
-	 **/
-    final int[] tuplesForSemanticIndexTest = { 
-            7, -1, 4, 1,                                 // Simple queries group
-            1, 2, 2, 1, 4, 3, 3,                         // CQs group
-            -1, -1, 2,                                   // String
-            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Integer
-            -1, 1, 1, -1, 1, 1, -1, 1, 1,                // Decimal
-            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Double
-            -1, -1, -1, -1, -1, -1, -1, -1, 0,           // Date time
-            -1, -1, -1, -1, 5, 5, -1, -1, 5, -1, -1, 5,  // Boolean
-            2, 5,										 // FILTER: String (EQ, NEQ)
-            2, 5, 5, 7, 0, 2,							 // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
-            1, 3, 2, 3, 1, 2,							 // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
-            2, 0, 0, 2, 0, 2,							 // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-            0, 4, 2, 2, 2, 2,							 // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-            5, 5									 	 // FILTER: Boolean (EQ, NEQ)
-    };    
+
     
 	public void testSiEqSig() throws Exception {
 		
-		prepareTestQueries(tuplesForSemanticIndexTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -285,7 +274,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testSiEqNoSig() throws Exception {
 	    
-		prepareTestQueries(tuplesForSemanticIndexTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -300,7 +289,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testSiNoEqSig() throws Exception {
 
-		prepareTestQueries(tuplesForSemanticIndexTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -315,7 +304,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testSiNoEqNoSig() throws Exception {
 
-		prepareTestQueries(tuplesForSemanticIndexTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -391,40 +380,9 @@ public class StockExchangeTest extends TestCase {
 		runTests(p);
 	}
 
-	/* These are the distinct tuples that we know each query returns 
-     * 
-     * Note: 
-     * - H2 can't handle query: [...] WHERE number="+3"
-     * - H2 can handle query: [...] WHERE shareType=1
-	 * - There is an issue for datatime format between H2 dan JENA. H2 always stores the data using the format
-     *   YYYY-MM-dd hh:mm:ss.s. And JENA always parse the datetime string as YYYY-MM-ddThh:mm:ssZ. Both are
-     *   incompatible for comparison.
-	 *   For example:
-	 *      Input '2008-01-01' will be converted into '2008-01-01 00:00:00.0' in H2 table. 
-     *      Input "2008-01-01T00:00:00Z"^^xsd:dateTime or "2008-01-01T00:00:00.0Z"^^xsd:dateTime will be
-     *      converted into 2008-01-01T00:00:00Z by JENA.
-     *      The SQL comparison '2008-01-01 00:00:00.0' <-> '2008-01-01T00:00:00Z' will always return null.
-	 **/
-    final int[] tuplesForVirtualTest = { 
-            7, 0, 4, 1,                               // Simple queries group
-            1, 2, 2, 1, 4, 3, 3,                      // CQs group
-            0, -1, 2,                                 // String
-            0, 2, 2, 0, 2, 2, 0, 0, 0,                // Integer
-            0, 1, 1, 0, 1, 1, 0, 1, 1,                // Decimal
-            0, 2, 2, 0, 2, 2, 0, 0, 0,                // Double
-            0, 0, 0, -1, -1, -1, -1, -1, 0,           // Date time 
-            0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,    // Boolean
-            2, 5,									  // FILTER: String (EQ, NEQ)
-            2, 5, 5, 7, 0, 2,						  // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
-            1, 3, 2, 3, 1, 2,						  // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
-            2, 0, 0, 2, 0, 2,						  // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-            0, 4, 2, 2, 2, 2,						  // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-            5, 5									  // FILTER: Boolean (EQ, NEQ)
-    };
-	
 	public void testViEqSig() throws Exception {
 
-		prepareTestQueries(tuplesForVirtualTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -436,7 +394,7 @@ public class StockExchangeTest extends TestCase {
 
 	public void testViEqNoSig() throws Exception {
 
-		prepareTestQueries(tuplesForVirtualTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -453,7 +411,7 @@ public class StockExchangeTest extends TestCase {
 	 */
 	public void testViNoEqSig() throws Exception {
 
-		prepareTestQueries(tuplesForVirtualTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -470,7 +428,7 @@ public class StockExchangeTest extends TestCase {
 	 */
 	public void testViNoEqNoSig() throws Exception {
 
-		prepareTestQueries(tuplesForVirtualTest);
+		prepareTestQueries(tuples);
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
