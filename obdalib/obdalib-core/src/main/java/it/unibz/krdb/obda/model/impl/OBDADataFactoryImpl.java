@@ -318,39 +318,43 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Predicate getDataTypePredicateLiteral(URI name) {
-		return OBDAVocabulary.RDFS_LITERAL;
+	public Predicate getDataTypePredicateLiteral(boolean withLanguageTag) {
+		if (withLanguageTag) {
+			return OBDAVocabulary.RDFS_LITERAL_WITH_LANG;
+		} else {
+			return OBDAVocabulary.RDFS_LITERAL;
+		}
 	}
 
 	@Override
-	public Predicate getDataTypePredicateString(URI name) {
+	public Predicate getDataTypePredicateString() {
 		return OBDAVocabulary.XSD_STRING;
 	}
-
+	
 	@Override
-	public Predicate getDataTypePredicateInteger(URI name) {
+	public Predicate getDataTypePredicateInteger() {
 		return OBDAVocabulary.XSD_INTEGER;
 	}
-
+	
 	@Override
-	public Predicate getDataTypePredicateDecimal(URI name) {
+	public Predicate getDataTypePredicateDecimal() {
 		return OBDAVocabulary.XSD_DECIMAL;
 	}
-
+	
 	@Override
-	public Predicate getDataTypePredicateDouble(URI name) {
+	public Predicate getDataTypePredicateDouble() {
 		return OBDAVocabulary.XSD_DOUBLE;
 	}
-
+	
 	@Override
-	public Predicate getDataTypePredicateDate(URI name) {
+	public Predicate getDataTypePredicateDateTime() {
 		return OBDAVocabulary.XSD_DATETIME;
 	}
-
+	
 	@Override
-	public Predicate getDataTypePredicateBoolean(URI name) {
+	public Predicate getDataTypePredicateBoolean() {
 		return OBDAVocabulary.XSD_BOOLEAN;
-	}
+	}	
 
 	@Override
 	public Function getEQFunction(Term firstTerm, Term secondTerm) {

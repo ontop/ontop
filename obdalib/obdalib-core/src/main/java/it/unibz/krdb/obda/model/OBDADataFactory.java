@@ -65,19 +65,19 @@ public interface OBDADataFactory extends Serializable {
 	 * Data types
 	 */
 
-	public Predicate getDataTypePredicateLiteral(URI name);
-
-	public Predicate getDataTypePredicateString(URI name);
-
-	public Predicate getDataTypePredicateInteger(URI name);
-
-	public Predicate getDataTypePredicateDecimal(URI name);
-
-	public Predicate getDataTypePredicateDouble(URI name);
-
-	public Predicate getDataTypePredicateDate(URI name);
-
-	public Predicate getDataTypePredicateBoolean(URI name);
+	public Predicate getDataTypePredicateLiteral(boolean withLanguageTag);
+	
+	public Predicate getDataTypePredicateString();
+	
+	public Predicate getDataTypePredicateInteger();
+	
+	public Predicate getDataTypePredicateDecimal();
+	
+	public Predicate getDataTypePredicateDouble();
+	
+	public Predicate getDataTypePredicateDateTime();
+	
+	public Predicate getDataTypePredicateBoolean();
 
 	/*
 	 * Boolean atoms
