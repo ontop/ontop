@@ -266,9 +266,7 @@ public class StockExchangeTest extends TestCase {
             2, 0, 0, 2, 0, 2,							 // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
             0, 4, 2, 2, 2, 2,							 // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
             5, 5									 	 // FILTER: Boolean (EQ, NEQ)
-    };
-	
-    
+    };    
     
 	public void testSiEqSig() throws Exception {
 		
@@ -408,20 +406,20 @@ public class StockExchangeTest extends TestCase {
      *      The SQL comparison '2008-01-01 00:00:00.0' <-> '2008-01-01T00:00:00Z' will always return null.
 	 **/
     final int[] tuplesForVirtualTest = { 
-            7, -1, 4, 1,                                 // Simple queries group
-            1, 2, 2, 1, 4, 3, 3,                         // CQs group
-            -1, -1, 2,                                   // String
-            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Integer
-            -1, 1, 1, -1, 1, 1, -1, 1, 1,                // Decimal
-            -1, 2, 2, -1, 2, 2, -1, 0, 0,                // Double
-            -1, -1, -1, -1, -1, -1, -1, -1, 0,           // Date time 
-            -1, -1, -1, -1, 5, 5, -1, -1, 5, -1, -1, 5,  // Boolean
-            2, 5,										 // FILTER: String (EQ, NEQ)
-            2, 5, 5, 7, 0, 2,							 // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
-            1, 3, 2, 3, 1, 2,							 // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
-            2, 0, 0, 2, 0, 2,							 // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
-            0, 4, 2, 2, 2, 2,							 // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
-            5, 5									 	 // FILTER: Boolean (EQ, NEQ)
+            7, 0, 4, 1,                               // Simple queries group
+            1, 2, 2, 1, 4, 3, 3,                      // CQs group
+            0, -1, 2,                                 // String
+            0, 2, 2, 0, 2, 2, 0, 0, 0,                // Integer
+            0, 1, 1, 0, 1, 1, 0, 1, 1,                // Decimal
+            0, 2, 2, 0, 2, 2, 0, 0, 0,                // Double
+            0, 0, 0, -1, -1, -1, -1, -1, 0,           // Date time 
+            0, 0, 0, 0, 5, 5, -1, 0, 5, -1, -1, 5,    // Boolean
+            2, 5,									  // FILTER: String (EQ, NEQ)
+            2, 5, 5, 7, 0, 2,						  // FILTER: Integer (EQ, NEQ, GT, GTE, LT, LTE)
+            1, 3, 2, 3, 1, 2,						  // FILTER: Decimal (EQ, NEQ, GT, GTE, LT, LTE)
+            2, 0, 0, 2, 0, 2,						  // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
+            0, 4, 2, 2, 2, 2,						  // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
+            5, 5									  // FILTER: Boolean (EQ, NEQ)
     };
 	
 	public void testViEqSig() throws Exception {
