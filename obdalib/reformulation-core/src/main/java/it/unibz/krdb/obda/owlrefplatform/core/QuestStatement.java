@@ -381,7 +381,8 @@ public class QuestStatement implements OBDAStatement {
 		} else {
 			DatalogProgram p = translateAndPreProcess(strquery);
 			DatalogProgram rewriting = getRewriting(p);
-			sql = getSQL(p, getSignature(strquery));
+			DatalogProgram unfolding = getUnfolding(rewriting);
+			sql = getSQL(unfolding, getSignature(strquery));
 		}
 		return sql;
 	}
