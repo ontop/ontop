@@ -49,7 +49,7 @@ public class MappingAnalyzer {
 
 	private SQLQueryTranslator translator;
 
-	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	private static Logger log = org.slf4j.LoggerFactory.getLogger(MappingAnalyzer.class);
 
@@ -67,29 +67,34 @@ public class MappingAnalyzer {
 
 	public DatalogProgram constructDatalogProgram() {
 
-		DatalogProgram datalog = dataFactory.getDatalogProgram();
+		DatalogProgram datalog = dfac.getDatalogProgram();
 
 		for (OBDAMappingAxiom axiom : mappingList) {
-//			log.debug("Analyzing SQL for the mapping: {}", axiom.toString());
-
+			// Obtain the target and source query from each mapping axiom in the model.
 			CQIE targetQuery = (CQIE) axiom.getTargetQuery();
 			OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
+			// Construct the SQL query tree from the source query
 			QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
+			
+			// Create a lookup table for variable swapping
 			LookupTable lookupTable = createLookupTable(queryTree, dbMetaData);
 
+			// We can get easily the table from the SQL query tree
 			ArrayList<Relation> tableList = queryTree.getTableSet();
 
 			// Construct the body from the source query
 			ArrayList<Atom> atoms = new ArrayList<Atom>();
 			for (Relation table : tableList) {
+				// Construct the URI from the table name
 				String tableName = table.getName();
-
 				URI predicateName = URI.create(tableName);
 
+				// Construct the predicate using the table name
 				int arity = dbMetaData.getDefinition(tableName).countAttribute();
-				Predicate predicate = dataFactory.getPredicate(predicateName, arity);
+				Predicate predicate = dfac.getPredicate(predicateName, arity);
 
+				// Swap the column name with a new variable from the lookup table
 				List<Term> terms = new ArrayList<Term>();
 				for (int i = 1; i <= arity; i++) {
 					String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
@@ -97,10 +102,11 @@ public class MappingAnalyzer {
 					if (termName == null) {
 						throw new RuntimeException("Column was not found in the lookup table: " + columnName);
 					}
-					Term term = dataFactory.getVariable(termName);
+					Term term = dfac.getVariable(termName);
 					terms.add(term);
 				}
-				Atom atom = dataFactory.getAtom(predicate, terms);
+				// Create an atom for a particular table
+				Atom atom = dfac.getAtom(predicate, terms);
 				atoms.add(atom);
 			}
 
@@ -108,60 +114,47 @@ public class MappingAnalyzer {
 			ArrayList<String> joinConditions = queryTree.getJoinCondition();
 			for (String predicate : joinConditions) {
 				String[] value = predicate.split("=");
-				Term t1 = dataFactory.getVariable(lookupTable.lookup(value[0]));
-				Term t2 = dataFactory.getVariable(lookupTable.lookup(value[1]));
-				Atom atom = dataFactory.getEQAtom(t1, t2);
+				Term t1 = dfac.getVariable(lookupTable.lookup(value[0]));
+				Term t2 = dfac.getVariable(lookupTable.lookup(value[1]));
+				Atom atom = dfac.getEQAtom(t1, t2);
 				atoms.add(atom);
 			}
 
 			// For the selection "where" clause conditions
 			Selection selection = queryTree.getSelection();
 			if (selection != null) {
-				/*
-				 * Filling up the OR stack
-				 */
+				// Filling up the OR stack
 				Stack<Function> stack = new Stack<Function>();
-
 				List<ICondition> conditions = selection.getRawConditions();
 				for (int i = 0; i < conditions.size(); i++) {
 					Object element = conditions.get(i);
 					if (element instanceof ComparisonPredicate) {
-
 						ComparisonPredicate pred = (ComparisonPredicate) element;
 						Function operator = getFunction(pred, lookupTable);
 						stack.push(operator);
-
 					} else if (element instanceof AndOperator) {
 						Term leftCondition = stack.pop();
-
 						ComparisonPredicate rightPred = (ComparisonPredicate) conditions.get(i + 1);
-
 						Term rightCondition = getFunction(rightPred, lookupTable);
-
-						Function andFunct = dataFactory.getANDFunction(leftCondition, rightCondition);
+						Function andFunct = dfac.getANDFunction(leftCondition, rightCondition);
 						stack.push(andFunct);
-
 						i += 1;
 					} else if (element instanceof OrOperator) {
-						/* Do nothing */
+						// NO-OP
 					} else {
 						/* Unsupported query */
 						return null;
 					}
 				}
 
-				/*
-				 * collapsing into a single atom.
-				 */
-
+				// Collapsing into a single atom.
 				while (stack.size() != 1) {
-					Function orAtom = dataFactory.getORFunction(stack.pop(), stack.pop());
+					Function orAtom = dfac.getORFunction(stack.pop(), stack.pop());
 					stack.push(orAtom);
 				}
 				Function f = stack.pop();
-				Atom atom = dataFactory.getAtom(f.getFunctionSymbol(), f.getTerms());
+				Atom atom = dfac.getAtom(f.getFunctionSymbol(), f.getTerms());
 				atoms.add(atom);
-
 			}
 
 			// Construct the head from the target query.
@@ -172,13 +165,9 @@ public class MappingAnalyzer {
 				for (Term term : terms) {					
 					newterms.add(updateTerm(term, lookupTable));
 				}
-				if (newterms.size() == 0) {
-					// System.out.println(0);
-				}
-				Atom newhead = dataFactory.getAtom(atom.getPredicate(), newterms);
-				CQIE rule = dataFactory.getCQIE(newhead, atoms);
+				Atom newhead = dfac.getAtom(atom.getPredicate(), newterms);
+				CQIE rule = dfac.getCQIE(newhead, atoms);
 				datalog.appendRule(rule);
-
 			}
 		}
 		return datalog;
@@ -189,31 +178,31 @@ public class MappingAnalyzer {
 		IValueExpression right = pred.getValueExpressions()[1];
 
 		String termLeftName = lookupTable.lookup(left.toString());
-		Term t1 = dataFactory.getVariable(termLeftName);
+		Term t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
 		Term t2 = null;
 		if (right instanceof ReferenceValueExpression) {
 			termRightName = lookupTable.lookup(right.toString());
-			t2 = dataFactory.getVariable(termRightName);
+			t2 = dfac.getVariable(termRightName);
 		} else if (right instanceof Literal) {
 			Literal literal = (Literal) right;
 			termRightName = literal.get().toString();			
 			if (literal instanceof StringLiteral) {
 				boolean isString = containDateTimeString(termRightName);
 				if (isString) {
-					t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.STRING);
+					t2 = dfac.getValueConstant(termRightName, COL_TYPE.STRING);
 				} else {
-					t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DATETIME);
+					t2 = dfac.getValueConstant(termRightName, COL_TYPE.DATETIME);
 				}
 			} else if (literal instanceof IntegerLiteral) {
-				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.INTEGER);
+				t2 = dfac.getValueConstant(termRightName, COL_TYPE.INTEGER);
 			} else if (literal instanceof DecimalLiteral) {
-				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.DOUBLE);
+				t2 = dfac.getValueConstant(termRightName, COL_TYPE.DOUBLE);
 			} else if (literal instanceof BooleanLiteral) {
-				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.BOOLEAN);
+				t2 = dfac.getValueConstant(termRightName, COL_TYPE.BOOLEAN);
 			} else {
-				t2 = dataFactory.getValueConstant(termRightName, COL_TYPE.LITERAL);
+				t2 = dfac.getValueConstant(termRightName, COL_TYPE.LITERAL);
 			}
 		}
 
@@ -222,22 +211,22 @@ public class MappingAnalyzer {
 		Function funct = null;
 		switch (op) {
 		case EQ:
-			funct = dataFactory.getEQFunction(t1, t2);
+			funct = dfac.getEQFunction(t1, t2);
 			break;
 		case GT:
-			funct = dataFactory.getGTFunction(t1, t2);
+			funct = dfac.getGTFunction(t1, t2);
 			break;
 		case LT:
-			funct = dataFactory.getLTFunction(t1, t2);
+			funct = dfac.getLTFunction(t1, t2);
 			break;
 		case GE:
-			funct = dataFactory.getGTEFunction(t1, t2);
+			funct = dfac.getGTEFunction(t1, t2);
 			break;
 		case LE:
-			funct = dataFactory.getLTEFunction(t1, t2);
+			funct = dfac.getLTEFunction(t1, t2);
 			break;
 		case NE:
-			funct = dataFactory.getNEQFunction(t1, t2);
+			funct = dfac.getNEQFunction(t1, t2);
 			break;
 		default:
 			throw new RuntimeException("Unknown opertor: " + op.toString() + " " + op.getClass().toString());
@@ -250,7 +239,8 @@ public class MappingAnalyzer {
 				"yyyy-MM-dd HH:mm:ss.SS",
 				"yyyy-MM-dd HH:mm:ss",
 				"yyyy-MM-dd",
-				"yyyy-MM-ddTHH:mm:ssZ"
+				"yyyy-MM-ddTHH:mm:ssZ",
+				"yyyy-MM-ddTHH:mm:ss.sZ"
 		};
 		
 		for (String formatString : formatStrings) {
@@ -277,7 +267,7 @@ public class MappingAnalyzer {
 			if (termName == null)
 				throw new RuntimeException(String.format("Variable %s not found. Make sure not to use wildecard in your SQL query, e.g., star *", var));
 
-			result = this.dataFactory.getVariable(termName);
+			result = this.dfac.getVariable(termName);
 			// System.out.println(termName);
 			// var.setName(termName);
 		} else if (term instanceof Function) {
@@ -288,7 +278,7 @@ public class MappingAnalyzer {
 				newterms.add(updateTerm(innerTerm, lookupTable));
 				// updateTerm(innerTerm, lookupTable);
 			}
-			result = dataFactory.getFunctionalTerm(func.getFunctionSymbol(), newterms);
+			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);
 		} else if (term instanceof ValueConstant) {
 			result = term.clone();
 		}
