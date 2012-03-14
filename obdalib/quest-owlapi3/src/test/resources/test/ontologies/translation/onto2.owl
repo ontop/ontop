@@ -63,7 +63,7 @@
     <!-- http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#age -->
 
     <owl:DatatypeProperty rdf:about="#age">
-        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
     
 

@@ -189,12 +189,12 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 //			//System.out.println(ass.toString());
 			count += 1;
 		}
-		assertTrue("count: " + count, count == 9);
+		assertTrue("count: " + count, count == 7);
 
 //		//System.out.println("###########################");
 
 		count = materializer.getTripleCount();
-		assertTrue("count: " + count, count == 9);
+		assertTrue("count: " + count, count == 7);
 
 		conn.close();
 	}
@@ -381,7 +381,7 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 				assertion = ofac.createObjectPropertyAssertion(pred, fac.getURIConstant(URI.create("1")),
 						fac.getURIConstant(URI.create("2")));
 			} else {
-				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("x"));
+				assertion = ofac.createDataPropertyAssertion(pred, fac.getURIConstant(URI.create("1")), fac.getValueConstant("22", COL_TYPE.INTEGER));
 			}
 			return assertion;
 		}
