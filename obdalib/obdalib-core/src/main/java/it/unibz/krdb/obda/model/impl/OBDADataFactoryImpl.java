@@ -28,9 +28,6 @@ import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1851116693137470887L;
 	private static OBDADataFactoryImpl instance = null;
 
@@ -87,6 +84,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public ValueConstant getValueConstant(String value, COL_TYPE type) {
 		return new ValueConstantImpl(value, type);
+	}
+	
+	@Override
+	public ValueConstant getValueConstant(String value, String language) {
+		return new ValueConstantImpl(value, language, COL_TYPE.STRING);
 	}
 
 	@Override
@@ -318,12 +320,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Predicate getDataTypePredicateLiteral(boolean withLanguageTag) {
-		if (withLanguageTag) {
-			return OBDAVocabulary.RDFS_LITERAL_WITH_LANG;
-		} else {
-			return OBDAVocabulary.RDFS_LITERAL;
-		}
+	public Predicate getDataTypePredicateLiteral() {
+		return OBDAVocabulary.RDFS_LITERAL;
 	}
 
 	@Override

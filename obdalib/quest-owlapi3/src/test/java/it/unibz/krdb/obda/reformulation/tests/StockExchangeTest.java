@@ -74,6 +74,7 @@ public class StockExchangeTest extends TestCase {
 	final int[] tuples = { 
 			7, 0, 4, 1,								// Simple queries group
 			1, 2, 2, 1, 4, 3, 3, 					// CQs group
+			0, 1,    								// Literal
 			0, -1, 2, 								// String: Incompatible, Invalid, OK
 			0, 2, 2, 0, 2, 2, 0, 0, 0, 		    	// Integer: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, No result, No result)
 			0, 1, 1, 0, 1, 1, 0, 1, 1,  			// Decimal: (Incompatible, OK, OK); (Incompatible, OK, OK); (Incompatible, OK, OK)

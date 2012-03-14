@@ -81,7 +81,8 @@ public class VirtualABoxMaterializer {
 
 	private Connection conn;
 
-	private OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/***
 	 * Collects the vocabulary of this OBDA model and initializes unfodlers and
@@ -355,18 +356,18 @@ public class VirtualABoxMaterializer {
 			Atom body = null;
 			signature = new LinkedList<String>();
 			if (p.getArity() == 1) {
-				head = obdafac.getAtom(obdafac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 1), obdafac.getVariable("col1"));
-				body = obdafac.getAtom(p, obdafac.getVariable("col1"));
+				head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 1), dfac.getVariable("col1"));
+				body = dfac.getAtom(p, dfac.getVariable("col1"));
 				signature.add("col1");
 			} else if (p.getArity() == 2) {
-				head = obdafac.getAtom(obdafac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 2), obdafac.getVariable("col1"), obdafac.getVariable("col2"));
-				body = obdafac.getAtom(p, obdafac.getVariable("col1"), obdafac.getVariable("col2"));
+				head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 2), dfac.getVariable("col1"), dfac.getVariable("col2"));
+				body = dfac.getAtom(p, dfac.getVariable("col1"), dfac.getVariable("col2"));
 				signature.add("col1");
 				signature.add("col2");
 			} else {
 				throw new IllegalArgumentException("Invalid arity " + p.getArity() + " " + p.toString());
 			}
-			currentQuery = obdafac.getDatalogProgram(obdafac.getCQIE(head, body));
+			currentQuery = dfac.getDatalogProgram(dfac.getCQIE(head, body));
 			sourceIterator = sources.iterator();
 
 			try {
@@ -418,7 +419,7 @@ public class VirtualABoxMaterializer {
 			List<CQIE> rules = unfolding.getRules();
 			if (rules.size() != 0) {
 				for (CQIE query : rules) {
-					DatalogProgram unfoldedQuery = obdafac.getDatalogProgram(query);
+					DatalogProgram unfoldedQuery = dfac.getDatalogProgram(query);
 					queryQueue.add(unfoldedQuery);  // for each new unfolded query, put it on a queue for per individual processing.
 				}
 			} else {
@@ -521,10 +522,9 @@ public class VirtualABoxMaterializer {
 			Atom queryHead = currentUnfoldedQuery.getRules().get(0).getHead();
 			Predicate queryPredicate = queryHead.getPredicate();
 			
-			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 			/* If a Class object */
 			if (queryPredicate.getArity() == 1) {
-				URIConstant c = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
+				URIConstant c = dfac.getURIConstant(URI.create(currentResults.getString(1)));
 				if (replacementDescription == null) {
 					assertion = ofac.createClassAssertion(pred, c);
 				} else {
@@ -536,9 +536,20 @@ public class VirtualABoxMaterializer {
 				Term object = queryHead.getTerm(1); // get the second term
 				if (object instanceof Function) {
 					Function function = (Function) object;
-					if (isDataTypeFunction(function)) {
-						URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
-						ValueConstant c2 = obdafac.getValueConstant(currentResults.getString(2), function.getFunctionSymbol().getType(0));
+					if (isLiteralDataProperty(function)) {
+						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
+						ValueConstant languageTag = (ValueConstant) function.getTerms().get(1); // The language tag is on the second term
+						String languageTagString = (languageTag == null) ? "" : languageTag.getValue();
+						ValueConstant c2 = dfac.getValueConstant(currentResults.getString(2), languageTagString);
+						if (replacementDescription == null) {
+							assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
+						} else {
+							Property replacementp = (Property) replacementDescription;
+							assertion = ofac.createDataPropertyAssertion(replacementp.getPredicate(), c1, c2);
+						}
+					} else if (isDataTypeFunction(function)) {
+						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
+						ValueConstant c2 = dfac.getValueConstant(currentResults.getString(2), function.getFunctionSymbol().getType(0));
 						if (replacementDescription == null) {
 							assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
 						} else {
@@ -546,8 +557,8 @@ public class VirtualABoxMaterializer {
 							assertion = ofac.createDataPropertyAssertion(replacementp.getPredicate(), c1, c2);
 						}
 					} else {
-						URIConstant c1 = obdafac.getURIConstant(URI.create(currentResults.getString(1)));
-						URIConstant c2 = obdafac.getURIConstant(URI.create(currentResults.getString(2)));
+						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
+						URIConstant c2 = dfac.getURIConstant(URI.create(currentResults.getString(2)));
 						if (replacementDescription == null) {
 							assertion = ofac.createObjectPropertyAssertion(pred, c1, c2);
 						} else {
@@ -571,10 +582,9 @@ public class VirtualABoxMaterializer {
 		/**
 		 * Determines if the given function is a special data type function or not.
 		 */
-		private boolean isDataTypeFunction(Function target) {
-			Predicate functionSymbol = target.getFunctionSymbol();
-			if (functionSymbol.equals(OBDAVocabulary.RDFS_LITERAL)
-					|| functionSymbol.equals(OBDAVocabulary.XSD_STRING)
+		private boolean isDataTypeFunction(Function function) {
+			Predicate functionSymbol = function.getFunctionSymbol();
+			if (functionSymbol.equals(OBDAVocabulary.XSD_STRING)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_INTEGER)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_DECIMAL)
 					|| functionSymbol.equals(OBDAVocabulary.XSD_DOUBLE)
@@ -583,6 +593,11 @@ public class VirtualABoxMaterializer {
 				return true;
 			}
 			return false;
+		}
+		
+		private boolean isLiteralDataProperty(Function function) {
+			Predicate functionSymbol = function.getFunctionSymbol();
+			return functionSymbol.equals(OBDAVocabulary.RDFS_LITERAL);
 		}
 
 		@Override

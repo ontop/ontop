@@ -39,8 +39,8 @@
       <SQLQuery string="select id, addressid from company"/>
     </mapping>
     <mapping id="mapping-stocks">
-      <CQ string="Stock(getStockObj($id)),financialInstrumentID(getStockObj($id),$id),amountOfShares(getStockObj($id),$numberofshares),typeOfShares(getStockObj($id),$sharetype)"/>
-      <SQLQuery string="select id, numberofshares, sharetype from stockinformation"/>
+      <CQ string="Stock(getStockObj($id)),financialInstrumentID(getStockObj($id),$id),amountOfShares(getStockObj($id),$numberofshares),typeOfShares(getStockObj($id),$sharetype),stockDescription(getStockObj($id),http://www.w3.org/2000/01/rdf-schema#Literal($description,'en-US'))"/>
+      <SQLQuery string="select id, numberofshares, sharetype, description from stockinformation"/>
     </mapping>
     <mapping id="mapping-stockbooks">
       <CQ string="StockExchangeList(getStockBookObj($date)),listdate(getStockBookObj($date),$date)"/>
@@ -101,6 +101,8 @@
       <Query id="transaction-offer-stock" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $inst $type WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x a :Offer.&#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :Stock.&#xa;&#x9;&#x9;$inst :typeOfShares $type.&#xa;} "/>
     </QueryGroup>
     <QueryGroup id="Data types">
+      <Query id="Literal-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :stockDescription &quot;Text description 1&quot;. } "/>
+      <Query id="Literal-lang-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :stockDescription &quot;Text description 1&quot;@en-US. } "/>
       <Query id="String-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity &quot;Bolzano&quot;. } "/>
       <Query id="String-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity Bolzano. } "/>
       <Query id="String-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string>. } "/>

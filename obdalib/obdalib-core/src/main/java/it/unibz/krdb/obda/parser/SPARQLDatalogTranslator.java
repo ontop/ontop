@@ -56,11 +56,8 @@ import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
  */
 public class SPARQLDatalogTranslator {
 
-	/** A factory to construct the subject and object terms */
-	private OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
-
 	/** A factory to construct the predicates */
-	private OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
+	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * The default constructor.
@@ -97,7 +94,7 @@ public class SPARQLDatalogTranslator {
 
 		Query queryObject = QueryFactory.create(query);
 
-		DatalogProgram datalog = this.predicateFactory.getDatalogProgram();
+		DatalogProgram datalog = ofac.getDatalogProgram();
 		if (queryObject.isDistinct())
 			datalog.getQueryModifiers().put("distinct", true);
 
@@ -113,7 +110,7 @@ public class SPARQLDatalogTranslator {
 		for (Element element : elements) {
 			body.addAll(getBodyAtoms(element));
 		}
-		CQIE rule = predicateFactory.getCQIE(head, body);
+		CQIE rule = ofac.getCQIE(head, body);
 		datalog.appendRule(rule);
 		return datalog;
 	}
@@ -132,12 +129,12 @@ public class SPARQLDatalogTranslator {
 		int termSize = termNames.size();
 		for (int i = 0; i < termSize; i++) { // iterate the projectors
 			String name = termNames.get(i);
-			Term term = termFactory.getVariable(name);
+			Term term = ofac.getVariable(name);
 			headTerms.add(term);
 		}
-		Predicate predicate = predicateFactory.getPredicate(OBDALibConstants.QUERY_HEAD_URI, termSize);
+		Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, termSize);
 
-		return predicateFactory.getAtom(predicate, headTerms);
+		return ofac.getAtom(predicate, headTerms);
 	}
 
 	/** Extract the body atoms */
@@ -185,17 +182,17 @@ public class SPARQLDatalogTranslator {
 				// Subject node
 				if (s instanceof Var) {
 					Var subject = (Var) s;
-					terms.add(termFactory.getVariable(subject.getName()));
+					terms.add(ofac.getVariable(subject.getName()));
 				} else if (s instanceof Node_Literal) {
 					Node_Literal subject = (Node_Literal) s;
 					String value = subject.getLiteralValue().toString();
 					subjectType = getDataType(subject);
-					terms.add(termFactory.getValueConstant(value, subjectType));
+					terms.add(ofac.getValueConstant(value, subjectType));
 				} else if (s instanceof Node_URI) {
 					Node_URI subject = (Node_URI) s;
 					subjectType = COL_TYPE.OBJECT;
 					subjectUri = URI.create(subject.getURI());
-					terms.add(termFactory.getURIConstant(subjectUri));
+					terms.add(ofac.getURIConstant(subjectUri));
 				}
 
 				// Object node
@@ -210,58 +207,68 @@ public class SPARQLDatalogTranslator {
 
 				// Construct the predicate
 				URI predicateUri = objectUri;
-				predicate = predicateFactory.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
+				predicate = ofac.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
 			} else {
 				// Subject node
 				if (s instanceof Var) {
 					Var subject = (Var) s;
-					terms.add(termFactory.getVariable(subject.getName()));
+					terms.add(ofac.getVariable(subject.getName()));
 				} else if (s instanceof Node_Literal) {
 					Node_Literal subject = (Node_Literal) s;
 					String value = subject.getLiteralValue().toString();
 					subjectType = getDataType(subject);
-					terms.add(termFactory.getValueConstant(value, subjectType));
+					terms.add(ofac.getValueConstant(value, subjectType));
 				} else if (s instanceof Node_URI) {
 					Node_URI subject = (Node_URI) s;
 					subjectType = COL_TYPE.OBJECT;
 					subjectUri = URI.create(subject.getURI());
-					terms.add(termFactory.getURIConstant(subjectUri));
+					terms.add(ofac.getURIConstant(subjectUri));
 				}
 
 				// Object node
 				if (o instanceof Var) {
 					Var object = (Var) o;
-					terms.add(termFactory.getVariable(object.getName()));
+					terms.add(ofac.getVariable(object.getName()));
 				} else if (o instanceof Node_Literal) {
 					Node_Literal object = (Node_Literal) o;
-					String value = object.getLiteralValue().toString();
 					objectType = getDataType(object);
-					ValueConstant constant = termFactory.getValueConstant(value, objectType);
+					
+					String value = object.getLiteralValue().toString();
+					ValueConstant constant = ofac.getValueConstant(value, objectType);
 
-					// v1.7: We extend the syntax such that the data type of a
-					// constant
+					// v1.7: We extend the syntax such that the data type of a constant
 					// is defined using a functional symbol.
-					Function dataTypeFunction = termFactory.getFunctionalTerm(getDataTypePredicate(objectType), constant);
+					Function dataTypeFunction = null;
+					if (objectType == COL_TYPE.LITERAL) {
+						// If the object has type LITERAL, check any language tag!
+						String lang = (object.getLiteralLanguage() == null) ? "" : object.getLiteralLanguage();
+						Predicate functionSymbol = ofac.getDataTypePredicateLiteral();
+						ValueConstant languageConstant = ofac.getValueConstant(lang, COL_TYPE.STRING);
+						dataTypeFunction = ofac.getFunctionalTerm(functionSymbol, constant, languageConstant);
+					} else {
+						// For other supported data-types
+						Predicate functionSymbol = getDataTypePredicate(objectType);
+						dataTypeFunction = ofac.getFunctionalTerm(functionSymbol, constant);
+					}
 					terms.add(dataTypeFunction);
 				} else if (o instanceof Node_URI) {
 					Node_URI object = (Node_URI) o;
 					objectType = COL_TYPE.OBJECT;
 					objectUri = URI.create(object.getURI());
-					terms.add(termFactory.getURIConstant(objectUri));
+					terms.add(ofac.getURIConstant(objectUri));
 				}
-
 				// Construct the predicate
 				URI predicateUri = URI.create(p.getURI());
-				predicate = predicateFactory.getPredicate(predicateUri, 2, new COL_TYPE[] { subjectType, objectType });
+				predicate = ofac.getPredicate(predicateUri, 2, new COL_TYPE[] { subjectType, objectType });
 			}
 			// Construct the atom
-			Atom atom = predicateFactory.getAtom(predicate, terms);
+			Atom atom = ofac.getAtom(predicate, terms);
 			elementTriplesAtoms.add(atom);
 		}
 		return elementTriplesAtoms;
 	}
 
-	private List<Atom> collectElementFilterAtom(ElementFilter elementFilter) {
+	private List<Atom> collectElementFilterAtom(ElementFilter elementFilter) throws QueryException {
 
 		List<Atom> elementFilterAtoms = new LinkedList<Atom>();
 
@@ -277,30 +284,30 @@ public class SPARQLDatalogTranslator {
 			Term term2 = getTermOfRelationalArgument(arg2, 2);
 
 			if (expr instanceof E_Equals) {
-				elementFilterAtoms.add(termFactory.getEQAtom(term1, term2));
+				elementFilterAtoms.add(ofac.getEQAtom(term1, term2));
 			} else if (expr instanceof E_NotEquals) {
-				elementFilterAtoms.add(termFactory.getNEQAtom(term1, term2));
+				elementFilterAtoms.add(ofac.getNEQAtom(term1, term2));
 			} else if (expr instanceof E_GreaterThan) {
-				elementFilterAtoms.add(termFactory.getGTAtom(term1, term2));
+				elementFilterAtoms.add(ofac.getGTAtom(term1, term2));
 			} else if (expr instanceof E_GreaterThanOrEqual) {
-				elementFilterAtoms.add(termFactory.getGTEAtom(term1, term2));
+				elementFilterAtoms.add(ofac.getGTEAtom(term1, term2));
 			} else if (expr instanceof E_LessThan) {
-				elementFilterAtoms.add(termFactory.getLTAtom(term1, term2));
+				elementFilterAtoms.add(ofac.getLTAtom(term1, term2));
 			} else if (expr instanceof E_LessThanOrEqual) {
-				elementFilterAtoms.add(termFactory.getLTEAtom(term1, term2));
+				elementFilterAtoms.add(ofac.getLTEAtom(term1, term2));
 			} else {
 				throw new QueryException("Unsupported query syntax");
-			}
+			}		
 		} else {
 			throw new QueryException("Unsupported query syntax");
 		}
 		return elementFilterAtoms;
 	}
 
-	private Term getTermOfRelationalArgument(Expr arg, int index) {
+	private Term getTermOfRelationalArgument(Expr arg, int index) throws QueryException {
 		Term term = null;
 		if (arg instanceof ExprVar) {
-			term = termFactory.getVariable(arg.getVarName());
+			term = ofac.getVariable(arg.getVarName());
 		} else if (arg instanceof NodeValue) {
 			if (index == 1) {
 				// if the first argument is a constant.
@@ -308,19 +315,19 @@ public class SPARQLDatalogTranslator {
 			}
 			NodeValue node = (NodeValue) arg;
 			if (node instanceof NodeValueString) {
-				term = termFactory.getValueConstant(node.getString(), COL_TYPE.STRING);
+				term = ofac.getValueConstant(node.getString(), COL_TYPE.STRING);
 			} else if (node instanceof NodeValueInteger) {
-				term = termFactory.getValueConstant(node.getInteger() + "", COL_TYPE.INTEGER);
+				term = ofac.getValueConstant(node.getInteger()+"", COL_TYPE.INTEGER);
 			} else if (node instanceof NodeValueDecimal) {
-				term = termFactory.getValueConstant(node.getDecimal() + "", COL_TYPE.DECIMAL);
+				term = ofac.getValueConstant(node.getDecimal()+"", COL_TYPE.DECIMAL);
 			} else if (node instanceof NodeValueDouble || node instanceof NodeValueFloat) {
-				term = termFactory.getValueConstant(node.getDouble() + "", COL_TYPE.DOUBLE);
+				term = ofac.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
 			} else if (node instanceof NodeValueDateTime) {
-				term = termFactory.getValueConstant(node.getDateTime() + "", COL_TYPE.DATETIME);
+				term = ofac.getValueConstant(node.getDateTime()+"", COL_TYPE.DATETIME);
 			} else if (node instanceof NodeValueBoolean) {
-				term = termFactory.getValueConstant(node.getBoolean() + "", COL_TYPE.BOOLEAN);
+				term = ofac.getValueConstant(node.getBoolean()+"", COL_TYPE.BOOLEAN);
 			} else {
-				throw new QueryException("Unsupported data type");
+				throw new QueryException("Unknown data type!");
 			}
 		}
 		return term;
@@ -340,10 +347,8 @@ public class SPARQLDatalogTranslator {
 			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)
 					|| dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
 				dataType = COL_TYPE.INTEGER;
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) { // special
-																						// case
-																						// for
-																						// decimal
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {
+				// special case for decimal
 				String value = node.getLiteralValue().toString();
 				if (value.contains(".")) {
 					// Put the type as decimal (with fractions).
@@ -366,32 +371,16 @@ public class SPARQLDatalogTranslator {
 		return dataType;
 	}
 
-	private Predicate getDataTypePredicate(COL_TYPE dataType) {
-		Predicate predicate = null;
-
+	private Predicate getDataTypePredicate(COL_TYPE dataType) throws QueryException {
 		switch (dataType) {
-		case LITERAL:
-			predicate = termFactory.getPredicate(OBDAVocabulary.RDFS_LITERAL_URI, 1, new COL_TYPE[] { dataType });
-			break;
-		case STRING:
-			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_STRING_URI, 1, new COL_TYPE[] { dataType });
-			break;
-		case INTEGER:
-			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_INTEGER_URI, 1, new COL_TYPE[] { dataType });
-			break;
-		case DECIMAL:
-			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DECIMAL_URI, 1, new COL_TYPE[] { dataType });
-			break;
-		case DOUBLE:
-			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DOUBLE_URI, 1, new COL_TYPE[] { dataType });
-			break;
-		case DATETIME:
-			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_DATETIME_URI, 1, new COL_TYPE[] { dataType });
-			break;
-		case BOOLEAN:
-			predicate = termFactory.getPredicate(OBDAVocabulary.XSD_BOOLEAN_URI, 1, new COL_TYPE[] { dataType });
-			break;
+			case STRING: return ofac.getDataTypePredicateString();
+			case INTEGER: return ofac.getDataTypePredicateInteger();
+			case DECIMAL: return ofac.getDataTypePredicateDecimal();
+			case DOUBLE: return ofac.getDataTypePredicateDouble();
+			case DATETIME: return ofac.getDataTypePredicateDateTime();
+			case BOOLEAN: return ofac.getDataTypePredicateBoolean();
+			default: 
+				throw new QueryException("Unknown data type!");
 		}
-		return predicate;
 	}
 }

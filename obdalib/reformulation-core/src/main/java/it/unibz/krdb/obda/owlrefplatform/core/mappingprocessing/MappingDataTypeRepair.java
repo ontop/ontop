@@ -2,7 +2,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
@@ -14,7 +16,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -33,31 +34,68 @@ public class MappingDataTypeRepair {
     
     private Map<String, List<Object[]>> termOccurenceIndex;
     
-    private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+    private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
+    /**
+     * Constructs a new mapping data type resolution. The object requires a database
+     * metadata for obtaining the table column definition as the default data-type.
+     * 
+     * @param metadata
+     * 			The database metadata.
+     */
     public MappingDataTypeRepair(DBMetadata metadata) {
         this.metadata = metadata;
     }
     
+    /**
+     * This method wraps the variable that holds data property values with a data type predicate. 
+     * It will replace the variable with a new function symbol and update the rule atom. However,
+     * if the users already defined the data-type in the mapping, this method simply accepts the
+     * function symbol.
+     * 
+     * @param mappingDatalog
+     * 			The set of mapping axioms.
+     * @throws OBDAException
+     */
     public void insertDataTyping(DatalogProgram mappingDatalog) throws OBDAException {
         List<CQIE> mappingRules = mappingDatalog.getRules();
         for (CQIE rule : mappingRules) {
             prepareIndex(rule);
             Atom atom = rule.getHead();
             Predicate predicate = atom.getPredicate();
-            if (predicate.getArity() == 2 && predicate.getType(1) == COL_TYPE.LITERAL) {
-            	// if it's a data property
-                Variable variable = (Variable) atom.getTerm(1);
-                Predicate functor = getDataTypeFunctor(variable);
-                Term newTerm = ofac.getFunctionalTerm(functor, variable);
-                atom.setTerm(1, newTerm);
+            if (isDataProperty(predicate)) {
+            	// If the predicate is a data property
+            	Term term = atom.getTerm(1);
+                if (term instanceof Function) {
+                	Predicate functionSymbol = ((Function) term).getFunctionSymbol();
+                	if (functionSymbol instanceof DataTypePredicate) {
+	                	// NO-OP
+	                	// If the term is already a data-type predicate then the program 
+	                	// accepts this user-defined data type.
+                	} else {
+                		throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
+                	}
+                } else if (term instanceof Variable) {
+                	// If the term has no data-type predicate then by default the
+                	// predicate is created following the database metadata of
+                	// column type.
+                	Variable variable = (Variable) term;
+	                Predicate functor = getDataTypeFunctor(variable);
+	                Term newTerm = dfac.getFunctionalTerm(functor, variable);
+	                atom.setTerm(1, newTerm);
+                }
             } else {
-            	// skip
+            	// NO-OP
+            	// For other types of predicate, skip them.
             }
         }
     }
+    
+    private boolean isDataProperty(Predicate predicate) {
+    	return predicate.getArity() == 2 && predicate.getType(1) == COL_TYPE.LITERAL;
+    }
 
-    private Predicate getDataTypeFunctor(Variable variable) throws OBDAException {
+	private Predicate getDataTypeFunctor(Variable variable) throws OBDAException {
         List<Object[]> list = termOccurenceIndex.get(variable.getName());
         if (list == null) {
             throw new OBDAException("Unknown term in head");
@@ -72,21 +110,21 @@ public class MappingDataTypeRepair {
         Attribute attribute = tableMetadata.getAttribute(pos);
         
         switch (attribute.type) {
-            case Types.VARCHAR: return OBDAVocabulary.XSD_STRING;
+            case Types.VARCHAR: return dfac.getDataTypePredicateString();
             case Types.INTEGER:
             case Types.BIGINT:
-            case Types.SMALLINT: return OBDAVocabulary.XSD_INTEGER;
+            case Types.SMALLINT: return dfac.getDataTypePredicateInteger();
             case Types.NUMERIC: // Decimal type for PgSQL
-            case Types.DECIMAL: return OBDAVocabulary.XSD_DECIMAL;
+            case Types.DECIMAL: return dfac.getDataTypePredicateDecimal();
             case Types.FLOAT:
             case Types.DOUBLE:
-            case Types.REAL: return OBDAVocabulary.XSD_DOUBLE;
+            case Types.REAL: return dfac.getDataTypePredicateDouble();
             case Types.DATE: // Date time type for H2
-            case Types.TIMESTAMP: return OBDAVocabulary.XSD_DATETIME;
+            case Types.TIMESTAMP: return dfac.getDataTypePredicateDateTime();
             case Types.BOOLEAN: 
             case Types.BINARY:
-            case Types.BIT: return OBDAVocabulary.XSD_BOOLEAN;
-            default: return OBDAVocabulary.RDFS_LITERAL;
+            case Types.BIT: return dfac.getDataTypePredicateBoolean();
+            default: return dfac.getDataTypePredicateLiteral();
         }
     }
     

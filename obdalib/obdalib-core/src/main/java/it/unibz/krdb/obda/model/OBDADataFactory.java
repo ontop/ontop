@@ -65,7 +65,7 @@ public interface OBDADataFactory extends Serializable {
 	 * Data types
 	 */
 
-	public Predicate getDataTypePredicateLiteral(boolean withLanguageTag);
+	public Predicate getDataTypePredicateLiteral();
 	
 	public Predicate getDataTypePredicateString();
 	
@@ -200,6 +200,23 @@ public interface OBDADataFactory extends Serializable {
 	 * @return the value constant.
 	 */
 	public ValueConstant getValueConstant(String value, Predicate.COL_TYPE type);
+	
+	/**
+	 * Construct a {@link ValueConstant} object with a language tag.
+	 * <p>
+	 * Example:
+	 * <p>
+	 * <code>
+	 * "This is American English"@en-US <br />
+	 * </code>
+	 * 
+	 * @param value
+	 *            the value of the constant.
+	 * @param language
+	 * 			  the language tag for the constant.
+	 * @return the value constant.
+	 */
+	public ValueConstant getValueConstant(String value, String language);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a

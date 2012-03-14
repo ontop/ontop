@@ -77,10 +77,8 @@ public class OBDAVocabulary {
 	
 	
 	/* Data type predicates */
-	
-	public static final Predicate RDFS_LITERAL = new DataTypePredicateImpl(URI.create(RDFS_LITERAL_URI), COL_TYPE.LITERAL);
-	
-	public static final Predicate RDFS_LITERAL_WITH_LANG = new DataTypePredicateImpl(URI.create(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.STRING });
+		
+	public static final Predicate RDFS_LITERAL = new DataTypePredicateImpl(URI.create(RDFS_LITERAL_URI), new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.STRING });
 	
 	public static final Predicate XSD_STRING = new DataTypePredicateImpl(URI.create(XSD_STRING_URI), COL_TYPE.STRING);
 	

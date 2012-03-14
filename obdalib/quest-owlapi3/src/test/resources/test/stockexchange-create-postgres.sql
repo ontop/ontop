@@ -51,7 +51,8 @@ CREATE TABLE stockinformation (
     id integer NOT NULL,
     numberofshares integer,
     sharetype boolean,
-    companyid integer
+    companyid integer,
+    description text
 );
 
 CREATE TABLE transaction (
@@ -106,16 +107,16 @@ INSERT INTO stockbooklist VALUES ('2008-04-07', 667);
 INSERT INTO stockbooklist VALUES ('2008-04-08', 668);
 INSERT INTO stockbooklist VALUES ('2008-04-09', 669);
 
-INSERT INTO stockinformation VALUES (661, 100, false, 211);
-INSERT INTO stockinformation VALUES (660, 100, false, 211);
-INSERT INTO stockinformation VALUES (662, 100, false, 211);
-INSERT INTO stockinformation VALUES (663, 100, false, 211);
-INSERT INTO stockinformation VALUES (664, 100, false, 211);
-INSERT INTO stockinformation VALUES (665, 100, true, 211);
-INSERT INTO stockinformation VALUES (666, 100, true, 211);
-INSERT INTO stockinformation VALUES (667, 100, true, 211);
-INSERT INTO stockinformation VALUES (669, 100, true, 211);
-INSERT INTO stockinformation VALUES (668, 100, true, 211);
+INSERT INTO stockinformation VALUES (661, 100, false, 211, 'Text description 1');
+INSERT INTO stockinformation VALUES (660, 100, false, 211, 'Text description 2');
+INSERT INTO stockinformation VALUES (662, 100, false, 211, 'Text description 3');
+INSERT INTO stockinformation VALUES (663, 100, false, 211, 'Text description 4');
+INSERT INTO stockinformation VALUES (664, 100, false, 211, 'Text description 5');
+INSERT INTO stockinformation VALUES (665, 100, true, 211, 'Testo di descrizione 1');
+INSERT INTO stockinformation VALUES (666, 100, true, 211, 'Testo di descrizione 2');
+INSERT INTO stockinformation VALUES (667, 100, true, 211, 'Testo di descrizione 3');
+INSERT INTO stockinformation VALUES (669, 100, true, 211, 'Testo di descrizione 4');
+INSERT INTO stockinformation VALUES (668, 100, true, 211, 'Testo di descrizione 5');
 
 INSERT INTO transaction VALUES (3331, '2008-04-01', 661, true, 112, 111, NULL, 12.6);
 INSERT INTO transaction VALUES (3332, '2008-04-02', 662, true, 112, 111, NULL, 108.34);

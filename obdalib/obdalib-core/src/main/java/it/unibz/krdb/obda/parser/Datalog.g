@@ -50,6 +50,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 }
 
@@ -87,7 +88,7 @@ private HashMap<String, String> directives = new HashMap<String, String>();
 private HashSet<Variable> variables = new HashSet<Variable>();
 
 /** A factory to construct the predicates and terms */
-private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 /** Select all flag */
 private boolean isSelectAll = false;
@@ -111,7 +112,7 @@ parse returns [DatalogProgram value]
   
 prog returns [DatalogProgram value]
 @init {
-  $value = dataFactory.getDatalogProgram();
+  $value = dfac.getDatalogProgram();
   CQIE rule = null;
 }
   : base?
@@ -128,8 +129,8 @@ prog returns [DatalogProgram value]
         int size = variableList.size(); 
         
         // Get the predicate atom
-        Predicate predicate = dataFactory.getPredicate(name, size);
-        Atom newhead = dataFactory.getAtom(predicate, variableList);
+        Predicate predicate = dfac.getPredicate(name, size);
+        Atom newhead = dfac.getAtom(predicate, variableList);
         rule.updateHead(newhead);
         
         isSelectAll = false;  
@@ -178,7 +179,7 @@ rule returns [CQIE value]
 
 datalog_syntax_rule returns [CQIE value]
   : INV_IMPLIES body {
-      $value = dataFactory.getCQIE(null, $body.value);
+      $value = dfac.getCQIE(null, $body.value);
     }
   | datalog_syntax_alt {
       $value = $datalog_syntax_alt.value;
@@ -187,16 +188,16 @@ datalog_syntax_rule returns [CQIE value]
 
 datalog_syntax_alt returns [CQIE value]
   : (head INV_IMPLIES body)=> head INV_IMPLIES body {
-      $value = dataFactory.getCQIE($head.value, $body.value);
+      $value = dfac.getCQIE($head.value, $body.value);
     }
   | head INV_IMPLIES {
-      $value = dataFactory.getCQIE($head.value, new LinkedList<Atom>());
+      $value = dfac.getCQIE($head.value, new LinkedList<Atom>());
     }
   ;
 
 swirl_syntax_rule returns [CQIE value]
   : IMPLIES head {
-      $value = dataFactory.getCQIE($head.value, new LinkedList<Atom>());
+      $value = dfac.getCQIE($head.value, new LinkedList<Atom>());
     }
   | swirl_syntax_alt {
       $value = $swirl_syntax_alt.value;
@@ -205,10 +206,10 @@ swirl_syntax_rule returns [CQIE value]
 
 swirl_syntax_alt returns [CQIE value]
   : (body IMPLIES head)=> body IMPLIES head {
-      $value = dataFactory.getCQIE($head.value, $body.value);
+      $value = dfac.getCQIE($head.value, $body.value);
     }
   | body IMPLIES {
-      $value = dataFactory.getCQIE(null, $body.value);
+      $value = dfac.getCQIE(null, $body.value);
     }
   ;
 
@@ -235,13 +236,13 @@ atom returns [Atom value]
       Vector<Term> elements = $terms.elements;
       if (elements == null)
         elements = new Vector<Term>();
-      Predicate predicate = dataFactory.getPredicate(uri, elements.size());
+      Predicate predicate = dfac.getPredicate(uri, elements.size());
       
       Vector<Term> terms = $terms.elements;
       if (terms == null)
         terms = new Vector<Term>();
         
-      $value = dataFactory.getAtom(predicate, terms);
+      $value = dfac.getAtom(predicate, terms);
     }
   ;
 
@@ -267,11 +268,11 @@ term returns [Term value]
 
 variable_term returns [Variable value] 
   : (DOLLAR|QUESTION) id { 
-      $value = dataFactory.getVariable($id.text);
+      $value = dfac.getVariable($id.text);
       variables.add($value); // collect the variable terms.
     }
   | ASTERISK {
-      $value = dataFactory.getVariable(OBDA_SELECT_ALL);
+      $value = dfac.getVariable(OBDA_SELECT_ALL);
       isSelectAll = true;
     }
   ;
@@ -292,21 +293,34 @@ literal_term returns [ValueConstant value]
       	}
       }
       
-      $value = dataFactory.getValueConstant(literal);
+      $value = dfac.getValueConstant(literal);
     }
   ; 
   
 object_term returns [Function value]
   : function LPAREN terms RPAREN {
-  URI uri = null;
-      try {
-      uri = new URI($function.value);
-      } catch (Exception e) {
-        System.out.println("Invalid URI: " + $function.value);
-      	throw new RecognitionException();
+      String functionName = $function.value;
+      int arity = $terms.elements.size();
+    
+      Predicate functionSymbol = null;  	
+      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateLiteral();
+      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateString();
+      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
+     	functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDecimal();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDouble();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDateTime();
+      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateBoolean();
+      } else {
+        functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
       }
-      Predicate fs = dataFactory.getPredicate(uri, $terms.elements.size());
-      $value = dataFactory.getFunctionalTerm(fs, $terms.elements);
+      $value = dfac.getFunctionalTerm(functionSymbol, $terms.elements);
     }
   ;
   
@@ -317,7 +331,7 @@ uri_term returns [URIConstant value]
   : uri { 
       uriText = $uri.text;      
       URI uri = URI.create(uriText);
-      $value = dataFactory.getURIConstant(uri);
+      $value = dfac.getURIConstant(uri);
     }
   ;
   
