@@ -34,7 +34,7 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	private HashMap<String, Integer> columnMap = new HashMap<String, Integer>();
 	private List<Term> signatureTyping;
 
-	private HashMap<Integer, COL_TYPE> typingMap = new HashMap<Integer, Predicate.COL_TYPE>();
+	private HashMap<String, Term> typingMap = new HashMap<String, Term>();
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -52,24 +52,19 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	 * @param st
 	 * @throws SQLException
 	 */
-	public OWLOBDARefResultSet(ResultSet set, List<Term> signatureTyping, OBDAStatement st) throws SQLException {
+	public OWLOBDARefResultSet(ResultSet set, List<String> signature, List<Term> signatureTyping, OBDAStatement st) throws SQLException {
 		this.set = set;
 		this.st = st;
 
 		this.signatureTyping = new ArrayList<Term>();
 		this.signatureTyping.addAll(signatureTyping);
-		
-		int i = getColumCount();
-		signature = new Vector<String>();
-		for (int j = 1; j <= i; j++) {
-			String columnLabel = set.getMetaData().getColumnLabel(j);
-			signature.add(columnLabel);
-			columnMap.put(columnLabel, j);
-			// Initializing the coltype buffer
-			getType(j);
-		}
 
-		
+		int i = signatureTyping.size();
+		this.signature = new Vector<String>(signature);
+		for (int j = 1; j <= i; j++) {
+			columnMap.put(signature.get(j - 1), j - 1);
+			typingMap.put(signature.get(j - 1), signatureTyping.get(j - 1));
+		}
 
 	}
 
@@ -82,12 +77,12 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	 * @return
 	 */
 	private COL_TYPE getType(int column) {
-		Term type = signatureTyping.get(column - 1);
+		Term type = signatureTyping.get(column);
 		if (!(type instanceof Function)) {
 			// The column is not typed
 			return null;
 		}
-		Function function = (Function) type;
+		Predicate function = ((Function) type).getFunctionSymbol();
 		if (function == OBDAVocabulary.XSD_BOOLEAN) {
 			return COL_TYPE.BOOLEAN;
 		} else if (function == OBDAVocabulary.XSD_DATETIME) {
@@ -102,36 +97,36 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 			return COL_TYPE.STRING;
 		} else if (function == OBDAVocabulary.RDFS_LITERAL) {
 			return COL_TYPE.LITERAL;
-		} else if (function.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
+		} else if (function.getName().equals(OBDAVocabulary.QUEST_URI)) {
 			return COL_TYPE.OBJECT;
-		} else if (function.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_BNODE)) {
+		} else if (function.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
 			return COL_TYPE.BNODE;
 		}
 		return COL_TYPE.OBJECT;
 	}
 
 	public double getDouble(int column) throws SQLException {
-		return set.getDouble(column);
+		return set.getDouble(signature.get(column - 1));
 	}
 
 	public int getInt(int column) throws SQLException {
-		return set.getInt(column);
+		return set.getInt(signature.get(column - 1));
 	}
 
 	public Object getObject(int column) throws SQLException {
-		return set.getObject(column);
+		return set.getObject(signature.get(column - 1));
 	}
 
 	public String getString(int column) throws SQLException {
-		return set.getString(column);
+		return set.getString(signature.get(column - 1));
 	}
 
 	public URI getURI(int column) throws SQLException {
-		return URI.create(set.getString(column));
+		return getURI(signature.get(column-1));
 	}
 
 	public int getColumCount() throws SQLException {
-		return set.getMetaData().getColumnCount();
+		return signature.size();
 	}
 
 	public int getFetchSize() throws SQLException {
@@ -157,64 +152,78 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 
 	@Override
 	public Constant getConstant(int column) throws SQLException, URISyntaxException {
+		return getConstant(signature.get(column-1));
+	}
 
-		COL_TYPE type = typingMap.get(column);
+	@Override
+	public ValueConstant getLiteral(int column) throws SQLException {
+		return getLiteral(signature.get(column-1));
+	}
+
+	@Override
+	public BNode getBNode(int column) throws SQLException {
+		return getBNode(signature.get(column-1));
+	}
+
+	@Override
+	public Constant getConstant(String name) throws SQLException, URISyntaxException {
+		int index = columnMap.get(name);
+		COL_TYPE type = getType(index);
 		Constant result = null;
 
 		if (type == COL_TYPE.OBJECT) {
-			result = fac.getURIConstant(new URI(set.getString(column)));
+			result = fac.getURIConstant(new URI(set.getString(name)));
 		} else if (type == COL_TYPE.BNODE) {
-			result = fac.getBNodeConstant(set.getString(column));
+			result = fac.getBNodeConstant(set.getString(name));
 		} else {
-			result = fac.getValueConstant(set.getString(column), type);
+			/*
+			 * The constant is a literal, we need to find if its rdfs:Literal or
+			 * a normal literal and construct it properly.
+			 */
+			if (type == COL_TYPE.LITERAL) {
+				// Function ftype = (Function)typingMap.get(index);
+				// Term valueterm = ftype.getTerms().get(0);
+				// Term langterm = ftype.getTerms().get(1);
+				String value = set.getString(name);
+				String language = set.getString(name + "LitLang");
+				result = fac.getValueConstant(value, language);
+
+			} else {
+				result = fac.getValueConstant(set.getString(name), type);
+			}
 		}
 
 		return result;
 	}
 
 	@Override
-	public ValueConstant getLiteral(int column) throws SQLException {
+	public URI getURI(String name) throws SQLException {
+		return URI.create(set.getString(name));
+	}
+
+	@Override
+	public ValueConstant getLiteral(String name) throws SQLException {
 		Constant result;
 		try {
-			result = getConstant(column);
+			result = getConstant(name);
 		} catch (URISyntaxException e) {
 			// This should never happen
-			log.error("Error casting column {}: {} ", column, e.getMessage());
+			log.error("Error casting column {}: {} ", name, e.getMessage());
 			return null;
 		}
 		return (ValueConstant) result;
 	}
 
 	@Override
-	public BNode getBNode(int column) throws SQLException {
+	public BNode getBNode(String name) throws SQLException {
 		Constant result;
 		try {
-			result = getConstant(column);
+			result = getConstant(name);
 		} catch (URISyntaxException e) {
 			// This should never happen
-			log.error("Error casting column {}: {} ", column, e.getMessage());
+			log.error("Error casting column {}: {} ", name, e.getMessage());
 			return null;
 		}
 		return (BNode) result;
-	}
-
-	@Override
-	public Constant getConstant(String name) throws SQLException, URISyntaxException {
-		return getConstant(this.columnMap.get(name));
-	}
-
-	@Override
-	public URI getURI(String name) throws SQLException {
-		return getURI(this.columnMap.get(name));
-	}
-
-	@Override
-	public ValueConstant getLiteral(String name) throws SQLException {
-		return getLiteral(this.columnMap.get(name));
-	}
-
-	@Override
-	public BNode getBNode(String name) throws SQLException {
-		return getBNode(this.columnMap.get(name));
 	}
 }

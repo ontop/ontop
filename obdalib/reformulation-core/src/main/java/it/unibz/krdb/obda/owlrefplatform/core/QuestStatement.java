@@ -125,8 +125,12 @@ public class QuestStatement implements OBDAStatement {
 			ResultSet set = sqlstatement.executeQuery(epistemicUnfolding);
 
 			int columnCount = set.getMetaData().getColumnCount();
+			List<String> signature = new Vector<String>();
+			for (int i = 1; i <= columnCount; i++) {
+				signature.add(set.getMetaData().getColumnLabel(i));
+			}
 			List<Term> typing = getDefaultTypingSignature(columnCount);
-			result = new OWLOBDARefResultSet(set, typing, this);
+			result = new OWLOBDARefResultSet(set, signature, typing, this);
 
 			return result;
 		} catch (Exception e) {
@@ -140,8 +144,12 @@ public class QuestStatement implements OBDAStatement {
 			ResultSet set = sqlstatement.executeQuery(query);
 
 			int columnCount = set.getMetaData().getColumnCount();
+			List<String> signature = new Vector<String>();
+			for (int i = 1; i <= columnCount; i++) {
+				signature.add(set.getMetaData().getColumnLabel(i));
+			}
 			List<Term> typing = getDefaultTypingSignature(columnCount);
-			result = new OWLOBDARefResultSet(set, typing, this);
+			result = new OWLOBDARefResultSet(set, signature, typing, this);
 			return result;
 		} catch (Exception e) {
 			throw new OBDAException(e);
@@ -265,7 +273,7 @@ public class QuestStatement implements OBDAStatement {
 			} else {
 				List<Term> typingSignature = unfolding.getRules().get(0).getHead().getTerms();
 				try {
-					result = new OWLOBDARefResultSet(set, typingSignature, this);
+					result = new OWLOBDARefResultSet(set, signature, typingSignature, this);
 				} catch (SQLException e) {
 					throw new OBDAException(e.getMessage());
 				}

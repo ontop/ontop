@@ -412,9 +412,57 @@ public class SQLGenerator implements SourceQueryGenerator {
 					Predicate functionSymbol = ov.getFunctionSymbol();
 					String functionString = functionSymbol.toString();
 					if (functionSymbol instanceof DataTypePredicate) {
-						Variable v = (Variable) ov.getTerms().get(0);
-						String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
-						sb.append(column);
+						/*
+						 * Case where we have a typing function in the head
+						 * (this is the case for all literal columns
+						 */
+						if (functionSymbol == OBDAVocabulary.RDFS_LITERAL) {
+							/*
+							 * Case for rdf:literal s with a language, we need
+							 * to select 2 terms from ".., rdf:literal(?x,"en"),
+							 * 
+							 * and signatrure "name" * we will generate a select
+							 * with the projection of 2 columns
+							 * 
+							 * , 'en' as nameqlang, view.colforx as name,
+							 */
+
+							/*
+							 * first we add the column for language, we have two
+							 * cases, where the language is already in the
+							 * funciton as a constant, e.g,. "en" or where the
+							 * language is a variable that must be obtained from
+							 * a column in the query
+							 */
+							Term langTerm = ov.getTerms().get(1);
+							String lang = null;
+							if (langTerm instanceof ValueConstant) {
+								lang = getQuotedString(((ValueConstant) langTerm).getValue());
+							} else {
+								lang = getSQLString(langTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+							}
+							sb.append(lang);
+							sb.append(" AS ");
+							sb.append(signature.get(hpos) + "LitLang, ");
+
+							Term term = ov.getTerms().get(0);
+							String termStr = null;
+							if (term instanceof ValueConstant) {
+								termStr = getQuotedString(((ValueConstant) term).getValue());
+							} else {
+								termStr = getSQLString(term, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+							}
+							sb.append(termStr);
+
+						} else {
+							/*
+							 * Case for all simple datatypes, we only select one
+							 * column from the table
+							 */
+							Variable v = (Variable) ov.getTerms().get(0);
+							String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+							sb.append(column);
+						}
 					} else {
 						if (functionString.equals("http://obda.org/quest#uri")) {
 							/***
@@ -468,12 +516,12 @@ public class SQLGenerator implements SourceQueryGenerator {
 					}
 				} else if (ht instanceof ValueConstant) {
 					ValueConstant ct = (ValueConstant) ht;
-					sb.append(ct.toString());
+					sb.append(ct.getValue().toString());
 				} else if (ht instanceof URIConstant) {
 					URIConstant uc = (URIConstant) ht;
-					sb.append(getQuotedString(uc.toString()));
+					sb.append(getQuotedString(uc.getURI().toString()));
 				}
-				sb.append(" as ");
+				sb.append(" AS ");
 				sb.append(signature.get(hpos));
 
 				if (hit.hasNext()) {
@@ -508,12 +556,12 @@ public class SQLGenerator implements SourceQueryGenerator {
 	private String getSQLtimestampFromXSDDatetime(String datetime) {
 		StringBuffer bf = new StringBuffer();
 		int indexofT = datetime.indexOf('T');
-		bf.append(datetime.substring(0,indexofT));
+		bf.append(datetime.substring(0, indexofT));
 		bf.append(" ");
-		bf.append(datetime.subSequence(indexofT +1, indexofT + 1 + 8));
+		bf.append(datetime.subSequence(indexofT + 1, indexofT + 1 + 8));
 		return bf.toString();
 	}
-	
+
 	public String getSQLString(Term term, List<Atom> body, String[] tableName, String[] viewName,
 			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex) {
 		StringBuffer result = new StringBuffer();

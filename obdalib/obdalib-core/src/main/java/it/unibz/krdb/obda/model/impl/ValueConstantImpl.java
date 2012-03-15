@@ -32,10 +32,19 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 	
 	protected ValueConstantImpl(String value, String language, Predicate.COL_TYPE type) {
+		if (language == null)
+			language = "";
+		
 		this.value = value;
 		this.language = language;
 		this.type = type;
-		this.identifier = value.hashCode();
+		StringBuffer bf =new StringBuffer();
+		bf.append(value);
+		bf.append(" ");
+		bf.append(language);
+		bf.append(" ");
+		bf.append(type);
+		this.identifier = bf.toString().hashCode();
 	}
 
 	@Override
@@ -78,10 +87,14 @@ public class ValueConstantImpl implements ValueConstant {
 
 	@Override
 	public String toString() {
-		String template = "%s";
-		if (getType() == COL_TYPE.LITERAL || getType() == COL_TYPE.STRING || getType() == COL_TYPE.DATETIME) {
-			template = "\"" + template + "\"";
-		}		
-		return String.format(template, getValue().toString());
+		if (getType() == COL_TYPE.LITERAL) {
+			if (language == null || language.equals(""))
+				return value;
+			else
+				return value + "@" + language;
+		} else {
+			return value;
+		}
+		
 	}
 }

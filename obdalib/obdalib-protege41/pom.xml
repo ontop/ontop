@@ -8,7 +8,7 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-protege41</artifactId>
-	<name>obda plugin for protege 4.1</name>
+	<name>OBDA plugin for protege 4.1</name>
 
 
 
@@ -324,7 +324,7 @@
 							exceptions. It's very important to assure only the needed depdencies are 
 							imported. -->
 						<!-- <Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package> -->
-						<Import-Package>org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package>
+						<Import-Package>javax.accessibility.*,org.w3c.dom.*,org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package>
 
 						<!-- This makes sure all OBDA classes are exported and available in 
 							dependent projects -->

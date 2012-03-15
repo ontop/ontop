@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,7 +58,8 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 
 					String[] crow = new String[numcols];
 					for (int j = 0; j < numcols; j++) {
-						crow[j] = results.getString(j + 1);
+						Constant constant = results.getConstant(j + 1);
+						crow[j] = constant.toString();
 					}
 					resultsTable.add(crow);
 					i += 1;
@@ -68,6 +70,8 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 			}
 			numrows = i;
 		} catch (SQLException e) {
+			throw new QueryResultException(e);
+		} catch (Exception e) {
 			throw new QueryResultException(e);
 		}
 
@@ -191,7 +195,8 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 				if (results.nextRow()) {
 					String[] crow = new String[numcols];
 					for (int j = 0; j < numcols; j++) {
-						crow[j] = results.getString(j + 1);
+						Constant constant = results.getConstant(j + 1);
+						crow[j] = constant.toString();
 					}
 					resultsTable.add(crow);
 					i += 1;
@@ -203,6 +208,8 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 			numrows = numrows + i;
 		} catch (SQLException e) {
 			throw new QueryResultException(e);
+		} catch (URISyntaxException e) {
+			throw new QueryResultException("Error teching result: " + e.getMessage());
 		}
 	}
 
