@@ -334,9 +334,9 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Processing embedded query #{}", i);
 			String cq = cqs.get(i);
 			try {
-				DatalogProgram p = t.parse(cq);
-				List<String> signature = getSignature(cq);
-				String finasql = getSQL(p, signature);
+				
+				
+				String finasql = getUnfolding(cq);
 				log.debug("SQL: {}", finasql);
 				sqlforcqs.add(finasql);
 			} catch (Exception e) {
@@ -375,7 +375,7 @@ public class QuestStatement implements OBDAStatement {
 		String sql = null;
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			sql = getSQLEpistemic(strquery);
-		}
+		} else
 		if (strquery.contains("/*direct*/")) {
 			sql = strquery;
 		} else {
