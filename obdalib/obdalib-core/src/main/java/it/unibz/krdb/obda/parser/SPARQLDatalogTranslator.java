@@ -10,12 +10,16 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import com.hp.hpl.jena.graph.Node;
@@ -30,6 +34,8 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_GreaterThan;
 import com.hp.hpl.jena.sparql.expr.E_GreaterThanOrEqual;
+import com.hp.hpl.jena.sparql.expr.E_Lang;
+import com.hp.hpl.jena.sparql.expr.E_LangMatches;
 import com.hp.hpl.jena.sparql.expr.E_LessThan;
 import com.hp.hpl.jena.sparql.expr.E_LessThanOrEqual;
 import com.hp.hpl.jena.sparql.expr.E_NotEquals;
@@ -59,6 +65,9 @@ public class SPARQLDatalogTranslator {
 	/** A factory to construct the predicates */
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
+	/** A utility map to store substitution rule */
+	private Map<Variable, Term> mgu = new HashMap<Variable, Term>();
+	
 	/**
 	 * The default constructor.
 	 */
@@ -111,7 +120,8 @@ public class SPARQLDatalogTranslator {
 			body.addAll(getBodyAtoms(element));
 		}
 		CQIE rule = ofac.getCQIE(head, body);
-		datalog.appendRule(rule);
+		CQIE pev = Util.applyUnifier(rule, mgu);
+		datalog.appendRule(pev);
 		return datalog;
 	}
 
@@ -295,6 +305,12 @@ public class SPARQLDatalogTranslator {
 				elementFilterAtoms.add(ofac.getLTAtom(term1, term2));
 			} else if (expr instanceof E_LessThanOrEqual) {
 				elementFilterAtoms.add(ofac.getLTEAtom(term1, term2));
+			} else if (expr instanceof E_LangMatches) {
+				// If we find a build-in function LANGMATCHES
+				Variable variable = ofac.getVariable(((E_Lang) arg1).getArg().getVarName());
+				ValueConstant languageTag = ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.STRING);
+				Function langMatches = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), variable, languageTag);
+				mgu.put(variable, langMatches);
 			} else {
 				throw new QueryException("Unsupported query syntax");
 			}		
@@ -381,6 +397,50 @@ public class SPARQLDatalogTranslator {
 			case BOOLEAN: return ofac.getDataTypePredicateBoolean();
 			default: 
 				throw new QueryException("Unknown data type!");
+		}
+	}
+	
+	private static class Util {
+		
+		/***
+		 * This method will return a new query, resulting from the application of
+		 * the unifier to the original query q. To do this, we will call the clone()
+		 * method of the original query and then will call applyUnifier to each atom
+		 * of the cloned query.
+		 */
+		static CQIE applyUnifier(CQIE q, Map<Variable, Term> unifier) {
+			CQIE newq = q.clone();
+
+			/* applying the unifier to every term in the head */
+			Atom head = newq.getHead();
+			applyUnifier(head, unifier);
+			for (Atom bodyatom : newq.getBody()) {
+				applyUnifier(bodyatom, unifier);
+			}
+			return newq;
+		}
+		
+		private static void applyUnifier(Atom atom, Map<Variable, Term> unifier) {
+			applyUnifier(atom.getTerms(), unifier);
+		}
+
+		private static void applyUnifier(List<Term> terms, Map<Variable, Term> unifier) {
+			for (int i = 0; i < terms.size(); i++) {
+				Term t = terms.get(i);
+				if (t instanceof VariableImpl) {
+					Term replacement = unifier.get(t);
+					if (replacement != null) {
+						terms.set(i, replacement);
+					}
+				} else if (t instanceof Function) {
+					applyUnifier((Function) t, unifier);
+				}
+			}
+		}
+
+		private static void applyUnifier(Function term, Map<Variable, Term> unifier) {
+			List<Term> terms = term.getTerms();
+			applyUnifier(terms, unifier);
 		}
 	}
 }

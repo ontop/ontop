@@ -184,6 +184,7 @@
       <Query id="DateTime_LTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate &lt;= &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
       <Query id="Boolean_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares $type. FILTER ( $type = true ). } "/>
       <Query id="Boolean_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares $type. FILTER ( $type != true ). } "/>
+      <Query id="Literal_LangMatches" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount $description WHERE { $x a :Stock; :amountOfShares $amount; :stockDescription $description. FILTER langMatches ( lang($description), &quot;en-US&quot; ). }"/>
     </QueryGroup>
   </SavedQueries>                                                                                                           
 </OBDA>
