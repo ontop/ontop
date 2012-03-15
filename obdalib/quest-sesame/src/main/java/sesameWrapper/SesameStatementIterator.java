@@ -17,11 +17,11 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 
-public class SesameStatementIterator extends RDFHandlerBase implements Iterator<Assertion> {
+public class SesameStatementIterator implements Iterator<Assertion> {
 	
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
-	private Predicate RDF_TYPE_PREDICATE = obdafac.getObjectPropertyPredicate("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+	private String RDF_TYPE_PREDICATE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
 	private String currTriple = null;
 	private String currSubject = null;
@@ -30,60 +30,19 @@ public class SesameStatementIterator extends RDFHandlerBase implements Iterator<
 	private Predicate currentPredicate = null;
 	
 	private final Map<Predicate, Description> equivalenceMap;
-	private final BufferedReader input = null;
 	
-	private List<Statement> aList = null;
-	private int index=-1;
+	private Iterator<Statement> stmIterator = null;
 	
-	public  SesameStatementIterator()
+		
+	public SesameStatementIterator(Iterator<Statement> iterator)
 	{
 		this.equivalenceMap =  new HashMap<Predicate, Description>();
-		aList = new LinkedList<Statement>();
+		this.stmIterator = iterator;
 	}
 	
-	public SesameStatementIterator(List<Statement> list)
-	{
-		this.equivalenceMap =  new HashMap<Predicate, Description>();
-		this.aList = list;
-	}
-	
-	public SesameStatementIterator(Statement st)
-	{
-		this();
-		add(st);
-	}
-	
-	  @Override
-	  public void handleStatement(Statement st) {
-		  add(st);
-	  }
-	  
-	  public int size()
-	  {
-		  if (aList!=null)
-		  return aList.size();
-		  return -1;
-	  }
-	  
-	  public List getAssertionList()
-	  {
-		  return this.aList;
-	  }
-	 
-	public void add(Statement s)
-	{
-		if (aList!=null)
-		{
-			aList.add(s);
-		}
-	}
-	
-	
+		
 	public boolean hasNext() {
-		if (aList!=null)
-			return aList.size()-1 > index;
-			
-		return false;
+		return stmIterator.hasNext();
 	}
 
 	
@@ -93,11 +52,9 @@ public class SesameStatementIterator extends RDFHandlerBase implements Iterator<
 			throw new NoSuchElementException();
 		}		
 
-		index++;
-		Assertion assertion = constructAssertion(aList.get(index));
-		if (assertion == null)
+		Assertion assertion = constructAssertion(stmIterator.next());
+		if (assertion == null && hasNext())
 		{
-			remove(index);
 			return next();
 		}
 		return assertion;
@@ -106,16 +63,10 @@ public class SesameStatementIterator extends RDFHandlerBase implements Iterator<
 	
 	public void remove() {
 		//assume current assertion removal
-		Assertion a = constructAssertion(aList.get(index));
-		aList.remove(a);
-		 index--;
+		stmIterator.remove();
 	}
 
-	public void remove(int ind)
-	{
-		aList.remove(ind);
-		index--;
-	}
+
 	/***
 	 * Constructs an ABox assertion with the data from the current result set.
 	 * 
@@ -133,7 +84,7 @@ public class SesameStatementIterator extends RDFHandlerBase implements Iterator<
 		
 		
 		
-		if (currPredicate.endsWith("rdf-syntax-ns#type"))
+		if (currPredicate.equals(RDF_TYPE_PREDICATE))
 		{
 			//System.out.println("ClassPredicate");
 			//OWLClassAssertionAxiom assertn = (OWLClassAssertionAxiom) st;

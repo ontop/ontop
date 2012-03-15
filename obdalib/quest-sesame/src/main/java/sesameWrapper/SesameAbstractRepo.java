@@ -1,12 +1,18 @@
 package sesameWrapper;
 import java.io.File;
 import java.sql.SQLException;
+
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBAbstractStore;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
+
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAModel;
 
 
 public abstract class SesameAbstractRepo implements org.openrdf.repository.Repository {
@@ -36,7 +42,7 @@ public abstract class SesameAbstractRepo implements org.openrdf.repository.Repos
 
 	public ValueFactory getValueFactory() {
 		//  Gets a ValueFactory for this Repository.		
-		return new ValueFactoryImpl();
+		return  ValueFactoryImpl.getInstance();
 	}
 
 	public void initialize() throws RepositoryException {
@@ -48,11 +54,12 @@ public abstract class SesameAbstractRepo implements org.openrdf.repository.Repos
 		}
 	}
 	
-	public QuestConnection getQuestConnection() throws OBDAException
-	{
-		return null;
-	}
+	public abstract OBDAModel getOBDAModel();
+	
+	public abstract OWLOntology getOntology();
 
+	public abstract QuestDBConnection getQuestConnection() throws OBDAException;
+	
 	public boolean isWritable() throws RepositoryException {
 		//Checks whether this repository is writable, i.e. 
 		//if the data contained in this repository can be changed. 
@@ -76,5 +83,9 @@ public abstract class SesameAbstractRepo implements org.openrdf.repository.Repos
 			e.printStackTrace();
 		}
 	}
+
+
+	public abstract String getType();
+	
 
 }

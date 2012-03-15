@@ -3,28 +3,55 @@ import java.io.File;
 import java.net.URI;
 
 import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
-public class SesameClassicRepo extends SesameAbstractRepo{
+public abstract class SesameClassicRepo extends SesameAbstractRepo{
 
-	private QuestDBClassicStore classicStore;
+	protected QuestDBClassicStore classicStore;
 
-	public SesameClassicRepo(String name, String tboxFile) throws Exception
+	public SesameClassicRepo() 
 	{
 		super();
 		
-		QuestPreferences config = new QuestPreferences();
-		config.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+	}
+	
+	protected void createStore(String name, String tboxFile, QuestPreferences config) throws Exception 
+	{
+		if (config.getProperty(QuestPreferences.ABOX_MODE) != QuestConstants.CLASSIC)
+			throw new RepositoryException("Must be in classic mode!");
 		
 		this.classicStore = new QuestDBClassicStore(name, (new File(tboxFile)).toURI(), config);
-	
-		
 	}
+	
+	
+	
+	public void doo()
+	{
+		classicStore.doo();
+	}
+	
+	@Override
+	public OWLOntology getOntology()
+	{
+		return classicStore.getOntology();
+	}
+	
+	@Override
+	public OBDAModel getOBDAModel()
+	{
+		return classicStore.getOBDAModel();
+	}
+	
+
 	
 	public void initialize() throws RepositoryException
 	{
@@ -37,7 +64,7 @@ public class SesameClassicRepo extends SesameAbstractRepo{
 	}
 	
 	@Override
-	public QuestConnection getQuestConnection() throws OBDAException
+	public QuestDBConnection getQuestConnection() throws OBDAException
 	{
 		return classicStore.getConnection();
 	}
@@ -49,6 +76,11 @@ public class SesameClassicRepo extends SesameAbstractRepo{
 		//The writability of the repository is determined by the writability 
 		//of the Sail that this repository operates on. 
 		return true;
+	}
+	
+	public  String getType()
+	{
+		return QuestConstants.CLASSIC;
 	}
 	
 }
