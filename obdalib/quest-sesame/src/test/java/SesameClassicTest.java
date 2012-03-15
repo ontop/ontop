@@ -1,11 +1,11 @@
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 
+import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -14,7 +14,10 @@ import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.*;
 import org.openrdf.repository.*;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParseException;
 
+import sesameWrapper.SesameClassicInMemoryRepo;
+import sesameWrapper.SesameClassicJDBCRepo;
 import sesameWrapper.SesameClassicRepo;
 
 import junit.framework.TestCase;
@@ -22,72 +25,72 @@ import junit.framework.TestCase;
 
 public class SesameClassicTest extends TestCase {
 
+	RepositoryConnection con = null;
+	Repository repo = null;
+	String baseURI = "http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#";
 	
-	public void test()
+	public void setupInMemory() throws Exception 
 	{
-		
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC);
-		
-		//create a sesame repository
-		RepositoryConnection con = null;
-		Repository repo = null;
-		
-		try {
-			
-			String owlfile = "/home/timi/workspace/obdalib-parent/quest-owlapi3/src/test/resources/test/ontologies/translation/onto2.owl";
+	
+			//create a sesame in-memory H2 repository	
+			String owlfile = "/home/timi/onto2.owl";
 				//"/home/timi/ontologies/helloworld/helloworld.owl";
-			repo = new SesameClassicRepo("my_name", owlfile);
+			
+			repo = new SesameClassicInMemoryRepo("my_name", owlfile);
 	
 			repo.initialize();
 			
 			con = repo.getConnection();
-			
-			
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
 		
+	}
+	
+	public void setupJDBC() throws Exception
+	{
+	
+		//create a sesame JDBC repository	
+			
+			String owlfile = "/home/timi/onto2.owl";
+				//"/home/timi/ontologies/helloworld/helloworld.owl";
+			
+			repo = new SesameClassicJDBCRepo("my_name", owlfile);
+	
+			repo.initialize();
+			
+			con = repo.getConnection();
+		
+	}
+	
+	
+	public void addFromFile() throws RDFParseException, RepositoryException, IOException
+	{
 	
 	///add data to repo
 		File file = new File("/home/timi/onto2plus.owl");
-		String baseURI = "http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#";
-		//"http://www.semanticweb.org/ontologies/helloworld.owl";
-		
+				
 		  if (file==null)
 			  System.out.println("FiLE not FOUND!");
 		  else
-		  try {
-			
+		  {
 			  System.out.println("Add from file.");
-		     con.add(file, baseURI, RDFFormat.RDFXML);
-		     
-		    //  con.close();
+		      con.add(file, baseURI, RDFFormat.RDFXML);
+		  }	
 		   
-		}
-		catch (Exception e) {
-		   // handle exception
-			e.printStackTrace();
-		}
+	}
+	
+	public void addFromURI() throws RepositoryException
+	{
 		
-		/*
 		ValueFactory f = repo.getValueFactory();
 
 		// create some resources and literals to make statements out of
 		org.openrdf.model.URI alice = f.createURI("http://example.org/people/alice");
 		org.openrdf.model.URI bob = f.createURI("http://example.org/people/bob");
-		org.openrdf.model.URI age = f.createURI("http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#age");
-		org.openrdf.model.URI person = f.createURI("http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#Person");
+		org.openrdf.model.URI age = f.createURI(baseURI + "age");
+		org.openrdf.model.URI person = f.createURI(baseURI+ "Person");
 		Literal bobsAge = f.createLiteral(5);
 		Literal alicesAge = f.createLiteral(14);
 
 		
-		   try {
 		      // alice is a person
 		      con.add(alice, RDF.TYPE, person);
 		      // alice's name is "Alice"
@@ -97,22 +100,18 @@ public class SesameClassicTest extends TestCase {
 		      con.add(bob, RDF.TYPE, person);
 		      // bob's name is "Bob"
 		      con.add(bob, age, bobsAge);
-		      
-		      System.out.println("Closing");
-		      con.close();
-		   }
-		   catch(Exception e)
-		   {
-			   e.printStackTrace();
-		   }
-		
-		*/
+		 
+	}
+	
+	
+	public void query() throws QueryEvaluationException, RepositoryException, MalformedQueryException
+	{	
 		
 		///query repo
-		 try {
-		      String queryString = "SELECT x, y FROM {x} p {y}";
-		      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SERQL, queryString);
+		      String queryString = "SELECT ?x WHERE {?x a :Person}";
+		      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 		      TupleQueryResult result = tupleQuery.evaluate();
+		     
 		      try {
 		    	  while (result.hasNext()) {
 		    		   BindingSet bindingSet = result.next();
@@ -124,17 +123,28 @@ public class SesameClassicTest extends TestCase {
 		      finally {
 		         result.close();
 		      }
-			  
-		      con.close();
-		   }
-		 catch(Exception e)
-		 {
-			 e.printStackTrace();
-		 }
-		   ValueFactory fac = repo.getValueFactory();
-		   
+			 
 		  
-	System.out.println("Done.");	
 	}
-
+	
+	public void close() throws RepositoryException
+	{
+		 System.out.println("Closing...");
+	      System.out.println("Done.");	
+	}
+	
+	
+	public void test1() throws Exception
+	{
+		setupInMemory();
+		addFromFile();
+		close();
+	}
+	
+	/*public void test2() throws Exception
+	{
+		setupJDBC();
+		close();
+	}
+*/
 }
