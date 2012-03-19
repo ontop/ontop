@@ -78,7 +78,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public ValueConstant getValueConstant(String value) {
-		return new ValueConstantImpl(value, null);
+		return new ValueConstantImpl(value, COL_TYPE.LITERAL);
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public ValueConstant getValueConstant(String value, String language) {
-		return new ValueConstantImpl(value, language, COL_TYPE.STRING);
+		return new ValueConstantImpl(value, language, COL_TYPE.LITERAL);
 	}
 
 	@Override

@@ -540,7 +540,7 @@ public class VirtualABoxMaterializer {
 						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
 						ValueConstant languageTag = (ValueConstant) function.getTerms().get(1); // The language tag is on the second term
 						String languageTagString = (languageTag == null) ? "" : languageTag.getValue();
-						ValueConstant c2 = dfac.getValueConstant(currentResults.getString(2), languageTagString);
+						ValueConstant c2 = dfac.getValueConstant(currentResults.getString(3), languageTagString);
 						if (replacementDescription == null) {
 							assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
 						} else {

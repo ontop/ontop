@@ -1513,7 +1513,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		List<Term> bodyTerms = new ArrayList<Term>();
 		if (isObjectProperty(predicate)) {
 			// If the predicate is a Object Property
-			headPredicate = dfac.getPredicate(URI.create("m"), 2, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
+			headPredicate = dfac.getPredicate(URI.create("m"), 2, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
 			headTerms.add(dfac.getVariable("X"));
 			headTerms.add(dfac.getVariable("Y"));				
 
@@ -1524,7 +1524,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// If the predicate is a Data Property
 			if (isLiteralDataProperty(predicate)) {		
 				// if the property has Literal type
-				headPredicate = dfac.getPredicate(URI.create("m"), 3, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING });
+				headPredicate = dfac.getPredicate(URI.create("m"), 3, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 				headTerms.add(dfac.getVariable("X"));
 				headTerms.add(dfac.getVariable("Y"));
 				headTerms.add(dfac.getVariable("Z"));

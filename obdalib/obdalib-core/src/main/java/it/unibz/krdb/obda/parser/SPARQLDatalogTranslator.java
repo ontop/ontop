@@ -253,7 +253,7 @@ public class SPARQLDatalogTranslator {
 						// If the object has type LITERAL, check any language tag!
 						String lang = (object.getLiteralLanguage() == null) ? "" : object.getLiteralLanguage();
 						Predicate functionSymbol = ofac.getDataTypePredicateLiteral();
-						ValueConstant languageConstant = ofac.getValueConstant(lang, COL_TYPE.STRING);
+						ValueConstant languageConstant = ofac.getValueConstant(lang, COL_TYPE.LITERAL);
 						dataTypeFunction = ofac.getFunctionalTerm(functionSymbol, constant, languageConstant);
 					} else {
 						// For other supported data-types
@@ -308,7 +308,7 @@ public class SPARQLDatalogTranslator {
 			} else if (expr instanceof E_LangMatches) {
 				// If we find a build-in function LANGMATCHES
 				Variable variable = ofac.getVariable(((E_Lang) arg1).getArg().getVarName());
-				ValueConstant languageTag = ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.STRING);
+				ValueConstant languageTag = ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.LITERAL);
 				Function langMatches = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), variable, languageTag);
 				mgu.put(variable, langMatches);
 			} else {
