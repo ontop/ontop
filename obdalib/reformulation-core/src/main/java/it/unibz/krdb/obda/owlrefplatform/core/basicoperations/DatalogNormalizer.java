@@ -28,6 +28,7 @@ public class DatalogNormalizer {
 	 */
 	public static DatalogProgram normalizeDatalogProgram(DatalogProgram dp) {
 		DatalogProgram clone = fac.getDatalogProgram();
+		clone.setQueryModifiers(dp.getQueryModifiers());
 		for (CQIE cq : dp.getRules()) {
 			CQIE normalized = normalizeCQIE(cq);
 			if (normalized != null) {
@@ -66,7 +67,7 @@ public class DatalogNormalizer {
 	}
 
 	/***
-	 * Eliminates all equalities in the query by applying substitions to the
+	 * Eliminates all equalities in the query by applying a substitution to the
 	 * database predicates.
 	 * 
 	 * @param query
@@ -107,8 +108,9 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	public static List<Atom> getUnfolderAtomList(Atom atom) {
-		if (atom.getPredicate() != OBDAVocabulary.AND)
+		if (atom.getPredicate() != OBDAVocabulary.AND) {
 			throw new InvalidParameterException();
+		}
 		List<Term> innerFunctionalTerms = new LinkedList<Term>();
 		for (Term term : atom.getTerms()) {
 			innerFunctionalTerms.addAll(getUnfolderTermList((Function) term));
@@ -133,8 +135,9 @@ public class DatalogNormalizer {
 
 		List<Term> result = new LinkedList<Term>();
 
-		if (term.getFunctionSymbol() != OBDAVocabulary.AND)
+		if (term.getFunctionSymbol() != OBDAVocabulary.AND) {
 			result.add(term);
+		}
 		else {
 			List<Term> terms = term.getTerms();
 			for (Term currentterm : terms) {
