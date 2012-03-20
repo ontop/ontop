@@ -11,6 +11,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
@@ -38,9 +39,13 @@ import com.hp.hpl.jena.sparql.expr.E_Lang;
 import com.hp.hpl.jena.sparql.expr.E_LangMatches;
 import com.hp.hpl.jena.sparql.expr.E_LessThan;
 import com.hp.hpl.jena.sparql.expr.E_LessThanOrEqual;
+import com.hp.hpl.jena.sparql.expr.E_LogicalAnd;
+import com.hp.hpl.jena.sparql.expr.E_LogicalOr;
 import com.hp.hpl.jena.sparql.expr.E_NotEquals;
 import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprFunction1;
 import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.ExprFunctionN;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.expr.NodeValue;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueBoolean;
@@ -159,6 +164,12 @@ public class SPARQLDatalogTranslator {
 		}
 	}
 
+	/**
+	 * Collects the triple atoms from the WHERE expression.
+	 * 
+	 * @param elementTriples
+	 * 			The Triple elements from Jena.
+	 */
 	private List<Atom> collectElementTriplesAtom(ElementTriplesBlock elementTriples) {
 		// Get the triples object.
 		BasicPattern triples = elementTriples.getTriples();
@@ -278,77 +289,145 @@ public class SPARQLDatalogTranslator {
 		return elementTriplesAtoms;
 	}
 
+	/**
+	 * Collects the atom from the FILTER expression.
+	 * 
+	 * @param elementFilter
+	 * 			The FILTER element from Jena parser.
+	 */
 	private List<Atom> collectElementFilterAtom(ElementFilter elementFilter) throws QueryException {
-
 		List<Atom> elementFilterAtoms = new LinkedList<Atom>();
-
 		Expr expr = elementFilter.getExpr();
-
-		if (expr instanceof ExprFunction2) {
-			// The expected function should be: (VAR) (OP) (VAR|LITERAL)
+		if (expr instanceof ExprFunction1) {
+			// NO-OP
+		} else if (expr instanceof ExprFunction2) {
 			ExprFunction2 function = (ExprFunction2) expr;
-			Expr arg1 = function.getArg1();
-			Expr arg2 = function.getArg2();
-
-			Term term1 = getTermOfRelationalArgument(arg1, 1);
-			Term term2 = getTermOfRelationalArgument(arg2, 2);
-
-			if (expr instanceof E_Equals) {
-				elementFilterAtoms.add(ofac.getEQAtom(term1, term2));
-			} else if (expr instanceof E_NotEquals) {
-				elementFilterAtoms.add(ofac.getNEQAtom(term1, term2));
-			} else if (expr instanceof E_GreaterThan) {
-				elementFilterAtoms.add(ofac.getGTAtom(term1, term2));
-			} else if (expr instanceof E_GreaterThanOrEqual) {
-				elementFilterAtoms.add(ofac.getGTEAtom(term1, term2));
-			} else if (expr instanceof E_LessThan) {
-				elementFilterAtoms.add(ofac.getLTAtom(term1, term2));
-			} else if (expr instanceof E_LessThanOrEqual) {
-				elementFilterAtoms.add(ofac.getLTEAtom(term1, term2));
-			} else if (expr instanceof E_LangMatches) {
+			Expr arg1 = function.getArg1(); // get the first argument
+			Expr arg2 = function.getArg2(); // get the second argument
+			if (expr instanceof E_LangMatches) {
 				// If we find a build-in function LANGMATCHES
-				Variable variable = ofac.getVariable(((E_Lang) arg1).getArg().getVarName());
+				Variable variable = getVariableTerm((ExprVar) ((E_Lang) arg1).getArg());
+				ValueConstant languageTag =  ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.LITERAL);
+				Function langMatches = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), variable, languageTag);
+				mgu.put(variable, langMatches);
+			} else {
+				Term term1 = getBooleanTerm(arg1);
+				Term term2 = getBooleanTerm(arg2);				
+				// Construct the boolean atom
+				elementFilterAtoms.add(getBooleanAtom(function, term1, term2));
+			}
+		} else if (expr instanceof ExprFunctionN) {
+			// NO-OP	
+		}
+		return elementFilterAtoms;
+	}
+	
+	private Term getBooleanTerm(Expr expr) {
+		Term term = null;
+		if (expr instanceof ExprVar) {
+			return getVariableTerm((ExprVar) expr);
+		} else if (expr instanceof NodeValue) {
+			return getConstantFunctionTerm((NodeValue) expr);
+		}		
+		
+		if (expr instanceof ExprFunction1) {
+			// NO-OP
+		} else if (expr instanceof ExprFunction2) {
+			ExprFunction2 function = (ExprFunction2) expr;
+			Expr arg1 = function.getArg1(); // get the first argument
+			Expr arg2 = function.getArg2(); // get the second argument
+			if (expr instanceof E_LangMatches) {
+				// If we find a build-in function LANGMATCHES
+				Variable variable = getVariableTerm((ExprVar) ((E_Lang) arg1).getArg());
 				ValueConstant languageTag = ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.LITERAL);
 				Function langMatches = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), variable, languageTag);
 				mgu.put(variable, langMatches);
 			} else {
-				throw new QueryException("Unsupported query syntax");
-			}		
+				Term term1 = getBooleanTerm(arg1);
+				Term term2 = getBooleanTerm(arg2);
+				// Construct the boolean function 
+				term = getBooleanFunction(function, term1, term2);
+			}
+		} else if (expr instanceof ExprFunctionN) {
+			// NO-OP
+		}
+		return term;				
+	}
+	
+	private Variable getVariableTerm(ExprVar expr) {
+		return ofac.getVariable(expr.getVarName());
+	}
+	
+	private Function getConstantFunctionTerm(NodeValue expr) {
+		Function constantFunction = null;
+		if (expr instanceof NodeValueString) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateString(), ofac.getValueConstant(expr.getString(), COL_TYPE.STRING));
+		} else if (expr instanceof NodeValueInteger) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateInteger(), ofac.getValueConstant(expr.getInteger()+"", COL_TYPE.INTEGER));
+		} else if (expr instanceof NodeValueDecimal) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDecimal(), ofac.getValueConstant(expr.getDecimal()+"", COL_TYPE.DECIMAL));
+		} else if (expr instanceof NodeValueDouble || expr instanceof NodeValueFloat) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDouble(), ofac.getValueConstant(expr.getDouble()+"", COL_TYPE.DOUBLE));
+		} else if (expr instanceof NodeValueDateTime) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDateTime(), ofac.getValueConstant(expr.getDateTime()+"", COL_TYPE.DATETIME));
+		} else if (expr instanceof NodeValueBoolean) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateBoolean(), ofac.getValueConstant(expr.getBoolean()+"", COL_TYPE.BOOLEAN));
 		} else {
-			throw new QueryException("Unsupported query syntax");
+			throw new QueryException("Unknown data type!");
 		}
-		return elementFilterAtoms;
+		return constantFunction;
 	}
-
-	private Term getTermOfRelationalArgument(Expr arg, int index) throws QueryException {
-		Term term = null;
-		if (arg instanceof ExprVar) {
-			term = ofac.getVariable(arg.getVarName());
-		} else if (arg instanceof NodeValue) {
-			if (index == 1) {
-				// if the first argument is a constant.
-				throw new QueryException("Unsupported query syntax");
-			}
-			NodeValue node = (NodeValue) arg;
-			if (node instanceof NodeValueString) {
-				term = ofac.getValueConstant(node.getString(), COL_TYPE.STRING);
-			} else if (node instanceof NodeValueInteger) {
-				term = ofac.getValueConstant(node.getInteger()+"", COL_TYPE.INTEGER);
-			} else if (node instanceof NodeValueDecimal) {
-				term = ofac.getValueConstant(node.getDecimal()+"", COL_TYPE.DECIMAL);
-			} else if (node instanceof NodeValueDouble || node instanceof NodeValueFloat) {
-				term = ofac.getValueConstant(node.getDouble()+"", COL_TYPE.DOUBLE);
-			} else if (node instanceof NodeValueDateTime) {
-				term = ofac.getValueConstant(node.getDateTime()+"", COL_TYPE.DATETIME);
-			} else if (node instanceof NodeValueBoolean) {
-				term = ofac.getValueConstant(node.getBoolean()+"", COL_TYPE.BOOLEAN);
-			} else {
-				throw new QueryException("Unknown data type!");
-			}
+	
+	private Atom getBooleanAtom(ExprFunction2 expr, Term term1, Term term2) {
+		Atom atom = null;
+		// The AND and OR expression
+		if (expr instanceof E_LogicalAnd) {
+			atom = ofac.getANDAtom(term1, term2);
+		} else if (expr instanceof E_LogicalOr) {
+			atom = ofac.getORAtom(term1, term2);
 		}
-		return term;
+		// The Relational expression
+		if (expr instanceof E_Equals) {
+			atom = ofac.getEQAtom(term1, term2);
+		} else if (expr instanceof E_NotEquals) {
+			atom = ofac.getNEQAtom(term1, term2);
+		} else if (expr instanceof E_GreaterThan) {
+			atom = ofac.getGTAtom(term1, term2);
+		} else if (expr instanceof E_GreaterThanOrEqual) {
+			atom = ofac.getGTEAtom(term1, term2);
+		} else if (expr instanceof E_LessThan) {
+			atom = ofac.getLTAtom(term1, term2);
+		} else if (expr instanceof E_LessThanOrEqual) {
+			atom = ofac.getLTEAtom(term1, term2);
+		}
+		return atom;
 	}
-
+	
+	private Function getBooleanFunction(ExprFunction2 expr, Term term1, Term term2) {
+		Function function = null;
+		// The AND and OR expression
+		if (expr instanceof E_LogicalAnd) {
+			function = ofac.getANDFunction(term1, term2);
+		} else if (expr instanceof E_LogicalOr) {
+			function = ofac.getORFunction(term1, term2);
+		}
+		// The Relational expression
+		if (expr instanceof E_Equals) {
+			function = ofac.getEQFunction(term1, term2);
+		} else if (expr instanceof E_NotEquals) {
+			function = ofac.getNEQFunction(term1, term2);
+		} else if (expr instanceof E_GreaterThan) {
+			function = ofac.getGTFunction(term1, term2);
+		} else if (expr instanceof E_GreaterThanOrEqual) {
+			function = ofac.getGTEFunction(term1, term2);
+		} else if (expr instanceof E_LessThan) {
+			function = ofac.getLTFunction(term1, term2);
+		} else if (expr instanceof E_LessThanOrEqual) {
+			function = ofac.getLTEFunction(term1, term2);
+		}
+		return function;
+	}
+	
 	private COL_TYPE getDataType(Node_Literal node) {
 		COL_TYPE dataType = null;
 

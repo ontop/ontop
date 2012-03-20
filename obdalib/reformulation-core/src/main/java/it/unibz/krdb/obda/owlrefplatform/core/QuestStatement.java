@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -223,6 +224,10 @@ public class QuestStatement implements OBDAStatement {
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
+		
+		// Flattening the query datalog
+		program = DatalogNormalizer.normalizeDatalogProgram(program);
+		
 		return program;
 	}
 

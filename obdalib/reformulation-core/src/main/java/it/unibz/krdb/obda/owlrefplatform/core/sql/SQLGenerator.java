@@ -458,10 +458,16 @@ public class SQLGenerator implements SourceQueryGenerator {
 							/*
 							 * Case for all simple datatypes, we only select one
 							 * column from the table
-							 */
-							Variable v = (Variable) ov.getTerms().get(0);
-							String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
-							sb.append(column);
+							 */							
+							Term term = ov.getTerms().get(0);
+							if (term instanceof Variable) {
+								Variable v = (Variable) term;
+								String column = getSQLString(v, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+								sb.append(column);
+							} else if (term instanceof ValueConstant) {
+								ValueConstant c = (ValueConstant) term;
+								sb.append(getQuotedString(c.getValue()));
+							}
 						}
 					} else {
 						if (functionString.equals("http://obda.org/quest#uri")) {
@@ -615,6 +621,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 				}
 			} else if (arity == 2) {
 				// if binary functions
+				if (isAndOrOperator(functionSymbol)) {
+					result.append("(");
+				} 
 				result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 				if (functionSymbol instanceof BooleanOperationPredicate) {
 					result.append(" ");
@@ -624,11 +633,18 @@ public class SQLGenerator implements SourceQueryGenerator {
 					throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 				}
 				result.append(getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+				if (isAndOrOperator(functionSymbol)) {
+					result.append(")");
+				}
 			}
 		}
 		return result.toString();
 	}
 
+	private boolean isAndOrOperator(Predicate functionSymbol) {
+		return functionSymbol.equals(OBDAVocabulary.AND) || functionSymbol.equals(OBDAVocabulary.OR);
+	}
+	
 	private boolean isUCQ(DatalogProgram query) {
 		boolean isUCQ = true;
 		int arity = query.getRules().get(0).getHead().getArity();
