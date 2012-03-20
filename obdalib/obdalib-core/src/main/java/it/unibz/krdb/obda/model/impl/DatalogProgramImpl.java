@@ -34,6 +34,12 @@ public class DatalogProgramImpl implements DatalogProgram {
 		if (rule == null) {
 			throw new IllegalArgumentException("DatalogProgram: Recieved a null rule.");
 		}
+		
+		if (rules.contains(rule)) {
+			// Skip if the rule already exists!
+			return;
+		}
+		
 		rules.add(rule);
 
 		Atom head = rule.getHead();
