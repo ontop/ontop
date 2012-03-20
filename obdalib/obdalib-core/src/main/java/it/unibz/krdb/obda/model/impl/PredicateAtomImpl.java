@@ -150,7 +150,7 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		for (int i = 0; i < terms.size(); i++) {
 			bf.append(terms.get(i));
 			if (i + 1 < terms.size()) {
-				bf.append(", ");
+				bf.append(",");
 			}
 		}
 		bf.append(")");
