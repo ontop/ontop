@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Insets;
 
 import javax.swing.BorderFactory;
@@ -98,6 +99,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private int heightID;
 	private JPanel mainPanel;
 	private QueryPainter painter;
+	private SQLQueryPainter sqlpainter;
 
 	public OBDAMappingListRenderer(OBDAPreferences preference, OBDAModel apic, TargetQueryVocabularyValidator validator) {
 
@@ -123,6 +125,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 
 		srcQueryTextPane = new JTextPane();
 		srcQueryTextPane.setMargin(new Insets(4, 4, 4, 4));
+		sqlpainter = new SQLQueryPainter(srcQueryTextPane);
 
 		mapTextPane = new JTextPane();
 		mapTextPane.setMargin(new Insets(4, 4, 4, 4));
@@ -200,7 +203,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		plainStyle = doc.addStyle("PLAIN_STYLE", null);
 		// StyleConstants.setForeground(plainStyle, Color.BLACK);
 		StyleConstants.setItalic(plainStyle, false);
-//		StyleConstants.setSpaceAbove(plainStyle, 0);
+		// StyleConstants.setSpaceAbove(plainStyle, 0);
 		// StyleConstants.setFontFamily(plainStyle,
 		// textPane.getFont().getFamily());
 
@@ -283,6 +286,19 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	int totalWidth;
 	int totalHeight;
 
+	/***
+	 * Now we compute the sizes of each of the components, including the text
+	 * panes. Note that for the target text pane we need to compute the number
+	 * of lines that the text will require, and the height of these lines
+	 * acordingly. Right now this is done in an approximate way using
+	 * FontMetris. It works fine most of the time, however, the algorithm needs
+	 * to be improved. For the source query we have an even cruder
+	 * implementation that needs to be adjusted in the same way as the one for
+	 * the target query (to compute the number of lines using FontMetris instead
+	 * of "maxChars".
+	 * 
+	 * @param parent
+	 */
 	private void computeDimensions(JPanel parent) {
 		iconWidth = trgQueryIconLabel.getPreferredSize().width;
 		iconHeight = trgQueryIconLabel.getPreferredSize().height;
@@ -293,16 +309,54 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 
 		if (preferredWidth != -1) {
 
+			// textWidth = preferredWidth - iconWidth - rcInsets.left -
+			// rcInsets.right - 6;
+
 			textWidth = preferredWidth - iconWidth - rcInsets.left - rcInsets.right - 6;
 
 			int maxChars = (textWidth / (plainFontWidth)) - 10;
 
 			String trgQuery = trgQueryTextPane.getText();
-			int linesTarget = (int) (trgQuery.length() / maxChars) + 1;
+
+			// int linesTarget = (int) (trgQuery.length() / maxChars) + 1;
+
+			/***
+			 * Computing the number of lines for the target query base on the
+			 * FontMetris. We are going to simulate a "wrap" operation over the
+			 * text of the target query in order to be able to count number of
+			 * lines.
+			 */
+			String[] split = trgQuery.split(" ");
+			int currentWidth = 0;
+			StringBuffer currentLine = new StringBuffer();
+			int linesTarget = 1;
+			FontMetrics m = trgQueryTextPane.getFontMetrics(plainFont);
+			for (String splitst : split) {
+				boolean space = false;
+				if (currentLine.length() != 0) {
+					currentLine.append(" ");
+					space = true;
+				}
+
+				int newSize = m.stringWidth((space ? " " : "") + splitst);
+				if (currentWidth + newSize <= textWidth) {
+					/* No need to wrap */
+					currentLine.append(splitst);
+					currentWidth += newSize;
+				} else {
+					/* we need to spit, all the sizes and string reset */
+					currentLine.setLength(0);
+					currentLine.append(splitst);
+					currentWidth = m.stringWidth(splitst);
+					linesTarget += 1;
+				}
+			}
+
 			String srcQuery = srcQueryTextPane.getText();
 			int linesSource = (int) (srcQuery.length() / maxChars) + 1;
 
-			textTargetHeight = minTextHeight * linesTarget; // target
+			textTargetHeight = m.getHeight() * linesTarget; // target
+			// textTargetHeight = minTextHeight * linesTarget; // target
 			textSourceHeight = minTextHeight * linesSource; // source
 			textidHeight = minTextHeight;
 
@@ -432,8 +486,9 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		}
 		try {
 			painter.recolorQuery();
+			sqlpainter.recolorQuery();
 		} catch (Exception e) {
-//			System.out.println("Error");
+			// System.out.println("Error");
 		}
 		trgQueryTextPane.setBorder(null);
 

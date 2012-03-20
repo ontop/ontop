@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.gui.swing.utils.QueryPainter;
 import it.unibz.krdb.obda.gui.swing.utils.QueryPainter.ValidatorListener;
+import it.unibz.krdb.obda.gui.swing.utils.SQLQueryPainter;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -108,6 +109,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				cmdInsertMapping.setEnabled(result);
 			}
 		});
+		
+		SQLQueryPainter sqlpainter = new SQLQueryPainter(txtSourceQuery);
 
 		cmdInsertMapping.addActionListener(new ActionListener() {
 
