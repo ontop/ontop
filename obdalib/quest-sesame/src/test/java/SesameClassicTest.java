@@ -8,14 +8,17 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
 import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.IntegerLiteralImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.*;
 import org.openrdf.repository.*;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 
+import sesameWrapper.RepositoryConnection;
 import sesameWrapper.SesameClassicInMemoryRepo;
 import sesameWrapper.SesameClassicJDBCRepo;
 import sesameWrapper.SesameClassicRepo;
@@ -25,7 +28,7 @@ import junit.framework.TestCase;
 
 public class SesameClassicTest extends TestCase {
 
-	RepositoryConnection con = null;
+	sesameWrapper.RepositoryConnection con = null;
 	Repository repo = null;
 	String baseURI = "http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#";
 	
@@ -40,7 +43,7 @@ public class SesameClassicTest extends TestCase {
 	
 			repo.initialize();
 			
-			con = repo.getConnection();
+			con = (RepositoryConnection) repo.getConnection();
 		
 	}
 	
@@ -56,7 +59,7 @@ public class SesameClassicTest extends TestCase {
 	
 			repo.initialize();
 			
-			con = repo.getConnection();
+			con = (RepositoryConnection) repo.getConnection();
 		
 	}
 	
@@ -104,41 +107,61 @@ public class SesameClassicTest extends TestCase {
 	}
 	
 	
-	public void query() throws QueryEvaluationException, RepositoryException, MalformedQueryException
+	public void tupleQuery() throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{	
 		
 		///query repo
-		      String queryString = "SELECT ?x WHERE {?x a :Person}";
-		      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+		      String queryString = "PREFIX : \n<http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#>\n " +
+		      		"SELECT ?x ?y WHERE { ?x a :Person. ?x :age ?y } ";
+		      TupleQuery tupleQuery = (con).prepareTupleQuery(QueryLanguage.SPARQL, queryString);
 		      TupleQueryResult result = tupleQuery.evaluate();
 		     
-		      try {
+		      System.out.println(result.getBindingNames());
+		      
 		    	  while (result.hasNext()) {
 		    		   BindingSet bindingSet = result.next();
-		    		   Value valueOfX = bindingSet.getValue("x");
-		    		   Value valueOfY = bindingSet.getValue("y");
-		    		   System.out.println("x="+valueOfX.toString()+", y="+valueOfY.toString());
+		    		   org.openrdf.model.URI valueOfX = (org.openrdf.model.URI) bindingSet.getValue("x");
+		    		   Literal valueOfY = (Literal) bindingSet.getValue("y");
+		    		   System.out.println(valueOfX.getLocalName()
+		    				   +", "+valueOfY.floatValue());
 		    	  }
-		      }
-		      finally {
 		         result.close();
-		      }
-			 
-		  
+	}
+	
+	
+	public void booleanQuery() throws QueryEvaluationException, RepositoryException, MalformedQueryException
+	{	
+		
+		///query repo
+		      String queryString = "PREFIX : \n<http://it.unibz.krdb/obda/ontologies/test/translation/onto2.owl#>\n " +
+		      		"ASK { :3 a :Person} ";
+		      BooleanQuery boolQuery = (con).prepareBooleanQuery(QueryLanguage.SPARQL, queryString);
+		      boolean result = boolQuery.evaluate();
+		     
+		      System.out.println(result);
 	}
 	
 	public void close() throws RepositoryException
 	{
 		 System.out.println("Closing...");
+		 con.close();
 	      System.out.println("Done.");	
 	}
 	
 	
 	public void test1() throws Exception
 	{
+		try{
 		setupInMemory();
 		addFromFile();
+		//tupleQuery();
+	//	booleanQuery();
 		close();
+		}
+		catch(Exception e)
+		{e.printStackTrace();
+		throw e;}
+		
 	}
 	
 	/*public void test2() throws Exception
