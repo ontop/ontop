@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 import org.openrdf.OpenRDFUtil;
 import org.openrdf.model.*;
@@ -254,48 +255,49 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
         boolean autoCommit = isAutoCommit();
         setAutoCommit(false);
 
-        SesameRDFHandler rdfHandler = new SesameRDFHandler();
+
+    	Semaphore empty = new Semaphore(0);
+		Semaphore full = new Semaphore(0);
+		
+        
+        SesameRDFHandler rdfHandler = new SesameRDFHandler(empty, full);
         rdfParser.setRDFHandler(rdfHandler);
         
+        
         try {
-            if (inputStreamOrReader instanceof  InputStream) {
-            	
-                rdfParser.parse((InputStream) inputStreamOrReader, baseURI);
-                System.out.println("Parsing... ");
-                          
-                             
-               try{
-              QuestDBStatement st = questConn.createStatement();
-               
-               st.add(rdfHandler.getAssertionIterator(), boolToInt(autoCommit), 5000);
-                
-               }
-               catch(Exception e)
-               {
-            	   System.out.println("OBDAException");
-            	   e.printStackTrace();
-               }
-               
-               
-               
-            } else if (inputStreamOrReader instanceof  Reader) {
-            	
-                rdfParser.parse((Reader) inputStreamOrReader, baseURI);
-                System.out.println("Parsing "+rdfParser.toString());
 
-            } else {
+            
+          
+            
+            if (inputStreamOrReader instanceof  InputStream) {
+            	inputStreamOrReader = (InputStream) inputStreamOrReader;
+            } 
+            else if (inputStreamOrReader instanceof  Reader) {
+            	inputStreamOrReader = (Reader) inputStreamOrReader;
+            } 
+            else {
                 throw new IllegalArgumentException(
                         "inputStreamOrReader must be an InputStream or a Reader, is a: "
                                 + inputStreamOrReader.getClass());
             }
-        } catch (RDFHandlerException e) {
-        	System.out.println("exception, rolling back!");
-        	e.printStackTrace();
-            if (autoCommit) {
-                rollback();
-            }
-            // RDFInserter only throws wrapped RepositoryExceptions
-            throw (RepositoryException) e.getCause();
+            
+            System.out.println("Parsing... ");
+           
+            
+            Iterator<Assertion> iterator = rdfHandler.getAssertionIterator();   
+            
+            Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseURI));
+            Thread process = new Thread(new Process((SesameStatementIterator)iterator));
+            
+          
+            //
+            insert.start();
+            process.start();
+          //  process.join();
+            insert.join();
+            process.join();
+                     
+     
         } catch (RuntimeException e) {
         	System.out.println("exception, rolling back!");
         	e.printStackTrace();
@@ -304,12 +306,72 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
                 rollback();
             }
             throw e;
-        } finally {
+        } catch (OBDAException e)
+        {
+        	e.printStackTrace();
+        } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
             setAutoCommit(autoCommit);
         }
     }
 
 
+            
+          private class Insert implements Runnable{
+        	  private RDFParser rdfParser;
+        	  private InputStream inputStreamOrReader;
+        	  private String baseURI;
+        	  public Insert(RDFParser rdfParser, InputStream inputStreamOrReader, String baseURI)
+        	  {
+        		  this.rdfParser = rdfParser;
+        		  this.inputStreamOrReader = inputStreamOrReader;
+        		  this.baseURI = baseURI;
+        	  }
+        	  public void run()
+        	  {
+        		  try {
+					rdfParser.parse((InputStream) inputStreamOrReader, baseURI);
+				} catch (RDFParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (RDFHandlerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	  }
+        	  
+          }
+          
+          private class Process implements Runnable{
+        	  private QuestDBStatement st;
+        	  private SesameStatementIterator iterator;
+        	  public Process(SesameStatementIterator iterator) throws OBDAException
+        	  {
+        		  st = questConn.createStatement();
+        		  this.iterator = iterator;
+        	  }
+        	  
+        	  public void run()
+        	  {
+        		    try {
+						st.add(iterator, boolToInt(autoCommit), 5000);
+        		    	
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+        	  }
+          }
+            
+        
+             
+               
+      
   
     protected void addWithoutCommit(Iterator< Statement> stmIterator, Resource... contexts)
     throws RepositoryException, OBDAException, URISyntaxException {
@@ -326,7 +388,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     	//create new quest statement
     	QuestDBStatement stm = questConn.createStatement();
  
-    	SesameStatementIterator it = new SesameStatementIterator(stmIterator);
+    	SesameStatementIterator it = new SesameStatementIterator((ListIterator)stmIterator, null, null);
     	
     	//insert data   useFile=false, batch=0
     	try {
@@ -523,8 +585,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException();
 		
-		ParsedBooleanQuery parsedQuery = QueryParserUtil.parseBooleanQuery(ql, queryString, baseURI);
-
+		try {
+			return new SesameBooleanQuery(queryString, baseURI, questConn.createStatement());
+		} catch (OBDAException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -539,13 +605,9 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
 			String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares queries that produce RDF graphs. 
-		if (ql != QueryLanguage.SPARQL)
-			throw new MalformedQueryException();
 		
-		ParsedGraphQuery query = QueryParserUtil.parseGraphQuery(ql, queryString, baseURI);
+		throw new MalformedQueryException("System does not support Graph Queries!");
 		
-		
-		return null;
 	}
 
 	public Query prepareQuery(QueryLanguage ql, String query)
@@ -562,22 +624,32 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException();
 		
+		
+		if (queryString.startsWith("SELECT"))
+			return prepareTupleQuery(ql,queryString, baseURI);
+		else if (queryString.startsWith("ASK"))
+			return prepareBooleanQuery(ql, queryString, baseURI);
+		else if (queryString.startsWith("CONSTRUCT"))
+			return prepareGraphQuery(ql, queryString, baseURI);
+		else 
+			throw new MalformedQueryException("Unrecognized query type!");
+		
 		//Prepares a query for evaluation on this repository (optional operation). 
-		 ParsedQuery parsedQuery = QueryParserUtil.parseQuery(ql, queryString, baseURI);
+		 //ParsedQuery parsedQuery = QueryParserUtil.parseQuery(ql, queryString, baseURI);
 		 
-	        /*if (parsedQuery instanceof TupleQueryModel) {
+	      /*  if (parsedQuery instanceof TupleQuery) {
 	            return new SailTupleQuery((TupleQueryModel)parsedQuery, this);
 	        }
-	        else if (parsedQuery instanceof GraphQueryModel) {
+	        else if (parsedQuery instanceof GraphQuery) {
 	            return new SailGraphQuery((GraphQueryModel)parsedQuery, this);
 	        }
-	        else if (parsedQuery instanceof BooleanQueryModel) {
+	        else if (parsedQuery instanceof BooleanQuery) {
 	            return new SailBooleanQuery((BooleanQueryModel)parsedQuery, this);
 	        }
 	        else {
 	            throw new RuntimeException("Unexpected query type: " + parsedQuery.getClass());
-	        }*/
-		return null;
+	        }
+	        */
 	}
 
 	public TupleQuery prepareTupleQuery(QueryLanguage ql, String query)
@@ -586,42 +658,21 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		//In case the query contains relative URIs that need to be 
 		//resolved against an external base URI, one should use 
 		//prepareTupleQuery(QueryLanguage, String, String) instead. 
-        return prepareTupleQuery(ql, query, null);
+        return this.prepareTupleQuery(ql, query, "");
     }
 
 	public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString,
 			String baseURI) throws RepositoryException, MalformedQueryException {
-		// TODO Auto-generated method stub
 		//Prepares a query that produces sets of value tuples. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException();
 		
-		
-		ParsedTupleQuery parsedQuery = QueryParserUtil.parseTupleQuery(ql, queryString, baseURI);
-		
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		OBDAModel obdaModel = repository.getOBDAModel();
-		factory.setOBDAController(obdaModel);
-		//factory.setPreferenceHolder(p);
-		
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner((OWLOntology)(repository.getOntology()), new SimpleConfiguration());
-		reasoner.loadOBDAModel(obdaModel);
-
-		// Now we are ready for querying
 		try {
-			OBDAStatement st = reasoner.getStatement();
-			OBDAResultSet rs = st.execute(queryString);
-			
-			while (rs.nextRow()) 
-				System.out.println(rs.toString());
-			
-		} catch (Exception e) {
+			return new SesameTupleQuery(queryString, baseURI, questConn.createStatement());
+		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
-		
-		
-		return (TupleQuery) parsedQuery;
+		return null;
 	}
 
 	public Update prepareUpdate(QueryLanguage arg0, String arg1)

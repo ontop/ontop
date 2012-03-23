@@ -9,6 +9,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 import org.openrdf.model.Statement;
 import org.openrdf.query.algebra.Create;
@@ -17,7 +18,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 
-public class SesameStatementIterator implements Iterator<Assertion> {
+public class SesameStatementIterator implements ListIterator<Assertion> {
 	
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
@@ -31,32 +32,83 @@ public class SesameStatementIterator implements Iterator<Assertion> {
 	
 	private final Map<Predicate, Description> equivalenceMap;
 	
-	private Iterator<Statement> stmIterator = null;
+	private ListIterator<Statement> stmIterator = null;
+	private Semaphore empty, full;
+	private boolean hasNext = true, emptyb=true;
 	
 		
-	public SesameStatementIterator(Iterator<Statement> iterator)
+	public SesameStatementIterator(ListIterator<Statement> iterator, Semaphore empty, Semaphore full)
 	{
 		this.equivalenceMap =  new HashMap<Predicate, Description>();
 		this.stmIterator = iterator;
+		this.empty = empty;
+		this.full = full;
 	}
 	
 		
 	public boolean hasNext() {
-		return stmIterator.hasNext();
+		
+		if (!hasNext)
+		{	//process what's left
+			return stmIterator.hasNext();
+		}
+		else
+		{
+			//remain open for next
+			//System.out.println("Wait while not empty...");
+			try {
+				
+				empty.acquire();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			//acquired semaphore, not empty anymore
+			emptyb = false;
+			return hasNext;
+		}
+	}
+	
+	protected void startRDF()
+	{
+		//keep stream of data open
+		this.hasNext = true;
+	}
+	
+	protected void endRDF()
+	{
+		//no more data will come
+		//System.out.println("End rdf");
+		this.hasNext = false;
+		empty.release();
 	}
 
-	
 	public Assertion next() {
 		
-		if (!hasNext()) {
+		//if semaphore not acquired, do it
+		if (emptyb)
+			if(!hasNext()) {
 			throw new NoSuchElementException();
 		}		
 
-		Assertion assertion = constructAssertion(stmIterator.next());
-		if (assertion == null && hasNext())
+		Statement statement = stmIterator.next();
+		Assertion assertion = constructAssertion(statement);
+
+		//Owl class assertion
+		if (assertion == null)
 		{
+			remove();
+			full.release();
+			System.out.println("Remove "+statement.toString());
+			//empty has to be acquired again
+			emptyb = true;
 			return next();
 		}
+		
+		remove();
+		full.release();
+		System.out.println("Remove "+statement.toString());
+		
+	
 		return assertion;
 	}
 
@@ -148,7 +200,45 @@ public class SesameStatementIterator implements Iterator<Assertion> {
 		else {
 			throw new RuntimeException("ERROR, Wrongly type predicate: " + currentPredicate.toString());
 		}
+		
 		return assertion;
 	}
+
+
+	public void add(Assertion e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public boolean hasPrevious() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	public int nextIndex() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	public Assertion previous() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public int previousIndex() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	public void set(Assertion e) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
