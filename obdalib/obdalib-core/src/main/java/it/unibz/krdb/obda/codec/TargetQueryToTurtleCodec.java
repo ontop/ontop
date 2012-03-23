@@ -20,8 +20,17 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * The Prefix Manager to obtain the prefix name and its complete URI.
+	 */
 	private PrefixManager prefMan = apic.getPrefixManager();
-	
+
+	/**
+	 * Default constructor.
+	 * 
+	 * @param apic
+	 *            The OBDA model.
+	 */
 	public TargetQueryToTurtleCodec(OBDAModel apic) {
 		super(apic);
 	}
@@ -30,7 +39,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	public String encode(OBDAQuery input) {
 		if (!(input instanceof CQIE)) {
 			return "";
-		}		
+		}
 		TurtleContainer turtle = new TurtleContainer();
 		List<Atom> body = ((CQIE) input).getBody();
 		for (Atom atom : body) {
@@ -44,19 +53,29 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 				predicate = getAbbreviatedName(atom.getPredicate());
 				object = getDisplayName(atom.getTerm(1));
 			}
-			turtle.put(subject, predicate, object);			
-		}			
+			turtle.put(subject, predicate, object);
+		}
 		return turtle.print();
 	}
-	
+
+	/**
+	 * Checks if the atom is unary or not.
+	 */
 	private boolean isUnary(Atom atom) {
 		return atom.getArity() == 1 ? true : false;
 	}
 
+	/**
+	 * Prints the short form of the predicate (by omitting the complete URI and
+	 * replacing it by a prefix name).
+	 */
 	private String getAbbreviatedName(Predicate predicate) {
 		return prefMan.getShortForm(predicate.toString(), true, false);
 	}
-	
+
+	/**
+	 * Prints the text representation of different terms.
+	 */
 	private String getDisplayName(Term term) {
 		StringBuffer sb = new StringBuffer();
 		if (term instanceof FunctionalTermImpl) {
@@ -87,20 +106,63 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		}
 		return sb.toString();
 	}
-	
+
 	@Override
 	public OBDAQuery decode(String input) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	/**
+	 * A utility class to store the Turtle main components, i.e., subject,
+	 * predicate and object. The data structure simulates a tree structure where
+	 * the subjects are the roots, the predicates are the intermediate nodes and
+	 * the objects are the leaves.
+	 * <p>
+	 * An example:
+	 * 
+	 * <pre>
+	 *   $s1 :p1 $o1
+	 *   $s1 :p2 $o2
+	 *   $s1 :p2 $o3
+	 * </pre>
+	 * 
+	 * The example is stored to the TurtleContainer as shown below.
+	 * 
+	 * <pre>
+	 *         :p1 - $o1    
+	 *        / 
+	 *   $s1 <      $o2
+	 *        :p2 <
+	 *              $o3
+	 * </pre>
+	 * <p>
+	 * This data structure helps in printing the short Turtle syntax by
+	 * traversing the tree.
+	 * 
+	 * <pre>
+	 * $s1 :p1 $o1; :p2 $o2, $o3 .
+	 * </pre>
+	 */
 	class TurtleContainer {
-					
+
 		private HashMap<String, ArrayList<String>> subjectToPredicates = new HashMap<String, ArrayList<String>>();
 		private HashMap<String, ArrayList<String>> predicateToObjects = new HashMap<String, ArrayList<String>>();
-		
-		TurtleContainer() { /* NO-OP */ }
-		
+
+		TurtleContainer() { /* NO-OP */
+		}
+
+		/**
+		 * Adding the subject, predicate and object components to this
+		 * container.
+		 * 
+		 * @param subject
+		 *            The subject term of the Atom.
+		 * @param predicate
+		 *            The Atom predicate.
+		 * @param object
+		 *            The object term of the Atom.
+		 */
 		void put(String subject, String predicate, String object) {
 			// Subject to Predicates map
 			ArrayList<String> predicateList = subjectToPredicates.get(subject);
@@ -109,7 +171,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			}
 			insert(predicateList, predicate);
 			subjectToPredicates.put(subject, predicateList);
-			
+
 			// Predicate to Objects map
 			ArrayList<String> objectList = predicateToObjects.get(predicate);
 			if (objectList == null) {
@@ -118,7 +180,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			objectList.add(object);
 			predicateToObjects.put(predicate, objectList);
 		}
-		
+
+		// Utility method to insert the predicate
 		private void insert(ArrayList<String> list, String input) {
 			if (!list.contains(input)) {
 				if (input.equals("a") || input.equals("rdf:type")) {
@@ -128,7 +191,12 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 				}
 			}
 		}
-		
+
+		/**
+		 * Prints the container.
+		 * 
+		 * @return The Turtle short representation.
+		 */
 		String print() {
 			StringBuffer sb = new StringBuffer();
 			for (String subject : subjectToPredicates.keySet()) {
@@ -142,7 +210,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					sb.append(predicate);
 					sb.append(" ");
 					semiColonSeparator = true;
-					
+
 					boolean commaSeparator = false;
 					for (String object : predicateToObjects.get(predicate)) {
 						if (commaSeparator) {
@@ -153,8 +221,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					}
 				}
 				sb.append(" ");
-				sb.append(".\n");				
-			}			
+				sb.append(".\n");
+			}
 			return sb.toString();
 		}
 	}

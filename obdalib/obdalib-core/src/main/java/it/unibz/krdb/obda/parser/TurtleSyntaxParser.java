@@ -70,6 +70,9 @@ public class TurtleSyntaxParser {
 		return output;
 	}
 
+	/**
+	 * Adds directives to the query header from the PrefixManager.
+	 */
 	private String appendDirectives(String query) {
 		StringBuffer sb = new StringBuffer();
 		Map<String, String> prefixMap = prefMan.getPrefixMap();
