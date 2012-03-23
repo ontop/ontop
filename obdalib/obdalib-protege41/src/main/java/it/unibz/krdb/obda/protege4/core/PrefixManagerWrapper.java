@@ -48,4 +48,8 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		return owlmapper.getPrefix(prefix);
 	}
 
+	@Override
+	public boolean contains(String prefix) {
+		return owlmapper.containsPrefixMapping(prefix);
+	}
 }

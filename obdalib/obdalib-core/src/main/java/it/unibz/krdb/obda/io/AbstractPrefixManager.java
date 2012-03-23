@@ -46,21 +46,25 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	public String getShortForm(String uri, boolean useDefaultPrefix, boolean isLiteral) {
 		StringBuilder result = new StringBuilder(uri);
 		if (getDefaultNamespace() != null && useDefaultPrefix) {
-			if (uri.length() > getDefaultNamespace().length())
+			if (uri.length() > getDefaultNamespace().length()) {
 				if (uri.substring(0, getDefaultNamespace().length()).equals(getDefaultNamespace())) {
 					result.replace(0, getDefaultNamespace().length(), "");
 					if (isLiteral) {
 						result.insert(0, "<");
 						result.append(">");
+					} else {
+						result.insert(0, ":");
 					}
 					return result.toString();
 				}
+			}
 		}
+		
 		Collection<String> longnamespacesset = this.getPrefixMap().values();
 		Iterator<String> longnamespaces = longnamespacesset.iterator();
 		while (longnamespaces.hasNext()) {
 			String longnamespace = longnamespaces.next();
-			if (uri.length() > longnamespace.length())
+			if (uri.length() > longnamespace.length()) {
 				if (uri.substring(0, longnamespace.length()).equals(longnamespace)) {
 					if (!isLiteral) {
 						result.replace(0, longnamespace.length(), this.getPrefixForURI(longnamespace) + ":");
@@ -69,8 +73,8 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 					}
 					break;
 				}
+			}
 		}
-
 		return result.toString();
 	}
 }

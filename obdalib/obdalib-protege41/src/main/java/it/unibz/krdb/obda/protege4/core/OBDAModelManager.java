@@ -146,7 +146,8 @@ public class OBDAModelManager implements Disposable {
 
 		OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
 		PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
-
+		addOBDADefaultPrefixes(prefixManager);
+		
 		// PrefixManager mapper =mmgr.getOWLOntologyManager();
 
 		OWLOntologyID ontologyID = this.owlEditorKit.getModelManager().getActiveOntology().getOntologyID();
@@ -168,6 +169,15 @@ public class OBDAModelManager implements Disposable {
 			activeOBDAModel.getPrefixManager().setDefaultNamespace(ontologyID.getOntologyIRI().toURI().toString());
 
 		// triggerOBDAModelChangeEvent(oldcontroller, obdacontroller);
+	}
+
+	/**
+	 * Append here all default prefixes used by the system.
+	 */
+	private void addOBDADefaultPrefixes(PrefixOWLOntologyFormat prefixManager) {
+		if (!prefixManager.containsPrefixMapping("quest")) {
+			prefixManager.setPrefix("quest", "http://obda.org/quest#");
+		}
 	}
 
 	/***

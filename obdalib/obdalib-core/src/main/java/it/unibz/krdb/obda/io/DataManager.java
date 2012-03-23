@@ -255,7 +255,6 @@ public class DataManager {
 				String name = n.getNodeName();
 				String value = n.getNodeValue();
 				if (name.equals("xml:base")) {
-					// prefixManager.addUri(value, name);
 					prefixManager.setDefaultNamespace(value);
 				} else if (name.equals("version")) {
 					version = value;
@@ -269,20 +268,13 @@ public class DataManager {
 		} else {
 			String ontoUrl = currentOntologyURI.toString();
 			int i = ontoUrl.lastIndexOf("/");
-			String ontoName = ontoUrl.substring(i + 1, ontoUrl.length() - 4); // -4
-			// because
-			// we
-			// want
-			// to
-			// remove
-			// the
-			// .owl
-			// suffix
+			String ontoName = ontoUrl.substring(i+1, ontoUrl.length()-4); // remove the .owl extension
 			prefixManager.addUri(ontoUrl, "xml:base");
 			prefixManager.addUri(ontoUrl, "xmlns");
 			prefixManager.addUri(ontoUrl.concat("#"), ontoName);
 		}
-
+		addOBDADefaultPrefixes(prefixManager);
+		
 		String file_version = root.getAttribute(FILE_VERSION_ATTRIBUTE);
 		int major = -1;
 		int minor = -1;
@@ -324,6 +316,15 @@ public class DataManager {
 					importQueriesFromXML(node);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Append here all default prefixes used by the system.
+	 */
+	private void addOBDADefaultPrefixes(PrefixManager prefixManager) {
+		if (!prefixManager.contains("quest")) {
+			prefixManager.addUri("http://obda.org/quest#", "quest");
 		}
 	}
 

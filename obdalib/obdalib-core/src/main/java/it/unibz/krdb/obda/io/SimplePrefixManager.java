@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.io;
 
 import java.util.HashMap;
+import java.util.Set;
 
 
 /**
@@ -82,5 +83,16 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 */
 	public HashMap<String, String> getPrefixMap() {
 		return prefixToURIMap;
+	}
+	
+	/**
+	 * Checks if the prefix manager stores the prefix name.
+	 * 
+	 * @param prefix
+	 * 				The prefix name to check.
+	 */
+	public boolean contains(String prefix) {
+		Set<String> prefixes = prefixToURIMap.keySet();
+		return prefixes.contains(prefix);
 	}
 }
