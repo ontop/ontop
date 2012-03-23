@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.gui.swing.utils;
 
 import it.unibz.krdb.obda.codec.SourceQueryToTextCodec;
-import it.unibz.krdb.obda.codec.TargetQeryToTextCodec;
+import it.unibz.krdb.obda.codec.TargetQueryToTurtleCodec;
 import it.unibz.krdb.obda.gui.swing.IconLoader;
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -88,7 +88,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private int plainFontWidth;
 
 	SourceQueryToTextCodec srccodec;
-	TargetQeryToTextCodec trgcodec;
+	TargetQueryToTurtleCodec trgcodec;
 	private Style background;
 	private Style alignment;
 	private JPanel trgQueryPanel;
@@ -107,7 +107,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		this.preferences = preference;
 
 		srccodec = new SourceQueryToTextCodec(apic);
-		trgcodec = new TargetQeryToTextCodec(apic);
+		trgcodec = new TargetQueryToTurtleCodec(apic);
 
 		trgQueryIconLabel = new JLabel("");
 		trgQueryIconLabel.setVerticalAlignment(SwingConstants.TOP);
@@ -488,7 +488,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 			painter.recolorQuery();
 			sqlpainter.recolorQuery();
 		} catch (Exception e) {
-			// System.out.println("Error");
+			 System.out.println(e.getLocalizedMessage());
 		}
 		trgQueryTextPane.setBorder(null);
 

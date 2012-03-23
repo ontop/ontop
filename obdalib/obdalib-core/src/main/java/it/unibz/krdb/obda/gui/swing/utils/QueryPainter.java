@@ -12,18 +12,12 @@
  */
 package it.unibz.krdb.obda.gui.swing.utils;
 
-import it.unibz.krdb.obda.codec.DatalogConjunctiveQueryXMLCodec;
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.parser.DatalogProgramParser;
-import it.unibz.krdb.obda.parser.DatalogQueryHelper;
+import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.BasicStroke;
@@ -32,7 +26,7 @@ import java.awt.Font;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Iterator;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -61,11 +55,6 @@ public class QueryPainter {
 	private OBDAPreferences pref = null;
 	private final OBDAModel apic;
 
-	// private boolean isValidQuery = false;
-
-	private DatalogProgramParser datalogParser = new DatalogProgramParser();
-
-	final DatalogConjunctiveQueryXMLCodec c;
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
 	private SimpleAttributeSet functor;
@@ -130,8 +119,6 @@ public class QueryPainter {
 		setupFont();
 
 		prepareTextPane();
-
-		c = new DatalogConjunctiveQueryXMLCodec(apic);
 
 		tasks = new Vector<ColorTask>();
 
@@ -274,12 +261,15 @@ public class QueryPainter {
 	}
 
 	private static String getHTMLErrorMessage(String msg) {
-		String html = "<html><body>";
-		msg = msg.replace("\n", "<br>");
-		msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-		html += msg;
-		html += "</body></html>";
-		return html;
+		if (msg != null) {
+			String html = "<html><body>";
+			msg = msg.replace("\n", "<br>");
+			msg = msg.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+			html += msg;
+			html += "</body></html>";
+			return html;
+		}
+		return null;
 	}
 
 	private void clearError() {
@@ -428,12 +418,11 @@ public class QueryPainter {
 	 * @throws Exception
 	 */
 	public void recolorQuery() throws Exception {
-		String input = null;
 
 		PrefixManager man = apic.getPrefixManager();
 
-		input = doc.getText(0, doc.getLength());
-		CQIE current_query = c.decode(input);
+		String input = doc.getText(0, doc.getLength());
+		CQIE current_query = parse(input);
 
 		input = doc.getText(0, doc.getLength());
 
@@ -463,126 +452,23 @@ public class QueryPainter {
 			pos = input.indexOf(":", pos + 1);
 		}
 
-		List<Atom> atoms = current_query.getBody();
+		for (Atom atom : current_query.getBody()) {
+			URI predicate = atom.getPredicate().getName();
+			String predicateName = man.getShortForm(atom.getPredicate().toString());
 
-		Iterator<Atom> it = atoms.iterator();
-		while (it.hasNext()) {
-			Atom a1 = it.next();
-			if (!(a1 instanceof Atom))
-				continue;
-			Atom at = (Atom) a1;
-			int arity = at.getArity();
-			if (arity == 1) { // concept query atom
-
-				String name = man.getShortForm(at.getPredicate().toString());
-				// int in = input.indexOf(name);
-				// setCharacterAttributes(in, name.length(), yellow,
-				// false);
-				ColorTask t1 = new ColorTask(name, clazz);
-				tasks.add(t1);
-
-				List<Term> terms = at.getTerms();
-				Term t = terms.get(0);
-
-				if (t instanceof FunctionalTermImpl) {
-
-					FunctionalTermImpl f = (FunctionalTermImpl) t;
-					String function = man.getShortForm(f.getFunctionSymbol().toString());
-
-					List<Term> para = f.getTerms();
-					Iterator<Term> para_it = para.iterator();
-					while (para_it.hasNext()) {
-
-						Term p = para_it.next();
-						// TODO NOT SAFE!
-						String str = "$" + p.toString();
-						ColorTask task2 = new ColorTask(str, variable);
-						tasks.add(task2);
-					}
-
-					ColorTask task1 = new ColorTask(function, functor);
-					tasks.add(task1);
-
-				} else if (t instanceof VariableImpl) {
-
-					VariableImpl v = (VariableImpl) t;
-					String str = "$" + v.getName();
-					ColorTask task = new ColorTask(str, variable);
-					tasks.add(task);
-
-				}
-
-			} else if (arity == 2) { // binary query atom
-
-				String name = man.getShortForm(at.getPredicate().toString());
-				// int in = input.indexOf(name);
-
-				List<Term> terms = at.getTerms();
-
-				if (terms.get(0) instanceof FunctionalTermImpl) {
-
-					FunctionalTermImpl f = (FunctionalTermImpl) terms.get(0);
-					String function = man.getShortForm(f.toString());
-					List<Term> para = f.getTerms();
-					Iterator<Term> para_it = para.iterator();
-					while (para_it.hasNext()) {
-
-						VariableImpl p = (VariableImpl) para_it.next();
-						String str = "$" + p.getName();
-
-						ColorTask task2 = new ColorTask(str, variable);
-						tasks.add(task2);
-
-					}
-					ColorTask task1 = new ColorTask(function, functor);
-					tasks.add(task1);
-
-				} else if (terms.get(0) instanceof VariableImpl) {
-
-					VariableImpl v = (VariableImpl) terms.get(0);
-					String str = "$" + v.getName();
-					ColorTask task = new ColorTask(str, variable);
-					tasks.add(task);
-
-				}
-				if (terms.get(1) instanceof FunctionalTermImpl) {
-
-					FunctionalTermImpl f = (FunctionalTermImpl) terms.get(1);
-					String function = man.getShortForm(f.getFunctionSymbol().toString());
-					//
-					List<Term> para = f.getTerms();
-					Iterator<Term> para_it = para.iterator();
-					while (para_it.hasNext()) {
-
-						VariableImpl p = (VariableImpl) para_it.next();
-						String str = "$" + p.getName();
-
-						ColorTask task2 = new ColorTask(str, variable);
-						tasks.add(task2);
-					}
-
-					ColorTask task = new ColorTask(name, objectProp);
-					tasks.add(task);
-					ColorTask task1 = new ColorTask(function, functor);
-					tasks.add(task1);
-
-				} else if (terms.get(1) instanceof VariableImpl) {
-
-					VariableImpl v = (VariableImpl) terms.get(1);
-					String str = "$" + v.getName();
-					ColorTask task = new ColorTask(name, dataProp);
-					tasks.add(task);
-					ColorTask task2 = new ColorTask(str, variable);
-					tasks.add(task2);
-
-				}
-			} else {
-				throw new RuntimeException("Unexpected parameter");
+			if (validator.isClass(predicate)) {
+				ColorTask task = new ColorTask(predicateName, clazz);
+				tasks.add(task);
+			} else if (validator.isObjectProperty(predicate)) {
+				ColorTask task = new ColorTask(predicateName, objectProp);
+				tasks.add(task);
+			} else if (validator.isDataProperty(predicate)) {
+				ColorTask task = new ColorTask(predicateName, dataProp);
+				tasks.add(task);
 			}
 		}
 
 		ColorTask[] taskArray = order(tasks);
-
 		for (int i = 0; i < taskArray.length; i++) {
 			if (taskArray[i].text != null) {
 				int index = input.indexOf(taskArray[i].text, 0);
@@ -592,35 +478,18 @@ public class QueryPainter {
 				}
 			}
 		}
-
 		tasks.clear();
-
 	}
 
 	private CQIE parse(String query) {
-		CQIE cq = null;
-		query = prepareQuery(query);
+		TurtleSyntaxParser textParser = new TurtleSyntaxParser(apic.getPrefixManager());
 		try {
-			datalogParser.parse(query);
-			cq = datalogParser.getRule(0);
+			return textParser.parse(query);
 		} catch (RecognitionException e) {
-			this.parsingException = e;
-			log.warn(e.getMessage(), e);
+			parsingException = e;
+//			log.warn(e.getMessage(), e);
+			return null;
 		}
-		return cq;
-	}
-
-	private String prepareQuery(String input) {
-		String query = "";
-		DatalogQueryHelper queryHelper = new DatalogQueryHelper(apic.getPrefixManager());
-
-		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1) { // if no head
-			query = String.format("%s %s %s", queryHelper.getDefaultHead(), OBDALibConstants.DATALOG_IMPLY_SYMBOL, input);
-		}
-		query = queryHelper.getPrefixes() + query; // Append the prefixes
-
-		return query;
 	}
 
 	private ColorTask[] order(Vector<ColorTask> v) {
@@ -638,13 +507,8 @@ public class QueryPainter {
 			}
 			result[j] = str;
 		}
-
 		return result;
 	}
-
-	// public void setValidQuery(boolean isValidQuery) {
-	// this.isValidQuery = isValidQuery;
-	// }
 
 	public boolean isValidQuery() {
 		return !invalid;
@@ -661,5 +525,4 @@ public class QueryPainter {
 			set = sas;
 		}
 	}
-
 }

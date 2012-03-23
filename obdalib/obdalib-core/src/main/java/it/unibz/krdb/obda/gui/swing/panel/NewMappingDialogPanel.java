@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
-import it.unibz.krdb.obda.codec.TargetQeryToTextCodec;
+import it.unibz.krdb.obda.codec.TargetQueryToTurtleCodec;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
@@ -12,17 +12,14 @@ import it.unibz.krdb.obda.gui.swing.utils.QueryPainter;
 import it.unibz.krdb.obda.gui.swing.utils.QueryPainter.ValidatorListener;
 import it.unibz.krdb.obda.gui.swing.utils.SQLQueryPainter;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.parser.DatalogProgramParser;
-import it.unibz.krdb.obda.parser.DatalogQueryHelper;
+import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
@@ -59,7 +56,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDADataSource dataSource = null;
 	private JDialog parent = null;
 	private TargetQueryVocabularyValidator validator = null;
-	private DatalogProgramParser datalogParser = new DatalogProgramParser();
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 	/** Logger */
@@ -565,31 +561,13 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAMappingAxiom mapping;
 
 	private CQIE parse(String query) {
-		CQIE cq = null;
+		TurtleSyntaxParser textParser = new TurtleSyntaxParser(controller.getPrefixManager());
 		try {
-			String input = prepareQuery(query);
-			DatalogProgram dp = datalogParser.parse(input);
-			if (dp.getRules().size() > 0) {
-				cq = dp.getRules().get(0); // TODO Change this when the system
-											// supports multiple data sources.
-			}
+			return textParser.parse(query);
 		} catch (RecognitionException e) {
-			log.warn(e.getMessage());
+//			log.warn(e.getMessage());
+			return null;
 		}
-		return cq;
-	}
-
-	private String prepareQuery(String input) {
-		String query = "";
-		DatalogQueryHelper queryHelper = new DatalogQueryHelper(controller.getPrefixManager());
-
-		String[] atoms = input.split(OBDALibConstants.DATALOG_IMPLY_SYMBOL, 2);
-		if (atoms.length == 1) // if no head
-			input = queryHelper.getDefaultHead() + " " + OBDALibConstants.DATALOG_IMPLY_SYMBOL + " " + input;
-
-		query += queryHelper.getPrefixes() + input;
-
-		return query;
 	}
 
 	@Override
@@ -621,7 +599,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 		txtSourceQuery.setText(mapping.getSourceQuery().toString());
 
-		TargetQeryToTextCodec trgcodec = new TargetQeryToTextCodec(this.controller);
+		TargetQueryToTurtleCodec trgcodec = new TargetQueryToTurtleCodec(this.controller);
 		String trgQuery = trgcodec.encode(mapping.getTargetQuery());
 		txtTargetQuery.setText(trgQuery);
 	}
