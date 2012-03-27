@@ -8,7 +8,6 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
@@ -25,7 +24,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -129,7 +127,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -193,7 +191,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -263,7 +261,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 
@@ -327,7 +325,7 @@ public class RDBMSDirectDataRepositoryManagerTest extends TestCase {
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 
 		List<Assertion> list = materializer.getAssertionList();
 

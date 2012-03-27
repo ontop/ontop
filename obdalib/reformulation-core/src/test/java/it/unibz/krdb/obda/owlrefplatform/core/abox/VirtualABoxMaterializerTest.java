@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.VirtualABoxMaterializer;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.BufferedReader;

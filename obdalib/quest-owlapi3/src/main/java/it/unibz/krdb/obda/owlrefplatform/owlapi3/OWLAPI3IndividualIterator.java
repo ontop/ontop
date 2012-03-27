@@ -1,13 +1,10 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 
-import java.util.HashMap;
 import java.util.Iterator;
 
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
@@ -19,7 +16,7 @@ public class OWLAPI3IndividualIterator implements Iterator<OWLIndividualAxiom> {
 	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
 	
 	public OWLAPI3IndividualIterator(OBDAModel model) throws Exception {
-		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model, new HashMap<Predicate, Description>());
+		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
 		Iterator<Assertion> assertions = materializer.getAssertionIterator();
 		setAssertions(assertions);
 	}

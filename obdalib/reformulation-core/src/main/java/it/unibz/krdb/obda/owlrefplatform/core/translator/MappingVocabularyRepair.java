@@ -34,6 +34,11 @@ public class MappingVocabularyRepair {
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
 	public void fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+		if (vocabulary.size() == 0) {
+			// Nothing to repair!
+			return;
+		}
+		
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));

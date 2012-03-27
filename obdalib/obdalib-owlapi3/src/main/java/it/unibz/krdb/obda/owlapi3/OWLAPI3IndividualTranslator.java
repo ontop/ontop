@@ -16,6 +16,8 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
@@ -34,37 +36,32 @@ public class OWLAPI3IndividualTranslator {
 
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-
 			IRI conceptIRI = IRI.create(ca.getConcept().getName());
-			IRI individualIRI = IRI.create(ca.getObject().getURI());
 
 			OWLClass description = dataFactory.getOWLClass(conceptIRI);
-			OWLIndividual individual = dataFactory.getOWLNamedIndividual(individualIRI);
+			OWLIndividual object = (OWLNamedIndividual) translate(ca.getObject());
 
-			return dataFactory.getOWLClassAssertionAxiom(description, individual);
+			return dataFactory.getOWLClassAssertionAxiom(description, object);
+		
 		} else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-
 			IRI roleIRI = IRI.create(opa.getRole().getName());
-			IRI subjectIRI = IRI.create(opa.getFirstObject().getURI());
-			IRI objectIRI = IRI.create(opa.getSecondObject().getURI());
 
 			OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
-			OWLIndividual subject = dataFactory.getOWLNamedIndividual(subjectIRI);
-			OWLIndividual object = dataFactory.getOWLNamedIndividual(objectIRI);
+			OWLIndividual subject = (OWLNamedIndividual) translate(opa.getFirstObject());
+			OWLIndividual object = (OWLNamedIndividual) translate(opa.getSecondObject());
 
 			return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
+		
 		} else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
-
 			IRI attributeIRI = IRI.create(dpa.getAttribute().getName());
-			IRI subjectIRI = IRI.create(dpa.getObject().getURI());
 
 			OWLDataProperty property = dataFactory.getOWLDataProperty(attributeIRI);
-			OWLIndividual subject = dataFactory.getOWLNamedIndividual(subjectIRI);
-			String value = dpa.getValue().getValue();
+			OWLIndividual subject = (OWLNamedIndividual) translate(dpa.getObject());
+			OWLLiteral object = (OWLLiteral) translate(dpa.getValue());
 
-			return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, value);
+			return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object);
 		}
 		return null;
 	}

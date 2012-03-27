@@ -1,42 +1,38 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.Quest;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.utils.MappingAnalyzer;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,10 +69,8 @@ import org.slf4j.LoggerFactory;
 public class VirtualABoxMaterializer {
 
 	private OBDAModel model;
-	private Map<Predicate, Description> equivalenceMap;
 
-	private Map<OBDADataSource, DatalogUnfolder> unfoldersMap = new HashMap<OBDADataSource, DatalogUnfolder>();
-	private Map<OBDADataSource, SQLGenerator> sqlgeneratorsMap = new HashMap<OBDADataSource, SQLGenerator>();
+	private Map<OBDADataSource, Quest> questInstanceMap = new HashMap<OBDADataSource, Quest>();
 	private Set<Predicate> vocabulary = new LinkedHashSet<Predicate>();
 
 	private Connection conn;
@@ -85,16 +79,14 @@ public class VirtualABoxMaterializer {
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/***
-	 * Collects the vocabulary of this OBDA model and initializes unfodlers and
-	 * SQL generators for the model.
+	 * Collects the vocabulary from the OBDA model to prepare the ABox creation.
 	 * 
 	 * @param model
 	 * @throws Exception
 	 */
-	public VirtualABoxMaterializer(OBDAModel model, Map<Predicate, Description> equivalenceMap) throws Exception {
+	public VirtualABoxMaterializer(OBDAModel model) throws Exception {
 		this.model = model;
-		this.equivalenceMap = equivalenceMap;
-
+		
 		for (OBDADataSource source : model.getSources()) {
 			// For each data source in the model
 			URI sourceUri = source.getSourceID();
@@ -112,15 +104,19 @@ public class VirtualABoxMaterializer {
 	        MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
 	        typeRepair.insertDataTyping(datalog);
 	        
-	        // Setup the unfolder
-	        DatalogUnfolder unfolder = new DatalogUnfolder(datalog, metadata);
+	        // TODO: Design redundancy!
+	        // For each data source, construct a new OBDA model!
+	        OBDAModel newModel = dfac.getOBDAModel();
+	        newModel.addSource(source);
+	        newModel.addMappings(sourceUri, mappingList);
 	        
-	        // Setup the SQL generator
-			JDBCUtility util = new JDBCUtility(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-	        SQLGenerator sqlgen = new SQLGenerator(metadata, util);
+	        Quest questInstance = new Quest();
+	        questInstance.setPreferences(getDefaultPreference());		
+			questInstance.loadTBox(ofac.createOntology()); // create an empty ontology	
+			questInstance.loadOBDAModel(newModel);
+			questInstance.setupRepository();
 	        
-			unfoldersMap.put(source, unfolder);
-			sqlgeneratorsMap.put(source, sqlgen);
+			questInstanceMap.put(source, questInstance);
 
 			// Collecting the vocabulary of the mappings
 			for (CQIE rule : datalog.getRules()) {
@@ -128,6 +124,15 @@ public class VirtualABoxMaterializer {
 				vocabulary.add(predicate);
 			}
 		}
+	}
+	
+	private QuestPreferences getDefaultPreference() {
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		return p;
 	}
 	
 	private void setupConnection(OBDADataSource datasource) throws SQLException {
@@ -148,7 +153,7 @@ public class VirtualABoxMaterializer {
     }
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
-		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), unfoldersMap, sqlgeneratorsMap);
+		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), questInstanceMap);
 	}
 
 	public List<Assertion> getAssertionList() throws Exception {
@@ -161,7 +166,7 @@ public class VirtualABoxMaterializer {
 	}
 
 	public Iterator<Assertion> getAssertionIterator(Predicate p) throws Exception {
-		return new VirtualTripleIterator(p, this.model.getSources(), this.unfoldersMap, this.sqlgeneratorsMap);
+		return new VirtualTripleIterator(p, this.model.getSources(), questInstanceMap);
 	}
 
 	/**
@@ -177,7 +182,7 @@ public class VirtualABoxMaterializer {
 	 * @throws Exception
 	 */
 	public List<Assertion> getAssertionList(Predicate p) throws Exception {
-		VirtualTripleIterator it = new VirtualTripleIterator(p, this.model.getSources(), this.unfoldersMap, this.sqlgeneratorsMap);
+		VirtualTripleIterator it = new VirtualTripleIterator(p, this.model.getSources(), questInstanceMap);
 		List<Assertion> assertions = new LinkedList<Assertion>();
 		while (it.hasNext()) {
 			assertions.add(it.next());
@@ -225,19 +230,16 @@ public class VirtualABoxMaterializer {
 
 		private Iterator<Predicate> predicates;
 		private Collection<OBDADataSource> sources;
-		private Map<OBDADataSource, DatalogUnfolder> unfolders;
-		private Map<OBDADataSource, SQLGenerator> sqlgens;
+		private Map<OBDADataSource, Quest> questInstances;
 
 		private Predicate currentPredicate = null;
 		private VirtualTripleIterator currentIterator = null;
 
-		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
-				Map<OBDADataSource, DatalogUnfolder> unfolders, Map<OBDADataSource, SQLGenerator> sqlgens)
-				throws SQLException {
+		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources, 
+				Map<OBDADataSource, Quest> questInstances) throws SQLException {
 			this.predicates = predicates;
 			this.sources = sources;
-			this.unfolders = unfolders;
-			this.sqlgens = sqlgens;
+			this.questInstances = questInstances;
 			try {
 				advanceToNextPredicate();
 			} catch (NoSuchElementException e) {
@@ -255,7 +257,7 @@ public class VirtualABoxMaterializer {
 				// NO-OP
 			}
 			currentPredicate = predicates.next();
-			currentIterator = new VirtualTripleIterator(currentPredicate, sources, unfolders, sqlgens);
+			currentIterator = new VirtualTripleIterator(currentPredicate, sources, questInstances);
 		}
 		
 		/**
@@ -327,47 +329,26 @@ public class VirtualABoxMaterializer {
 		private boolean hasnext = false;
 
 		private OBDADataSource currentSource;
-		private DatalogProgram currentQuery;  // A query object before unfolded
-		private DatalogProgram currentUnfoldedQuery;  // A query object after unfolded
+		private String currentQuery;
 
-		private Predicate pred;
+		private Predicate predicate;
 
-		private ResultSet currentResults;
-		private LinkedList<String> signature;
+		private OBDAResultSet currentResults;
 		private Iterator<OBDADataSource> sourceIterator;
-		private Map<OBDADataSource, DatalogUnfolder> unfolders;
-		private Map<OBDADataSource, SQLGenerator> sqlgens;
+		private Map<OBDADataSource, Quest> questInstances;
 		private Queue<DatalogProgram> queryQueue = new LinkedList<DatalogProgram>();
 
-		private Connection conn;
-		private Statement st;
+		private QuestConnection conn;
+		private QuestStatement st;
 		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 		
-		public VirtualTripleIterator(Predicate p, Collection<OBDADataSource> sources,
-				Map<OBDADataSource, DatalogUnfolder> unfolders, Map<OBDADataSource, SQLGenerator> sqlgens)
-				throws SQLException {
-			this.pred = p;
-			this.unfolders = unfolders;
-			this.sqlgens = sqlgens;
-
-			// Generating the query that as for the content of this predicate
-			Atom head = null;
-			Atom body = null;
-			signature = new LinkedList<String>();
-			if (p.getArity() == 1) {
-				head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 1), dfac.getVariable("col1"));
-				body = dfac.getAtom(p, dfac.getVariable("col1"));
-				signature.add("col1");
-			} else if (p.getArity() == 2) {
-				head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 2), dfac.getVariable("col1"), dfac.getVariable("col2"));
-				body = dfac.getAtom(p, dfac.getVariable("col1"), dfac.getVariable("col2"));
-				signature.add("col1");
-				signature.add("col2");
-			} else {
-				throw new IllegalArgumentException("Invalid arity " + p.getArity() + " " + p.toString());
-			}
-			currentQuery = dfac.getDatalogProgram(dfac.getCQIE(head, body));
+		public VirtualTripleIterator(Predicate predicate, Collection<OBDADataSource> sources, 
+				Map<OBDADataSource, Quest> questInstances) throws SQLException {
+			this.predicate = predicate;
+			this.questInstances = questInstances;
+			
+			currentQuery = createQuery();
 			sourceIterator = sources.iterator();
 
 			try {
@@ -376,6 +357,20 @@ public class VirtualABoxMaterializer {
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
+		}
+		
+		// SPARQL query generated from the predicate
+		private String createQuery() {
+			StringBuffer sb = new StringBuffer();
+			sb.append("PREFIX :	<" + model.getPrefixManager().getDefaultNamespace() + ">\n");
+						
+			if (predicate.getArity() == 1) {
+				sb.append("SELECT $x WHERE { $x a <" + predicate.getName() + "> . }");
+			} else {
+				sb.append("SELECT $x $y WHERE { $x <" + predicate.getName() + "> $y . }");
+			}
+			
+			return sb.toString();
 		}
 		
 		/**
@@ -403,34 +398,16 @@ public class VirtualABoxMaterializer {
 		 * Advances to the next sources, configures an unfolder using the
 		 * mappings for the source and executes the query related to the
 		 * predicate
-		 * @throws OBDAException 
-		 * @throws SQLException 
-		 * 
 		 * @throws NoSuchElementException
 		 * @throws Exception
 		 */
-		private void advanceToNextSource() throws OBDAException, SQLException {
+		private void advanceToNextSource() throws Exception {
 			disconnect(); // disconnect from the current source
 			
 			currentSource = sourceIterator.next();
-			DatalogUnfolder unfolder = unfolders.get(currentSource);
-			DatalogProgram unfolding = unfolder.unfold(currentQuery);
+			Quest questInstance = questInstances.get(currentSource);
 			
-			List<CQIE> rules = unfolding.getRules();
-			if (rules.size() != 0) {
-				for (CQIE query : rules) {
-					DatalogProgram unfoldedQuery = dfac.getDatalogProgram(query);
-					queryQueue.add(unfoldedQuery);  // for each new unfolded query, put it on a queue for per individual processing.
-				}
-			} else {
-				advanceToNextSource();
-			}
-			
-			String url = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-			String username = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-			String password = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-			
-			conn = DriverManager.getConnection(url, username, password);
+			conn = questInstance.getConnection();
 			st = conn.createStatement();
 		}
 		
@@ -441,14 +418,8 @@ public class VirtualABoxMaterializer {
 		 * @throws OBDAException
 		 * @throws SQLException
 		 */
-		private void advanceToNextQuery() throws OBDAException, SQLException {
-			
-			currentUnfoldedQuery = queryQueue.poll(); // fetch the first query rule in the queue
-			
-			SQLGenerator sqlgen = sqlgens.get(currentSource);
-			String sql = sqlgen.generateSourceQuery(currentUnfoldedQuery, signature).trim();
-			
-			currentResults = st.executeQuery(sql);
+		private void advanceToNextQuery() throws OBDAException, SQLException {			
+			currentResults = st.execute(currentQuery);
 		}
 		
 		@Override
@@ -458,14 +429,14 @@ public class VirtualABoxMaterializer {
 					return hasnext;
 				} else {
 					peeked = true;
-					hasnext = currentResults.next();
+					hasnext = currentResults.nextRow();
 					while (!hasnext) {
 						try {
 							if (queryQueue.peek() == null) {
 								advanceToNextSource();
 							}
 							advanceToNextQuery();
-							hasnext = currentResults.next();
+							hasnext = currentResults.nextRow();
 						} catch (NoSuchElementException e) {
 							return false;
 						} catch (Exception e) {
@@ -487,14 +458,14 @@ public class VirtualABoxMaterializer {
 					peeked = false;
 					return constructAssertion();
 				} else {
-					boolean hasnext = currentResults.next();
+					boolean hasnext = currentResults.nextRow();
 					while (!hasnext) {
 						try {
 							if (queryQueue.peek() == null) {
 								advanceToNextSource();
 							}
 							advanceToNextQuery();
-							hasnext = currentResults.next();
+							hasnext = currentResults.nextRow();
 						} catch (NoSuchElementException e) {
 							throw e;
 						} catch (Exception e) {
@@ -506,6 +477,8 @@ public class VirtualABoxMaterializer {
 				}
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -514,92 +487,45 @@ public class VirtualABoxMaterializer {
 		 * set.
 		 * 
 		 * @return
+		 * @throws URISyntaxException 
 		 */
-		private Assertion constructAssertion() throws SQLException {
-			Assertion assertion = null;
-
-			Description replacementDescription = equivalenceMap.get(pred);
-			Atom queryHead = currentUnfoldedQuery.getRules().get(0).getHead();
-			Predicate queryPredicate = queryHead.getPredicate();
-			
-			/* If a Class object */
-			if (queryPredicate.getArity() == 1) {
-				URIConstant c = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-				if (replacementDescription == null) {
-					assertion = ofac.createClassAssertion(pred, c);
+		private Assertion constructAssertion() throws SQLException, URISyntaxException {
+			Assertion assertion = null;			
+			int arity = predicate.getArity();
+			if (arity == 1) {
+				Constant value = currentResults.getConstant(1);
+				if (value instanceof URIConstant) {
+					URIConstant c = (URIConstant) value;
+					assertion = ofac.createClassAssertion(predicate, c);
 				} else {
-					OClass replacementc = (OClass) replacementDescription;
-					assertion = ofac.createClassAssertion(replacementc.getPredicate(), c);
-				}
-			/* If a Property object */
-			} else if (queryPredicate.getArity() == 2) {
-				Term object = queryHead.getTerm(1); // get the second term
-				if (object instanceof Function) {
-					Function function = (Function) object;
-					if (isLiteralDataProperty(function)) {
-						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-						ValueConstant languageTag = (ValueConstant) function.getTerms().get(1); // The language tag is on the second term
-						String languageTagString = (languageTag == null) ? "" : languageTag.getValue();
-						ValueConstant c2 = dfac.getValueConstant(currentResults.getString(3), languageTagString);
-						if (replacementDescription == null) {
-							assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
-						} else {
-							Property replacementp = (Property) replacementDescription;
-							assertion = ofac.createDataPropertyAssertion(replacementp.getPredicate(), c1, c2);
-						}
-					} else if (isDataTypeFunction(function)) {
-						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-						ValueConstant c2 = dfac.getValueConstant(currentResults.getString(2), function.getFunctionSymbol().getType(0));
-						if (replacementDescription == null) {
-							assertion = ofac.createDataPropertyAssertion(pred, c1, c2);
-						} else {
-							Property replacementp = (Property) replacementDescription;
-							assertion = ofac.createDataPropertyAssertion(replacementp.getPredicate(), c1, c2);
-						}
-					} else {
-						URIConstant c1 = dfac.getURIConstant(URI.create(currentResults.getString(1)));
-						URIConstant c2 = dfac.getURIConstant(URI.create(currentResults.getString(2)));
-						if (replacementDescription == null) {
-							assertion = ofac.createObjectPropertyAssertion(pred, c1, c2);
-						} else {
-							Property replacementp = (Property) replacementDescription;
-							if (!replacementp.isInverse()) {
-								assertion = ofac.createObjectPropertyAssertion(replacementp.getPredicate(), c1, c2);
-							} else {
-								assertion = ofac.createObjectPropertyAssertion(replacementp.getPredicate(), c2, c1);
-							}
-						}
-					}
-				} else {
-					// TODO We should do something if the object is not an instance of function.
+					// Ignore - NO-OP
 				}
 			} else {
-				throw new RuntimeException("ERROR, Wrongly typed predicate: " + pred.toString());
+				COL_TYPE type = predicate.getType(1);
+				if (type == COL_TYPE.OBJECT) {
+					Constant value1 = currentResults.getConstant(1);
+					Constant value2 = currentResults.getConstant(2);
+					if (value1 instanceof URIConstant && value2 instanceof URIConstant) {
+						URIConstant o1 = (URIConstant) value1;
+						URIConstant o2 = (URIConstant) value2;
+						assertion = ofac.createObjectPropertyAssertion(predicate, o1, o2);
+					} else {
+						// Ignore - NO-OP
+					}
+				} else {
+					Constant value = currentResults.getConstant(1);
+					if (value instanceof URIConstant) {
+						URIConstant o = (URIConstant) value;
+						ValueConstant c = (ValueConstant) currentResults.getConstant(2);
+						assertion = ofac.createDataPropertyAssertion(predicate, o, c);
+					} else {
+						// Ignore - NO-OP
+					}
+				}
 			}
 			return assertion;
-		}		
-		
-		/**
-		 * Determines if the given function is a special data type function or not.
-		 */
-		private boolean isDataTypeFunction(Function function) {
-			Predicate functionSymbol = function.getFunctionSymbol();
-			if (functionSymbol.equals(OBDAVocabulary.XSD_STRING)
-					|| functionSymbol.equals(OBDAVocabulary.XSD_INTEGER)
-					|| functionSymbol.equals(OBDAVocabulary.XSD_DECIMAL)
-					|| functionSymbol.equals(OBDAVocabulary.XSD_DOUBLE)
-					|| functionSymbol.equals(OBDAVocabulary.XSD_DATETIME)
-					|| functionSymbol.equals(OBDAVocabulary.XSD_BOOLEAN)) {
-				return true;
-			}
-			return false;
 		}
 		
-		private boolean isLiteralDataProperty(Function function) {
-			Predicate functionSymbol = function.getFunctionSymbol();
-			return functionSymbol.equals(OBDAVocabulary.RDFS_LITERAL);
-		}
-
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();

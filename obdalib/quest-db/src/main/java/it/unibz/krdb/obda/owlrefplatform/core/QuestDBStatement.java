@@ -10,8 +10,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.VirtualABoxMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -119,7 +119,7 @@ public class QuestDBStatement implements OBDAStatement {
 			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			DataManager io = new DataManager(obdaModel);
 			io.loadOBDADataFromURI(uri, URI.create(""), obdaModel.getPrefixManager());
-			VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModel, st.questInstance.getEquivalenceMap());
+			VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(st.questInstance);
 			assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 			int result = st.insertData(assertionIter, useFile, commit, batch);
 			return result;

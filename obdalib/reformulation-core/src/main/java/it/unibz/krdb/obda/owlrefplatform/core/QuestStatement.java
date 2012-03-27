@@ -15,6 +15,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
@@ -65,16 +66,17 @@ public class QuestStatement implements OBDAStatement {
 
 	private boolean canceled = false;
 
-	Logger log = LoggerFactory.getLogger(QuestStatement.class);
+	private DatalogProgram unfoldingProgram;
+	
 	private Statement sqlstatement;
 
 	private RDBMSDataRepositoryManager repository;
 
-	private DatalogProgram unfoldingProgram;
-
 	private QuestConnection conn;
 
 	protected Quest questInstance;
+
+	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
 
@@ -339,16 +341,12 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		// Now we generate the SQL for each CQ
-
-		SPARQLDatalogTranslator t = new SPARQLDatalogTranslator();
 		LinkedList<String> sqlforcqs = new LinkedList<String>();
 		log.debug("Found {} embedded queries.", cqs.size());
 		for (int i = 0; i < cqs.size(); i++) {
 			log.debug("Processing embedded query #{}", i);
 			String cq = cqs.get(i);
-			try {
-				
-				
+			try {				
 				String finasql = getUnfolding(cq);
 				log.debug("SQL: {}", finasql);
 				sqlforcqs.add(finasql);
@@ -607,10 +605,11 @@ public class QuestStatement implements OBDAStatement {
 	 * @throws SQLException
 	 */
 	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
-
 		int result = -1;
-		if (!useFile)
-			result = repository.insertData(conn.conn, data, commit, batch);
+		if (!useFile) {
+			EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getEquivalenceMap());
+			result = repository.insertData(conn.conn, newData, commit, batch);
+		}
 		else {
 			try {
 				// File temporalFile = new File("quest-copy.tmp");

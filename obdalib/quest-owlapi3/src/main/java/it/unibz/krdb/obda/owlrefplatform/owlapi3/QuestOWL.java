@@ -39,39 +39,30 @@ import org.slf4j.LoggerFactory;
 public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBDAQueryReasoner {
 
 	/* The merge and tranlsation of all loaded ontologies */
-	private Ontology translatedOntologyMerge = null;
+	private Ontology translatedOntologyMerge;
 
-	private HashSet<OWLOntology> loadedOntologies = null;
+	private OBDAModel obdaModel;
 
-	private OBDAModel obdaModel = null;
+	private HashSet<OWLOntology> loadedOntologies = new HashSet<OWLOntology>();
 
-	private Logger log = LoggerFactory.getLogger(QuestOWL.class);
+	private QuestPreferences preferences = new QuestPreferences();
 
-	private QuestPreferences preferences = null;
+	private Quest questInstance = new Quest();
 
-	OWLAPI3VocabularyExtractor vext = new OWLAPI3VocabularyExtractor();
+	private QuestConnection conn;
 
-	private Quest questInstance = null;
+	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	private QuestConnection conn = null;
-
-	/***
-	 * Optimization flags
+	/**
+	 * Default constructor.
 	 */
-
-	// private boolean optimizeEquivalences = true;
-
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
-
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
+			BufferingMode bufferingMode, Properties preferences) {
 		super(rootOntology, configuration, bufferingMode);
-		this.preferences = new QuestPreferences();
-		this.preferences.putAll(preferences);
-
 		this.obdaModel = obdaModel;
-		questInstance = new Quest();
+		this.preferences.putAll(preferences);		
+		
 		Set<OWLOntology> closure = rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology);
-		loadedOntologies = new HashSet<OWLOntology>();
 		loadedOntologies.addAll(closure);
 		try {
 			loadOntologies(closure);
@@ -79,7 +70,6 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 		} catch (Exception e) {
 			throw new OWLRuntimeException(e);
 		}
-
 	}
 
 	public void setPreferences(QuestPreferences preferences) {
@@ -95,69 +85,55 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 
 		log.debug("Initializing Quest query answering engine...");
 
-//		String reformulationTechnique = (String) preferences.getCurrentValue(QuestPreferences.REFORMULATION_TECHNIQUE);
-//		boolean bOptimizeEquivalences = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_EQUIVALENCES);
-//		boolean bOptimizeTBoxSigma = preferences.getCurrentBooleanValueFor(QuestPreferences.OPTIMIZE_TBOX_SIGMA);
-		boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
-		//		String dbType = (String) preferences.getCurrentValue(QuestPreferences.DBTYPE);
+		final boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		final String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
 
 		getProgressMonitor().reasonerTaskStarted("Initializing");
-		// getProgressMonitor().setMessage("Classifying...");
-		// getProgressMonitor().setStarted();
 
+		// Loading the OBDA Model and TBox ontology to Quest
 		questInstance.loadTBox(translatedOntologyMerge);
 		questInstance.loadOBDAModel(obdaModel);
 
-		if (preferences == null) {
-			throw new NullPointerException("ReformulationPlatformPreferences not set");
-		}
-
+		// Load the preferences
 		log.debug("Initializing Quest query answering engine...");
-
 		questInstance.setPreferences(preferences);
 
 		try {
-
 			getProgressMonitor().reasonerTaskProgressChanged(1, 4);
-
+			
+			// Setup repository
 			questInstance.setupRepository();
 			getProgressMonitor().reasonerTaskProgressChanged(2, 4);
+			
+			// Retrives the connection from Quest
 			conn = questInstance.getConnection();
 			getProgressMonitor().reasonerTaskProgressChanged(3, 4);
-			/*
-			 * Preparing the data source
-			 */
-
+			
+			// Preparing the data source
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
-
 				QuestStatement st = conn.createStatement();
 				if (bObtainFromOntology) {
+					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(loadedOntologies, questInstance.getEquivalenceMap());
-
 					st.insertData(aBoxIter, 5000, 500);
-
 				}
 				if (bObtainFromMappings) {
+					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
-
-					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(questInstance.getOBDAModel(), questInstance.getEquivalenceMap());
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(questInstance.getOBDAModel());
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 					st.insertData(assertionIter, 5000, 500);
 					assertionIter.disconnect();
 				}
-
 				st.createIndexes();
 				st.close();
 				conn.commit();
-
+			} else {
+				// VIRTUAL MODE - NO-OP
 			}
-
-			log.debug("... Quest has been setup and is ready for querying");
-			// isClassified = true;
-
+			log.debug("Quest has completed the setup and it is ready for query answering!");
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw e;
@@ -194,8 +170,8 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 	 */
 	private void loadOntologies(Set<OWLOntology> ontologies) throws Exception {
 		/*
-		 * We will keep track of the loaded ontologies and tranlsate the TBox
-		 * part of them into our internal represntation
+		 * We will keep track of the loaded ontologies and translate the TBox
+		 * part of them into our internal representation.
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
@@ -204,22 +180,15 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 		try {
 			translatedOntologyMerge = translator.mergeTranslateOntologies(ontologies);
 		} catch (Exception e) {
-			throw new Exception(e) {
-
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = -745370766306607220L;
-			};
+			throw e;
 		}
 
 		if (loadedOntologies == null) {
 			loadedOntologies = new HashSet<OWLOntology>();
 		}
-		this.loadedOntologies.addAll(ontologies);
+		loadedOntologies.addAll(ontologies);
 
 		log.debug("Ontology loaded: {}", translatedOntologyMerge);
-
 	}
 
 	private ReasonerProgressMonitor getProgressMonitor() {
@@ -229,7 +198,6 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 
 	@Override
 	public void loadOBDAModel(OBDAModel model) {
-
 		obdaModel = (OBDAModel) model.clone();
 	}
 
@@ -251,7 +219,6 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 	@Override
 	public void interrupt() {
 		super.interrupt();
-
 	}
 
 	@Override
@@ -268,7 +235,5 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 		} catch (Exception e) {
 			throw new OWLRuntimeException(e);
 		}
-
 	}
-
 }
