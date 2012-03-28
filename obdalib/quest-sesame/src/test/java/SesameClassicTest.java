@@ -120,9 +120,9 @@ public class SesameClassicTest extends TestCase {
 		      
 		    	  while (result.hasNext()) {
 		    		   BindingSet bindingSet = result.next();
-		    		   org.openrdf.model.URI valueOfX = (org.openrdf.model.URI) bindingSet.getValue("x");
+		    		   Value valueOfX =  bindingSet.getValue("x");
 		    		   Literal valueOfY = (Literal) bindingSet.getValue("y");
-		    		   System.out.println(valueOfX.getLocalName()
+		    		   System.out.println(valueOfX.stringValue()
 		    				   +", "+valueOfY.floatValue());
 		    	  }
 		         result.close();
@@ -153,9 +153,10 @@ public class SesameClassicTest extends TestCase {
 	{
 		try{
 		setupInMemory();
+		//addFromURI();
 		addFromFile();
 		tupleQuery();
-		booleanQuery();
+		//booleanQuery();
 		close();
 		}
 		catch(Exception e)
@@ -164,10 +165,10 @@ public class SesameClassicTest extends TestCase {
 		
 	}
 	
-	public void test2() throws Exception
-	{
-		setupJDBC();
-		close();
-	}
+//	public void test2() throws Exception
+//	{
+//		setupJDBC();
+//		close();
+//	}
 
 }

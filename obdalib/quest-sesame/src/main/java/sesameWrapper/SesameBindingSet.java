@@ -1,7 +1,11 @@
 package sesameWrapper;
 
+import it.unibz.krdb.obda.model.BNode;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAResultSet;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 
@@ -30,11 +34,11 @@ public class SesameBindingSet implements BindingSet {
 
 	public SesameBindingSet(OBDAResultSet set) {
 		this.set = (OWLOBDARefResultSet) set;
-		try {
-			this.count = set.getColumCount();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			try {
+				this.count = set.getColumCount();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 	}
 
@@ -52,7 +56,7 @@ public class SesameBindingSet implements BindingSet {
 				bnames.add(s);
 			return bnames;
 
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -69,43 +73,13 @@ public class SesameBindingSet implements BindingSet {
 
 			if (hasBinding(bindingName)) {
 				int column = set.getSignature().indexOf(bindingName) + 1;
-				COL_TYPE type = set.getType(column - 1);
-
-				if (type == COL_TYPE.BOOLEAN) {
-					boolean b = (set.getInt(column) == 1);
-					value = fact.createLiteral(b);
-
-				} else if (type == COL_TYPE.DATETIME) {
-					XMLGregorianCalendar calendar;
-					value = fact.createLiteral(set.getString(column));
-
-				} else if (type == COL_TYPE.DECIMAL) {
-					value = fact.createLiteral(set.getInt(column));
-
-				} else if (type == COL_TYPE.DOUBLE) {
-					value = fact.createLiteral(set.getDouble(column));
-
-				} else if (type == COL_TYPE.INTEGER) {
-					value = fact.createLiteral(set.getInt(column));
-
-				} else if (type == COL_TYPE.STRING) {
-					value = fact.createLiteral(set.getString(column));
-
-				} else if (type == COL_TYPE.LITERAL) {
-					value = fact.createLiteral(set.getLiteral(bindingName).getValue(), set.getLiteral(bindingName).getLanguage());
-
-				} else if (type == COL_TYPE.OBJECT) {
-					value = (Value) set.getObject(column);
-
-				} else if (type == COL_TYPE.BNODE) {
+				Constant c = set.getConstant(bindingName);
+				if (c instanceof BNode)
 					value = fact.createBNode(set.getBNode(bindingName).getName());
-
-				} else if (type == COL_TYPE.LITERAL) { // URI!!!
+				else if (c instanceof URIConstant)
 					value = fact.createURI(set.getString(column));
-
-				} else {
-					value = fact.createURI(set.getLiteral(column).getValue());
-				}
+				else if (c instanceof ValueConstant)
+					value = fact.createLiteral(set.getString(column));
 			}
 
 			return new BindingImpl(bindingName, value);
@@ -119,7 +93,7 @@ public class SesameBindingSet implements BindingSet {
 
 		try {
 			return set.getSignature().contains(bindingName);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -133,7 +107,7 @@ public class SesameBindingSet implements BindingSet {
 			bindings = set.getSignature();
 			for (String s : bindings)
 				allBindings.add(createBinding(s));
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
