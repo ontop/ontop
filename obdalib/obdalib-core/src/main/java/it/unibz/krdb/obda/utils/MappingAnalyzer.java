@@ -239,8 +239,8 @@ public class MappingAnalyzer {
 				"yyyy-MM-dd HH:mm:ss.SS",
 				"yyyy-MM-dd HH:mm:ss",
 				"yyyy-MM-dd",
-				"yyyy-MM-ddTHH:mm:ssZ",
-				"yyyy-MM-ddTHH:mm:ss.sZ"
+				"yyyy-MM-dd'T'HH:mm:ssZ",
+				"yyyy-MM-dd'T'HH:mm:ss.sZ"
 		};
 		
 		for (String formatString : formatStrings) {
