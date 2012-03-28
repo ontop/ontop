@@ -115,12 +115,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			return iterator.hasNext();
 		else {
 		//check if head is null
-		if (endRdf) //end has been signaled
-		{
-			//no more data to come, process what's left
-			return (buffer.peek() != null);
-		}
-		else
+		
 		{
 			try {
 				if (((stmt = buffer.take()).equals(stm)))

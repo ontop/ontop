@@ -40,10 +40,7 @@ public class SesameBooleanQuery implements BooleanQuery {
 			if (next)
 				return (rs.getInt(1) == 1);
 
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
