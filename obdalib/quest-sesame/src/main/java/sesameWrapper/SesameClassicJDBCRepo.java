@@ -7,8 +7,8 @@ import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
 
 	private static QuestPreferences p = new QuestPreferences();
-	private String restorePath="/home/timi/workspace/obdalib-parent/quest-sesame/src/test/resources/my_name.qst";
-	private String storePath="/home/timi/workspace/obdalib-parent/quest-sesame/src/test/resources/";
+	private String restorePath="src/test/resources/my_name.qst";
+	private String storePath="src/test/resources/";
 
 	
 	public SesameClassicJDBCRepo(String name, String tboxFile) throws Exception {

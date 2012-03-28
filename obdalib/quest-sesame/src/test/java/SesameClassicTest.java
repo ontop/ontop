@@ -149,20 +149,20 @@ public class SesameClassicTest extends TestCase {
 	}
 	
 	
-//	public void test1() throws Exception
-//	{
-//		try{
-//		setupInMemory();
-//		addFromFile();
-//		//tupleQuery();
-//	//	booleanQuery();
-//		close();
-//		}
-//		catch(Exception e)
-//		{e.printStackTrace();
-//		throw e;}
-//		
-//	}
+	public void test1() throws Exception
+	{
+		try{
+		setupInMemory();
+		addFromFile();
+		tupleQuery();
+		booleanQuery();
+		close();
+		}
+		catch(Exception e)
+		{e.printStackTrace();
+		throw e;}
+		
+	}
 	
 	public void test2() throws Exception
 	{

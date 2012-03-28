@@ -30,9 +30,6 @@ public class SesameVirtualTest extends TestCase {
 			con = repo.getConnection();
 			
 			
-		   ((SesameVirtualRepo) repo).doo();
-
-			
 			con.close();
 			
 			

@@ -254,21 +254,13 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 
         boolean autoCommit = isAutoCommit();
         setAutoCommit(false);
-
-
-    	Semaphore empty = new Semaphore(0);
-		Semaphore full = new Semaphore(0);
-		
+	
         
-        SesameRDFHandler rdfHandler = new SesameRDFHandler(empty, full);
+        SesameRDFIterator rdfHandler = new SesameRDFIterator();
         rdfParser.setRDFHandler(rdfHandler);
         
         
-        try {
-
-            
-          
-            
+        try {            
             if (inputStreamOrReader instanceof  InputStream) {
             	inputStreamOrReader = (InputStream) inputStreamOrReader;
             } 
@@ -282,18 +274,14 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
             }
             
             System.out.println("Parsing... ");
-           
-            
-            Iterator<Assertion> iterator = rdfHandler.getAssertionIterator();   
-            
+                    
             Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseURI));
-            Thread process = new Thread(new Process((SesameStatementIterator)iterator));
-            
+            Thread process = new Thread(new Process(rdfHandler));
           
-            //
+            //start threads
             insert.start();
             process.start();
-          //  process.join();
+            
             insert.join();
             process.join();
                      
@@ -349,8 +337,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
           
           private class Process implements Runnable{
         	  private QuestDBStatement st;
-        	  private SesameStatementIterator iterator;
-        	  public Process(SesameStatementIterator iterator) throws OBDAException
+        	  private SesameRDFIterator iterator;
+        	  public Process(SesameRDFIterator iterator) throws OBDAException
         	  {
         		  st = questConn.createStatement();
         		  this.iterator = iterator;
@@ -362,15 +350,11 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 						st.add(iterator, boolToInt(autoCommit), 5000);
         		    	
 					} catch (SQLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
         	  }
           }
-            
-        
-             
-               
+                       
       
   
     protected void addWithoutCommit(Iterator< Statement> stmIterator, Resource... contexts)
@@ -388,7 +372,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     	//create new quest statement
     	QuestDBStatement stm = questConn.createStatement();
  
-    	SesameStatementIterator it = new SesameStatementIterator((ListIterator)stmIterator, null, null);
+    	SesameRDFIterator it = new SesameRDFIterator(stmIterator);
     	
     	//insert data   useFile=false, batch=0
     	try {

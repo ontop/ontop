@@ -21,7 +21,8 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 		this.result = res;
 		try {
 			this.count = result.getFetchSize();
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -31,7 +32,8 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 		
 		try {
 			return result.getSignature();
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -40,7 +42,8 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 	public void close() throws QueryEvaluationException {
 		try {
 			result.close();
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
@@ -55,7 +58,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 				read = false;
 				return hasNext;
 				
-			} catch (OBDAException e) {
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
@@ -78,7 +81,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 					return new SesameBindingSet(result);
 				else
 					throw new QueryEvaluationException("End of result set!");
-			} catch (OBDAException e) {
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			return null;

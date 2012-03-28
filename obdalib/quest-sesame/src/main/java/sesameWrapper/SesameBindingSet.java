@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ public class SesameBindingSet implements BindingSet {
 		this.set = (OWLOBDARefResultSet) set;
 		try {
 			this.count = set.getColumCount();
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
@@ -51,7 +52,8 @@ public class SesameBindingSet implements BindingSet {
 				bnames.add(s);
 			return bnames;
 
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -117,7 +119,7 @@ public class SesameBindingSet implements BindingSet {
 
 		try {
 			return set.getSignature().contains(bindingName);
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -131,7 +133,7 @@ public class SesameBindingSet implements BindingSet {
 			bindings = set.getSignature();
 			for (String s : bindings)
 				allBindings.add(createBinding(s));
-		} catch (OBDAException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
