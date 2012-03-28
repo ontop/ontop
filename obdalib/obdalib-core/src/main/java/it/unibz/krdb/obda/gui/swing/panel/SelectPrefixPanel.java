@@ -68,14 +68,15 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		parent.setVisible(true);
 	}
 
+	private boolean isBasePrefix(String prefix) {
+		return (prefix.equals(":")) ? true : false;
+	}
+	
 	private void drawCheckBoxes() {
-
 		checkboxes = new Vector<JCheckBox>();
 		labels = new Vector<JLabel>();
-		int i = 0;
-		Iterator<String> it = prefixMap.keySet().iterator();
-		while (it.hasNext()) {
-			String key = it.next();
+		int yIndex = 1;
+		for (String key : prefixMap.keySet()) {
 			if (!key.equals("version")) {
 				jCheckBox1 = new JCheckBox();
 				jCheckBox1.setText(key);
@@ -86,37 +87,42 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
 				gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 				gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-				gridBagConstraints.gridy = i;
 				gridBagConstraints.gridx = 0;
+				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : yIndex;
 				gridBagConstraints.weightx = 0.0;
 				jPanel2.add(jCheckBox1, gridBagConstraints);
-				checkboxes.add(jCheckBox1);
-
-				jPanel2.add(jCheckBox1, gridBagConstraints);
-
+				
 				jLabel1 = new JLabel();
-				jLabel1.setText(": <" + prefixMap.get(key) + ">");
+				jLabel1.setText("<" + prefixMap.get(key) + ">");
 				jLabel1.setPreferredSize(new Dimension(350, 15));
 				gridBagConstraints = new java.awt.GridBagConstraints();
 				gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 				gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-				gridBagConstraints.weightx = 1.0;
-				gridBagConstraints.gridx = 1;
-				gridBagConstraints.gridy = i;
 				gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+				gridBagConstraints.gridx = 1;
+				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : yIndex;
+				gridBagConstraints.weightx = 1.0;
 				jPanel2.add(jLabel1, gridBagConstraints);
 				labels.add(jLabel1);
-
-				i++;
-				if (key.equals("owl") || key.equals("rdf") || key.equals("rdfs")) {
-					jCheckBox1.setSelected(true);
+				
+				// Arrange the check-box list
+				if (isBasePrefix(key)) {
+					// Always put the base prefix on top of the list.
+					checkboxes.add(0, jCheckBox1);
+					labels.add(0, jLabel1);
+				} else {
+					checkboxes.add(jCheckBox1);
+					labels.add(jLabel1);
 				}
+				
+				// Increase the index Y counter
+				yIndex++;
 			}
 		}
 
 		java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = i + 1;
+		gridBagConstraints.gridy = yIndex + 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.weighty = 1.0;
@@ -197,16 +203,12 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 
 	private void accept() {
 		StringBuffer prefix = new StringBuffer();
-		prefix.append("PREFIX ");
-		prefix.append(": <");
-		prefix.append(base);
-		prefix.append("#");
-		prefix.append(">\n");
 		int i = 0;
-		for (JCheckBox box : checkboxes) {
-			if (box.isSelected()) {
+		for (JCheckBox checkbox : checkboxes) {
+			if (checkbox.isSelected()) {
 				prefix.append("PREFIX ");
-				prefix.append(box.getText());
+				prefix.append(checkbox.getText());
+				prefix.append(" ");
 				prefix.append(labels.get(i).getText());
 				prefix.append("\n");
 			}
@@ -316,10 +318,6 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 		gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
 		add(jPanel2, gridBagConstraints);
 	}// </editor-fold>//GEN-END:initComponents
-
-	private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jCheckBox1ActionPerformed
-		// TODO add your handling code here:
-	}// GEN-LAST:event_jCheckBox1ActionPerformed
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton jButtonAccept;
