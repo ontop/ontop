@@ -1,7 +1,5 @@
 package sesameWrapper;
 
-import org.openrdf.repository.RepositoryException;
-
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 

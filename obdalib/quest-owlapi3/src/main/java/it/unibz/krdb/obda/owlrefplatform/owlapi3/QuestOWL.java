@@ -2,12 +2,14 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQueryReasoner;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3VocabularyExtractor;
+import it.unibz.krdb.obda.owlapi3.OWLConnection;
+import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
+import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -15,13 +17,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.VirtualABoxMaterializer.VirtualTriplePredicateIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLRuntimeException;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBDAQueryReasoner {
+public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OWLQueryReasoner {
 
 	/* The merge and tranlsation of all loaded ontologies */
 	private Ontology translatedOntologyMerge;
@@ -49,19 +51,21 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 
 	private Quest questInstance = new Quest();
 
-	private QuestConnection conn;
-
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	/**
+	private QuestConnection conn = null;
+
+	private QuestOWLConnection owlconn = null;
+
+	/***
 	 * Default constructor.
 	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
-			BufferingMode bufferingMode, Properties preferences) {
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences) {
 		super(rootOntology, configuration, bufferingMode);
 		this.obdaModel = obdaModel;
-		this.preferences.putAll(preferences);		
-		
+		this.preferences.putAll(preferences);
+
 		Set<OWLOntology> closure = rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology);
 		loadedOntologies.addAll(closure);
 		try {
@@ -77,8 +81,8 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 	}
 
 	@Override
-	public QuestStatement getStatement() throws OBDAException {
-		return conn.createStatement();
+	public OWLStatement getStatement() throws OWLException {
+		return owlconn.createStatement();
 	}
 
 	private void classify() throws Exception {
@@ -101,15 +105,16 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 
 		try {
 			getProgressMonitor().reasonerTaskProgressChanged(1, 4);
-			
+
 			// Setup repository
 			questInstance.setupRepository();
 			getProgressMonitor().reasonerTaskProgressChanged(2, 4);
-			
+
 			// Retrives the connection from Quest
 			conn = questInstance.getConnection();
+			owlconn = new QuestOWLConnection(conn);
 			getProgressMonitor().reasonerTaskProgressChanged(3, 4);
-			
+
 			// Preparing the data source
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
 				QuestStatement st = conn.createStatement();
@@ -122,6 +127,7 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 				if (bObtainFromMappings) {
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
+
 					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(questInstance.getOBDAModel());
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 					st.insertData(assertionIter, 5000, 500);
@@ -202,8 +208,8 @@ public class QuestOWL extends StructuralReasoner implements OBDAOWLReasoner, OBD
 	}
 
 	@Override
-	public QuestConnection getConnection() throws OBDAException {
-		return conn;
+	public OWLConnection getConnection() throws OBDAException {
+		return owlconn;
 	}
 
 	@Override

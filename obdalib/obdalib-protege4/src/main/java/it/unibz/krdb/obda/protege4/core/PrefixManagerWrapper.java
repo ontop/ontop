@@ -45,4 +45,10 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		return owlmapper.getValue(prefix);
 	}
 
+	@Override
+	public boolean contains(String prefix) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

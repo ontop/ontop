@@ -5,17 +5,17 @@ import it.unibz.krdb.obda.gui.swing.OBDASaveQueryResultToFileAction;
 import it.unibz.krdb.obda.gui.swing.panel.QueryInterfacePanel;
 import it.unibz.krdb.obda.gui.swing.panel.ResultViewTablePanel;
 import it.unibz.krdb.obda.gui.swing.panel.SavedQueriesPanelListener;
-import it.unibz.krdb.obda.gui.swing.tablemodel.IncrementalQueryResultSetTableModel;
 import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgressListener;
 import it.unibz.krdb.obda.gui.swing.utils.TextMessageFrame;
-import it.unibz.krdb.obda.model.OBDAQueryReasoner;
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
+import it.unibz.krdb.obda.owlapi3.OWLResultSet;
+import it.unibz.krdb.obda.owlapi3.OWLResultSetTableModel;
+import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
@@ -46,15 +46,15 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	/**
 	 *
 	 */
-	private static final long			serialVersionUID		= 1L;
-	private static final Logger			log						= LoggerFactory.getLogger(QueryInterfaceView.class);
+	private static final long serialVersionUID = 1L;
+	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
 
-	QueryInterfacePanel					panel_query_interface	= null;
+	QueryInterfacePanel panel_query_interface = null;
 
-	ResultViewTablePanel				panel_view_results		= null;
+	ResultViewTablePanel panel_view_results = null;
 
-	private OWLOntologyChangeListener	ontochange_listener		= null;
-	OBDAModelManager				obdaController			= null;
+	private OWLOntologyChangeListener ontochange_listener = null;
+	OBDAModelManager obdaController = null;
 
 	@Override
 	protected void disposeOWLView() {
@@ -72,7 +72,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				queryInterfaceView.removeListener(this);
 			}
 		}
-		
+
 		obdaController.removeListener(this);
 	}
 
@@ -91,15 +91,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		OBDAPreferences preference = (OBDAPreferences) getOWLEditorKit().get(OBDAPreferences.class.getName());
 		panel_query_interface = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), this.getOWLModelManager().getActiveOntology()
 				.getOntologyID().getOntologyIRI().toURI(), preference);
-		panel_query_interface.setPreferredSize(new Dimension(400,250));
-		panel_query_interface.setMinimumSize(new Dimension(400,250));
+		panel_query_interface.setPreferredSize(new Dimension(400, 250));
+		panel_query_interface.setMinimumSize(new Dimension(400, 250));
 		panel_view_results = new ResultViewTablePanel(panel_query_interface);
 		panel_right_main.setLayout(new java.awt.BorderLayout());
 		split_right_horizontal.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 		split_right_horizontal.setResizeWeight(0.5);
 		split_right_horizontal.setDividerLocation(0.5);
-		
-		
+
 		split_right_horizontal.setOneTouchExpandable(true);
 		split_right_horizontal.setTopComponent(panel_query_interface);
 		panel_view_results.setMinimumSize(new java.awt.Dimension(400, 250));
@@ -165,8 +164,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		panel_query_interface.setExecuteUCQAction(new OBDADataQueryAction() {
 
-			private long	time	= 0;
-			private int		rows	= 0;
+			private long time = 0;
+			private int rows = 0;
 
 			@Override
 			public void run(String query, QueryInterfacePanel panel) {
@@ -181,9 +180,10 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					action.run();
 					latch.await();
 					monitor.stop();
-					OBDAResultSet result = action.getResult();
+					OWLResultSet result = action.getResult();
 					if (result != null) {
-						IncrementalQueryResultSetTableModel model = new IncrementalQueryResultSetTableModel(result, obdaController.getActiveOBDAModel().getPrefixManager(), panel_query_interface.isShortURISelect());
+						OWLResultSetTableModel model = new OWLResultSetTableModel(result, obdaController
+								.getActiveOBDAModel().getPrefixManager(), panel_query_interface.isShortURISelect());
 						model.addTableModelListener(panel);
 						rows = model.getRowCount();
 						panel_view_results.setTableModel(model);
@@ -212,8 +212,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		panel_query_interface.setRetrieveUCQExpansionAction(new OBDADataQueryAction() {
 
-			private long		time	= 0;
-			private final int	rows	= 0;
+			private long time = 0;
+			private final int rows = 0;
 
 			@Override
 			public void run(String query, QueryInterfacePanel pane) {
@@ -264,8 +264,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		panel_query_interface.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction() {
 
-			private long		time	= 0;
-			private final int	rows	= 0;
+			private long time = 0;
+			private final int rows = 0;
 
 			public void run(String query, QueryInterfacePanel pane) {
 
@@ -285,8 +285,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					if (result != null) {
 						TextMessageFrame panel = new TextMessageFrame();
 						JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-//						panel.setLocation((protegeFrame.getLocation().x + protegeFrame.getSize().width) / 2 - 400, (protegeFrame
-//								.getLocation().y + protegeFrame.getSize().height) / 2 - 300);
+						// panel.setLocation((protegeFrame.getLocation().x +
+						// protegeFrame.getSize().width) / 2 - 400,
+						// (protegeFrame
+						// .getLocation().y + protegeFrame.getSize().height) / 2
+						// - 300);
 						DialogUtils.centerDialogWRTParent(protegeFrame, panel);
 						DialogUtils.installEscapeCloseOperation(panel);
 						panel.setModal(true);
@@ -321,24 +324,24 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public void run(String query, File file) {
 
-				try {
-					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Saving...");
-					CountDownLatch latch = new CountDownLatch(1);
-					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
-					monitor.addProgressListener(action);
-					monitor.start();
-					action.run();
-					latch.await();
-					monitor.stop();
-					OBDAResultSet result = action.getResult();
-					if (result != null) {
-						ResultSetToFileWriter.saveResultSet(result, file);
-					}
-				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error while saving query results.\n " + e.getMessage()
-							+ "\nPlease refer to the log file for more information.");
-					log.error("Error while saving query results.", e);
-				}
+//				try {
+//					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Saving...");
+//					CountDownLatch latch = new CountDownLatch(1);
+//					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
+//					monitor.addProgressListener(action);
+//					monitor.start();
+//					action.run();
+//					latch.await();
+//					monitor.stop();
+//					OWLResultSet result = action.getResult();
+//					if (result != null) {
+//						ResultSetToFileWriter.saveResultSet(result, file);
+//					}
+//				} catch (Exception e) {
+//					JOptionPane.showMessageDialog(null, "Error while saving query results.\n " + e.getMessage()
+//							+ "\nPlease refer to the log file for more information.");
+//					log.error("Error while saving query results.", e);
+//				}
 			}
 		});
 
@@ -386,11 +389,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	private class UnfoldQueryAction implements OBDAProgressListener {
-		private OBDAStatement		statement	= null;
-		private CountDownLatch	latch		= null;
-		private Thread			thread		= null;
-		private String			result		= null;
-		private String			query		= null;
+		private OWLStatement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private String result = null;
+		private String query = null;
 
 		private UnfoldQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -405,11 +408,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OBDAQueryReasoner) {
+					if (reasoner instanceof OWLQueryReasoner) {
 
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							QuestStatement st = dqr.getStatement();
+							QuestOWLStatement st = (QuestOWLStatement)dqr.getStatement();
 							result = st.getUnfolding(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -448,11 +451,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class ExpandQueryAction implements OBDAProgressListener {
 
-		private OBDAStatement		statement	= null;
-		private CountDownLatch	latch		= null;
-		private Thread			thread		= null;
-		private String			result		= null;
-		private String			query		= null;
+		private OWLStatement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private String result = null;
+		private String query = null;
 
 		private ExpandQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -467,11 +470,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OBDAQueryReasoner) {
+					if (reasoner instanceof OWLQueryReasoner) {
 
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							QuestStatement st = dqr.getStatement();
+							QuestOWLStatement st = (QuestOWLStatement)dqr.getStatement();
 							result = st.getRewriting(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -510,18 +513,18 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class ExecuteQueryAction implements OBDAProgressListener {
 
-		private OBDAStatement		statement	= null;
-		private CountDownLatch	latch		= null;
-		private Thread			thread		= null;
-		private OBDAResultSet	result		= null;
-		private String			query		= null;
+		private OWLStatement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private OWLResultSet result = null;
+		private String query = null;
 
 		private ExecuteQueryAction(CountDownLatch latch, String query) {
 			this.latch = latch;
 			this.query = query;
 		}
 
-		public OBDAResultSet getResult() {
+		public OWLResultSet getResult() {
 			return result;
 		}
 
@@ -529,11 +532,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OBDAQueryReasoner) {
+					if (reasoner instanceof OWLQueryReasoner) {
 
 						try {
-							OBDAQueryReasoner dqr = (OBDAQueryReasoner) reasoner;
-							OBDAStatement st = dqr.getStatement();
+							OWLQueryReasoner dqr = (OWLQueryReasoner) reasoner;
+							OWLStatement st = dqr.getStatement();
 							result = st.execute(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -573,11 +576,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	private class CountAllTuplesAction implements OBDAProgressListener {
 
-		private OBDAStatement		statement	= null;
-		private CountDownLatch	latch		= null;
-		private Thread			thread		= null;
-		private int				result		= -1;
-		private String			query		= null;
+		private OWLStatement statement = null;
+		private CountDownLatch latch = null;
+		private Thread thread = null;
+		private int result = -1;
+		private String query = null;
 
 		private CountAllTuplesAction(CountDownLatch latch, String query) {
 			this.latch = latch;
@@ -592,11 +595,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			thread = new Thread() {
 				public void run() {
 					OWLReasoner reasoner = getOWLEditorKit().getModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof OBDAQueryReasoner) {
+					if (reasoner instanceof OWLQueryReasoner) {
 
 						try {
 							QuestOWL dqr = (QuestOWL) reasoner;
-							QuestStatement st = dqr.getStatement();
+							OWLStatement st = dqr.getStatement();
 							result = st.getTupleCount(query);
 							latch.countDown();
 						} catch (Exception e) {
@@ -637,6 +640,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	public void activeOntologyChanged() {
 		panel_query_interface.setOBDAModel(this.obdaController.getActiveOBDAModel());
 		panel_query_interface.setBaseURI(this.getOWLModelManager().getActiveOntology().getOntologyID().getOntologyIRI().toURI());
-		
+
 	}
 }

@@ -16,39 +16,33 @@ import org.openrdf.query.Dataset;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 
-public class SesameBooleanQuery implements BooleanQuery{
+public class SesameBooleanQuery implements BooleanQuery {
 
 	private String queryString, baseURI;
 	private QuestDBStatement stm;
-	
-	public SesameBooleanQuery(String queryString, String baseURI, QuestDBStatement questDBStatement) throws MalformedQueryException
-	{
-		//check if valid query string
-		if (queryString.contains("ASK"))
-		{
+
+	public SesameBooleanQuery(String queryString, String baseURI, QuestDBStatement questDBStatement) throws MalformedQueryException {
+		// check if valid query string
+		if (queryString.contains("ASK")) {
 			this.queryString = queryString;
 			this.baseURI = baseURI;
 			this.stm = questDBStatement;
-		  		
-		}
-		else
+
+		} else
 			throw new MalformedQueryException("Boolean Query expected!");
 	}
-	
+
 	public boolean evaluate() throws QueryEvaluationException {
-	
+
 		try {
 			OBDAResultSet rs = stm.execute(queryString);
 			boolean next = rs.nextRow();
 			if (next)
-				 return (rs.getInt(1) == 1);
-			
+				return (rs.getInt(1) == 1);
+
 		} catch (OBDAException e) {
 			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
-  		
 		return false;
 	}
 
@@ -59,12 +53,12 @@ public class SesameBooleanQuery implements BooleanQuery{
 
 	public void setMaxQueryTime(int maxQueryTime) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void clearBindings() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public BindingSet getBindings() {
@@ -84,22 +78,22 @@ public class SesameBooleanQuery implements BooleanQuery{
 
 	public void removeBinding(String name) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void setBinding(String name, Value value) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void setDataset(Dataset dataset) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void setIncludeInferred(boolean includeInferred) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public OBDAQueryModifiers getQueryModifiers() {
@@ -109,7 +103,7 @@ public class SesameBooleanQuery implements BooleanQuery{
 
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

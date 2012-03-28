@@ -1,3 +1,5 @@
+import junit.framework.TestCase;
+
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -10,7 +12,6 @@ import org.openrdf.rio.RDFHandlerException;
 
 import sesameWrapper.SesameRDFHandler;
 import sesameWrapper.SesameStatementIterator;
-import junit.framework.TestCase;
 
 
 public class SesameStatementIteratorTest extends TestCase {

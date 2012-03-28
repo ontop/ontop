@@ -69,23 +69,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 			
 	}
 	
-	@Override
-	public OWLOntology getOntology()
-	{
-		return virtualStore.getOntology();
-	}
-	
-	@Override
-	public OBDAModel getOBDAModel()
-	{
-		return virtualStore.getOBDAModel();
-	}
-	
 
-	public void doo()
-	{
-		virtualStore.doo();
-	}
 	
 	public void initialize() throws RepositoryException
 	{

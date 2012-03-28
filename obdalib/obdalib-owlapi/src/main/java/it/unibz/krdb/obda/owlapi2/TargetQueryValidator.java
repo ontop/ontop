@@ -98,4 +98,22 @@ public boolean validate(CQIE targetQuery) {
 public Vector<String> getInvalidPredicates() {
     return invalidPredicates;
   }
+
+@Override
+public boolean isClass(URI predicate) {
+	// TODO Auto-generated method stub
+	return false;
+}
+
+@Override
+public boolean isObjectProperty(URI predicate) {
+	// TODO Auto-generated method stub
+	return false;
+}
+
+@Override
+public boolean isDataProperty(URI predicate) {
+	// TODO Auto-generated method stub
+	return false;
+}
 }

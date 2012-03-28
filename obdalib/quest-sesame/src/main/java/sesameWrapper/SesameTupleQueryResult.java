@@ -1,10 +1,13 @@
 package sesameWrapper;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 
 import java.sql.SQLException;
 import java.util.List;
 
-import org.openrdf.query.*;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQueryResult;
 
 public class SesameTupleQueryResult implements TupleQueryResult{
 
@@ -18,7 +21,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 		this.result = res;
 		try {
 			this.count = result.getFetchSize();
-		} catch (SQLException e) {
+		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
 	}
@@ -28,7 +31,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 		
 		try {
 			return result.getSignature();
-		} catch (SQLException e) {
+		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -37,7 +40,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 	public void close() throws QueryEvaluationException {
 		try {
 			result.close();
-		} catch (SQLException e) {
+		} catch (OBDAException e) {
 			e.printStackTrace();
 		}		
 	}
@@ -52,7 +55,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 				read = false;
 				return hasNext;
 				
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				e.printStackTrace();
 			}
 		}
@@ -75,7 +78,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 					return new SesameBindingSet(result);
 				else
 					throw new QueryEvaluationException("End of result set!");
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				e.printStackTrace();
 			}
 			return null;

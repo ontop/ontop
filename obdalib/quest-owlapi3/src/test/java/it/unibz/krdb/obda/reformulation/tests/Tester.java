@@ -4,9 +4,9 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLResultSet;
+import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -155,8 +155,8 @@ public class Tester {
 
 		String prefix = getPrefix();
 		String fullquery = prefix + "\n" + query;
-		OBDAStatement statement = reasoner.getStatement();
-		OBDAResultSet result = statement.execute(fullquery);
+		OWLStatement statement = reasoner.getStatement();
+		OWLResultSet result = statement.execute(fullquery);
 		int col = result.getColumCount();
 		HashSet<String> tuples = new HashSet<String>();
 		while (result.nextRow()) {
@@ -166,9 +166,9 @@ public class Tester {
 					tuple = tuple + ",";
 				}
 				if (isBooleanQuery(id)) {
-					tuple = tuple + result.getString(i);
+					tuple = tuple + result.getOWLLiteral(i).parseBoolean();
 				} else {
-					URI uri = result.getURI(i);
+					URI uri = result.getOWLNamedIndividual(i).getIRI().toURI();
 					tuple = tuple + uri.getFragment();
 				}
 			}

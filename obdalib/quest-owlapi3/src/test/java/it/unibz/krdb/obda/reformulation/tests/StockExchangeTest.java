@@ -4,9 +4,9 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAResultSet;
-import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OWLResultSet;
+import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -203,7 +203,7 @@ public class StockExchangeTest extends TestCase {
 		reasoner.loadOBDAModel(obdaModel);
 
 		// Now we are ready for querying
-		OBDAStatement st = reasoner.getStatement();
+		OWLStatement st = reasoner.getStatement();
 
 		List<Result> summaries = new LinkedList<StockExchangeTest.Result>();
 
@@ -218,7 +218,7 @@ public class StockExchangeTest extends TestCase {
 			long start = System.currentTimeMillis();
 			long end = 0;
 			try {
-				OBDAResultSet rs = st.execute(tq.query);
+				OWLResultSet rs = st.execute(tq.query);
 				end = System.currentTimeMillis();
 				while (rs.nextRow()) {
 					count += 1;

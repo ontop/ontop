@@ -34,24 +34,7 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo{
 	
 	
 	
-	public void doo()
-	{
-		classicStore.doo();
-	}
 	
-	@Override
-	public OWLOntology getOntology()
-	{
-		return classicStore.getOntology();
-	}
-	
-	@Override
-	public OBDAModel getOBDAModel()
-	{
-		return classicStore.getOBDAModel();
-	}
-	
-
 	
 	public void initialize() throws RepositoryException
 	{

@@ -36,7 +36,7 @@ public class SesameClassicTest extends TestCase {
 	{
 	
 			//create a sesame in-memory H2 repository	
-			String owlfile = "/home/timi/onto2.owl";
+			String owlfile = "src/test/resources/onto2.owl";
 				//"/home/timi/ontologies/helloworld/helloworld.owl";
 			
 			repo = new SesameClassicInMemoryRepo("my_name", owlfile);
@@ -52,7 +52,7 @@ public class SesameClassicTest extends TestCase {
 	
 		//create a sesame JDBC repository	
 			
-			String owlfile = "/home/timi/onto2.owl";
+			String owlfile = "src/test/resources/onto2.owl";
 				//"/home/timi/ontologies/helloworld/helloworld.owl";
 			
 			repo = new SesameClassicJDBCRepo("my_name", owlfile);
@@ -68,7 +68,7 @@ public class SesameClassicTest extends TestCase {
 	{
 	
 	///add data to repo
-		File file = new File("/home/timi/onto2plus.owl");
+		File file = new File("src/test/resources/onto2plus.owl");
 				
 		  if (file==null)
 			  System.out.println("FiLE not FOUND!");
@@ -149,25 +149,25 @@ public class SesameClassicTest extends TestCase {
 	}
 	
 	
-	public void test1() throws Exception
-	{
-		try{
-		setupInMemory();
-		addFromFile();
-		//tupleQuery();
-	//	booleanQuery();
-		close();
-		}
-		catch(Exception e)
-		{e.printStackTrace();
-		throw e;}
-		
-	}
+//	public void test1() throws Exception
+//	{
+//		try{
+//		setupInMemory();
+//		addFromFile();
+//		//tupleQuery();
+//	//	booleanQuery();
+//		close();
+//		}
+//		catch(Exception e)
+//		{e.printStackTrace();
+//		throw e;}
+//		
+//	}
 	
-	/*public void test2() throws Exception
+	public void test2() throws Exception
 	{
 		setupJDBC();
 		close();
 	}
-*/
+
 }

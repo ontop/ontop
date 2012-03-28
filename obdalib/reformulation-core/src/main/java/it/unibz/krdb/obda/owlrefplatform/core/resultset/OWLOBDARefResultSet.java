@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
@@ -50,9 +51,9 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	 *            A list of terms that determines the type of the columns of
 	 *            this results set.
 	 * @param st
-	 * @throws SQLException
+	 * @throws OBDAException
 	 */
-	public OWLOBDARefResultSet(ResultSet set, List<String> signature, List<Term> signatureTyping, OBDAStatement st) throws SQLException {
+	public OWLOBDARefResultSet(ResultSet set, List<String> signature, List<Term> signatureTyping, OBDAStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
 
@@ -76,7 +77,7 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	 * @param column
 	 * @return
 	 */
-	private COL_TYPE getType(int column) {
+	public COL_TYPE getType(int column) {
 		Term type = signatureTyping.get(column);
 		if (!(type instanceof Function)) {
 			// The column is not typed
@@ -105,44 +106,72 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 		return COL_TYPE.OBJECT;
 	}
 
-	public double getDouble(int column) throws SQLException {
-		return set.getDouble(signature.get(column - 1));
+	public double getDouble(int column) throws OBDAException {
+		try {
+			return set.getDouble(signature.get(column - 1));
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
-	public int getInt(int column) throws SQLException {
-		return set.getInt(signature.get(column - 1));
+	public int getInt(int column) throws OBDAException {
+		try {
+			return set.getInt(signature.get(column - 1));
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
-	public Object getObject(int column) throws SQLException {
-		return set.getObject(signature.get(column - 1));
+	public Object getObject(int column) throws OBDAException {
+		try {
+			return set.getObject(signature.get(column - 1));
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
-	public String getString(int column) throws SQLException {
-		return set.getString(signature.get(column - 1));
+	public String getString(int column) throws OBDAException {
+		try {
+			return set.getString(signature.get(column - 1));
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
-	public URI getURI(int column) throws SQLException {
-		return getURI(signature.get(column-1));
+	public URI getURI(int column) throws OBDAException {
+		return getURI(signature.get(column - 1));
 	}
 
-	public int getColumCount() throws SQLException {
+	public int getColumCount() throws OBDAException {
 		return signature.size();
 	}
 
-	public int getFetchSize() throws SQLException {
-		return set.getFetchSize();
+	public int getFetchSize() throws OBDAException {
+		try {
+			return set.getFetchSize();
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
-	public List<String> getSignature() throws SQLException {
+	public List<String> getSignature() throws OBDAException {
 		return signature;
 	}
 
-	public boolean nextRow() throws SQLException {
-		return set.next();
+	public boolean nextRow() throws OBDAException {
+		try {
+			return set.next();
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
-	public void close() throws SQLException {
-		set.close();
+	public void close() throws OBDAException {
+		try {
+			set.close();
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
 	@Override
@@ -151,79 +180,76 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	}
 
 	@Override
-	public Constant getConstant(int column) throws SQLException, URISyntaxException {
-		return getConstant(signature.get(column-1));
+	public Constant getConstant(int column) throws OBDAException {
+		return getConstant(signature.get(column - 1));
 	}
 
 	@Override
-	public ValueConstant getLiteral(int column) throws SQLException {
-		return getLiteral(signature.get(column-1));
+	public ValueConstant getLiteral(int column) throws OBDAException {
+		return getLiteral(signature.get(column - 1));
 	}
 
 	@Override
-	public BNode getBNode(int column) throws SQLException {
-		return getBNode(signature.get(column-1));
+	public BNode getBNode(int column) throws OBDAException {
+		return getBNode(signature.get(column - 1));
 	}
 
 	@Override
-	public Constant getConstant(String name) throws SQLException, URISyntaxException {
+	public Constant getConstant(String name) throws OBDAException {
 		int index = columnMap.get(name);
 		COL_TYPE type = getType(index);
 		Constant result = null;
 
-		if (type == COL_TYPE.OBJECT) {
-			result = fac.getURIConstant(new URI(set.getString(name)));
-		} else if (type == COL_TYPE.BNODE) {
-			result = fac.getBNodeConstant(set.getString(name));
-		} else {
-			/*
-			 * The constant is a literal, we need to find if its rdfs:Literal or
-			 * a normal literal and construct it properly.
-			 */
-			if (type == COL_TYPE.LITERAL) {
-				// Function ftype = (Function)typingMap.get(index);
-				// Term valueterm = ftype.getTerms().get(0);
-				// Term langterm = ftype.getTerms().get(1);
-				String value = set.getString(name);
-				String language = set.getString(name + "LitLang");
-				result = fac.getValueConstant(value, language);
-
+		try {
+			if (type == COL_TYPE.OBJECT || type == null) {
+				result = fac.getURIConstant(URI.create(set.getString(name)));
+			} else if (type == COL_TYPE.BNODE) {
+				result = fac.getBNodeConstant(set.getString(name));
 			} else {
-				result = fac.getValueConstant(set.getString(name), type);
-			}
-		}
+				/*
+				 * The constant is a literal, we need to find if its
+				 * rdfs:Literal or a normal literal and construct it properly.
+				 */
+				if (type == COL_TYPE.LITERAL) {
+					// Function ftype = (Function)typingMap.get(index);
+					// Term valueterm = ftype.getTerms().get(0);
+					// Term langterm = ftype.getTerms().get(1);
+					String value = set.getString(name);
+					String language = set.getString(name + "LitLang");
+					result = fac.getValueConstant(value, language);
 
+				} else {
+					result = fac.getValueConstant(set.getString(name), type);
+				}
+			}
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 		return result;
 	}
 
 	@Override
-	public URI getURI(String name) throws SQLException {
-		return URI.create(set.getString(name));
+	public URI getURI(String name) throws OBDAException {
+		try {
+			return URI.create(set.getString(name));
+		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		}
 	}
 
 	@Override
-	public ValueConstant getLiteral(String name) throws SQLException {
+	public ValueConstant getLiteral(String name) throws OBDAException {
 		Constant result;
-		try {
-			result = getConstant(name);
-		} catch (URISyntaxException e) {
-			// This should never happen
-			log.error("Error casting column {}: {} ", name, e.getMessage());
-			return null;
-		}
+
+		result = getConstant(name);
+
 		return (ValueConstant) result;
 	}
 
 	@Override
-	public BNode getBNode(String name) throws SQLException {
+	public BNode getBNode(String name) throws OBDAException {
 		Constant result;
-		try {
-			result = getConstant(name);
-		} catch (URISyntaxException e) {
-			// This should never happen
-			log.error("Error casting column {}: {} ", name, e.getMessage());
-			return null;
-		}
+		result = getConstant(name);
 		return (BNode) result;
 	}
 }

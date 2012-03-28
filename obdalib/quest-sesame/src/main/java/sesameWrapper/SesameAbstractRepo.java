@@ -54,10 +54,6 @@ public abstract class SesameAbstractRepo implements org.openrdf.repository.Repos
 		}
 	}
 	
-	public abstract OBDAModel getOBDAModel();
-	
-	public abstract OWLOntology getOntology();
-
 	public abstract QuestDBConnection getQuestConnection() throws OBDAException;
 	
 	public boolean isWritable() throws RepositoryException {

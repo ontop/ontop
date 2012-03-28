@@ -1,13 +1,8 @@
-package it.unibz.krdb.obda.gui.swing.tablemodel;
+package it.unibz.krdb.obda.owlapi3;
 
-import it.unibz.krdb.obda.exception.QueryResultException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAResultSet;
 
-import java.net.URISyntaxException;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
@@ -16,9 +11,13 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-public class IncrementalQueryResultSetTableModel implements TableModel {
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
-	OBDAResultSet results;
+public class OWLResultSetTableModel implements TableModel {
+
+	OWLResultSet results;
 	int numcols, numrows, fetchsize;
 
 	Vector<String[]> resultsTable = null;
@@ -37,7 +36,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 	 * ResultSetTableModelFactory, which is what you should use to obtain a
 	 * ResultSetTableModel
 	 */
-	public IncrementalQueryResultSetTableModel(OBDAResultSet results, PrefixManager prefixman, boolean useshortform) throws OBDAException {
+	public OWLResultSetTableModel(OWLResultSet results, PrefixManager prefixman, boolean useshortform) throws OWLException {
 		this.prefixman = prefixman;
 		this.useshortform = useshortform;
 
@@ -57,8 +56,10 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
-					Constant constant = results.getConstant(j + 1);
+					OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
+
 					crow[j] = constant.toString();
+
 				}
 				resultsTable.add(crow);
 				i += 1;
@@ -79,7 +80,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 
 		try {
 			results.close();
-		} catch (OBDAException e) {
+		} catch (OWLException e) {
 		}
 
 	}
@@ -181,7 +182,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 		return mergeSet.add(row);
 	}
 
-	private void fetchMoreTuples() throws OBDAException {
+	private void fetchMoreTuples() throws OWLException {
 
 		int i = 0;
 		while (i < fetchsize && !isAfterLast) {
@@ -189,7 +190,7 @@ public class IncrementalQueryResultSetTableModel implements TableModel {
 			if (results.nextRow()) {
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
-					Constant constant = results.getConstant(j + 1);
+					OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
 					crow[j] = constant.toString();
 				}
 				resultsTable.add(crow);

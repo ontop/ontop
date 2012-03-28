@@ -1,8 +1,6 @@
 package it.unibz.krdb.obda.model;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
 import java.util.List;
 
 public interface OBDAResultSet {
@@ -13,17 +11,17 @@ public interface OBDAResultSet {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	public int getColumCount() throws SQLException;
+	public int getColumCount() throws OBDAException;
 
-	public List<String> getSignature() throws SQLException;
+	public List<String> getSignature() throws OBDAException;
 
-	public int getFetchSize() throws SQLException;
+	public int getFetchSize() throws OBDAException;
 
-	public void close() throws SQLException;
+	public void close() throws OBDAException;
 
 	public OBDAStatement getStatement();
 
-	public boolean nextRow() throws SQLException;
+	public boolean nextRow() throws OBDAException;
 
 	// ////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -31,21 +29,21 @@ public interface OBDAResultSet {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	public Constant getConstant(int column) throws SQLException, URISyntaxException;
+	public Constant getConstant(int column) throws OBDAException;
 
-	public URI getURI(int column) throws SQLException, URISyntaxException;
+	public URI getURI(int column) throws OBDAException;
 
-	public ValueConstant getLiteral(int column) throws SQLException;
+	public ValueConstant getLiteral(int column) throws OBDAException;
 
-	public BNode getBNode(int column) throws SQLException;
+	public BNode getBNode(int column) throws OBDAException;
 
-	public Constant getConstant(String name) throws SQLException, URISyntaxException;
+	public Constant getConstant(String name) throws OBDAException;
 
-	public URI getURI(String name) throws SQLException;
+	public URI getURI(String name) throws OBDAException;
 
-	public ValueConstant getLiteral(String name) throws SQLException;
+	public ValueConstant getLiteral(String name) throws OBDAException;
 
-	public BNode getBNode(String name) throws SQLException;
+	public BNode getBNode(String name) throws OBDAException;
 
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -53,12 +51,12 @@ public interface OBDAResultSet {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	public String getString(int column) throws SQLException;
+	public String getString(int column) throws OBDAException;
 
-	public int getInt(int column) throws SQLException;
+	public int getInt(int column) throws OBDAException;
 
-	public double getDouble(int column) throws SQLException;
+	public double getDouble(int column) throws OBDAException;
 
-	public Object getObject(int column) throws SQLException;
+	public Object getObject(int column) throws OBDAException;
 
 }

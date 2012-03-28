@@ -446,7 +446,7 @@ public class VirtualABoxMaterializer {
 					}
 				}
 				return hasnext;
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -475,11 +475,9 @@ public class VirtualABoxMaterializer {
 					}
 					return constructAssertion();
 				}
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				throw new RuntimeException(e);
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
+			} 
 		}
 
 		/***
@@ -489,7 +487,7 @@ public class VirtualABoxMaterializer {
 		 * @return
 		 * @throws URISyntaxException 
 		 */
-		private Assertion constructAssertion() throws SQLException, URISyntaxException {
+		private Assertion constructAssertion() throws OBDAException {
 			Assertion assertion = null;			
 			int arity = predicate.getArity();
 			if (arity == 1) {

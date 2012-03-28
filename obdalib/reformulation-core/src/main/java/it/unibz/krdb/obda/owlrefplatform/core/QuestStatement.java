@@ -226,17 +226,17 @@ public class QuestStatement implements OBDAStatement {
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
-		
+
 		// Flattening the query datalog
 		program = DatalogNormalizer.normalizeDatalogProgram(program);
-		
+
 		return program;
 	}
 
 	private DatalogProgram getUnfolding(DatalogProgram query) throws OBDAException {
 		log.debug("Start the unfolding process...");
 		OBDAQuery unfolding = unfoldingmechanism.unfold((DatalogProgram) query);
-		return (DatalogProgram)unfolding;
+		return (DatalogProgram) unfolding;
 	}
 
 	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
@@ -273,17 +273,15 @@ public class QuestStatement implements OBDAStatement {
 			try {
 				set = sqlstatement.executeQuery(sql);
 			} catch (SQLException e) {
-				throw new OBDAException(e);
+				throw new OBDAException(e.getMessage());
 			}
 			if (isDPBoolean(program)) {
 				result = new BooleanOWLOBDARefResultSet(set, this);
 			} else {
 				List<Term> typingSignature = unfolding.getRules().get(0).getHead().getTerms();
-				try {
-					result = new OWLOBDARefResultSet(set, signature, typingSignature, this);
-				} catch (SQLException e) {
-					throw new OBDAException(e.getMessage());
-				}
+
+				result = new OWLOBDARefResultSet(set, signature, typingSignature, this);
+
 			}
 		}
 
@@ -346,7 +344,7 @@ public class QuestStatement implements OBDAStatement {
 		for (int i = 0; i < cqs.size(); i++) {
 			log.debug("Processing embedded query #{}", i);
 			String cq = cqs.get(i);
-			try {				
+			try {
 				String finasql = getUnfolding(cq);
 				log.debug("SQL: {}", finasql);
 				sqlforcqs.add(finasql);
@@ -386,8 +384,7 @@ public class QuestStatement implements OBDAStatement {
 		String sql = null;
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			sql = getSQLEpistemic(strquery);
-		} else
-		if (strquery.contains("/*direct*/")) {
+		} else if (strquery.contains("/*direct*/")) {
 			sql = strquery;
 		} else {
 			DatalogProgram p = translateAndPreProcess(strquery);
@@ -444,7 +441,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			sqlstatement.close();
 		} catch (SQLException e) {
-			throw new OBDAException(e);
+			throw new OBDAException(e.getMessage());
 		}
 	}
 
@@ -501,7 +498,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			return sqlstatement.getFetchSize();
 		} catch (SQLException e) {
-			throw new OBDAException(e);
+			throw new OBDAException(e.getMessage());
 		}
 
 	}
@@ -511,7 +508,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			return sqlstatement.getMaxRows();
 		} catch (SQLException e) {
-			throw new OBDAException(e);
+			throw new OBDAException(e.getMessage());
 		}
 
 	}
@@ -521,7 +518,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			sqlstatement.getMoreResults();
 		} catch (SQLException e) {
-			throw new OBDAException(e);
+			throw new OBDAException(e.getMessage());
 		}
 
 	}
@@ -531,7 +528,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			sqlstatement.setFetchSize(rows);
 		} catch (SQLException e) {
-			throw new OBDAException(e);
+			throw new OBDAException(e.getMessage());
 		}
 
 	}
@@ -541,8 +538,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			sqlstatement.setMaxRows(max);
 		} catch (SQLException e) {
-			throw new OBDAException(e);
-
+			throw new OBDAException(e.getMessage());
 		}
 
 	}
@@ -552,8 +548,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			sqlstatement.setQueryTimeout(seconds);
 		} catch (SQLException e) {
-			throw new OBDAException(e);
-
+			throw new OBDAException(e.getMessage());
 		}
 
 	}
@@ -569,7 +564,6 @@ public class QuestStatement implements OBDAStatement {
 
 	@Override
 	public OBDAResultSet getResultSet() throws OBDAException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -578,8 +572,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			return sqlstatement.getQueryTimeout();
 		} catch (SQLException e) {
-			throw new OBDAException(e);
-
+			throw new OBDAException(e.getMessage());
 		}
 	}
 
@@ -588,8 +581,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			return sqlstatement.isClosed();
 		} catch (SQLException e) {
-			throw new OBDAException(e);
-
+			throw new OBDAException(e.getMessage());
 		}
 	}
 
@@ -606,15 +598,18 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
 		int result = -1;
+		
+		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getEquivalenceMap());
+		
 		if (!useFile) {
-			EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getEquivalenceMap());
+			
 			result = repository.insertData(conn.conn, newData, commit, batch);
 		}
 		else {
 			try {
 				// File temporalFile = new File("quest-copy.tmp");
 				// FileOutputStream os = new FileOutputStream(temporalFile);
-				result = (int) repository.loadWithFile(conn.conn, data);
+				result = (int) repository.loadWithFile(conn.conn, newData);
 				// os.close();
 
 			} catch (IOException e) {

@@ -47,19 +47,34 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		StringBuilder result = new StringBuilder(uri);
 		if (getDefaultNamespace() != null && useDefaultPrefix) {
 			if (uri.length() > getDefaultNamespace().length()) {
-				if (uri.substring(0, getDefaultNamespace().length()).equals(getDefaultNamespace())) {
-					result.replace(0, getDefaultNamespace().length(), "");
+				// if (uri.substring(0,
+				// getDefaultNamespace().length()).equals(getDefaultNamespace()))
+				// {
+				// result.replace(0, getDefaultNamespace().length(), "");
+				// if (isLiteral) {
+				// result.insert(0, "<");
+				// result.append(">");
+				// } else {
+				// result.insert(0, ":");
+				// }
+				// return result.toString();
+				// }
+
+				if (uri.contains(getDefaultNamespace())) {
+					int index = uri.indexOf(getDefaultNamespace());
+					result.replace(index, getDefaultNamespace().length(), "");
 					if (isLiteral) {
 						result.insert(0, "<");
 						result.append(">");
 					} else {
-						result.insert(0, ":");
+						if (result.charAt(0) != '<')
+							result.insert(0, ":");
 					}
 					return result.toString();
 				}
 			}
 		}
-		
+
 		Collection<String> longnamespacesset = this.getPrefixMap().values();
 		Iterator<String> longnamespaces = longnamespacesset.iterator();
 		while (longnamespaces.hasNext()) {

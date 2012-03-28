@@ -65,7 +65,10 @@ public class SesameRDFHandler extends RDFHandlerBase {
 			}
 		
 			//add statement to buffer
+		synchronized (stIterator) {
 			stIterator.add(st);
+		}
+			
 
 		//add to buffer and step back
 		System.out.print("Handle statement: "+st.getSubject().toString().split("#")[1] + " " 

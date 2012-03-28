@@ -136,7 +136,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 		mappingList.setCellRenderer(new OBDAMappingListRenderer(preference, apic, validator));
 		mappingList.setModel(new SynchronizedMappingListModel(apic));
-		mappingList.setFixedCellWidth(400);
+		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		mappingList.addMouseListener(new PopupListener());
 
