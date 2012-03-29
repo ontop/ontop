@@ -57,7 +57,6 @@ public class SesameBindingSet implements BindingSet {
 			return bnames;
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

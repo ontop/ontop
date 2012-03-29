@@ -43,7 +43,6 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	private  Iterator<Statement> iterator;
 	private int size = 1;
 	private boolean fromIterator = false, endRdf = false;
-	private Semaphore empty;
 	private ValueFactory fact = ValueFactoryImpl.getInstance();
 	private Statement stm = fact.createStatement(null, null, null), stmt=null;
 		

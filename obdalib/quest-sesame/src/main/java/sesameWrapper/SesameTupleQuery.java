@@ -47,8 +47,8 @@ public class SesameTupleQuery implements TupleQuery{
 			
 		} catch (OBDAException e) {
 			e.printStackTrace();
+			throw new QueryEvaluationException(e.getMessage());
 		}
-		return null;
 	}
 
 	//needed by TupleQuery interface
@@ -64,12 +64,20 @@ public class SesameTupleQuery implements TupleQuery{
 	}
 
 	public int getMaxQueryTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			return stm.getQueryTimeout();
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public void setMaxQueryTime(int maxQueryTime) {
-		// TODO Auto-generated method stub
+		try {
+			stm.setQueryTimeout(maxQueryTime);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 

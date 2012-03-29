@@ -16,15 +16,10 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 	private boolean read = true, hasNext = false;
 	
 	
-	public SesameTupleQueryResult(OBDAResultSet res)
+	public SesameTupleQueryResult(OBDAResultSet res) throws OBDAException
 	{
 		this.result = res;
-		try {
-			this.count = result.getFetchSize();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.count = result.getFetchSize();
 	}
 	
 	//tuplequeryresult intf
@@ -32,8 +27,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 		
 		try {
 			return result.getSignature();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -42,9 +36,9 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 	public void close() throws QueryEvaluationException {
 		try {
 			result.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (OBDAException e) {
 			e.printStackTrace();
+			throw new QueryEvaluationException(e.getMessage());
 		}		
 	}
 
@@ -58,8 +52,9 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 				read = false;
 				return hasNext;
 				
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				e.printStackTrace();
+				throw new QueryEvaluationException(e.getMessage());
 			}
 		}
 		else
@@ -67,7 +62,6 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 			//pointer did not advance, hasNext was called already
 			return hasNext;
 		}
-		return false;
 	}
 
 	public BindingSet next() throws QueryEvaluationException {
@@ -81,10 +75,10 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 					return new SesameBindingSet(result);
 				else
 					throw new QueryEvaluationException("End of result set!");
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				e.printStackTrace();
+				throw new QueryEvaluationException(e.getMessage());
 			}
-			return null;
 		}
 		
 		else {
@@ -97,7 +91,7 @@ public class SesameTupleQueryResult implements TupleQueryResult{
 	}
 
 	public void remove() throws QueryEvaluationException {
-		
+		throw new QueryEvaluationException("Remove not supported!");
 	}
 	//end tuplequeryresult intf
 

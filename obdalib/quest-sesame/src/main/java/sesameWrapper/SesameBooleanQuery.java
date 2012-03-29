@@ -42,17 +42,26 @@ public class SesameBooleanQuery implements BooleanQuery {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new QueryEvaluationException(e.getMessage());
 		}
 		return false;
 	}
 
 	public int getMaxQueryTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			return stm.getQueryTimeout();
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public void setMaxQueryTime(int maxQueryTime) {
-		// TODO Auto-generated method stub
+		try {
+			stm.setQueryTimeout(maxQueryTime);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -72,8 +81,7 @@ public class SesameBooleanQuery implements BooleanQuery {
 	}
 
 	public boolean getIncludeInferred() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public void removeBinding(String name) {
@@ -92,7 +100,6 @@ public class SesameBooleanQuery implements BooleanQuery {
 	}
 
 	public void setIncludeInferred(boolean includeInferred) {
-		// TODO Auto-generated method stub
 
 	}
 

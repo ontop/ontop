@@ -43,6 +43,7 @@ public abstract class SesameClassicRepo extends SesameAbstractRepo{
 			classicStore.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
+			throw new RepositoryException(e.getMessage());
 		}
 	}
 	

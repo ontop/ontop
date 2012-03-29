@@ -43,6 +43,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	private QuestDBConnection questConn;
     private boolean isOpen;
     private boolean autoCommit;
+    private  RDFParser rdfParser;
 
 	
 	public RepositoryConnection(SesameAbstractRepo rep) throws OBDAException
@@ -146,7 +147,6 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 
 	public void add(File file, String baseURI, RDFFormat dataFormat, Resource... contexts)
 			throws IOException, RDFParseException, RepositoryException {
-		// TODO Auto-generated method stub
 		//Adds RDF data from the specified file to a specific contexts in the repository. 
 		
 		
@@ -245,12 +245,13 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     	
         OpenRDFUtil.verifyContextNotNull(contexts);
 
-        RDFParser rdfParser = Rio.createParser(dataFormat,
+        rdfParser = Rio.createParser(dataFormat,
                 getRepository().getValueFactory());
 
         rdfParser.setVerifyData(true);
         rdfParser.setStopAtFirstError(true);
         rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
+        
 
         boolean autoCommit = isAutoCommit();
         setAutoCommit(false);
@@ -297,9 +298,14 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
         } catch (OBDAException e)
         {
         	e.printStackTrace();
+        	 if (autoCommit) {
+                 rollback();
+             }
         } catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			 if (autoCommit) {
+	                rollback();
+	            }
 		} finally {
             setAutoCommit(autoCommit);
         }
@@ -317,18 +323,15 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
         		  this.inputStreamOrReader = inputStreamOrReader;
         		  this.baseURI = baseURI;
         	  }
-        	  public void run()
+        	  public void run() 
         	  {
         		  try {
 					rdfParser.parse((InputStream) inputStreamOrReader, baseURI);
 				} catch (RDFParseException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (RDFHandlerException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
         	  }
@@ -411,10 +414,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     protected void removeWithoutCommit(Resource subject,
     		org.openrdf.model.URI predicate, Value object, Resource... contexts)
     	throws RepositoryException{
-    	autoCommit = false;
-    //	questConn.
-    	autoCommit = true;
-    
+    	
+    	throw new RepositoryException("Removal not supported!");
     }
 
 
@@ -425,13 +426,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 	}
 
 	public void clearNamespaces() throws RepositoryException {
-		// TODO Auto-generated method stub
 		//Removes all namespace declarations from the repository. 
+		remove(null, null, null,(Resource[]) null);
 		
 	}
 
 	public void close() throws RepositoryException {
-		// TODO Auto-generated method stub
 		//Closes the connection, freeing resources. 
 		//If the connection is not in autoCommit mode, 
 		//all non-committed operations will be lost. 
@@ -475,7 +475,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		return null;
 	}
 
-	public String getNamespace(String arg0) throws RepositoryException {
+	public String getNamespace(String prefix) throws RepositoryException {
 		// TODO Auto-generated method stub
 		//Gets the namespace that is associated with the specified prefix, if any. 
 		return null;
@@ -486,13 +486,12 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		// TODO Auto-generated method stub
 		//Gets all declared namespaces as a RepositoryResult of Namespace objects. 
 		//Each Namespace object consists of a prefix and a namespace name. 
-		return null;
+		throw new RepositoryException("getNamespaces() not supported");
 	}
 
 	public ParserConfig getParserConfig() {
-		// TODO Auto-generated method stub
 		//Returns the parser configuration this connection uses for Rio-based operations. 
-		return null;
+		return rdfParser.getParserConfig();
 	}
 
 	public Repository getRepository() {
@@ -508,6 +507,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		//predicate and/or object from the repository.
 		//The result is optionally restricted to the specified set of named contexts. 
 		//construct query for it
+		
 		return null;
 	}
 
@@ -567,12 +567,11 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares true/false queries. 
 		if (ql != QueryLanguage.SPARQL)
-			throw new MalformedQueryException();
+			throw new MalformedQueryException("SPARQL query expected!");
 		
 		try {
 			return new SesameBooleanQuery(queryString, baseURI, questConn.createStatement());
 		} catch (OBDAException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -604,9 +603,8 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 
 	public Query prepareQuery(QueryLanguage ql, String queryString, String baseURI)
 			throws RepositoryException, MalformedQueryException {
-		// TODO Auto-generated method stub
 		if (ql != QueryLanguage.SPARQL)
-			throw new MalformedQueryException();
+			throw new MalformedQueryException("SPARQL query expected! ");
 		
 		
 		if (queryString.startsWith("SELECT"))
@@ -618,22 +616,6 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		else 
 			throw new MalformedQueryException("Unrecognized query type!");
 		
-		//Prepares a query for evaluation on this repository (optional operation). 
-		 //ParsedQuery parsedQuery = QueryParserUtil.parseQuery(ql, queryString, baseURI);
-		 
-	      /*  if (parsedQuery instanceof TupleQuery) {
-	            return new SailTupleQuery((TupleQueryModel)parsedQuery, this);
-	        }
-	        else if (parsedQuery instanceof GraphQuery) {
-	            return new SailGraphQuery((GraphQueryModel)parsedQuery, this);
-	        }
-	        else if (parsedQuery instanceof BooleanQuery) {
-	            return new SailBooleanQuery((BooleanQueryModel)parsedQuery, this);
-	        }
-	        else {
-	            throw new RuntimeException("Unexpected query type: " + parsedQuery.getClass());
-	        }
-	        */
 	}
 
 	public TupleQuery prepareTupleQuery(QueryLanguage ql, String query)
@@ -649,7 +631,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 			String baseURI) throws RepositoryException, MalformedQueryException {
 		//Prepares a query that produces sets of value tuples. 
 		if (ql != QueryLanguage.SPARQL)
-			throw new MalformedQueryException();
+			throw new MalformedQueryException("SPARQL query expected!");
 		
 		try {
 			return new SesameTupleQuery(queryString, baseURI, questConn.createStatement());
@@ -777,7 +759,6 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
          try {
 			this.questConn.setAutoCommit(autoCommit);
 		} catch (OBDAException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
          
@@ -798,9 +779,9 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
 		
 	}
 
-	public void setParserConfig(ParserConfig arg0) {
-		// TODO Auto-generated method stub
+	public void setParserConfig(ParserConfig config) {
 		//Set the parser configuration this connection should use for RDFParser-based operations. 
+		rdfParser.setParserConfig(config);
 		
 	}
 

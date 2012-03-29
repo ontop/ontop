@@ -7,7 +7,7 @@ import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
 
 	private static QuestPreferences p = new QuestPreferences();
-	private String restorePath="src/test/resources/my_name.qst";
+	private String restorePath="src/test/resources/";
 	private String storePath="src/test/resources/";
 
 	
@@ -17,7 +17,7 @@ public class SesameClassicJDBCRepo extends SesameClassicRepo {
 		
 		//try to restore
 		try{
-		classicStore = (QuestDBClassicStore) classicStore.restore(restorePath);
+		classicStore = (QuestDBClassicStore) classicStore.restore(restorePath+name+".qst");
 		}
 		catch(Exception e)
 		{
