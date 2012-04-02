@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY quest-typing-test "http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#" >
+]>
+
+
+<rdf:RDF xmlns="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#"
+     xml:base="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:quest-typing-test="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#">
+    <owl:Ontology rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#nottyped -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;nottyped"/>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#rdfsliteral -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;rdfsliteral">
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdboolean -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsdboolean">
+        <rdfs:range rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddatetime -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsddatetime">
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddecimal -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsddecimal">
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddouble -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsddouble">
+        <rdfs:range rdf:resource="&xsd;double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdfloat -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsdfloat">
+        <rdfs:range rdf:resource="&xsd;float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdint -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsdint">
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdinteger -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsdinteger">
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdstring -->
+
+    <owl:DatatypeProperty rdf:about="&quest-typing-test;xsdstring">
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#asdf -->
+
+    <owl:Thing rdf:about="&quest-typing-test;asdf">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#obj1 -->
+
+    <owl:Thing rdf:about="&quest-typing-test;obj1">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+        <nottyped rdf:datatype="&xsd;decimal">10.10</nottyped>
+        <nottyped rdf:datatype="&xsd;int">123456789</nottyped>
+        <nottyped rdf:datatype="&xsd;integer">123456789</nottyped>
+        <nottyped rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</nottyped>
+        <nottyped rdf:datatype="&xsd;double">3.3333</nottyped>
+        <nottyped rdf:datatype="&xsd;float">3.3333</nottyped>
+        <nottyped rdf:datatype="&xsd;string">some string</nottyped>
+        <nottyped rdf:datatype="&xsd;boolean">true</nottyped>
+        <nottyped rdf:datatype="&rdfs;Literal">val2</nottyped>
+        <nottyped>val1</nottyped>
+        
+
+        <rdfsliteral rdf:datatype="&xsd;decimal">10.10</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;int">123456789</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;integer">123456789</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;double">3.3333</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;float">3.3333</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;string">some string</rdfsliteral>
+        <rdfsliteral rdf:datatype="&xsd;boolean">true</rdfsliteral>
+        <rdfsliteral rdf:datatype="&rdfs;Literal">val2</rdfsliteral>
+        <rdfsliteral>val1</rdfsliteral>
+
+        <xsdboolean rdf:datatype="&xsd;decimal">10.10</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;int">123456789</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;integer">123456789</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;double">3.3333</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;float">3.3333</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;string">some string</xsdboolean>
+        <xsdboolean rdf:datatype="&xsd;boolean">true</xsdboolean>
+        <xsdboolean rdf:datatype="&rdfs;Literal">val2</xsdboolean>
+        <xsdboolean>val1</xsdboolean>
+        
+        <xsddatatime rdf:datatype="&xsd;decimal">10.10</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;int">123456789</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;integer">123456789</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;double">3.3333</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;float">3.3333</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;string">some string</xsddatatime>
+        <xsddatatime rdf:datatype="&xsd;boolean">true</xsddatatime>
+        <xsddatatime rdf:datatype="&rdfs;Literal">val2</xsddatatime>
+        <xsddatatime>val1</xsddatatime>
+        
+        <xsddecimal rdf:datatype="&xsd;decimal">10.10</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;int">123456789</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;integer">123456789</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;double">3.3333</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;float">3.3333</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;string">some string</xsddecimal>
+        <xsddecimal rdf:datatype="&xsd;boolean">true</xsddecimal>
+        <xsddecimal rdf:datatype="&rdfs;Literal">val2</xsddecimal>
+        <xsddecimal>val1</xsddecimal>
+
+        <xsddouble rdf:datatype="&xsd;decimal">10.10</xsddouble>
+        <xsddouble rdf:datatype="&xsd;int">123456789</xsddouble>
+        <xsddouble rdf:datatype="&xsd;integer">123456789</xsddouble>
+        <xsddouble rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsddouble>
+        <xsddouble rdf:datatype="&xsd;double">3.3333</xsddouble>
+        <xsddouble rdf:datatype="&xsd;float">3.3333</xsddouble>
+        <xsddouble rdf:datatype="&xsd;string">some string</xsddouble>
+        <xsddouble rdf:datatype="&xsd;boolean">true</xsddouble>
+        <xsddouble rdf:datatype="&rdfs;Literal">val2</xsddouble>
+        <nottyped>val1</nottyped>
+
+        <xsdfloat rdf:datatype="&xsd;decimal">10.10</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;int">123456789</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;integer">123456789</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;double">3.3333</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;float">3.3333</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;string">some string</xsdfloat>
+        <xsdfloat rdf:datatype="&xsd;boolean">true</xsdfloat>
+        <xsdfloat rdf:datatype="&rdfs;Literal">val2</xsdfloat>
+        <xsdfloat>val1</xsdfloat>
+
+        <xsdint rdf:datatype="&xsd;decimal">10.10</xsdint>
+        <xsdint rdf:datatype="&xsd;int">123456789</xsdint>
+        <xsdint rdf:datatype="&xsd;integer">123456789</xsdint>
+        <xsdint rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsdint>
+        <xsdint rdf:datatype="&xsd;double">3.3333</xsdint>
+        <xsdint rdf:datatype="&xsd;float">3.3333</xsdint>
+        <xsdint rdf:datatype="&xsd;string">some string</xsdint>
+        <xsdint rdf:datatype="&xsd;boolean">true</xsdint>
+        <xsdint rdf:datatype="&rdfs;Literal">val2</xsdint>
+        <xsdint>val1</xsdint>
+
+        <xsdinteger rdf:datatype="&xsd;decimal">10.10</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;int">123456789</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;integer">123456789</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;double">3.3333</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;float">3.3333</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;string">some string</xsdinteger>
+        <xsdinteger rdf:datatype="&xsd;boolean">true</xsdinteger>
+        <xsdinteger rdf:datatype="&rdfs;Literal">val2</xsdinteger>
+        <xsdinteger>val1</xsdinteger>
+
+        <xsdstring rdf:datatype="&xsd;decimal">10.10</xsdstring>
+        <xsdstring rdf:datatype="&xsd;int">123456789</xsdstring>
+        <xsdstring rdf:datatype="&xsd;integer">123456789</xsdstring>
+        <xsdstring rdf:datatype="&xsd;dateTime">2012-10-10T11:30:00Z</xsdstring>
+        <xsdstring rdf:datatype="&xsd;double">3.3333</xsdstring>
+        <xsdstring rdf:datatype="&xsd;float">3.3333</xsdstring>
+        <xsdstring rdf:datatype="&xsd;string">some string</xsdstring>
+        <xsdstring rdf:datatype="&xsd;boolean">true</xsdstring>
+        <xsdstring rdf:datatype="&rdfs;Literal">val2</xsdstring>
+        <xsdstring>val1</xsdstring>
+
+
+    </owl:Thing>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
+

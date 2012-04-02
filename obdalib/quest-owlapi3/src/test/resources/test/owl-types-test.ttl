@@ -1,0 +1,341 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix quest-typing-test: <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> .
+@prefix : <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl> .
+
+<http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl> rdf:type owl:Ontology .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+quest-typing-test:xsddatatime rdf:type owl:AnnotationProperty .
+
+
+
+
+
+#################################################################
+#
+#    Datatypes
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#nottyped
+
+quest-typing-test:nottyped rdf:type owl:DatatypeProperty .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#rdfsliteral
+
+quest-typing-test:rdfsliteral rdf:type owl:DatatypeProperty ;
+                              
+                              rdfs:range rdfs:Literal .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdboolean
+
+quest-typing-test:xsdboolean rdf:type owl:DatatypeProperty ;
+                             
+                             rdfs:range xsd:boolean .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddatetime
+
+quest-typing-test:xsddatetime rdf:type owl:DatatypeProperty ;
+                              
+                              rdfs:range xsd:dateTime .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddecimal
+
+quest-typing-test:xsddecimal rdf:type owl:DatatypeProperty ;
+                             
+                             rdfs:range xsd:decimal .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddouble
+
+quest-typing-test:xsddouble rdf:type owl:DatatypeProperty ;
+                            
+                            rdfs:range xsd:double .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdfloat
+
+quest-typing-test:xsdfloat rdf:type owl:DatatypeProperty ;
+                           
+                           rdfs:range xsd:float .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdint
+
+quest-typing-test:xsdint rdf:type owl:DatatypeProperty ;
+                         
+                         rdfs:range xsd:int .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdinteger
+
+quest-typing-test:xsdinteger rdf:type owl:DatatypeProperty ;
+                             
+                             rdfs:range xsd:integer .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdstring
+
+quest-typing-test:xsdstring rdf:type owl:DatatypeProperty ;
+                            
+                            rdfs:range xsd:string .
+
+
+
+
+
+#################################################################
+#
+#    Individuals
+#
+#################################################################
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#asdf
+
+quest-typing-test:asdf rdf:type owl:NamedIndividual ,
+                                owl:Thing .
+
+
+
+###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#obj1
+
+quest-typing-test:obj1 rdf:type owl:NamedIndividual ,
+                                owl:Thing ;
+                       
+                       quest-typing-test:rdfsliteral 10.10 ;
+                       
+                       quest-typing-test:xsddouble 10.10 ;
+                       
+                       quest-typing-test:xsdboolean 10.10 ;
+                       
+                       quest-typing-test:xsdstring 10.10 ;
+                       
+                       quest-typing-test:xsdinteger 10.10 ;
+                       
+                       quest-typing-test:xsddatatime 10.10 ;
+                       
+                       quest-typing-test:nottyped 10.10 ;
+                       
+                       quest-typing-test:xsdfloat 10.10 ;
+                       
+                       quest-typing-test:xsdint 10.10 ;
+                       
+                       quest-typing-test:xsddecimal 10.10 ;
+                       
+                       quest-typing-test:xsdint "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsddouble "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsdboolean "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsddatatime "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsdinteger "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:rdfsliteral "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsdfloat "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:nottyped "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsdstring "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsddecimal "123456789"^^xsd:int ;
+                       
+                       quest-typing-test:xsdstring 123456789 ;
+                       
+                       quest-typing-test:xsddecimal 123456789 ;
+                       
+                       quest-typing-test:xsdboolean 123456789 ;
+                       
+                       quest-typing-test:xsddatatime 123456789 ;
+                       
+                       quest-typing-test:xsdfloat 123456789 ;
+                       
+                       quest-typing-test:xsdint 123456789 ;
+                       
+                       quest-typing-test:xsddouble 123456789 ;
+                       
+                       quest-typing-test:xsdinteger 123456789 ;
+                       
+                       quest-typing-test:rdfsliteral 123456789 ;
+                       
+                       quest-typing-test:nottyped 123456789 ;
+                       
+                       quest-typing-test:xsdstring "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsdinteger "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsdint "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsdboolean "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:nottyped "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsddatatime "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsddecimal "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:rdfsliteral "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsddouble "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:xsdfloat "2012-10-10T11:30:00Z"^^xsd:dateTime ;
+                       
+                       quest-typing-test:rdfsliteral "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsddatatime "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsddecimal "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsddouble "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsdinteger "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsdstring "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:nottyped "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsdboolean "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsdint "3.3333"^^xsd:double ;
+                       
+                       quest-typing-test:xsdfloat "3.3333"^^xsd:double ,
+                                                  "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:nottyped "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsdboolean "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:rdfsliteral "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsdinteger "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsddatatime "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsdstring "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsdint "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsddecimal "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsddouble "3.3333"^^xsd:float ;
+                       
+                       quest-typing-test:xsddatatime "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsdint "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsddecimal "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsdinteger "some string"^^xsd:string ;
+                       
+                       quest-typing-test:rdfsliteral "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsddouble "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsdstring "some string"^^xsd:string ;
+                       
+                       quest-typing-test:nottyped "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsdfloat "some string"^^xsd:string ;
+                       
+                       quest-typing-test:xsdboolean "some string"^^xsd:string ,
+                                                    "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsddatatime "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsdstring "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsdfloat "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsdint "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:nottyped "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsddouble "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsddecimal "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:rdfsliteral "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:xsdinteger "true"^^xsd:boolean ;
+                       
+                       quest-typing-test:nottyped "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsdinteger "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsdint "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsdboolean "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsddatatime "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:rdfsliteral "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsdstring "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsddecimal "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsddouble "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:xsdfloat "val2"^^rdfs:Literal ;
+                       
+                       quest-typing-test:rdfsliteral "val1" ;
+                       
+                       quest-typing-test:xsddecimal "val1" ;
+                       
+                       quest-typing-test:nottyped "val1" ;
+                       
+                       quest-typing-test:xsdinteger "val1" ;
+                       
+                       quest-typing-test:xsdboolean "val1" ;
+                       
+                       quest-typing-test:xsdstring "val1" ;
+                       
+                       quest-typing-test:xsdfloat "val1" ;
+                       
+                       quest-typing-test:xsdint "val1" ;
+                       
+                       quest-typing-test:xsddatatime "val1" .
+
+
+
+
+###  Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net
+
