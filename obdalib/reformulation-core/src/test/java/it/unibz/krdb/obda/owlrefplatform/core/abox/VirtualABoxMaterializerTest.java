@@ -128,7 +128,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
-		assertTrue(assertions.size() == 18);
+		assertEquals(18, assertions.size());
 
 		int count = materializer.getTripleCount();
 		assertTrue("count: " + count, count == 18);
