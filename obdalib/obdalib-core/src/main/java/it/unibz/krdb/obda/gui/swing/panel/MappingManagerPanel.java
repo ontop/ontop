@@ -859,6 +859,14 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
 	}
+	
+	public void setFilter(String filter) {
+		
+		txtFilter.setText(filter);
+		chkFilter.setSelected(true);
+		processFilterAction();
+	
+	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JCheckBox chkFilter;

@@ -1,21 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<VSNode splits="1.0">
-		<CNode>
-			<Component label="Datasources Selector">
-				<Property id="pluginId"
-					value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent" />
-			</Component>
-			<Component label="Mappings Manager">
-				<Property id="pluginId"
-					value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent" />
-			</Component>
-			<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
-				value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
-			<Component label="SQL query interface">
-				<Property id="pluginId"
-					value="it.unibz.krdb.obda.protege4.SQLQueryInterfaceViewComponent" />
-			</Component>
-		</CNode>
+	<VSNode splits="0.275 0.725">
+
+		<HSNode splits="0.5 0.5">
+			<CNode>
+				<Component label="Class hierarchy">
+					<Property id="pluginId"
+						value="org.protege.editor.owl.OWLAssertedClassHierarchy" />
+				</Component>
+			</CNode>
+			<VSNode splits="1.0">
+				<CNode>
+					<Component label="Object property hierarchy">
+						<Property id="pluginId"
+							value="org.protege.editor.owl.OWLObjectPropertyTree" />
+					</Component>
+					<Component label="Data property hierarchy">
+						<Property id="pluginId" value="org.protege.editor.owl.OWLDataPropertyTree" />
+					</Component>
+					<Component label="Annotation property hierarchy">
+						<Property id="pluginId"
+							value="org.protege.editor.owl.OWLAnnotationPropertyTree" />
+					</Component>
+				</CNode>
+			</VSNode>
+		</HSNode>
+
+		<VSNode splits="1.0">
+			<CNode>
+				<Component label="Datasources Selector">
+					<Property id="pluginId"
+						value="it.unibz.krdb.obda.protege4.DatasourcesManagerViewComponent" />
+				</Component>
+				<Component label="Mappings Manager">
+					<Property id="pluginId"
+						value="it.unibz.krdb.obda.protege4.MappingsManagerViewComponent" />
+				</Component>
+				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
+					value="it.unibz.krdb.obda.protege4.RDBMSInspectorViewComponent"/> </Component> -->
+				<Component label="SQL query interface">
+					<Property id="pluginId"
+						value="it.unibz.krdb.obda.protege4.SQLQueryInterfaceViewComponent" />
+				</Component>
+			</CNode>
+		</VSNode>
 	</VSNode>
 </layout>

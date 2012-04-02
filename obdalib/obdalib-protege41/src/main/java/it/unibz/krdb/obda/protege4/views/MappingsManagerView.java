@@ -14,27 +14,34 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
+import org.protege.editor.owl.ui.renderer.OWLEntityRendererImpl;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import org.protege.editor.owl.ui.view.Findable;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
+public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, Findable<OWLEntity> {
 
-	private static final long	serialVersionUID	= 1790921396564256165L;
+	private static final long serialVersionUID = 1790921396564256165L;
 
-	private final Logger		log					= Logger.getLogger(MappingsManagerView.class);
+	private final Logger log = Logger.getLogger(MappingsManagerView.class);
 
-	OBDAModelManager			controller			= null;
+	OBDAModelManager controller = null;
 
-	DatasourceSelector			datasourceSelector	= null;
+	DatasourceSelector datasourceSelector = null;
 
-	MappingManagerPanel			mappingPanel		= null;
+	MappingManagerPanel mappingPanel = null;
 
 	@Override
 	protected void disposeOWLView() {
@@ -46,17 +53,33 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		// Retrieve the editor kit.
 		final OWLEditorKit editor = getOWLEditorKit();
 
-		controller = (OBDAModelManager)editor.get(OBDAModelImpl.class.getName());
+		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
 
 		OBDAPreferences preference = (OBDAPreferences) editor.get(OBDAPreferences.class.getName());
 
 		OWLOntology ontology = editor.getModelManager().getActiveOntology();
 
-		
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);		
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(controller.getActiveOBDAModel(), preference, validator);
+
+		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
+
+			@Override
+			public void selectionChanged() throws Exception {
+				OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
+				if (entity == null)
+					return;
+				if (!entity.isTopEntity()) {
+					String shortf = editor.getOWLWorkspace().getOWLModelManager().getOWLEntityRenderer().getShortForm(entity);
+					mappingPanel.setFilter("pred:" + shortf);
+				} else {
+					mappingPanel.setFilter("");
+				}
+
+			}
+		});
 
 		datasourceSelector = new DatasourceSelector(controller.getActiveOBDAModel());
 		datasourceSelector.addDatasourceListListener(mappingPanel);
@@ -66,9 +89,9 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		selectorPanel.setLayout(new GridBagLayout());
 
 		JLabel label = new JLabel("Select datasource: ");
-//		label.setBackground(new java.awt.Color(153, 153, 153));
-//		label.setFont(new java.awt.Font("Arial", 1, 11));
-//		label.setForeground(new java.awt.Color(153, 153, 153));
+		// label.setBackground(new java.awt.Color(153, 153, 153));
+		// label.setFont(new java.awt.Font("Arial", 1, 11));
+		// label.setForeground(new java.awt.Color(153, 153, 153));
 		label.setPreferredSize(new Dimension(119, 14));
 
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
@@ -93,16 +116,28 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		add(mappingPanel, BorderLayout.CENTER);
 		add(selectorPanel, BorderLayout.NORTH);
 
-//		log.debug("Mappings manager initialized");
+		// log.debug("Mappings manager initialized");
 	}
 
 	@Override
 	public void activeOntologyChanged() {
 		mappingPanel.setOBDAModel(controller.getActiveOBDAModel());
-		
+
 		OWLOntology ontology = getOWLModelManager().getActiveOntology();
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);		
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);
 		mappingPanel.setTargetQueryValidator(validator);
 		datasourceSelector.setDatasourceController(controller.getActiveOBDAModel());
+	}
+
+	@Override
+	public List<OWLEntity> find(String match) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void show(OWLEntity owlEntity) {
+		System.out.println(owlEntity);
+
 	}
 }

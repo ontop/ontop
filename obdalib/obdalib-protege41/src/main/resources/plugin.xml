@@ -21,7 +21,8 @@
 			value="it.unibz.krdb.obda.protege4.views.MappingsManagerView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="OBDA"></category>
+		<category value="OBDA"></category>		
+		<navigates value="@org.protege.classcategory"/>
 	</extension>
 	
 	<!-- <extension id="RDBMSInspectorViewComponent"
