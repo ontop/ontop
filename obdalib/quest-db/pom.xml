@@ -3,7 +3,7 @@
   <parent>
     <artifactId>obdalib-parent</artifactId>
     <groupId>inf.unibz.it.obda</groupId>
-    <version>1.7</version>
+    <version>1.7-alpha-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <artifactId>quest-db</artifactId>
@@ -13,24 +13,24 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		

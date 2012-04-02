@@ -5,7 +5,7 @@
 	<groupId>inf.unibz.it.obda</groupId>
 	<artifactId>obdalib-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.7</version>
+	<version>1.7-alpha-SNAPSHOT</version>
 	<name>obdalib-parent</name>
 	<url>http://obda.inf.unibz.it/</url>
 

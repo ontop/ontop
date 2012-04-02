@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7</version>
+		<version>1.7-alpha-SNAPSHOT</version>
 	</parent>
 	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>quest-sesame</artifactId>
@@ -17,37 +17,37 @@
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 
 

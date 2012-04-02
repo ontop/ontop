@@ -6,19 +6,19 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7</version>
+		<version>1.7-alpha-SNAPSHOT</version>
 	</parent>
 
 	<!-- <groupId>inf.unibz.it.obda</groupId> -->
 	<artifactId>reformulation-core</artifactId>
-	<!-- <version>1.7</version> -->
+	<!-- <version>1.7-alpha-SNAPSHOT</version> -->
 	<name>reformulation-core</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7</version>
+			<version>1.7-alpha-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
