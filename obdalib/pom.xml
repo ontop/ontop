@@ -70,23 +70,21 @@
 			<name>Maven Bolzano OBDA snapshots repository</name>
 			<url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-snapshots/</url>
 		</snapshotRepository>
+		<repository>
+			<id>bolzano-obda-release</id>
+			<name>Maven Bolzano OBDA release repository</name>
+			<url>http://obdavm.inf.unibz.it:8080/nexus/content/repositories/bolzano-obda-release/</url>
+		</repository>
 	</distributionManagement>
 
 	<build>
 		<pluginManagement>
 
 			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<configuration>
-						<password>${release.password}</password>
-						<username>${release.username}</username>
-						<tagBase>scm:svn:http://hyper.dis.uniroma1.it/svn/quonto/tags</tagBase>
-						<autoVersionSubmodules>true</autoVersionSubmodules>
-					</configuration>
-				</plugin>
-
+				<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-release-plugin</artifactId> 
+					<configuration> <password>${release.password}</password> <username>${release.username}</username> 
+					<tagBase>scm:svn:http://hyper.dis.uniroma1.it/svn/quonto/tags</tagBase> <autoVersionSubmodules>true</autoVersionSubmodules> 
+					</configuration> </plugin> -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
@@ -130,8 +128,8 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		
-		
+
+
 	</build>
 
 
