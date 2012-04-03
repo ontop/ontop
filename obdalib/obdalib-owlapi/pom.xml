@@ -76,6 +76,14 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					<excludes>
+						<exclude>**/*.java</exclude>
+						<exclude>**/*.java</exclude>
+					</excludes>
+					<testExcludes>
+						<exclude>**/*.java</exclude>
+						<exclude>**/*.java</exclude>
+					</testExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
