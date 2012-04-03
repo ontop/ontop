@@ -205,6 +205,7 @@ object returns [Term value]
   | function { $value = $function.value; }
   | literal  { $value = $literal.value; }
   | variable { $value = $variable.value; }
+  | dataTypeFunction { $value = $dataTypeFunction.value; }
 //  | blank
   ;
   
@@ -244,6 +245,21 @@ function returns [Function value]
   : resource LPAREN terms RPAREN {
       String functionName = $resource.value.toString();
       int arity = $terms.value.size();    
+      Predicate functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
+      $value = dfac.getFunctionalTerm(functionSymbol, $terms.value);
+    }
+  ;
+
+dataTypeFunction returns [Function value]
+  : variable AT language {
+      Predicate functionSymbol = dfac.getDataTypePredicateLiteral();
+      Variable var = $variable.value;
+      ValueConstant lang = dfac.getValueConstant($language.text);
+      $value = dfac.getFunctionalTerm(functionSymbol, var, lang);
+    }
+  | variable REFERENCE resource {
+      Variable var = $variable.value;
+      String functionName = $resource.value.toString();
       Predicate functionSymbol = null;  	
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
     	functionSymbol = dfac.getDataTypePredicateLiteral();
@@ -259,10 +275,8 @@ function returns [Function value]
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
-      } else {
-        functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
       }
-      $value = dfac.getFunctionalTerm(functionSymbol, $terms.value);
+      $value = dfac.getFunctionalTerm(functionSymbol, var);
     }
   ;
 
@@ -279,10 +293,16 @@ term returns [Term value]
   | literal { $value = $literal.value; }
   ;  
 
-literal returns [ValueConstant value]
-//  : STRING_WITH_QUOTE_DOUBLE (AT language)?
-//  | dataTypeString { $value = $numericPositive.value; }
-  : stringLiteral  { $value = $stringLiteral.value; }
+literal returns [Term value]
+  : stringLiteral (AT language)? {
+       Predicate functionSymbol = dfac.getDataTypePredicateLiteral();
+       ValueConstant constant = $stringLiteral.value;
+       if ($language.text != null && $language.text.trim().length() > 0) {
+         constant = dfac.getValueConstant(constant.getValue(), $language.text);
+       }
+       $value = dfac.getFunctionalTerm(functionSymbol, constant);
+    }
+  | dataTypeString { $value = $dataTypeString.value; }
   | numericLiteral { $value = $numericLiteral.value; }
   | booleanLiteral { $value = $booleanLiteral.value; }
   ;
@@ -294,8 +314,28 @@ stringLiteral returns [ValueConstant value]
     }
   ;
    
-dataTypeString
-  : STRING_WITH_QUOTE_DOUBLE REFERENCE resource
+dataTypeString returns [Term value]
+  :  stringLiteral REFERENCE resource {
+      ValueConstant constant = $stringLiteral.value;
+      String functionName = $resource.value.toString();
+      Predicate functionSymbol = null;  	
+      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateLiteral();
+      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateString();
+      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
+     	functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDecimal();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDouble();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDateTime();
+      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateBoolean();
+      }
+      $value = dfac.getFunctionalTerm(functionSymbol, constant);
+    }
   ;
   
 numericLiteral returns [ValueConstant value]
@@ -321,7 +361,7 @@ name
   ;
  
 language
-  : CHAR
+  : VARNAME
   ;
 
 booleanLiteral returns [ValueConstant value]
@@ -355,7 +395,7 @@ BASE: ('B'|'b')('A'|'a')('S'|'s')('E'|'e');
 
 PREFIX: ('P'|'p')('R'|'r')('E'|'e')('F'|'f')('I'|'i')('X'|'x');
 
-FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
+FALSE: ('F'|'STRING_WITH_QUOTE_DOUBLEf')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
 
 TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
 

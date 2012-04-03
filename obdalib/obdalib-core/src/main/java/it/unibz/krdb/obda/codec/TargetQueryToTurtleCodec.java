@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.codec;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
@@ -11,6 +12,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,18 +82,38 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		StringBuffer sb = new StringBuffer();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
-			String fname = getAbbreviatedName(function.getFunctionSymbol());
-			sb.append(fname);
-			sb.append("(");
-			boolean separator = false;
-			for (Term innerTerm : function.getTerms()) {
-				if (separator) {
-					sb.append(", ");
+			Predicate functionSymbol = function.getFunctionSymbol();
+			String fname = getAbbreviatedName(functionSymbol);
+			if (functionSymbol instanceof DataTypePredicate) {
+				// if the function symbol is a data type predicate
+				if (isLiteralDataType(functionSymbol)) {
+					// if it is rdfs:Literal
+					Term var = function.getTerms().get(0);
+					Term lang = function.getTerms().get(1);
+					sb.append(getDisplayName(var));
+					sb.append("@");
+					sb.append(lang.toString());
+				} else {
+					// for the other data types
+					Term var = function.getTerms().get(0);
+					sb.append(getDisplayName(var));
+					sb.append("^^");
+					sb.append(fname);
 				}
-				sb.append(getDisplayName(innerTerm));
-				separator = true;
+			} else {
+				// for any ordinary function symbol
+				sb.append(fname);
+				sb.append("(");
+				boolean separator = false;
+				for (Term innerTerm : function.getTerms()) {
+					if (separator) {
+						sb.append(", ");
+					}
+					sb.append(getDisplayName(innerTerm));
+					separator = true;
+				}
+				sb.append(")");
 			}
-			sb.append(")");
 		} else if (term instanceof Variable) {
 			sb.append("$");
 			sb.append(term.toString());
@@ -105,6 +127,10 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			sb.append("\"");
 		}
 		return sb.toString();
+	}
+	
+	private boolean isLiteralDataType(Predicate predicate) {
+		return predicate.equals(OBDAVocabulary.RDFS_LITERAL);
 	}
 
 	@Override
