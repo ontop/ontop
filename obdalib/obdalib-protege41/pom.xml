@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha-SNAPSHOT</version>
+		<version>1.7-alpha</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>obdalib-protege41</artifactId>
-	<name>OBDA plugin for protege 4.1</name>
+	<name>obdalib-protege41</name>
 
 
 
@@ -49,12 +49,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
@@ -64,13 +64,13 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 
@@ -251,6 +251,8 @@
 	</dependencies>
 
 	<build>
+		<finalName>it.unibz.inf.obda.p4plugin-1.7.${buildNumber}a1</finalName>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -258,7 +260,7 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-					<excludes>					
+					<excludes>
 						<exclude>**/TW*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
@@ -268,6 +270,16 @@
 					</testExcludes>
 				</configuration>
 			</plugin>
+
+		<!-- 	<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+ -->
 			<plugin>
 				<!-- This is the main plugin to build the bundle. Informattion about 
 					this plugin can be found here: http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html 
@@ -275,6 +287,17 @@
 
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+
+<!-- 				<executions>
+					<execution>
+						<id>bundle-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions> -->
+
 				<!-- <version>2.3.4</version> -->
 				<extensions>true</extensions>
 				<configuration>
@@ -286,8 +309,10 @@
 						are packed as jars. 2. It makes sure all the protege plugin resources are 
 						packed (plugin.xml, tabs*.xml, etc). 3. It makes sure the META-INF/MANIFEST.MF 
 						for OSGi bundles is created with the correct imports, exports and classpath. -->
+
 					<instructions>
-						<Build-Jdk>1.6</Build-Jdk>
+
+						<!-- <Build-Jdk>1.6</Build-Jdk> -->
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
@@ -307,8 +332,10 @@
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
 						<Bundle-Build>${buildNumber}</Bundle-Build>
-														
+						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal, *</Private-Package>
+						<Import-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal, *</Import-Package>
 						
+
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
@@ -321,11 +348,12 @@
 							exceptions. It's very important to assure only the needed depdencies are 
 							imported. -->
 						<!-- <Import-Package>com.ibm.db2.jcc.licenses.*,com.hp.hpl.jena.iri.*,org.apache.commons.logging.*,com.hp.hpl.jena.query.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,!*,org.protege.osgi.jdbc</Import-Package> -->
-						<Import-Package>javax.accessibility.*,org.w3c.dom.*,org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package>
+						<!-- <Import-Package>!osgi.wiring.package,!org.w3c.dom.ranges,javax.accessibility.*,org.apache.log4j,javax.swing.*,org.apache.commons.logging.*,org.apache.log4j.*,org.atlr.*,org.slf4j.*,org.protege.*,org.coode.*,org.semanticweb.*,uk.ac.manchester.*,org.protege.osgi.jdbc,org.xml.sax*,javax.xml*,javax.xml.parsers*,javax.naming*,ch.qos.logback.classic*,com.hp.hpl.jena.iri*,com.hp.hpl.jena.query*,!*</Import-Package> -->
 
 						<!-- This makes sure all OBDA classes are exported and available in 
 							dependent projects -->
-						<Export-Package>it.unibz.krdb.*</Export-Package>
+						<!-- <Export-Package>it.unibz.krdb.*</Export-Package> -->
+
 
 
 						<!-- Not needed anymore, it was necessary when we were not using import-package 
@@ -350,4 +378,10 @@
 
 		</plugins>
 	</build>
+	<url>http://obda.inf.unibz.it/protege-plugin/</url>
+	<description>The OBDA plugin for Protege 4.1 and up</description>
+	<organization>
+		<name>KRDB Research Centre. Free University of Bozen Bolzano.</name>
+		<url>http://www.inf.unibz.it/krdb/</url>
+	</organization>
 </project>

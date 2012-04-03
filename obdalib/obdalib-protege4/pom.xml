@@ -4,13 +4,13 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha-SNAPSHOT</version>
+		<version>1.7-alpha</version>
 	</parent>
 
 	<artifactId>obdalib-protege4</artifactId>
 	<packaging>bundle</packaging>
 	<name>obdalib-protege4</name>
-	<!-- <version>1.7-alpha-SNAPSHOT</version> -->
+	<!-- <version>1.7-alpha</version> -->
 
 	<repositories>
 		<!-- This repository holds protege 4 and obdalib related dependencies, 
@@ -49,12 +49,12 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<!--Dependencies from the OBDA projects to include in the jar -->
@@ -64,13 +64,13 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi2</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<!-- All the following dependencies are required at compilation or runtime 

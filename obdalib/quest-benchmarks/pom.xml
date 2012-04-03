@@ -5,34 +5,34 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha-SNAPSHOT</version>
+		<version>1.7-alpha</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>quest-benchmarks</artifactId>
-	<name>Quest benchmarks</name>
+	<name>quest-benchmarks</name>
 	<description>a set of benchmarking utilities for Quest</description>
 	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi3</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>quest-owlapi3</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 

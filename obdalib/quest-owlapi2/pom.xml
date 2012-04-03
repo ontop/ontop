@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>obdalib-parent</artifactId>
 		<groupId>inf.unibz.it.obda</groupId>
-		<version>1.7-alpha-SNAPSHOT</version>
+		<version>1.7-alpha</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>quest-owlapi2</artifactId>
@@ -13,24 +13,24 @@
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>reformulation-core</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-owlapi</artifactId>
-			<version>1.7-alpha-SNAPSHOT</version>
+			<version>1.7-alpha</version>
 		</dependency>
 
 		<dependency>
@@ -59,4 +59,5 @@
 	</properties>
 
 
+	<name>quest-owlapi2</name>
 </project>
