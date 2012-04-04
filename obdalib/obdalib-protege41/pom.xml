@@ -335,7 +335,7 @@
 						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
 							!org.w3c.dom.traversal*</Private-Package>
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
+						<Import-Package>org.w3c.dom.*,javax.swing.*,javax.naming.*, javax.xml.parsers.*,org.xml.sax.*, org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
 							org.semanticweb.*,
 							!com.touchgraph*, !org.codehaus*, !org.json*,
 							!org.w3c.dom*,
