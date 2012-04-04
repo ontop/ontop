@@ -20,19 +20,27 @@
 
 
 	<modules>
-		<module>obdalib-core</module>
-		<module>obdalib-owlapi</module>
-		<module>obdalib-protege4</module>
-		<module>reformulation-core</module>
-		<module>quest-sesame</module>
-		<module>obdalib-owlapi3</module>
-		<module>obdalib-protege41</module>
-		<module>quest-owlapi2</module>
-		<module>quest-owlapi3</module>
-		<module>quest-db</module>
-		<module>quest-benchmarks</module>
-		<module>quest-distribution</module>
-	</modules>
+	    <module>obdalib-core</module>
+  		<module>reformulation-core</module>
+  		<module>obdalib-owlapi3</module>
+  		<module>obdalib-protege41</module>
+  		<module>quest-owlapi3</module>
+   		<module>quest-distribution</module>
+	</modules>  
+	
+	<profiles>
+        <profile>
+          <id>all</id>
+          <modules>
+      		<module>obdalib-owlapi</module>
+      		<module>obdalib-protege4</module>
+      		<module>quest-sesame</module>
+      		<module>quest-owlapi2</module>
+      		<module>quest-db</module>
+      		<module>quest-benchmarks</module>
+      	   </modules>
+        </profile>
+      </profiles>
 
 	<properties>
 		<aversion>1.7</aversion>

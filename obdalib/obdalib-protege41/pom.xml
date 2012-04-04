@@ -332,7 +332,7 @@
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
 						<Bundle-Build>${buildNumber}</Bundle-Build>
-						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal, *</Private-Package>
+						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package>
 						<Import-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal, *</Import-Package>
 						
 
@@ -365,6 +365,14 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
+                <executions>
+                                        <execution>
+                                            <phase>validate</phase>
+                                            <goals>
+                                                <goal>create</goal>
+                                            </goals>
+                                        </execution>
+                                    </executions>
 			</plugin>
 
 			<plugin>
