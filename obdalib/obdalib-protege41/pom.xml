@@ -334,6 +334,7 @@
 						<Bundle-Build>${buildNumber}</Bundle-Build>
 						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
 							!org.w3c.dom.traversal*</Private-Package>
+						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
 						<Import-Package>org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
 							org.semanticweb.*,
 							!com.touchgraph*, !org.codehaus*, !org.json*,
