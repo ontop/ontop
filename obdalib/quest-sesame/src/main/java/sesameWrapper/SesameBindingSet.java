@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 
 import java.sql.SQLException;
@@ -18,8 +19,10 @@ import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
@@ -76,9 +79,28 @@ public class SesameBindingSet implements BindingSet {
 				if (c instanceof BNode)
 					value = fact.createBNode(set.getBNode(bindingName).getName());
 				else if (c instanceof URIConstant)
-					value = fact.createURI(set.getString(column));
-				else if (c instanceof ValueConstant)
-					value = fact.createLiteral(set.getString(column));
+					value = fact.createURI(set.getURI(column).toString());
+				else if (c instanceof ValueConstant) {
+					ValueConstant literal = set.getLiteral(column);
+					URI datatype = null;
+					if (literal.getType() == COL_TYPE.BOOLEAN)
+						datatype = fact.createURI(OBDAVocabulary.XSD_BOOLEAN_URI);
+					else if	(literal.getType() == COL_TYPE.DATETIME)
+						datatype = fact.createURI(OBDAVocabulary.XSD_DATETIME_URI);
+					else if	(literal.getType() == COL_TYPE.DECIMAL)
+						datatype = fact.createURI(OBDAVocabulary.XSD_DECIMAL_URI);
+					else if	(literal.getType() == COL_TYPE.DOUBLE)
+						datatype = fact.createURI(OBDAVocabulary.XSD_DOUBLE_URI);
+					else if	(literal.getType() == COL_TYPE.INTEGER)
+						datatype = fact.createURI(OBDAVocabulary.XSD_INTEGER_URI);
+					else if	(literal.getType() == COL_TYPE.LITERAL)
+						datatype = fact.createURI(OBDAVocabulary.RDFS_LITERAL_URI);
+					else if	(literal.getType() == COL_TYPE.OBJECT)
+						datatype = fact.createURI(OBDAVocabulary.XSD_STRING_URI);
+					else if	(literal.getType() == COL_TYPE.STRING)
+						datatype = fact.createURI(OBDAVocabulary.XSD_STRING_URI);
+					value = fact.createLiteral(literal.getValue(), datatype);
+				}
 			}
 
 			return new BindingImpl(bindingName, value);
