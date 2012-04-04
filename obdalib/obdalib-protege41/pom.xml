@@ -78,6 +78,19 @@
 			together with the bundle. They have a default scope of runtime and compilation -->
 
 		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgrapht</artifactId>
+			<version>0.8.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+			<version>0.8.3</version>
+		</dependency>
+
+
+		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
 			<version>3.1.3</version>
@@ -271,15 +284,9 @@
 				</configuration>
 			</plugin>
 
-		<!-- 	<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
-			</plugin>
- -->
+			<!-- <plugin> <artifactId>maven-jar-plugin</artifactId> <configuration> 
+				<archive> <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile> 
+				</archive> </configuration> </plugin> -->
 			<plugin>
 				<!-- This is the main plugin to build the bundle. Informattion about 
 					this plugin can be found here: http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html 
@@ -288,15 +295,8 @@
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 
-<!-- 				<executions>
-					<execution>
-						<id>bundle-manifest</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>manifest</goal>
-						</goals>
-					</execution>
-				</executions> -->
+				<!-- <executions> <execution> <id>bundle-manifest</id> <phase>process-classes</phase> 
+					<goals> <goal>manifest</goal> </goals> </execution> </executions> -->
 
 				<!-- <version>2.3.4</version> -->
 				<extensions>true</extensions>
@@ -332,10 +332,20 @@
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
 						<Bundle-Build>${buildNumber}</Bundle-Build>
-						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package>
-						<Import-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal, *</Import-Package>
-						
-
+						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
+							!org.w3c.dom.traversal*</Private-Package>
+						<Import-Package>org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
+							org.semanticweb.*,
+							!com.touchgraph*, !org.codehaus*, !org.json*,
+							!org.w3c.dom*,
+							!org.xml.*,!sun.*,!jena.*, !junit.*, !org.antl*,
+							!org.apache*,
+							org.codehaus*, !org.ietf.*, !javax.*, !com.hp.*,
+							!arq*, !antlr*,
+							!EDU.oswego.cs.dl.util.concurrent,
+							!osgi.wiring.package,
+							!org.w3c.dom.ranges, !org.w3c.dom.traversal,
+							*</Import-Package>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
@@ -365,14 +375,14 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-                <executions>
-                                        <execution>
-                                            <phase>validate</phase>
-                                            <goals>
-                                                <goal>create</goal>
-                                            </goals>
-                                        </execution>
-                                    </executions>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
