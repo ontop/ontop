@@ -101,18 +101,32 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					sb.append(fname);
 				}
 			} else {
-				// for any ordinary function symbol
-				sb.append(fname);
-				sb.append("(");
-				boolean separator = false;
-				for (Term innerTerm : function.getTerms()) {
-					if (separator) {
-						sb.append(", ");
+				if (fname.equals("quest:uri")) { // TODO: Make this as a BuildinPredicate
+					String uriTemplate = function.getTerms().get(0).toString();
+					for (Term innerTerm : function.getTerms()) {
+						if (innerTerm instanceof Variable) {
+							uriTemplate = uriTemplate.replace("{}", "{" + getDisplayName(innerTerm) + "}");
+						}
 					}
-					sb.append(getDisplayName(innerTerm));
-					separator = true;
+					sb.append("<");
+					sb.append("\"");
+					sb.append(uriTemplate);
+					sb.append("\"");
+					sb.append(">");
+				} else {
+					// for any ordinary function symbol
+					sb.append(fname);
+					sb.append("(");
+					boolean separator = false;
+					for (Term innerTerm : function.getTerms()) {
+						if (separator) {
+							sb.append(", ");
+						}
+						sb.append(getDisplayName(innerTerm));
+						separator = true;
+					}
+					sb.append(")");
 				}
-				sb.append(")");
 			}
 		} else if (term instanceof Variable) {
 			sb.append("$");

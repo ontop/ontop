@@ -194,6 +194,7 @@ subject returns [Term value]
 //  | blank
   : variable { $value = $variable.value; }
   | function { $value = $function.value; }
+  | uriTemplateFunction { $value = $uriTemplateFunction.value; }
   ;
   
 predicate returns [URI value]
@@ -206,12 +207,13 @@ object returns [Term value]
   | literal  { $value = $literal.value; }
   | variable { $value = $variable.value; }
   | dataTypeFunction { $value = $dataTypeFunction.value; }
+  | uriTemplateFunction { $value = $uriTemplateFunction.value; }
 //  | blank
   ;
   
 resource returns [URI value]
-  : uriref { $value = URI.create($uriref.value); }
-  | qname { $value = URI.create($qname.value); }
+//  : uriref { $value = URI.create($uriref.value); }
+  : qname { $value = URI.create($qname.value); }
   ;
   
 uriref returns [String value]
@@ -277,6 +279,32 @@ dataTypeFunction returns [Function value]
     	functionSymbol = dfac.getDataTypePredicateBoolean();
       }
       $value = dfac.getFunctionalTerm(functionSymbol, var);
+    }
+  ;
+
+uriTemplateFunction returns [Function value]
+  : LESS stringLiteral GREATER {
+      String template = $stringLiteral.value.toString();
+      List<Term> terms = new ArrayList<Term>();
+      while (template.contains("{") && template.contains("}")) {
+        // scan the input string if it contains "{" ... "}"
+        int start = template.indexOf("{");
+        int end = template.indexOf("}");
+        
+        // extract the whole placeholder, e.g., "{?var}"
+        String placeHolder = template.substring(start, end+1);
+        template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
+        
+        // extract the variable name only, e.g., "{?var}" --> "var"
+        terms.add(dfac.getVariable(placeHolder.substring(2, placeHolder.length()-1)));
+      }
+      // replace the placeholder string to the original. The current string becomes the template
+      template = template.replaceAll("\\[\\]", "{}");
+      ValueConstant uriTemplate = dfac.getValueConstant(template);
+      
+      // the URI template is always on the first position in the term list
+      terms.add(0, uriTemplate);
+      $value = dfac.getFunctionalTerm(dfac.getPredicate(OBDAVocabulary.QUEST_URI, terms.size(), null), terms);
     }
   ;
 
