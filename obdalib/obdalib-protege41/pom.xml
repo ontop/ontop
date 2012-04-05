@@ -269,7 +269,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>it.unibz.inf.obda.p4plugin-1.7.${buildNumber}a1</finalName>
+		<finalName>it.unibz.inf.obda.p4plugin-1.7a1</finalName>
 
 		<plugins>
 			<plugin>
@@ -337,7 +337,7 @@
 
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
-						<Bundle-Build>${buildNumber}</Bundle-Build>
+						<Build-Number>${buildNumber}</Build-Number>
 <!-- 						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
 							!org.w3c.dom.traversal*</Private-Package>
  -->						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
