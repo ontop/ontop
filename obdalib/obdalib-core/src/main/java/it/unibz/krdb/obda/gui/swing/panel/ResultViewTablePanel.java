@@ -69,7 +69,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         scrQueryResult = new javax.swing.JScrollPane();
         tblQueryResult = new javax.swing.JTable();
         pnlCommandButton = new javax.swing.JPanel();
-        cmdExportResult = new javax.swing.JButton();
+//        cmdExportResult = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(400, 480));
         setLayout(new java.awt.BorderLayout());
@@ -90,29 +90,29 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
         pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        cmdExportResult.setText("Export Result to CSV File");
-        cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdExportResultActionPerformed(evt);
-            }
-        });
-        pnlCommandButton.add(cmdExportResult);
+//        cmdExportResult.setText("Export Result to CSV File");
+//        cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                cmdExportResultActionPerformed(evt);
+//            }
+//        });
+//        pnlCommandButton.add(cmdExportResult);
 
         add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
     }// </editor-fold>//GEN-END:initComponents
 
 
-	private void cmdExportResultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveResultsActionPerformed
-		GetOutputFileDialog dialog = new GetOutputFileDialog();
-		final File file = dialog.getOutPutFile();
-		if(file != null){
-			EventQueue.invokeLater(new Runnable() {
-				public void run() {
-					saveToFileAction.run(querypanel.getQuery(), file);
-				}
-			});
-		}
-	}// GEN-LAST:event_buttonSaveResultsActionPerformed
+//	private void cmdExportResultActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveResultsActionPerformed
+//		GetOutputFileDialog dialog = new GetOutputFileDialog();
+//		final File file = dialog.getOutPutFile();
+//		if(file != null){
+//			EventQueue.invokeLater(new Runnable() {
+//				public void run() {
+//					saveToFileAction.run(querypanel.getQuery(), file);
+//				}
+//			});
+//		}
+//	}// GEN-LAST:event_buttonSaveResultsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExportResult;
