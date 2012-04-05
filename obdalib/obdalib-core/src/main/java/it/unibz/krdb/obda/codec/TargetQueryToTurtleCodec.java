@@ -49,10 +49,10 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			if (isUnary(atom)) {
 				subject = getDisplayName(atom.getTerm(0));
 				predicate = "a";
-				object = getAbbreviatedName(atom.getPredicate());
+				object = getAbbreviatedName(atom.getPredicate().toString(), false);
 			} else {
 				subject = getDisplayName(atom.getTerm(0));
-				predicate = getAbbreviatedName(atom.getPredicate());
+				predicate = getAbbreviatedName(atom.getPredicate().toString(), false);
 				object = getDisplayName(atom.getTerm(1));
 			}
 			turtle.put(subject, predicate, object);
@@ -71,8 +71,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	 * Prints the short form of the predicate (by omitting the complete URI and
 	 * replacing it by a prefix name).
 	 */
-	private String getAbbreviatedName(Predicate predicate) {
-		return prefMan.getShortForm(predicate.toString(), true, false);
+	private String getAbbreviatedName(String uri, boolean inText) {
+		return prefMan.getShortForm(uri, false, inText);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
-			String fname = getAbbreviatedName(functionSymbol);
+			String fname = getAbbreviatedName(functionSymbol.toString(), false);
 			if (functionSymbol instanceof DataTypePredicate) {
 				// if the function symbol is a data type predicate
 				if (isLiteralDataType(functionSymbol)) {
@@ -112,6 +112,10 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			} else {
 				if (fname.equals("quest:uri")) { // TODO: Make this as a BuildinPredicate
 					String uriTemplate = function.getTerms().get(0).toString();
+					
+					// Shorten the URI if possible
+					uriTemplate = getAbbreviatedName(uriTemplate, true);
+					
 					for (Term innerTerm : function.getTerms()) {
 						if (innerTerm instanceof Variable) {
 							uriTemplate = uriTemplate.replace("{}", "{" + getDisplayName(innerTerm) + "}");

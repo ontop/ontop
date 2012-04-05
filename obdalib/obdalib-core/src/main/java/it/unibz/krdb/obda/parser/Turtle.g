@@ -246,7 +246,7 @@ variable returns [Variable value]
 function returns [Function value]
   : resource LPAREN terms RPAREN {
       String functionName = $resource.value.toString();
-      int arity = $terms.value.size();    
+      int arity = $terms.value.size();  
       Predicate functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
       $value = dfac.getFunctionalTerm(functionSymbol, $terms.value);
     }
@@ -288,6 +288,28 @@ uriTemplateFunction returns [Function value]
   : LESS stringLiteral GREATER {
       String template = $stringLiteral.value.toString();
       List<Term> terms = new ArrayList<Term>();
+      
+      if (template.contains("&") && template.contains(";")) {
+        // scan the input string if it contains "{" ... "}"
+        int start = template.indexOf("&");
+        int end = template.indexOf(";");
+        
+        // extract the whole prefix placeholder, e.g., "&hello;"
+        String prefixPlaceHolder = template.substring(start, end+1);
+        
+        // extract the prefix name, e.g., "&hello;" --> "hello"
+        String prefix = prefixPlaceHolder.substring(1, prefixPlaceHolder.length()-1);
+        
+        // make an exception for base prefix: replace it to a blank string
+        prefix = prefix.equals(":") ? "" : prefix;
+        
+        String uri = directives.get(prefix);        
+        if (uri == null) {
+          throw new RecognitionException(); // the prefix is unknown.
+        }
+        template = template.replaceFirst(prefixPlaceHolder, uri);
+      }
+      
       while (template.contains("{") && template.contains("}")) {
         // scan the input string if it contains "{" ... "}"
         int start = template.indexOf("{");

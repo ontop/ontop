@@ -42,7 +42,12 @@ public class TurtleSyntaxParserTest extends TestCase {
 		assertTrue(result);
 	}
 	
-	public void test_4_2() {
+	public void test_4_2_1() {
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName \"John\"^^rdfs:Literal .");
+		assertTrue(result);
+	}
+	
+	public void test_4_2_2() {
 		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName \"John\"@en-US .");
 		assertTrue(result);
 	}
@@ -68,18 +73,43 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 	
 	public void test_5_2_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^xsd:string; :age $age^^xsd:int .");
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^xsd:string; :age $age^^xsd:integer .");
 		assertTrue(result);
 	}
 	
 	public void test_5_2_3() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:int .");
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:integer .");
 		assertTrue(result);
 	}
 	
 	public void test_5_2_4() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:int; :description $text@en-US .");
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:integer; :description $text@en-US .");
 		assertTrue(result);
+	}
+	
+	public void test_6_1() {
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^xsd:String .");
+		assertFalse(result);
+	}
+	
+	public void test_6_2() {
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^ex:randomDatatype .");
+		assertFalse(result);
+	}
+	
+	public void test_7_1() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person .");
+		assertTrue(result);
+	}
+	
+	public void test_7_2() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> :hasFather <\"&:;Person-{$id}\"> .");
+		assertTrue(result);
+	}
+	
+	public void test_7_3() {
+		final boolean result = parse("<\"&ex;Person-{$id}\"> :hasFather <\"&ex;Person-{$id}\"> .");
+		assertFalse(result);
 	}
 	
 	private boolean parse(String input) {
@@ -99,7 +129,9 @@ public class TurtleSyntaxParserTest extends TestCase {
 	private PrefixManager getPrefixManager() {
 		PrefixManager pm = new SimplePrefixManager();
 		pm.addUri("http://example.org/testcase#", ":");
-		pm.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf:");		
+		pm.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf:");
+		pm.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs:");
+		pm.addUri("http://www.w3.org/2001/XMLSchema#", "xsd:");
 		return pm;
 	}
 }

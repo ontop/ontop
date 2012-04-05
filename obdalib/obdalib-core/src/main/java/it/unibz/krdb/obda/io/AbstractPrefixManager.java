@@ -84,7 +84,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 					if (!isLiteral) {
 						result.replace(0, longnamespace.length(), this.getPrefixForURI(longnamespace) + ":");
 					} else {
-						result.replace(0, longnamespace.length(), "&" + this.getPrefixForURI(longnamespace) + ";");
+						result.replace(0, longnamespace.length(), "&" + this.getPrefixForURI(longnamespace) + ":;");
 					}
 					break;
 				}
