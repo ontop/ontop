@@ -277,6 +277,8 @@ dataTypeFunction returns [Function value]
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
+      } else {
+        throw new RecognitionException();
       }
       $value = dfac.getFunctionalTerm(functionSymbol, var);
     }
@@ -361,6 +363,8 @@ dataTypeString returns [Term value]
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
+      } else {
+        throw new RecognitionException();
       }
       $value = dfac.getFunctionalTerm(functionSymbol, constant);
     }

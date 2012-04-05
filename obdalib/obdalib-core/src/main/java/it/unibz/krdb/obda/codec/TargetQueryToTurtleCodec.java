@@ -88,11 +88,20 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 				// if the function symbol is a data type predicate
 				if (isLiteralDataType(functionSymbol)) {
 					// if it is rdfs:Literal
-					Term var = function.getTerms().get(0);
-					Term lang = function.getTerms().get(1);
-					sb.append(getDisplayName(var));
-					sb.append("@");
-					sb.append(lang.toString());
+					int arity = function.getArity();
+					if (arity == 1) {
+						// without the language tag
+						Term var = function.getTerms().get(0);
+						sb.append(getDisplayName(var));
+						sb.append("^^rdfs:Literal");
+					} else if (arity == 2) {
+						// with the language tag
+						Term var = function.getTerms().get(0);
+						Term lang = function.getTerms().get(1);
+						sb.append(getDisplayName(var));
+						sb.append("@");
+						sb.append(lang.toString());
+					}
 				} else {
 					// for the other data types
 					Term var = function.getTerms().get(0);
