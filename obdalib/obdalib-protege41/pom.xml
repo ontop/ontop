@@ -317,7 +317,8 @@
 						<!-- This makes sure any dependency in the obdalib <dependency> dependencies 
 							are packed as .classes (uncompressed, no jars) and the rest is packed as 
 							.jars -->
-						<Embed-Dependency>obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency>
+						<!-- <Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
+						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
 						<!-- necessary for protege 4 plugins -->
 						<Bundle-Category>protege</Bundle-Category>
@@ -332,10 +333,10 @@
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
 						<Bundle-Build>${buildNumber}</Bundle-Build>
-						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
+<!-- 						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
 							!org.w3c.dom.traversal*</Private-Package>
-						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>org.w3c.dom.*,javax.swing.*,javax.naming.*, javax.xml.parsers.*,org.xml.sax.*, org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
+ -->						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
+						<Import-Package>it.unibz.krdb.obda.*, org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
 							org.semanticweb.*,
 							!com.touchgraph*, !org.codehaus*, !org.json*,
 							!org.w3c.dom*,
