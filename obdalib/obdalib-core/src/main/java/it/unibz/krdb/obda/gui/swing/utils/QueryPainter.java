@@ -489,6 +489,8 @@ public class QueryPainter {
 			parsingException = e;
 //			log.warn(e.getMessage(), e);
 			return null;
+		} catch (Exception e) {
+			return null;
 		}
 	}
 

@@ -567,6 +567,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		} catch (RecognitionException e) {
 //			log.warn(e.getMessage());
 			return null;
+		} catch (Exception e) {
+			return null;
 		}
 	}
 

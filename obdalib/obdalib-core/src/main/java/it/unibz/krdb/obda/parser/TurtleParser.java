@@ -11,8 +11,8 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
@@ -32,13 +32,8 @@ import org.antlr.runtime.Parser;
 import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
+import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class TurtleParser extends Parser {
@@ -150,7 +145,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "parse"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:100:1: parse returns [CQIE value] : ( statement )* EOF ;
-    public final CQIE parse() throws RecognitionException {
+    public final CQIE parse() throws Exception {
         CQIE value = null;
 
 
@@ -225,7 +220,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "statement"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:115:1: statement returns [List<Atom> value] : ( directive PERIOD | triples PERIOD );
-    public final List<Atom> statement() throws RecognitionException {
+    public final List<Atom> statement() throws Exception {
         List<Atom> value = null;
 
 
@@ -463,7 +458,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "triples"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:140:1: triples returns [List<Atom> value] : subject predicateObjectList ;
-    public final List<Atom> triples() throws RecognitionException {
+    public final List<Atom> triples() throws Exception {
         List<Atom> value = null;
 
 
@@ -513,7 +508,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "predicateObjectList"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:146:1: predicateObjectList returns [List<Atom> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
-    public final List<Atom> predicateObjectList() throws RecognitionException {
+    public final List<Atom> predicateObjectList() throws Exception {
         List<Atom> value = null;
 
 
@@ -699,7 +694,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "objectList"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:185:1: objectList returns [List<Term> value] : o1= object ( COMMA o2= object )* ;
-    public final List<Term> objectList() throws RecognitionException {
+    public final List<Term> objectList() throws Exception {
         List<Term> value = null;
 
 
@@ -776,7 +771,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "subject"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:192:1: subject returns [Term value] : ( variable | function | uriTemplateFunction );
-    public final Term subject() throws RecognitionException {
+    public final Term subject() throws Exception {
         Term value = null;
 
 
@@ -913,7 +908,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "object"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:204:1: object returns [Term value] : ( resource | function | literal | variable | dataTypeFunction | uriTemplateFunction );
-    public final Term object() throws RecognitionException {
+    public final Term object() throws Exception {
         Term value = null;
 
 
@@ -1472,7 +1467,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "function"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:246:1: function returns [Function value] : resource LPAREN terms RPAREN ;
-    public final Function function() throws RecognitionException {
+    public final Function function() throws Exception {
         Function value = null;
 
 
@@ -1527,7 +1522,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "dataTypeFunction"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:255:1: dataTypeFunction returns [Function value] : ( variable AT language | variable REFERENCE resource );
-    public final Function dataTypeFunction() throws RecognitionException {
+    public final Function dataTypeFunction() throws Exception {
         Function value = null;
 
 
@@ -1643,7 +1638,7 @@ public class TurtleParser extends Parser {
                           } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
                         	functionSymbol = dfac.getDataTypePredicateBoolean();
                           } else {
-                            throw new RecognitionException();
+                            throw new Exception("Unknown datatype: " + functionName);
                           }
                           value = dfac.getFunctionalTerm(functionSymbol, var);
                         
@@ -1669,7 +1664,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "uriTemplateFunction"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:287:1: uriTemplateFunction returns [Function value] : LESS stringLiteral GREATER ;
-    public final Function uriTemplateFunction() throws RecognitionException {
+    public final Function uriTemplateFunction() throws Exception {
         Function value = null;
 
 
@@ -1710,7 +1705,7 @@ public class TurtleParser extends Parser {
                     
                     String uri = directives.get(prefix);        
                     if (uri == null) {
-                      throw new RecognitionException(); // the prefix is unknown.
+                      throw new Exception("The prefix name is unknown: " + prefix); // the prefix is unknown.
                     }
                     template = template.replaceFirst(prefixPlaceHolder, uri);
                   }
@@ -1725,7 +1720,15 @@ public class TurtleParser extends Parser {
                     template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
                     
                     // extract the variable name only, e.g., "{?var}" --> "var"
-                    terms.add(dfac.getVariable(placeHolder.substring(2, placeHolder.length()-1)));
+                    try {
+                    	String variableName = placeHolder.substring(2, placeHolder.length()-1);                    	
+                    	if (variableName.equals("")) {
+                    		throw new Exception("Variable name has not been properly defined!");
+                    	}
+                        terms.add(dfac.getVariable(variableName));
+                    } catch (IndexOutOfBoundsException e) {
+                    	throw new Exception("Variable name has not been properly defined!");
+                    }
                   }
                   // replace the placeholder string to the original. The current string becomes the template
                   template = template.replaceAll("\\[\\]", "{}");
@@ -1755,7 +1758,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "terms"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:335:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
-    public final Vector<Term> terms() throws RecognitionException {
+    public final Vector<Term> terms() throws Exception {
         Vector<Term> value = null;
 
 
@@ -1832,7 +1835,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "term"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:342:1: term returns [Term value] : ( function | variable | literal );
-    public final Term term() throws RecognitionException {
+    public final Term term() throws Exception {
         Term value = null;
 
 
@@ -1942,7 +1945,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "literal"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:348:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
-    public final Term literal() throws RecognitionException {
+    public final Term literal() throws Exception {
         Term value = null;
 
 
@@ -2147,7 +2150,7 @@ public class TurtleParser extends Parser {
 
     // $ANTLR start "dataTypeString"
     // C:\\Project\\Obdalib\\obdalib-parent\\obdalib-core\\src\\main\\java\\it\\unibz\\krdb\\obda\\parser\\Turtle.g:369:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
-    public final Term dataTypeString() throws RecognitionException {
+    public final Term dataTypeString() throws Exception {
         Term value = null;
 
 
@@ -2193,7 +2196,7 @@ public class TurtleParser extends Parser {
                   } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
                 	functionSymbol = dfac.getDataTypePredicateBoolean();
                   } else {
-                    throw new RecognitionException();
+                    throw new Exception("Unknown datatype: " + functionName);
                   }
                   value = dfac.getFunctionalTerm(functionSymbol, constant);
                 

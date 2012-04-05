@@ -50,9 +50,8 @@ public class TurtleSyntaxParser {
 	 * @param input
 	 *            A target query string written in Turtle syntax.
 	 * @return A CQIE object.
-	 * @throws RecognitionException if the syntax is not supported yet.
 	 */
-	public CQIE parse(String input) throws RecognitionException {
+	public CQIE parse(String input) throws Exception {
 		if (prefMan != null) {
 			// Update the input by appending the directives
 			input = appendDirectives(input);

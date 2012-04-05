@@ -118,11 +118,13 @@ public class TurtleSyntaxParserTest extends TestCase {
 		
 		try {
 	    	parser.parse(input);
-	    }
-	    catch (RecognitionException e) {
+	    } catch (RecognitionException e) {
 	      log.debug(e.getMessage());
 	      return false;
-	    }
+	    } catch (Exception e) {
+	    	log.debug(e.getMessage());
+		    return false;
+		}
 	    return true;
 	}
 	
