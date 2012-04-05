@@ -116,6 +116,11 @@
 			<version>2.2</version>
 		</dependency>
 		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>json-jena</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>3.4.4</version>
@@ -336,13 +341,16 @@
 <!-- 						<Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges,
 							!org.w3c.dom.traversal*</Private-Package>
  -->						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>it.unibz.krdb.obda.*, org.protege.osgi.jdbc, org.protege.osgi.*, uk.ac.manchester.*, org.protege.*,
+						<Import-Package>!org.json, javax.xml.datatype, javax.swing.*, 
+						    javax.accessibility, javax.naming.*, javax.xml.parsers.*,org.xml.sax.*, 
+						    it.unibz.krdb.obda.*, org.protege.osgi.jdbc, org.protege.osgi.*, 
+						    uk.ac.manchester.*, org.protege.*,
 							org.semanticweb.*,
-							!com.touchgraph*, !org.codehaus*, !org.json*,
+							!com.touchgraph*, !org.codehaus.janino, org.codehaus.* 
 							!org.w3c.dom*,
 							!org.xml.*,!sun.*,!jena.*, !junit.*, !org.antl*,
 							!org.apache*,
-							org.codehaus*, !org.ietf.*, !javax.*, !com.hp.*,
+							!org.ietf.*, !javax.*, !com.hp.*,
 							!arq*, !antlr*,
 							!EDU.oswego.cs.dl.util.concurrent,
 							!osgi.wiring.package,
