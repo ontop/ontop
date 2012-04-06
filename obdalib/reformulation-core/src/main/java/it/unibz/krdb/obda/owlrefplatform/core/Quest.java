@@ -241,7 +241,7 @@ public class Quest implements Serializable {
 			aboxJdbcDriver = preferences.getProperty(QuestPreferences.JDBC_DRIVER);
 		}
 
-		log.info("Active preferences:");
+		log.debug("Active preferences:");
 
 		for (Object key : preferences.keySet()) {
 			log.info("{} = {}", key, preferences.get(key));
@@ -528,7 +528,6 @@ public class Quest implements Serializable {
 
 			log.error(e.getMessage(), e);
 			OBDAException ex = new OBDAException(e.getMessage(), e);
-			e.fillInStackTrace();
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
 				SQLException e1 = sqle.getNextException();

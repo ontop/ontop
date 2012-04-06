@@ -1,15 +1,14 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import junit.framework.TestCase;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Collections;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+
+import java.util.Set;
+
+import junit.framework.TestCase;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReformulationTest extends TestCase {
 

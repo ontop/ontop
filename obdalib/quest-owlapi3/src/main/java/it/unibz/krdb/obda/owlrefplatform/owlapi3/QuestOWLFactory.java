@@ -1,13 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi3.OBDAOWLReasonerFactory;
 
 import java.util.Properties;
 
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;

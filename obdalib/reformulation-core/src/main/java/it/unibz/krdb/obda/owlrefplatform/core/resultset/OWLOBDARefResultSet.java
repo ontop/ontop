@@ -216,7 +216,10 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 					// Term langterm = ftype.getTerms().get(1);
 					String value = set.getString(name);
 					String language = set.getString(name + "LitLang");
-					result = fac.getValueConstant(value, language);
+					if (language == null || language.trim().equals(""))
+						result = fac.getValueConstant(value);
+					else
+						result = fac.getValueConstant(value, language);
 
 				} else {
 					result = fac.getValueConstant(set.getString(name), type);

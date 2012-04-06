@@ -2,7 +2,6 @@ package it.unibz.krdb.obda.owlapi3;
 
 import java.util.Properties;
 
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public interface OBDAOWLReasonerFactory extends OWLReasonerFactory {

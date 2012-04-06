@@ -193,19 +193,20 @@ public class OBDAModelManager implements Disposable {
 			EventType type = event.getType();
 			OWLModelManager source = event.getSource();
 
+			
 			switch (type) {
 			case ABOUT_TO_CLASSIFY:
 				log.debug("ABOUT TO CLASSIFY");
-				if ((!inititializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
-					OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
-					if (reasoner instanceof QuestOWL) {
-						QuestOWL quest = (QuestOWL) reasoner;
-						ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit
-								.get(QuestPreferences.class.getName());
-						quest.setPreferences(reasonerPreference);
-						quest.loadOBDAModel(getActiveOBDAModel());
-					}
-				}
+//				if ((!inititializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
+//					OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
+//					if (reasoner instanceof QuestOWL) {
+//						QuestOWL quest = (QuestOWL) reasoner;
+//						ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit
+//								.get(QuestPreferences.class.getName());
+//						quest.setPreferences(reasonerPreference);
+//						quest.loadOBDAModel(getActiveOBDAModel());
+//					}
+//				}
 				break;
 
 			case ENTITY_RENDERER_CHANGED:

@@ -12,7 +12,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
 public class OWLResultSetTableModel implements TableModel {

@@ -5,7 +5,6 @@ import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.util.List;
 

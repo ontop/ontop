@@ -434,13 +434,16 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 * language is a variable that must be obtained from
 							 * a column in the query
 							 */
+							String lang = "''";
+							if (ov.getTerms().size() > 1) {
 							Term langTerm = ov.getTerms().get(1);
-							String lang = null;
+							
 							if (langTerm instanceof ValueConstant) {
 								lang = getQuotedString(((ValueConstant) langTerm).getValue());
 							} else {
 								lang = getSQLString(langTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
 							}
+							}	
 							sb.append(lang);
 							sb.append(" AS ");
 							sb.append(signature.get(hpos) + "LitLang, ");

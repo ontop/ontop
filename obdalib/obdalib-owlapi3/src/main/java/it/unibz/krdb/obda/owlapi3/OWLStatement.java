@@ -1,7 +1,5 @@
 package it.unibz.krdb.obda.owlapi3;
 
-import it.unibz.krdb.obda.model.OBDAException;
-
 import org.semanticweb.owlapi.model.OWLException;
 
 public interface OWLStatement {
