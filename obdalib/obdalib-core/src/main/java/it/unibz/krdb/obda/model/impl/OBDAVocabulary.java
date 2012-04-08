@@ -92,4 +92,6 @@ public class OBDAVocabulary {
 	
 	public static final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(URI.create(XSD_BOOLEAN_URI), COL_TYPE.BOOLEAN);
 	
+	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE, XSD_DATETIME, XSD_BOOLEAN};
+	
 }

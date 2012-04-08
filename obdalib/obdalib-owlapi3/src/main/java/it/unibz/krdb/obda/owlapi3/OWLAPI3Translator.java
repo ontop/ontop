@@ -18,9 +18,11 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
+import it.unibz.krdb.obda.ontology.impl.PropertySomeDataTypeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
@@ -88,7 +90,7 @@ public class OWLAPI3Translator {
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	
+
 	private static final Logger log = LoggerFactory.getLogger(OWLAPI3Translator.class);
 
 	/*
@@ -155,6 +157,7 @@ public class OWLAPI3Translator {
 		// ManchesterOWLSyntaxOWLObjectRendererImpl rend = new
 		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
+		
 		Ontology dl_onto = ofac.createOntology(owl.getOntologyID().getOntologyIRI().toURI());
 
 		/*
@@ -197,6 +200,12 @@ public class OWLAPI3Translator {
 		Iterator<OWLAxiom> it = axioms.iterator();
 		while (it.hasNext()) {
 			OWLAxiom axiom = it.next();
+			
+			/*** 
+			 * Important to use the negated normal form of the axioms, and not the simple ones.
+			 */
+			axiom = axiom.getNNF();
+			
 			try {
 				if (axiom instanceof OWLEquivalentClassesAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -425,35 +434,70 @@ public class OWLAPI3Translator {
 
 			/*
 			 * We found an existential, we need to get an auxiliary set of
-			 * subClassAssertion
+			 * subClassAssertion. Remember, each \exists R.A might have an
+			 * encoding using existing two axioms. \exists R'^- subClassof A, R'
+			 * subRoleOf R.
 			 */
 			List<SubDescriptionAxiom> aux = auxiliaryAssertions.get(superDescription);
+			PropertySomeRestriction auxclass = null;
 			if (aux == null) {
 				/*
-				 * no aux subclass assertions found for this exists R.A,
+				 * no auxiliary subclass assertions found for this exists R.A,
 				 * creating a new one
 				 */
-				PropertySomeClassRestriction eR = (PropertySomeClassRestriction) superDescription;
-				Predicate role = eR.getPredicate();
-				OClass filler = eR.getFiller();
+				Predicate role = null;
+				BasicClassDescription filler = null;
+				boolean isInverse = false;
 
-				Property auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate(URI
-						.create(OntologyImpl.AUXROLEURI + auxRoleCounter)));
+				if (superDescription instanceof PropertySomeClassRestriction) {
+					PropertySomeClassRestriction eR = (PropertySomeClassRestriction) superDescription;
+					role = eR.getPredicate();
+					filler = eR.getFiller();
+					isInverse = eR.isInverse();
+				} else if (superDescription instanceof PropertySomeDataTypeRestrictionImpl) {
+					PropertySomeDataTypeRestrictionImpl eR = (PropertySomeDataTypeRestrictionImpl) superDescription;
+					role = eR.getPredicate();
+					filler = eR.getFiller();
+					isInverse = eR.isInverse();
+				}
+
+				Property auxRole = ofac
+						.createProperty(dfac.getObjectPropertyPredicate(URI.create(OntologyImpl.AUXROLEURI + auxRoleCounter)));
 				auxRoleCounter += 1;
+
+				PropertySomeRestriction propertySomeRestriction = ofac.getPropertySomeRestriction(auxRole.getPredicate(), isInverse);
+				auxclass = propertySomeRestriction;
 
 				/* Creating the new subrole assertions */
 				SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) ofac.createSubPropertyAxiom(auxRole,
-						ofac.createProperty(role, eR.isInverse()));
+						ofac.createProperty(role, isInverse));
 				/* Creatin the range assertion */
-				SubClassAxiomImpl subclass = (SubClassAxiomImpl) ofac.createSubClassAxiom(
-						ofac.getPropertySomeRestriction(auxRole.getPredicate(), true), filler);
+				PropertySomeRestriction propertySomeRestrictionInv = ofac.getPropertySomeRestriction(auxRole.getPredicate(),
+						!isInverse);
+
+				SubClassAxiomImpl subclass = (SubClassAxiomImpl) ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
 				aux = new LinkedList<SubDescriptionAxiom>();
 				aux.add(subclass);
 				aux.add(subrole);
 
+				auxiliaryAssertions.put(superDescription, aux);
+
 				dl_onto.addAssertion(subclass);
 				dl_onto.addAssertion(subrole);
+			} else {
+				/*
+				 * The encoding already exists, so we retrieve it, and get the
+				 * existsR that we need for the extra axiom
+				 */
+				SubClassAxiomImpl axiom1 = (SubClassAxiomImpl) aux.get(0);
+				PropertySomeRestriction propertySomeInv = (PropertySomeRestriction) axiom1.getSub();
+				PropertySomeRestriction propertySome = ofac.getPropertySomeRestriction(propertySomeInv.getPredicate(),
+						!propertySomeInv.isInverse());
+				auxclass = propertySome;
 			}
+
+			SubClassAxiomImpl inc = (SubClassAxiomImpl) ofac.createSubClassAxiom(subDescription, auxclass);
+			dl_onto.addAssertion(inc);
 		}
 	}
 
@@ -585,7 +629,8 @@ public class OWLAPI3Translator {
 				result.add(cd);
 			} else if (filler instanceof OWLDatatype) {
 				Property role = getRoleExpression(property);
-				ClassDescription cd = ofac.createPropertySomeDataTypeRestriction(role.getPredicate(), role.isInverse(), getDataTypeExpression(filler));
+				ClassDescription cd = ofac.createPropertySomeDataTypeRestriction(role.getPredicate(), role.isInverse(),
+						getDataTypeExpression(filler));
 				result.add(cd);
 			}
 		} else {
@@ -860,11 +905,9 @@ public class OWLAPI3Translator {
 		if (datatype == null) {
 			return Predicate.COL_TYPE.LITERAL;
 		}
-		if (datatype.isString() 
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_STRING) { // xsd:string
+		if (datatype.isString() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_STRING) { // xsd:string
 			return Predicate.COL_TYPE.STRING;
-		} else if (datatype.isRDFPlainLiteral() 
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL // rdf:PlainLiteral
+		} else if (datatype.isRDFPlainLiteral() || datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL // rdf:PlainLiteral
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDF_XML_LITERAL // rdf:XmlLiteral
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) { // rdfs:Literal
 			return Predicate.COL_TYPE.LITERAL;
@@ -881,15 +924,12 @@ public class OWLAPI3Translator {
 			return Predicate.COL_TYPE.INTEGER;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DECIMAL) { // xsd:decimal
 			return Predicate.COL_TYPE.DECIMAL;
-		} else if (datatype.isFloat() 
-				|| datatype.isDouble() 
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE // xsd:double
+		} else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE // xsd:double
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
 			return Predicate.COL_TYPE.DOUBLE;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
 			return Predicate.COL_TYPE.DATETIME;
-		} else if (datatype.isBoolean() 
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) { // xsd:boolean
+		} else if (datatype.isBoolean() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) { // xsd:boolean
 			return Predicate.COL_TYPE.BOOLEAN;
 		} else {
 			throw new TranslationException("Unsupported data range: " + datatype.toString());
@@ -897,16 +937,23 @@ public class OWLAPI3Translator {
 	}
 
 	private Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
-		switch(type) {
-			case LITERAL: return dfac.getDataTypePredicateLiteral();
-			case STRING: return dfac.getDataTypePredicateString();
-			case INTEGER: return dfac.getDataTypePredicateInteger();
-			case DECIMAL: return dfac.getDataTypePredicateDecimal();
-			case DOUBLE: return dfac.getDataTypePredicateDouble();
-			case DATETIME: return dfac.getDataTypePredicateDateTime();
-			case BOOLEAN: return dfac.getDataTypePredicateBoolean();
-			default: 
-				return dfac.getDataTypePredicateLiteral();
+		switch (type) {
+		case LITERAL:
+			return dfac.getDataTypePredicateLiteral();
+		case STRING:
+			return dfac.getDataTypePredicateString();
+		case INTEGER:
+			return dfac.getDataTypePredicateInteger();
+		case DECIMAL:
+			return dfac.getDataTypePredicateDecimal();
+		case DOUBLE:
+			return dfac.getDataTypePredicateDouble();
+		case DATETIME:
+			return dfac.getDataTypePredicateDateTime();
+		case BOOLEAN:
+			return dfac.getDataTypePredicateBoolean();
+		default:
+			return dfac.getDataTypePredicateLiteral();
 		}
 	}
 }

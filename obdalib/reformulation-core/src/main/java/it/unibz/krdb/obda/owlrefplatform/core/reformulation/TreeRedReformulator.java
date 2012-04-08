@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
@@ -108,16 +109,16 @@ public class TreeRedReformulator implements QueryRewriter {
 		boolean loop = true;
 		while (loop) {
 
-//			/*
-//			 * This is a safety check to avoid running out of memory during a
-//			 * reformulation.
-//			 */
-//			try {
-//				MemoryUtils.checkAvailableMemory();
-//			} catch (MemoryLowException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			// /*
+			// * This is a safety check to avoid running out of memory during a
+			// * reformulation.
+			// */
+			// try {
+			// MemoryUtils.checkAvailableMemory();
+			// } catch (MemoryLowException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 
 			loop = false;
 			HashSet<CQIE> newqueriesbyPI = new HashSet<CQIE>(1000);
@@ -250,7 +251,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		}
 
-		List<CQIE> resultlist = new ArrayList<CQIE>((int)(result.size()*1.5));
+		List<CQIE> resultlist = new ArrayList<CQIE>((int) (result.size() * 1.5));
 		resultlist.addAll(result);
 		log.debug("Main loop ended. Queries produced: {}", resultlist.size());
 
@@ -258,7 +259,10 @@ public class TreeRedReformulator implements QueryRewriter {
 		resultlist = cleanAuxiliaryQueries(resultlist);
 		log.debug("Removed auxiliary queries. New size: {}", resultlist.size());
 
-//		log.debug("Reformulation: {}", resultlist);
+		resultlist = cleanEmptyQueries(resultlist);
+		log.debug("Removed empty queries. New size: {}", resultlist.size());
+
+		// log.debug("Reformulation: {}", resultlist);
 
 		/* One last pass of the syntactic containment checker */
 
@@ -283,8 +287,8 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		QueryUtils.copyQueryModifiers(input, resultprogram);
 
-//		if (showreformulation)
-//			log.debug("Computed reformulation: \n{}", resultprogram);
+		// if (showreformulation)
+		// log.debug("Computed reformulation: \n{}", resultprogram);
 		log.debug("Reformulation size: {}, Time elapse: {}ms", resultlist.size(), milliseconds);
 
 		// log.info("Time elapsed for reformulation: {}s", seconds);
@@ -310,18 +314,50 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * @return
 	 */
 	private List<CQIE> cleanAuxiliaryQueries(List<CQIE> originalQueries) {
-		List<CQIE> newQueries = new ArrayList<CQIE>((int)(originalQueries.size()*1.5));
+		List<CQIE> newQueries = new ArrayList<CQIE>((int) (originalQueries.size() * 1.5));
 		for (CQIE query : originalQueries) {
 			List<Atom> body = query.getBody();
 			boolean auxiliary = false;
 			for (Atom atom : body) {
-				if (atom.getPredicate().getName().toString().substring(0, OntologyImpl.AUXROLEURI.length())
-						.equals(OntologyImpl.AUXROLEURI)) {
+				if (atom.getPredicate().getName().toString().substring(0, OntologyImpl.AUXROLEURI.length()).equals(OntologyImpl.AUXROLEURI)) {
 					auxiliary = true;
 					break;
 				}
 			}
 			if (!auxiliary) {
+				newQueries.add(query);
+			}
+		}
+		return newQueries;
+	}
+
+	/***
+	 * Eliminates queries that must be empty becauase there are unsatisfiable
+	 * atoms. At this moment, only queries containing atoms of the form
+	 * "xsd:string(?x)" are empty queries.
+	 * 
+	 * @param originalQueries
+	 * @return
+	 */
+	private List<CQIE> cleanEmptyQueries(List<CQIE> originalQueries) {
+		List<CQIE> newQueries = new ArrayList<CQIE>((int) (originalQueries.size() * 1.5));
+		for (CQIE query : originalQueries) {
+			List<Atom> body = query.getBody();
+			boolean empty = false;
+			for (Atom atom : body) {
+				Predicate predicate = atom.getPredicate();
+				for (Predicate datatype : OBDAVocabulary.QUEST_DATATYPE_PREDICATES) {
+					if (predicate == datatype) {
+						empty = true;
+						break;
+					}
+					if (empty)
+						break;
+				}
+				if (empty)
+					break;
+			}
+			if (!empty) {
 				newQueries.add(query);
 			}
 		}

@@ -228,7 +228,29 @@ public class SPARQLDatalogTranslator {
 
 				// Construct the predicate
 				URI predicateUri = objectUri;
-				predicate = ofac.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
+				
+				if (predicateUri.toString().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+					predicate = OBDAVocabulary.RDFS_LITERAL;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+					predicate = OBDAVocabulary.XSD_BOOLEAN;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_DATETIME_URI)) {
+					predicate = OBDAVocabulary.XSD_DATETIME;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+					predicate = OBDAVocabulary.XSD_DECIMAL;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
+					predicate = OBDAVocabulary.XSD_DOUBLE;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+					predicate = OBDAVocabulary.XSD_DOUBLE;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_INT_URI)) {
+					predicate = OBDAVocabulary.XSD_INTEGER;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_INTEGER_URI)) {
+					predicate = OBDAVocabulary.XSD_INTEGER;
+				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_STRING_URI)) {
+					predicate = OBDAVocabulary.XSD_STRING;
+				} else {
+					predicate = ofac.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
+				}
+				
 			} else {
 				// Subject node
 				if (s instanceof Var) {

@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -36,7 +37,7 @@ public class OntologyImpl implements Ontology {
 	private Set<Predicate> concepts = null;
 
 	private Set<Predicate> roles = null;
-	
+
 	private Set<Predicate> reserved = null;
 
 	private URI ontouri = null;
@@ -58,15 +59,15 @@ public class OntologyImpl implements Ontology {
 	public boolean isSaturated = false;
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	
+
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
-	
+
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
 
 	// private Set<PositiveInclusion> assertions = null;
-	
+
 	class ReservedPredicate extends HashSet<Predicate> {
 		public ReservedPredicate() {
 			add(OBDAVocabulary.RDFS_LITERAL);
@@ -78,7 +79,7 @@ public class OntologyImpl implements Ontology {
 			add(OBDAVocabulary.XSD_BOOLEAN);
 		}
 	}
-	
+
 	OntologyImpl(URI uri) {
 		ontouri = uri;
 		originalassertions = new LinkedHashSet<Axiom>();
@@ -140,14 +141,14 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public boolean referencesPredicates(Collection<Predicate> preds) {
 		for (Predicate pred : preds) {
-			
+
 			/***
-			 * Make sure we never validate against auxiliary roles introduced
-			 * by the translation of the OWL ontology
+			 * Make sure we never validate against auxiliary roles introduced by
+			 * the translation of the OWL ontology
 			 */
 			if (preds.toString().contains(AUXROLEURI))
 				continue;
-			
+
 			if (!(concepts.contains(pred) || roles.contains(pred) || reserved.contains(pred)))
 				return false;
 		}
@@ -163,7 +164,7 @@ public class OntologyImpl implements Ontology {
 		if (!referencesPredicates(assertion.getReferencedEntities())) {
 			IllegalArgumentException ex = new IllegalArgumentException("At least one of these predicates is unknown: "
 					+ assertion.getReferencedEntities().toString());
-//			ex.fillInStackTrace();
+			// ex.fillInStackTrace();
 			throw ex;
 		}
 
@@ -420,6 +421,14 @@ public class OntologyImpl implements Ontology {
 				Set<SubDescriptionAxiom> rightNonExistential = getRightNotExistential(acd.getPredicate());
 				rightNonExistential.add(pi);
 
+			} else if (description2 instanceof DataType) {
+				DataType acd = (DataType) description2;
+				Set<SubDescriptionAxiom> rightAssertion = getRight(acd.getPredicate());
+				rightAssertion.add(pi);
+
+				Set<SubDescriptionAxiom> rightNonExistential = getRightNotExistential(acd.getPredicate());
+				rightNonExistential.add(pi);
+
 			} else if (description2 instanceof PropertySomeRestrictionImpl) {
 				PropertySomeRestrictionImpl ecd = (PropertySomeRestrictionImpl) description2;
 				Set<SubDescriptionAxiom> rightAssertion = getRight(ecd.getPredicate());
@@ -432,6 +441,11 @@ public class OntologyImpl implements Ontology {
 			/* Processing left side */
 			if (description1 instanceof ClassImpl) {
 				ClassImpl acd = (ClassImpl) description1;
+				Set<SubDescriptionAxiom> leftAssertion = getLeft(acd.getPredicate());
+				leftAssertion.add(pi);
+
+			} else if (description1 instanceof DataType) {
+				DataType acd = (DataType) description1;
 				Set<SubDescriptionAxiom> leftAssertion = getLeft(acd.getPredicate());
 				leftAssertion.add(pi);
 

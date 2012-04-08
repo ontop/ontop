@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -74,6 +75,8 @@ public class PositiveInclusionApplicator {
 			Predicate inc_predicate = null;
 			if (inc instanceof OClass) {
 				inc_predicate = ((OClass) inc).getPredicate();
+			}if (inc instanceof DataType) {
+				inc_predicate = ((DataType) inc).getPredicate();
 			} else if (inc instanceof PropertySomeRestriction) {
 				inc_predicate = ((PropertySomeRestriction) inc).getPredicate();
 			}
