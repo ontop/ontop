@@ -63,17 +63,16 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	 */
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed" desc="Generated
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         scrQueryResult = new javax.swing.JScrollPane();
         tblQueryResult = new javax.swing.JTable();
         pnlCommandButton = new javax.swing.JPanel();
         cmdExportResult = new javax.swing.JButton();
 
-        setMinimumSize(new java.awt.Dimension(400, 480));
         setLayout(new java.awt.BorderLayout());
 
+        setMinimumSize(new java.awt.Dimension(400, 480));
         tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -86,19 +85,22 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
         add(scrQueryResult, java.awt.BorderLayout.CENTER);
 
-        pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
-        pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
         pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        cmdExportResult.setText("Export Result to CSV File");
+        pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
+        pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
+        cmdExportResult.setText("Export...");
+        cmdExportResult.setEnabled(false);
         cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdExportResultActionPerformed(evt);
             }
         });
+
         pnlCommandButton.add(cmdExportResult);
 
         add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
+
     }// </editor-fold>//GEN-END:initComponents
 
 

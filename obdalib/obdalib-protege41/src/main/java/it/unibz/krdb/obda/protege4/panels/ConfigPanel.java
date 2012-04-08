@@ -3,6 +3,8 @@ package it.unibz.krdb.obda.protege4.panels;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 
+import java.awt.Dimension;
+
 public class ConfigPanel extends javax.swing.JPanel {
 
     /**
@@ -18,6 +20,8 @@ public class ConfigPanel extends javax.swing.JPanel {
         this.preference = preference;
         initComponents();
         setSelections(preference);
+        this.setMaximumSize(new Dimension(1024,768));
+        this.setMinimumSize(new Dimension(1024,768));
     }
 
     private void setSelections(QuestPreferences preference) {
@@ -247,7 +251,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
         pnlTWConfiguration.add(pnlReformulationMethods, gridBagConstraints);
 
-        pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Data Configuration"));
+        pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "ABox mode"));
         pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(520, 280));
         pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(520, 280));
         pnlABoxConfiguration.setLayout(new java.awt.BorderLayout());
@@ -263,7 +267,7 @@ public class ConfigPanel extends javax.swing.JPanel {
         AboxMode.add(radVirtualObda);
         radVirtualObda.setFont(new java.awt.Font("Tahoma", 1, 11));
         radVirtualObda.setSelected(true);
-        radVirtualObda.setText("Virtual OBDA.");
+        radVirtualObda.setText("Virtual ABox.");
         radVirtualObda.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         radVirtualObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -289,17 +293,17 @@ public class ConfigPanel extends javax.swing.JPanel {
 
         AboxMode.add(radClassicObda);
         radClassicObda.setFont(new java.awt.Font("Tahoma", 1, 11));
-        radClassicObda.setText("Classic OBDA.");
-        radClassicObda.setActionCommand("Classic ABox (= uses pre-defined ABox in the ontology)");
+        radClassicObda.setText("Classic ABox.");
+        radClassicObda.setActionCommand("Classic ABox");
         radClassicObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radClassicObdaActionPerformed(evt);
             }
         });
         pnlClassicalModeInfo.add(radClassicObda);
-        radClassicObda.getAccessibleContext().setAccessibleName("Classic ABox. Uses pre-defined ABox in the ontology.");
+        radClassicObda.getAccessibleContext().setAccessibleName("Classic ABox. The system will maintain ABox assertions in a DB.");
 
-        lblClassicModeInfo.setText("The reasoner imports the data into a new database (makes a copy).");
+        lblClassicModeInfo.setText("");
         pnlClassicalModeInfo.add(lblClassicModeInfo);
 
         pnlClassicMode.add(pnlClassicalModeInfo);

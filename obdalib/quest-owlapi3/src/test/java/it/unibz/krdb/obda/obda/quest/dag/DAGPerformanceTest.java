@@ -48,7 +48,7 @@ public class DAGPerformanceTest extends TestCase {
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void testOnto15() throws Exception {
+	public void disabledtestOnto15() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
@@ -134,7 +134,7 @@ public class DAGPerformanceTest extends TestCase {
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void testOnto17() throws Exception {
+	public void disabledtestOnto17() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));
@@ -219,7 +219,7 @@ public class DAGPerformanceTest extends TestCase {
 	 * Test the performance of classifying an ontology with 500 classes, 1000
 	 * subclassAxioms and 2 roles
 	 */
-	public void testOnto19() throws Exception {
+	public void disabledtestOnto19() throws Exception {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLDataFactory fac = man.getOWLDataFactory();
 		OWLOntology ont = man.createOntology(IRI.create("http://www.obda.org/krdb/obda/quest/core/dag/test.owl"));

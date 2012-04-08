@@ -17,6 +17,10 @@
 	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOWL" level="DEBUG" />
 	<logger name="it.unibz.krdb.obda.owlrefplatform.core.QuestOBDAStatement" level="DEBUG" />
 
+
+	<!--  Quest Core -->
+	<logger name="it.unibz.krdb.obda.owlrefplatform.core.Quest" level="DEBUG"/>
+
 	<!-- Query Rewriting component -->
 	<!--
 	<logger name="it.unibz.krdb.obda.owlrefplatform.core.reformulation" level="DEBUG" />

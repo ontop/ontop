@@ -124,11 +124,11 @@
     
   <!-- OBDA preferences -->
     
-  <extension id="preferences.obdaplugin"
+  <!-- <extension id="preferences.obdaplugin"
              point="org.protege.editor.core.application.preferencespanel">
     <label value="OBDA"/>
     <class value="it.unibz.krdb.obda.protege4.gui.preferences.OBDAPluginPreferencesPanel"/>
-  </extension>
+  </extension> -->
   
   <extension id="reformulation-configuration"
              point="org.protege.editor.core.application.preferencespanel">

@@ -23,6 +23,8 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 
 	public PrefixManagerWrapper(PrefixOWLOntologyFormat owlmapper) {
 		this.owlmapper = owlmapper;
+		String questprefix = owlmapper.getPrefix("quest");
+		
 	}
 
 	@Override
@@ -34,7 +36,19 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	@Override
 	public String getPrefixForURI(String uri) {
 		String prefix = owlmapper.getPrefixIRI(IRI.create(uri));
+		String p2 = owlmapper.getPrefix(uri);
+		
+		for (String key: owlmapper.getPrefixName2PrefixMap().keySet()) {
+			if (owlmapper.getPrefixName2PrefixMap().get(key).equals(uri)) {
+				prefix = key;
+			}
+		}
+		if (prefix == null && owlmapper.getDefaultPrefix().equals(uri))
+			prefix = ":";
+		
 		//we use -1 since OWL API return colon with prefxies, e.g., test:
+//		System.out.println(uri);
+//		System.out.println(prefix);
 		return prefix.substring(0,prefix.length()-1);
 	}
 

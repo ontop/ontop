@@ -10,7 +10,9 @@ import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -19,13 +21,10 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
-import org.protege.editor.owl.ui.renderer.OWLEntityRendererImpl;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -89,6 +88,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		selectorPanel.setLayout(new GridBagLayout());
 
 		JLabel label = new JLabel("Select datasource: ");
+		label.setFont(new Font("Dialog", Font.BOLD, 12));
+		label.setForeground(new Color(53,113,163));
 		// label.setBackground(new java.awt.Color(153, 153, 153));
 		// label.setFont(new java.awt.Font("Arial", 1, 11));
 		// label.setForeground(new java.awt.Color(153, 153, 153));

@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -47,6 +48,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		initComponents();
 		setDatasourcesController(model);
 		enableFields(false);
+		
+		lblDataSourceName.setFont(new Font("Dialog", Font.BOLD, 12));
+		lblDataSourceName.setForeground(new Color(53,113,163));
+		lblDataSourceName.setText("Select datasource");
+		
 	}
 
 	public void setDatasourcesController(OBDAModel model) {

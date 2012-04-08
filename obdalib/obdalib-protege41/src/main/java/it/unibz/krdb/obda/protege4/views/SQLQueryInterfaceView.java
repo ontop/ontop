@@ -8,7 +8,9 @@ import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -55,10 +57,14 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		selectorPanel.setLayout(new GridBagLayout());
 
 		JLabel label = new JLabel("Select datasource: ");
-		label.setBackground(new java.awt.Color(153, 153, 153));
-		label.setFont(new java.awt.Font("Arial", 1, 11));
-		label.setForeground(new java.awt.Color(153, 153, 153));
-		label.setPreferredSize(new Dimension(119, 14));
+		
+		label.setFont(new Font("Dialog", Font.BOLD, 12));
+		label.setForeground(new Color(53,113,163));
+		
+//		label.setBackground(new java.awt.Color(153, 153, 153));
+//		label.setFont(new java.awt.Font("Arial", 1, 11));
+//		label.setForeground(new java.awt.Color(153, 153, 153));
+//		label.setPreferredSize(new Dimension(119, 14));
 
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -75,7 +81,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
 		selectorPanel.add(datasourceSelector, gridBagConstraints);
 
-		selectorPanel.setBorder(new TitledBorder("Datasource Selection"));
+		selectorPanel.setBorder(new TitledBorder("Datasource selection"));
 		queryPanel.setBorder(new TitledBorder("SQL Query"));
 
 		setLayout(new BorderLayout());

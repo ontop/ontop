@@ -247,6 +247,12 @@
             </Component>
             <Component class="javax.swing.JLabel" name="lblInsertFilter">
               <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Dialog" size="12" style="1"/>
+                </Property>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="a3" green="71" red="35" type="rgb"/>
+                </Property>
                 <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="text" type="java.lang.String" value="Search:"/>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -269,7 +275,7 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="chkFilter">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Apply Filters"/>
+                <Property name="text" type="java.lang.String" value="Enable filter"/>
               </Properties>
               <Events>
                 <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkFilterItemStateChanged"/>

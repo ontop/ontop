@@ -379,211 +379,207 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-	// desc=" Generated Code ">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		menuMappings = new javax.swing.JPopupMenu();
-		pnlMappingManager = new javax.swing.JPanel();
-		pnlMappingButtons = new javax.swing.JPanel();
-		cmdAddMapping = new javax.swing.JButton();
-		cmdRemoveMapping = new javax.swing.JButton();
-		cmdDuplicateMapping = new javax.swing.JButton();
-		jPanel1 = new javax.swing.JPanel();
-		cmdSelectAll = new javax.swing.JButton();
-		cmdDeselectAll = new javax.swing.JButton();
-		pnlExtraButtons = new javax.swing.JPanel();
-		labelMappings = new javax.swing.JLabel();
-		fieldMappings = new javax.swing.JTextField();
-		lblInsertFilter = new javax.swing.JLabel();
-		txtFilter = new javax.swing.JTextField();
-		chkFilter = new javax.swing.JCheckBox();
-		mappingScrollPane = new javax.swing.JScrollPane();
-		mappingList = new javax.swing.JList();
+        menuMappings = new javax.swing.JPopupMenu();
+        pnlMappingManager = new javax.swing.JPanel();
+        pnlMappingButtons = new javax.swing.JPanel();
+        cmdAddMapping = new javax.swing.JButton();
+        cmdRemoveMapping = new javax.swing.JButton();
+        cmdDuplicateMapping = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        cmdSelectAll = new javax.swing.JButton();
+        cmdDeselectAll = new javax.swing.JButton();
+        pnlExtraButtons = new javax.swing.JPanel();
+        labelMappings = new javax.swing.JLabel();
+        fieldMappings = new javax.swing.JTextField();
+        lblInsertFilter = new javax.swing.JLabel();
+        txtFilter = new javax.swing.JTextField();
+        chkFilter = new javax.swing.JCheckBox();
+        mappingScrollPane = new javax.swing.JScrollPane();
+        mappingList = new javax.swing.JList();
 
-		menuMappings.setLayout(null);
+        menuMappings.setLayout(null);
 
-		setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.GridBagLayout());
 
-		pnlMappingManager.setLayout(new java.awt.BorderLayout());
+        pnlMappingManager.setLayout(new java.awt.BorderLayout());
 
-		pnlMappingManager.setAutoscrolls(true);
-		pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
-		pnlMappingButtons.setLayout(new java.awt.GridBagLayout());
+        pnlMappingManager.setAutoscrolls(true);
+        pnlMappingManager.setPreferredSize(new java.awt.Dimension(400, 200));
+        pnlMappingButtons.setLayout(new java.awt.GridBagLayout());
 
-		pnlMappingButtons.setEnabled(false);
-		cmdAddMapping.setText("Create...");
-		cmdAddMapping.setToolTipText("Create...");
-		cmdAddMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdAddMapping.setContentAreaFilled(false);
-		cmdAddMapping.setIconTextGap(0);
-		cmdAddMapping.setMaximumSize(new java.awt.Dimension(25, 25));
-		cmdAddMapping.setMinimumSize(new java.awt.Dimension(75, 25));
-		cmdAddMapping.setPreferredSize(new java.awt.Dimension(75, 25));
-		cmdAddMapping.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdAddMappingActionPerformed(evt);
-			}
-		});
+        pnlMappingButtons.setEnabled(false);
+        cmdAddMapping.setText("Create...");
+        cmdAddMapping.setToolTipText("Create...");
+        cmdAddMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdAddMapping.setContentAreaFilled(false);
+        cmdAddMapping.setIconTextGap(0);
+        cmdAddMapping.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdAddMapping.setMinimumSize(new java.awt.Dimension(75, 25));
+        cmdAddMapping.setPreferredSize(new java.awt.Dimension(75, 25));
+        cmdAddMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdAddMappingActionPerformed(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-		pnlMappingButtons.add(cmdAddMapping, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdAddMapping, gridBagConstraints);
 
-		cmdRemoveMapping.setText("Remove...");
-		cmdRemoveMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdRemoveMapping.setContentAreaFilled(false);
-		cmdRemoveMapping.setIconTextGap(0);
-		cmdRemoveMapping.setMaximumSize(new java.awt.Dimension(25, 25));
-		cmdRemoveMapping.setMinimumSize(new java.awt.Dimension(75, 25));
-		cmdRemoveMapping.setPreferredSize(new java.awt.Dimension(75, 25));
-		cmdRemoveMapping.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdRemoveMappingActionPerformed(evt);
-			}
-		});
+        cmdRemoveMapping.setText("Remove...");
+        cmdRemoveMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdRemoveMapping.setContentAreaFilled(false);
+        cmdRemoveMapping.setIconTextGap(0);
+        cmdRemoveMapping.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdRemoveMapping.setMinimumSize(new java.awt.Dimension(75, 25));
+        cmdRemoveMapping.setPreferredSize(new java.awt.Dimension(75, 25));
+        cmdRemoveMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRemoveMappingActionPerformed(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-		pnlMappingButtons.add(cmdRemoveMapping, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdRemoveMapping, gridBagConstraints);
 
-		cmdDuplicateMapping.setText("Copy...");
-		cmdDuplicateMapping.setToolTipText("Duplicate mappings");
-		cmdDuplicateMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdDuplicateMapping.setContentAreaFilled(false);
-		cmdDuplicateMapping.setIconTextGap(0);
-		cmdDuplicateMapping.setMaximumSize(new java.awt.Dimension(25, 25));
-		cmdDuplicateMapping.setMinimumSize(new java.awt.Dimension(75, 25));
-		cmdDuplicateMapping.setPreferredSize(new java.awt.Dimension(75, 25));
-		cmdDuplicateMapping.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdDuplicateMappingActionPerformed(evt);
-			}
-		});
+        cmdDuplicateMapping.setText("Copy...");
+        cmdDuplicateMapping.setToolTipText("Duplicate mappings");
+        cmdDuplicateMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdDuplicateMapping.setContentAreaFilled(false);
+        cmdDuplicateMapping.setIconTextGap(0);
+        cmdDuplicateMapping.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdDuplicateMapping.setMinimumSize(new java.awt.Dimension(75, 25));
+        cmdDuplicateMapping.setPreferredSize(new java.awt.Dimension(75, 25));
+        cmdDuplicateMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDuplicateMappingActionPerformed(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-		pnlMappingButtons.add(cmdDuplicateMapping, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdDuplicateMapping, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 4;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.weightx = 1.0;
-		pnlMappingButtons.add(jPanel1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        pnlMappingButtons.add(jPanel1, gridBagConstraints);
 
-		cmdSelectAll.setText("Select all");
-		cmdSelectAll.setToolTipText("Select all");
-		cmdSelectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdSelectAll.setContentAreaFilled(false);
-		cmdSelectAll.setIconTextGap(0);
-		cmdSelectAll.setMaximumSize(new java.awt.Dimension(25, 25));
-		cmdSelectAll.setMinimumSize(new java.awt.Dimension(75, 25));
-		cmdSelectAll.setPreferredSize(new java.awt.Dimension(75, 25));
-		cmdSelectAll.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdSelectAllActionPerformed(evt);
-			}
-		});
+        cmdSelectAll.setText("Select all");
+        cmdSelectAll.setToolTipText("Select all");
+        cmdSelectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdSelectAll.setContentAreaFilled(false);
+        cmdSelectAll.setIconTextGap(0);
+        cmdSelectAll.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdSelectAll.setMinimumSize(new java.awt.Dimension(75, 25));
+        cmdSelectAll.setPreferredSize(new java.awt.Dimension(75, 25));
+        cmdSelectAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSelectAllActionPerformed(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 7;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-		pnlMappingButtons.add(cmdSelectAll, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdSelectAll, gridBagConstraints);
 
-		cmdDeselectAll.setText("Select none");
-		cmdDeselectAll.setToolTipText("Select none");
-		cmdDeselectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-		cmdDeselectAll.setContentAreaFilled(false);
-		cmdDeselectAll.setIconTextGap(0);
-		cmdDeselectAll.setMaximumSize(new java.awt.Dimension(25, 25));
-		cmdDeselectAll.setMinimumSize(new java.awt.Dimension(75, 25));
-		cmdDeselectAll.setPreferredSize(new java.awt.Dimension(75, 25));
-		cmdDeselectAll.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdDeselectAllActionPerformed(evt);
-			}
-		});
+        cmdDeselectAll.setText("Select none");
+        cmdDeselectAll.setToolTipText("Select none");
+        cmdDeselectAll.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdDeselectAll.setContentAreaFilled(false);
+        cmdDeselectAll.setIconTextGap(0);
+        cmdDeselectAll.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdDeselectAll.setMinimumSize(new java.awt.Dimension(75, 25));
+        cmdDeselectAll.setPreferredSize(new java.awt.Dimension(75, 25));
+        cmdDeselectAll.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDeselectAllActionPerformed(evt);
+            }
+        });
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 8;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-		pnlMappingButtons.add(cmdDeselectAll, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        pnlMappingButtons.add(cmdDeselectAll, gridBagConstraints);
 
-		pnlMappingManager.add(pnlMappingButtons, java.awt.BorderLayout.NORTH);
+        pnlMappingManager.add(pnlMappingButtons, java.awt.BorderLayout.NORTH);
 
-		pnlExtraButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 2));
+        pnlExtraButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 2));
 
-		pnlExtraButtons.setMinimumSize(new java.awt.Dimension(532, 25));
-		pnlExtraButtons.setPreferredSize(new java.awt.Dimension(532, 25));
-		labelMappings.setText("Mapping count:");
-		pnlExtraButtons.add(labelMappings);
+        pnlExtraButtons.setMinimumSize(new java.awt.Dimension(532, 25));
+        pnlExtraButtons.setPreferredSize(new java.awt.Dimension(532, 25));
+        labelMappings.setText("Mapping count:");
+        pnlExtraButtons.add(labelMappings);
 
-		fieldMappings.setEditable(false);
-		fieldMappings.setText("0");
-		fieldMappings.setPreferredSize(new java.awt.Dimension(50, 28));
-		pnlExtraButtons.add(fieldMappings);
+        fieldMappings.setEditable(false);
+        fieldMappings.setText("0");
+        fieldMappings.setPreferredSize(new java.awt.Dimension(50, 28));
+        pnlExtraButtons.add(fieldMappings);
 
-		lblInsertFilter.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-		lblInsertFilter.setText("Search:");
-		lblInsertFilter.setMinimumSize(new java.awt.Dimension(120, 20));
-		lblInsertFilter.setPreferredSize(new java.awt.Dimension(75, 20));
-		pnlExtraButtons.add(lblInsertFilter);
+        lblInsertFilter.setFont(new java.awt.Font("Dialog", 1, 12));
+        lblInsertFilter.setForeground(new java.awt.Color(53, 113, 163));
+        lblInsertFilter.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblInsertFilter.setText("Search:");
+        lblInsertFilter.setMinimumSize(new java.awt.Dimension(120, 20));
+        lblInsertFilter.setPreferredSize(new java.awt.Dimension(75, 20));
+        pnlExtraButtons.add(lblInsertFilter);
 
-		txtFilter.setPreferredSize(new java.awt.Dimension(250, 20));
-		txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyPressed(java.awt.event.KeyEvent evt) {
-				sendFilters(evt);
-			}
-		});
+        txtFilter.setPreferredSize(new java.awt.Dimension(250, 20));
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                sendFilters(evt);
+            }
+        });
 
-		pnlExtraButtons.add(txtFilter);
+        pnlExtraButtons.add(txtFilter);
 
-		chkFilter.setText("Apply Filters");
-		chkFilter.addItemListener(new java.awt.event.ItemListener() {
-			public void itemStateChanged(java.awt.event.ItemEvent evt) {
-				chkFilterItemStateChanged(evt);
-			}
-		});
+        chkFilter.setText("Enable filter");
+        chkFilter.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkFilterItemStateChanged(evt);
+            }
+        });
 
-		pnlExtraButtons.add(chkFilter);
+        pnlExtraButtons.add(chkFilter);
 
-		pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
+        pnlMappingManager.add(pnlExtraButtons, java.awt.BorderLayout.SOUTH);
 
-		mappingList.setModel(new javax.swing.AbstractListModel() {
-			String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+        mappingList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        mappingScrollPane.setViewportView(mappingList);
 
-			public int getSize() {
-				return strings.length;
-			}
+        pnlMappingManager.add(mappingScrollPane, java.awt.BorderLayout.CENTER);
 
-			public Object getElementAt(int i) {
-				return strings[i];
-			}
-		});
-		mappingScrollPane.setViewportView(mappingList);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(pnlMappingManager, gridBagConstraints);
 
-		pnlMappingManager.add(mappingScrollPane, java.awt.BorderLayout.CENTER);
-
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		add(pnlMappingManager, gridBagConstraints);
-
-	}// </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
 	private void cmdSelectAllActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cmdSelectAllActionPerformed
 		mappingList.setSelectionInterval(0, mappingList.getModel().getSize());
@@ -868,26 +864,25 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	
 	}
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JCheckBox chkFilter;
-	private javax.swing.JButton cmdAddMapping;
-	private javax.swing.JButton cmdDeselectAll;
-	private javax.swing.JButton cmdDuplicateMapping;
-	private javax.swing.JButton cmdRemoveMapping;
-	private javax.swing.JButton cmdSelectAll;
-	private javax.swing.JTextField fieldMappings;
-	private javax.swing.JPanel jPanel1;
-	private javax.swing.JLabel labelMappings;
-	private javax.swing.JLabel lblInsertFilter;
-	private javax.swing.JList mappingList;
-	private javax.swing.JScrollPane mappingScrollPane;
-	private javax.swing.JPopupMenu menuMappings;
-	private javax.swing.JPanel pnlExtraButtons;
-	private javax.swing.JPanel pnlMappingButtons;
-	private javax.swing.JPanel pnlMappingManager;
-	private javax.swing.JTextField txtFilter;
-
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkFilter;
+    private javax.swing.JButton cmdAddMapping;
+    private javax.swing.JButton cmdDeselectAll;
+    private javax.swing.JButton cmdDuplicateMapping;
+    private javax.swing.JButton cmdRemoveMapping;
+    private javax.swing.JButton cmdSelectAll;
+    private javax.swing.JTextField fieldMappings;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel labelMappings;
+    private javax.swing.JLabel lblInsertFilter;
+    private javax.swing.JList mappingList;
+    private javax.swing.JScrollPane mappingScrollPane;
+    private javax.swing.JPopupMenu menuMappings;
+    private javax.swing.JPanel pnlExtraButtons;
+    private javax.swing.JPanel pnlMappingButtons;
+    private javax.swing.JPanel pnlMappingManager;
+    private javax.swing.JTextField txtFilter;
+    // End of variables declaration//GEN-END:variables
 
 	/***
 	 * Parses the string in the search field.
