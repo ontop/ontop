@@ -29,4 +29,13 @@ public interface PrefixManager extends Serializable
   public String getShortForm(String uri, boolean useDefaultPrefix, boolean isLiteral);
   
   public boolean contains(String prefix);
+  
+  /***
+   * Define a prefix (including ":"), e.g., mariano:, http://mariano.org#
+   * @param name
+   * @param uri
+   * @return
+   */
+  public void setPrefix(String name, String uri);
+  
 }

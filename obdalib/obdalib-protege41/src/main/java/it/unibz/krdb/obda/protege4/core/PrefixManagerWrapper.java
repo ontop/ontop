@@ -26,6 +26,11 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		String questprefix = owlmapper.getPrefix("quest");
 		
 	}
+	
+	@Override
+	public String getDefaultNamespace() {
+		return super.getDefaultNamespace();
+	}
 
 	@Override
 	public void addUri(String uri, String prefix) {
@@ -65,5 +70,10 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	@Override
 	public boolean contains(String prefix) {
 		return owlmapper.containsPrefixMapping(prefix);
+	}
+
+	@Override
+	public void setPrefix(String name, String uri) {
+		owlmapper.setPrefix(name, uri);
 	}
 }

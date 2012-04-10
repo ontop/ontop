@@ -29,10 +29,12 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		if ((uri.charAt(uri.length() - 1) == '#') || (uri.charAt(uri.length() - 1) == '/')) {
 			defaultNamespace = uri;
 			return;
-		}
-		if (uri.charAt(uri.length() - 1) != '/') {
+		} else if (uri.charAt(uri.length() - 1) != '/') {
 			defaultNamespace = uri + "#";
+		} else {
+			defaultNamespace = uri;
 		}
+		this.setPrefix(":", defaultNamespace);
 	}
 
 	public String getShortForm(String uri) {
