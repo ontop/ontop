@@ -354,8 +354,7 @@
 							!arq*, !antlr*,
 							!EDU.oswego.cs.dl.util.concurrent,
 							!osgi.wiring.package,
-							!org.w3c.dom.ranges, !org.w3c.dom.traversal,
-							*</Import-Package>
+							!org.w3c.dom.ranges, *</Import-Package>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
