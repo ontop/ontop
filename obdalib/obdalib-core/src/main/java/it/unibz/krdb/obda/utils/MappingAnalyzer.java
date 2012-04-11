@@ -189,11 +189,11 @@ public class MappingAnalyzer {
 			Literal literal = (Literal) right;
 			termRightName = literal.get().toString();			
 			if (literal instanceof StringLiteral) {
-				boolean isString = containDateTimeString(termRightName);
-				if (isString) {
-					t2 = dfac.getValueConstant(termRightName, COL_TYPE.STRING);
-				} else {
+				boolean isDateTime = containDateTimeString(termRightName);
+				if (isDateTime) {
 					t2 = dfac.getValueConstant(termRightName, COL_TYPE.DATETIME);
+				} else {
+					t2 = dfac.getValueConstant(termRightName, COL_TYPE.STRING);
 				}
 			} else if (literal instanceof IntegerLiteral) {
 				t2 = dfac.getValueConstant(termRightName, COL_TYPE.INTEGER);
