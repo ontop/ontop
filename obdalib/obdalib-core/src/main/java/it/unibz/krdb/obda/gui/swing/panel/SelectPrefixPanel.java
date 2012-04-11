@@ -193,7 +193,9 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				directive.append("PREFIX ");
 				directive.append(prefix);
 				directive.append(" ");
+				directive.append("<");
 				directive.append(prefixMap.get(prefix));
+				directive.append(">");
 				directive.append("\n");
 			}
 		}
