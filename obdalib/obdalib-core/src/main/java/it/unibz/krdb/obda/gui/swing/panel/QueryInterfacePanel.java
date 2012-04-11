@@ -296,7 +296,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		// String newcontent = prefix + "\n" + currentcontent;
 		// queryTextPane.setText(newcontent);
 
-		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getPrefixManager().getPrefixMap(), queryTextPane, baseuri.toString());
+		SelectPrefixPanel dialog = new SelectPrefixPanel(apic.getPrefixManager(), queryTextPane);
 		dialog.show();
 	}// GEN-LAST:event_buttonAdvancedPropertiesActionPerformed
 

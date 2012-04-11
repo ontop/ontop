@@ -5,12 +5,12 @@
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
+import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
@@ -21,35 +21,22 @@ import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
-/*
- * SelectPrefixDialog.java
- *
- * Created on 22-mar-2011, 10.54.46
- */
-
-/**
- * 
- * @author Manfred Gerstgrasser
- */
 public class SelectPrefixPanel extends javax.swing.JPanel {
 
 	private Map<String, String> prefixMap = null;
 	private JDialog parent = null;
 	private JTextPane querypane = null;
 	private Vector<JCheckBox> checkboxes = null;
-	private Vector<JLabel> labels = null;
-	private String base = null;
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8277829841902027620L;
 
 	/** Creates new form SelectPrefixDialog */
-	public SelectPrefixPanel(Map<String, String> prefixes, JTextPane pane, String base) {
+	public SelectPrefixPanel(PrefixManager manager, JTextPane parent) {
 		super();
-		this.prefixMap = prefixes;
-		this.querypane = pane;
-		this.base = base;
+		prefixMap = manager.getPrefixMap();
+		querypane = parent;
 		initComponents();
 		drawCheckBoxes();
 	}
@@ -73,9 +60,9 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	}
 	
 	private void drawCheckBoxes() {
+		
 		checkboxes = new Vector<JCheckBox>();
-		labels = new Vector<JLabel>();
-		int yIndex = 1;
+		int gridYIndex = 1;
 		for (String key : prefixMap.keySet()) {
 			if (!key.equals("version")) {
 				jCheckBox1 = new JCheckBox();
@@ -88,7 +75,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 				gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
 				gridBagConstraints.gridx = 0;
-				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : yIndex;
+				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : gridYIndex;
 				gridBagConstraints.weightx = 0.0;
 				jPanel2.add(jCheckBox1, gridBagConstraints);
 				
@@ -100,29 +87,26 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 				gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
 				gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
 				gridBagConstraints.gridx = 1;
-				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : yIndex;
+				gridBagConstraints.gridy = isBasePrefix(key) ? 0 : gridYIndex;
 				gridBagConstraints.weightx = 1.0;
 				jPanel2.add(jLabel1, gridBagConstraints);
-				labels.add(jLabel1);
 				
 				// Arrange the check-box list
 				if (isBasePrefix(key)) {
 					// Always put the base prefix on top of the list.
 					checkboxes.add(0, jCheckBox1);
-					labels.add(0, jLabel1);
 				} else {
 					checkboxes.add(jCheckBox1);
-					labels.add(jLabel1);
 				}
 				
 				// Increase the index Y counter
-				yIndex++;
+				gridYIndex++;
 			}
 		}
 
 		java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = yIndex + 1;
+		gridBagConstraints.gridy = gridYIndex + 1;
 		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 		gridBagConstraints.weightx = 1.0;
 		gridBagConstraints.weighty = 1.0;
@@ -202,20 +186,19 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	}
 
 	private void accept() {
-		StringBuffer prefix = new StringBuffer();
-		int i = 0;
+		StringBuffer directive = new StringBuffer();
 		for (JCheckBox checkbox : checkboxes) {
 			if (checkbox.isSelected()) {
-				prefix.append("PREFIX ");
-				prefix.append(checkbox.getText());
-				prefix.append(" ");
-				prefix.append(labels.get(i).getText());
-				prefix.append("\n");
+				String prefix = checkbox.getText();
+				directive.append("PREFIX ");
+				directive.append(prefix);
+				directive.append(" ");
+				directive.append(prefixMap.get(prefix));
+				directive.append("\n");
 			}
-			i++;
 		}
 		String currentcontent = querypane.getText();
-		String newContent = prefix + currentcontent;
+		String newContent = directive + currentcontent;
 		querypane.setText(newContent);
 		parent.setVisible(false);
 		parent.dispose();
