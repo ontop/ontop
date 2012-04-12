@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.protege4.core;
 
 import it.unibz.krdb.obda.io.DataManager;
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -50,6 +51,7 @@ import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.model.SetOntologyID;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +132,18 @@ public class OBDAModelManager implements Disposable {
 
 			for (int idx = 0; idx < changes.size(); idx++) {
 				OWLOntologyChange change = changes.get(idx);
+				if (change instanceof SetOntologyID) {
+					IRI newiri = ((SetOntologyID) change).getNewOntologyID().getOntologyIRI();
+					IRI oldiri = ((SetOntologyID) change).getOriginalOntologyID().getOntologyIRI();
+					OBDAModel model = obdamodels.get(oldiri.toURI());
+					PrefixManager prefixManager = model.getPrefixManager();
+					prefixManager.setDefaultNamespace(newiri.toURI().toString());
+					
+					obdamodels.remove(oldiri.toURI());
+					obdamodels.put(newiri.toURI(), model);
+					continue;
+				}
+
 				if (idx + 1 >= changes.size())
 					continue;
 				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
@@ -174,14 +188,13 @@ public class OBDAModelManager implements Disposable {
 				Predicate removedPredicate = translator.getPredicate(removedEntity);
 				Predicate newPredicate = translator.getPredicate(newEntity);
 
-				
 				obdamodel.renamePredicate(removedPredicate, newPredicate);
 			}
 
 			/***
 			 * Applying the deletions to the obda model
 			 */
-			for (OWLEntity removede: removals) {
+			for (OWLEntity removede : removals) {
 				Predicate removedPredicate = translator.getPredicate(removede);
 				obdamodel.deletePredicate(removedPredicate);
 
@@ -488,21 +501,8 @@ public class OBDAModelManager implements Disposable {
 
 		if (ontology == null)
 			return;
-
-		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass6677841155"));
-		OWLAxiom axiom = owlmm.getOWLDataFactory().getOWLDeclarationAxiom(newClass);
-
-		try {
-			AddAxiom addChange = new AddAxiom(ontology, axiom);
-			owlmm.applyChange(addChange);
-			RemoveAxiom removeChange = new RemoveAxiom(ontology, axiom);
-			owlmm.applyChange(removeChange);
-		} catch (Exception e) {
-			log.warn("Exception forcing an ontology change. Your OWL model might contain a new class that you need to remove manually: {}",
-					newClass.getIRI());
-			log.warn(e.getMessage());
-			log.debug(e.getMessage(), e);
-		}
+		
+		owlmm.setDirty(ontology);
 	}
 
 	/***
