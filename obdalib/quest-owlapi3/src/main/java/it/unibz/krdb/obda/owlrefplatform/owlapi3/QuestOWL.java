@@ -159,13 +159,13 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		}
 
 		man = rootOntology.getOWLOntologyManager();
-		man.addOntologyChangeListener(new OWLOntologyChangeListener() {
-
-			@Override
-			public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-				prepared = false;
-			}
-		});
+//		man.addOntologyChangeListener(new OWLOntologyChangeListener() {
+//
+//			@Override
+//			public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
+//				prepared = false;
+//			}
+//		});
 
 		this.obdaModel = obdaModel;
 		this.preferences.putAll(preferences);

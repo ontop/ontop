@@ -16,6 +16,8 @@ import it.unibz.krdb.obda.codec.DatasourceXMLCodec;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
+import it.unibz.krdb.obda.model.Atom;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -23,6 +25,7 @@ import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.IOException;
@@ -48,37 +51,37 @@ public class OBDAModelImpl implements OBDAModel {
 	 */
 	private static final long serialVersionUID = -455389288391300717L;
 
-	protected URI										currentOntologyURI	= null;
+	protected URI currentOntologyURI = null;
 
 	// protected OBDAModelImpl dscontroller = null;
 
 	// private MappingControllerInterface mapcontroller = null;
 
-	protected QueryController							queryController		= null;
+	protected QueryController queryController = null;
 
-	private PrefixManager								prefman				= null;
+	private PrefixManager prefman = null;
 
-	protected final Logger								log					= LoggerFactory.getLogger(this.getClass());
+	protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	/***
 	 * Datasources
 	 */
 
-	private static final DatasourceXMLCodec					codec				= new DatasourceXMLCodec();
+	private static final DatasourceXMLCodec codec = new DatasourceXMLCodec();
 
-	private HashMap<URI, OBDADataSource>				datasources			= null;
+	private HashMap<URI, OBDADataSource> datasources = null;
 
-	private ArrayList<OBDAModelListener>				sourceslisteners	= null;
+	private ArrayList<OBDAModelListener> sourceslisteners = null;
 
-	OBDADataFactory										fac					= null;
+	OBDADataFactory fac = null;
 
 	/***
 	 * Mappings
 	 */
 
-	private ArrayList<OBDAMappingListener>				mappinglisteners	= null;
+	private ArrayList<OBDAMappingListener> mappinglisteners = null;
 
-	private Hashtable<URI, ArrayList<OBDAMappingAxiom>>	mappings			= null;
+	private Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = null;
 
 	protected OBDAModelImpl() {
 
@@ -626,17 +629,64 @@ public class OBDAModelImpl implements OBDAModel {
 	public Object clone() {
 		OBDAModel clone = fac.getOBDAModel();
 		for (OBDADataSource source : datasources.values()) {
-			clone.addSource((OBDADataSource)source.clone());			
+			clone.addSource((OBDADataSource) source.clone());
 			for (ArrayList<OBDAMappingAxiom> mappingList : mappings.values()) {
 				for (OBDAMappingAxiom mapping : mappingList) {
 					try {
-						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom)mapping.clone());
+						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom) mapping.clone());
 					} catch (DuplicateMappingException e) {
 						// Does nothing
 					}
 				}
 			}
-		}		
+		}
 		return clone;
+	}
+
+	@Override
+	public int renamePredicate(Predicate oldname, Predicate newName) {
+		int modifiedCount = 0;
+		for (OBDADataSource source : datasources.values()) {
+			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
+			for (OBDAMappingAxiom mapping : mp) {
+				CQIE cq = (CQIE) mapping.getTargetQuery();
+				List<Atom> body = cq.getBody();
+				for (int idx = 0; idx < body.size(); idx++) {
+					Atom oldatom = body.get(idx);
+					if (!oldatom.getPredicate().equals(oldname))
+						continue;
+					modifiedCount += 1;
+					Atom newatom = fac.getAtom(newName, oldatom.getTerms());
+					body.set(idx, newatom);
+				}
+				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
+			}
+		}
+		return modifiedCount;
+	}
+
+	@Override
+	public int deletePredicate(Predicate predicate) {
+		int modifiedCount = 0;
+		for (OBDADataSource source : datasources.values()) {
+			List<OBDAMappingAxiom> mp = new ArrayList<OBDAMappingAxiom>(mappings.get(source.getSourceID()));			
+			for (OBDAMappingAxiom mapping : mp) {
+				CQIE cq = (CQIE) mapping.getTargetQuery();
+				List<Atom> body = cq.getBody();
+				for (int idx = 0; idx < body.size(); idx++) {
+					Atom oldatom = body.get(idx);
+					if (!oldatom.getPredicate().equals(predicate))
+						continue;
+					modifiedCount += 1;
+					body.remove(idx);
+				}
+				if (body.size() != 0) {
+					fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
+				} else {
+					removeMapping(source.getSourceID(), mapping.getId());
+				}
+			}
+		}
+		return modifiedCount;
 	}
 }

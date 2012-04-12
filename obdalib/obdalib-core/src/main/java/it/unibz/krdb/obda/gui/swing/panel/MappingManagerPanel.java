@@ -859,7 +859,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	public void setFilter(String filter) {
 		
 		txtFilter.setText(filter);
-		chkFilter.setSelected(true);
+//		chkFilter.setSelected(true);
 		processFilterAction();
 	
 	}

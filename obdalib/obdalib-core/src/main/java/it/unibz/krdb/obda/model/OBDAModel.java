@@ -183,6 +183,25 @@ public interface OBDAModel extends Cloneable, Serializable {
 	 */
 	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery);
 
+	/***
+	 * Refactors every mapping in this OBDA model by modifying each mapping of
+	 * the model by replacing each atom that use the predicate oldname, with a
+	 * new atom that uses newName and has the same terms as the old atom.
+	 * 
+	 * @param oldname
+	 * @param newName
+	 * @return the number of mappings that have been modified.
+	 */
+	public int renamePredicate(Predicate oldname, Predicate newName);
+
+	/***
+	 * Removes all atoms that involve the given predicate in all mappings.
+	 * 
+	 * @param predicate
+	 * @return
+	 */
+	public int deletePredicate(Predicate predicate);
+
 	public boolean containsMapping(URI datasourceUri, String mappingId);
 
 	public Object clone();

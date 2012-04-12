@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
@@ -60,7 +61,7 @@ public class MappingVocabularyRepair {
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
-		log.debug("Reparing {} mappings", originalMappings.size());
+		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<URI, Predicate> urimap = new HashMap<URI, Predicate>();
 		for (Predicate p : vocabulary) {
 			urimap.put(p.getName(), p);
@@ -76,7 +77,11 @@ public class MappingVocabularyRepair {
 			for (Atom atom : body) {
 				Predicate p = atom.getPredicate();
 				Atom newatom = null;
-				newatom = dfac.getAtom(urimap.get(p.getName()), atom.getTerms());
+				Predicate predicate = urimap.get(p.getName());
+				if (predicate == null) {
+					throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+				}
+				newatom = dfac.getAtom(predicate, atom.getTerms());
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);

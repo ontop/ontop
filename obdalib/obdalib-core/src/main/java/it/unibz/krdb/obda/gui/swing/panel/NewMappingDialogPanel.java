@@ -27,6 +27,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -105,7 +106,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				cmdInsertMapping.setEnabled(result);
 			}
 		});
-		
+
 		SQLQueryPainter sqlpainter = new SQLQueryPainter(txtSourceQuery);
 
 		cmdInsertMapping.addActionListener(new ActionListener() {
@@ -117,11 +118,35 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			}
 		});
 
+		txtTargetQuery.addKeyListener(new CTRLEnterKeyListener());
+		txtSourceQuery.addKeyListener(new CTRLEnterKeyListener());
+		fieldID.addKeyListener(new CTRLEnterKeyListener());
+
 		// jPanel1.setPreferredSize(new Dimension(Integer.MAX_VALUE,
 		// Integer.MAX_VALUE));
 		// jPanel2.setMinimumSize(new Dimension(0, 0));
 		// jPanel2.setPreferredSize(new Dimension(50,100));
 		// jSplitPane1.setDividerLocation(0.5);
+
+	}
+
+	private class CTRLEnterKeyListener implements KeyListener {
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
+				cmdInsertMappingActionPerformed(null);
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+		}
 
 	}
 
@@ -389,23 +414,23 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			evt.consume();
 		}
 	}// GEN-LAST:event_changeTargetQueryFocus
-	
+
 	private void releaseResultset() {
 		TableModel model = jTable1.getModel();
 		if (model == null)
 			return;
 		if (!(model instanceof IncrementalResultSetTableModel))
 			return;
-		IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel)model;
+		IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
 		imodel.close();
-			
+
 	}
 
 	private void cmdTestQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
 
 		/* Cleaning the existing table and freeding resources */
 		releaseResultset();
-		
+
 		OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
 		CountDownLatch latch = new CountDownLatch(1);
 		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
@@ -507,9 +532,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void cmdInsertMappingActionPerformed(ActionEvent e) {// GEN-FIRST:event_cmdInsertMappingActionPerformed
-		
+
 		releaseResultset();
-		
+
 		final String targetQueryString = txtTargetQuery.getText().trim();
 		final String sourceQueryString = txtSourceQuery.getText().trim();
 
@@ -563,7 +588,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		try {
 			return textParser.parse(query);
 		} catch (RecognitionException e) {
-//			log.warn(e.getMessage());
+			// log.warn(e.getMessage());
 			return null;
 		} catch (Exception e) {
 			return null;
@@ -579,7 +604,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		this.fieldID.setText(id);
 
 	}
-	
+
 	@Override
 	public void finalize() {
 		releaseResultset();

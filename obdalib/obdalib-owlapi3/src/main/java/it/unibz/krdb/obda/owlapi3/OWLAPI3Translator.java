@@ -83,9 +83,6 @@ import org.slf4j.LoggerFactory;
 
 public class OWLAPI3Translator {
 
-	private HashSet<String> objectproperties = null;
-	private HashSet<String> dataproperties = null;
-
 	private final LanguageProfile profile = LanguageProfile.DLLITEA;
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -104,8 +101,6 @@ public class OWLAPI3Translator {
 
 	public OWLAPI3Translator() {
 
-		objectproperties = new HashSet<String>();
-		dataproperties = new HashSet<String>();
 	}
 
 	/***
@@ -153,12 +148,37 @@ public class OWLAPI3Translator {
 
 	}
 
+	public Predicate getPredicate(OWLEntity entity) {
+		Predicate p = null;
+		if (entity instanceof OWLClass) {
+			/* We ignore TOP and BOTTOM (Thing and Nothing) */
+			if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
+				return null;
+			}
+			URI uri = entity.getIRI().toURI();
+
+			p = dfac.getClassPredicate(uri);
+		} else if (entity instanceof OWLObjectProperty) {
+			URI uri = entity.getIRI().toURI();
+
+			p = dfac.getObjectPropertyPredicate(uri);
+		} else if (entity instanceof OWLDataProperty) {
+			URI uri = entity.getIRI().toURI();
+
+			p = dfac.getDataPropertyPredicate(uri);
+		}
+		return p;
+	}
+
 	public Ontology translate(OWLOntology owl) throws PunningException {
 		// ManchesterOWLSyntaxOWLObjectRendererImpl rend = new
 		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
-		
 		Ontology dl_onto = ofac.createOntology(owl.getOntologyID().getOntologyIRI().toURI());
+
+		HashSet<String> objectproperties = new HashSet<String>();
+		HashSet<String> dataproperties = new HashSet<String>();
+		HashSet<String> classes = new HashSet<String>();
 
 		/*
 		 * First we add all definitions for classes and roles
@@ -167,31 +187,31 @@ public class OWLAPI3Translator {
 		Iterator<OWLEntity> eit = entities.iterator();
 		while (eit.hasNext()) {
 			OWLEntity entity = eit.next();
-			if (entity instanceof OWLClass) {
-				/* We ignore TOP and BOTTOM (Thing and Nothing) */
-				if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
-					continue;
-				}
-				URI uri = entity.getIRI().toURI();
-				Predicate p = dfac.getClassPredicate(uri);
-				dl_onto.addConcept(p);
-			} else if (entity instanceof OWLObjectProperty) {
-				URI uri = entity.getIRI().toURI();
-				objectproperties.add(uri.toString());
-				Predicate p = dfac.getObjectPropertyPredicate(uri);
-				if (dataproperties.contains(uri.toString())) {
-					throw new PunningException("Please avoid using the same name for object and data properties.");
+			Predicate p = getPredicate(entity);
+			if (p == null)
+				continue;
+			if (p.getArity() == 1) {
+				if (dataproperties.contains(p.getName().toString()) || objectproperties.contains(p.getName().toString())) {
+					throw new PunningException("Punning not allowed. Offending entity: " + p.getName());
 				} else {
-					dl_onto.addRole(p);
+					classes.add(p.getName().toString());
+					dl_onto.addConcept(p);
 				}
-			} else if (entity instanceof OWLDataProperty) {
-				URI uri = entity.getIRI().toURI();
-				dataproperties.add(uri.toString());
-				Predicate p = dfac.getDataPropertyPredicate(uri);
-				if (objectproperties.contains(uri.toString())) {
-					throw new PunningException("Please avoid using the same name for object and data properties.");
+			} else {
+				if (p.getType(1) == COL_TYPE.OBJECT) {
+					if (dataproperties.contains(p.getName().toString()) || classes.contains(p.getName().toString())) {
+						throw new PunningException("Punning not allowed. Offending entity: " + p.getName());
+					} else {
+						objectproperties.add(p.getName().toString());
+						dl_onto.addRole(p);
+					}
 				} else {
-					dl_onto.addRole(p);
+					if (objectproperties.contains(p.getName().toString()) || classes.contains(p.getName().toString())) {
+						throw new PunningException("Punning not allowed. Offending entity: " + p.getName());
+					} else {
+						dataproperties.add(p.getName().toString());
+						dl_onto.addRole(p);
+					}
 				}
 			}
 		}
@@ -200,12 +220,13 @@ public class OWLAPI3Translator {
 		Iterator<OWLAxiom> it = axioms.iterator();
 		while (it.hasNext()) {
 			OWLAxiom axiom = it.next();
-			
-			/*** 
-			 * Important to use the negated normal form of the axioms, and not the simple ones.
+
+			/***
+			 * Important to use the negated normal form of the axioms, and not
+			 * the simple ones.
 			 */
 			axiom = axiom.getNNF();
-			
+
 			try {
 				if (axiom instanceof OWLEquivalentClassesAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -472,8 +493,7 @@ public class OWLAPI3Translator {
 				SubPropertyAxiomImpl subrole = (SubPropertyAxiomImpl) ofac.createSubPropertyAxiom(auxRole,
 						ofac.createProperty(role, isInverse));
 				/* Creatin the range assertion */
-				PropertySomeRestriction propertySomeRestrictionInv = ofac.getPropertySomeRestriction(auxRole.getPredicate(),
-						!isInverse);
+				PropertySomeRestriction propertySomeRestrictionInv = ofac.getPropertySomeRestriction(auxRole.getPredicate(), !isInverse);
 
 				SubClassAxiomImpl subclass = (SubClassAxiomImpl) ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
 				aux = new LinkedList<SubDescriptionAxiom>();

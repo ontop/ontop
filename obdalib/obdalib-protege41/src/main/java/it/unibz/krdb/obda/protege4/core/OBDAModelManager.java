@@ -7,10 +7,11 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAMappingListener;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelRefactorer;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
@@ -21,9 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
@@ -38,11 +41,15 @@ import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +99,95 @@ public class OBDAModelManager implements Disposable {
 		owlmmgr.addListener(modelManagerListener);
 		obdaManagerListeners = new LinkedList<OBDAModelManagerListener>();
 		obdamodels = new HashMap<URI, OBDAModel>();
+
+		/***
+		 * Adding ontology change listeners to synchronize with the mappings
+		 **/
+
+		mmgr.addOntologyChangeListener(new OntologyRefactoringListener());
+
+	}
+
+	/***
+	 * This ontology change listener has some euristics that determine if the
+	 * user is refactoring his ontology. In particular, this listener will try
+	 * to determine if some add/remove axioms are in fact a "renaming"
+	 * operation. This happens when a list of axioms has a
+	 * remove(DeclarationAxiom(x)) immediatly followed by an
+	 * add(DeclarationAxiom(y)), in this case, y is a renaming for x.
+	 * 
+	 * @author mariano
+	 * 
+	 */
+	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
+
+		OWLAPI3Translator translator = new OWLAPI3Translator();
+
+		@Override
+		public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
+			Map<OWLEntity, OWLEntity> renamings = new HashMap<OWLEntity, OWLEntity>();
+			Set<OWLEntity> removals = new HashSet<OWLEntity>();
+
+			for (int idx = 0; idx < changes.size(); idx++) {
+				OWLOntologyChange change = changes.get(idx);
+				if (idx + 1 >= changes.size())
+					continue;
+				if (change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
+					/***
+					 * Found the pattern of a renaming refactoring
+					 */
+					RemoveAxiom remove = (RemoveAxiom) change;
+					AddAxiom add = (AddAxiom) changes.get(idx + 1);
+
+					if (!(remove.getAxiom() instanceof OWLDeclarationAxiom && add.getAxiom() instanceof OWLDeclarationAxiom))
+						continue;
+
+					/*
+					 * we found the patter we are looking for, a remove and add
+					 * of declaration axioms
+					 */
+					OWLEntity olde = ((OWLDeclarationAxiom) remove.getAxiom()).getEntity();
+					OWLEntity newe = ((OWLDeclarationAxiom) add.getAxiom()).getEntity();
+					renamings.put(olde, newe);
+				} else if (change instanceof RemoveAxiom && ((RemoveAxiom) change).getAxiom() instanceof OWLDeclarationAxiom) {
+					/***
+					 * Found the pattern of a deletion
+					 */
+					OWLDeclarationAxiom declaration = (OWLDeclarationAxiom) ((RemoveAxiom) change).getAxiom();
+					OWLEntity removedEntity = declaration.getEntity();
+					removals.add(removedEntity);
+
+				}
+			}
+
+			/***
+			 * Applying the renamings to the OBDA model
+			 */
+			OBDAModel obdamodel = getActiveOBDAModel();
+			for (OWLEntity olde : renamings.keySet()) {
+				OWLEntity removedEntity = olde;
+				OWLEntity newEntity = renamings.get(removedEntity);
+				/*
+				 * This set of changes appears to be a "renaming" operation,
+				 * hence we will modify the OBDA model acordingly
+				 */
+				Predicate removedPredicate = translator.getPredicate(removedEntity);
+				Predicate newPredicate = translator.getPredicate(newEntity);
+
+				
+				obdamodel.renamePredicate(removedPredicate, newPredicate);
+			}
+
+			/***
+			 * Applying the deletions to the obda model
+			 */
+			for (OWLEntity removede: removals) {
+				Predicate removedPredicate = translator.getPredicate(removede);
+				obdamodel.deletePredicate(removedPredicate);
+
+			}
+
+		}
 
 	}
 
@@ -147,7 +243,7 @@ public class OBDAModelManager implements Disposable {
 		OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
 		PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
 		addOBDADefaultPrefixes(prefixManager);
-		
+
 		// PrefixManager mapper =mmgr.getOWLOntologyManager();
 
 		OWLOntologyID ontologyID = this.owlEditorKit.getModelManager().getActiveOntology().getOntologyID();
@@ -193,20 +289,22 @@ public class OBDAModelManager implements Disposable {
 			EventType type = event.getType();
 			OWLModelManager source = event.getSource();
 
-			
 			switch (type) {
 			case ABOUT_TO_CLASSIFY:
 				log.debug("ABOUT TO CLASSIFY");
-//				if ((!inititializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
-//					OWLReasoner reasoner = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
-//					if (reasoner instanceof QuestOWL) {
-//						QuestOWL quest = (QuestOWL) reasoner;
-//						ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit
-//								.get(QuestPreferences.class.getName());
-//						quest.setPreferences(reasonerPreference);
-//						quest.loadOBDAModel(getActiveOBDAModel());
-//					}
-//				}
+				// if ((!inititializing) && (obdamodels != null) &&
+				// (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
+				// OWLReasoner reasoner =
+				// owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasoner();
+				// if (reasoner instanceof QuestOWL) {
+				// QuestOWL quest = (QuestOWL) reasoner;
+				// ProtegeReformulationPlatformPreferences reasonerPreference =
+				// (ProtegeReformulationPlatformPreferences) owlEditorKit
+				// .get(QuestPreferences.class.getName());
+				// quest.setPreferences(reasonerPreference);
+				// quest.loadOBDAModel(getActiveOBDAModel());
+				// }
+				// }
 				break;
 
 			case ENTITY_RENDERER_CHANGED:

@@ -22,6 +22,8 @@ import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.net.URI;
 
 import javax.swing.JDialog;
@@ -88,7 +90,30 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		queryTextPane.setDocument(_styled_doc);
 		queryTextPane.setBackground(Color.WHITE);
 		queryTextPane.setCaretColor(Color.BLACK);
+		
+		queryTextPane.addKeyListener(new CTRLEnterKeyListener());
+		
 	}
+
+	private class CTRLEnterKeyListener implements KeyListener {
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
+				buttonExecuteActionPerformed(null);
+			}
+
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+		}
+	}
+
 
 	public void setOBDAModel(OBDAModel api) {
 		this.apic = api;
