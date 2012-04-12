@@ -294,8 +294,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		panelTrg.add(lblTargetQuery, java.awt.BorderLayout.NORTH);
 
 		scrTargetQuery.setFocusable(false);
-		txtTargetQuery
-				.setToolTipText("Write the query that will be the head of the mapping. \\nThis is a conjunctive query, possibly with function simbols to create object uris from the data of the databse. \\n For example: obdap:q($id) :- Person(individual-uri($id))");
 		txtTargetQuery.setFocusCycleRoot(false);
 		txtTargetQuery.addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent evt) {

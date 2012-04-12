@@ -89,63 +89,63 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	 */
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-	// desc="Generated Code">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		pnlDataSourceSettings = new javax.swing.JPanel();
-		pnlDataSourceInfo = new javax.swing.JPanel();
-		lblDataSourceName = new javax.swing.JLabel();
-		pnlDataSourceSelector = new javax.swing.JPanel();
-		lblDataSourceType = new javax.swing.JLabel();
-		lblDataSourceTypeValue = new javax.swing.JLabel();
-		lblMappingType = new javax.swing.JLabel();
-		lblMappingTypeValue = new javax.swing.JLabel();
-		pnlDataSourceParameters = new javax.swing.JPanel();
-		lblJdbcUrl = new javax.swing.JLabel();
-		txtJdbcUrl = new javax.swing.JTextField();
-		lblDatabaseUsername = new javax.swing.JLabel();
-		txtDatabaseUsername = new javax.swing.JTextField();
-		lblDatabasePassword = new javax.swing.JLabel();
-		lblJdbcDriver = new javax.swing.JLabel();
-		txtJdbcDriver = new javax.swing.JTextField();
-		txtDatabasePassword = new javax.swing.JPasswordField();
-		pnlTestConnection = new javax.swing.JPanel();
-		cmdTestConnection = new javax.swing.JButton();
-		lblConnectionStatus = new javax.swing.JLabel();
-		pnlCommandButton = new javax.swing.JPanel();
-		cmdNew = new javax.swing.JButton();
-		cmdRemove = new javax.swing.JButton();
+        pnlDataSourceSettings = new javax.swing.JPanel();
+        pnlDataSourceInfo = new javax.swing.JPanel();
+        lblDataSourceName = new javax.swing.JLabel();
+        pnlDataSourceSelector = new javax.swing.JPanel();
+        lblDataSourceType = new javax.swing.JLabel();
+        lblDataSourceTypeValue = new javax.swing.JLabel();
+        lblMappingType = new javax.swing.JLabel();
+        lblMappingTypeValue = new javax.swing.JLabel();
+        pnlDataSourceParameters = new javax.swing.JPanel();
+        lblJdbcUrl = new javax.swing.JLabel();
+        txtJdbcUrl = new javax.swing.JTextField();
+        lblDatabaseUsername = new javax.swing.JLabel();
+        txtDatabaseUsername = new javax.swing.JTextField();
+        lblDatabasePassword = new javax.swing.JLabel();
+        lblJdbcDriver = new javax.swing.JLabel();
+        txtJdbcDriver = new javax.swing.JTextField();
+        txtDatabasePassword = new javax.swing.JPasswordField();
+        pnlTestConnection = new javax.swing.JPanel();
+        cmdTestConnection = new javax.swing.JButton();
+        lblConnectionStatus = new javax.swing.JLabel();
+        pnlCommandButton = new javax.swing.JPanel();
+        cmdNew = new javax.swing.JButton();
+        cmdRemove = new javax.swing.JButton();
 
-		setMinimumSize(new java.awt.Dimension(540, 270));
-		setPreferredSize(new java.awt.Dimension(540, 270));
-		setLayout(new java.awt.BorderLayout());
+        setMinimumSize(new java.awt.Dimension(540, 270));
+        setPreferredSize(new java.awt.Dimension(540, 270));
+        setLayout(new java.awt.BorderLayout());
 
-		pnlDataSourceSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Datasource Settings"));
-		pnlDataSourceSettings.setAutoscrolls(true);
-		pnlDataSourceSettings.setMinimumSize(new java.awt.Dimension(540, 250));
-		pnlDataSourceSettings.setPreferredSize(new java.awt.Dimension(540, 250));
-		pnlDataSourceSettings.setLayout(new java.awt.BorderLayout());
+        pnlDataSourceSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Datasource Settings"));
+        pnlDataSourceSettings.setAutoscrolls(true);
+        pnlDataSourceSettings.setMinimumSize(new java.awt.Dimension(540, 250));
+        pnlDataSourceSettings.setPreferredSize(new java.awt.Dimension(540, 250));
+        pnlDataSourceSettings.setLayout(new java.awt.BorderLayout());
 
-		pnlDataSourceInfo.setAutoscrolls(true);
-		pnlDataSourceInfo.setMaximumSize(new java.awt.Dimension(32767, 23));
-		pnlDataSourceInfo.setMinimumSize(new java.awt.Dimension(540, 70));
-		pnlDataSourceInfo.setPreferredSize(new java.awt.Dimension(540, 70));
-		pnlDataSourceInfo.setLayout(new java.awt.GridBagLayout());
+        pnlDataSourceInfo.setAutoscrolls(true);
+        pnlDataSourceInfo.setMaximumSize(new java.awt.Dimension(32767, 23));
+        pnlDataSourceInfo.setMinimumSize(new java.awt.Dimension(540, 70));
+        pnlDataSourceInfo.setPreferredSize(new java.awt.Dimension(540, 70));
+        pnlDataSourceInfo.setLayout(new java.awt.GridBagLayout());
 
-		lblDataSourceName.setBackground(new java.awt.Color(153, 153, 153));
-		lblDataSourceName.setFont(new java.awt.Font("Arial", 1, 11));
-		lblDataSourceName.setForeground(new java.awt.Color(153, 153, 153));
-		lblDataSourceName.setText("Data Source Name:");
-		lblDataSourceName.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.ipadx = 10;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-		gridBagConstraints.weighty = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-		pnlDataSourceInfo.add(lblDataSourceName, gridBagConstraints);
+        lblDataSourceName.setBackground(new java.awt.Color(153, 153, 153));
+        lblDataSourceName.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblDataSourceName.setForeground(new java.awt.Color(153, 153, 153));
+        lblDataSourceName.setText("Data Source Name:");
+        lblDataSourceName.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        pnlDataSourceInfo.add(lblDataSourceName, gridBagConstraints);
 
 		pnlDataSourceSelector.setLayout(new java.awt.BorderLayout());
 		pnlDataSourceSelector.setPreferredSize(new Dimension(300, 25));
@@ -154,204 +154,205 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
 		gridBagConstraints.anchor = gridBagConstraints.WEST;
-		// gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		// gridBagConstraints.weightx = 1;
 		pnlDataSourceInfo.add(pnlDataSourceSelector, gridBagConstraints);
 
-		lblDataSourceType.setBackground(new java.awt.Color(153, 153, 153));
-		lblDataSourceType.setFont(new java.awt.Font("Arial", 1, 11));
-		lblDataSourceType.setForeground(new java.awt.Color(153, 153, 153));
-		lblDataSourceType.setText("Type:");
-		lblDataSourceType.setFocusable(false);
-		lblDataSourceType.setMaximumSize(new java.awt.Dimension(119, 14));
-		lblDataSourceType.setMinimumSize(new java.awt.Dimension(119, 14));
-		lblDataSourceType.setPreferredSize(new java.awt.Dimension(119, 14));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.ipadx = 10;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		gridBagConstraints.weighty = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-		pnlDataSourceInfo.add(lblDataSourceType, gridBagConstraints);
+        lblDataSourceType.setBackground(new java.awt.Color(153, 153, 153));
+        lblDataSourceType.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblDataSourceType.setForeground(new java.awt.Color(153, 153, 153));
+        lblDataSourceType.setText("Type:");
+        lblDataSourceType.setFocusable(false);
+        lblDataSourceType.setMaximumSize(new java.awt.Dimension(119, 14));
+        lblDataSourceType.setMinimumSize(new java.awt.Dimension(119, 14));
+        lblDataSourceType.setPreferredSize(new java.awt.Dimension(119, 14));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        pnlDataSourceInfo.add(lblDataSourceType, gridBagConstraints);
 
-		lblDataSourceTypeValue.setFont(new java.awt.Font("Arial", 0, 11));
-		lblDataSourceTypeValue.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.ipadx = 10;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		pnlDataSourceInfo.add(lblDataSourceTypeValue, gridBagConstraints);
+        lblDataSourceTypeValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        lblDataSourceTypeValue.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        pnlDataSourceInfo.add(lblDataSourceTypeValue, gridBagConstraints);
 
-		lblMappingType.setBackground(new java.awt.Color(153, 153, 153));
-		lblMappingType.setFont(new java.awt.Font("Arial", 1, 11));
-		lblMappingType.setForeground(new java.awt.Color(153, 153, 153));
-		lblMappingType.setText("Mapping Type:");
-		lblMappingType.setFocusable(false);
-		lblMappingType.setMaximumSize(new java.awt.Dimension(119, 14));
-		lblMappingType.setMinimumSize(new java.awt.Dimension(119, 14));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.ipadx = 10;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-		pnlDataSourceInfo.add(lblMappingType, gridBagConstraints);
+        lblMappingType.setBackground(new java.awt.Color(153, 153, 153));
+        lblMappingType.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblMappingType.setForeground(new java.awt.Color(153, 153, 153));
+        lblMappingType.setText("Mapping Type:");
+        lblMappingType.setFocusable(false);
+        lblMappingType.setMaximumSize(new java.awt.Dimension(119, 14));
+        lblMappingType.setMinimumSize(new java.awt.Dimension(119, 14));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        pnlDataSourceInfo.add(lblMappingType, gridBagConstraints);
 
-		lblMappingTypeValue.setFont(new java.awt.Font("Arial", 0, 11));
-		lblMappingTypeValue.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.ipadx = 10;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		pnlDataSourceInfo.add(lblMappingTypeValue, gridBagConstraints);
+        lblMappingTypeValue.setFont(new java.awt.Font("Arial", 0, 11)); // NOI18N
+        lblMappingTypeValue.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        pnlDataSourceInfo.add(lblMappingTypeValue, gridBagConstraints);
 
-		pnlDataSourceSettings.add(pnlDataSourceInfo, java.awt.BorderLayout.NORTH);
+        pnlDataSourceSettings.add(pnlDataSourceInfo, java.awt.BorderLayout.NORTH);
 
-		pnlDataSourceParameters.setAlignmentX(5.0F);
-		pnlDataSourceParameters.setAlignmentY(5.0F);
-		pnlDataSourceParameters.setAutoscrolls(true);
-		// pnlDataSourceParameters.setFocusTraversalPolicyProvider(true);
-		pnlDataSourceParameters.setMaximumSize(new java.awt.Dimension(6404444, 34452345));
-		pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(540, 110));
-		pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(540, 110));
-		pnlDataSourceParameters.setLayout(new java.awt.GridBagLayout());
+        pnlDataSourceParameters.setAlignmentX(5.0F);
+        pnlDataSourceParameters.setAlignmentY(5.0F);
+        pnlDataSourceParameters.setAutoscrolls(true);
+        // pnlDataSourceParameters.setFocusTraversalPolicyProvider(true);
+        pnlDataSourceParameters.setMaximumSize(new java.awt.Dimension(6404444, 34452345));
+        pnlDataSourceParameters.setMinimumSize(new java.awt.Dimension(540, 110));
+        pnlDataSourceParameters.setPreferredSize(new java.awt.Dimension(540, 110));
+        pnlDataSourceParameters.setLayout(new java.awt.GridBagLayout());
 
-		lblJdbcUrl.setFont(new java.awt.Font("Arial", 1, 11));
-		lblJdbcUrl.setForeground(new java.awt.Color(153, 153, 153));
-		lblJdbcUrl.setText("  JDBC URL:");
-		lblJdbcUrl.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		pnlDataSourceParameters.add(lblJdbcUrl, gridBagConstraints);
+        lblJdbcUrl.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblJdbcUrl.setForeground(new java.awt.Color(153, 153, 153));
+        lblJdbcUrl.setText("  JDBC URL:");
+        lblJdbcUrl.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        pnlDataSourceParameters.add(lblJdbcUrl, gridBagConstraints);
 
-		txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-		txtJdbcUrl.setMinimumSize(new java.awt.Dimension(180, 19));
-		txtJdbcUrl.setName("somename"); // NOI18N
-		txtJdbcUrl.setPreferredSize(new java.awt.Dimension(180, 19));
-		txtJdbcUrl.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				fieldChangeHandler(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
-		pnlDataSourceParameters.add(txtJdbcUrl, gridBagConstraints);
+        txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
+        txtJdbcUrl.setMinimumSize(new java.awt.Dimension(180, 24));
+        txtJdbcUrl.setName("somename"); // NOI18N
+        txtJdbcUrl.setNextFocusableComponent(txtDatabaseUsername);
+        txtJdbcUrl.setPreferredSize(new java.awt.Dimension(180, 24));
+        txtJdbcUrl.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fieldChangeHandler(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
+        pnlDataSourceParameters.add(txtJdbcUrl, gridBagConstraints);
 
-		lblDatabaseUsername.setFont(new java.awt.Font("Arial", 1, 11));
-		lblDatabaseUsername.setForeground(new java.awt.Color(153, 153, 153));
-		lblDatabaseUsername.setText("  Database Username:");
-		lblDatabaseUsername.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		pnlDataSourceParameters.add(lblDatabaseUsername, gridBagConstraints);
+        lblDatabaseUsername.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblDatabaseUsername.setForeground(new java.awt.Color(153, 153, 153));
+        lblDatabaseUsername.setText("  Database Username:");
+        lblDatabaseUsername.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        pnlDataSourceParameters.add(lblDatabaseUsername, gridBagConstraints);
 
-		// txtDatabaseUsername.setFocusTraversalPolicy(getFocusTraversalPolicy());
-		txtDatabaseUsername.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-		txtDatabaseUsername.setMinimumSize(new java.awt.Dimension(180, 19));
-		txtDatabaseUsername.setName("somename"); // NOI18N
-		txtDatabaseUsername.setPreferredSize(new java.awt.Dimension(180, 19));
-		txtDatabaseUsername.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				fieldChangeHandler(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 1;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
-		pnlDataSourceParameters.add(txtDatabaseUsername, gridBagConstraints);
+        // txtDatabaseUsername.setFocusTraversalPolicy(getFocusTraversalPolicy());
+        txtDatabaseUsername.setMaximumSize(new java.awt.Dimension(25, 2147483647));
+        txtDatabaseUsername.setMinimumSize(new java.awt.Dimension(180, 24));
+        txtDatabaseUsername.setName("somename"); // NOI18N
+        txtDatabaseUsername.setNextFocusableComponent(txtDatabasePassword);
+        txtDatabaseUsername.setPreferredSize(new java.awt.Dimension(180, 24));
+        txtDatabaseUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fieldChangeHandler(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
+        pnlDataSourceParameters.add(txtDatabaseUsername, gridBagConstraints);
 
-		lblDatabasePassword.setFont(new java.awt.Font("Arial", 1, 11));
-		lblDatabasePassword.setForeground(new java.awt.Color(153, 153, 153));
-		lblDatabasePassword.setText("  Database Password:");
-		lblDatabasePassword.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		pnlDataSourceParameters.add(lblDatabasePassword, gridBagConstraints);
+        lblDatabasePassword.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblDatabasePassword.setForeground(new java.awt.Color(153, 153, 153));
+        lblDatabasePassword.setText("  Database Password:");
+        lblDatabasePassword.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        pnlDataSourceParameters.add(lblDatabasePassword, gridBagConstraints);
 
-		lblJdbcDriver.setFont(new java.awt.Font("Arial", 1, 11));
-		lblJdbcDriver.setForeground(new java.awt.Color(153, 153, 153));
-		lblJdbcDriver.setText("  JDBC Driver:");
-		lblJdbcDriver.setFocusable(false);
-		lblJdbcDriver.setMaximumSize(new java.awt.Dimension(120, 14));
-		lblJdbcDriver.setMinimumSize(new java.awt.Dimension(120, 14));
-		lblJdbcDriver.setPreferredSize(new java.awt.Dimension(120, 14));
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		pnlDataSourceParameters.add(lblJdbcDriver, gridBagConstraints);
+        lblJdbcDriver.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
+        lblJdbcDriver.setForeground(new java.awt.Color(153, 153, 153));
+        lblJdbcDriver.setText("  JDBC Driver:");
+        lblJdbcDriver.setFocusable(false);
+        lblJdbcDriver.setMaximumSize(new java.awt.Dimension(120, 14));
+        lblJdbcDriver.setMinimumSize(new java.awt.Dimension(120, 14));
+        lblJdbcDriver.setPreferredSize(new java.awt.Dimension(120, 14));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        pnlDataSourceParameters.add(lblJdbcDriver, gridBagConstraints);
 
-		txtJdbcDriver.setMaximumSize(new java.awt.Dimension(25, 2147483647));
-		txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 19));
-		txtJdbcDriver.setName("somename"); // NOI18N
-		txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 19));
-		txtJdbcDriver.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				fieldChangeHandler(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 3;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
-		pnlDataSourceParameters.add(txtJdbcDriver, gridBagConstraints);
+        txtJdbcDriver.setMaximumSize(new java.awt.Dimension(25, 2147483647));
+        txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
+        txtJdbcDriver.setName("somename"); // NOI18N
+        txtJdbcDriver.setNextFocusableComponent(txtJdbcUrl);
+        txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
+        txtJdbcDriver.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fieldChangeHandler(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
+        pnlDataSourceParameters.add(txtJdbcDriver, gridBagConstraints);
 
-		txtDatabasePassword.setMinimumSize(new java.awt.Dimension(180, 19));
-		txtDatabasePassword.setPreferredSize(new java.awt.Dimension(180, 19));
-		txtDatabasePassword.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				fieldChangeHandler(evt);
-			}
-		});
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
-		pnlDataSourceParameters.add(txtDatabasePassword, gridBagConstraints);
+        txtDatabasePassword.setMinimumSize(new java.awt.Dimension(180, 24));
+        txtDatabasePassword.setPreferredSize(new java.awt.Dimension(180, 24));
+        txtDatabasePassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                fieldChangeHandler(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 10, 2, 0);
+        pnlDataSourceParameters.add(txtDatabasePassword, gridBagConstraints);
 
-		pnlDataSourceSettings.add(pnlDataSourceParameters, java.awt.BorderLayout.CENTER);
+        pnlDataSourceSettings.add(pnlDataSourceParameters, java.awt.BorderLayout.CENTER);
 
-		pnlTestConnection.setMinimumSize(new java.awt.Dimension(540, 33));
-		pnlTestConnection.setPreferredSize(new java.awt.Dimension(540, 33));
-		pnlTestConnection.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        pnlTestConnection.setMinimumSize(new java.awt.Dimension(540, 33));
+        pnlTestConnection.setPreferredSize(new java.awt.Dimension(540, 33));
+        pnlTestConnection.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-		cmdTestConnection.setText("Test Connection");
-		cmdTestConnection.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdTestConnectionActionPerformed(evt);
-			}
-		});
-		pnlTestConnection.add(cmdTestConnection);
-		pnlTestConnection.add(lblConnectionStatus);
+        cmdTestConnection.setText("Test Connection");
+        cmdTestConnection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdTestConnectionActionPerformed(evt);
+            }
+        });
+        pnlTestConnection.add(cmdTestConnection);
+        pnlTestConnection.add(lblConnectionStatus);
 
 		pnlDataSourceSettings.add(pnlTestConnection, java.awt.BorderLayout.SOUTH);
 
@@ -405,7 +406,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 						selector.set(source);
 						return;
 					} else {
-						JOptionPane.showMessageDialog(this, "The data source ID already used", "Warning", JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(this, "The data source ID is already taken!", "Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}
 			} else {
@@ -486,32 +487,31 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		return;
 	}// GEN-LAST:event_fieldChangeHandler
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton cmdNew;
-	private javax.swing.JButton cmdRemove;
-	private javax.swing.JButton cmdTestConnection;
-	private javax.swing.JLabel lblConnectionStatus;
-	private javax.swing.JLabel lblDataSourceName;
-	private javax.swing.JLabel lblDataSourceType;
-	private javax.swing.JLabel lblDataSourceTypeValue;
-	private javax.swing.JLabel lblDatabasePassword;
-	private javax.swing.JLabel lblDatabaseUsername;
-	private javax.swing.JLabel lblJdbcDriver;
-	private javax.swing.JLabel lblJdbcUrl;
-	private javax.swing.JLabel lblMappingType;
-	private javax.swing.JLabel lblMappingTypeValue;
-	private javax.swing.JPanel pnlCommandButton;
-	private javax.swing.JPanel pnlDataSourceInfo;
-	private javax.swing.JPanel pnlDataSourceParameters;
-	private javax.swing.JPanel pnlDataSourceSelector;
-	private javax.swing.JPanel pnlDataSourceSettings;
-	private javax.swing.JPanel pnlTestConnection;
-	private javax.swing.JPasswordField txtDatabasePassword;
-	private javax.swing.JTextField txtDatabaseUsername;
-	private javax.swing.JTextField txtJdbcDriver;
-	private javax.swing.JTextField txtJdbcUrl;
-
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdNew;
+    private javax.swing.JButton cmdRemove;
+    private javax.swing.JButton cmdTestConnection;
+    private javax.swing.JLabel lblConnectionStatus;
+    private javax.swing.JLabel lblDataSourceName;
+    private javax.swing.JLabel lblDataSourceType;
+    private javax.swing.JLabel lblDataSourceTypeValue;
+    private javax.swing.JLabel lblDatabasePassword;
+    private javax.swing.JLabel lblDatabaseUsername;
+    private javax.swing.JLabel lblJdbcDriver;
+    private javax.swing.JLabel lblJdbcUrl;
+    private javax.swing.JLabel lblMappingType;
+    private javax.swing.JLabel lblMappingTypeValue;
+    private javax.swing.JPanel pnlCommandButton;
+    private javax.swing.JPanel pnlDataSourceInfo;
+    private javax.swing.JPanel pnlDataSourceParameters;
+    private javax.swing.JPanel pnlDataSourceSelector;
+    private javax.swing.JPanel pnlDataSourceSettings;
+    private javax.swing.JPanel pnlTestConnection;
+    private javax.swing.JPasswordField txtDatabasePassword;
+    private javax.swing.JTextField txtDatabaseUsername;
+    private javax.swing.JTextField txtJdbcDriver;
+    private javax.swing.JTextField txtJdbcUrl;
+    // End of variables declaration//GEN-END:variables
 
 	private void currentDatasourceChange(OBDADataSource previousdatasource, OBDADataSource currentsource) {
 

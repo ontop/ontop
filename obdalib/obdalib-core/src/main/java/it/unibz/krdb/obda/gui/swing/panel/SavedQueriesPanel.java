@@ -260,6 +260,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
         cmdImport.setToolTipText("Import queries from an obda file");
         cmdImport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdImport.setContentAreaFilled(false);
+        cmdImport.setEnabled(false);
         cmdImport.setMaximumSize(new java.awt.Dimension(100, 25));
         cmdImport.setMinimumSize(new java.awt.Dimension(25, 25));
         cmdImport.setPreferredSize(new java.awt.Dimension(50, 25));
@@ -273,6 +274,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
         cmdExport.setText("Export");
         cmdExport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdExport.setContentAreaFilled(false);
+        cmdExport.setEnabled(false);
         cmdExport.setMaximumSize(new java.awt.Dimension(100, 25));
         cmdExport.setMinimumSize(new java.awt.Dimension(50, 25));
         cmdExport.setPreferredSize(new java.awt.Dimension(50, 25));
