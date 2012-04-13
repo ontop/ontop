@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 
@@ -116,14 +117,29 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					// Shorten the URI if possible
 					uriTemplate = getAbbreviatedName(uriTemplate, true);
 					
-					for (Term innerTerm : function.getTerms()) {
-						if (innerTerm instanceof Variable) {
-							uriTemplate = uriTemplate.replace("{}", "{" + getDisplayName(innerTerm) + "}");
-						}
-					}
 					sb.append("<");
 					sb.append("\"");
-					sb.append(uriTemplate);
+					
+					StringTokenizer st = new StringTokenizer(uriTemplate, "}", true);
+					for (Term innerTerm : function.getTerms()) {
+						if (innerTerm instanceof Variable) {
+							while (st.hasMoreTokens()) {
+								String token = st.nextToken();								
+								if (token.equals("}")) {
+									sb.append(getDisplayName(innerTerm));
+									sb.append("}");
+									break;
+								} else {
+									sb.append(token);
+								}
+							}
+						}
+					}					
+					while (st.hasMoreTokens()) {
+						// Append the rest of the tokens, if exist
+						sb.append(st.nextToken());
+					}
+
 					sb.append("\"");
 					sb.append(">");
 				} else {
