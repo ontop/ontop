@@ -179,9 +179,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 					}
 				} catch (DuplicateMappingException e) {
-					JOptionPane.showMessageDialog(null, "Error while inserting mapping.\n " + e.getMessage()
-							+ "\nPlease refer to the log file for more information.");
-					log.error("Error while counting tuples.", e);
+					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
 				}
 				parent.setVisible(false);
 				parent.dispose();
