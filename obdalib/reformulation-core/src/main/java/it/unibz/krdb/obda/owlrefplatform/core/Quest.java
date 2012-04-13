@@ -526,8 +526,8 @@ public class Quest implements Serializable {
 
 		} catch (Exception e) {
 
-			log.error(e.getMessage(), e);
-			OBDAException ex = new OBDAException(e.getMessage(), e);
+//			log.error(e.getMessage(), e);
+			OBDAException ex = new OBDAException(e.getMessage());
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;
 				SQLException e1 = sqle.getNextException();

@@ -428,9 +428,6 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 						addDocumentListener(myself);
 
 					} catch (Exception e) {
-
-						System.err.print("Unexcpected error: " + e.getMessage());
-						e.printStackTrace(System.err);
 						addDocumentListener(myself);
 						alreadyColoring = false;
 					}

@@ -159,13 +159,14 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		}
 
 		man = rootOntology.getOWLOntologyManager();
-//		man.addOntologyChangeListener(new OWLOntologyChangeListener() {
-//
-//			@Override
-//			public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-//				prepared = false;
-//			}
-//		});
+		// man.addOntologyChangeListener(new OWLOntologyChangeListener() {
+		//
+		// @Override
+		// public void ontologiesChanged(List<? extends OWLOntologyChange>
+		// changes) throws OWLException {
+		// prepared = false;
+		// }
+		// });
 
 		this.obdaModel = obdaModel;
 		this.preferences.putAll(preferences);
@@ -203,8 +204,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		final boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
 		final String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
 
-		pm.reasonerTaskStarted("Classifying...");
-		pm.reasonerTaskBusy();
+		// pm.reasonerTaskStarted("Classifying...");
+		// pm.reasonerTaskBusy();
 
 		questInstance = new Quest();
 
@@ -216,16 +217,16 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		questInstance.setPreferences(preferences);
 
 		try {
-			pm.reasonerTaskProgressChanged(1, 4);
+			// pm.reasonerTaskProgressChanged(1, 4);
 
 			// Setup repository
 			questInstance.setupRepository();
-			pm.reasonerTaskProgressChanged(2, 4);
+			// pm.reasonerTaskProgressChanged(2, 4);
 
 			// Retrives the connection from Quest
 			conn = questInstance.getConnection();
 			owlconn = new QuestOWLConnection(conn);
-			pm.reasonerTaskProgressChanged(3, 4);
+			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
@@ -254,11 +255,11 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			}
 			log.debug("Quest has completed the setup and it is ready for query answering!");
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			log.error(e.getMessage());
 			throw e;
 		} finally {
 			// pm.reasonerTaskProgressChanged(4, 4);
-			pm.reasonerTaskStopped();
+			// pm.reasonerTaskStopped();
 		}
 	}
 
@@ -376,6 +377,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 	public void prepareReasoner() throws ReasonerInterruptedException, TimeOutException {
 
+		pm.reasonerTaskStarted("Classifying...");
+		pm.reasonerTaskBusy();
 		try {
 			/*
 			 * Compute the an ontology with the merge of all the vocabulary and
@@ -384,15 +387,19 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 			loadOntologies();
 			classify();
-		} catch (Exception e) {
-			throw new OWLRuntimeException(e);
-		}
-		
-		classHierarchyInfo.computeHierarchy();
-		objectPropertyHierarchyInfo.computeHierarchy();
-		dataPropertyHierarchyInfo.computeHierarchy();
 
-		prepared = true;
+			classHierarchyInfo.computeHierarchy();
+			objectPropertyHierarchyInfo.computeHierarchy();
+			dataPropertyHierarchyInfo.computeHierarchy();
+
+			prepared = true;
+
+		} catch (Exception e) {
+			throw new OWLRuntimeException(e.getMessage());
+		} finally {
+			pm.reasonerTaskStopped();
+		}
+
 	}
 
 	public void precomputeInferences(InferenceType... inferenceTypes) throws ReasonerInterruptedException, TimeOutException,
@@ -972,8 +979,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		}
 
 		public void computeHierarchy() {
-			pm.reasonerTaskStarted("Computing " + name + " hierarchy");
-			pm.reasonerTaskBusy();
+			// pm.reasonerTaskStarted("Computing " + name + " hierarchy");
+			// pm.reasonerTaskBusy();
 			nodeCache.clear();
 			Map<T, Collection<T>> cache = new HashMap<T, Collection<T>>();
 			Set<T> entities = new HashSet<T>();
@@ -981,9 +988,9 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 				entities.addAll(getEntities(ont));
 			}
 			classificationSize = entities.size();
-			pm.reasonerTaskProgressChanged(0, classificationSize);
+			// pm.reasonerTaskProgressChanged(0, classificationSize);
 			updateForSignature(entities, cache);
-			pm.reasonerTaskStopped();
+			// pm.reasonerTaskStopped();
 		}
 
 		private void updateForSignature(Set<T> signature, Map<T, Collection<T>> cache) {
@@ -999,7 +1006,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			Set<T> equivBottomOrParentsOfBottom = new HashSet<T>();
 			for (T entity : signature) {
 				if (!processed.contains(entity)) {
-					pm.reasonerTaskProgressChanged(processed.size(), signature.size());
+					// pm.reasonerTaskProgressChanged(processed.size(),
+					// signature.size());
 					tarjan(entity, 0, new Stack<T>(), new HashMap<T, Integer>(), new HashMap<T, Integer>(), cyclesResult, processed,
 							new HashSet<T>(), cache, equivTopOrChildrenOfTop, equivBottomOrParentsOfBottom);
 					throwExceptionIfInterrupted();
@@ -1091,7 +1099,8 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					parentsOfBottom.add(entity);
 				}
 			}
-			pm.reasonerTaskProgressChanged(processed.size(), classificationSize);
+			// pm.reasonerTaskProgressChanged(processed.size(),
+			// classificationSize);
 			indexMap.put(entity, index);
 			lowlinkMap.put(entity, index);
 			index = index + 1;
