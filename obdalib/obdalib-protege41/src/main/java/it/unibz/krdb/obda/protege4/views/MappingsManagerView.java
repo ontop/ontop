@@ -71,7 +71,13 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 				if (entity == null)
 					return;
 				if (!entity.isTopEntity()) {
-					String shortf = editor.getOWLWorkspace().getOWLModelManager().getOWLEntityRenderer().getShortForm(entity);
+					String shortf = entity.getIRI().getFragment();
+					if (shortf == null) {
+						String iri = entity.getIRI().toString();
+						shortf = iri.substring(iri.lastIndexOf("/"));
+					}
+//					String shortf = editor.getOWLWorkspace().getOWLModelManager().getOWLEntityRenderer().getShortForm(entity);
+//					shortf = controller.getActiveOBDAModel().getPrefixManager().getShortForm(entity.toString());
 					mappingPanel.setFilter("pred:" + shortf);
 				} else {
 					mappingPanel.setFilter("");
