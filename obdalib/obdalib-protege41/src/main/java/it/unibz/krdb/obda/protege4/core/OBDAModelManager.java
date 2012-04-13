@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
 import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
+import it.unibz.krdb.obda.utils.VersionInfo;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.io.File;
@@ -40,8 +41,6 @@ import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
@@ -102,12 +101,11 @@ public class OBDAModelManager implements Disposable {
 		obdaManagerListeners = new LinkedList<OBDAModelManagerListener>();
 		obdamodels = new HashMap<URI, OBDAModel>();
 
-		/***
-		 * Adding ontology change listeners to synchronize with the mappings
-		 **/
-
+		// Adding ontology change listeners to synchronize with the mappings
 		mmgr.addOntologyChangeListener(new OntologyRefactoringListener());
 
+		// Printing the version information to the console
+		System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
 	}
 
 	/***

@@ -332,9 +332,9 @@
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
 						<Bundle-Description>The OBDA plugin for Protege 4.1</Bundle-Description>
-						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research
-							Centre</Bundle-Vendor>
-
+						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research Centre</Bundle-Vendor>
+						<Implementation-Version>${project.version}.${buildNumber}</Implementation-Version>
+						
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
 						<Build-Number>${buildNumber}</Build-Number>

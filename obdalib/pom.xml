@@ -131,6 +131,7 @@
 								<Project-Url>${project.url}</Project-Url>
 								<Project-Version>${project.version}</Project-Version>
 								<Project-Build>${buildNumber}</Project-Build>
+								<Implementation-Version>${project.version}.${buildNumber}</Implementation-Version>
 							</manifestEntries>
 						</archive>
 					</configuration>
