@@ -242,6 +242,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
+	private HashMap<Predicate, Integer> indexes;
+	
 	private Properties config;
 
 	private DAG dag;
@@ -618,19 +620,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public int insertData(Connection conn, Iterator<Assertion> data, int commit, int batch) throws SQLException {
+	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
-		if (commit < 1) {
-			commit = -1;
-		}
-		if (batch < 1) {
-			batch = -1;
-		}
+		// The precondition for the limit number must be greater or equal to one.
+		commitLimit = (commitLimit < 1) ? 1 : commitLimit;
+		batchLimit = (batchLimit < 1) ? 1 : batchLimit;
 		
+		// Create the insert statement for all assertions (i.e, concept, role and attribute)
 		PreparedStatement classStm = conn.prepareStatement(class_insert);
-		PreparedStatement roleStm = conn.prepareStatement(role_insert);
-		
+		PreparedStatement roleStm = conn.prepareStatement(role_insert);		
 		PreparedStatement attributeLiteralStm = conn.prepareStatement(attribute_table_literal_insert);
 		PreparedStatement attributeStringStm = conn.prepareStatement(attribute_table_string_insert);
 		PreparedStatement attributeIntegerStm = conn.prepareStatement(attribute_table_integer_insert);
@@ -639,9 +638,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		PreparedStatement attributeDateStm = conn.prepareStatement(attribute_table_datetime_insert);
 		PreparedStatement attributeBooleanStm = conn.prepareStatement(attribute_table_boolean_insert);
 
-		HashMap<Predicate, Integer> indexes = new HashMap<Predicate, Integer>(this.ontology.getVocabulary().size() * 2);
+		// For caching the indexes
+		indexes = new HashMap<Predicate, Integer>(this.ontology.getVocabulary().size() * 2);
 
-		int insertscount = 0;
+		// For counting the insertion
+		InsertionMonitor monitor = new InsertionMonitor();
+		
 		int batchCount = 0;
 		int commitCount = 0;
 
@@ -651,224 +653,202 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			commitCount += 1;
 
 			if (ax instanceof DataPropertyAssertion) {
-				// Data property coming from the TBox
-				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
-				Predicate attribute = attributeABoxAssertion.getAttribute();
-				Predicate.COL_TYPE attributeType = getAttributeType(attribute);
-				
-				// Data property coming from the ABox
-				String uri = attributeABoxAssertion.getObject().getURI().toString();
-				String value = attributeABoxAssertion.getValue().getValue();
-				String lang = attributeABoxAssertion.getValue().getLanguage();
-				Predicate.COL_TYPE assertionType = attributeABoxAssertion.getValue().getType(); 
-				
-				if (attributeType != Predicate.COL_TYPE.LITERAL) {
-					if (assertionType != null) {
-						if (assertionType != attributeType) {
-							continue; // skip it!
-						}
-					}
-				}
+				// Get the data property assertion
+				DataPropertyAssertion attributeAssertion = (DataPropertyAssertion) ax;
+				Predicate attribute = attributeAssertion.getAttribute();
 								
-				Integer idxc = indexes.get(attribute);
-				int idx = -1;
-				if (idxc == null) {
-					Property propDesc = ofac.createProperty(attribute);
-					DAGNode node = pureIsa.getRoleNode(propDesc);
-					idx = node.getIndex();
-					indexes.put(attribute, idx);
-				} else {
-					idx = idxc;
-				}
-
-				insertscount += 1;
-
-				switch(attributeType) {
-				case LITERAL:
-					setInputStatement(attributeLiteralStm, uri, value, lang, idx);
-					attributeLiteralStm.addBatch();
-					break;
-				case STRING:
-					setInputStatement(attributeStringStm, uri, value, idx);
-					attributeStringStm.addBatch();
-					break;
-				case INTEGER:
-					setInputStatement(attributeIntegerStm, uri, Integer.parseInt(value), idx);
-					attributeIntegerStm.addBatch();
-					break;
-				case DECIMAL:
-					setInputStatement(attributeDecimalStm, uri, parseBigDecimal(value), idx);
-					attributeDecimalStm.addBatch();
-					break;
-				case DOUBLE:
-					setInputStatement(attributeDoubleStm, uri, Double.parseDouble(value), idx);
-					attributeDoubleStm.addBatch();
-					break;
-				case DATETIME:
-					setInputStatement(attributeDateStm, uri, parseTimestamp(value), idx);
-					attributeDateStm.addBatch();
-					break;
-				case BOOLEAN:
-					value = getBooleanString(value);  // PostgreSQL abbreviates the boolean value to 't' and 'f'
-					setInputStatement(attributeBooleanStm, uri, Boolean.parseBoolean(value), idx);
-					attributeBooleanStm.addBatch();
-					break;
-				}
-
-			} else if (ax instanceof ObjectPropertyAssertion) {
-
-				ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
+				Predicate.COL_TYPE assertionType = getAssertionType(attributeAssertion); // datatype from the ABox (i.e., the database)
+				Predicate.COL_TYPE attributeType = getAttributeType(attribute); // datatype from the TBox (i.e., the ontology)
 				
-				String uri1 = roleABoxAssertion.getFirstObject().getURI().toString();
-				String uri2 = roleABoxAssertion.getSecondObject().getURI().toString();
-
-				Predicate propPred = roleABoxAssertion.getRole();
-				Property propDesc = ofac.createProperty(propPred);
-
-				if (dag.equi_mappings.containsKey(propDesc)) {
-					Property desc = (Property) dag.equi_mappings.get(propDesc);
-					if (desc.isInverse()) {
-						String tmp = uri1;
-						uri1 = uri2;
-						uri2 = tmp;
+				// Check if there is a conflict between the datatypes from TBox and ABox
+				boolean hasDatatypeConflict = false;
+				if (attributeType != COL_TYPE.LITERAL) {
+					if (assertionType != null && assertionType != attributeType) {
+						hasDatatypeConflict = true;
 					}
+				}				
+
+				if (hasDatatypeConflict) {
+					monitor.fail(attribute);  // advanced the failure counter
+				}
+				else {
+					// Construct the database INSERT statements
+					String uri = attributeAssertion.getObject().getURI().toString();
+					String value = attributeAssertion.getValue().getValue();
+					String lang = attributeAssertion.getValue().getLanguage();
+					int idx = getAttributeIndex(attribute);
+					
+					// The insertion is based on the datatype from TBox
+					switch(attributeType) {
+					case LITERAL: setInputStatement(attributeLiteralStm, uri, value, lang, idx); break;
+					case STRING: setInputStatement(attributeStringStm, uri, value, idx); break;
+					case INTEGER: setInputStatement(attributeIntegerStm, uri, Integer.parseInt(value), idx); break;
+					case DECIMAL: setInputStatement(attributeDecimalStm, uri, parseBigDecimal(value), idx); break;
+					case DOUBLE: setInputStatement(attributeDoubleStm, uri, Double.parseDouble(value), idx); break;
+					case DATETIME: setInputStatement(attributeDateStm, uri, parseTimestamp(value), idx); break;
+					case BOOLEAN:
+						value = getBooleanString(value);  // PostgreSQL abbreviates the boolean value to 't' and 'f'
+						setInputStatement(attributeBooleanStm, uri, Boolean.parseBoolean(value), idx); break;
+					}					
+					monitor.success();	// advanced the success counter
+				}
+				
+			} else if (ax instanceof ObjectPropertyAssertion) {
+				// Get the object property assertion
+				ObjectPropertyAssertion roleAssertion = (ObjectPropertyAssertion) ax;
+				Predicate role = roleAssertion.getRole();
+
+				String uri1 = roleAssertion.getFirstObject().getURI().toString();
+				String uri2 = roleAssertion.getSecondObject().getURI().toString();
+				if (isInverse(role)) {
+					swap(uri1, uri2);
 				}
 
-				int idx = -1;
-				Integer idxc = indexes.get(propPred);
-				if (idxc == null) {
-
-					DAGNode node = pureIsa.getRoleNode(propDesc);
-					if (node == null) {
-						Property desc = (Property) dag.equi_mappings.get(propDesc);
-
-						if (desc == null) {
-							log.error("Property class without node: " + propDesc);
-						}
-						Property desinv = ofac.createProperty(desc.getPredicate(), !desc.isInverse());
-						DAGNode node2 = (pureIsa.getRoleNode(desinv));
-						idx = node2.getIndex();
-					} else {
-						idx = node.getIndex();
-					}
-					indexes.put(roleABoxAssertion.getRole(), idx);
-				} else {
-					idx = idxc;
-				}
-
-				insertscount += 1;
-
+				// Construct the database INSERT statement
 				roleStm.setString(1, uri1);
 				roleStm.setString(2, uri2);
-				roleStm.setInt(3, idx);
+				roleStm.setInt(3, getRoleIndex(role));
 				roleStm.addBatch();
 
+				monitor.success();	// advanced the success counter
+
 			} else if (ax instanceof ClassAssertion) {
-				ClassAssertion cassertion = (ClassAssertion) ax;
-				Predicate pred = cassertion.getConcept();
+				// Get the class assertion
+				ClassAssertion classAssertion = (ClassAssertion) ax;
+				Predicate concept = classAssertion.getConcept();
+			
+				String uri = classAssertion.getObject().getURI().toString();
 
-				int idx = -1;
-				Integer idxc = indexes.get(cassertion.getConcept());
-				if (idxc == null) {
-					Predicate clsPred = cassertion.getConcept();
-					ClassDescription clsDesc = ofac.createClass(clsPred);
-					DAGNode node = pureIsa.getClassNode(clsDesc);
-					if (node == null) {
-						String cls = cassertion.getConcept().getName().toString();
-						log.error("Found class without node: " + cls.toString());
-					}
-					idx = node.getIndex();
-					indexes.put(pred, idx);
-				} else {
-					idx = idxc;
-				}
-				String uri = cassertion.getObject().getURI().toString();
-
-				insertscount += 1;
-
+				// Construct the database INSERT statement
 				classStm.setString(1, uri);
-				classStm.setInt(2, idx);
+				classStm.setInt(2, getConceptIndex(concept));
 				classStm.addBatch();
-				// }
+
+				monitor.success();	// advanced the success counter
 			}
 
-			if (batchCount == batch) {
-				batchCount = 0;
-				roleStm.executeBatch();
-				roleStm.clearBatch();
-
-				attributeLiteralStm.executeBatch();
-				attributeLiteralStm.clearBatch();
-				
-				attributeStringStm.executeBatch();
-				attributeStringStm.clearBatch();
-				
-				attributeIntegerStm.executeBatch();
-				attributeIntegerStm.clearBatch();
-				
-				attributeDecimalStm.executeBatch();
-				attributeDecimalStm.clearBatch();
-				
-				attributeDoubleStm.executeBatch();
-				attributeDoubleStm.clearBatch();
-				
-				attributeDateStm.executeBatch();
-				attributeDateStm.clearBatch();
-				
-				attributeBooleanStm.executeBatch();
-				attributeBooleanStm.clearBatch();
-
-				classStm.executeBatch();
-				classStm.clearBatch();
+			// Check if the batch count is already in the batch limit
+			if (batchCount == batchLimit) {
+				executeBatch(roleStm);				
+				executeBatch(attributeLiteralStm);
+				executeBatch(attributeStringStm);
+				executeBatch(attributeIntegerStm);
+				executeBatch(attributeDecimalStm);
+				executeBatch(attributeDoubleStm);
+				executeBatch(attributeDateStm);
+				executeBatch(attributeBooleanStm);
+				executeBatch(classStm);
+				batchCount = 0; // reset the counter
 			}
-			if (commitCount == commit) {
-				commitCount = 0;
+			
+			// Check if the commit count is already in the commit limit
+			if (commitCount == commitLimit) {
 				conn.commit();
+				commitCount = 0; // reset the counter
 			}
 		}
 
-		roleStm.executeBatch();
-		roleStm.clearBatch();
-		roleStm.close();
+		// Execute the rest of the batch
+		executeBatch(roleStm);				
+		executeBatch(attributeLiteralStm);
+		executeBatch(attributeStringStm);
+		executeBatch(attributeIntegerStm);
+		executeBatch(attributeDecimalStm);
+		executeBatch(attributeDoubleStm);
+		executeBatch(attributeDateStm);
+		executeBatch(attributeBooleanStm);
+		executeBatch(classStm);
+		
+		// Close all open statements
+		closeStatment(roleStm);
+		closeStatment(attributeLiteralStm);
+		closeStatment(attributeStringStm);
+		closeStatment(attributeIntegerStm);
+		closeStatment(attributeDecimalStm);
+		closeStatment(attributeDoubleStm);
+		closeStatment(attributeDateStm);
+		closeStatment(attributeBooleanStm);
+		closeStatment(classStm);
+		
+		// Commit the rest of the batch insert
+		conn.commit();
+				
+		// Print the monitoring log
+		monitor.printLog();
+		
+		return monitor.getSuccessCount();
+	}
+	
+	private void closeStatment(PreparedStatement statement) throws SQLException {
+		statement.close();
+	}
 
-		attributeLiteralStm.executeBatch();
-		attributeLiteralStm.clearBatch();
-		attributeLiteralStm.close();
-		
-		attributeStringStm.executeBatch();
-		attributeStringStm.clearBatch();
-		attributeStringStm.close();
-		
-		attributeIntegerStm.executeBatch();
-		attributeIntegerStm.clearBatch();
-		attributeIntegerStm.close();
-		
-		attributeDecimalStm.executeBatch();
-		attributeDecimalStm.clearBatch();
-		attributeDecimalStm.close();
-		
-		attributeDoubleStm.executeBatch();
-		attributeDoubleStm.clearBatch();
-		attributeDoubleStm.close();
-		
-		attributeDateStm.executeBatch();
-		attributeDateStm.clearBatch();
-		attributeDateStm.close();
-		
-		attributeBooleanStm.executeBatch();
-		attributeBooleanStm.clearBatch();
-		attributeBooleanStm.close();
-		
-		classStm.executeBatch();
-		classStm.clearBatch();
-		classStm.close();
+	private void executeBatch(PreparedStatement statement) throws SQLException {
+		statement.executeBatch();
+		statement.clearBatch();
+	}
 
-		if (commit != -1) {
-			conn.commit();
+	private void swap(String uri1, String uri2) {
+		String tmp = uri1;
+		uri1 = uri2;
+		uri2 = tmp;
+	}
+
+	private boolean isInverse(Predicate role) {
+		Property property = ofac.createProperty(role);
+		if (dag.equi_mappings.containsKey(property)) {
+			Property desc = (Property) dag.equi_mappings.get(property);
+			if (desc.isInverse()) {
+				return true;
+			}
 		}
-		log.debug("Total tuples inserted: {}", insertscount);
-		return insertscount;
+		return false;
+	}
+	
+	private int getConceptIndex(Predicate concept) {
+		Integer idxc = indexes.get(concept);
+		if (idxc == null) {
+			ClassDescription description = ofac.createClass(concept);
+			DAGNode node = pureIsa.getClassNode(description);
+			if (node == null) {
+				log.error("Found class without node: " + concept);
+			}
+			idxc = new Integer(node.getIndex());
+			indexes.put(concept, idxc);
+		}
+		return idxc.intValue();
+	}
 
+	private int getRoleIndex(Predicate role) {
+		Integer idxc = indexes.get(role);
+		if (idxc == null) {
+			Property description = ofac.createProperty(role);
+			DAGNode node = pureIsa.getRoleNode(description);
+			if (node == null) {
+				Property desc = (Property) dag.equi_mappings.get(description);
+				if (desc == null) {
+					log.error("Property class without node: " + description);
+				}
+				Property desinv = ofac.createProperty(desc.getPredicate(), !desc.isInverse());
+				DAGNode node2 = (pureIsa.getRoleNode(desinv));
+				idxc = new Integer(node2.getIndex());
+			} else {
+				idxc = new Integer(node.getIndex());
+			}
+			indexes.put(role, idxc);
+		}
+		return idxc.intValue();
+	}
+
+	private int getAttributeIndex(Predicate attribute) {		
+		Integer idxc = indexes.get(attribute);
+		if (idxc == null) {
+			Property propDesc = ofac.createProperty(attribute);
+			DAGNode node = pureIsa.getRoleNode(propDesc);
+			idxc = new Integer(node.getIndex());
+			indexes.put(attribute, idxc);
+		}
+		return idxc.intValue();
 	}
 
 	private String getBooleanString(String value) {
@@ -886,42 +866,49 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		stm.setString(2, value);
 		stm.setString(3, lang);
 		stm.setInt(4, idx);
+		stm.addBatch();
 	}
 	
 	private void setInputStatement(PreparedStatement stm, String uri, String value, int idx) throws SQLException {
 		stm.setString(1, uri);
 		stm.setString(2, value);
 		stm.setInt(3, idx);
+		stm.addBatch();
 	}
 
 	private void setInputStatement(PreparedStatement stm, String uri, int value, int idx) throws SQLException {
 		stm.setString(1, uri);
 		stm.setInt(2, value);
 		stm.setInt(3, idx);
+		stm.addBatch();
 	}
 	
 	private void setInputStatement(PreparedStatement stm, String uri, BigDecimal value, int idx) throws SQLException {
 		stm.setString(1, uri);
 		stm.setBigDecimal(2, value);
 		stm.setInt(3, idx);
+		stm.addBatch();
 	}
 	
 	private void setInputStatement(PreparedStatement stm, String uri, double value, int idx) throws SQLException {
 		stm.setString(1, uri);
 		stm.setDouble(2, value);
 		stm.setInt(3, idx);
+		stm.addBatch();
 	}
 	
 	private void setInputStatement(PreparedStatement stm, String uri, Timestamp value, int idx) throws SQLException {
 		stm.setString(1, uri);										
 		stm.setTimestamp(2, value);
 		stm.setInt(3, idx);
+		stm.addBatch();
 	}
 	
 	private void setInputStatement(PreparedStatement stm, String uri, boolean value, int idx) throws SQLException {
 		stm.setString(1, uri);
 		stm.setBoolean(2, value);
 		stm.setInt(3, idx);
+		stm.addBatch();
 	}
 
 	private BigDecimal parseBigDecimal(String value) {
@@ -947,6 +934,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
     	return null; // the string can't be parsed to one of the datetime formats.
 	}
 	
+	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {		
 		PropertySomeRestriction role = ofac.getPropertySomeRestriction(attribute, true);
 		DAGNode roleNode = dag.get(role);
@@ -960,6 +948,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 		}
 		return COL_TYPE.LITERAL;
+	}
+	
+	// Attribute datatype from ABox
+	private COL_TYPE getAssertionType(DataPropertyAssertion assertion) {
+		return assertion.getValue().getType();
 	}
 
 	@Override
@@ -2522,5 +2515,44 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				writer.append('\n');
 			}
 		}		
+	}
+	
+	class InsertionMonitor {
+	
+		private int success = 0;
+		private Map<Predicate, Integer> failures = new HashMap<Predicate, Integer>();
+		
+		void success() {
+			success++;
+		}
+
+		void fail(Predicate predicate) {
+			Integer counter = failures.get(predicate);
+			if (counter == null) {
+				counter = new Integer(0);
+			}
+			failures.put(predicate, counter + 1);
+		}
+		
+		int getSuccessCount() {
+			return success;
+		}
+		
+		Map<Predicate, Integer> getFailureCount() {
+			return failures;
+		}		
+
+		public void printLog() {
+			log.debug("Total successful insertions: " + success + ".");			
+			int totalFailures = 0;
+			for (Predicate predicate : failures.keySet()) {
+				int failure = failures.get(predicate);
+				log.debug("Failed to insert data for predicate " + predicate.toString() + " (" + failure + " tuples).");
+				totalFailures += failure;
+			}
+			if (totalFailures > 0) {
+				log.error("Total failed insertions: " + totalFailures + ". (REASON: datatype mismatch between the ontology and database).");
+			}
+		}
 	}
 }
