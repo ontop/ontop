@@ -333,7 +333,7 @@
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
 						<Bundle-Description>The OBDA plugin for Protege 4.1</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen Bolzano. KRDB Research Centre</Bundle-Vendor>
-						<Implementation-Version>${project.version}.${buildNumber}</Implementation-Version>
+						<Implementation-Version>${project.version}.1426</Implementation-Version>
 						
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
