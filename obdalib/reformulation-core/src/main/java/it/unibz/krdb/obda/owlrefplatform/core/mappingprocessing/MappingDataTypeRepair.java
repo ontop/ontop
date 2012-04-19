@@ -140,12 +140,11 @@ public class MappingDataTypeRepair {
             while (tit.hasNext()) {
                 Term t = tit.next();
                 if (t instanceof AnonymousVariable) {
-                    i++;
+                    // NO-OP
                 } else if (t instanceof VariableImpl) {
                     Object[] o = new Object[2];
                     o[0] = a;  // atom
-                    o[1] = i;  // index
-                    i++;
+                    o[1] = i;  // position index
                     List<Object[]> aux = termOccurenceIndex.get(((VariableImpl) t).getName());
                     if (aux == null) {
                         aux = new LinkedList<Object[]>();
@@ -153,12 +152,13 @@ public class MappingDataTypeRepair {
                     aux.add(o);
                     termOccurenceIndex.put(((VariableImpl) t).getName(), aux);
                 } else if (t instanceof FunctionalTermImpl) {
-                    // NO-OP
+                	// NO-OP
                 } else if (t instanceof ValueConstant) {
-                    // NO-OP
+                	// NO-OP
                 } else if (t instanceof URIConstant) {
-                    // NO-OP
+                	// NO-OP
                 }
+                i++; // evaluate the next term so we need to increase the position index
             }
         }
     }

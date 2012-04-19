@@ -98,35 +98,41 @@ private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
  *------------------------------------------------------------------*/
  
 parse returns [CQIE value]
-@init {
-  List<Atom> body = new LinkedList<Atom>();
-}
-  : statement* EOF {
+  : directiveStatement*
+    t1=triplesStatement {
       int arity = variableSet.size();
       List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
       Atom head = dfac.getAtom(dfac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, arity, null), distinguishVariables);
-      if ($statement.value != null) {
-        body.addAll($statement.value); 
+      
+      // Create a new rule
+      List<Atom> triples = $t1.value;
+      $value = dfac.getCQIE(head, triples);      
+    }
+    (t2=triplesStatement)* EOF {
+      List<Atom> additionalTriples = $t2.value;
+      if (additionalTriples != null) {
+        // If there are additional triple statements then just add to the existing body
+        List<Atom> existingBody = $value.getBody();
+        existingBody.addAll(additionalTriples);
       }
-      $value = dfac.getCQIE(head, body); 
     }
   ;
-  
-statement returns [List<Atom> value]
-  : directive PERIOD
-  | triples PERIOD { $value = $triples.value; }
-  ;
 
+directiveStatement
+  : directive PERIOD
+  ;
+  
+triplesStatement returns [List<Atom> value]
+  : triples PERIOD { $value = $triples.value; }
+  ;
+  
 directive
   : base
   | prefixID
   ;
 
 base
-  : AT BASE uriref {
-      String uriref = $uriref.value;
-      directives.put("", uriref);
-    }
+  : AT BASE uriref
   ;
 
 prefixID
@@ -142,7 +148,7 @@ triples returns [List<Atom> value]
       $value = $predicateObjectList.value;
     }
   ;
-    
+  
 predicateObjectList returns [List<Atom> value]
 @init {
    $value = new LinkedList<Atom>();
@@ -188,13 +194,13 @@ objectList returns [List<Term> value]
 }
   : o1=object { $value.add($o1.value); } (COMMA o2=object { $value.add($o2.value); })* 
   ;
-
+  
 subject returns [Term value]
-//  : resource
-//  | blank
-  : variable { $value = $variable.value; }
+  : resource { $value = dfac.getURIConstant($resource.value); }
+  | variable { $value = $variable.value; }
   | function { $value = $function.value; }
   | uriTemplateFunction { $value = $uriTemplateFunction.value; }
+//  | blank
   ;
   
 predicate returns [URI value]
@@ -202,7 +208,7 @@ predicate returns [URI value]
   ;
   
 object returns [Term value]
-  : resource { $value = dfac.getURIConstant($resource.value); } // if the object is a resource then it has to be an rdf:type object!
+  : resource { $value = dfac.getURIConstant($resource.value); }
   | function { $value = $function.value; }
   | literal  { $value = $literal.value; }
   | variable { $value = $variable.value; }
@@ -212,8 +218,8 @@ object returns [Term value]
   ;
   
 resource returns [URI value]
-//  : uriref { $value = URI.create($uriref.value); }
-  : qname { $value = URI.create($qname.value); }
+  : uriref { $value = URI.create($uriref.value); }
+  | qname { $value = URI.create($qname.value); }
   ;
   
 uriref returns [String value]
@@ -221,7 +227,7 @@ uriref returns [String value]
   ;
   
 qname returns [String value]
-  : (prefix|COLON) name? {
+  : prefix name {
       String prefix = "";
       if ($prefix.text != null) {
         prefix = $prefix.text.substring(0, $prefix.text.length()-1); // remove the colon!
@@ -285,27 +291,32 @@ dataTypeFunction returns [Function value]
   ;
 
 uriTemplateFunction returns [Function value]
-  : LESS stringLiteral GREATER {
-      String template = $stringLiteral.value.toString();
-      List<Term> terms = new ArrayList<Term>();
-      
+@init {
+  List<Term> terms = new ArrayList<Term>();
+}
+  : STRING_WITH_TEMPLATE_SIGN {
+      String template = $STRING_WITH_TEMPLATE_SIGN.text;
+            
+      // cleanup the template string, e.g., <"&ex;student-{pid}"> --> &ex;student-{pid}
+      template = template.substring(2, template.length()-2);
+                  
       if (template.contains("&") && template.contains(";")) {
-        // scan the input string if it contains "{" ... "}"
+        // scan the input string if it contains "&...;"
         int start = template.indexOf("&");
         int end = template.indexOf(";");
         
-        // extract the whole prefix placeholder, e.g., "&hello;"
+        // extract the whole prefix placeholder, e.g., "&ex;"
         String prefixPlaceHolder = template.substring(start, end+1);
         
-        // extract the prefix name, e.g., "&hello;" --> "hello"
+        // extract the prefix name, e.g., "&hello;" --> "ex"
         String prefix = prefixPlaceHolder.substring(1, prefixPlaceHolder.length()-1);
         
-        // make an exception for base prefix: replace it to a blank string
+        // make an exception for prefix ":", replace it to a blank string
         prefix = prefix.equals(":") ? "" : prefix;
         
         String uri = directives.get(prefix);        
         if (uri == null) {
-          throw new RecognitionException(); // the prefix is unknown.
+          throw new Exception("The prefix name is unknown: " + prefix); // the prefix is unknown.
         }
         template = template.replaceFirst(prefixPlaceHolder, uri);
       }
@@ -320,7 +331,15 @@ uriTemplateFunction returns [Function value]
         template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
         
         // extract the variable name only, e.g., "{?var}" --> "var"
-        terms.add(dfac.getVariable(placeHolder.substring(2, placeHolder.length()-1)));
+        try {
+       	  String variableName = placeHolder.substring(2, placeHolder.length()-1);                    	
+       	  if (variableName.equals("")) {
+       	    throw new Exception("Variable name has not been properly defined!");
+       	  }
+          terms.add(dfac.getVariable(variableName));
+        } catch (IndexOutOfBoundsException e) {
+       	  throw new Exception("Variable name has not been properly defined!");
+        }
       }
       // replace the placeholder string to the original. The current string becomes the template
       template = template.replaceAll("\\[\\]", "{}");
@@ -386,7 +405,7 @@ dataTypeString returns [Term value]
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
       } else {
-        throw new RecognitionException();
+        throw new Exception("Unknown datatype: " + functionName);
       }
       $value = dfac.getFunctionalTerm(functionSymbol, constant);
     }
@@ -407,7 +426,8 @@ relativeURI
   ;
 
 prefix
-  : STRING_PREFIX
+  : STRING_PREFIX 
+  | COLON
   ;
 
 name
@@ -449,16 +469,20 @@ BASE: ('B'|'b')('A'|'a')('S'|'s')('E'|'e');
 
 PREFIX: ('P'|'p')('R'|'r')('E'|'e')('F'|'f')('I'|'i')('X'|'x');
 
-FALSE: ('F'|'STRING_WITH_QUOTE_DOUBLEf')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
+FALSE: ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e');
 
 TRUE: ('T'|'t')('R'|'r')('U'|'u')('E'|'e');
 
 REFERENCE:     '^^';
+LTSIGN:        '<"';
+RTSIGN:        '">';
 SEMI:          ';';
 PERIOD:        '.';
 COMMA:         ',';
 LSQ_BRACKET:   '[';
 RSQ_BRACKET:   ']';
+LCR_BRACKET:   '{';
+RCR_BRACKET:   '}';		
 LPAREN:        '(';
 RPAREN:        ')';
 QUESTION:      '?';
@@ -564,7 +588,9 @@ fragment ID_CORE: (ID_START|DIGIT);
 
 fragment ID: ID_START (ID_CORE)*;
 
-ID_PLAIN: ID_START (ID_CORE)*;
+STRING_PREFIX
+  : ID_START (ID_CORE)* COLON
+  ;
 
 STRING_WITH_QUOTE
   : '\'' ( options {greedy=false  ;} : ~('\u0027' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '\''
@@ -574,13 +600,13 @@ STRING_WITH_QUOTE_DOUBLE
   : '"'  ( options {greedy=false  ;} : ~('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '"'
   ;
 
+STRING_WITH_TEMPLATE_SIGN
+  : '<"'  ( options {greedy=false  ;} : ~('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '">'
+  ;	
+
 STRING_URI
   : SCHEMA COLON DOUBLE_SLASH (URI_PATH)*
   ;
-
-STRING_PREFIX
-  : ID COLON
-  ; 
   
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};
   

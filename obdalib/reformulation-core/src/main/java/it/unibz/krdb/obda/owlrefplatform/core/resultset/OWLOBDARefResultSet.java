@@ -10,12 +10,13 @@ import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -78,32 +79,43 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 	 * @return
 	 */
 	public COL_TYPE getType(int column) {
-		Term type = signatureTyping.get(column);
-		if (!(type instanceof Function)) {
-			// The column is not typed
+		Term term = signatureTyping.get(column);
+		if (term instanceof Variable) {
+			// Variables without a data-type function have no data-type!
 			return null;
+		} else if (term instanceof Constant) {
+			Constant constant = (Constant) term;
+			if (constant instanceof ValueConstant) {
+				return ((ValueConstant) constant).getType();
+			} else if (constant instanceof URIConstant) {
+				return COL_TYPE.OBJECT;
+			} else if (constant instanceof BNode) {
+				return COL_TYPE.BNODE;
+			}
+		} else if (term instanceof Function) {		
+			Predicate function = ((Function) term).getFunctionSymbol();
+			if (function == OBDAVocabulary.XSD_BOOLEAN) {
+				return COL_TYPE.BOOLEAN;
+			} else if (function == OBDAVocabulary.XSD_DATETIME) {
+				return COL_TYPE.DATETIME;
+			} else if (function == OBDAVocabulary.XSD_DECIMAL) {
+				return COL_TYPE.DECIMAL;
+			} else if (function == OBDAVocabulary.XSD_DOUBLE) {
+				return COL_TYPE.DOUBLE;
+			} else if (function == OBDAVocabulary.XSD_INTEGER) {
+				return COL_TYPE.INTEGER;
+			} else if (function == OBDAVocabulary.XSD_STRING) {
+				return COL_TYPE.STRING;
+			} else if (function == OBDAVocabulary.RDFS_LITERAL) {
+				return COL_TYPE.LITERAL;
+			} else if (function.getName().equals(OBDAVocabulary.QUEST_URI)) {
+				return COL_TYPE.OBJECT;
+			} else if (function.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
+				return COL_TYPE.BNODE;
+			}
 		}
-		Predicate function = ((Function) type).getFunctionSymbol();
-		if (function == OBDAVocabulary.XSD_BOOLEAN) {
-			return COL_TYPE.BOOLEAN;
-		} else if (function == OBDAVocabulary.XSD_DATETIME) {
-			return COL_TYPE.DATETIME;
-		} else if (function == OBDAVocabulary.XSD_DECIMAL) {
-			return COL_TYPE.DECIMAL;
-		} else if (function == OBDAVocabulary.XSD_DOUBLE) {
-			return COL_TYPE.DOUBLE;
-		} else if (function == OBDAVocabulary.XSD_INTEGER) {
-			return COL_TYPE.INTEGER;
-		} else if (function == OBDAVocabulary.XSD_STRING) {
-			return COL_TYPE.STRING;
-		} else if (function == OBDAVocabulary.RDFS_LITERAL) {
-			return COL_TYPE.LITERAL;
-		} else if (function.getName().equals(OBDAVocabulary.QUEST_URI)) {
-			return COL_TYPE.OBJECT;
-		} else if (function.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
-			return COL_TYPE.BNODE;
-		}
-		return COL_TYPE.OBJECT;
+		// For other kind of term class.
+		return null;		
 	}
 
 	public double getDouble(int column) throws OBDAException {
@@ -202,7 +214,8 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 
 		try {
 			if (type == COL_TYPE.OBJECT || type == null) {
-				result = fac.getURIConstant(URI.create(set.getString(name)));
+				String value = set.getString(name);
+				result = fac.getURIConstant(URI.create(value));
 			} else if (type == COL_TYPE.BNODE) {
 				result = fac.getBNodeConstant(set.getString(name));
 			} else {
@@ -216,10 +229,12 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 					// Term langterm = ftype.getTerms().get(1);
 					String value = set.getString(name);
 					String language = set.getString(name + "LitLang");
-					if (language == null || language.trim().equals(""))
+					if (language == null || language.trim().equals("")) {
 						result = fac.getValueConstant(value);
-					else
+					}
+					else {
 						result = fac.getValueConstant(value, language);
+					}
 
 				} else {
 					result = fac.getValueConstant(set.getString(name), type);

@@ -525,7 +525,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 					}
 				} else if (ht instanceof ValueConstant) {
 					ValueConstant ct = (ValueConstant) ht;
-					sb.append(ct.getValue().toString());
+					sb.append(getQuotedString(ct.getValue().toString()));
 				} else if (ht instanceof URIConstant) {
 					URIConstant uc = (URIConstant) ht;
 					sb.append(getQuotedString(uc.getURI().toString()));

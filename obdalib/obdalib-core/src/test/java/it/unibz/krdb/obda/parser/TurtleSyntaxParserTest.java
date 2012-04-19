@@ -12,88 +12,123 @@ public class TurtleSyntaxParserTest extends TestCase {
 
 	final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
 	
-	public void test_1() {
+	public void test_1_1() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person .");
+		assertTrue(result);
+	}
+	
+	public void test_1_2() {
 		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person .");
 		assertTrue(result);
 	}
 	
-	public void test_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :hasFather <\"http://example.org/testcase#Person-{$id}\"> .");
+	public void test_1_3() {
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a <http://example.org/testcase#Person> .");
+		assertTrue(result);
+	}
+	
+	public void test_1_4() {
+		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/testcase#Person> .");
+		assertTrue(result);
+	}
+	
+	public void test_2_1() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> :hasFather <\"&:;Person-{$id}\"> .");
+		assertTrue(result);
+	}
+	
+	public void test_2_2() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> :hasFather <http://example.org/testcase#Person-12> .");
+		assertTrue(result);
+	}
+	
+	public void test_2_3() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> <http://example.org/testcase#hasFather> <http://example.org/testcase#Person-12> .");
 		assertTrue(result);
 	}
 	
 	public void test_3_1() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName $fname .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> :firstName $fname .");
 		assertTrue(result);
 	}
 	
 	public void test_3_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName $fname^^xsd:string .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> :firstName $fname^^xsd:string .");
 		assertTrue(result);
 	}
 	
 	public void test_3_3() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName $fname@en-US .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> :firstName $fname@en-US .");
 		assertTrue(result);
 	}
 	
-	public void test_4_1() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName \"John\"^^xsd:string .");
+	public void test_4_1_1() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> :firstName \"John\"^^xsd:string .");
+		assertTrue(result);
+	}
+	
+	public void test_4_1_2() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> <http://example.org/testcase#firstName> \"John\"^^xsd:string .");
 		assertTrue(result);
 	}
 	
 	public void test_4_2_1() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName \"John\"^^rdfs:Literal .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> :firstName \"John\"^^rdfs:Literal .");
 		assertTrue(result);
 	}
 	
 	public void test_4_2_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> :firstName \"John\"@en-US .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> :firstName \"John\"@en-US .");
 		assertTrue(result);
 	}
 	
 	public void test_5_1_1() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :firstName $fname .");
 		assertTrue(result);
 	}
 	
 	public void test_5_1_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname; :age $age .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :firstName $fname; :age $age .");
 		assertTrue(result);
 	}
 	
 	public void test_5_1_3() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname; :age $age .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :hasFather <\"&:;Person-{$id}\">; :firstName $fname; :age $age .");
 		assertTrue(result);
 	}
 	
 	public void test_5_2_1() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^xsd:string .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :firstName $fname^^xsd:string .");
 		assertTrue(result);
 	}
 	
 	public void test_5_2_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^xsd:string; :age $age^^xsd:integer .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :firstName $fname^^xsd:string; :age $age^^xsd:integer .");
 		assertTrue(result);
 	}
 	
 	public void test_5_2_3() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:integer .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :hasFather <\"&:;Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:integer .");
 		assertTrue(result);
 	}
 	
 	public void test_5_2_4() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :hasFather <\"http://example.org/testcase#Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:integer; :description $text@en-US .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :hasFather <\"&:;Person-{$id}\">; :firstName $fname^^xsd:string; :age $age^^xsd:integer; :description $text@en-US .");
+		assertTrue(result);
+	}
+	
+	public void test_5_2_5() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> a <http://example.org/testcase#Person>; <http://example.org/testcase:hasFather> <\"&:;Person-{$id}\">; <http://example.org/testcase#firstName> $fname^^xsd:string; <http://example.org/testcase#age> $age^^xsd:integer; <http://example.org/testcase#description> $text@en-US .");
 		assertTrue(result);
 	}
 	
 	public void test_6_1() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^xsd:String .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :firstName $fname^^xsd:String .");
 		assertFalse(result);
 	}
 	
 	public void test_6_2() {
-		final boolean result = parse("<\"http://example.org/testcase#Person-{$id}\"> a :Person; :firstName $fname^^ex:randomDatatype .");
+		final boolean result = parse("<\"&:;Person-{$id}\"> a :Person; :firstName $fname^^ex:randomDatatype .");
 		assertFalse(result);
 	}
 	

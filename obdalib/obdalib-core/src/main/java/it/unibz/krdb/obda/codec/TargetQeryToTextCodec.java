@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
@@ -156,6 +157,8 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 			term_sb.append("\"");
 			term_sb.append(man.getShortForm(term.toString(),true,true));
 			term_sb.append("\"");
+		} else if (term instanceof URIConstant) {
+			term_sb.append(term.toString());
 		}
 		return term_sb.toString();
 	}

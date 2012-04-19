@@ -290,7 +290,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					}
 				}
 				sb.append(" ");
-				sb.append(".\n");
+				sb.append(".");
+				sb.append(" ");
 			}
 			return sb.toString();
 		}

@@ -2,16 +2,16 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryTranslator;
 import it.unibz.krdb.sql.DBMetadata;
@@ -19,6 +19,7 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.BooleanLiteral;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
+import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 import it.unibz.krdb.sql.api.DecimalLiteral;
 import it.unibz.krdb.sql.api.ICondition;
 import it.unibz.krdb.sql.api.IValueExpression;
@@ -30,7 +31,6 @@ import it.unibz.krdb.sql.api.ReferenceValueExpression;
 import it.unibz.krdb.sql.api.Relation;
 import it.unibz.krdb.sql.api.Selection;
 import it.unibz.krdb.sql.api.StringLiteral;
-import it.unibz.krdb.sql.api.ComparisonPredicate.Operator;
 
 import java.net.URI;
 import java.text.ParseException;
@@ -162,7 +162,7 @@ public class MappingAnalyzer {
 			for (Atom atom : atomList) {
 				List<Term> terms = atom.getTerms();
 				List<Term> newterms = new LinkedList<Term>();
-				for (Term term : terms) {					
+				for (Term term : terms) {
 					newterms.add(updateTerm(term, lookupTable));
 				}
 				Atom newhead = dfac.getAtom(atom.getPredicate(), newterms);
@@ -279,7 +279,7 @@ public class MappingAnalyzer {
 				// updateTerm(innerTerm, lookupTable);
 			}
 			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);
-		} else if (term instanceof ValueConstant) {
+		} else if (term instanceof Constant) {
 			result = term.clone();
 		}
 		return result;

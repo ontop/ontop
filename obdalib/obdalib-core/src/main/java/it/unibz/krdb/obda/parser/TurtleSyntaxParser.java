@@ -76,25 +76,14 @@ public class TurtleSyntaxParser {
 		StringBuffer sb = new StringBuffer();
 		Map<String, String> prefixMap = prefMan.getPrefixMap();
 		for (String prefix : prefixMap.keySet()) {
-			if (prefix.equals(":")) {
-				StringBuffer base = new StringBuffer();
-				base.append("@BASE");
-				base.append(" ");
-				base.append("<");
-				base.append(prefixMap.get(prefix));
-				base.append(">");
-				base.append(" .\n");
-				sb.insert(0, base.toString()); // Put the BASE definition at the very beginning.
-			} else {
-				sb.append("@PREFIX");
-				sb.append(" ");
-				sb.append(prefix);
-				sb.append(" ");
-				sb.append("<");
-				sb.append(prefixMap.get(prefix));
-				sb.append(">");
-				sb.append(" .\n");
-			}
+			sb.append("@PREFIX");
+			sb.append(" ");
+			sb.append(prefix);
+			sb.append(" ");
+			sb.append("<");
+			sb.append(prefixMap.get(prefix));
+			sb.append(">");
+			sb.append(" .\n");
 		}
 		sb.append(query);
 		return sb.toString();
