@@ -369,8 +369,8 @@ public class QueryPainter {
 		// }
 
 		variable = new SimpleAttributeSet();
-		Color c_var = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
-		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, c_var);
+//		Color c_var = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
+//		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, c_var);
 		// if (!useDefault) {
 		// variable.addAttribute(StyleConstants.FontConstants.Family, font);
 		// variable.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
