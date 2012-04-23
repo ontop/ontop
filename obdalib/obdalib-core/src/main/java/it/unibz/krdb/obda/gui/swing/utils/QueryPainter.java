@@ -318,10 +318,10 @@ public class QueryPainter {
 		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
 		functor = new SimpleAttributeSet();
-		Color c_func = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
-		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, c_func);
+//		Color c_func = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
+//		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, c_func);
 
-		Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
+//		Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
 		String font = "Dialog";
 		// String font =
 		// pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
@@ -331,8 +331,8 @@ public class QueryPainter {
 		Integer size = 14;
 
 		parameters = new SimpleAttributeSet();
-		Color c_para = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
-		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, c_para);
+//		Color c_para = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
+//		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, c_para);
 
 		dataProp = new SimpleAttributeSet();
 //		Color c_dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
@@ -409,7 +409,8 @@ public class QueryPainter {
 	}
 
 	private int getFontSize() {
-		return Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+		return 14;
+//		return Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
 	}
 
 	/***
