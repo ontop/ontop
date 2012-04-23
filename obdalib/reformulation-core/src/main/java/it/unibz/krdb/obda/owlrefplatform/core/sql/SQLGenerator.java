@@ -57,12 +57,12 @@ public class SQLGenerator implements SourceQueryGenerator {
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
 	private static final String qualifiedColumn = "%s.%s";
-	private static final String conditionEQCol = "%s.%s = %s.%s";
-	private static final String conditionEQConstant = "%s.%s = %s";
-	private static final String conditionGTConstant = "%s.%s > %s";
-	private static final String conditionGTEConstant = "%s.%s >= %s";
-	private static final String conditionLTConstant = "%s.%s < %s";
-	private static final String conditionLTEQConstant = "%s.%s <= %s";
+	private static final String conditionEQCol = "%s.\"%s\" = %s.\"%s\"";
+	private static final String conditionEQConstant = "%s.\"%s\" = %s";
+	private static final String conditionGTConstant = "%s.\"%s\" > %s";
+	private static final String conditionGTEConstant = "%s.\"%s\" >= %s";
+	private static final String conditionLTConstant = "%s.\"%s\" < %s";
+	private static final String conditionLTEQConstant = "%s.\"%s\" <= %s";
 
 	private final DBMetadata metadata;
 	private final JDBCUtility jdbcutil;
@@ -479,15 +479,16 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 */
 							ValueConstant c = (ValueConstant) ov.getTerms().get(0);
 							StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
-							functionString = "'" + tokenizer.nextToken() + "'";
-							int currentTerm = 1;
+							functionString = getQuotedString(tokenizer.nextToken());
+							int termIndex = 1;
 							do {
-								Variable var = (Variable) ov.getTerms().get(currentTerm);
-								vex.add(getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-								if (tokenizer.hasMoreTokens())
-									vex.add("'" + tokenizer.nextToken() + "'");
-								currentTerm += 1;
-							} while (tokenizer.hasMoreElements() || currentTerm < ov.getTerms().size());
+								Term currentTerm = ov.getTerms().get(termIndex);
+								vex.add(getSQLString(currentTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+								if (tokenizer.hasMoreTokens()) {
+									vex.add(getQuotedString(tokenizer.nextToken()));
+								}
+								termIndex += 1;
+							} while (tokenizer.hasMoreElements() || termIndex < ov.getTerms().size());
 							String concat = jdbcutil.getConcatination(functionString, vex);
 							sb.append(concat);
 
@@ -506,9 +507,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 								} else if (v instanceof ValueConstant) {
 									ValueConstant ct = (ValueConstant) v;
 									StringBuilder var = new StringBuilder();
-									var.append("'");
-									var.append(ct.toString());
-									var.append("'");
+									var.append(getQuotedString(ct.toString()));
 									vex.add(var.toString());
 								} else if (v instanceof URIConstant) {
 									URIConstant uc = (URIConstant) v;
@@ -519,7 +518,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 									throw new RuntimeException("Invalid term in the head");
 								}
 							}
-							String concat = jdbcutil.getConcatination("'" + functionString + "'", vex);
+							String concat = jdbcutil.getConcatination(getQuotedString(functionString), vex);
 							sb.append(concat);
 						}
 					}
@@ -606,7 +605,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			String columnName = metadata.getAttributeName(tableName[atomidx], termidx + 1);
 			result.append(viewname);
 			result.append(".");
-			result.append(columnName);
+			result.append(getDoubleQuotedString(columnName));
 		} else if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
@@ -668,6 +667,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 		bf.append("'");
 		bf.append(str);
 		bf.append("'");
+		return bf.toString();
+	}
+	
+	private String getDoubleQuotedString(String str) {
+		StringBuffer bf = new StringBuffer();
+		bf.append("\"");
+		bf.append(str);
+		bf.append("\"");
 		return bf.toString();
 	}
 

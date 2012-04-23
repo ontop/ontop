@@ -187,13 +187,12 @@ public class VirtualABoxStatistics {
 	}
 
 	private String getSelectionString(OBDASQLQuery query) {
-		final String sql = query.toString().toLowerCase(); // make it lower case
-															// to help identify
-															// a string.
-
-		final int start = sql.indexOf("from");
-		final int end = sql.length();
-
-		return sql.substring(start, end);
+		final String originalSql = query.toString();
+		
+		String sql = originalSql.toLowerCase(); // make it lower case to help identify a string.
+		int start = sql.indexOf("from");
+		int end = sql.length();
+		
+		return originalSql.substring(start, end);
 	}
 }
