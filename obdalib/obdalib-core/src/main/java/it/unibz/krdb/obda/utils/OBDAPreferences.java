@@ -79,7 +79,7 @@ public class OBDAPreferences extends Properties{
 	public OBDAPreferences(){
 		super();
 		listeners = new ArrayList<OBDAPreferenceChangeListener>();
-//		setDefaultValues();
+		setDefaultValues();
 	}
 	
 	public String getOBDAPreference(String key){
