@@ -276,7 +276,7 @@ public class SPARQLDatalogTranslator {
 					Node_Literal object = (Node_Literal) o;
 					objectType = getDataType(object);
 					
-					String value = object.getLiteralValue().toString();
+					String value = object.getLiteralLexicalForm();
 					ValueConstant constant = ofac.getValueConstant(value, objectType);
 
 					// v1.7: We extend the syntax such that the data type of a constant
