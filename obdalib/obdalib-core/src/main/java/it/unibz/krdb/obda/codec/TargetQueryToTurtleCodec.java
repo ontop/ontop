@@ -161,9 +161,17 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 			sb.append("$");
 			sb.append(term.toString());
 		} else if (term instanceof URIConstant) {
-			sb.append("<");
-			sb.append(term.toString());
-			sb.append(">");
+			String originalUri = term.toString();			
+			String abbreviatedUri = getAbbreviatedName(originalUri, false); // Shorten the URI if possible
+			
+			if (!abbreviatedUri.equals(originalUri)) {
+				sb.append(abbreviatedUri);
+			} else {
+				// If the URI can't be shorten then use the full URI within brackets
+				sb.append("<");
+				sb.append(originalUri);
+				sb.append(">");
+			}
 		} else if (term instanceof ValueConstant) {
 			sb.append("\"");
 			sb.append(term.toString());
