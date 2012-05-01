@@ -63,7 +63,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private static final long serialVersionUID = -486013653814714526L;
 
-	private OBDAPreferences preference;
+//	private OBDAPreferences preference;
 
 	private Thread validatorThread;
 
@@ -97,9 +97,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(OBDAModel apic, OBDAPreferences preference, TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(OBDAModel apic,  TargetQueryVocabularyValidator validator) {
 
-		this.preference = preference;
+//		this.preference = preference;
 //		datalogParser = new DatalogProgramParser();
 		this.validatortrg = validator;
 
@@ -134,7 +134,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// mappingsTree.setRootVisible(true);
 		// mappingsTree.setInvokesStopCellEditing(true);
 
-		mappingList.setCellRenderer(new OBDAMappingListRenderer(preference, apic, validator));
+		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic, validator));
 		mappingList.setModel(new SynchronizedMappingListModel(apic));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -361,7 +361,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, preference, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 400);
@@ -848,7 +848,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Create mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, preference, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
 		panel.setID(id);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 400);

@@ -52,7 +52,6 @@ public class QueryPainter {
 
 	private Vector<ColorTask> tasks = null;
 	private boolean alreadyColoring = false;
-	private OBDAPreferences pref = null;
 	private final OBDAModel apic;
 
 	private SimpleAttributeSet black;
@@ -107,9 +106,8 @@ public class QueryPainter {
 
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 
-	public QueryPainter(OBDAModel apic, OBDAPreferences pref, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
-		this.pref = pref;
 		this.parent = parent;
 		this.validator = validator;
 		this.doc = parent.getStyledDocument();

@@ -87,9 +87,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		JPanel panel_right_main = new JPanel();
 		JSplitPane split_right_horizontal = new javax.swing.JSplitPane();
-		OBDAPreferences preference = (OBDAPreferences) getOWLEditorKit().get(OBDAPreferences.class.getName());
 		panel_query_interface = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), this.getOWLModelManager().getActiveOntology()
-				.getOntologyID().getOntologyIRI().toURI(), preference);
+				.getOntologyID().getOntologyIRI().toURI());
 		panel_query_interface.setPreferredSize(new Dimension(400, 250));
 		panel_query_interface.setMinimumSize(new Dimension(400, 250));
 		panel_view_results = new ResultViewTablePanel(panel_query_interface);

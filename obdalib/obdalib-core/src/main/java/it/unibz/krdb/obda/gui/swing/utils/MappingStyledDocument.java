@@ -27,10 +27,10 @@ public class MappingStyledDocument extends DefaultStyledDocument {
 	 */
 	private static final long serialVersionUID = -1541062682306964359L;
 
-	public MappingStyledDocument(JTextPane parent, OBDAModel apic, TargetQueryVocabularyValidator validator, OBDAPreferences preference) {
+	public MappingStyledDocument(JTextPane parent, OBDAModel apic, TargetQueryVocabularyValidator validator) {
 		super();
 
-		QueryPainter painter = new QueryPainter(apic, preference, parent, validator);
+		QueryPainter painter = new QueryPainter(apic, parent, validator);
 
 	}
 

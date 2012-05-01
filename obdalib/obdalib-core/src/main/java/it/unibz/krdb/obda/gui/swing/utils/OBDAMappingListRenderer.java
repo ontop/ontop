@@ -76,7 +76,6 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	final String PATH_INVALIDMAPPINGHEAD_ICON = "images/head_invalid.png";
 	final String PATH_MAPPINGBODY_ICON = "images/body.png";
 	private int plainFontHeight;
-	private OBDAPreferences preferences;
 	private Style plainStyle;
 	private Style boldStyle;
 	private Style nonBoldStyle;
@@ -101,10 +100,9 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private QueryPainter painter;
 	private SQLQueryPainter sqlpainter;
 
-	public OBDAMappingListRenderer(OBDAPreferences preference, OBDAModel apic, TargetQueryVocabularyValidator validator) {
+	public OBDAMappingListRenderer(OBDAModel apic, TargetQueryVocabularyValidator validator) {
 
 		// setPreferredWidth(width);
-		this.preferences = preference;
 
 		srccodec = new SourceQueryToTextCodec(apic);
 		trgcodec = new TargetQueryToTurtleCodec(apic);
@@ -119,7 +117,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		mapIconLabel.setVerticalAlignment(SwingConstants.TOP);
 
 		trgQueryTextPane = new JTextPane();
-		painter = new QueryPainter(apic, preference, trgQueryTextPane, validator);
+		painter = new QueryPainter(apic, trgQueryTextPane, validator);
 
 		trgQueryTextPane.setMargin(new Insets(4, 4, 4, 4));
 
@@ -191,7 +189,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 
 	private void resetStyles(StyledDocument doc) {
 		doc.setParagraphAttributes(0, doc.getLength(), plainStyle, true);
-		StyleConstants.setFontSize(fontSizeStyle, getFontSize());
+		StyleConstants.setFontSize(fontSizeStyle, 14);
 		Font f = plainFont;
 		StyleConstants.setFontFamily(fontSizeStyle, f.getFamily());
 		doc.setParagraphAttributes(0, doc.getLength(), fontSizeStyle, false);
@@ -249,9 +247,9 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		this.preferredWidth = preferredWidth;
 	}
 
-	private int getFontSize() {
-		return Integer.parseInt(preferences.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
-	}
+//	private int getFontSize() {
+//		return Integer.parseInt(preferences.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+//	}
 
 	private void setupFont() {
 

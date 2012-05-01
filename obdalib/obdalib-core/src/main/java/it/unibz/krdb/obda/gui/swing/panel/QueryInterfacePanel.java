@@ -70,12 +70,12 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	private URI													baseuri						= null;
 
 	/** Creates new form QueryInterfacePanel */
-	public QueryInterfacePanel(OBDAModel apic, URI baseuri, OBDAPreferences prefs) {
+	public QueryInterfacePanel(OBDAModel apic, URI baseuri) {
 		this.qc = apic.getQueryController();
 		instance = this;
 		this.apic = apic;
 		this.baseuri = baseuri;
-		prefs.registerPreferenceChangedListener(this);
+//		prefs.registerPreferenceChangedListener(this);
 		initComponents();
 		
         
@@ -84,7 +84,7 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 //		Font font = new Font("Dialog", Font.PLAIN, 14);
 //		queryTextPane.setFont(font);
 		StyleContext style = new StyleContext();
-		_styled_doc = new SPARQLQueryStyledDocument(style, prefs);
+		_styled_doc = new SPARQLQueryStyledDocument(style);
 
 		
 		queryTextPane.setDocument(_styled_doc);

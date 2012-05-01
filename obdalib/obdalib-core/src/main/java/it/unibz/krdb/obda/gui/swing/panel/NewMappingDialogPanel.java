@@ -53,7 +53,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	/** Fields */
 	private OBDAModel controller = null;
-	private OBDAPreferences preferences = null;
+//	private OBDAPreferences preferences = null;
 	private OBDADataSource dataSource = null;
 	private JDialog parent = null;
 	private TargetQueryVocabularyValidator validator = null;
@@ -71,11 +71,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * @param dataSource
 	 * @param ontology
 	 */
-	public NewMappingDialogPanel(OBDAModel controller, OBDAPreferences preference, JDialog parent, OBDADataSource dataSource,
+	public NewMappingDialogPanel(OBDAModel controller, JDialog parent, OBDADataSource dataSource,
 			TargetQueryVocabularyValidator validator) {
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.controller = controller;
-		this.preferences = preference;
+//		this.preferences = preference;
 		this.parent = parent;
 		this.dataSource = dataSource;
 		this.validator = validator;
@@ -98,7 +98,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		fieldID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		cmdInsertMapping.setEnabled(false);
-		QueryPainter painter = new QueryPainter(controller, preferences, txtTargetQuery, validator);
+		QueryPainter painter = new QueryPainter(controller, txtTargetQuery, validator);
 		painter.addValidatorListener(new ValidatorListener() {
 
 			@Override
