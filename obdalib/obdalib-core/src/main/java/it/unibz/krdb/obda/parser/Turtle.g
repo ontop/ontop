@@ -308,11 +308,11 @@ uriTemplateFunction returns [Function value]
         // extract the whole prefix placeholder, e.g., "&ex;"
         String prefixPlaceHolder = template.substring(start, end+1);
         
-        // extract the prefix name, e.g., "&hello;" --> "ex"
+        // extract the prefix name, e.g., "&ex;" --> "ex"
         String prefix = prefixPlaceHolder.substring(1, prefixPlaceHolder.length()-1);
         
-        // make an exception for prefix ":", replace it to a blank string
-        prefix = prefix.equals(":") ? "" : prefix;
+        // replace any colon sign
+        prefix = prefix.replace(":", "");
         
         String uri = directives.get(prefix);        
         if (uri == null) {
