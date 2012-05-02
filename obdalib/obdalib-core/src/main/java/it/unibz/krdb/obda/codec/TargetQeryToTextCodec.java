@@ -102,7 +102,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 				}
 				
 				Atom at = (Atom) it.next();
-				String name = man.getShortForm(at.getPredicate().toString());
+				String name = at.getPredicate().toString();
 				sb.append(name);
 				sb.append("(");
 				List<Term> t_list = at.getTerms();
@@ -134,7 +134,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 		StringBuffer term_sb = new StringBuffer();
 		if (term instanceof FunctionalTermImpl) {
 			FunctionalTermImpl ft = (FunctionalTermImpl) term;
-			String fname = man.getShortForm(ft.getFunctionSymbol().toString());
+			String fname = ft.getFunctionSymbol().toString();
 			term_sb.append(fname);
 			term_sb.append("(");
 			List<Term> t_list2 = ft.getTerms();
@@ -155,7 +155,7 @@ public class TargetQeryToTextCodec extends ObjectToTextCodec<OBDAQuery> {
 			term_sb.append(term.toString());
 		} else if (term instanceof ValueConstant) {
 			term_sb.append("\"");
-			term_sb.append(man.getShortForm(term.toString(),true,true));
+			term_sb.append(term.toString());
 			term_sb.append("\"");
 		} else if (term instanceof URIConstant) {
 			term_sb.append(term.toString());
