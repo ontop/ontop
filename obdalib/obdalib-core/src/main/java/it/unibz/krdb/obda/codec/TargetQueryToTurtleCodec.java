@@ -72,8 +72,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	 * Prints the short form of the predicate (by omitting the complete URI and
 	 * replacing it by a prefix name).
 	 */
-	private String getAbbreviatedName(String uri, boolean inText) {
-		return prefMan.getShortForm(uri, false, inText);
+	private String getAbbreviatedName(String uri, boolean isLiteral) {
+		return prefMan.getShortForm(uri, true, isLiteral);
 	}
 
 	/**
@@ -118,8 +118,7 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 					uriTemplate = getAbbreviatedName(uriTemplate, true);
 					
 					sb.append("<");
-					sb.append("\"");
-					
+					sb.append("\"");					
 					StringTokenizer st = new StringTokenizer(uriTemplate, "}", true);
 					for (Term innerTerm : function.getTerms()) {
 						if (innerTerm instanceof Variable) {
@@ -139,7 +138,6 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 						// Append the rest of the tokens, if exist
 						sb.append(st.nextToken());
 					}
-
 					sb.append("\"");
 					sb.append(">");
 				} else {

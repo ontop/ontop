@@ -49,28 +49,13 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		StringBuilder result = new StringBuilder(uri);
 		if (getDefaultNamespace() != null && useDefaultPrefix) {
 			if (uri.length() > getDefaultNamespace().length()) {
-				// if (uri.substring(0,
-				// getDefaultNamespace().length()).equals(getDefaultNamespace()))
-				// {
-				// result.replace(0, getDefaultNamespace().length(), "");
-				// if (isLiteral) {
-				// result.insert(0, "<");
-				// result.append(">");
-				// } else {
-				// result.insert(0, ":");
-				// }
-				// return result.toString();
-				// }
-
 				if (uri.contains(getDefaultNamespace())) {
 					int index = uri.indexOf(getDefaultNamespace());
 					result.replace(index, getDefaultNamespace().length(), "");
 					if (isLiteral) {
-						result.insert(0, "<");
-						result.append(">");
+						result.insert(0, "&:;");
 					} else {
-						if (result.charAt(0) != '<')
-							result.insert(0, ":");
+						result.insert(0, ":");
 					}
 					return result.toString();
 				}
@@ -83,10 +68,10 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 			String longnamespace = longnamespaces.next();
 			if (uri.length() > longnamespace.length()) {
 				if (uri.substring(0, longnamespace.length()).equals(longnamespace)) {
-					if (!isLiteral) {
-						result.replace(0, longnamespace.length(), this.getPrefixForURI(longnamespace) + ":");
+					if (isLiteral) {
+						result.replace(0, longnamespace.length(), "&" + getPrefixForURI(longnamespace) + ":;");
 					} else {
-						result.replace(0, longnamespace.length(), "&" + this.getPrefixForURI(longnamespace) + ":;");
+						result.replace(0, longnamespace.length(), getPrefixForURI(longnamespace) + ":");
 					}
 					break;
 				}
