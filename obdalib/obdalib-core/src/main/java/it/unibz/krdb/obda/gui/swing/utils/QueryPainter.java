@@ -423,6 +423,9 @@ public class QueryPainter {
 		String input = doc.getText(0, doc.getLength());
 		CQIE current_query = parse(input);
 
+		if (current_query == null)
+			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
+		
 		input = doc.getText(0, doc.getLength());
 
 		int pos = input.indexOf("(", 0);
