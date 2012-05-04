@@ -27,6 +27,10 @@ public class OBDAVocabulary {
 
 	public static final String	strOR	= "http://obdalib.org/predicates/boolean#OR";
 	
+	public static final String  strIS_NULL  = "http://obdalib.org/predicates/boolean#IS_NULL";
+	
+	public static final String  strIS_NOT_NULL  = "http://obdalib.org/predicates/boolean#IS_NOT_NULL";
+	
 	
 	/* Boolean predicates */
 
@@ -47,6 +51,10 @@ public class OBDAVocabulary {
 	public static final Predicate	NOT	= new BooleanOperationPredicateImpl(URI.create(strNOT), 1);
 
 	public static final Predicate	OR	= new BooleanOperationPredicateImpl(URI.create(strOR), 2);
+	
+	public static final Predicate	IS_NULL	= new BooleanOperationPredicateImpl(URI.create(strIS_NULL), 1);
+
+	public static final Predicate	IS_NOT_NULL	= new BooleanOperationPredicateImpl(URI.create(strIS_NOT_NULL), 1);
 	
 	
 	/* Data type predicate URIs */

@@ -108,13 +108,13 @@ public interface OBDADataFactory extends Serializable {
 	public Atom getORAtom(Term term1, Term term2, Term term3);
 
 	public Atom getORAtom(List<Term> terms);
+	
+	public Atom getIsNullAtom(Term term);
+	
+	public Atom getIsNotNullAtom(Term term);
 
 	/*
-	 * Boolean fuctional terms
-	 */
-
-	/*
-	 * Boolean atoms
+	 * Boolean function terms
 	 */
 
 	public Function getEQFunction(Term firstTerm, Term secondTerm);
@@ -142,6 +142,14 @@ public interface OBDADataFactory extends Serializable {
 	public Function getORFunction(Term term1, Term term2, Term term3);
 
 	public Function getORFunction(List<Term> terms);
+	
+	public Function getIsNullFunction(Term term);
+	
+	public Function getIsNotNullFunction(Term term);
+	
+	/*
+	 * JDBC objects
+	 */
 
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass);
 

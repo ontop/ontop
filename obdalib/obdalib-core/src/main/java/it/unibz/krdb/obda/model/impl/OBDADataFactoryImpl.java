@@ -305,6 +305,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Atom getIsNullAtom(Term term) {
+		return getAtom(OBDAVocabulary.IS_NULL, term);
+	}
+
+	@Override
+	public Atom getIsNotNullAtom(Term term) {
+		return getAtom(OBDAVocabulary.IS_NOT_NULL, term);
+	}
+	
+	@Override
 	public Predicate getObjectPropertyPredicate(String name) {
 		return getObjectPropertyPredicate(URI.create(name));
 	}
@@ -458,6 +468,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getIsNullFunction(Term term) {
+		return getFunctionalTerm(OBDAVocabulary.IS_NULL, term);
+	}
+
+	@Override
+	public Function getIsNotNullFunction(Term term) {
+		return getFunctionalTerm(OBDAVocabulary.IS_NOT_NULL, term);
+	}
+
+	@Override
 	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, String password, String driverclass) {
 		URI id = URI.create(UUID.randomUUID().toString());
 		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
@@ -506,5 +526,4 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public BNode getBNodeConstant(String name) {
 		return new BNodeConstantImpl(name);
 	}
-
 }

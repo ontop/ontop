@@ -25,6 +25,8 @@ import it.unibz.krdb.sql.api.ICondition;
 import it.unibz.krdb.sql.api.IValueExpression;
 import it.unibz.krdb.sql.api.IntegerLiteral;
 import it.unibz.krdb.sql.api.Literal;
+import it.unibz.krdb.sql.api.LogicalOperator;
+import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.OrOperator;
 import it.unibz.krdb.sql.api.QueryTree;
 import it.unibz.krdb.sql.api.ReferenceValueExpression;
@@ -130,17 +132,38 @@ public class MappingAnalyzer {
 					Object element = conditions.get(i);
 					if (element instanceof ComparisonPredicate) {
 						ComparisonPredicate pred = (ComparisonPredicate) element;
-						Function operator = getFunction(pred, lookupTable);
-						stack.push(operator);
-					} else if (element instanceof AndOperator) {
-						Term leftCondition = stack.pop();
-						ComparisonPredicate rightPred = (ComparisonPredicate) conditions.get(i + 1);
-						Term rightCondition = getFunction(rightPred, lookupTable);
-						Function andFunct = dfac.getANDFunction(leftCondition, rightCondition);
-						stack.push(andFunct);
-						i += 1;
-					} else if (element instanceof OrOperator) {
-						// NO-OP
+						Function compOperator = getFunction(pred, lookupTable);
+						stack.push(compOperator);
+					} else if (element instanceof NullPredicate) {
+						NullPredicate pred = (NullPredicate) element;
+						Function nullOperator = getFunction(pred, lookupTable);
+						stack.push(nullOperator);
+					} else if (element instanceof LogicalOperator) {
+						// Check either it's AND or OR operator
+						if (element instanceof AndOperator) {
+							/*
+							 *  The AND operator has the expression: <condition> AND <condition>
+							 *  There are two types of conditions: (1) using the comparison predicate
+							 *  (such as EQ, LT, GT, etc.) and (2) using the null predicate (i.e.,
+							 *  IS NULL or IS NOT NULL). Each has a different way to handle.
+							 */
+							ICondition condition = conditions.get(i + 1); i++; // the right-hand condition
+							if (condition instanceof ComparisonPredicate) {							
+								ComparisonPredicate pred = (ComparisonPredicate) condition;
+								Term leftCondition = stack.pop();
+								Term rightCondition = getFunction(pred, lookupTable);
+								Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
+								stack.push(andOperator);
+							} else if (condition instanceof NullPredicate) {
+								NullPredicate pred = (NullPredicate) condition;
+								Term leftCondition = stack.pop();
+								Term rightCondition = getFunction(pred, lookupTable);
+								Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
+								stack.push(andOperator);
+							}
+						} else if (element instanceof OrOperator) {
+							// NO-OP
+						}
 					} else {
 						/* Unsupported query */
 						return null;
@@ -148,7 +171,7 @@ public class MappingAnalyzer {
 				}
 
 				// Collapsing into a single atom.
-				while (stack.size() != 1) {
+				while (stack.size() > 1) {
 					Function orAtom = dfac.getORFunction(stack.pop(), stack.pop());
 					stack.push(orAtom);
 				}
@@ -173,6 +196,19 @@ public class MappingAnalyzer {
 		return datalog;
 	}
 
+	private Function getFunction(NullPredicate pred, LookupTable lookupTable) {
+		IValueExpression column = pred.getValueExpression();
+		
+		String name = lookupTable.lookup(column.toString());
+		Term t = dfac.getVariable(name);
+		
+		if (pred.useIsNullOperator()) {
+			return dfac.getIsNullFunction(t);
+		} else {
+			return dfac.getIsNotNullFunction(t);
+		}		
+	}
+	
 	private Function getFunction(ComparisonPredicate pred, LookupTable lookupTable) {
 		IValueExpression left = pred.getValueExpressions()[0];
 		IValueExpression right = pred.getValueExpressions()[1];

@@ -42,21 +42,23 @@ public class SQLGenerator implements SourceQueryGenerator {
 	/**
 	 * Operator symbols
 	 */
-	private static final String EQ_OPERATOR = "=";
-	private static final String NEQ_OPERATOR = "<>";
-	private static final String GT_OPERATOR = ">";
-	private static final String GTE_OPERATOR = ">=";
-	private static final String LT_OPERATOR = "<";
-	private static final String LTE_OPERATOR = "<=";
-	private static final String AND_OPERATOR = "AND";
-	private static final String OR_OPERATOR = "OR";
-	private static final String NOT_OPERATOR = "NOT";
-
+	private static final String EQ_OPERATOR = "%s = %s";
+	private static final String NEQ_OPERATOR = "%s <> %s";
+	private static final String GT_OPERATOR = "%s > %s";
+	private static final String GTE_OPERATOR = "%s >= %s";
+	private static final String LT_OPERATOR = "%s < %s";
+	private static final String LTE_OPERATOR = "%s <= %s";
+	private static final String AND_OPERATOR = "%s AND %s";
+	private static final String OR_OPERATOR = "%s OR %s";
+	private static final String NOT_OPERATOR = "NOT %s";
+	private static final String IS_NULL_OPERATOR = "%s IS NULL";
+	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
+	
 	/**
 	 * Formatting template
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
-	private static final String qualifiedColumn = "%s.%s";
+	private static final String qualifiedColumn = "%s.\"%s\"";
 	private static final String conditionEQCol = "%s.\"%s\" = %s.\"%s\"";
 	private static final String conditionEQConstant = "%s.\"%s\" = %s";
 	private static final String conditionGTConstant = "%s.\"%s\" > %s";
@@ -280,9 +282,10 @@ public class SQLGenerator implements SourceQueryGenerator {
 			for (int i1 = 0; i1 < body.size(); i1++) {
 
 				Atom atom = body.get(i1);
+				Predicate predicate = atom.getPredicate();
 				List<Term> terms = atom.getTerms();
 
-				if (atom.getPredicate() instanceof BooleanOperationPredicate) {
+				if (predicate instanceof BooleanOperationPredicate) {
 					/*
 					 * This is a comparison atom, not associated with a DB atom,
 					 * but imposing conditions on columns of those.
@@ -545,20 +548,35 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 	public String getSQLCondition(Atom atom, List<Atom> body, String[] tableName, String[] viewName,
 			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex) {
-		StringBuffer result = new StringBuffer();
-		Predicate predicate = atom.getPredicate();
-		result.append("(");
-		result.append(getSQLString(atom.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-		if (predicate instanceof BooleanOperationPredicate) {
-			result.append(" ");
-			result.append(getBooleanOperatorString(predicate));
-			result.append(" ");
+		if (isUnary(atom.getArity())) {
+			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
+			Term term = atom.getTerms().get(0);
+			String expressionFormat = getBooleanOperatorString(atom.getPredicate());
+			String column = getSQLString(term, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+			return String.format("(" + expressionFormat + ")", column);
+			
+		} else if (isBinary(atom.getArity())) {
+			// For binary boolean operators, e.g., EQ, GT, LT, etc.
+			Term left = atom.getTerms().get(0);
+			Term right = atom.getTerms().get(1);
+	
+			String expressionFormat = getBooleanOperatorString(atom.getPredicate());
+			String leftOp = getSQLString(left, body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+			String rightOp = getSQLString(right, body, tableName, viewName, varAtomIndex, varAtomTermIndex);				
+			return String.format("(" + expressionFormat + ")", leftOp, rightOp);
+		
 		} else {
-			throw new RuntimeException("Unexpected function in the query: " + predicate);
+			// Throw an exception for other types
+			throw new RuntimeException("No support for n-ary boolean condition predicate: " + atom.getPredicate());
 		}
-		result.append(getSQLString(atom.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
-		result.append(")");
-		return result.toString();
+	}
+
+	private boolean isUnary(int arity) {
+		return (arity == 1) ? true : false;
+	}
+
+	private boolean isBinary(int arity) {
+		return (arity == 2) ? true : false;
 	}
 
 	private String getSQLtimestampFromXSDDatetime(String datetime) {
@@ -575,26 +593,21 @@ public class SQLGenerator implements SourceQueryGenerator {
 		StringBuffer result = new StringBuffer();
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-
 			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
 				result.append(getQuotedString(ct.getValue()));
 			} else if (ct.getType() == COL_TYPE.DATETIME) {
 				result.append(getQuotedString(getSQLtimestampFromXSDDatetime(ct.getValue())));
-
 			} else {
 				result.append(ct.getValue());
 			}
-
+			
 		} else if (term instanceof URIConstant) {
 			URIConstant uc = (URIConstant) term;
 			result.append(getQuotedString(uc.toString()));
+			
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			List<Integer> posList = varAtomIndex.get(var); // locating the first
-															// occurrence of the
-															// variable in a DB
-															// atom (using the
-															// indexes)
+			List<Integer> posList = varAtomIndex.get(var); // Locating the first occurrence of the variable in a DB atom (using the indexes)
 			if (posList == null) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
@@ -606,6 +619,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			result.append(viewname);
 			result.append(".");
 			result.append(getDoubleQuotedString(columnName));
+			
 		} else if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
@@ -615,9 +629,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 				if (functionSymbol instanceof DataTypePredicate) {
 					result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 				} else if (functionSymbol instanceof BooleanOperationPredicate) {
-					result.append(getBooleanOperatorString(functionSymbol));
-					result.append(" ");
-					result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
+					String expressionFormat = getBooleanOperatorString(functionSymbol);
+					String op = getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+					result.append(String.format(expressionFormat, op));
 				} else {
 					throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 				}
@@ -698,6 +712,12 @@ public class SQLGenerator implements SourceQueryGenerator {
 			operator = OR_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.NOT)) {
 			operator = NOT_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.IS_NULL)) {
+			operator = IS_NULL_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.IS_NOT_NULL)) {
+			operator = IS_NOT_NULL_OPERATOR;
+		} else {
+			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
 		return operator;
 	}

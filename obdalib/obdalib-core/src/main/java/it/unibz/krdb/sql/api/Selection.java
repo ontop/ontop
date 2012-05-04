@@ -37,6 +37,24 @@ public class Selection implements Serializable{
 	}
 	
 	/**
+	 * Inserts a IS NULL or IS NOT NULL condition to the list.
+	 * 
+	 * @param predicate
+	 * 			The null predicate.
+	 * @throws Exception An exception is thrown if a boolean condition
+	 * immediately succeed another boolean condition.
+	 */
+	public void addCondition(NullPredicate predicate) throws Exception {
+		if (!conditions.isEmpty()) {
+			Object obj = conditions.peekLast();
+			if (obj instanceof ComparisonPredicate) {
+				throw new Exception("Illegal conditional expression!");
+			}
+		}
+		conditions.add(predicate);
+	}
+	
+	/**
 	 * Inserts a boolean operator among boolean conditions. A boolean
 	 * operator must not succeed another boolean operator.
 	 * 
@@ -69,10 +87,13 @@ public class Selection implements Serializable{
 	public void copy(Queue<Object> specification) throws Exception {
 		for (Object obj : specification) {
 			if (obj instanceof ComparisonPredicate) {
-				addCondition((ComparisonPredicate)obj);
+				addCondition((ComparisonPredicate) obj);
 			}
-			else {
-				addOperator((LogicalOperator)obj);
+			else if (obj instanceof NullPredicate) {
+				addCondition((NullPredicate) obj);
+			}
+			else if (obj instanceof LogicalOperator) {
+				addOperator((LogicalOperator) obj);
 			}
 		}
 	}
@@ -107,7 +128,7 @@ public class Selection implements Serializable{
 	 */
 	public ComparisonPredicate getCondition(int index) {
 		index = index * 2;
-		return (ComparisonPredicate)conditions.get(index);
+		return (ComparisonPredicate) conditions.get(index);
 	}
 	
 	public List<ICondition> getRawConditions() {

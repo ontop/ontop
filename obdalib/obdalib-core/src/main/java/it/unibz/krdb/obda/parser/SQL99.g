@@ -38,6 +38,7 @@ import it.unibz.krdb.sql.api.TablePrimary;
 import it.unibz.krdb.sql.api.DerivedColumn;
 import it.unibz.krdb.sql.api.GroupingElement;
 import it.unibz.krdb.sql.api.ComparisonPredicate;
+import it.unibz.krdb.sql.api.NullPredicate;
 import it.unibz.krdb.sql.api.AndOperator;
 import it.unibz.krdb.sql.api.OrOperator;
 import it.unibz.krdb.sql.api.ColumnReference;
@@ -478,7 +479,7 @@ boolean_factor
  
 predicate returns [IPredicate value]
   : comparison_predicate { $value = $comparison_predicate.value; }
-//  | null_predicate
+  | null_predicate { $value = $null_predicate.value; }
 //  | in_predicate
   ;
   
@@ -497,8 +498,13 @@ comp_op returns [ComparisonPredicate.Operator value]
   | GREATER EQUALS { $value = ComparisonPredicate.Operator.GE; }
   ;
 
-null_predicate
-  : column_reference IS (NOT)? NULL
+null_predicate returns [NullPredicate value]
+@init {
+  boolean useIsNull = true;
+}
+  : column_reference IS (NOT { useIsNull = false; })? NULL {
+      $value = new NullPredicate($column_reference.value, useIsNull);
+    }
   ;
 
 in_predicate
