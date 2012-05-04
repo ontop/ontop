@@ -17,8 +17,9 @@ import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
-import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -56,12 +57,12 @@ public class QueryPainter {
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
-	private SimpleAttributeSet functor;
-	private SimpleAttributeSet parameters;
 	private SimpleAttributeSet dataProp;
 	private SimpleAttributeSet objectProp;
 	private SimpleAttributeSet clazz;
-	private SimpleAttributeSet variable;
+	
+	private SimpleAttributeSet individual;
+	
 
 	private Style invalidQuery;
 	private Border defaultBorder;
@@ -315,65 +316,30 @@ public class QueryPainter {
 		brackets = new SimpleAttributeSet();
 		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
-		functor = new SimpleAttributeSet();
-//		Color c_func = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
-//		functor.addAttribute(StyleConstants.CharacterConstants.Foreground, c_func);
-
-//		Boolean bold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
 		String font = "Dialog";
-		// String font =
-		// pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
-		// Integer size =
-		// Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
-
 		Integer size = 14;
 
-		parameters = new SimpleAttributeSet();
-//		Color c_para = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
-//		parameters.addAttribute(StyleConstants.CharacterConstants.Foreground, c_para);
-
 		dataProp = new SimpleAttributeSet();
-//		Color c_dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
 		Color c_dp = new Color(41,167,121);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
-		// if (!useDefault) {
-		// dataProp.addAttribute(StyleConstants.FontConstants.Family, font);
-		// dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
-		// dataProp.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		// }
 
 		objectProp = new SimpleAttributeSet();
 		Color c_op = new Color(41,119,167);
-//		Color c_op = new Color(Integer.parseInt(pref.get(OBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
 		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_op);
 		objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
-		// if (!useDefault) {
-		// objectProp.addAttribute(StyleConstants.FontConstants.Family, font);
-		// objectProp.addAttribute(StyleConstants.CharacterConstants.Bold,
-		// bold);
-		// objectProp.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		// }
 
 		clazz = new SimpleAttributeSet();
 		Color c_clazz = new Color(199,155,41);
-//		Color c_clazz = new Color(Integer.parseInt(pref.get(OBDAPreferences.CLASS_COLOR).toString()));
 		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, c_clazz);
 		clazz.addAttribute(StyleConstants.CharacterConstants.Bold, true);
-		// if (!useDefault) {
-		// clazz.addAttribute(StyleConstants.FontConstants.Family, font);
-		// clazz.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
-		// clazz.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		// }
+		
+		
+		individual = new SimpleAttributeSet();
+		Color c_individual = new Color(83,24,82);
+		individual.addAttribute(StyleConstants.CharacterConstants.Foreground, c_individual);
+		individual.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
-		variable = new SimpleAttributeSet();
-//		Color c_var = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
-//		variable.addAttribute(StyleConstants.CharacterConstants.Foreground, c_var);
-		// if (!useDefault) {
-		// variable.addAttribute(StyleConstants.FontConstants.Family, font);
-		// variable.addAttribute(StyleConstants.CharacterConstants.Bold, bold);
-		// variable.addAttribute(StyleConstants.FontConstants.FontSize, size);
-		// }
 	}
 
 	private void resetStyles() {
@@ -468,6 +434,25 @@ public class QueryPainter {
 				ColorTask task = new ColorTask(predicateName, dataProp);
 				tasks.add(task);
 			}
+			
+			Term term1 = null;
+			Term term2 = null;
+			term1 = atom.getTerm(0);
+			if (atom.getArity() == 2) {
+				term2 = atom.getTerm(1);
+			}
+			if (term1 instanceof URIConstant) {
+				String rendered = man.getShortForm(((URIConstant) term1).getURI().toString());
+				ColorTask task = new ColorTask(rendered, individual);
+				tasks.add(task);
+			}
+			if (term2 instanceof URIConstant) {
+				String rendered = man.getShortForm(((URIConstant) term2).getURI().toString());
+				ColorTask task = new ColorTask(rendered, individual);
+				tasks.add(task);
+			}
+			
+			
 		}
 
 		ColorTask[] taskArray = order(tasks);
