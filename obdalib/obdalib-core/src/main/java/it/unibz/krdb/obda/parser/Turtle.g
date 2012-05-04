@@ -136,8 +136,10 @@ base
   ;
 
 prefixID
-  : AT PREFIX prefix uriref {
-      String prefix = $prefix.text;
+@init {
+  String prefix = "";
+}
+  : AT PREFIX (namespace { prefix = $namespace.text; } | defaultNamespace { prefix = $defaultNamespace.text; }) uriref {
       String uriref = $uriref.value;
       directives.put(prefix.substring(0, prefix.length()-1), uriref); // remove the end colon
     }
@@ -227,13 +229,10 @@ uriref returns [String value]
   ;
   
 qname returns [String value]
-  : prefix name {
-      String prefix = "";
-      if ($prefix.text != null) {
-        prefix = $prefix.text.substring(0, $prefix.text.length()-1); // remove the colon!
-      }
-      String uri = directives.get(prefix);
-      $value = uri + $name.text; 
+  : PREFIXED_NAME {
+      String[] tokens = $PREFIXED_NAME.text.split(":", 2);            
+      String uri = directives.get(tokens[0]);  // the first token is the prefix
+      $value = uri + tokens[1];  // the second token is the local name
     }
   ;
   
@@ -425,9 +424,12 @@ relativeURI
   : STRING_URI
   ;
 
-prefix
-  : STRING_PREFIX 
-  | COLON
+namespace
+  : NAMESPACE
+  ;
+  
+defaultNamespace
+  : COLON
   ;
 
 name
@@ -572,7 +574,7 @@ DECIMAL_NEGATIVE
   
 VARNAME
   : ALPHA CHAR*
-  ;  
+  ;
 
 fragment ECHAR
   : '\\' ('t' | 'b' | 'n' | 'r' | 'f' | '\\' | '"' | '\'')
@@ -588,8 +590,19 @@ fragment ID_CORE: (ID_START|DIGIT);
 
 fragment ID: ID_START (ID_CORE)*;
 
-STRING_PREFIX
-  : ID_START (ID_CORE)* COLON
+fragment NAME_START_CHAR: (ALPHA|UNDERSCORE);
+
+fragment NAME_CHAR: (NAME_START_CHAR|DIGIT|UNDERSCORE|MINUS|PERIOD|HASH|QUESTION|SLASH);	 
+
+NCNAME
+  : NAME_START_CHAR (NAME_CHAR)*;
+
+NAMESPACE
+  : NAME_START_CHAR (NAME_CHAR)* COLON
+  ;
+
+PREFIXED_NAME
+  : NCNAME? COLON NCNAME
   ;
 
 STRING_WITH_QUOTE
@@ -606,7 +619,7 @@ STRING_WITH_TEMPLATE_SIGN
 
 STRING_URI
   : SCHEMA COLON DOUBLE_SLASH (URI_PATH)*
-  ;
+  ; 
   
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};
   

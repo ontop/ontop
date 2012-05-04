@@ -143,8 +143,28 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 	
 	public void test_7_3() {
-		final boolean result = parse("<\"&ex;Person-{$id}\"> :hasFather <\"&ex;Person-{$id}\"> .");
+		final boolean result = parse("<\"&nodef:;Person-{$id}\"> :hasFather <\"&nodef:;Person-{$id}\"> .");
 		assertFalse(result);
+	}
+	
+	public void test_8_1() {
+		final boolean result = parse("<\"&:;Person-{$id}\"> rdf:type :Person .");
+		assertTrue(result);
+	}
+	
+	public void test_8_2() {
+		final boolean result = parse("<\"&ex:;Person-{$id}\"> rdf:type ex:Person .");
+		assertTrue(result);
+	}
+	
+	public void test_8_3() {
+		final boolean result = parse("<\"&ex:;Person-{$id}\"> ex:hasFather ex:Person-123 .");
+		assertTrue(result);
+	}
+	
+	public void test_8_4() {
+		final boolean result = parse("<\"&ex:;Person/{$id}/\"> ex:hasFather ex:Person/123/ .");
+		assertTrue(result);
 	}
 	
 	private boolean parse(String input) {
@@ -165,10 +185,11 @@ public class TurtleSyntaxParserTest extends TestCase {
 	
 	private PrefixManager getPrefixManager() {
 		PrefixManager pm = new SimplePrefixManager();
-		pm.addUri("http://example.org/testcase#", ":");
+		pm.addUri("http://obda.inf.unibz.it/testcase#", ":");
 		pm.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf:");
 		pm.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs:");
 		pm.addUri("http://www.w3.org/2001/XMLSchema#", "xsd:");
+		pm.addUri("http://www.example.org/", "ex:");
 		return pm;
 	}
 }
