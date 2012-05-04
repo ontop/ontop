@@ -28,7 +28,6 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	public void setDefaultNamespace(String uri) {
 		if ((uri.charAt(uri.length() - 1) == '#') || (uri.charAt(uri.length() - 1) == '/')) {
 			defaultNamespace = uri;
-			return;
 		} else if (uri.charAt(uri.length() - 1) != '/') {
 			defaultNamespace = uri + "#";
 		} else {
@@ -51,11 +50,18 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 			if (uri.length() > getDefaultNamespace().length()) {
 				if (uri.contains(getDefaultNamespace())) {
 					int index = uri.indexOf(getDefaultNamespace());
-					result.replace(index, getDefaultNamespace().length(), "");
+					result.replace(index, getDefaultNamespace().length()+index, "");
 					if (isLiteral) {
 						result.insert(0, "&:;");
 					} else {
-						result.insert(0, ":");
+						// TODO: BAD CODE! The precondition for the input URI should not include any symbols. Only a valid URI string!
+						if (uri.charAt(0) == '<') { 
+							// If the URI is enclosed by <...> brackets then put the colon after the opening bracket.
+							result.insert(1, ":");
+						}
+						else {
+							result.insert(0, ":");
+						}
 					}
 					return result.toString();
 				}
