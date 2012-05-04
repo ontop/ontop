@@ -47,15 +47,21 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 		List<Atom> body = ((CQIE) input).getBody();
 		for (Atom atom : body) {
 			String subject, predicate, object = "";
+			String originalString = atom.getPredicate().toString();
 			if (isUnary(atom)) {
 				subject = getDisplayName(atom.getTerm(0));
 				predicate = "a";
-				object = getAbbreviatedName(atom.getPredicate().toString(), false);
+				object = getAbbreviatedName(originalString, false);
+				if (originalString.equals(object))
+					object = "<" + object + ">";
 			} else {
 				subject = getDisplayName(atom.getTerm(0));
-				predicate = getAbbreviatedName(atom.getPredicate().toString(), false);
+				predicate = getAbbreviatedName(originalString, false);
+				if (originalString.equals(predicate))
+					predicate = "<" + predicate + ">";
 				object = getDisplayName(atom.getTerm(1));
 			}
+			
 			turtle.put(subject, predicate, object);
 		}
 		return turtle.print();
