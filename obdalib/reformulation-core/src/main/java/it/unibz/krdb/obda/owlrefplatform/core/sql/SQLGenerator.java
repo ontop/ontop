@@ -59,12 +59,6 @@ public class SQLGenerator implements SourceQueryGenerator {
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
 	private static final String qualifiedColumn = "%s.\"%s\"";
-	private static final String conditionEQCol = "%s.\"%s\" = %s.\"%s\"";
-	private static final String conditionEQConstant = "%s.\"%s\" = %s";
-	private static final String conditionGTConstant = "%s.\"%s\" > %s";
-	private static final String conditionGTEConstant = "%s.\"%s\" >= %s";
-	private static final String conditionLTConstant = "%s.\"%s\" < %s";
-	private static final String conditionLTEQConstant = "%s.\"%s\" <= %s";
 
 	private final DBMetadata metadata;
 	private final JDBCUtility jdbcutil;
@@ -251,7 +245,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 						String currentView = viewName[index];
 						String column1 = metadata.getAttributeName(tableName[index], position1 + 1);
 						String column2 = metadata.getAttributeName(tableName[index], position2 + 1);
-						String currentcondition = String.format(conditionEQCol, currentView, column1, currentView, column2);
+						String qualifiedNameColumn1 = String.format(qualifiedColumn, currentView, column1);
+						String qualifiedNameColumn2 = String.format(qualifiedColumn, currentView, column2);
+						String currentcondition = String.format(EQ_OPERATOR, qualifiedNameColumn1, qualifiedNameColumn2);
 						whereConditions.add(currentcondition);
 					}
 				}
@@ -267,9 +263,12 @@ public class SQLGenerator implements SourceQueryGenerator {
 					for (int indexatom2var2 : varAtomTermIndex.get(var).get(atom2)) {
 						String view1 = viewName[indexatom1];
 						String column1 = metadata.getAttributeName(tableName[indexatom1], indexatom1var + 1);
+						String qualifiedNameColumn1 = String.format(qualifiedColumn, view1, column1);
 						String view2 = viewName[indexatom2];
 						String column2 = metadata.getAttributeName(tableName[indexatom2], indexatom2var2 + 1);
-						String currentcondition = String.format(conditionEQCol, view1, column1, view2, column2);
+						String qualifiedNameColumn2 = String.format(qualifiedColumn, view2, column2);
+						
+						String currentcondition = String.format(EQ_OPERATOR, qualifiedNameColumn1, qualifiedNameColumn2);
 						whereConditions.add(currentcondition);
 					}
 				}
@@ -309,15 +308,16 @@ public class SQLGenerator implements SourceQueryGenerator {
 							} else {
 								value = ct.getValue();
 							}
-
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
-							String condition = String.format(conditionEQConstant, viewName[i1], colname, value);
+							String qualifiedName = String.format(qualifiedColumn, viewName[i1], colname);
+							String condition = String.format(EQ_OPERATOR, qualifiedName, value);
 							whereConditions.add(condition);
 						} else if (term instanceof URIConstant) {
 							URIConstant ct = (URIConstant) term;
-							String value = ct.getURI().toString();
+							String value = getQuotedString(ct.getURI().toString());
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
-							String condition = String.format(conditionEQConstant, viewName[i1], colname, getQuotedString(value));
+							String qualifiedName = String.format(qualifiedColumn, viewName[i1], colname);
+							String condition = String.format(EQ_OPERATOR, qualifiedName, value);
 							whereConditions.add(condition);
 						} else if (term instanceof Variable) {
 							// NO-OP
@@ -616,9 +616,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			int termidx = varAtomTermIndex.get(var).get(atom).get(0);
 			String viewname = viewName[atomidx];
 			String columnName = metadata.getAttributeName(tableName[atomidx], termidx + 1);
-			result.append(viewname);
-			result.append(".");
-			result.append(getDoubleQuotedString(columnName));
+			result.append(String.format(qualifiedColumn, viewname, columnName));
 			
 		} else if (term instanceof Function) {
 			Function function = (Function) term;
@@ -640,15 +638,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 				if (isAndOrOperator(functionSymbol)) {
 					result.append("(");
 				} 
-				result.append(getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 				if (functionSymbol instanceof BooleanOperationPredicate) {
-					result.append(" ");
-					result.append(getBooleanOperatorString(functionSymbol));
-					result.append(" ");
+					String expressionFormat = getBooleanOperatorString(functionSymbol);
+					String leftOp = getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+					String rightOp = getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex);
+					result.append(String.format(expressionFormat, leftOp, rightOp));
 				} else {
 					throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 				}
-				result.append(getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex));
 				if (isAndOrOperator(functionSymbol)) {
 					result.append(")");
 				}
@@ -681,14 +678,6 @@ public class SQLGenerator implements SourceQueryGenerator {
 		bf.append("'");
 		bf.append(str);
 		bf.append("'");
-		return bf.toString();
-	}
-	
-	private String getDoubleQuotedString(String str) {
-		StringBuffer bf = new StringBuffer();
-		bf.append("\"");
-		bf.append(str);
-		bf.append("\"");
 		return bf.toString();
 	}
 
