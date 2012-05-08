@@ -119,21 +119,10 @@ public class QueryAnonymizer {
 			Atom atom = (Atom) it.next();
 			List<Term> terms = atom.getTerms();
 			int pos = 0;
-			Iterator<Term> term_it = terms.iterator();
-			while (term_it.hasNext()) {
-				Term t = term_it.next();
-				if (t instanceof VariableImpl) {
-					Object[] obj = new Object[2];
-					obj[0] = atom;
-					obj[1] = pos;
-					List<Object[]> list = auxmap.get(((VariableImpl) t).getName());
-					if (list == null) {
-						list = new LinkedList<Object[]>();
-					}
-					list.add(obj);
-					auxmap.put(((VariableImpl) t).getName(), list);
-				}
+			for (Term t : terms) {
+				collectAuxiliaries(t, atom, pos, auxmap);
 			}
+			pos++;
 		}
 
 		Iterator<Atom> it2 = body.iterator();
@@ -162,6 +151,29 @@ public class QueryAnonymizer {
 		return query;
 	}
 
+	private void collectAuxiliaries(Term term, Atom atom, int pos, HashMap<String, List<Object[]>> auxmap) {
+		if (term instanceof VariableImpl) {
+			VariableImpl var = (VariableImpl) term;
+			Object[] obj = new Object[2];
+			obj[0] = atom;
+			obj[1] = pos;
+			List<Object[]> list = auxmap.get(var.getName());
+			if (list == null) {
+				list = new LinkedList<Object[]>();
+			}
+			list.add(obj);
+			auxmap.put(var.getName(), list);
+		} else if (term instanceof FunctionalTermImpl) {
+			FunctionalTermImpl funct = (FunctionalTermImpl) term;
+			for (Term t : funct.getTerms()) {
+				collectAuxiliaries(t, atom, pos, auxmap);
+			}
+		} else {
+			// NO-OP
+			// Ignore constants
+		}
+	}
+	
 	private boolean isVariableInHead(CQIE q, Term t) {
 		if (t instanceof AnonymousVariable)
 			return false;

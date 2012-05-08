@@ -54,6 +54,7 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueDecimal;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueDouble;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueFloat;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueInteger;
+import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueNode;
 import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueString;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
@@ -394,6 +395,8 @@ public class SPARQLDatalogTranslator {
 			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDateTime(), ofac.getValueConstant(expr.getDateTime()+"", COL_TYPE.DATETIME));
 		} else if (expr instanceof NodeValueBoolean) {
 			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateBoolean(), ofac.getValueConstant(expr.getBoolean()+"", COL_TYPE.BOOLEAN));
+		} else if (expr instanceof NodeValueNode) {
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), ofac.getValueConstant(expr.getNode().getLiteralLexicalForm()+"", COL_TYPE.LITERAL));
 		} else {
 			throw new QueryException("Unknown data type!");
 		}
