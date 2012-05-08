@@ -23,7 +23,7 @@ public class JDBCUtility implements Serializable {
 	private static final long serialVersionUID = 5218570087742414646L;
 
 	private enum Driver {
-		PGSQL, MYSQL, H2, DB2, ORACLE, TEIID
+		PGSQL, MYSQL, H2, DB2, ORACLE, SQLSERVER, TEIID
 	}
 
 	private Driver driver = null;
@@ -53,6 +53,8 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.ORACLE;
 		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
 			driver = Driver.TEIID;
+		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
+			driver = Driver.SQLSERVER;
 		} else {
 			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
 			log.warn("WARNING: If you database is not fully compliant with SQL 99 you might experience problems using Quest.");
@@ -94,6 +96,13 @@ public class JDBCUtility implements Serializable {
 			}
 			sql += ")";
 			break;
+		case SQLSERVER:
+			sql = String.format("(%s", uribase);
+			for (int i = 0; i < list.size(); i++) {
+				sql += String.format(" + CAST(%s as varchar)", list.get(i));
+			}
+			sql += ")";
+			break;
 		}
 		return sql;
 	}
@@ -114,6 +123,8 @@ public class JDBCUtility implements Serializable {
 		case ORACLE:
 			sql = String.format("ROWNUM <= %s", limit);
 			break;
+		case SQLSERVER:
+			sql = String.format("OFFSET %s ROWS\nFETCH NEXT %s ROWS ONLY ", limit, limit);
 		}
 		return sql;
 	}
