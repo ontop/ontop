@@ -128,4 +128,24 @@ public class JDBCUtility implements Serializable {
 		}
 		return sql;
 	}
+
+	public String getQualifiedColumn(String tablename, String columnname) {
+		String sql = "";
+		switch (driver) {
+		case MYSQL:
+			sql = String.format("%s.`%s`", tablename, columnname);
+			break;
+		case H2:
+			sql = String.format("%s.`%s`", tablename, columnname.toLowerCase());
+			break;
+		case PGSQL:
+		case TEIID:
+		case DB2:
+		case ORACLE:
+		case SQLSERVER:
+			sql = String.format("%s.\"%s\"", tablename, columnname);
+		}
+		return sql;
+	}
+
 }
