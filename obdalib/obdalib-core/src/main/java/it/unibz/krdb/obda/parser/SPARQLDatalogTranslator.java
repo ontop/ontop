@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_Literal;
 import com.hp.hpl.jena.graph.Node_URI;
@@ -73,7 +75,7 @@ public class SPARQLDatalogTranslator {
 
 	/** A utility map to store substitution rule */
 	private Map<Variable, Term> mgu = new HashMap<Variable, Term>();
-	
+
 	/**
 	 * The default constructor.
 	 */
@@ -169,7 +171,7 @@ public class SPARQLDatalogTranslator {
 	 * Collects the triple atoms from the WHERE expression.
 	 * 
 	 * @param elementTriples
-	 * 			The Triple elements from Jena.
+	 *            The Triple elements from Jena.
 	 */
 	private List<Atom> collectElementTriplesAtom(ElementTriplesBlock elementTriples) {
 		// Get the triples object.
@@ -207,9 +209,8 @@ public class SPARQLDatalogTranslator {
 					terms.add(ofac.getVariable(subject.getName()));
 				} else if (s instanceof Node_Literal) {
 					Node_Literal subject = (Node_Literal) s;
-					String value = subject.getLiteralValue().toString();
-					subjectType = getDataType(subject);
-					terms.add(ofac.getValueConstant(value, subjectType));
+					ValueConstant constant = getConstant(subject);
+					terms.add(constant);
 				} else if (s instanceof Node_URI) {
 					Node_URI subject = (Node_URI) s;
 					subjectType = COL_TYPE.OBJECT;
@@ -229,7 +230,7 @@ public class SPARQLDatalogTranslator {
 
 				// Construct the predicate
 				URI predicateUri = objectUri;
-				
+
 				if (predicateUri.toString().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 					predicate = OBDAVocabulary.RDFS_LITERAL;
 				} else if (predicateUri.toString().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
@@ -251,7 +252,7 @@ public class SPARQLDatalogTranslator {
 				} else {
 					predicate = ofac.getPredicate(predicateUri, 1, new COL_TYPE[] { subjectType });
 				}
-				
+
 			} else {
 				// Subject node
 				if (s instanceof Var) {
@@ -259,9 +260,8 @@ public class SPARQLDatalogTranslator {
 					terms.add(ofac.getVariable(subject.getName()));
 				} else if (s instanceof Node_Literal) {
 					Node_Literal subject = (Node_Literal) s;
-					String value = subject.getLiteralValue().toString();
-					subjectType = getDataType(subject);
-					terms.add(ofac.getValueConstant(value, subjectType));
+					ValueConstant constant = getConstant(subject);
+					terms.add(constant);
 				} else if (s instanceof Node_URI) {
 					Node_URI subject = (Node_URI) s;
 					subjectType = COL_TYPE.OBJECT;
@@ -276,15 +276,17 @@ public class SPARQLDatalogTranslator {
 				} else if (o instanceof Node_Literal) {
 					Node_Literal object = (Node_Literal) o;
 					objectType = getDataType(object);
-					
-					String value = object.getLiteralLexicalForm();
-					ValueConstant constant = ofac.getValueConstant(value, objectType);
 
-					// v1.7: We extend the syntax such that the data type of a constant
+					
+					ValueConstant constant = getConstant(object);
+
+					// v1.7: We extend the syntax such that the data type of a
+					// constant
 					// is defined using a functional symbol.
 					Function dataTypeFunction = null;
 					if (objectType == COL_TYPE.LITERAL) {
-						// If the object has type LITERAL, check any language tag!
+						// If the object has type LITERAL, check any language
+						// tag!
 						String lang = (object.getLiteralLanguage() == null) ? "" : object.getLiteralLanguage();
 						Predicate functionSymbol = ofac.getDataTypePredicateLiteral();
 						ValueConstant languageConstant = ofac.getValueConstant(lang, COL_TYPE.LITERAL);
@@ -312,47 +314,61 @@ public class SPARQLDatalogTranslator {
 		return elementTriplesAtoms;
 	}
 
+	public ValueConstant getConstant(Node_Literal literal) {
+		RDFDatatype type = literal.getLiteralDatatype();
+
+		COL_TYPE objectType = getDataType(literal);
+
+		String value = literal.getLiteralLexicalForm();
+		ValueConstant constant = ofac.getValueConstant(value, objectType);
+
+		/*
+		 * Validating that the value is correct (lexically) with respect to the
+		 * specified datatype
+		 */
+		boolean valid = false;
+		if (type == XSDDatatype.XSDanyURI) {
+			valid = XSDDatatype.XSDanyURI.isValid(value);
+		} else if (type == XSDDatatype.XSDboolean) {
+			valid = XSDDatatype.XSDboolean.isValid(value);
+		} else if (type == XSDDatatype.XSDdateTime) {
+			valid = XSDDatatype.XSDdateTime.isValid(value);
+		} else if (type == XSDDatatype.XSDdecimal) {
+			valid = XSDDatatype.XSDdecimal.isValid(value);
+		} else if (type == XSDDatatype.XSDdouble) {
+			valid = XSDDatatype.XSDdouble.isValid(value);
+		} else if (type == XSDDatatype.XSDfloat) {
+			valid = XSDDatatype.XSDfloat.isValid(value);
+		} else if (type == XSDDatatype.XSDint) {
+			valid = XSDDatatype.XSDint.isValid(value);
+		} else if (type == XSDDatatype.XSDinteger) {
+			valid = XSDDatatype.XSDinteger.isValid(value);
+		} else if (type == XSDDatatype.XSDlong) {
+			valid = XSDDatatype.XSDlong.isValid(value);
+		} else if (type == XSDDatatype.XSDshort) {
+			valid = XSDDatatype.XSDshort.isValid(value);
+		} else if (type == XSDDatatype.XSDstring) {
+			valid = XSDDatatype.XSDstring.isValid(value);
+		} else if (literal.getLiteralDatatypeURI() == null || literal.getLiteralDatatypeURI().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+			valid = true;
+		} else {
+			valid = false;
+		}
+		if (!valid)
+			throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
+		return constant;
+		
+	}
+
 	/**
 	 * Collects the atom from the FILTER expression.
 	 * 
 	 * @param elementFilter
-	 * 			The FILTER element from Jena parser.
+	 *            The FILTER element from Jena parser.
 	 */
 	private List<Atom> collectElementFilterAtom(ElementFilter elementFilter) throws QueryException {
 		List<Atom> elementFilterAtoms = new LinkedList<Atom>();
 		Expr expr = elementFilter.getExpr();
-		if (expr instanceof ExprFunction1) {
-			// NO-OP
-		} else if (expr instanceof ExprFunction2) {
-			ExprFunction2 function = (ExprFunction2) expr;
-			Expr arg1 = function.getArg1(); // get the first argument
-			Expr arg2 = function.getArg2(); // get the second argument
-			if (expr instanceof E_LangMatches) {
-				// If we find a build-in function LANGMATCHES
-				Variable variable = getVariableTerm((ExprVar) ((E_Lang) arg1).getArg());
-				ValueConstant languageTag =  ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.LITERAL);
-				Function langMatches = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), variable, languageTag);
-				mgu.put(variable, langMatches);
-			} else {
-				Term term1 = getBooleanTerm(arg1);
-				Term term2 = getBooleanTerm(arg2);				
-				// Construct the boolean atom
-				elementFilterAtoms.add(getBooleanAtom(function, term1, term2));
-			}
-		} else if (expr instanceof ExprFunctionN) {
-			// NO-OP	
-		}
-		return elementFilterAtoms;
-	}
-	
-	private Term getBooleanTerm(Expr expr) {
-		Term term = null;
-		if (expr instanceof ExprVar) {
-			return getVariableTerm((ExprVar) expr);
-		} else if (expr instanceof NodeValue) {
-			return getConstantFunctionTerm((NodeValue) expr);
-		}		
-		
 		if (expr instanceof ExprFunction1) {
 			// NO-OP
 		} else if (expr instanceof ExprFunction2) {
@@ -368,41 +384,80 @@ public class SPARQLDatalogTranslator {
 			} else {
 				Term term1 = getBooleanTerm(arg1);
 				Term term2 = getBooleanTerm(arg2);
-				// Construct the boolean function 
+				// Construct the boolean atom
+				elementFilterAtoms.add(getBooleanAtom(function, term1, term2));
+			}
+		} else if (expr instanceof ExprFunctionN) {
+			// NO-OP
+		}
+		return elementFilterAtoms;
+	}
+
+	private Term getBooleanTerm(Expr expr) {
+		Term term = null;
+		if (expr instanceof ExprVar) {
+			return getVariableTerm((ExprVar) expr);
+		} else if (expr instanceof NodeValue) {
+			return getConstantFunctionTerm((NodeValue) expr);
+		}
+
+		if (expr instanceof ExprFunction1) {
+			// NO-OP
+		} else if (expr instanceof ExprFunction2) {
+			ExprFunction2 function = (ExprFunction2) expr;
+			Expr arg1 = function.getArg1(); // get the first argument
+			Expr arg2 = function.getArg2(); // get the second argument
+			if (expr instanceof E_LangMatches) {
+				// If we find a build-in function LANGMATCHES
+				Variable variable = getVariableTerm((ExprVar) ((E_Lang) arg1).getArg());
+				ValueConstant languageTag = ofac.getValueConstant(arg2.getConstant().getString(), COL_TYPE.LITERAL);
+				Function langMatches = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), variable, languageTag);
+				mgu.put(variable, langMatches);
+			} else {
+				Term term1 = getBooleanTerm(arg1);
+				Term term2 = getBooleanTerm(arg2);
+				// Construct the boolean function
 				term = getBooleanFunction(function, term1, term2);
 			}
 		} else if (expr instanceof ExprFunctionN) {
 			// NO-OP
 		}
-		return term;				
+		return term;
 	}
-	
+
 	private Variable getVariableTerm(ExprVar expr) {
 		return ofac.getVariable(expr.getVarName());
 	}
-	
+
 	private Function getConstantFunctionTerm(NodeValue expr) {
 		Function constantFunction = null;
 		if (expr instanceof NodeValueString) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateString(), ofac.getValueConstant(expr.getString(), COL_TYPE.STRING));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateString(),
+					ofac.getValueConstant(expr.getString(), COL_TYPE.STRING));
 		} else if (expr instanceof NodeValueInteger) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateInteger(), ofac.getValueConstant(expr.getInteger()+"", COL_TYPE.INTEGER));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateInteger(),
+					ofac.getValueConstant(expr.getInteger() + "", COL_TYPE.INTEGER));
 		} else if (expr instanceof NodeValueDecimal) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDecimal(), ofac.getValueConstant(expr.getDecimal()+"", COL_TYPE.DECIMAL));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDecimal(),
+					ofac.getValueConstant(expr.getDecimal() + "", COL_TYPE.DECIMAL));
 		} else if (expr instanceof NodeValueDouble || expr instanceof NodeValueFloat) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDouble(), ofac.getValueConstant(expr.getDouble()+"", COL_TYPE.DOUBLE));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDouble(),
+					ofac.getValueConstant(expr.getDouble() + "", COL_TYPE.DOUBLE));
 		} else if (expr instanceof NodeValueDateTime) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDateTime(), ofac.getValueConstant(expr.getDateTime()+"", COL_TYPE.DATETIME));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateDateTime(),
+					ofac.getValueConstant(expr.getDateTime() + "", COL_TYPE.DATETIME));
 		} else if (expr instanceof NodeValueBoolean) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateBoolean(), ofac.getValueConstant(expr.getBoolean()+"", COL_TYPE.BOOLEAN));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateBoolean(),
+					ofac.getValueConstant(expr.getBoolean() + "", COL_TYPE.BOOLEAN));
 		} else if (expr instanceof NodeValueNode) {
-			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(), ofac.getValueConstant(expr.getNode().getLiteralLexicalForm()+"", COL_TYPE.LITERAL));
+			constantFunction = ofac.getFunctionalTerm(ofac.getDataTypePredicateLiteral(),
+					ofac.getValueConstant(expr.getNode().getLiteralLexicalForm() + "", COL_TYPE.LITERAL));
 		} else {
 			throw new QueryException("Unknown data type!");
 		}
 		return constantFunction;
 	}
-	
+
 	private Atom getBooleanAtom(ExprFunction2 expr, Term term1, Term term2) {
 		Atom atom = null;
 		// The AND and OR expression
@@ -427,7 +482,7 @@ public class SPARQLDatalogTranslator {
 		}
 		return atom;
 	}
-	
+
 	private Function getBooleanFunction(ExprFunction2 expr, Term term1, Term term2) {
 		Function function = null;
 		// The AND and OR expression
@@ -452,7 +507,7 @@ public class SPARQLDatalogTranslator {
 		}
 		return function;
 	}
-	
+
 	private COL_TYPE getDataType(Node_Literal node) {
 		COL_TYPE dataType = null;
 
@@ -485,7 +540,7 @@ public class SPARQLDatalogTranslator {
 			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 				dataType = COL_TYPE.BOOLEAN;
 			} else {
-				dataType = COL_TYPE.LITERAL; // TODO should throw an exception
+				throw new RuntimeException("Unsupported datatype: " + dataTypeURI.toString());
 			}
 		}
 		return dataType;
@@ -493,24 +548,30 @@ public class SPARQLDatalogTranslator {
 
 	private Predicate getDataTypePredicate(COL_TYPE dataType) throws QueryException {
 		switch (dataType) {
-			case STRING: return ofac.getDataTypePredicateString();
-			case INTEGER: return ofac.getDataTypePredicateInteger();
-			case DECIMAL: return ofac.getDataTypePredicateDecimal();
-			case DOUBLE: return ofac.getDataTypePredicateDouble();
-			case DATETIME: return ofac.getDataTypePredicateDateTime();
-			case BOOLEAN: return ofac.getDataTypePredicateBoolean();
-			default: 
-				throw new QueryException("Unknown data type!");
+		case STRING:
+			return ofac.getDataTypePredicateString();
+		case INTEGER:
+			return ofac.getDataTypePredicateInteger();
+		case DECIMAL:
+			return ofac.getDataTypePredicateDecimal();
+		case DOUBLE:
+			return ofac.getDataTypePredicateDouble();
+		case DATETIME:
+			return ofac.getDataTypePredicateDateTime();
+		case BOOLEAN:
+			return ofac.getDataTypePredicateBoolean();
+		default:
+			throw new QueryException("Unknown data type!");
 		}
 	}
-	
+
 	private static class Util {
-		
+
 		/***
-		 * This method will return a new query, resulting from the application of
-		 * the unifier to the original query q. To do this, we will call the clone()
-		 * method of the original query and then will call applyUnifier to each atom
-		 * of the cloned query.
+		 * This method will return a new query, resulting from the application
+		 * of the unifier to the original query q. To do this, we will call the
+		 * clone() method of the original query and then will call applyUnifier
+		 * to each atom of the cloned query.
 		 */
 		static CQIE applyUnifier(CQIE q, Map<Variable, Term> unifier) {
 			CQIE newq = q.clone();
@@ -523,7 +584,7 @@ public class SPARQLDatalogTranslator {
 			}
 			return newq;
 		}
-		
+
 		private static void applyUnifier(Atom atom, Map<Variable, Term> unifier) {
 			applyUnifier(atom.getTerms(), unifier);
 		}

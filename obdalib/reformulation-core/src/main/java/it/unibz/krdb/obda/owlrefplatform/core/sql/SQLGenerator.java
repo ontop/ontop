@@ -53,7 +53,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 	private static final String NOT_OPERATOR = "NOT %s";
 	private static final String IS_NULL_OPERATOR = "%s IS NULL";
 	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
-	
+
 	/**
 	 * Formatting template
 	 */
@@ -159,7 +159,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 		if (tempdist != null)
 			distinct = (Boolean) tempdist;
 
-		/* Main look, constructing the SPJ query for each CQ */
+		/* Main loop, constructing the SPJ query for each CQ */
 
 		StringBuffer result = new StringBuffer();
 		boolean isMoreThanOne = false;
@@ -216,7 +216,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 			/*
 			 * First we generate all conditions for shared variables (join
-			 * conditions, and duplciated variables in single atoms
+			 * conditions, and duplicated variables in single atoms
 			 */
 
 			Map<Variable, Integer> varCount = new HashMap<Variable, Integer>();
@@ -266,7 +266,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 						String view2 = viewName[indexatom2];
 						String column2 = metadata.getAttributeName(tableName[indexatom2], indexatom2var2 + 1);
 						String qualifiedNameColumn2 = jdbcutil.getQualifiedColumn(view2, column2);
-						
+
 						String currentcondition = String.format("(" + EQ_OPERATOR + ")", qualifiedNameColumn1, qualifiedNameColumn2);
 						whereConditions.add(currentcondition);
 					}
@@ -299,21 +299,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 						Term term = terms.get(termj);
 						if (term instanceof ValueConstant) {
 							ValueConstant ct = (ValueConstant) term;
-							String value = null;
-							if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
-								value = getQuotedString(ct.getValue());
-							} else if (ct.getType() == COL_TYPE.DATETIME) {
-								value = getQuotedString(getSQLtimestampFromXSDDatetime(ct.getValue()));
-							} else {
-								value = ct.getValue();
-							}
+							String value = jdbcutil.getSQLLexicalForm(ct);
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
 							String qualifiedName = jdbcutil.getQualifiedColumn(viewName[i1], colname);
 							String condition = String.format("(" + EQ_OPERATOR + ")", qualifiedName, value);
 							whereConditions.add(condition);
 						} else if (term instanceof URIConstant) {
 							URIConstant ct = (URIConstant) term;
-							String value = getQuotedString(ct.getURI().toString());
+							String value = jdbcutil.getSQLLexicalForm(ct.getURI().toString());
 							String colname = metadata.getAttributeName(tableName[i1], termj + 1);
 							String qualifiedName = jdbcutil.getQualifiedColumn(viewName[i1], colname);
 							String condition = String.format("(" + EQ_OPERATOR + ")", qualifiedName, value);
@@ -380,9 +373,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			result.append(sqlquery);
 			isMoreThanOne = true;
 		}
-		
-		
-		
+
 		return result.toString();
 	}
 
@@ -439,14 +430,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 */
 							String lang = "''";
 							if (ov.getTerms().size() > 1) {
-							Term langTerm = ov.getTerms().get(1);
-							
-							if (langTerm instanceof ValueConstant) {
-								lang = getQuotedString(((ValueConstant) langTerm).getValue());
-							} else {
-								lang = getSQLString(langTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
+								Term langTerm = ov.getTerms().get(1);
+
+								if (langTerm instanceof ValueConstant) {
+									lang = jdbcutil.getSQLLexicalForm((ValueConstant) langTerm);
+								} else {
+									lang = getSQLString(langTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
+								}
 							}
-							}	
 							sb.append(lang);
 							sb.append(" AS ");
 							sb.append(signature.get(hpos) + "LitLang, ");
@@ -454,7 +445,8 @@ public class SQLGenerator implements SourceQueryGenerator {
 							Term term = ov.getTerms().get(0);
 							String termStr = null;
 							if (term instanceof ValueConstant) {
-								termStr = getQuotedString(((ValueConstant) term).getValue());
+								termStr = jdbcutil.getSQLLexicalForm((ValueConstant) term);
+//								termStr = getQuotedString(((ValueConstant) term).getValue());
 							} else {
 								termStr = getSQLString(term, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
 							}
@@ -464,7 +456,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 							/*
 							 * Case for all simple datatypes, we only select one
 							 * column from the table
-							 */							
+							 */
 							Term term = ov.getTerms().get(0);
 							if (term instanceof Variable) {
 								Variable v = (Variable) term;
@@ -472,7 +464,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 								sb.append(column);
 							} else if (term instanceof ValueConstant) {
 								ValueConstant c = (ValueConstant) term;
-								sb.append(getQuotedString(c.getValue()));
+								sb.append(jdbcutil.getSQLLexicalForm(c));
 							}
 						}
 					} else {
@@ -482,13 +474,13 @@ public class SQLGenerator implements SourceQueryGenerator {
 							 */
 							ValueConstant c = (ValueConstant) ov.getTerms().get(0);
 							StringTokenizer tokenizer = new StringTokenizer(c.toString(), "{}");
-							functionString = getQuotedString(tokenizer.nextToken());
+							functionString = jdbcutil.getSQLLexicalForm(tokenizer.nextToken());
 							int termIndex = 1;
 							do {
 								Term currentTerm = ov.getTerms().get(termIndex);
 								vex.add(getSQLString(currentTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false));
 								if (tokenizer.hasMoreTokens()) {
-									vex.add(getQuotedString(tokenizer.nextToken()));
+									vex.add(jdbcutil.getSQLLexicalForm(tokenizer.nextToken()));
 								}
 								termIndex += 1;
 							} while (tokenizer.hasMoreElements() || termIndex < ov.getTerms().size());
@@ -509,28 +501,28 @@ public class SQLGenerator implements SourceQueryGenerator {
 									vex.add(getSQLString(var, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false));
 								} else if (v instanceof ValueConstant) {
 									ValueConstant ct = (ValueConstant) v;
-									StringBuilder var = new StringBuilder();
-									var.append(getQuotedString(ct.toString()));
+									StringBuilder var = new StringBuilder();									
+									var.append(jdbcutil.getSQLLexicalForm(ct.toString()));
 									vex.add(var.toString());
 								} else if (v instanceof URIConstant) {
 									URIConstant uc = (URIConstant) v;
 									StringBuilder var = new StringBuilder();
-									var.append(getQuotedString(uc.toString()));
+									var.append(jdbcutil.getSQLLexicalForm(uc.toString()));
 									vex.add(var.toString());
 								} else {
 									throw new RuntimeException("Invalid term in the head");
 								}
 							}
-							String concat = jdbcutil.getConcatination(getQuotedString(functionString), vex);
+							String concat = jdbcutil.getConcatination(jdbcutil.getSQLLexicalForm(functionString), vex);
 							sb.append(concat);
 						}
 					}
 				} else if (ht instanceof ValueConstant) {
 					ValueConstant ct = (ValueConstant) ht;
-					sb.append(getQuotedString(ct.getValue().toString()));
+					sb.append(jdbcutil.getSQLLexicalForm(ct));
 				} else if (ht instanceof URIConstant) {
 					URIConstant uc = (URIConstant) ht;
-					sb.append(getQuotedString(uc.getURI().toString()));
+					sb.append(jdbcutil.getSQLLexicalForm(uc.getURI().toString()));
 				}
 				sb.append(" AS ");
 				sb.append(signature.get(hpos));
@@ -555,16 +547,16 @@ public class SQLGenerator implements SourceQueryGenerator {
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			String column = getSQLString(term, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
 			return String.format(expressionFormat, column);
-			
+
 		} else if (isBinary(atom)) {
-			// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.	
+			// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
 			Term left = atom.getTerms().get(0);
-			Term right = atom.getTerms().get(1);			
+			Term right = atom.getTerms().get(1);
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			String leftOp = getSQLString(left, body, tableName, viewName, varAtomIndex, varAtomTermIndex, true);
 			String rightOp = getSQLString(right, body, tableName, viewName, varAtomIndex, varAtomTermIndex, true);
 			return String.format("(" + expressionFormat + ")", leftOp, rightOp);
-		
+
 		} else {
 			// Throw an exception for other types
 			throw new RuntimeException("No support for n-ary boolean condition predicate: " + atom.getPredicate());
@@ -584,14 +576,14 @@ public class SQLGenerator implements SourceQueryGenerator {
 	private boolean isBinary(Atom atom) {
 		return (atom.getArity() == 2) ? true : false;
 	}
-	
+
 	/**
 	 * Determines if it is a unary function.
 	 */
 	private boolean isUnary(Function fun) {
 		return (fun.getArity() == 1) ? true : false;
 	}
-	
+
 	/**
 	 * Determines if it is a binary function.
 	 */
@@ -599,36 +591,23 @@ public class SQLGenerator implements SourceQueryGenerator {
 		return (fun.getArity() == 2) ? true : false;
 	}
 
-	private String getSQLtimestampFromXSDDatetime(String datetime) {
-		StringBuffer bf = new StringBuffer();
-		int indexofT = datetime.indexOf('T');
-		bf.append(datetime.substring(0, indexofT));
-		bf.append(" ");
-		bf.append(datetime.subSequence(indexofT + 1, indexofT + 1 + 8));
-		return bf.toString();
-	}
-
 	public String getSQLString(Term term, List<Atom> body, String[] tableName, String[] viewName,
-			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex,
-			boolean useBrackets) {
+			Map<Variable, List<Integer>> varAtomIndex, Map<Variable, Map<Atom, List<Integer>>> varAtomTermIndex, boolean useBrackets) {
 		StringBuffer result = new StringBuffer();
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			if (ct.getType() == COL_TYPE.LITERAL || ct.getType() == COL_TYPE.STRING) {
-				result.append(getQuotedString(ct.getValue()));
-			} else if (ct.getType() == COL_TYPE.DATETIME) {
-				result.append(getQuotedString(getSQLtimestampFromXSDDatetime(ct.getValue())));
-			} else {
-				result.append(ct.getValue());
-			}
-			
+			result.append(jdbcutil.getSQLLexicalForm(ct));
 		} else if (term instanceof URIConstant) {
 			URIConstant uc = (URIConstant) term;
-			result.append(getQuotedString(uc.toString()));
-			
+			result.append(jdbcutil.getSQLLexicalForm(uc.toString()));
+
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			List<Integer> posList = varAtomIndex.get(var); // Locating the first occurrence of the variable in a DB atom (using the indexes)
+			List<Integer> posList = varAtomIndex.get(var); // Locating the first
+															// occurrence of the
+															// variable in a DB
+															// atom (using the
+															// indexes)
 			if (posList == null) {
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + term);
 			}
@@ -638,7 +617,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 			String viewname = viewName[atomidx];
 			String columnName = metadata.getAttributeName(tableName[atomidx], termidx + 1);
 			result.append(jdbcutil.getQualifiedColumn(viewname, columnName));
-			
+
 		} else if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
@@ -653,8 +632,10 @@ public class SQLGenerator implements SourceQueryGenerator {
 				} else if (isBinary(function)) {
 					// for binary functions, e.g., AND, OR, EQ, NEQ, GT, etc.
 					String expressionFormat = getBooleanOperatorString(functionSymbol);
-					String leftOp = getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex, true);
-					String rightOp = getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex, true);
+					String leftOp = getSQLString(function.getTerms().get(0), body, tableName, viewName, varAtomIndex, varAtomTermIndex,
+							true);
+					String rightOp = getSQLString(function.getTerms().get(1), body, tableName, viewName, varAtomIndex, varAtomTermIndex,
+							true);
 					result.append(String.format(expressionFormat, leftOp, rightOp));
 					if (useBrackets) {
 						result.insert(0, "(");
@@ -667,7 +648,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 		}
 		return result.toString();
 	}
-	
+
 	private boolean isUCQ(DatalogProgram query) {
 		boolean isUCQ = true;
 		int arity = query.getRules().get(0).getHead().getArity();
@@ -683,13 +664,13 @@ public class SQLGenerator implements SourceQueryGenerator {
 		return isUCQ;
 	}
 
-	private String getQuotedString(String str) {
-		StringBuffer bf = new StringBuffer();
-		bf.append("'");
-		bf.append(str);
-		bf.append("'");
-		return bf.toString();
-	}
+//	private String getQuotedString(String str) {
+//		StringBuffer bf = new StringBuffer();
+//		bf.append("'");
+//		bf.append(str);
+//		bf.append("'");
+//		return bf.toString();
+//	}
 
 	private String getBooleanOperatorString(Predicate functionSymbol) {
 		String operator = null;

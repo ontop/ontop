@@ -19,6 +19,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import java.net.URI;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +93,7 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 			} else if (constant instanceof BNode) {
 				return COL_TYPE.BNODE;
 			}
-		} else if (term instanceof Function) {		
+		} else if (term instanceof Function) {
 			Predicate function = ((Function) term).getFunctionSymbol();
 			if (function == OBDAVocabulary.XSD_BOOLEAN) {
 				return COL_TYPE.BOOLEAN;
@@ -115,7 +116,7 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 			}
 		}
 		// For other kind of term class.
-		return null;		
+		return null;
 	}
 
 	public double getDouble(int column) throws OBDAException {
@@ -224,19 +225,32 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 				 * rdfs:Literal or a normal literal and construct it properly.
 				 */
 				if (type == COL_TYPE.LITERAL) {
-					// Function ftype = (Function)typingMap.get(index);
-					// Term valueterm = ftype.getTerms().get(0);
-					// Term langterm = ftype.getTerms().get(1);
 					String value = set.getString(name);
 					String language = set.getString(name + "LitLang");
 					if (language == null || language.trim().equals("")) {
 						result = fac.getValueConstant(value);
-					}
-					else {
+					} else {
 						result = fac.getValueConstant(value, language);
 					}
 
+				} else if (type == COL_TYPE.BOOLEAN) {
+					boolean value = set.getBoolean(name);
+					if (value)
+						result = fac.getValueConstant("true", type);
+					else
+						result = fac.getValueConstant("false", type);
+
+				} else if (type == COL_TYPE.DATETIME) {
+					Timestamp value = set.getTimestamp(name);
+					result = fac.getValueConstant(value.toString().replace(' ', 'T'), type);
+					
+//					if (value)
+//						result = fac.getValueConstant("true", type);
+//					else
+//						result = fac.getValueConstant("false", type);
+
 				} else {
+
 					result = fac.getValueConstant(set.getString(name), type);
 				}
 			}
