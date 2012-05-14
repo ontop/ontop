@@ -149,9 +149,9 @@ public class TMappingProcessor implements Serializable {
 		Iterator<CQIE> mappingIterator = currentMappings.iterator();
 		
 		Atom head = newmapping.getHead();
-		System.out.println(newmapping.getHead().getPredicate().getName());
-		if (head.getPredicate().getName().toString().equals("http://www.semanticweb.org/ontologies/2011/3/LUCADAOntology.owl#hasPreHistology"))
-			System.out.println("Here");
+//		System.out.println(newmapping.getHead().getPredicate().getName());
+//		if (head.getPredicate().getName().toString().equals("http://www.semanticweb.org/ontologies/2011/3/LUCADAOntology.owl#hasPreHistology"))
+//			System.out.println("Here");
 		while (mappingIterator.hasNext()) {
 			CQIE currentMapping = mappingIterator.next();
 			List<Atom> strippedExistingConditions = new LinkedList<Atom>();
@@ -570,7 +570,7 @@ public class TMappingProcessor implements Serializable {
 			}
 		}
 
-		System.out.println(tmappingsProgram);
+//		System.out.println(tmappingsProgram);
 		return tmappingsProgram;
 	}
 
