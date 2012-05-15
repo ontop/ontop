@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export JDBC_PLUGINS_PATH=/Applications/Protege_4.1-obdalib-1.7/plugins
-export REVISION=1440
+export JDBC_PLUGINS_PATH=/Applications/Protege_4.1-obdalib-1.7-alpha/plugins
+export REVISION=1456
 rm -fr obdalib-protege41/dist
 svn update
 mvn clean

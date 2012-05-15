@@ -92,8 +92,9 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<excludes>
+						<exclude>*it/unibz/krdb/obda/owlrefplatform/core/reformulation/TreeWitness*</exclude>
 						<exclude>**/TW*.java</exclude>
-						<exclude>**/LUBM*.java</exclude>
+						<exclude>**/LUBM*.java</exclude>            
 					</excludes>
 					<testExcludes>
 						<exclude>**/MappingToRuleTester.java</exclude>
