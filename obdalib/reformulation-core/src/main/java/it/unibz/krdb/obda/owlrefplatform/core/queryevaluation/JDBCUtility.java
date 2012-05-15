@@ -252,8 +252,10 @@ public class JDBCUtility implements Serializable {
 			case DB2:
 			case TEIID:
 			case ORACLE:
-			case SQLSERVER:
 				sql = "TRUE";
+				break;
+			case SQLSERVER:
+				sql = "'TRUE'";
 				break;
 			}
 		} else if (value.equals("0") || value.equals("false")) {
@@ -264,8 +266,10 @@ public class JDBCUtility implements Serializable {
 			case DB2:
 			case TEIID:
 			case ORACLE:
-			case SQLSERVER:
 				sql = "FALSE";
+				break;
+			case SQLSERVER:
+				sql = "'FALSE'";
 				break;
 			}
 		} else {
