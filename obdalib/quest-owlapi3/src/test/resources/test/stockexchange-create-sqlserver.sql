@@ -68,7 +68,7 @@ CREATE TABLE "transaction" (
     brokerid integer,
     forclientid integer,
     forcompanyid integer,
-    amount decimal
+    amount decimal(18, 4)
 	CONSTRAINT transaction_pkey PRIMARY KEY NONCLUSTERED (id)
 );
 
