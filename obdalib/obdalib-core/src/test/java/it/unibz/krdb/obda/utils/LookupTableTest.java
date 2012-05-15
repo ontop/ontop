@@ -1,11 +1,10 @@
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.sql.DBMetadata;
 import junit.framework.TestCase;
 
 public class LookupTableTest extends TestCase {
 	
-	private LookupTable lookupTable = new LookupTable(new DBMetadata());
+	private LookupTable lookupTable = new LookupTable();
 	
 	public void setUp() {
 		lookupTable.add("Employee.id");

@@ -5,12 +5,12 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -269,49 +269,106 @@ public class JDBCConnectionManager {
 	 * @return The database meta data object.
 	 */
 	public static DBMetadata getMetaData(Connection conn) {
+		DBMetadata metadata = null;
 		try {
-
-			DatabaseMetaData md = conn.getMetaData();
-
-			ResultSet rsTables = md.getTables(null, null, null, null);
-
-			DBMetadata metadata = new DBMetadata();
-
-			metadata.setDriverName(md.getDriverName());
-			metadata.setDatabaseProductName(md.getDatabaseProductName());
-
-			metadata.setStoresLowerCaseIdentifier(md.storesLowerCaseIdentifiers());
-			metadata.setStoresLowerCaseQuotedIdentifiers(md.storesLowerCaseQuotedIdentifiers());
-			metadata.setStoresMixedCaseIdentifiers(md.storesMixedCaseIdentifiers());
-			metadata.setStoresMixedCaseQuotedIdentifiers(md.storesMixedCaseQuotedIdentifiers());
-			metadata.setStoresUpperCaseIdentifiers(md.storesUpperCaseIdentifiers());
-			metadata.setStoresUpperCaseQuotedIdentifiers(md.storesUpperCaseQuotedIdentifiers());
-
-			while (rsTables.next()) {
-				String tblCatalog = rsTables.getString("TABLE_CAT");
-				String tblName = rsTables.getString("TABLE_NAME");
-				String tblSchema = rsTables.getString("TABLE_SCHEM");
-
-				ResultSet rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
-				ArrayList<String> pk = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
-
-				TableDefinition td = new TableDefinition();
-				td.setName(tblName);
-				for (int pos = 1; rsColumns.next(); pos++) {
-					td.setAttribute(
-							pos,
-							new Attribute(rsColumns.getString("COLUMN_NAME"), rsColumns.getInt("DATA_TYPE"), pk.contains(rsColumns
-									.getString("COLUMN_NAME")), rsColumns.getInt("NULLABLE")));
-				}
-				// Add this information to the DBMetadata
-				metadata.add(td);
-			}
+			final DatabaseMetaData md = conn.getMetaData();
+			if (md.getDatabaseProductName().equals("Oracle")) {
+				// If the database engine is Oracle
+				metadata = getOracleMetaData(md, conn);
+			} else {
+				// For other database engines
+				metadata = getOtherMetaData(md);
+			}			
 			return metadata;
 		} catch (Exception e) {
-			throw new RuntimeException("Impossible to get DB metadata", e);
+			throw new RuntimeException("Errors on collecting database metadata: " + e.getMessage());
 		}
 	}
+	
+	/**
+	 * Retrieve metadata for most of the database engine, e.g., MySQL, PostgreSQL, SQL server
+	 */
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		ResultSet rsTables = null;
+		try {
+			rsTables = md.getTables(null, null, null, new String[] { "TABLE" });
+			while (rsTables.next()) {
+				final String tblCatalog = rsTables.getString("TABLE_CAT");
+				final String tblName = rsTables.getString("TABLE_NAME");
+				final String tblSchema = rsTables.getString("TABLE_SCHEM");
+				final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 
+				ResultSet rsColumns = null;
+				try {
+					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
+
+					/* Make sure that the values that stored inside the DBMetadata have 
+					 * proper lexical representation. */
+					String lexicalTableName = metadata.getFormattedIdentifier(tblName);
+					TableDefinition td = new TableDefinition(lexicalTableName);
+					for (int pos = 1; rsColumns.next(); pos++) {
+						td.setAttribute(pos, new Attribute(
+								metadata.getFormattedIdentifier(rsColumns.getString("COLUMN_NAME")), // column name
+								rsColumns.getInt("DATA_TYPE"),  // column datatype
+								primaryKeys.contains(rsColumns.getString("COLUMN_NAME")), // is primary key
+								rsColumns.getInt("NULLABLE"))); // is nullable
+					}
+					// Add this information to the DBMetadata
+					metadata.add(td);
+				} finally {
+					rsColumns.close(); // close existing open cursor
+				}
+			}
+		} finally {
+			rsTables.close();
+		}
+		return metadata;
+	}
+	
+	/**
+	 * Retrieve metadata for Oracle database engine
+	 */
+	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
+		DBMetadata metadata = new DBMetadata(md);
+		Statement stmt = null;
+		ResultSet rsTables = null;
+		try {
+			stmt = conn.createStatement();
+			rsTables = stmt.executeQuery("select object_name from user_objects where object_type = 'TABLE' and NOT object_name LIKE 'BIN$%'");
+			while (rsTables.next()) {
+				final String tblName = rsTables.getString("object_name");
+				final ArrayList<String> primaryKeys = getPrimaryKey(md, null, null, tblName);
+
+				ResultSet rsColumns = null;
+				try {
+					rsColumns = md.getColumns(null, null, tblName, null);
+					
+					/* Make sure that the values that stored inside the DBMetadata have 
+					 * proper lexical representation. */
+					String lexicalTableName = metadata.getFormattedIdentifier(tblName);
+					TableDefinition td = new TableDefinition(lexicalTableName);
+					for (int pos = 1; rsColumns.next(); pos++) {
+						td.setAttribute(pos, new Attribute(
+								metadata.getFormattedIdentifier(rsColumns.getString("COLUMN_NAME")), // column name
+								rsColumns.getInt("DATA_TYPE"),  // column datatype
+								primaryKeys.contains(rsColumns.getString("COLUMN_NAME")), // is primary key
+								rsColumns.getInt("NULLABLE"))); // is nullable
+					}
+					// Add this information to the DBMetadata
+					metadata.add(td);
+				} finally {
+					rsColumns.close(); // close existing open cursor
+				}
+			}
+		}
+		finally {
+			rsTables.close();
+			stmt.close();
+		}
+		return metadata;
+	}
+	
 	/* Retrives the primary key(s) from a table */
 	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		ArrayList<String> pk = new ArrayList<String>();

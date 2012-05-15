@@ -80,7 +80,7 @@ public class MappingAnalyzer {
 			QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
 			
 			// Create a lookup table for variable swapping
-			LookupTable lookupTable = createLookupTable(queryTree, dbMetaData);
+			LookupTable lookupTable = createLookupTable(queryTree);
 
 			// We can get easily the table from the SQL query tree
 			ArrayList<Relation> tableList = queryTree.getTableSet();
@@ -89,7 +89,7 @@ public class MappingAnalyzer {
 			ArrayList<Atom> atoms = new ArrayList<Atom>();
 			for (Relation table : tableList) {
 				// Construct the URI from the table name
-				String tableName = table.getName();
+				String tableName = dbMetaData.getFormattedIdentifier(table.getName());
 				URI predicateName = URI.create(tableName);
 
 				// Construct the predicate using the table name
@@ -116,8 +116,10 @@ public class MappingAnalyzer {
 			ArrayList<String> joinConditions = queryTree.getJoinCondition();
 			for (String predicate : joinConditions) {
 				String[] value = predicate.split("=");
-				Term t1 = dfac.getVariable(lookupTable.lookup(value[0]));
-				Term t2 = dfac.getVariable(lookupTable.lookup(value[1]));
+				String leftValue = dbMetaData.getFormattedIdentifier(value[0]);
+				String rightValue = dbMetaData.getFormattedIdentifier(value[1]);
+				Term t1 = dfac.getVariable(lookupTable.lookup(leftValue));
+				Term t2 = dfac.getVariable(lookupTable.lookup(rightValue));
 				Atom atom = dfac.getEQAtom(t1, t2);
 				atoms.add(atom);
 			}
@@ -199,13 +201,14 @@ public class MappingAnalyzer {
 	private Function getFunction(NullPredicate pred, LookupTable lookupTable) {
 		IValueExpression column = pred.getValueExpression();
 		
-		String name = lookupTable.lookup(column.toString());
-		Term t = dfac.getVariable(name);
+		String columnName = dbMetaData.getFormattedIdentifier(column.toString());
+		String variableName = lookupTable.lookup(columnName);
+		Term var = dfac.getVariable(variableName);
 		
 		if (pred.useIsNullOperator()) {
-			return dfac.getIsNullFunction(t);
+			return dfac.getIsNullFunction(var);
 		} else {
-			return dfac.getIsNotNullFunction(t);
+			return dfac.getIsNotNullFunction(var);
 		}		
 	}
 	
@@ -213,13 +216,15 @@ public class MappingAnalyzer {
 		IValueExpression left = pred.getValueExpressions()[0];
 		IValueExpression right = pred.getValueExpressions()[1];
 
-		String termLeftName = lookupTable.lookup(left.toString());
+		String leftValueName = dbMetaData.getFormattedIdentifier(left.toString());
+		String termLeftName = lookupTable.lookup(leftValueName);
 		Term t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
 		Term t2 = null;
 		if (right instanceof ReferenceValueExpression) {
-			termRightName = lookupTable.lookup(right.toString());
+			String rightValueName = dbMetaData.getFormattedIdentifier(right.toString());
+			termRightName = lookupTable.lookup(rightValueName);
 			t2 = dfac.getVariable(termRightName);
 		} else if (right instanceof Literal) {
 			Literal literal = (Literal) right;
@@ -299,10 +304,11 @@ public class MappingAnalyzer {
 		Term result = null;
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			String termName = lookupTable.lookup(var.getName());
-			if (termName == null)
+			String varName = dbMetaData.getFormattedIdentifier(var.getName());
+			String termName = lookupTable.lookup(varName);
+			if (termName == null) {
 				throw new RuntimeException(String.format("Variable %s not found. Make sure not to use wildecard in your SQL query, e.g., star *", var));
-
+			}
 			result = this.dfac.getVariable(termName);
 			// System.out.println(termName);
 			// var.setName(termName);
@@ -321,23 +327,23 @@ public class MappingAnalyzer {
 		return result;
 	}
 
-	private LookupTable createLookupTable(QueryTree queryTree, DBMetadata dbmetadata) {
-		LookupTable lookupTable = new LookupTable(dbmetadata);
+	private LookupTable createLookupTable(QueryTree queryTree) {
+		LookupTable lookupTable = new LookupTable();
 
 		// Collect all the possible column names from tables.
 		ArrayList<Relation> tableList = queryTree.getTableSet();
 		for (Relation table : tableList) {
-			String tableName = table.getName();
-
+			String tableName = dbMetaData.getFormattedIdentifier(table.getName());
 			DataDefinition def = dbMetaData.getDefinition(tableName);
-			if (def == null)
+			if (def == null) {
 				throw new RuntimeException("Definition not found for table: " + tableName);
+			}
 			int size = def.countAttribute();
 
 			String[] columnList = new String[2];
 			for (int i = 1; i <= size; i++) {
-				columnList[0] = dbMetaData.getAttributeName(tableName, i);
-				columnList[1] = dbMetaData.getFullQualifiedAttributeName(tableName, i);
+				columnList[0] = dbMetaData.getAttributeName(tableName, i); // get the simple attribute name
+				columnList[1] = dbMetaData.getFullQualifiedAttributeName(tableName, i); // get the full qualified attribute name 
 				lookupTable.add(columnList);
 			}
 		}
@@ -346,7 +352,7 @@ public class MappingAnalyzer {
 		ArrayList<String> aliasMap = queryTree.getAliasMap();
 		for (String alias : aliasMap) {
 			String[] reference = alias.split("=");
-			lookupTable.add(reference[0], reference[1]);
+			lookupTable.add(dbMetaData.getFormattedIdentifier(reference[0]), reference[1]);
 		}
 
 		return lookupTable;

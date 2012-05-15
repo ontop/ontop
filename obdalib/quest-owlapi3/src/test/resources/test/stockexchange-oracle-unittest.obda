@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY dc 'http://purl.org/dc/elements/1.1/'>
+   <!ENTITY swrl 'http://www.w3.org/2003/11/swrl#'>
+   <!ENTITY dctype 'http://purl.org/dc/dcmitype/Image'>
+   <!ENTITY foaf 'http://xmlns.com/foaf/0.1/'>
+   <!ENTITY swrlb 'http://www.w3.org/2003/11/swrlb#'>
+   <!ENTITY adolena 'http://ksg.meraka.co.za/adolena.owl#'>
+   <!ENTITY dcterms 'http://purl.org/dc/terms/'>
+]>
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:adolena="http://ksg.meraka.co.za/adolena.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
+    <mapping id="mapping-addresses">
+      <CQ string="Address(getAddressObj($id)),addressID(getAddressObj($id),$id),inStreet(getAddressObj($id),$street),hasNumber(getAddressObj($id),$number),inCity(getAddressObj($id),$city),inState(getAddressObj($id),$state),inCountry(getAddressObj($id),$country)"/>
+      <SQLQuery string="select id, street, number, city, state, country from address"/>
+    </mapping>
+    <mapping id="mapping-brokers">
+      <CQ string="StockBroker(getPersonObj($id)),firstName(getPersonObj($id),$name),lastName(getPersonObj($id),$lastname),dateOfBirth(getPersonObj($id),$dateofbirth),ssn(getPersonObj($id),$ssn)"/>
+      <SQLQuery string="select id, name, lastname, dateofbirth, ssn from broker"/>
+    </mapping>
+    <mapping id="mapping-broker-address">
+      <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+      <SQLQuery string="select id, addressid from broker"/>
+    </mapping>
+    <mapping id="mapping-investors">
+      <CQ string="Investor(getPersonObj($id)),firstName(getPersonObj($id),$name),lastName(getPersonObj($id),$lastname),dateOfBirth(getPersonObj($id),$dateofbirth),ssn(getPersonObj($id),$ssn)"/>
+      <SQLQuery string="select id, name, lastname, dateofbirth, ssn from client"/>
+    </mapping>
+    <mapping id="mapping-investor-address">
+      <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+      <SQLQuery string="select id, name, lastname, addressid from client"/>
+    </mapping>
+    <mapping id="mapping-companies">
+      <CQ string="Company(getCompanyObj($id)),companyName(getCompanyObj($id),$name),marketShares(getCompanyObj($id),$marketshares),netWorth(getCompanyObj($id),$networth)"/>
+      <SQLQuery string="select id, name, marketshares, networth from company"/>
+    </mapping>
+    <mapping id="mapping-company-addresses">
+      <CQ string="hasAddress(getCompanyObj($id),getAddressObj($addressid))"/>
+      <SQLQuery string="select id, addressid from company"/>
+    </mapping>
+    <mapping id="mapping-stocks">
+      <CQ string="Stock(getStockObj($id)),financialInstrumentID(getStockObj($id),$id),amountOfShares(getStockObj($id),$numberofshares),typeOfShares(getStockObj($id),$sharetype),stockDescription(getStockObj($id),http://www.w3.org/2000/01/rdf-schema#Literal($description,'en-US'))"/>
+      <SQLQuery string="select id, numberofshares, sharetype, description from stockinformation"/>
+    </mapping>
+    <mapping id="mapping-stockbooks">
+      <CQ string="StockExchangeList(getStockBookObj($date)),listdate(getStockBookObj($date),$date)"/>
+      <SQLQuery string="select distinct date from stockbooklist "/>
+    </mapping>
+    <mapping id="mapping-tradesOnBehalfOf-physical">
+      <CQ string="tradesOnBehalfOf(getPersonObj($brokerid),getPersonObj($clientid))"/>
+      <SQLQuery string="select brokerid, clientid from brokerworksfor where clientid IS NOT NULL"/>
+    </mapping>
+    <mapping id="mapping-tradesOnBehalfOf-legal">
+      <CQ string="tradesOnBehalfOf(getPersonObj($brokerid),getCompanyObj($companyid))"/>
+      <SQLQuery string="select brokerid, companyid from brokerworksfor where companyid IS NOT NULL"/>
+    </mapping>
+    <mapping id="mapping-transactions">
+      <CQ string="Transaction(getTransactionObj($id)),transactionID(getTransactionObj($id),$id),transactionDate(getTransactionObj($id),$date),amountOfTransaction(getTransactionObj($id),$amount)"/>
+      <SQLQuery string="select id, date, amount from transaction"/>
+    </mapping>
+    <mapping id="mapping-transaction-roles-persons">
+      <CQ string="isExecutedBy(getTransactionObj($id),getPersonObj($brokerid)),isExecutedFor(getTransactionObj($id),getPersonObj($forclientid)),involvesInstrument(getTransactionObj($id),getStockObj($stockid))"/>
+      <SQLQuery string="select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL"/>
+    </mapping>
+    <mapping id="mapping-transaction-roles-companies">
+      <CQ string="isExecutedBy(getTransactionObj($id),getPersonObj($brokerid)),isExecutedFor(getTransactionObj($id),getCompanyObj($forcompanyid)),involvesInstrument(getTransactionObj($id),getStockObj($stockid))"/>
+      <SQLQuery string="select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL"/>
+    </mapping>
+    <mapping id="mapping-stock-company">
+      <CQ string="belongsToCompany(getStockObj($id),getCompanyObj($companyid))"/>
+      <SQLQuery string="select id, companyid from stockinformation"/>
+    </mapping>
+    <mapping id="mapping-stock-listedin">
+      <CQ string="listsStock(getStockBookObj($date),getStockObj($stockid))"/>
+      <SQLQuery string="select date, stockid from stockbooklist"/>
+    </mapping>
+    <mapping id="mapping-dealer">
+      <CQ string="Dealer(getPersonObj($clientid))"/>
+      <SQLQuery string="select clientid from broker,client,brokerworksfor where client.id = broker.id and brokerid=broker.id and client.id=clientid"/>
+    </mapping>
+    <mapping id="mapping-offers">
+      <CQ string="Offer(getTransactionObj($id))"/>
+      <SQLQuery string="SELECT id FROM transaction WHERE type=true"/>
+    </mapping>                                                                                  
+  </mappings>
+  <dataSource URI="RandBStockExchange" databaseDriver="oracle.jdbc.driver.OracleDriver" databasePassword="obdaps83" databaseURL="jdbc:oracle:thin:@//localhost:1521/xe" databaseUsername="oracle" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
+  <SavedQueries>
+    <QueryGroup id="Simple queries">
+      <Query id="Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address ; &#xa;&#x9;&#x9; :addressID $id; &#xa;&#x9;&#x9; :inStreet $street; &#xa;&#x9;&#x9; :inCity $city;&#xa;&#x9;&#x9; :inCountry $country; &#xa;&#x9;&#x9; :inState $state;&#xa;&#x9;&#x9; :hasNumber $number.&#xa; } "/>
+      <Query id="Addresses-id991" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet 'Via Marconi'. &#xa;&#x9;&#x9;$x :inCity 'Bolzano'. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa;} "/>
+      <Query id="Persons-Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE { $x a :Person. &#xa;&#x9;&#x9;$x :firstName $fn. &#xa;&#x9;&#x9;$x :lastName $ln. &#xa;&#x9;&#x9;$x :hasAddress $address. &#xa;&#x9;&#x9;$address :inStreet $street. &#xa;&#x9;&#x9;$address :inCity $city. &#xa;&#x9;&#x9;$address :inCountry $country. } "/>
+      <Query id="StockTraders" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fn $ln $securitynumber WHERE {&#xa;&#x9;&#x9;$trader a :StockTrader. &#xa;&#x9;&#x9;$trader :firstName $fn. &#xa;&#x9;&#x9;$trader :lastName $ln. &#xa;&#x9;&#x9;$trader :ssn $securitynumber&#xa; } "/>
+    </QueryGroup>
+    <QueryGroup id="CQs">
+      <Query id="Brokers-Workfor-Themselfs" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum &#xa;WHERE { &#xa;$broker a :StockBroker;  &#xa;               :tradesOnBehalfOf $broker;&#xa;               :firstName $fname; &#xa;               :lastName $ln;&#xa;              :ssn $securitynum &#xa;} "/>
+      <Query id="Brokers-Workfor-Physical" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum WHERE { &#xa;&#x9;$member a :StockExchangeMember. &#xa;&#x9;$member :tradesOnBehalfOf $client1. &#xa;&#x9;$client1 a :PhysicalPerson. &#xa;&#x9;$member :firstName $fname. &#xa;&#x9;$member :lastName $ln. &#xa;&#x9;$member :ssn $securitynum&#xa; } "/>
+      <Query id="Brokers-Workfor-Legal" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum WHERE { &#xa;&#x9;$member a :StockExchangeMember. &#xa;&#x9;$member :tradesOnBehalfOf $client1. &#xa;&#x9;$client1 a :LegalPerson. &#xa;&#x9;$member :firstName $fname. &#xa;&#x9;$member :lastName $ln. &#xa;&#x9;$member :ssn $securitynum&#xa; } "/>
+      <Query id="Brokers-Workfor-Legal-Phisical" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $fname $ln $securitynum WHERE { &#xa;&#x9;$member a :StockExchangeMember. &#xa;&#x9;$member :tradesOnBehalfOf $client1. &#xa;&#x9;$client1 a :PhysicalPerson. &#xa;&#x9;$member :tradesOnBehalfOf $client2. &#xa;&#x9;$client2 a :LegalPerson. &#xa;&#x9;$member :firstName $fname. &#xa;&#x9;$member :lastName $ln. &#xa;&#x9;$member :ssn $securitynum &#xa;}&#xa;"/>
+      <Query id="Transactions-FinantialInstrument" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :FinantialInstrument.&#xa;} "/>
+      <Query id="transaction-stock-type" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $inst $type WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :Stock.&#xa;&#x9;&#x9;$inst :typeOfShares $type.&#xa;} "/>
+      <Query id="transaction-offer-stock" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $inst $type WHERE {      $x a :Transaction . &#xa;&#x9;&#x9;$x a :Offer.&#xa;&#x9;&#x9;$x :involvesInstrument $inst. &#xa;&#x9;&#x9;$inst a :Stock.&#xa;&#x9;&#x9;$inst :typeOfShares $type.&#xa;} "/>
+    </QueryGroup>
+    <QueryGroup id="Data types">
+      <Query id="Literal-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :stockDescription &quot;Text description 1&quot;. } "/>
+      <Query id="Literal-lang-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :stockDescription &quot;Text description 1&quot;@en-US. } "/>
+      <Query id="String-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity &quot;Bolzano&quot;. } "/>
+      <Query id="String-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity Bolzano. } "/>
+      <Query id="String-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string>. } "/>
+      <Query id="Integer-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber &quot;3&quot;. } "/>
+      <Query id="Integer-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber 3. } "/>
+      <Query id="Integer-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber &quot;3&quot;^^&lt;http://www.w3.org/2001/XMLSchema#integer>. } "/>
+      <Query id="PositiveInteger-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber &quot;+3&quot;. } "/>
+      <Query id="PositiveInteger-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber +3. } "/>
+      <Query id="PositiveInteger-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber &quot;+3&quot;^^&lt;http://www.w3.org/2001/XMLSchema#integer>. } "/>
+      <Query id="NegativeInteger-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber &quot;-3&quot;. } "/>
+      <Query id="NegativeInteger-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber -3. } "/>
+      <Query id="NegativeInteger-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber &quot;-3&quot;^^&lt;http://www.w3.org/2001/XMLSchema#integer>. } "/>
+      <Query id="Decimal-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction &quot;12.6&quot;. } "/>
+      <Query id="Decimal-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction 12.6. } "/>
+      <Query id="Decimal-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction &quot;12.6&quot;^^&lt;http://www.w3.org/2001/XMLSchema#decimal>. } "/>
+      <Query id="PositiveDecimal-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction &quot;+1667.0092&quot;. } "/>
+      <Query id="PositiveDecimal-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction +1667.0092. } "/>
+      <Query id="PositiveDecimal-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction &quot;+1667.0092&quot;^^&lt;http://www.w3.org/2001/XMLSchema#decimal>. } "/>
+      <Query id="NegativeDecimal-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction &quot;-2.349&quot;. } "/>
+      <Query id="NegativeDecimal-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction -2.349. } "/>
+      <Query id="NegativeDecimal-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction &quot;-2.349&quot;^^&lt;http://www.w3.org/2001/XMLSchema#decimal>. } "/>
+      <Query id="Double-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth &quot;1.2345678e+03&quot;. } "/>
+      <Query id="Double-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth 1.2345678e+03. } "/>
+      <Query id="Double-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth &quot;1.2345678e+03&quot;^^&lt;http://www.w3.org/2001/XMLSchema#double>. } "/>
+      <Query id="PositiveDouble-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth &quot;+1.2345678e+03&quot;. } "/>
+      <Query id="PositiveDouble-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth +1.2345678e+03. } "/>
+      <Query id="PositiveDouble-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth &quot;+1.2345678e+03&quot;^^&lt;http://www.w3.org/2001/XMLSchema#double>. } "/>
+      <Query id="NegativeDouble-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth &quot;-1.2345678e+03&quot;. } "/>
+      <Query id="NegativeDouble-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth -1.2345678e+03. } "/>
+      <Query id="NegativeDouble-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth &quot;-1.2345678e+03&quot;^^&lt;http://www.w3.org/2001/XMLSchema#double>. } "/>
+      <Query id="DateTime-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate &quot;2008-04-02&quot;. } "/>
+      <Query id="DateTime2-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate &quot;2008-04-02 00:00:00.0&quot;. } "/>
+      <Query id="DateTime3-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate &quot;2008-04-02T00:00:00Z&quot;. } "/>
+      <Query id="DateTime-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate 2008-04-02. } "/>
+      <Query id="DateTime2-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate 2008-04-02 00:00:00.0. } "/>
+      <Query id="DateTime3-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate 2008-04-02T00:00:00Z. } "/>
+      <Query id="DateTime-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate &quot;2008-04-02&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime>. } "/>
+      <Query id="DateTime2-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate &quot;2008-04-02 00:00:00.0&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime>. } "/>
+      <Query id="DateTime3-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate &quot;2008-04-02T00:00:00Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime>. } "/>
+      <Query id="Boolean-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;true&quot;. } "/>
+      <Query id="Boolean2-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;TRUE&quot;. } "/>
+      <Query id="Boolean3-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;t&quot;. } "/>
+      <Query id="Boolean4-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;1&quot;. } "/>
+      <Query id="Boolean-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares true. } "/>
+      <Query id="Boolean2-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares TRUE. } "/>
+      <Query id="Boolean3-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares t. } "/>
+      <Query id="Boolean4-no-quotes" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares 1. } "/>
+      <Query id="Boolean-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;true&quot;^^&lt;http://www.w3.org/2001/XMLSchema#boolean>. } "/>
+      <Query id="Boolean2-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;TRUE&quot;^^&lt;http://www.w3.org/2001/XMLSchema#boolean>. } "/>
+      <Query id="Boolean3-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;t&quot;^^&lt;http://www.w3.org/2001/XMLSchema#boolean>. } "/>
+      <Query id="Boolean4-xsd" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares &quot;1&quot;^^&lt;http://www.w3.org/2001/XMLSchema#boolean>. } "/>
+    </QueryGroup>
+    <QueryGroup id="Filters">
+      <Query id="String_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity $city. FILTER ( $city = &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> ). }"/>
+      <Query id="String_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :inCity $city. FILTER ( $city != &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> ). }"/>
+      <Query id="Integer_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber $number. FILTER ( $number = 3 ). } "/>
+      <Query id="Integer_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber $number. FILTER ( $number != 3 ). } "/>
+      <Query id="Integer_GT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber $number. FILTER ( $number > 3 ). } "/>
+      <Query id="Integer_GTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber $number. FILTER ( $number >= 3 ). } "/>
+      <Query id="Integer_LT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber $number. FILTER ( $number &lt; 3 ). } "/>
+      <Query id="Integer_LTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $street WHERE { $x a :Address; :inStreet $street; :hasNumber $number. FILTER ( $number &lt;= 3 ). } "/>
+      <Query id="Decimal_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction $amount. FILTER ( $amount = 12.6 ). } "/>
+      <Query id="Decimal_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction $amount. FILTER ( $amount != 12.6 ). } "/>
+      <Query id="Decimal_GT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction $amount. FILTER ( $amount > 12.6 ). } "/>
+      <Query id="Decimal_GTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction $amount. FILTER ( $amount >= 12.6 ). } "/>
+      <Query id="Decimal_LT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction $amount. FILTER ( $amount &lt; 12.6 ). } "/>
+      <Query id="Decimal_LTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $date WHERE { $x a :Transaction; :transactionDate $date; :amountOfTransaction $amount. FILTER ( $amount &lt;= 12.6 ). } "/>
+      <Query id="Double_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth $netWorth. FILTER ( $netWorth = 1.2345678e+03 ). } "/>
+      <Query id="Double_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth $netWorth. FILTER ( $netWorth != 1.2345678e+03 ). } "/>
+      <Query id="Double_GT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth $netWorth. FILTER ( $netWorth > 1.2345678e+03 ). } "/>
+      <Query id="Double_GTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth $netWorth. FILTER ( $netWorth >= 1.2345678e+03 ). } "/>
+      <Query id="Double_LT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth $netWorth. FILTER ( $netWorth &lt; 1.2345678e+03 ). } "/>
+      <Query id="Double_LTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $name WHERE { $x a :Company; :companyName $name; :netWorth $netWorth. FILTER ( $netWorth &lt;= 1.2345678e+03 ). } "/>
+      <Query id="DateTime_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate = &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
+      <Query id="DateTime_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate != &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
+      <Query id="DateTime_GT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate > &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
+      <Query id="DateTime_GTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate >= &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
+      <Query id="DateTime_LT" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate &lt; &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
+      <Query id="DateTime_LTE" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $id WHERE { $x a :Transaction; :transactionID $id; :transactionDate $transDate. FILTER ( $transDate &lt;= &quot;2008-04-02T00:00:00.0Z&quot;^^&lt;http://www.w3.org/2001/XMLSchema#dateTime> ). } "/>
+      <Query id="Boolean_EQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares $type. FILTER ( $type = true ). } "/>
+      <Query id="Boolean_NEQ" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount WHERE { $x a :Stock; :amountOfShares $amount; :typeOfShares $type. FILTER ( $type != true ). } "/>
+      <Query id="Literal_LangMatches" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT $x $amount $description WHERE { $x a :Stock; :amountOfShares $amount; :stockDescription $description. FILTER langMatches ( lang($description), &quot;en-US&quot; ). }"/>
+    </QueryGroup>
+  </SavedQueries>                                                                                                          
+</OBDA>

@@ -101,9 +101,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private void collectPrimaryKeyData() {
 		for (CQIE mapping : unfoldingProgram.getRules()) {
 			for (Atom newatom : mapping.getBody()) {
-				if (newatom.getPredicate() instanceof BooleanOperationPredicate)
+				Predicate newAtomPredicate = newatom.getPredicate();
+				if (newAtomPredicate instanceof BooleanOperationPredicate) {
 					continue;
-				DataDefinition def = this.metadata.getDefinition(newatom.getPredicate().toString());
+				}
+				String newAtomName = metadata.getFormattedIdentifier(newAtomPredicate.toString());
+				DataDefinition def = metadata.getDefinition(newAtomName);
 				List<Integer> pkeyIdx = new LinkedList<Integer>();
 				for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
 					Attribute column = def.getAttribute(columnidx);
@@ -248,13 +251,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		boolean isDBQuery = true;
 		for (Atom atom : cqie.getBody()) {
 			Predicate predicate = atom.getPredicate();
-			if (predicate instanceof BooleanOperationPredicate)
+			if (predicate instanceof BooleanOperationPredicate) {
 				continue;
-			if (metadata.getDefinition(predicate.getName().toString()) == null) {
+			}
+			String tableName = metadata.getFormattedIdentifier(predicate.toString());
+			if (metadata.getDefinition(tableName) == null) {
 				isDBQuery = false;
 				break;
 			}
-
 		}
 		return isDBQuery;
 	}

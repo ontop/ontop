@@ -28,8 +28,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	@Override
 	public void setUp() {
 		metadata = new DBMetadata();
-		TableDefinition table = new TableDefinition();
-		table.setName("TABLE");
+		TableDefinition table = new TableDefinition("TABLE");
 		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true));
 		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false));
 		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false));
@@ -37,8 +36,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		metadata.add(table);
 		
 		
-		table = new TableDefinition();
-		table.setName("TABLE2");
+		table = new TableDefinition("TABLE2");
 		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true));
 		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false));
 		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false));
@@ -76,9 +74,6 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body = fac.getAtom(fac.getPredicate("TABLE", 4), bodyTerms);
 		rule = fac.getCQIE(head, body);
 		unfoldingProgram.appendRule(rule);
-		
-		
-		
 		
 		head = fac.getAtom(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
 		bodyTerms = new LinkedList<Term>();

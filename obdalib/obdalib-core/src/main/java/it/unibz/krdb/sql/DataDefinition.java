@@ -8,15 +8,21 @@ import java.util.HashMap;
 
 public abstract class DataDefinition implements Serializable {
 
+	private static final long serialVersionUID = 212770563440334334L;
+
 	protected String name;
 
 	protected HashMap<Integer, Attribute> attributes = new HashMap<Integer, Attribute>();
 
-	public DataDefinition() {
-
+	public DataDefinition() { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
+		// NO-OP
+	}
+	
+	public DataDefinition(String name) {
+		this.name = name;
 	}
 
-	public void setName(String name) {
+	public void setName(String name) { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
 		this.name = name;
 	}
 

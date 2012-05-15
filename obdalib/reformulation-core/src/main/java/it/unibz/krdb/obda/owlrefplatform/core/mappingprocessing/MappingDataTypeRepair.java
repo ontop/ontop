@@ -104,7 +104,8 @@ public class MappingDataTypeRepair {
         Atom atom = (Atom) o[0];
         Integer pos = (Integer) o[1];
         
-        String tableName = atom.getPredicate().toString();
+        Predicate functionSymbol = atom.getPredicate();
+        String tableName = metadata.getFormattedIdentifier(functionSymbol.toString());
         DataDefinition tableMetadata = metadata.getDefinition(tableName);
         
         Attribute attribute = tableMetadata.getAttribute(pos);

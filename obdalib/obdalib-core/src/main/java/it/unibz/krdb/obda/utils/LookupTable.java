@@ -1,14 +1,12 @@
 package it.unibz.krdb.obda.utils;
 
-import it.unibz.krdb.sql.DBMetadata;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 
+ * A utility class to map database column names to new variables.
  */
 public class LookupTable {
 	
@@ -28,11 +26,9 @@ public class LookupTable {
 	 * A special number that connects one or more entries to its alternative name.
 	 */
 	private int index = 1;
-
-	private DBMetadata dbmetadata;
 	
-	public LookupTable(DBMetadata dbmetadata) {
-		this.dbmetadata = dbmetadata;
+	public LookupTable() {
+		// NO-OP
 	}
 	
 	/**
@@ -46,8 +42,6 @@ public class LookupTable {
 		if (entry == null) {
 			return;
 		}
-		entry = dbmetadata.getFormattedIdentifier(entry);
-
 		log.put(entry, index);
 		register();
 		increaseIndex();
@@ -63,7 +57,7 @@ public class LookupTable {
 	public void add(String[] entries) {
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				log.put(dbmetadata.getFormattedIdentifier(entries[i]), index);
+				log.put(entries[i], index);
 			}
 		}
 		register();
@@ -94,14 +88,9 @@ public class LookupTable {
 	 * 			a new index.
 	 */
 	public void add(String entry, String reference) {
-		
-		
 		if (entry == null) {
 			return;
 		}
-		
-		entry = dbmetadata.getFormattedIdentifier(entry);
-		reference = dbmetadata.getFormattedIdentifier(reference);
 		
 		if (!log.containsKey(reference)) {
 			add(entry);
@@ -116,8 +105,6 @@ public class LookupTable {
 	 * Returns the alternative name for the given entry.
 	 */
 	public String lookup(String entry) {
-		entry = dbmetadata.getFormattedIdentifier(entry);
-		
 		if (log.containsKey(entry)) {
 			Integer index = log.get(entry);
 			return retrieve(index);
@@ -125,15 +112,11 @@ public class LookupTable {
 		return null;
 	}
 	
-	
-	
 	/**
 	 * Removes the given entry from the lookup table. This action follows the
 	 * removal of the alternative name, if necessary.
 	 */
-	public void remove(String entry) {
-		entry = dbmetadata.getFormattedIdentifier(entry);
-		
+	public void remove(String entry) {	
 		log.remove(entry);
 		unregister();
 	}
@@ -144,7 +127,7 @@ public class LookupTable {
 	 */
 	public void remove(String[] entries) {
 		for (int i = 0; i < entries.length; i++) {
-			log.remove(dbmetadata.getFormattedIdentifier(entries[i]));
+			log.remove(entries[i]);
 		}
 		unregister();
 	}
@@ -169,9 +152,6 @@ public class LookupTable {
 		if (!log.containsKey(entry) || !log.containsKey(reference)) {
 			return false;
 		}
-		entry = dbmetadata.getFormattedIdentifier(entry);
-		reference = dbmetadata.getFormattedIdentifier(reference);
-
 		String name = lookup(reference);
 		Integer index = log.get(entry);
 		update(index, name);

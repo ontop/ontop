@@ -74,13 +74,8 @@ public class SQLQueryTranslator {
 			String columnName = columns[i].trim();
 			if (columnName.contains(" as ")) {
 				columnName = columnName.split(" as ")[1].trim();
-			}
-			
-			columnName = dbMetaData.getFormattedIdentifier(columnName);
-			
-			
-
-			
+			}			
+			columnName = dbMetaData.getFormattedIdentifier(columnName);			
 			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
 		}
 		return viewDefinition;

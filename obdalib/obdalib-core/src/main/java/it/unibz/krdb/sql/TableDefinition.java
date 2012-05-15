@@ -4,6 +4,12 @@ import it.unibz.krdb.sql.api.Attribute;
 
 public class TableDefinition extends DataDefinition {
 
+	private static final long serialVersionUID = 3981063635965170154L;
+
+	public TableDefinition(String name) {
+		super(name);
+	}
+	
 	@Override
 	public String toString() {
 		StringBuffer bf = new StringBuffer();

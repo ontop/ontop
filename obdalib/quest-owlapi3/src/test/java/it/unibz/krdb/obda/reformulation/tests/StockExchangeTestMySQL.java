@@ -183,7 +183,7 @@ public class StockExchangeTestMySQL extends TestCase {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-postgres.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-mysql.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();

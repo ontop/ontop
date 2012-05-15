@@ -451,8 +451,7 @@ public class SQL99ParserTest extends TestCase {
 
 		DBMetadata metadata = new DBMetadata();
 
-		TableDefinition tableStudent = new TableDefinition();
-		tableStudent.setName("student");
+		TableDefinition tableStudent = new TableDefinition("student");
 		tableStudent.setAttribute(1,
 				new Attribute("id", Types.INTEGER, true, 0));
 		tableStudent.setAttribute(2, new Attribute("name", Types.VARCHAR,
@@ -463,8 +462,7 @@ public class SQL99ParserTest extends TestCase {
 				Types.TIMESTAMP, false, 0));
 		metadata.add(tableStudent);
 
-		TableDefinition tableGrade = new TableDefinition();
-		tableGrade.setName("grade");
+		TableDefinition tableGrade = new TableDefinition("grade");
 		tableGrade.setAttribute(1, new Attribute("sm_id", Types.INTEGER, false,
 				0));
 		tableGrade.setAttribute(2, new Attribute("st_id", Types.INTEGER, false,
@@ -478,24 +476,21 @@ public class SQL99ParserTest extends TestCase {
 				false, 0));
 		metadata.add(tableGrade);
 
-		TableDefinition tableSemester = new TableDefinition();
-		tableSemester.setName("semester");
+		TableDefinition tableSemester = new TableDefinition("semester");
 		tableSemester.setAttribute(1, new Attribute("id", Types.INTEGER, true,
 				0));
 		tableSemester.setAttribute(2, new Attribute("semester", Types.INTEGER,
 				true, 0));
 		metadata.add(tableSemester);
 
-		TableDefinition tableErasmus = new TableDefinition();
-		tableErasmus.setName("erasmus");
+		TableDefinition tableErasmus = new TableDefinition("erasmus");
 		tableErasmus.setAttribute(1,
 				new Attribute("id", Types.INTEGER, true, 0));
 		tableErasmus.setAttribute(2, new Attribute("name", Types.VARCHAR,
 				false, 0));
 		metadata.add(tableErasmus);
 
-		TableDefinition tableTax = new TableDefinition();
-		tableTax.setName("tax");
+		TableDefinition tableTax = new TableDefinition("tax");
 		tableTax.setAttribute(1,
 				new Attribute("payee", Types.VARCHAR, false, 0));
 		tableTax.setAttribute(2,
