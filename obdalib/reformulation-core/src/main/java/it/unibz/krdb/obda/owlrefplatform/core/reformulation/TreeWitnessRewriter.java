@@ -9,16 +9,17 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.xerces.util.URI;
-import org.apache.xerces.util.URI.MalformedURIException;
+//import org.apache.xerces.util.URI;
+//import org.apache.xerces.util.URI.MalformedURIException;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.ClassExpressionType;
-import org.semanticweb.owlapi.model.IRI;
+//import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -61,8 +62,28 @@ public class TreeWitnessRewriter {
 		b.add(body2);
 		return fac.getCQIE(head, b);		
 	}
+	
+	private static Atom getAtom(URI name, List<Term> terms) 
+	{
+		return fac.getAtom(fac.getPredicate(name, terms.size()), terms);
+	}
+	
+	private static Atom getAtom(URI name, Term term) 
+	{
+		List<Term> terms = new LinkedList<Term>();
+		terms.add(term);
+		return fac.getAtom(fac.getPredicate(name, 1), terms);
+	}
+	
+	private static Atom getAtom(URI name, Term term1, Term term2) 
+	{
+		List<Term> terms = new LinkedList<Term>();
+		terms.add(term1);
+		terms.add(term2);
+		return fac.getAtom(fac.getPredicate(name, 1), terms);
+	}
 
-	public DatalogProgram getRewriting(Set<TreeWitness> tws) throws MalformedURIException
+	public DatalogProgram getRewriting(Set<TreeWitness> tws) //throws MalformedURIException
 	{
 		DatalogProgram q = fac.getDatalogProgram(); //(cqie.getHead().getPredicate());
 		
@@ -70,12 +91,12 @@ public class TreeWitnessRewriter {
 		int Q = 0;
 		for (Atom a: cqie.getBody())
 			if (a.getArity() == 2)
-				mainbody.add(new Atom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
+				mainbody.add(getAtom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
 		
 		// if no binary predicates
 		if (mainbody.size() == 0)
 			for (Atom a: cqie.getBody())
-				mainbody.add(new Atom(getExtName(a.getPredicate().getName()), a.getTerms()));			
+				mainbody.add(getAtom(getExtName(a.getPredicate().getName()), a.getTerms()));			
 		
 		q.appendRule(fac.getCQIE(cqie.getHead(), mainbody));
 	
@@ -86,12 +107,12 @@ public class TreeWitnessRewriter {
 				URI Qname = getQName(a.getPredicate().getName(), ++Q);
 				// TODO: groups for pairs of terms
 				List<Atom> group = new LinkedList<Atom>();
-				group.add(new Atom(getExtName(a.getPredicate().getName()), a.getTerms()));
+				group.add(getAtom(getExtName(a.getPredicate().getName()), a.getTerms()));
 				for (Atom aa: cqie.getBody())
 					if ((aa.getArity() == 1) && a.getTerms().contains(aa.getTerm(0)))
-						group.add(new Atom(getExtName(aa.getPredicate().getName()), aa.getTerms()));
+						group.add(getAtom(getExtName(aa.getPredicate().getName()), aa.getTerms()));
 					
-				q.apendRule(fac.getCQIE(fac.getAtom(Qname, a.getTerms()), group));
+				q.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), group));
 			
 				for (TreeWitness tw: tws)
 					if (tw.getDomain().containsAll(a.getTerms()))
@@ -100,14 +121,14 @@ public class TreeWitnessRewriter {
 						List<Atom> twf = new LinkedList<Atom>();
 						List<Term> roots = new LinkedList<Term>(tw.getRoots());
 						Term r0 = roots.get(0);
-						twf.add(fac.getAtom(getExtName(tw.getGenerator()), r0));
+						twf.add(getAtom(getExtName(tw.getGenerator()), r0));
 						for (Term rt: roots)
 							if (!rt.equals(roots.get(0)))
-								twf.add(fac.getAtom(new URI("http://EQ"), rt, r0));
+								twf.add(getAtom(new URI("http://EQ"), rt, r0));
 						for (OWLClassExpression c: tw.getRootType())
-							twf.add(fac.getAtom(getExtName(new URI(c.asOWLClass().getIRI().toString())), r0));
+							twf.add(getAtom(getExtName(new URI(c.asOWLClass().getIRI().toString())), r0));
 						
-						q.appendRule(fac.getCQIE(fac.getAtom(Qname, a.getTerms()), twf));
+						q.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), twf));
 					}
 			}
 		
@@ -123,7 +144,7 @@ public class TreeWitnessRewriter {
 	}
 	
 	
-	public List<CQIE> getExtPredicates(Set<PropertySomeClassRestriction> gencon) throws MalformedURIException
+	public List<CQIE> getExtPredicates(Set<PropertySomeClassRestriction> gencon) //throws MalformedURIException
 	{
 		List<CQIE> list = new LinkedList<CQIE>();
 		Set<Predicate> exts = new HashSet<Predicate>();
@@ -139,23 +160,23 @@ public class TreeWitnessRewriter {
 		for (PropertySomeClassRestriction some: gencon)
 		{
 			URI uri = getExtName(some);
-			Term x = new Variable("x");
+			Term x = fac.getVariable("x");
 			
 			for (OWLClass c: r.getClasses())
 				if (!c.isOWLNothing() && r.isSubsumed(c, some))
 				{
 					//System.out.println("EXT COMPUTE SUBCLASSES: " + c);
-					list.add(getCQIE(new Atom(uri, x), new Atom(new URI(c.getIRI().toString()), x)));
+					list.add(getCQIE(getAtom(uri, x), getAtom(new URI(c.getIRI().toString()), x)));
 				}
 			
 			{
-				Term w = new Variable("w");
+				Term w = fac.getVariable("w");
 				Atom ra = getRoleAtom(some.getProperty(), x, w);
 				exts.add(ra.getPredicate());
-				ra.setPredicate(new Predicate(getExtName(ra.getPredicate().getName()), 2));
+				ra.setPredicate(fac.getPredicate(getExtName(ra.getPredicate().getName()), 2));
 				//System.out.println(ra);
 				if(r.isSubsumed(f.getOWLObjectSomeValuesFrom(some.getProperty(), f.getOWLThing()), some))
-					list.add(getCQIE(new Atom(uri, x), ra));
+					list.add(getCQIE(getAtom(uri, x), ra));
 				//else
 				//{
 				//	OWLClass ca = some.getFiller().asOWLClass();
@@ -187,23 +208,23 @@ public class TreeWitnessRewriter {
 			{
 				URI ext = getExtName(pred.getName());
 				OWLClass ac = f.getOWLClass(pred.getIRI());
-				Term x = new Variable("x");
+				Term x = fac.getVariable("x");
 				//list.add(getCQIE(new Atom(ext, x), new Atom(a.getPredicate().getName(), x)));
 				
 				for (OWLClass c: r.getClasses())
 					if (!c.isOWLNothing() && r.isSubsumed(c, ac))
-						list.add(getCQIE(new Atom(ext, x), new Atom(new URI(c.getIRI().toString()), x)));
+						list.add(getCQIE(getAtom(ext, x), getAtom(new URI(c.getIRI().toString()), x)));
 				
 				for (OWLObjectPropertyExpression p: r.getProperties())
 					if (!p.isOWLBottomObjectProperty() && r.isSubsumed(f.getOWLObjectSomeValuesFrom(p, f.getOWLThing()), ac))
-						list.add(getCQIE(new Atom(ext, x), getRoleAtom(p, x, new Variable("w"))));						
+						list.add(getCQIE(getAtom(ext, x), getRoleAtom(p, x, fac.getVariable("w"))));						
 			}
 			else if (pred.getArity() == 2)
 			{
 				URI ext = getExtName(pred.getName());
 				OWLObjectProperty pa = f.getOWLObjectProperty(pred.getIRI());
-				Term x = new Variable("x");
-				Term y = new Variable("y");
+				Term x = fac.getVariable("x");
+				Term y = fac.getVariable("y");
 				//list.add(getCQIE(new Atom(ext, x, y), new Atom(a.getPredicate().getName(), x, y)));
 				
 				for (OWLObjectPropertyExpression p: r.getProperties())
@@ -215,7 +236,7 @@ public class TreeWitnessRewriter {
 						//	System.out.println("INVERSE " + pi + " OF " + a.getPredicate() + ": NO EXTRA RULE GENERATED");
 						//	continue;
 						//}
-						list.add(getCQIE(new Atom(ext, x, y), getRoleAtom(p, x, y)));
+						list.add(getCQIE(getAtom(ext, x, y), getRoleAtom(p, x, y)));
 					}
 			}
 		}
@@ -223,7 +244,7 @@ public class TreeWitnessRewriter {
 		return list;
 	}
 	
-	private static URI getExtName(URI name) throws MalformedURIException 
+	private static URI getExtName(URI name) //throws MalformedURIException 
 	{
 		String s = name.toString();
 		URI uri = new URI(s);
@@ -231,7 +252,7 @@ public class TreeWitnessRewriter {
 		return uri;
 	}
 
-	private static URI getQName(URI name, int pos) throws MalformedURIException 
+	private static URI getQName(URI name, int pos) //throws MalformedURIException 
 	{
 		String s = name.toString();
 		URI uri = new URI(s);
@@ -239,7 +260,7 @@ public class TreeWitnessRewriter {
 		return uri;
 	}
 
-	private static URI getExtName(PropertySomeClassRestriction some) throws MalformedURIException 
+	private static URI getExtName(PropertySomeClassRestriction some) //throws MalformedURIException 
 	{
 		OWLObjectPropertyExpression p = some.getProperty();
 		boolean inverse = false;
@@ -256,17 +277,17 @@ public class TreeWitnessRewriter {
 		return uri;
 	}
 
-	private static Atom getRoleAtom(OWLObjectPropertyExpression p, Term t1, Term t2) throws MalformedURIException
+	private static Atom getRoleAtom(OWLObjectPropertyExpression p, Term t1, Term t2) //throws MalformedURIException
 	{
 		if (!p.isAnonymous())
 		{
 			if (!p.isOWLBottomObjectProperty())
-				return new Atom(new URI(p.asOWLObjectProperty().getIRI().toString()), t1, t2);
+				return getAtom(new URI(p.asOWLObjectProperty().getIRI().toString()), t1, t2);
 		}
 		else 
 		{ 
 			OWLObjectPropertyExpression pi = p.getInverseProperty().getSimplified();
-			return new Atom(new URI(pi.asOWLObjectProperty().getIRI().toString()), t2, t1);
+			return getAtom(new URI(pi.asOWLObjectProperty().getIRI().toString()), t2, t1);
 		}
 		return null;
 	}
