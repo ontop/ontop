@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -290,28 +291,35 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+
 		ResultSet rsTables = null;
 		try {
 			rsTables = md.getTables(null, null, null, new String[] { "TABLE" });
 			while (rsTables.next()) {
+				Set<String> tableColumns = new HashSet<String>();
+
 				final String tblCatalog = rsTables.getString("TABLE_CAT");
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 
+				TableDefinition td = new TableDefinition(tblName);
+				
 				ResultSet rsColumns = null;
 				try {
 					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
-
-					/* Make sure that the values that stored inside the DBMetadata have 
-					 * proper lexical representation. */
-					TableDefinition td = new TableDefinition(tblName);
 					for (int pos = 1; rsColumns.next(); pos++) {
-						td.setAttribute(pos, new Attribute(
-								rsColumns.getString("COLUMN_NAME"), // column name
-								rsColumns.getInt("DATA_TYPE"),  // column datatype
-								primaryKeys.contains(rsColumns.getString("COLUMN_NAME")), // is primary key
-								rsColumns.getInt("NULLABLE"))); // is nullable
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
+						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final int isNullable = rsColumns.getInt("NULLABLE");						
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isNullable));
+						
+						// Check if the columns are unique regardless their letter cases
+						if (!tableColumns.add(columnName.toLowerCase())) {
+							// if exist
+							throw new RuntimeException("The system cannot process duplicate table columns!");
+						}
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);
@@ -330,28 +338,35 @@ public class JDBCConnectionManager {
 	 */
 	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
+		
 		Statement stmt = null;
 		ResultSet rsTables = null;
 		try {
 			stmt = conn.createStatement();
 			rsTables = stmt.executeQuery("select object_name from user_objects where object_type = 'TABLE' and NOT object_name LIKE 'BIN$%'");
 			while (rsTables.next()) {
+				Set<String> tableColumns = new HashSet<String>();
+
 				final String tblName = rsTables.getString("object_name");
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, null, null, tblName);
 
+				TableDefinition td = new TableDefinition(tblName);
+				
 				ResultSet rsColumns = null;
 				try {
 					rsColumns = md.getColumns(null, null, tblName, null);
-					
-					/* Make sure that the values that stored inside the DBMetadata have 
-					 * proper lexical representation. */
-					TableDefinition td = new TableDefinition(tblName);
 					for (int pos = 1; rsColumns.next(); pos++) {
-						td.setAttribute(pos, new Attribute(
-								rsColumns.getString("COLUMN_NAME"), // column name
-								rsColumns.getInt("DATA_TYPE"),  // column datatype
-								primaryKeys.contains(rsColumns.getString("COLUMN_NAME")), // is primary key
-								rsColumns.getInt("NULLABLE"))); // is nullable
+						final String columnName = rsColumns.getString("COLUMN_NAME");
+						final int dataType = rsColumns.getInt("DATA_TYPE");
+						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+						final int isNullable = rsColumns.getInt("NULLABLE");						
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isNullable));
+						
+						// Check if the columns are unique regardless their letter cases
+						if (!tableColumns.add(columnName.toLowerCase())) {
+							// if exist
+							throw new RuntimeException("The system cannot process duplicate table columns!");
+						}
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);
