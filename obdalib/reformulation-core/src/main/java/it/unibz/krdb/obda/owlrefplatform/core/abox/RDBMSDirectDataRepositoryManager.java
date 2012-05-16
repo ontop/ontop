@@ -73,28 +73,28 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	private static OBDADataFactory obdaFactory = OBDADataFactoryImpl.getInstance();
 
-	private final String strtabledata = "quest_%s";
+	private final String strtabledata = "QUEST_%s";
 
-	final String strtablemetada = "quest_metadata_direct_mapping";
+	final String strtablemetada = "QUEST_METADATA_DIRECT_MAPPING";
 
-	final String strcreate_table_class = "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000))";
+	final String strcreate_table_class = "CREATE TABLE " + strtabledata + " (TERM0 VARCHAR(1000))";
 
-	final String strcreate_table_property = "CREATE TABLE " + strtabledata + " (term0 VARCHAR(1000), term1 VARCHAR(1000))";
+	final String strcreate_table_property = "CREATE TABLE " + strtabledata + " (TERM0 VARCHAR(1000), TERM1 VARCHAR(1000))";
 
-	final String strcreate_index_class = "CREATE INDEX idx%s ON " + strtabledata + " (term0)";
+	final String strcreate_index_class = "CREATE INDEX IDX%s ON " + strtabledata + " (TERM0)";
 
-	final String strcreate_index_property_1 = "CREATE INDEX idx1%s ON " + strtabledata + " (term0, term1)";
+	final String strcreate_index_property_1 = "CREATE INDEX IDX1%s ON " + strtabledata + " (TERM0, TERM1)";
 
-	final String strcreate_index_property_2 = "CREATE INDEX idx2%s ON " + strtabledata + " (term1, term0)";
+	final String strcreate_index_property_2 = "CREATE INDEX IDX2%s ON " + strtabledata + " (TERM1, TERM0)";
 
-	final String strdrop_index_class = "DROP INDEX idx%s";
+	final String strdrop_index_class = "DROP INDEX IDX%s";
 
-	final String strdrop_index_property_1 = "DROP INDEX idx1%s";
+	final String strdrop_index_property_1 = "DROP INDEX IDX1%s";
 
-	final String strdrop_index_property_2 = "DROP INDEX idx2%s";
+	final String strdrop_index_property_2 = "DROP INDEX IDX2%s";
 
 	final String strcreate_meta_table = "CREATE TABLE " + strtablemetada
-			+ " (uri VARCHAR(1000) NOT NULL, type VARCHAR(1000) NOT NULL, tablename VARCHAR(1000) NOT NULL)";
+			+ " (URI VARCHAR(1000) NOT NULL, TYPE VARCHAR(1000) NOT NULL, TABLENAME VARCHAR(1000) NOT NULL)";
 
 	final String strinsert_meta_table = "INSERT INTO " + strtablemetada + " VALUES ('%s', '%s', '%s')";
 
@@ -102,9 +102,9 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	final String strinsert_table_property = "INSERT INTO " + strtabledata + " VALUES ('%s', '%s')";
 
-	final String strselect_table_class = "SELECT term0 FROM " + strtabledata + "";
+	final String strselect_table_class = "SELECT TERM0 FROM " + strtabledata + "";
 
-	final String strselect_table_property = "SELECT term0, term1 FROM " + strtabledata + "";
+	final String strselect_table_property = "SELECT TERM0, TERM1 FROM " + strtabledata + "";
 
 	final String strdrop_table_class = "DROP TABLE " + strtabledata + "";
 
@@ -112,7 +112,7 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 
 	final String stranalyze = "ANALYZE";
 
-	final String strselect_meta_table = "SELECT uri, type, tablename FROM " + strtablemetada + "";
+	final String strselect_meta_table = "SELECT URI, TYPE, TABLENAME FROM " + strtablemetada + "";
 
 	private Set<Predicate> vocabulary;
 
@@ -502,14 +502,14 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			OBDAMappingAxiom map = null;
 
 			if (pred.getArity() == 1) {
-				Atom head = obdaFactory.getAtom(unaryq, obdaFactory.getVariable("term0"));
-				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"));
+				Atom head = obdaFactory.getAtom(unaryq, obdaFactory.getVariable("TERM0"));
+				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("TERM0"));
 				OBDAQuery target = obdaFactory.getCQIE(head, body);
 				String sqlquery = String.format(strselect_table_class, predicatetableMap.get(pred));
 				map = obdaFactory.getRDBMSMappingAxiom(sqlquery, target);
 			} else if (pred.getArity() == 2) {
-				Atom head = obdaFactory.getAtom(binaryq, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
-				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("term0"), obdaFactory.getVariable("term1"));
+				Atom head = obdaFactory.getAtom(binaryq, obdaFactory.getVariable("TERM0"), obdaFactory.getVariable("TERM1"));
+				Atom body = obdaFactory.getAtom(pred, obdaFactory.getVariable("TERM0"), obdaFactory.getVariable("TERM1"));
 				OBDAQuery target = obdaFactory.getCQIE(head, body);
 				String sqlquery = String.format(strselect_table_property, predicatetableMap.get(pred));
 				map = obdaFactory.getRDBMSMappingAxiom(sqlquery, target);
@@ -558,10 +558,10 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 			}
 
 			if (predicate.getArity() == 1) {
-				predicatetableMap.put(predicate, "tclass" + classcounter);
+				predicatetableMap.put(predicate, "TCLASS" + classcounter);
 				classcounter += 1;
 			} else if (predicate.getArity() == 2) {
-				predicatetableMap.put(predicate, "tproperty" + propertycounter);
+				predicatetableMap.put(predicate, "TPROPERTY" + propertycounter);
 				propertycounter += 1;
 			} else {
 				throw new RuntimeException("Unsupported arity. Offending predicate: " + predicate);
@@ -613,9 +613,9 @@ public class RDBMSDirectDataRepositoryManager implements RDBMSDataRepositoryMana
 		log.debug("Restoring metadata from DB");
 		try {
 			while (result.next()) {
-				String predicatename = result.getString("uri");
-				String type = result.getString("type");
-				String tablename = result.getString("tablename");
+				String predicatename = result.getString("URI");
+				String type = result.getString("TYPE");
+				String tablename = result.getString("TABLENAME");
 
 				Predicate predicate = null;
 

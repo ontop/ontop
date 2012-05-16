@@ -88,17 +88,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static String select_query = "SELECT * FROM " + index_table;
 
-	public static final String class_table = "quest_class_assertion";
+	public static final String class_table = "QUEST_CLASS_ASSERTION";
 
-	public static final String role_table = "quest_object_property_assertion";
+	public static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
 
-	public static final String attribute_table_literal = "quest_data_property_literal_assertion";
-	public static final String attribute_table_string = "quest_data_property_string_assertion";
-	public static final String attribute_table_integer = "quest_data_property_integer_assertion";
-	public static final String attribute_table_decimal = "quest_data_property_decimal_assertion";
-	public static final String attribute_table_double = "quest_data_property_double_assertion";
-	public static final String attribute_table_datetime = "quest_data_property_datetime_assertion";
-	public static final String attribute_table_boolean = "quest_data_property_boolean_assertion";
+	public static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
+	public static final String attribute_table_string = "QUEST_DATA_PROPERTY_STRING_ASSERTION";
+	public static final String attribute_table_integer = "QUEST_DATA_PROPERTY_INTEGER_ASSERTION";
+	public static final String attribute_table_decimal = "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION";
+	public static final String attribute_table_double = "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION";
+	public static final String attribute_table_datetime = "QUEST_DATA_PROPERTY_DATETIME_ASSERTION";
+	public static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
 
 	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "URI VARCHAR(1000), " + "IDX SMALLINT" + ")";
 
@@ -143,13 +143,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + " (IDX)";
 	public static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
 
-	public static final String attribute_literal_index = "idx_literal_attribute";
-	public static final String attribute_string_index = "idx_string_attribute";
-	public static final String attribute_integer_index = "idx_integer_attribute";
-	public static final String attribute_decimal_index = "idx_decimal_attribute";
-	public static final String attribute_double_index = "idx_double_attribute";
-	public static final String attribute_datetime_index = "idx_datetime_attribute";
-	public static final String attribute_boolean_index = "idx_boolean_attribute";
+	public static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
+	public static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
+	public static final String attribute_integer_index = "IDX_INTEGER_ATTRIBUTE";
+	public static final String attribute_decimal_index = "IDX_DECIMAL_ATTRIBUTE";
+	public static final String attribute_double_index = "IDX_DOUBLE_ATTRIBUTE";
+	public static final String attribute_datetime_index = "IDX_DATETIME_ATTRIBUTE";
+	public static final String attribute_boolean_index = "IDX_BOOLEAN_ATTRIBUTE";
 	
 	public static final String indexattribute_literal1 = "CREATE INDEX " + attribute_literal_index + "1" + " ON " + attribute_table_literal + " (URI)";
 	public static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table_string + " (URI)";
