@@ -92,11 +92,11 @@ public class StockExchangeTestSqlServer extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		/*
-		 * Initializing and H2 database with the stock exchange data
+		 * Initializing and MSSQL database with the stock exchange data
 		 */
 		driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		url = "jdbc:sqlserver://localhost;databaseName=stockclient1";
-		username = "sqlserver";
+		url = "jdbc:sqlserver://obdawin.unibz.it:1433;databaseName=questjunitdb";
+		username = "mssql";
 		password = "obdaps83";
 		log.debug("Driver: {}", driver);
 		log.debug("Url: {}", url);

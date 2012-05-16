@@ -56,7 +56,7 @@ CREATE TABLE stockinformation (
     numberofshares integer,
     sharetype bit,
     companyid integer,
-    description text
+    description character varying(200)
 	CONSTRAINT stockinformation_pkey PRIMARY KEY NONCLUSTERED (id)
 );
 
