@@ -79,7 +79,7 @@ INSERT INTO address VALUES (995, 'Huberg Strasse', 3, 'Bolzano', 'Bolzano', 'Ita
 INSERT INTO address VALUES (996, 'Via Piani di Bolzano', 7, 'Marconi', 'Trentino', 'Italy');
 INSERT INTO address VALUES (993, 'Romer Street', 32, 'Malaga', 'Malaga', 'Spain');
 INSERT INTO address VALUES (997, 'Samara road', 9976, 'Puebla', 'Puebla', 'Mexico');
-INSERT INTO address VALUES (998, '"id" address', 245, 'city', 'state', 'country');
+INSERT INTO address VALUES (998, 'Jalan Madura 12', 245, 'Jakarta', 'Jakarta', 'Indonesia');
 
 INSERT INTO broker VALUES (112, 'Joana', 'Lopatenkko', '14-JUL-1970', 'JLPTK54992', 992);
 INSERT INTO broker VALUES (113, 'Walter', 'Schmidt', '03-SEP-1968', 'WSCH9820783903', 993);
