@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author mariano
  * 
  */
-public class StockExchangeTest extends TestCase {
+public class StockExchangeTestH2 extends TestCase {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
@@ -68,7 +68,7 @@ public class StockExchangeTest extends TestCase {
 	List<TestQuery> testQueries = new LinkedList<TestQuery>();
 
 	final String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
-	final String obdafile = "src/test/resources/test/stockexchange-unittest.obda";
+	final String obdafile = "src/test/resources/test/stockexchange-h2-unittest.obda";
 	
 	/* These are the distinct tuples that we know each query returns */
 	final int[] tuples = {
@@ -205,7 +205,7 @@ public class StockExchangeTest extends TestCase {
 		// Now we are ready for querying
 		OWLStatement st = reasoner.getStatement();
 
-		List<Result> summaries = new LinkedList<StockExchangeTest.Result>();
+		List<Result> summaries = new LinkedList<StockExchangeTestH2.Result>();
 
 		int qc = 0;
 		for (TestQuery tq : testQueries) {
