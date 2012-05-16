@@ -105,7 +105,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (newAtomPredicate instanceof BooleanOperationPredicate) {
 					continue;
 				}
-				String newAtomName = metadata.getFormattedIdentifier(newAtomPredicate.toString());
+				String newAtomName = newAtomPredicate.toString();
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				List<Integer> pkeyIdx = new LinkedList<Integer>();
 				for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
@@ -254,7 +254,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			if (predicate instanceof BooleanOperationPredicate) {
 				continue;
 			}
-			String tableName = metadata.getFormattedIdentifier(predicate.toString());
+			String tableName = predicate.toString();
 			if (metadata.getDefinition(tableName) == null) {
 				isDBQuery = false;
 				break;

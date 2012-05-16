@@ -42,8 +42,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import org.slf4j.Logger;
-
 public class MappingAnalyzer {
 
 	private ArrayList<OBDAMappingAxiom> mappingList;
@@ -52,8 +50,6 @@ public class MappingAnalyzer {
 	private SQLQueryTranslator translator;
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-
-	private static Logger log = org.slf4j.LoggerFactory.getLogger(MappingAnalyzer.class);
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
@@ -89,7 +85,7 @@ public class MappingAnalyzer {
 			ArrayList<Atom> atoms = new ArrayList<Atom>();
 			for (Relation table : tableList) {
 				// Construct the URI from the table name
-				String tableName = dbMetaData.getFormattedIdentifier(table.getName());
+				String tableName = table.getName();
 				URI predicateName = URI.create(tableName);
 
 				// Construct the predicate using the table name
@@ -116,8 +112,8 @@ public class MappingAnalyzer {
 			ArrayList<String> joinConditions = queryTree.getJoinCondition();
 			for (String predicate : joinConditions) {
 				String[] value = predicate.split("=");
-				String leftValue = dbMetaData.getFormattedIdentifier(value[0]);
-				String rightValue = dbMetaData.getFormattedIdentifier(value[1]);
+				String leftValue = value[0];
+				String rightValue = value[1];
 				Term t1 = dfac.getVariable(lookupTable.lookup(leftValue));
 				Term t2 = dfac.getVariable(lookupTable.lookup(rightValue));
 				Atom atom = dfac.getEQAtom(t1, t2);
@@ -201,7 +197,7 @@ public class MappingAnalyzer {
 	private Function getFunction(NullPredicate pred, LookupTable lookupTable) {
 		IValueExpression column = pred.getValueExpression();
 		
-		String columnName = dbMetaData.getFormattedIdentifier(column.toString());
+		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
 		Term var = dfac.getVariable(variableName);
 		
@@ -216,14 +212,14 @@ public class MappingAnalyzer {
 		IValueExpression left = pred.getValueExpressions()[0];
 		IValueExpression right = pred.getValueExpressions()[1];
 
-		String leftValueName = dbMetaData.getFormattedIdentifier(left.toString());
+		String leftValueName = left.toString();
 		String termLeftName = lookupTable.lookup(leftValueName);
 		Term t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
 		Term t2 = null;
 		if (right instanceof ReferenceValueExpression) {
-			String rightValueName = dbMetaData.getFormattedIdentifier(right.toString());
+			String rightValueName = right.toString();
 			termRightName = lookupTable.lookup(rightValueName);
 			t2 = dfac.getVariable(termRightName);
 		} else if (right instanceof Literal) {
@@ -304,21 +300,18 @@ public class MappingAnalyzer {
 		Term result = null;
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			String varName = dbMetaData.getFormattedIdentifier(var.getName());
+			String varName = var.getName();
 			String termName = lookupTable.lookup(varName);
 			if (termName == null) {
 				throw new RuntimeException(String.format("Variable %s not found. Make sure not to use wildecard in your SQL query, e.g., star *", var));
 			}
-			result = this.dfac.getVariable(termName);
-			// System.out.println(termName);
-			// var.setName(termName);
+			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
 			Function func = (Function) term;
 			List<Term> terms = func.getTerms();
 			List<Term> newterms = new LinkedList<Term>();
 			for (Term innerTerm : terms) {
 				newterms.add(updateTerm(innerTerm, lookupTable));
-				// updateTerm(innerTerm, lookupTable);
 			}
 			result = dfac.getFunctionalTerm(func.getFunctionSymbol(), newterms);
 		} else if (term instanceof Constant) {
@@ -333,7 +326,7 @@ public class MappingAnalyzer {
 		// Collect all the possible column names from tables.
 		ArrayList<Relation> tableList = queryTree.getTableSet();
 		for (Relation table : tableList) {
-			String tableName = dbMetaData.getFormattedIdentifier(table.getName());
+			String tableName = table.getName();
 			DataDefinition def = dbMetaData.getDefinition(tableName);
 			if (def == null) {
 				throw new RuntimeException("Definition not found for table: " + tableName);
@@ -352,7 +345,9 @@ public class MappingAnalyzer {
 		ArrayList<String> aliasMap = queryTree.getAliasMap();
 		for (String alias : aliasMap) {
 			String[] reference = alias.split("=");
-			lookupTable.add(dbMetaData.getFormattedIdentifier(reference[0]), reference[1]);
+			String aliasName = reference[0];
+			String columnName = reference[1];
+			lookupTable.add(aliasName, columnName);
 		}
 
 		return lookupTable;

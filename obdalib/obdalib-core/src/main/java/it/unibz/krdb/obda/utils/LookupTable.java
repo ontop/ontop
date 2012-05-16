@@ -6,7 +6,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A utility class to map database column names to new variables.
+ * A utility class to map database column names to new variables. The map ignores
+ * the letter case of the column names when retrieving the new variables. To implement
+ * this, the HashMap will operate on one single case (i.e., lower case). Thus, all
+ * input strings that arrive to methods related to HashMap will always be overwritten
+ * to lower case.
  */
 public class LookupTable {
 	
@@ -42,7 +46,7 @@ public class LookupTable {
 		if (entry == null) {
 			return;
 		}
-		log.put(entry, index);
+		putEntry(entry, index);
 		register();
 		increaseIndex();
 	}
@@ -57,7 +61,7 @@ public class LookupTable {
 	public void add(String[] entries) {
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				log.put(entries[i], index);
+				putEntry(entries[i], index);
 			}
 		}
 		register();
@@ -92,12 +96,12 @@ public class LookupTable {
 			return;
 		}
 		
-		if (!log.containsKey(reference)) {
+		if (!exist(reference)) {
 			add(entry);
 		}
 		else {
-			Integer index = log.get(reference);
-			log.put(entry, index);
+			Integer index = getEntry(reference);
+			putEntry(entry, index);
 		}
 	}
 	
@@ -105,8 +109,8 @@ public class LookupTable {
 	 * Returns the alternative name for the given entry.
 	 */
 	public String lookup(String entry) {
-		if (log.containsKey(entry)) {
-			Integer index = log.get(entry);
+		if (exist(entry)) {
+			Integer index = getEntry(entry);
 			return retrieve(index);
 		}
 		return null;
@@ -116,8 +120,8 @@ public class LookupTable {
 	 * Removes the given entry from the lookup table. This action follows the
 	 * removal of the alternative name, if necessary.
 	 */
-	public void remove(String entry) {	
-		log.remove(entry);
+	public void remove(String entry) {
+		removeEntry(entry);
 		unregister();
 	}
 	
@@ -127,7 +131,7 @@ public class LookupTable {
 	 */
 	public void remove(String[] entries) {
 		for (int i = 0; i < entries.length; i++) {
-			log.remove(entries[i]);
+			removeEntry(entries[i]);
 		}
 		unregister();
 	}
@@ -149,11 +153,11 @@ public class LookupTable {
 	 * "Salary.pid" --> "t1" </pre>
 	 */
 	public boolean asEqualTo(String entry, String reference) {
-		if (!log.containsKey(entry) || !log.containsKey(reference)) {
+		if (!exist(entry) || !exist(reference)) {
 			return false;
 		}
 		String name = lookup(reference);
-		Integer index = log.get(entry);
+		Integer index = getEntry(entry);
 		update(index, name);
 		
 		return true;
@@ -172,17 +176,52 @@ public class LookupTable {
 		return str;
 	}
 	
-	/* Retrieves the alternative name given the index number */
+	/* Utility method to check if the entry exists already in the table or not. 
+	 * Input string will be written in lower case. 
+	 */
+	private boolean exist(String entry) {
+		final String sourceEntry = entry.toLowerCase();
+		return log.containsKey(sourceEntry);
+	}
+	
+	/* Utility method to add an entry in the lookup table. 
+	 * Input string will be written in lower case.
+	 */
+	private void putEntry(String entry, Integer index) {
+		final String insertedEntry = entry.toLowerCase();
+		log.put(insertedEntry, index);
+	}
+	
+	/* Utility method to get an entry from the lookup table. 
+	 * Input string will be written in lower case.
+	 */
+	private Integer getEntry(String entry) {
+		final String sourceEntry = entry.toLowerCase();
+		return log.get(sourceEntry);
+	}
+	
+	/* Utility method to remove an entry from the lookup table. 
+	 * Input string will be written in lower case. 
+	 */
+	private void removeEntry(String entry) {
+		final String sourceEntry = entry.toLowerCase();
+		log.remove(sourceEntry);
+	}
+	
+	/* Retrieves the alternative name given the index number
+	 */
 	private String retrieve(int index) {
 		return master.get(index);
 	}
 	
-	/* Changes the alternative in the given index number */
+	/* Changes the alternative in the given index number
+	 */
 	private void update(int index, String value) {
 		master.put(index, value);
 	}
 	
-	/* Assigns the newly added entry to an alternative name. */
+	/* Assigns the newly added entry to an alternative name. 
+	 */
 	private void register() {
 		if (!master.containsKey(index)) {
 			String name = String.format(DEFAULT_NAME_FORMAT, index);

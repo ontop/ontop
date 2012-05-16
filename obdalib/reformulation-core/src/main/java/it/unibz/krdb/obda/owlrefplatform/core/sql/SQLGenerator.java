@@ -9,7 +9,6 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -188,7 +187,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 					continue;
 				}
 				Predicate tablePredicate = atom.getPredicate();
-				String tableName = metadata.getFormattedIdentifier(tablePredicate.toString());
+				String tableName = tablePredicate.toString();
 				DataDefinition def = metadata.getDefinition(tableName);
 				if (def == null) {
 					/*

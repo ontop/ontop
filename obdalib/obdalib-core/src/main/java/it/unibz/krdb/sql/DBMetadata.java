@@ -153,8 +153,7 @@ public class DBMetadata implements Serializable {
 		return storesLowerCaseIdentifiers;
 	}
 
-	public void setStoresLowerCaseQuotedIdentifiers(
-			boolean storesLowerCaseQuotedIdentifiers) {
+	public void setStoresLowerCaseQuotedIdentifiers(boolean storesLowerCaseQuotedIdentifiers) {
 		this.storesLowerCaseQuotedIdentifiers = storesLowerCaseQuotedIdentifiers;
 	}
 
@@ -162,10 +161,8 @@ public class DBMetadata implements Serializable {
 		return storesLowerCaseQuotedIdentifiers;
 	}
 
-	public void setStoresMixedCaseQuotedIdentifiers(
-			boolean storesMixedCaseQuotedIdentifiers) {
-		// XXX Design Decision: We prefer this feature is disabled to all DBMS
-		this.storesMixedCaseQuotedIdentifiers = false;
+	public void setStoresMixedCaseQuotedIdentifiers(boolean storesMixedCaseQuotedIdentifiers) {
+		this.storesMixedCaseQuotedIdentifiers = storesMixedCaseQuotedIdentifiers;
 	}
 
 	public boolean getStoresMixedCaseQuotedIdentifiers() {
@@ -180,8 +177,7 @@ public class DBMetadata implements Serializable {
 		return storesMixedCaseIdentifiers;
 	}
 
-	public void setStoresUpperCaseQuotedIdentifiers(
-			boolean storesUpperCaseQuotedIdentifiers) {
+	public void setStoresUpperCaseQuotedIdentifiers(boolean storesUpperCaseQuotedIdentifiers) {
 		this.storesUpperCaseQuotedIdentifiers = storesUpperCaseQuotedIdentifiers;
 	}
 
@@ -207,26 +203,5 @@ public class DBMetadata implements Serializable {
 			bf.append("\n");
 		}
 		return bf.toString();
-	}
-
-	/**
-	 * Returns the correct lexical representation of identifiers used by the
-	 * database engine. Use this method for internal purpose only.
-	 * 
-	 * @param identifier
-	 *            The identifier string.
-	 * @return The lexical representation accepted by a database engine.
-	 */
-	public String getFormattedIdentifier(String identifier) {
-		// XXX Design Decision: We omitted writing identifiers with quotes.
-		String result = identifier;
-		if (storesMixedCaseIdentifiers) {
-			// NO-OP
-		} else if (storesLowerCaseIdentifiers) {
-			result = result.toLowerCase();
-		} else if (storesUpperCaseIdentifiers) {
-			result = result.toUpperCase();
-		}
-		return result;
 	}
 }

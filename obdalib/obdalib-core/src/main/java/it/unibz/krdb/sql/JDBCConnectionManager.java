@@ -305,11 +305,10 @@ public class JDBCConnectionManager {
 
 					/* Make sure that the values that stored inside the DBMetadata have 
 					 * proper lexical representation. */
-					String lexicalTableName = metadata.getFormattedIdentifier(tblName);
-					TableDefinition td = new TableDefinition(lexicalTableName);
+					TableDefinition td = new TableDefinition(tblName);
 					for (int pos = 1; rsColumns.next(); pos++) {
 						td.setAttribute(pos, new Attribute(
-								metadata.getFormattedIdentifier(rsColumns.getString("COLUMN_NAME")), // column name
+								rsColumns.getString("COLUMN_NAME"), // column name
 								rsColumns.getInt("DATA_TYPE"),  // column datatype
 								primaryKeys.contains(rsColumns.getString("COLUMN_NAME")), // is primary key
 								rsColumns.getInt("NULLABLE"))); // is nullable
@@ -346,11 +345,10 @@ public class JDBCConnectionManager {
 					
 					/* Make sure that the values that stored inside the DBMetadata have 
 					 * proper lexical representation. */
-					String lexicalTableName = metadata.getFormattedIdentifier(tblName);
-					TableDefinition td = new TableDefinition(lexicalTableName);
+					TableDefinition td = new TableDefinition(tblName);
 					for (int pos = 1; rsColumns.next(); pos++) {
 						td.setAttribute(pos, new Attribute(
-								metadata.getFormattedIdentifier(rsColumns.getString("COLUMN_NAME")), // column name
+								rsColumns.getString("COLUMN_NAME"), // column name
 								rsColumns.getInt("DATA_TYPE"),  // column datatype
 								primaryKeys.contains(rsColumns.getString("COLUMN_NAME")), // is primary key
 								rsColumns.getInt("NULLABLE"))); // is nullable

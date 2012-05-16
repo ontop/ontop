@@ -105,7 +105,7 @@ public class MappingDataTypeRepair {
         Integer pos = (Integer) o[1];
         
         Predicate functionSymbol = atom.getPredicate();
-        String tableName = metadata.getFormattedIdentifier(functionSymbol.toString());
+        String tableName = functionSymbol.toString();
         DataDefinition tableMetadata = metadata.getDefinition(tableName);
         
         Attribute attribute = tableMetadata.getAttribute(pos);
@@ -136,12 +136,10 @@ public class MappingDataTypeRepair {
         while (it.hasNext()) {
             Atom a = (Atom) it.next();
             List<Term> terms = a.getTerms();
-            Iterator<Term> tit = terms.iterator();
-            int i = 1;
-            while (tit.hasNext()) {
-                Term t = tit.next();
+            int i = 1; // position index
+            for (Term t : terms) {
                 if (t instanceof AnonymousVariable) {
-                    // NO-OP
+                    i++; // increase the position index to evaluate the next variable
                 } else if (t instanceof VariableImpl) {
                     Object[] o = new Object[2];
                     o[0] = a;  // atom
@@ -152,6 +150,7 @@ public class MappingDataTypeRepair {
                     }
                     aux.add(o);
                     termOccurenceIndex.put(((VariableImpl) t).getName(), aux);
+                    i++; // increase the position index to evaluate the next variable
                 } else if (t instanceof FunctionalTermImpl) {
                 	// NO-OP
                 } else if (t instanceof ValueConstant) {
@@ -159,7 +158,6 @@ public class MappingDataTypeRepair {
                 } else if (t instanceof URIConstant) {
                 	// NO-OP
                 }
-                i++; // evaluate the next term so we need to increase the position index
             }
         }
     }
