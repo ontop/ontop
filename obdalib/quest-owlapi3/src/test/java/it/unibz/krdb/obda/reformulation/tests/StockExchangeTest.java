@@ -110,7 +110,7 @@ public class StockExchangeTest extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 //		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:stockclient1";
+		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
 
@@ -119,7 +119,7 @@ public class StockExchangeTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-postgres.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -155,7 +155,7 @@ public class StockExchangeTest extends TestCase {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-postgres.sql");
+		FileReader reader = new FileReader("src/test/resources/test/stockexchange-drop-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
