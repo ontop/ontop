@@ -11,6 +11,9 @@ import it.unibz.krdb.obda.gui.swing.treemodel.MappingSQLStringTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingFunctorTreeModelFilter;
 import it.unibz.krdb.obda.gui.swing.treemodel.MappingPredicateTreeModelFilter;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+
+import java.util.List;
+import java.util.LinkedList;
 }
 
 @lexer::header {
@@ -53,7 +56,7 @@ filter returns [TreeModelFilter<OBDAMappingAxiom> value]
       }
       
       // Register the keyword.
-      $value.addStringFilter($keyword.text);
+      $value.addStringFilter($keyword.value);
       
       // Register the negation.
       if (not != null) {
@@ -71,9 +74,36 @@ type returns [TreeModelFilter<OBDAMappingAxiom> value]
   | PRED    { $value = new MappingPredicateTreeModelFilter(); }
   ;
   
-keyword
-  : STRING (COMMA STRING)*
+keyword returns [String[\] value]
+@init {
+  List<String> inputList = new LinkedList<String>();
+}
+  : t1=input { inputList.add($t1.value); } (COMMA t2=input { inputList.add($t2.value); } )* {
+      $value = inputList.toArray(new String[inputList.size()]);
+    }
   ; 
+ 
+input returns [String value]
+  : unquoted_string { $value = $unquoted_string.value; }
+  | quoted_string { $value = $quoted_string.value; }
+  ; 
+ 
+unquoted_string returns [String value]
+  : STRING { $value = $STRING.text; }
+  ;
+  
+quoted_string returns [String value]
+  : STRING_WITH_QUOTE_DOUBLE {
+      String str = $STRING_WITH_QUOTE_DOUBLE.text;
+      str = str.substring(1, str.length()-1);
+      $value = str.trim();
+    }
+  | STRING_WITH_QUOTE {
+      String str = $STRING_WITH_QUOTE.text;
+      str = str.substring(1, str.length()-1);
+      $value = str.trim();
+    }
+  ;
  
 /*------------------------------------------------------------------
  * LEXER RULES
@@ -97,7 +127,7 @@ COMMA:         ',';
 COLON:         ':';
 SEMI:          ';';
 UNDERSCORE:    '_';
-DASH:          '-';
+DASH:          '-';	
 
 fragment ALPHA: ('a'..'z'|'A'..'Z');
 
@@ -107,6 +137,20 @@ fragment ALPHANUM: (ALPHA|DIGIT);
 
 fragment CHAR: (ALPHANUM|UNDERSCORE|DASH);
 
-STRING: CHAR*;
+fragment ECHAR
+  : '\\' ('t' | 'b' | 'n' | 'r' | 'f' | '\\' | '"' | '\'')
+  ;
+
+STRING
+  : ALPHA CHAR*
+  ;
+
+STRING_WITH_QUOTE
+  : '\'' ( options {greedy=false  ;} : ~('\u0027' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '\''
+  ;
+
+STRING_WITH_QUOTE_DOUBLE
+  : '"'  ( options {greedy=false  ;} : ~('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR )* '"'
+  ;
 
 WS: (' '|'\t'|('\n'|'\r'('\n')))+ {$channel=HIDDEN;};
