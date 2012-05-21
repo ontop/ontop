@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.model;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * This class defines the basic component of the proposition. A proposition is a
@@ -12,4 +13,6 @@ public interface Term extends Serializable {
 
 	
 	public Term clone();
+	
+	public Set<Variable> getReferencedVariables();
 }

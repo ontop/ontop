@@ -271,7 +271,7 @@ public class SPARQLQueryStyledDocument extends DefaultStyledDocument implements 
 								continue;
 							}
 
-							BasicPattern triples = triplesBock.getTriples();
+							BasicPattern triples = triplesBock.getPattern();
 							for (int i = 0; i < triples.size(); i++) {
 								Triple triple = triples.get(i);
 								Node o = triple.getObject();

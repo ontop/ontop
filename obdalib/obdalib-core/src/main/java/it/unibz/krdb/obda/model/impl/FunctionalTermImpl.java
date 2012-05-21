@@ -3,12 +3,16 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FunctionalTermImpl implements Function, ListListener {
 
@@ -97,7 +101,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	public String toString() {
 		if (string != null && !rehash)
 			return string;
-		
 
 		StringBuffer sb_t = new StringBuffer();
 
@@ -106,7 +109,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 				sb_t.append(",");
 			}
 			Term t = terms.get(i);
-			if (t ==  null)
+			if (t == null)
 				System.out.println("Null");
 			sb_t.append(t.toString());
 		}
@@ -180,5 +183,15 @@ public class FunctionalTermImpl implements Function, ListListener {
 	public void listChanged() {
 		rehash = true;
 		string = null;
+	}
+
+	@Override
+	public Set<Variable> getReferencedVariables() {
+		Set<Variable> vars = new LinkedHashSet<Variable>();
+		for (Term t : terms) {
+			for (Variable v : t.getReferencedVariables())
+				vars.add(v);
+		}
+		return vars;
 	}
 }

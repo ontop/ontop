@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.LUBM;
 
-import it.unibz.krdb.obda.owlrefplatform.QuestDB;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.io.File;

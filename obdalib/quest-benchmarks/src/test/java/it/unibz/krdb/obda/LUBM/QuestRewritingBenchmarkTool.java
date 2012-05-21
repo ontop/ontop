@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.LUBM;
 
-import it.unibz.krdb.obda.owlapi2.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.QuestDBClassicStore;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.io.File;

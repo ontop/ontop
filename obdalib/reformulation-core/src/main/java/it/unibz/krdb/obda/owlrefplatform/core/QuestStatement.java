@@ -24,9 +24,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultS
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
-import it.unibz.krdb.obda.parser.SPARQLDatalogTranslator;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -43,7 +43,11 @@ import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
+import com.hp.hpl.jena.sparql.algebra.Op;
 
 /**
  * The obda statement provides the implementations necessary to query the
@@ -67,7 +71,7 @@ public class QuestStatement implements OBDAStatement {
 	private boolean canceled = false;
 
 	private DatalogProgram unfoldingProgram;
-	
+
 	private Statement sqlstatement;
 
 	private RDBMSDataRepositoryManager repository;
@@ -187,13 +191,16 @@ public class QuestStatement implements OBDAStatement {
 		// Contruct the datalog program object from the query string
 		log.debug("Input user query:\n" + strquery);
 
-		SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
-
 		DatalogProgram program = null;
 		try {
-			program = sparqlTranslator.parse(strquery);
+			Query arqQuery = QueryFactory.create(strquery);
+			boolean isBoolean = arqQuery.isAskType();
+			if (arqQuery.isConstructType() || arqQuery.isDescribeType())
+				throw new QueryException("Only SELECT and ASK queries are supported.");
+			Op op = Algebra.compile(arqQuery);
+			program = SparqlAlgebraToDatalogTranslator.translate(op, isBoolean, arqQuery.getResultVars());
 		} catch (QueryException e) {
-			log.warn(e.getMessage());
+			throw e;
 		}
 
 		if (program == null) { // if the SPARQL translator doesn't work,
@@ -476,8 +483,7 @@ public class QuestStatement implements OBDAStatement {
 	// }
 
 	private List<String> getSignature(String query) throws OBDAException {
-		SPARQLDatalogTranslator sparqlTranslator = new SPARQLDatalogTranslator();
-		List<String> signature = sparqlTranslator.getSignature(query);
+		List<String> signature = SparqlAlgebraToDatalogTranslator.getSignature(query);
 		return signature;
 	}
 
@@ -598,14 +604,13 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
 		int result = -1;
-		
+
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getEquivalenceMap());
-		
+
 		if (!useFile) {
-			
+
 			result = repository.insertData(conn.conn, newData, commit, batch);
-		}
-		else {
+		} else {
 			try {
 				// File temporalFile = new File("quest-copy.tmp");
 				// FileOutputStream os = new FileOutputStream(temporalFile);

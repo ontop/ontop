@@ -1,7 +1,11 @@
 package it.unibz.krdb.obda.model.impl;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 public class ValueConstantImpl implements ValueConstant {
@@ -97,4 +101,10 @@ public class ValueConstantImpl implements ValueConstant {
 		}
 		
 	}
+	
+	@Override
+	public Set<Variable> getReferencedVariables() {
+		return new LinkedHashSet<Variable>();
+	}
+
 }

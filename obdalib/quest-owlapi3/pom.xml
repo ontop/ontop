@@ -34,7 +34,22 @@
 			<version>3.2.3-r1824</version>
 			<classifier>jar</classifier>
 		</dependency>
+
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
+
+
 
 	<build>
 		<plugins>
@@ -44,10 +59,10 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-					
-                    <testExcludes>
-                    						<exclude>**/SemanticIndexTestSuite.java</exclude>
-                    </testExcludes>					
+
+					<testExcludes>
+						<exclude>**/SemanticIndexTestSuite.java</exclude>
+					</testExcludes>
 				</configuration>
 			</plugin>
 

@@ -4,12 +4,16 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /***
  * This is a rule implementation that keeps track of changes in the query by
@@ -128,7 +132,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public CQIEImpl clone() {
 		Atom copyHead = (Atom) head.clone();
-		List<Atom> copyBody = new ArrayList<Atom>(body.size()+10);
+		List<Atom> copyBody = new ArrayList<Atom>(body.size() + 10);
 
 		for (Atom atom : body) {
 			if (atom != null) {
@@ -162,5 +166,17 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
 		this.modifiers = modifiers;
+	}
+
+	@Override
+	public Set<Variable> getReferencedVariables() {
+
+		Set<Variable> vars = new LinkedHashSet<Variable>();
+		for (Atom atom : body)
+			for (Term t : atom.getTerms()) {
+				for (Variable v : t.getReferencedVariables())
+					vars.add(v);
+			}
+		return vars;
 	}
 }

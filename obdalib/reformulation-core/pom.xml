@@ -24,58 +24,45 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
 			<!-- <version>4.8.2</version> -->
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> <groupId>xsdlib</groupId> <artifactId>xsdlib</artifactId> 
-			<version>20030225</version> </dependency> -->
 
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId>
+		</dependency>
 
-		<!-- <dependency> <groupId>net.sourceforge.owlapi</groupId> <artifactId>owlapi</artifactId> 
-			<version>2.2.0-r1317</version> </dependency> <dependency> <groupId>net.sourceforge.owlapi</groupId> 
-			<artifactId>owlapi</artifactId> <version>3.2.3-r1824</version> <classifier>jar</classifier> 
-			</dependency> -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.3.157</version>
 		</dependency>
 
 
-		<!-- <dependency> <groupId>inf.unibz.it.obda</groupId> <artifactId>obdalib-protege4</artifactId> 
-			<version>1.0.3-SNAPSHOT</version> <scope>provided</scope> </dependency> -->
-		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
-			<version>2.7.1</version> </dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.5.11</version>
 			<type>jar</type>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.0-801.jdbc4</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.18</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgrapht</artifactId>
-			<version>0.8.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jgraph</groupId>
 			<artifactId>jgraph</artifactId>
-			<version>0.8.3</version>
 		</dependency>
 
 	</dependencies>
@@ -94,7 +81,7 @@
 					<excludes>
 						<exclude>*it/unibz/krdb/obda/owlrefplatform/core/reformulation/TreeWitness*</exclude>
 						<exclude>**/TW*.java</exclude>
-						<exclude>**/LUBM*.java</exclude>            
+						<exclude>**/LUBM*.java</exclude>
 					</excludes>
 					<testExcludes>
 						<exclude>**/MappingToRuleTester.java</exclude>
@@ -127,12 +114,12 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-			</plugin>			
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
-			
+
 		</plugins>
 	</build>
 </project>

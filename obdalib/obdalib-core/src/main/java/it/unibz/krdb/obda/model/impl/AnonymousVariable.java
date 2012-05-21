@@ -1,5 +1,8 @@
 package it.unibz.krdb.obda.model.impl;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.Variable;
 
 public class AnonymousVariable implements Variable {
@@ -52,5 +55,10 @@ public class AnonymousVariable implements Variable {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	@Override
+	public Set<Variable> getReferencedVariables() {
+		return new LinkedHashSet<Variable>();
 	}
 }

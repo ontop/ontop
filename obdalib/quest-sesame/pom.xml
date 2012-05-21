@@ -19,31 +19,31 @@
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha</version>
 		</dependency>
-		
+
 		<dependency>
 			<artifactId>obdalib-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha</version>
 		</dependency>
-		
+
 		<dependency>
 			<artifactId>reformulation-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha</version>
 		</dependency>
-		
+
 		<dependency>
 			<artifactId>quest-owlapi3</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha</version>
 		</dependency>
-		
+
 		<dependency>
 			<artifactId>obdalib-core</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
 			<version>1.7-alpha</version>
 		</dependency>
-		
+
 		<dependency>
 			<artifactId>quest-db</artifactId>
 			<groupId>inf.unibz.it.obda</groupId>
@@ -55,14 +55,12 @@
 			<!-- this includes ALL seasame -->
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-runtime</artifactId>
-			<version>2.6.1</version>
 		</dependency>
 
 		<!-- These will download some of the sources -->
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
-			<version>2.6.1</version>
 		</dependency>
 
 

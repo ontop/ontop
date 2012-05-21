@@ -1,8 +1,11 @@
 package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.net.URI;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provides a storage to put the URI constant.
@@ -66,4 +69,10 @@ public class URIConstantImpl implements URIConstant {
 	public String toString() {
 		return uri.toString();
 	}
+	
+	@Override
+	public Set<Variable> getReferencedVariables() {
+		return new LinkedHashSet<Variable>();
+	}
+
 }

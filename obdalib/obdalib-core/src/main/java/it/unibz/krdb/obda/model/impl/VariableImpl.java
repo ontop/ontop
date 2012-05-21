@@ -2,6 +2,9 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Variable;
 
+import java.util.Collections;
+import java.util.Set;
+
 import com.sun.msv.datatype.xsd.XSDatatype;
 
 public class VariableImpl implements Variable {
@@ -10,11 +13,11 @@ public class VariableImpl implements Variable {
 	 * 
 	 */
 	private static final long serialVersionUID = 5723075311798541659L;
-	
+
 	private final String name;
-	
+
 	private final XSDatatype type;
-	
+
 	private final int identifier;
 
 	protected VariableImpl(String name, XSDatatype type) {
@@ -58,9 +61,15 @@ public class VariableImpl implements Variable {
 
 	@Override
 	public Variable clone() {
-		 return this;
+		return this;
 		// VariableImpl clone = new VariableImpl(new String(name), this.type);
 		// clone.identifier = identifier;
 		// return clone;
 	}
+
+	@Override
+	public Set<Variable> getReferencedVariables() {
+		return Collections.singleton((Variable)this);
+	}
+
 }
