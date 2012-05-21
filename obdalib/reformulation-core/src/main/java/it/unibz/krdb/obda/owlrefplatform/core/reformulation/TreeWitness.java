@@ -3,23 +3,24 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import java.util.HashSet;
 import java.util.Set;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
 // instead of import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.semanticweb.owlapi.model.OWLClassExpression;
+//import org.semanticweb.owlapi.model.OWLClassExpression;
 
 public class TreeWitness {
 	private Set<Term> roots;
 	private Set<Term> domain;
-	private Set<OWLClassExpression> roottype;
+	private Set<ClassDescription> roottype;
 	private PropertySomeClassRestriction gen;
 
 	Logger	log = LoggerFactory.getLogger(TreeWitnessObsolete.class);
 	
-	public TreeWitness(PropertySomeClassRestriction gen, Set<Term> roots, Set<OWLClassExpression> roottype, Term nonroot) {
+	public TreeWitness(PropertySomeClassRestriction gen, Set<Term> roots, Set<ClassDescription> roottype, Term nonroot) {
 		this.gen = gen;
 		this.roots = roots;
 		this.roottype = roottype;
@@ -27,7 +28,7 @@ public class TreeWitness {
 		domain.add(nonroot);
 	}
 
-	public TreeWitness(PropertySomeClassRestriction gen, Set<Term> roots, Set<OWLClassExpression> roottype, Set<Term> nonroots) {
+	public TreeWitness(PropertySomeClassRestriction gen, Set<Term> roots, Set<ClassDescription> roottype, Set<Term> nonroots) {
 		this.gen = gen;
 		this.roots = roots;
 		this.roottype = roottype;
@@ -47,7 +48,7 @@ public class TreeWitness {
 		return gen;
 	}
 	
-	public Set<OWLClassExpression> getRootType() {
+	public Set<ClassDescription> getRootType() {
 		return roottype;
 	}
 	

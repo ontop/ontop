@@ -4,10 +4,19 @@ import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -15,36 +24,48 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-//import org.apache.xerces.util.URI;
-//import org.apache.xerces.util.URI.MalformedURIException;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.ClassExpressionType;
+
+//import org.semanticweb.owlapi.model.ClassExpressionType;
 //import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
+//import org.semanticweb.owlapi.model.OWLAxiom;
+//import org.semanticweb.owlapi.model.OWLClass;
+//import org.semanticweb.owlapi.model.OWLClassExpression;
+//import org.semanticweb.owlapi.model.OWLDataFactory;
+//import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
+//import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+//import org.semanticweb.owlapi.model.OWLOntology;
+//import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
-public class TreeWitnessRewriter {
-	private OWLDataFactory f;
-	private CQIE cqie;
-	private List<OWLSubClassOfAxiom> axioms;
+public class TreeWitnessRewriter implements QueryRewriter {
+//	private OWLDataFactory f;
+	private List<SubClassAxiomImpl> axioms;
 	private OWLReasoner reasoner;
 	private Reasoner r;
 	private static OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
+	private static OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
+	private Ontology tbox;
 
-	public TreeWitnessRewriter(CQIE cqie, List<OWLSubClassOfAxiom> axioms, OWLDataFactory f, OWLReasoner reasoner)
+	@Override
+	public void setTBox(Ontology ontology) {
+		this.tbox = ontology;
+	}
+
+	@Override
+	public void setCBox(Ontology sigma) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public TreeWitnessRewriter(OWLReasoner reasoner)
 	{
-		this.cqie = cqie;
-		this.axioms = axioms;
-		this.f = f;
-		this.reasoner = reasoner;
 		r = new Reasoner(f, reasoner);
 	}
 
@@ -82,24 +103,62 @@ public class TreeWitnessRewriter {
 		terms.add(term2);
 		return fac.getAtom(fac.getPredicate(name, 1), terms);
 	}
-
-	public DatalogProgram getRewriting(Set<TreeWitness> tws) //throws MalformedURIException
-	{
-		DatalogProgram q = fac.getDatalogProgram(); //(cqie.getHead().getPredicate());
-		
-		List<Atom> mainbody = new LinkedList<Atom>();
-		int Q = 0;
-		for (Atom a: cqie.getBody())
-			if (a.getArity() == 2)
-				mainbody.add(getAtom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
-		
-		// if no binary predicates
-		if (mainbody.size() == 0)
-			for (Atom a: cqie.getBody())
-				mainbody.add(getAtom(getExtName(a.getPredicate().getName()), a.getTerms()));			
-		
-		q.appendRule(fac.getCQIE(cqie.getHead(), mainbody));
 	
+	private static Atom getRoleAtom(PropertySomeClassRestriction p, Term t1, Term t2) //throws MalformedURIException
+	{
+		if (!p.isInverse())
+			return getAtom(p.getPredicate().getName(), t1, t2);
+		else
+			return getAtom(p.getPredicate().getName(), t2, t1);
+	}
+
+	
+	private Set<TreeWitness> getReducedSetOfTreeWitnesses(CQIE cqie)
+	{
+		Set<TreeWitness> treewitnesses = getTreeWitnesses(cqie);
+
+		Set<TreeWitness> subtws = new HashSet<TreeWitness>();
+		for (TreeWitness tw: treewitnesses)
+		{
+			boolean subsumed = false;
+			for (TreeWitness tw1: treewitnesses)
+				if (!tw.equals(tw1) && tw.getDomain().equals(tw1.getDomain()) && tw.getRoots().equals(tw1.getRoots()))
+					if (reasoner.isEntailed(f.getOWLSubClassOfAxiom(tw.getGenerator(), tw1.getGenerator())))
+					{
+						System.out.println("SUBSUMED: " + tw + " BY " + tw1);
+						subsumed = true;
+						//break;
+					}
+			if (!subsumed)
+				subtws.add(tw);
+		}
+		return subtws;
+	}
+	
+	@Override
+	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException 
+	{	
+		// public DatalogProgram getRewriting(Set<TreeWitness> tws) //throws MalformedURIException
+		CQIE cqie = (CQIE)input;
+		
+		Set<TreeWitness> tws = getReducedSetOfTreeWitnesses(cqie);
+		
+		DatalogProgram output = fac.getDatalogProgram(); //(cqie.getHead().getPredicate());
+		
+		int Q = 0;
+		{
+			List<Atom> mainbody = new LinkedList<Atom>();
+			for (Atom a: cqie.getBody())
+				if (a.getArity() == 2)
+					mainbody.add(getAtom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
+			
+			// if no binary predicates
+			if (mainbody.size() == 0)
+				for (Atom a: cqie.getBody())
+					mainbody.add(getAtom(getExtName(a.getPredicate().getName()), a.getTerms()));			
+			
+			output.appendRule(fac.getCQIE(cqie.getHead(), mainbody));
+		}
 		Q = 0;
 		for (Atom a: cqie.getBody())
 			if (a.getArity() == 2)
@@ -112,7 +171,7 @@ public class TreeWitnessRewriter {
 					if ((aa.getArity() == 1) && a.getTerms().contains(aa.getTerm(0)))
 						group.add(getAtom(getExtName(aa.getPredicate().getName()), aa.getTerms()));
 					
-				q.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), group));
+				output.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), group));
 			
 				for (TreeWitness tw: tws)
 					if (tw.getDomain().containsAll(a.getTerms()))
@@ -125,10 +184,13 @@ public class TreeWitnessRewriter {
 						for (Term rt: roots)
 							if (!rt.equals(roots.get(0)))
 								twf.add(getAtom(new URI("http://EQ"), rt, r0));
-						for (OWLClassExpression c: tw.getRootType())
-							twf.add(getAtom(getExtName(new URI(c.asOWLClass().getIRI().toString())), r0));
+						for (ClassDescription c: tw.getRootType())
+						{
+							OClass cl = (OClass)c;
+							twf.add(getAtom(getExtName(cl.getPredicate().getName()), r0));
+						}
 						
-						q.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), twf));
+						output.appendRule(fac.getCQIE(getAtom(Qname, a.getTerms()), twf));
 					}
 			}
 		
@@ -137,14 +199,14 @@ public class TreeWitnessRewriter {
 			gen.add(tw.getGenerator());
 		
 		//System.out.println("\nEXT PREDICATES");
-		for (CQIE ext: getExtPredicates(gen))
-			q.appendRule(ext);
+		for (CQIE ext: getExtPredicates(cqie, gen))
+			output.appendRule(ext);
 		
-		return q;
+		return output;
 	}
 	
 	
-	public List<CQIE> getExtPredicates(Set<PropertySomeClassRestriction> gencon) //throws MalformedURIException
+	public List<CQIE> getExtPredicates(CQIE cqie, Set<PropertySomeClassRestriction> gencon) //throws MalformedURIException
 	{
 		List<CQIE> list = new LinkedList<CQIE>();
 		Set<Predicate> exts = new HashSet<Predicate>();
@@ -162,27 +224,21 @@ public class TreeWitnessRewriter {
 			URI uri = getExtName(some);
 			Term x = fac.getVariable("x");
 			
-			for (OWLClass c: r.getClasses())
+			for (Predicate c: tbox.getConcepts())
 				if (!c.isOWLNothing() && r.isSubsumed(c, some))
 				{
 					//System.out.println("EXT COMPUTE SUBCLASSES: " + c);
-					list.add(getCQIE(getAtom(uri, x), getAtom(new URI(c.getIRI().toString()), x)));
+					list.add(getCQIE(getAtom(uri, x), getAtom(c.getName(), x)));
 				}
 			
 			{
 				Term w = fac.getVariable("w");
-				Atom ra = getRoleAtom(some.getProperty(), x, w);
+				Atom ra = getRoleAtom(some, x, w);
 				exts.add(ra.getPredicate());
 				ra.setPredicate(fac.getPredicate(getExtName(ra.getPredicate().getName()), 2));
 				//System.out.println(ra);
 				if(r.isSubsumed(f.getOWLObjectSomeValuesFrom(some.getProperty(), f.getOWLThing()), some))
 					list.add(getCQIE(getAtom(uri, x), ra));
-				//else
-				//{
-				//	OWLClass ca = some.getFiller().asOWLClass();
-				//	list.add(getCQIE(new Atom(uri, x), ra, new Atom(getExtName(new URI(ca.getIRI().toString())), x)));
-				//	exts.add(new Predicate(new URI(ca.getIRI().toString()), 1));
-				//}
 			}
 			/*
 			for (OWLObjectPropertyExpression p: getProperties())
@@ -244,57 +300,30 @@ public class TreeWitnessRewriter {
 		return list;
 	}
 	
-	private static URI getExtName(URI name) //throws MalformedURIException 
+	private static URI getExtName(URI name)
 	{
-		String s = name.toString();
-		URI uri = new URI(s);
-		uri.setFragment("EXT_" + uri.getFragment());
-		return uri;
-	}
-
-	private static URI getQName(URI name, int pos) //throws MalformedURIException 
-	{
-		String s = name.toString();
-		URI uri = new URI(s);
-		uri.setFragment("Q_" + pos + "_" + uri.getFragment());
-		return uri;
+		return new URI(name.getScheme(), name.getSchemeSpecificPart(), 
+				"EXT_" + name.getFragment());
 	}
 
 	private static URI getExtName(PropertySomeClassRestriction some) //throws MalformedURIException 
 	{
-		OWLObjectPropertyExpression p = some.getProperty();
-		boolean inverse = false;
-		if (p.isAnonymous())
-		{
-			p = p.getInverseProperty().getSimplified();
-			inverse = true;
-		}
-
-		//System.out.println(p);
-		URI filler = new URI(some.getFiller().asOWLClass().getIRI().toString());
-		URI uri = new URI(p.asOWLObjectProperty().getIRI().toString());
-		uri.setFragment("EXT_" + uri.getFragment() + (inverse ? "_I_" : "_") + filler.getFragment());
-		return uri;
+		URI property = some.getPredicate().getName();
+		return new URI(property.getScheme(), property.getSchemeSpecificPart(), 
+					"EXT_" + property.getFragment() + (some.isInverse() ? "_I_" : "_") 
+					+ some.getFiller().getPredicate().getName().getFragment());
 	}
 
-	private static Atom getRoleAtom(OWLObjectPropertyExpression p, Term t1, Term t2) //throws MalformedURIException
+	private static URI getQName(URI name, int pos)  
 	{
-		if (!p.isAnonymous())
-		{
-			if (!p.isOWLBottomObjectProperty())
-				return getAtom(new URI(p.asOWLObjectProperty().getIRI().toString()), t1, t2);
-		}
-		else 
-		{ 
-			OWLObjectPropertyExpression pi = p.getInverseProperty().getSimplified();
-			return getAtom(new URI(pi.asOWLObjectProperty().getIRI().toString()), t2, t1);
-		}
-		return null;
+		return new URI(name.getScheme(), name.getSchemeSpecificPart(), 
+					"Q_" + pos + "_" + name.getFragment());
 	}
+
 	
 	
 	
-	public Set<TreeWitness> getTreeWitnesses()
+	public Set<TreeWitness> getTreeWitnesses(CQIE cqie)
 	{
 		Set<TreeWitness> treewitnesses = new HashSet<TreeWitness>();
 		
@@ -307,13 +336,13 @@ public class TreeWitnessRewriter {
 				continue;
 			}
 			List<OWLObjectPropertyExpression> edges = new LinkedList<OWLObjectPropertyExpression>();
-			Set<OWLClassExpression> endtype = new HashSet<OWLClassExpression>();
+			Set<ClassDescription> endtype = new HashSet<ClassDescription>();
 			Set<Term> roots = new HashSet<Term>();
 			for (Atom a: cqie.getBody())
 			{
 				if ((a.getArity() == 1) && (a.getTerm(0).equals(v)))
 				{	
-					endtype.add(f.getOWLClass(IRI.create(a.getPredicate().getName().toString())));
+					endtype.add(ontFactory.createClass(a.getPredicate().getName()));
 				}
 				else if ((a.getArity() == 2) && (a.getTerm(0).equals(v)))
 				{
@@ -330,9 +359,9 @@ public class TreeWitnessRewriter {
 			System.out.println("  EDGES " + edges);
 			System.out.println("  ENDTYPE " + endtype);
 
-			for (OWLSubClassOfAxiom a: axioms)
+			for (SubClassAxiomImpl a: axioms)
 			{
-				OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom)a.getSuperClass();
+				PropertySomeClassRestriction some = (PropertySomeClassRestriction)a.getSuper();
 				if (isTreeWitness(some, roots, edges, endtype))
 				{
 					TreeWitness tw = new TreeWitness(some, roots, getRootType(roots), v);
@@ -356,7 +385,7 @@ public class TreeWitnessRewriter {
 	}
 	
 	
-	private void saturateTreeWitnesses(Set<TreeWitness> treewitnesses, Set<TreeWitness> delta, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<TreeWitness> tws)
+	private void saturateTreeWitnesses(CQIE cqie, Set<TreeWitness> treewitnesses, Set<TreeWitness> delta, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<TreeWitness> tws)
 	{
 		boolean saturated = true;
 		for (Atom a: cqie.getBody())
@@ -412,7 +441,7 @@ public class TreeWitnessRewriter {
 				System.out.println(tw);
 			
 			// collect the type of the root
-			Set<OWLClassExpression> endtype = new HashSet<OWLClassExpression>();
+			Set<ClassDescription> endtype = new HashSet<ClassDescription>();
 			Set<Term> nonroots = new HashSet<Term>();
 			boolean nonrootsbound = true;
 			for (TreeWitness tw: tws)
@@ -427,9 +456,9 @@ public class TreeWitnessRewriter {
 			
 			System.out.println("      NON-ROOTS ARE " + (nonrootsbound ? "" : "NOT") + " BOUND");
 			if (nonrootsbound)
-				for (OWLSubClassOfAxiom a: axioms)
+				for (SubClassAxiomImpl a: axioms)
 				{
-					OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom)a.getSuperClass();
+					PropertySomeClassRestriction some = (PropertySomeClassRestriction)a.getSuper();
 					if (isTreeWitness(some, roots, edges, endtype))
 					{
 						TreeWitness tw = new TreeWitness(some, roots, getRootType(roots), nonroots);
@@ -472,87 +501,42 @@ public class TreeWitnessRewriter {
 		return true;
 	}
 
-	private Set<OWLClassExpression> getRootType(Set<Term> roots)
+	private Set<ClassDescription> getRootType(CQIE cqie, Set<Term> roots)
 	{
-		Set<OWLClassExpression> roottype = new HashSet<OWLClassExpression>();
+		Set<ClassDescription> roottype = new HashSet<ClassDescription>();
 		//System.out.println("         ROOTS " + roots);
-		for (Atom a1: cqie.getBody())
-			if ((a1.getArity() == 1) && roots.contains(a1.getTerm(0)))
-				roottype.add(f.getOWLClass(IRI.create(a1.getPredicate().getName().toString())));
+		for (Atom a: cqie.getBody())
+			if ((a.getArity() == 1) && roots.contains(a.getTerm(0)))
+				roottype.add(ontFactory.createClass(a.getPredicate()));
 
+		// TODO: reflexivity stuff
+		
 		//System.out.println("         ROOT TYPE " + roottype);
 		return roottype;
 	}
 	
 	
 	
-	public static List<OWLSubClassOfAxiom> getGeneratingAxioms(OWLOntology o) 
+	public static List<SubClassAxiomImpl> getGeneratingAxioms(Ontology o) 
 	{
-		List<OWLSubClassOfAxiom> axioms = new LinkedList<OWLSubClassOfAxiom>();
+		List<SubClassAxiomImpl> axioms = new LinkedList<SubClassAxiomImpl>();
 		System.out.println("AXIOMS");
-		for (OWLAxiom ax: o.getAxioms())
+		for (Axiom ax: o.getAssertions())
 		{
-			if (ax.isOfType(AxiomType.ANNOTATION_ASSERTION) || 
-				ax.isOfType(AxiomType.DECLARATION))
+			if (ax instanceof SubClassAxiomImpl)
 			{
-				//System.out.println("Annotation: " + ax);
-			}
-			else if (ax.isOfType(AxiomType.SUBCLASS_OF))
-			{
-				OWLSubClassOfAxiom sax = (OWLSubClassOfAxiom)ax;
-				OWLClassExpression sc = sax.getSuperClass();
-				if (sc.getClassExpressionType() == ClassExpressionType.OBJECT_SOME_VALUES_FROM)
+				SubClassAxiomImpl sax = (SubClassAxiomImpl)ax;
+				ClassDescription sc = sax.getSuper();
+				if (sc instanceof PropertySomeClassRestriction)
 				{
-					OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom)sc;
-					System.out.println("property " + some.getProperty() + ", filler " + some.getFiller() + " from " + sax);
+					PropertySomeClassRestriction some = (PropertySomeClassRestriction)sc;
+					System.out.println("property " + some.getPredicate() + ", filler " + some.getFiller() + " from " + sax);
 					axioms.add(sax);
 				}
-				else if (sc.getClassExpressionType() != ClassExpressionType.OWL_CLASS)
+				else //if (sc instanceof OClass)
 				{
-					System.out.println("SUBCLASS OF " + sc + ": " + sax);
+					System.out.println("SUBCLASS OF " + sc + ": " + sax + ((sc instanceof OClass) ? "": " UNKNOWN TYPE"));
 				}
-			}
-			else if (ax.isOfType(AxiomType.EQUIVALENT_CLASSES)) 
-			{
-				//System.out.println(ax);
-				OWLEquivalentClassesAxiom sax = (OWLEquivalentClassesAxiom)ax;
-				for (OWLClassExpression sc : sax.getClassExpressionsAsList())
-				{
-					if (sc.getClassExpressionType() == ClassExpressionType.OBJECT_SOME_VALUES_FROM)
-					{
-						OWLObjectSomeValuesFrom some = (OWLObjectSomeValuesFrom)sc;
-						System.out.println("property " + some.getProperty() + ", filler " + some.getFiller() + " from " + sax);
-						System.out.println("TO BE DONE!");
-						//axioms.add(sax);
-					}
-					else if (sc.getClassExpressionType() != ClassExpressionType.OWL_CLASS)
-					{
-						System.out.println("SUBCLASS OF " + sc + ": " + sax);
-					}
-				}
-			}
-			else if (ax.isOfType(AxiomType.OBJECT_PROPERTY_DOMAIN) || 
-					 ax.isOfType(AxiomType.OBJECT_PROPERTY_RANGE) ||
-					 ax.isOfType(AxiomType.DATA_PROPERTY_DOMAIN) ||
-					 ax.isOfType(AxiomType.DATA_PROPERTY_RANGE))
-			{
-				//System.out.println("DOMAIN/RANGE " + ax);
-			}
-			else if (ax.isOfType(AxiomType.TRANSITIVE_OBJECT_PROPERTY))
-			{
-			
-			}
-			else if (ax.isOfType(AxiomType.SUB_OBJECT_PROPERTY) || 
-					 ax.isOfType(AxiomType.INVERSE_OBJECT_PROPERTIES))
-			{
-				
-			}
-			else if (ax.isOfType(AxiomType.CLASS_ASSERTION) || 
-					 ax.isOfType(AxiomType.OBJECT_PROPERTY_ASSERTION))
-			{
-			}
-			else if (ax.isOfType(AxiomType.DISJOINT_CLASSES))
-			{
 			}
 			else
 				System.out.println(ax);
