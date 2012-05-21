@@ -43,11 +43,7 @@ import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.algebra.Algebra;
-import com.hp.hpl.jena.sparql.algebra.Op;
 
 /**
  * The obda statement provides the implementations necessary to query the
@@ -193,12 +189,7 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogProgram program = null;
 		try {
-			Query arqQuery = QueryFactory.create(strquery);
-			boolean isBoolean = arqQuery.isAskType();
-			if (arqQuery.isConstructType() || arqQuery.isDescribeType())
-				throw new QueryException("Only SELECT and ASK queries are supported.");
-			Op op = Algebra.compile(arqQuery);
-			program = SparqlAlgebraToDatalogTranslator.translate(op, isBoolean, arqQuery.getResultVars());
+			program = SparqlAlgebraToDatalogTranslator.translate(strquery);
 		} catch (QueryException e) {
 			throw e;
 		}

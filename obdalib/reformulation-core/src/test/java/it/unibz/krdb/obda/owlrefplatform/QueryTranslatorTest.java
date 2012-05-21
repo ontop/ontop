@@ -4,11 +4,12 @@
  * Copyright 2010 OBDA-API. All rights reserved.
  * Use is subject to license terms.
  */
-package it.unibz.krdb.obda.parser;
+package it.unibz.krdb.obda.owlrefplatform;
 
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 
 import java.util.List;
 
@@ -101,16 +102,16 @@ public class QueryTranslatorTest extends TestCase {
 		"ORDER BY $fn"
 	};
 
-	private SPARQLDatalogTranslator translator;
+
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		translator = new SPARQLDatalogTranslator();
+//		translator = new SPARQLDatalogTranslator();
 	}
 
 	public void testGetDatalog() {
-		DatalogProgram datalog = translator.parse(QUERIES[0]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[0]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);
@@ -118,7 +119,7 @@ public class QueryTranslatorTest extends TestCase {
 	}
 
 	public void testRdfTypeAndSubjectIsNodeLiteral() {
-		DatalogProgram datalog = translator.parse(QUERIES[1]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[1]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);
@@ -126,7 +127,7 @@ public class QueryTranslatorTest extends TestCase {
 	}
 
 	public void testRdfTypeAndSubjectIsNodeUri() {
-		DatalogProgram datalog = translator.parse(QUERIES[2]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[2]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);
@@ -134,7 +135,7 @@ public class QueryTranslatorTest extends TestCase {
 	}
 
 	public void testSubjectAndObjectAreNodeLiteral() {
-		DatalogProgram datalog = translator.parse(QUERIES[3]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[3]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);
@@ -142,7 +143,7 @@ public class QueryTranslatorTest extends TestCase {
 	}
 
 	public void testSubjectAndObjectAreNodeUri() {
-		DatalogProgram datalog = translator.parse(QUERIES[4]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[4]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);
@@ -151,7 +152,7 @@ public class QueryTranslatorTest extends TestCase {
 
 	public void testRdfTypeAndObjectIsVariable() {
 		try {
-			DatalogProgram datalog = translator.parse(QUERIES[5]);
+			DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[5]);
 			List<CQIE> rules = datalog.getRules();
 			List<Atom> body = rules.get(0).getBody();
 			assertTrue("Number of rules", rules.size() == 1);
@@ -163,7 +164,7 @@ public class QueryTranslatorTest extends TestCase {
 
 	public void testRdfTypeAndObjectIsNodeLiteral() {
 		try {
-			DatalogProgram datalog = translator.parse(QUERIES[6]);
+			DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[6]);
 			List<CQIE> rules = datalog.getRules();
 			List<Atom> body = rules.get(0).getBody();
 			assertTrue("Number of rules", rules.size() == 1);
@@ -175,7 +176,7 @@ public class QueryTranslatorTest extends TestCase {
 
 	public void testPredicateIsVariable() {
 		try {
-			DatalogProgram datalog = translator.parse(QUERIES[7]);
+			DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[7]);
 			List<CQIE> rules = datalog.getRules();
 			List<Atom> body = rules.get(0).getBody();
 			assertTrue("Number of rules", rules.size() == 1);
@@ -187,7 +188,7 @@ public class QueryTranslatorTest extends TestCase {
 
 	public void testPredicateIsNodeLiteral() {
 		try {
-			DatalogProgram datalog = translator.parse(QUERIES[8]);
+			DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[8]);
 			List<CQIE> rules = datalog.getRules();
 			List<Atom> body = rules.get(0).getBody();
 			assertTrue("Number of rules", rules.size() == 1);
@@ -198,7 +199,7 @@ public class QueryTranslatorTest extends TestCase {
 	}
 
 	public void testPredicateIsNodeUri() {
-		DatalogProgram datalog = translator.parse(QUERIES[9]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[9]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);
@@ -206,7 +207,7 @@ public class QueryTranslatorTest extends TestCase {
 	}
 
 	public void testDifferentElementGroup() {
-		DatalogProgram datalog = translator.parse(QUERIES[10]);
+		DatalogProgram datalog = SparqlAlgebraToDatalogTranslator.translate(QUERIES[10]);
 		List<CQIE> rules = datalog.getRules();
 		List<Atom> body = rules.get(0).getBody();
 		assertTrue("Number of rules", rules.size() == 1);

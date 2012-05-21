@@ -13,16 +13,13 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
 import java.net.URI;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -34,6 +31,7 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
@@ -112,6 +110,15 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	public static List<Atom> translate(OpBGP op) {
 		return translate(op.getPattern());
+	}
+
+	public static DatalogProgram translate(String strquery) {
+		Query arqQuery = QueryFactory.create(strquery);
+		boolean isBoolean = arqQuery.isAskType();
+		if (arqQuery.isConstructType() || arqQuery.isDescribeType())
+			throw new QueryException("Only SELECT and ASK queries are supported.");
+		Op op = Algebra.compile(arqQuery);
+		return SparqlAlgebraToDatalogTranslator.translate(op, isBoolean, arqQuery.getResultVars());
 	}
 
 	public static List<List<Atom>> translate(OpFilter op, Map<Variable, Term> mgu) {
@@ -201,20 +208,20 @@ public class SparqlAlgebraToDatalogTranslator {
 				 * Its not a select *, so getting all the variables in the query
 				 */
 				List<Term> headVars = new LinkedList<Term>();
-				for (String varName: signature)
+				for (String varName : signature)
 					headVars.add(ofac.getVariable(varName));
-//				Set<Variable> vars = new LinkedHashSet<Variable>();
-//				for (Atom atom : body)
-//					for (Term t : atom.getTerms()) {
-//						for (Variable v : t.getReferencedVariables())
-//							vars.add(v);
-//					}
-//				headVars.addAll(vars);
+				// Set<Variable> vars = new LinkedHashSet<Variable>();
+				// for (Atom atom : body)
+				// for (Term t : atom.getTerms()) {
+				// for (Variable v : t.getReferencedVariables())
+				// vars.add(v);
+				// }
+				// headVars.addAll(vars);
 				Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, headVars.size());
 				head = ofac.getAtom(predicate, headVars);
 				cq = ofac.getCQIE(head, body);
 			}
-			
+
 			queries.add(Unifier.applyUnifier(cq, mgu));
 		}
 
@@ -583,8 +590,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		return function;
 	}
-
-	
 
 	public static List<String> getSignature(String query) {
 		Query q = QueryFactory.create(query);
