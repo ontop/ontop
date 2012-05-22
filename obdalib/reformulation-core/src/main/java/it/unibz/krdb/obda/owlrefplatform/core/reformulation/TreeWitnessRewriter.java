@@ -19,56 +19,77 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 
-//import org.semanticweb.owlapi.model.ClassExpressionType;
-//import org.semanticweb.owlapi.model.IRI;
-//import org.semanticweb.owlapi.model.OWLAxiom;
-//import org.semanticweb.owlapi.model.OWLClass;
-//import org.semanticweb.owlapi.model.OWLClassExpression;
-//import org.semanticweb.owlapi.model.OWLDataFactory;
-//import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-//import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-//import org.semanticweb.owlapi.model.OWLOntology;
-//import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.reasoner.Reasoner;
 
 public class TreeWitnessRewriter implements QueryRewriter {
-//	private OWLDataFactory f;
-	private List<SubClassAxiomImpl> axioms;
-	private OWLReasoner reasoner;
-	private Reasoner r;
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private Ontology tbox;
+	private List<SubClassAxiomImpl> generatingAxioms;
+
 	private static OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
 	private static OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	private Ontology tbox;
+	
+	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
+
 
 	@Override
-	public void setTBox(Ontology ontology) {
+	public void setTBox(Ontology ontology) 
+	{
 		this.tbox = ontology;
-	}
 
-	@Override
-	public void setCBox(Ontology sigma) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		// collect generating axioms
+		generatingAxioms = new LinkedList<SubClassAxiomImpl>();
+		log.debug("AXIOMS");
+		for (Axiom ax: tbox.getAssertions())
+		{
+			if (ax instanceof SubClassAxiomImpl)
+			{
+				SubClassAxiomImpl sax = (SubClassAxiomImpl)ax;
+				ClassDescription sc = sax.getSuper();
+				if (sc instanceof PropertySomeClassRestriction)
+				{
+					PropertySomeClassRestriction some = (PropertySomeClassRestriction)sc;
+					log.debug("property " + some.getPredicate() + ", filler " + some.getFiller() + " from " + sax);
+					generatingAxioms.add(sax);
+				}
+				else //if (sc instanceof OClass)
+				{
+					log.debug("SUBCLASS OF " + sc + ": " + sax + ((sc instanceof OClass) ? "": " UNKNOWN TYPE"));
+				}
+			}
+			else
+				log.debug(ax.toString());
+		}
 	}
 	
-	public TreeWitnessRewriter(OWLReasoner reasoner)
+
+
+	@Override
+	public void setCBox(Ontology sigma) 
 	{
-		r = new Reasoner(f, reasoner);
+		// TODO Auto-generated method stub	
 	}
 
+	@Override
+	public void initialize() 
+	{
+		// TODO Auto-generated method stub	
+	}
+	
 	private static CQIE getCQIE(Atom head, Atom body)
 	{
 		List<Atom> b = new LinkedList<Atom>();
@@ -112,27 +133,33 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			return getAtom(p.getPredicate().getName(), t2, t1);
 	}
 
-	
-	private Set<TreeWitness> getReducedSetOfTreeWitnesses(CQIE cqie)
+	private static class AdjacentTermsPair 
 	{
-		Set<TreeWitness> treewitnesses = getTreeWitnesses(cqie);
-
-		Set<TreeWitness> subtws = new HashSet<TreeWitness>();
-		for (TreeWitness tw: treewitnesses)
+		private Term t1, t2;
+		
+		public AdjacentTermsPair(Term t1, Term t2)
 		{
-			boolean subsumed = false;
-			for (TreeWitness tw1: treewitnesses)
-				if (!tw.equals(tw1) && tw.getDomain().equals(tw1.getDomain()) && tw.getRoots().equals(tw1.getRoots()))
-					if (reasoner.isEntailed(f.getOWLSubClassOfAxiom(tw.getGenerator(), tw1.getGenerator())))
-					{
-						System.out.println("SUBSUMED: " + tw + " BY " + tw1);
-						subsumed = true;
-						//break;
-					}
-			if (!subsumed)
-				subtws.add(tw);
+			this.t1 = t1;
+			this.t2 = t2;
 		}
-		return subtws;
+		
+		public boolean equals(Object o)
+		{
+			if (o instanceof AdjacentTermsPair)
+			{
+				AdjacentTermsPair other = (AdjacentTermsPair)o;
+				if (this.t1.equals(other.t1) && this.t2.equals(other.t2))
+					return true;
+				if (this.t2.equals(other.t1) && this.t1.equals(other.t2))
+					return true;
+			}
+			return false;
+		}
+		
+		public String toString()
+		{
+			return "term pair: {" + t1 + ", " + t2 + "}";
+		}
 	}
 	
 	@Override
@@ -145,12 +172,13 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 		DatalogProgram output = fac.getDatalogProgram(); //(cqie.getHead().getPredicate());
 		
+		try {
 		int Q = 0;
 		{
 			List<Atom> mainbody = new LinkedList<Atom>();
 			for (Atom a: cqie.getBody())
 				if (a.getArity() == 2)
-					mainbody.add(getAtom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
+						mainbody.add(getAtom(getQName(a.getPredicate().getName(), ++Q), a.getTerms()));
 			
 			// if no binary predicates
 			if (mainbody.size() == 0)
@@ -201,12 +229,16 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		//System.out.println("\nEXT PREDICATES");
 		for (CQIE ext: getExtPredicates(cqie, gen))
 			output.appendRule(ext);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return output;
 	}
 	
 	
-	public List<CQIE> getExtPredicates(CQIE cqie, Set<PropertySomeClassRestriction> gencon) //throws MalformedURIException
+	public List<CQIE> getExtPredicates(CQIE cqie, Set<PropertySomeClassRestriction> gencon) throws URISyntaxException //throws MalformedURIException
 	{
 		List<CQIE> list = new LinkedList<CQIE>();
 		Set<Predicate> exts = new HashSet<Predicate>();
@@ -214,8 +246,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		for (Atom a: cqie.getBody())
 			exts.add(a.getPredicate());
 				
-		reasoner.precomputeInferences();
-
 		
 		// GENERATING CONCEPTS
 		
@@ -225,7 +255,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			Term x = fac.getVariable("x");
 			
 			for (Predicate c: tbox.getConcepts())
-				if (!c.isOWLNothing() && r.isSubsumed(c, some))
+				//COMM if (!c.isOWLNothing() && r.isSubsumed(c, some))
 				{
 					//System.out.println("EXT COMPUTE SUBCLASSES: " + c);
 					list.add(getCQIE(getAtom(uri, x), getAtom(c.getName(), x)));
@@ -237,7 +267,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				exts.add(ra.getPredicate());
 				ra.setPredicate(fac.getPredicate(getExtName(ra.getPredicate().getName()), 2));
 				//System.out.println(ra);
-				if(r.isSubsumed(f.getOWLObjectSomeValuesFrom(some.getProperty(), f.getOWLThing()), some))
+				//COMM if(r.isSubsumed(f.getOWLObjectSomeValuesFrom(some.getProperty(), f.getOWLThing()), some))
 					list.add(getCQIE(getAtom(uri, x), ra));
 			}
 			/*
@@ -257,7 +287,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			*/
 		}
 				
-		
+	/* COMM	
 		for (Predicate pred: exts)
 		{
 			if (pred.getArity() == 1)
@@ -296,17 +326,17 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					}
 			}
 		}
-		
+	*/	
 		return list;
 	}
 	
-	private static URI getExtName(URI name)
+	private static URI getExtName(URI name) throws URISyntaxException
 	{
 		return new URI(name.getScheme(), name.getSchemeSpecificPart(), 
 				"EXT_" + name.getFragment());
 	}
 
-	private static URI getExtName(PropertySomeClassRestriction some) //throws MalformedURIException 
+	private static URI getExtName(PropertySomeClassRestriction some) throws URISyntaxException //throws MalformedURIException 
 	{
 		URI property = some.getPredicate().getName();
 		return new URI(property.getScheme(), property.getSchemeSpecificPart(), 
@@ -314,19 +344,40 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					+ some.getFiller().getPredicate().getName().getFragment());
 	}
 
-	private static URI getQName(URI name, int pos)  
+	private static URI getQName(URI name, int pos) throws URISyntaxException  
 	{
 		return new URI(name.getScheme(), name.getSchemeSpecificPart(), 
 					"Q_" + pos + "_" + name.getFragment());
 	}
 
 	
+	private Set<TreeWitness> getReducedSetOfTreeWitnesses(CQIE cqie)
+	{
+		Set<TreeWitness> treewitnesses = getTreeWitnesses(cqie);
+
+		Set<TreeWitness> subtws = new HashSet<TreeWitness>();
+		for (TreeWitness tw: treewitnesses)
+		{
+			boolean subsumed = false;
+			for (TreeWitness tw1: treewitnesses)
+				if (!tw.equals(tw1) && tw.getDomain().equals(tw1.getDomain()) && tw.getRoots().equals(tw1.getRoots()))
+					// COMM if (reasoner.isEntailed(f.getOWLSubClassOfAxiom(tw.getGenerator(), tw1.getGenerator())))
+					{
+						System.out.println("SUBSUMED: " + tw + " BY " + tw1);
+						subsumed = true;
+						//break;
+					}
+			if (!subsumed)
+				subtws.add(tw);
+		}
+		return subtws;
+	}
 	
-	
-	public Set<TreeWitness> getTreeWitnesses(CQIE cqie)
+		
+	private Set<TreeWitness> getTreeWitnesses(CQIE cqie)
 	{
 		Set<TreeWitness> treewitnesses = new HashSet<TreeWitness>();
-		
+/* COMM		
 		for (Term v: cqie.getVariables())
 		{
 			System.out.println("VARIABLE " + v);
@@ -359,12 +410,12 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			System.out.println("  EDGES " + edges);
 			System.out.println("  ENDTYPE " + endtype);
 
-			for (SubClassAxiomImpl a: axioms)
+			for (SubClassAxiomImpl a: generatingAxioms)
 			{
 				PropertySomeClassRestriction some = (PropertySomeClassRestriction)a.getSuper();
 				if (isTreeWitness(some, roots, edges, endtype))
 				{
-					TreeWitness tw = new TreeWitness(some, roots, getRootType(roots), v);
+					TreeWitness tw = new TreeWitness(some, roots, getRootType(cqie, roots), v);
 					System.out.println(tw);
 					treewitnesses.add(tw);				
 				}
@@ -380,11 +431,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				saturateTreeWitnesses(treewitnesses, delta, new HashSet<Term>(), new LinkedList<OWLObjectPropertyExpression>(), twa);
 			}
 		while (treewitnesses.addAll(delta));
-		
+*/		
 		return treewitnesses;
 	}
 	
-	
+/* COMM	
 	private void saturateTreeWitnesses(CQIE cqie, Set<TreeWitness> treewitnesses, Set<TreeWitness> delta, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<TreeWitness> tws)
 	{
 		boolean saturated = true;
@@ -456,21 +507,22 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			
 			System.out.println("      NON-ROOTS ARE " + (nonrootsbound ? "" : "NOT") + " BOUND");
 			if (nonrootsbound)
-				for (SubClassAxiomImpl a: axioms)
+				for (SubClassAxiomImpl a: generatingAxioms)
 				{
 					PropertySomeClassRestriction some = (PropertySomeClassRestriction)a.getSuper();
 					if (isTreeWitness(some, roots, edges, endtype))
 					{
-						TreeWitness tw = new TreeWitness(some, roots, getRootType(roots), nonroots);
+						TreeWitness tw = new TreeWitness(some, roots, getRootType(cqie, roots), nonroots);
 						System.out.println(tw);
 						delta.add(tw);				
 					}
 				}
 		}
+		
 	}
-	
-	
-	private boolean isTreeWitness(PropertySomeClassRestriction some, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<OWLClassExpression> endtype)
+	*/
+	/* COMM
+	private boolean isTreeWitness(PropertySomeClassRestriction some, Set<Term> roots, List<OWLObjectPropertyExpression> edges, Set<ClassDescription> endtype)
 	{
 		System.out.println("      CHECKING " + some);
 		boolean match = false;
@@ -500,7 +552,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		System.out.println("         ALL MATCHED");
 		return true;
 	}
-
+*/
 	private Set<ClassDescription> getRootType(CQIE cqie, Set<Term> roots)
 	{
 		Set<ClassDescription> roottype = new HashSet<ClassDescription>();
@@ -517,30 +569,4 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	
 	
 	
-	public static List<SubClassAxiomImpl> getGeneratingAxioms(Ontology o) 
-	{
-		List<SubClassAxiomImpl> axioms = new LinkedList<SubClassAxiomImpl>();
-		System.out.println("AXIOMS");
-		for (Axiom ax: o.getAssertions())
-		{
-			if (ax instanceof SubClassAxiomImpl)
-			{
-				SubClassAxiomImpl sax = (SubClassAxiomImpl)ax;
-				ClassDescription sc = sax.getSuper();
-				if (sc instanceof PropertySomeClassRestriction)
-				{
-					PropertySomeClassRestriction some = (PropertySomeClassRestriction)sc;
-					System.out.println("property " + some.getPredicate() + ", filler " + some.getFiller() + " from " + sax);
-					axioms.add(sax);
-				}
-				else //if (sc instanceof OClass)
-				{
-					System.out.println("SUBCLASS OF " + sc + ": " + sax + ((sc instanceof OClass) ? "": " UNKNOWN TYPE"));
-				}
-			}
-			else
-				System.out.println(ax);
-		}
-		return axioms;
-	}
 }
