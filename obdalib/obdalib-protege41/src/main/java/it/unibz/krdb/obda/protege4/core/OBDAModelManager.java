@@ -41,6 +41,8 @@ import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
@@ -302,6 +304,7 @@ public class OBDAModelManager implements Disposable {
 
 			switch (type) {
 			case ABOUT_TO_CLASSIFY:
+				loadingData = true;
 				log.debug("ABOUT TO CLASSIFY");
 				// if ((!inititializing) && (obdamodels != null) &&
 				// (owlEditorKit != null) && (getActiveOBDAModel() != null)) {
@@ -323,6 +326,7 @@ public class OBDAModelManager implements Disposable {
 				break;
 
 			case ONTOLOGY_CLASSIFIED:
+				loadingData = false;
 				break;
 
 			case ACTIVE_ONTOLOGY_CHANGED:
@@ -500,7 +504,22 @@ public class OBDAModelManager implements Disposable {
 		if (ontology == null)
 			return;
 		
-		owlmm.setDirty(ontology);
+//		owlmm.setDirty(ontology);
+		
+		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass6677841155"));
+		OWLAxiom axiom = owlmm.getOWLDataFactory().getOWLDeclarationAxiom(newClass);
+
+		try {
+			AddAxiom addChange = new AddAxiom(ontology, axiom);
+			owlmm.applyChange(addChange);
+			RemoveAxiom removeChange = new RemoveAxiom(ontology, axiom);
+			owlmm.applyChange(removeChange);
+		} catch (Exception e) {
+			log.warn("Exception forcing an ontology change. Your OWL model might contain a new class that you need to remove manually: {}",
+					newClass.getIRI());
+			log.warn(e.getMessage());
+			log.debug(e.getMessage(), e);
+		}
 	}
 
 	/***
