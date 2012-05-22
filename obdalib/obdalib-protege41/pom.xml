@@ -278,11 +278,11 @@
 						<Bundle-Description>The OBDA plugin for Protege 4.1</Bundle-Description>
 						<Bundle-Vendor>Free University of Bozen-Bolzano. KRDB Research
 							Centre</Bundle-Vendor>
-						<Implementation-Version>${project.version}.b1474</Implementation-Version>
+						<Implementation-Version>${project.version}.b1479</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
 						<Bundle-Version>1.7-alpha</Bundle-Version>
-						<Build-Number>1474</Build-Number>
+						<Build-Number>1479</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
 						<Import-Package>!org.json, javax.xml.datatype, javax.swing.*,
