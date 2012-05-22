@@ -109,11 +109,11 @@ public class TreeWitnessReformulator implements QueryRewriter {
 		log.debug("binary predicates: " + predicates);
 
 		// compute tree witness functions
-		Set<TreeWitness> tws = new HashSet<TreeWitness>();
+		Set<TreeWitnessObsolete> tws = new HashSet<TreeWitnessObsolete>();
 		for (Term t : terms) {
 			for (Predicate p : predicates) {
 				for (int d = 1; d <= 2; d++) {
-					TreeWitness tw = new TreeWitness(t, new PredicatePosition(p, d));
+					TreeWitnessObsolete tw = new TreeWitnessObsolete(t, new PredicatePosition(p, d));
 					if (tw.extendWithAtoms(cqie.getBody())) {
 						log.debug(tw.toString());
 						List<Term> nonroots = tw.getNonRoots();
@@ -143,7 +143,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 			}
 		}
 		log.debug("TREE WITNESSES");
-		for (TreeWitness tw : tws) {
+		for (TreeWitnessObsolete tw : tws) {
 			log.debug(tw.toString());
 		}
 
@@ -215,7 +215,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	// check whether the term t of the tree witness tw can be an instance of C
 	// in the anonymous part
 
-	private boolean checkTree(TreeWitness tw, Term t, ClassDescription C) {
+	private boolean checkTree(TreeWitnessObsolete tw, Term t, ClassDescription C) {
 		if (tw.isInDomain(t) && !tw.isRoot(t)) {
 			PredicatePosition pp = tw.getLabelTail(t);
 			log.debug("checking tree for predicate position: " + pp + " for " + t);
@@ -230,10 +230,10 @@ public class TreeWitnessReformulator implements QueryRewriter {
 
 	// return the atom that replaces a in the query (either head-atom or ext-atom)
 	
-	private Atom rewriteAtom(DatalogProgram out, Set<TreeWitness> tws, Atom a, CQIE cqie, Atom head, Atom ext, Map<ClassDescription, Predicate> views) {
+	private Atom rewriteAtom(DatalogProgram out, Set<TreeWitnessObsolete> tws, Atom a, CQIE cqie, Atom head, Atom ext, Map<ClassDescription, Predicate> views) {
 		
 		boolean nontrivialRule = false;
-		for (TreeWitness tw : tws) {
+		for (TreeWitnessObsolete tw : tws) {
 			log.debug("atom " + a + " on " + tw + " with term " + a.getTerms());
 			
 			boolean inDomain = true;
@@ -251,7 +251,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 				continue;
 			}
 
-			List<Atom> wb = getRuleBodyForTreeWitness(tw, cqie, views);
+			List<Atom> wb = getRuleBodyForTreeWitnessObsolete(tw, cqie, views);
 			if (wb != null) {
 				out.appendRule(fac.getCQIE(head, wb));
 				nontrivialRule = true; 
@@ -268,7 +268,7 @@ public class TreeWitnessReformulator implements QueryRewriter {
 	
 	// returns null if no rule should be produced for the tree witness
 
-	private List<Atom> getRuleBodyForTreeWitness(TreeWitness tw, CQIE cqie, Map<ClassDescription, Predicate> views) {
+	private List<Atom> getRuleBodyForTreeWitnessObsolete(TreeWitnessObsolete tw, CQIE cqie, Map<ClassDescription, Predicate> views) {
 		List<Term> roots = tw.getRoots();
 		Term x = roots.get(0);
 
