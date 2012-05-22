@@ -1,20 +1,21 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>obdalib-parent</artifactId>
-    <groupId>inf.unibz.it.obda</groupId>
-    <version>1.7-alpha</version>
-    <relativePath>..</relativePath>
-  </parent>
-  <artifactId>obdalib-owlapi3</artifactId>
-  
-  
-  <dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>obdalib-parent</artifactId>
+		<groupId>inf.unibz.it.obda</groupId>
+		<version>1.7-alpha</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>obdalib-owlapi3</artifactId>
+
+
+	<dependencies>
 		<dependency>
 			<groupId>inf.unibz.it.obda</groupId>
 			<artifactId>obdalib-core</artifactId>
 			<version>1.7-alpha</version>
-			</dependency>
+		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi</artifactId>
@@ -26,14 +27,10 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-	<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
-		</dependency> <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-core</artifactId> 
-		</dependency> -->		<!-- <dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency> -->
+		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
+			</dependency> <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-core</artifactId> 
+			</dependency> -->		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
+			<type>jar</type> <scope>compile</scope> </dependency> -->
 	</dependencies>
 
 
@@ -57,15 +54,15 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-			</plugin>			
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
-			
-			
+
+
 		</plugins>
 	</build>
-	
+
 	<name>obdalib-owlapi3</name>
 </project>

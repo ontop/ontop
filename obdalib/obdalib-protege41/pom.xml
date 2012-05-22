@@ -161,36 +161,20 @@
 
 		<!-- Required by OSGi plugins -->
 
-		<dependency>
-			<groupId>org.eclipse.equinox</groupId>
-			<artifactId>osgi</artifactId>
-			<version>3.1.1</version>
-			<scope>provided</scope>
-		</dependency>
+		<!-- <dependency> <groupId>org.eclipse.equinox</groupId> <artifactId>osgi</artifactId> 
+			<version>3.1.1</version> <scope>provided</scope> </dependency> -->
 
 		<!-- Eclipse dependencies -->
 
-		<dependency>
-			<groupId>org.eclipse.equinox</groupId>
-			<artifactId>common</artifactId>
-			<version>3.3.0-v20070426</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.equinox</groupId>
-			<artifactId>registry</artifactId>
-			<version>3.3.0-v20070522</version>
-			<scope>provided</scope>
-		</dependency>
+		<!-- <dependency> <groupId>org.eclipse.equinox</groupId> <artifactId>common</artifactId> 
+			<version>3.3.0-v20070426</version> <scope>provided</scope> </dependency> 
+			<dependency> <groupId>org.eclipse.equinox</groupId> <artifactId>registry</artifactId> 
+			<version>3.3.0-v20070522</version> <scope>provided</scope> </dependency> -->
 
 		<!-- Protege 4 and OWLAPI bundle dependencies -->
 
-		<dependency>
-			<groupId>org.protege</groupId>
-			<artifactId>org.protege.common</artifactId>
-			<version>4.1.0-b239</version>
-			<scope>provided</scope>
-		</dependency>
+		<!-- <dependency> <groupId>org.protege</groupId> <artifactId>org.protege.common</artifactId> 
+			<version>4.1.0-b239</version> <scope>provided</scope> </dependency> -->
 		<dependency>
 			<groupId>org.protege</groupId>
 			<artifactId>org.protege.editor.core.application</artifactId>
@@ -238,6 +222,7 @@
 					<source>1.6</source>
 					<target>1.6</target>
 					<excludes>
+						<exclude>*it/unibz/krdb/obda/owlrefplatform/core/reformulation/TreeWitness*</exclude>
 						<exclude>**/TW*.java</exclude>
 						<exclude>**/LUBM*.java</exclude>
 					</excludes>
