@@ -251,8 +251,10 @@ public class JDBCUtility implements Serializable {
 			case PGSQL:
 			case DB2:
 			case TEIID:
-			case ORACLE:
 				sql = "TRUE";
+				break;
+			case ORACLE:
+				sql = "1";
 				break;
 			case SQLSERVER:
 				sql = "'TRUE'";
@@ -265,8 +267,10 @@ public class JDBCUtility implements Serializable {
 			case PGSQL:
 			case DB2:
 			case TEIID:
-			case ORACLE:
 				sql = "FALSE";
+				break;
+			case ORACLE:
+				sql = "0";
 				break;
 			case SQLSERVER:
 				sql = "'FALSE'";
@@ -310,5 +314,22 @@ public class JDBCUtility implements Serializable {
 			sql = String.format("\"%s\" %s", tablename, viewname);
 		}
 		return sql;
+	}
+	
+	public String quote(String name) {
+		String str = "";
+		switch (driver) {
+		case MYSQL:
+			str = String.format("`%s`", name);
+			break;
+		case H2:
+		case PGSQL:
+		case TEIID:
+		case DB2:
+		case ORACLE:
+		case SQLSERVER:
+			str = String.format("\"%s\"", name);
+		}
+		return str;
 	}
 }

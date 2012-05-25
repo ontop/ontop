@@ -519,7 +519,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 					sb.append(jdbcutil.getSQLLexicalForm(uc.getURI().toString()));
 				}
 				sb.append(" AS ");
-				sb.append(signature.get(hpos));
+				sb.append(jdbcutil.quote(signature.get(hpos)));
 
 				if (hit.hasNext()) {
 					sb.append(", ");
