@@ -318,7 +318,7 @@ public class CQCUtilities {
 	 *            is needed to provide a numbering to each of the new constants
 	 * @return
 	 */
-	private static int getCanonicalAtom(Atom atom, int constantcounter, Map<Variable, Term> currentMap) {
+	public static int getCanonicalAtom(Atom atom, int constantcounter, Map<Variable, Term> currentMap) {
 		List<Term> headterms = ((Atom) atom).getTerms();
 		for (int i = 0; i < headterms.size(); i++) {
 			Term term = headterms.get(i);

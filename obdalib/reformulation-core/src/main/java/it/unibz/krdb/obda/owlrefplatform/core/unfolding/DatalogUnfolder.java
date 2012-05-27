@@ -78,17 +78,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (term instanceof FunctionalTermImpl) {
 					FunctionalTermImpl function = (FunctionalTermImpl) term;
 					String predicateName = function.getFunctionSymbol().getName().toString();
-//					if (functTermMap.containsKey(predicateName)) {
-//						/*
-//						 * We found an existing fucntional term that has the
-//						 * same predicate, these must have the same airity,
-//						 * otherwise we cannt match URI constants with
-//						 * functional terms.
-//						 */
-//						Function existing = functTermMap.get(predicateName);
-//						if (function.getTerms().size() != existing.getTerms().size())
-//							throw new Exception("The model contains two URI building functions with the same base but different arity");
-//					}
+					// if (functTermMap.containsKey(predicateName)) {
+					// /*
+					// * We found an existing fucntional term that has the
+					// * same predicate, these must have the same airity,
+					// * otherwise we cannt match URI constants with
+					// * functional terms.
+					// */
+					// Function existing = functTermMap.get(predicateName);
+					// if (function.getTerms().size() !=
+					// existing.getTerms().size())
+					// throw new
+					// Exception("The model contains two URI building functions with the same base but different arity");
+					// }
 					functTermMap.put(predicateName, function);
 				}
 			}
@@ -333,7 +335,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		QueryUtils.copyQueryModifiers(inputquery, dp);
 		dp.appendRule(partialEvaluation.getRules());
 
-		// log.debug("Computed partial evaluation: \n{}", dp);
+		
 		long endtime = System.nanoTime();
 		long timeelapsedseconds = (endtime - startime) / 1000000;
 		log.debug("Unfolding size: {}   Time elapsed: {} ms", dp.getRules().size(), timeelapsedseconds);
@@ -384,20 +386,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			if (pev != null) {
 
 				// TODO Hack. The following is a small hack
-				/*
-				 * We now take into account Primary Key constraints on the
-				 * database to avoid adding redundant atoms to the query. This
-				 * could also be done as an afterstep, using unification and CQC
-				 * checks, however, its is much more expensive that way.
-				 */
 
 				/*
-				 * Given a primary Key on A, on columns 1,2, and an atom
-				 * A(x,y,z) added by the resolution engine (always added at the
-				 * end of the CQ body), we will look for other atom A(x,y,z') if
-				 * the atom exists, we can unify both atoms, apply the MGU to
-				 * the query and remove one of the atoms.
+				 * The following blocks eliminate redundant atoms w.r.t. query
+				 * containment by doing syntactic checks on the atoms. This
+				 * saves us from requiring full CQC checks. They are a bit
+				 * hacky, and they change the cardinality of non-distinct
+				 * queries.
 				 */
+
 				List<Atom> newbody = pev.getBody();
 				int newatomcount = mappingRule.getBody().size();
 				int oldatoms = newbody.size() - newatomcount - 1;
@@ -406,48 +403,115 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					if (newatom.getPredicate() instanceof BooleanOperationPredicate)
 						continue;
 
+					/*
+					 * OPTIMIZATION 1: PRIMARY KEYS
+					 * 
+					 * We now take into account Primary Key constraints on the
+					 * database to avoid adding redundant atoms to the query.
+					 * This could also be done as an afterstep, using
+					 * unification and CQC checks, however, its is much more
+					 * expensive that way.
+					 */
+
+					/*
+					 * Given a primary Key on A, on columns 1,2, and an atom
+					 * A(x,y,z) added by the resolution engine (always added at
+					 * the end of the CQ body), we will look for other atom
+					 * A(x,y,z') if the atom exists, we can unify both atoms,
+					 * apply the MGU to the query and remove one of the atoms.
+					 */
+
 					List<Integer> pkey = primaryKeys.get(newatom.getPredicate());
-					if (pkey == null || pkey.isEmpty()) {
-						continue;
+					if (pkey != null && !pkey.isEmpty()) {
+						/*
+						 * the predicate has a primary key, looking for
+						 * candidates for unification, when we find one we can
+						 * stop, since the application of this optimization at
+						 * each step of the derivation tree guarantees there
+						 * wont be any other redundant atom.
+						 */
+						Atom replacement = null;
+
+						for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
+							Atom tempatom = newbody.get(idx2);
+
+							if (tempatom.getPredicate().equals(newatom.getPredicate())) {
+
+								boolean redundant = true;
+								for (Integer termidx : pkey) {
+									if (!newatom.getTerm(termidx - 1).equals(tempatom.getTerm(termidx - 1))) {
+										redundant = false;
+										break;
+									}
+								}
+								if (redundant) {
+									/* found a replacement atom */
+									replacement = tempatom;
+									break;
+								}
+
+							}
+						}
+						if (replacement != null) {
+							Map<Variable, Term> mgu = Unifier.getMGU(newatom, replacement);
+							pev = Unifier.applyUnifier(pev, mgu);
+							newbody = pev.getBody();
+							newbody.remove(newatomidx);
+							newatomidx -= 1;
+							continue;
+						}
 					}
 
 					/*
-					 * the predicate has a primary key, looking for candidates
-					 * for unification, when we find one we can stop, since the
-					 * application of this optimization at each step of the
-					 * derivation tree guarantees there wont be any other
-					 * redundant atom.
+					 * We remove all atoms that do not impose extra conditions
+					 * on existing data. These are atoms that are implied by
+					 * other atoms, and only check for the existance of data.
+					 * They are redundant because there exists another atom that
+					 * guarnatees satisfiabiliy of this atom. E.g.,
+					 * 
+					 * b1 = r(x,y,z), r(m,n,o) b1 = r(x,y,z), r(x,n,o) b1 =
+					 * r(x,y,z), r(x,y,o)
+					 * 
+					 * In all these bodies, the second atoms is redundant w.r.t.
+					 * set semantics. Note that with bag semantics, removing the
+					 * atoms changes the cardinality of the query. E.g., let the
+					 * data for r be:
+					 * 
+					 * r(1,2,3), r(4,5,6), r(1,7,8).
+					 * 
+					 * Then we have that |b1| = 9, |b2| = 5 and |b3| = 3.
+					 * However, since the current implementation of the system
+					 * is relaxed w.r.t. count of non-distinct values (it will
+					 * probably stay like that), we dont care and we can remove
+					 * these atoms.
+					 * 
+					 * The condition is, given 2 atoms A, B, freeze B, and try
+					 * to unify A,B, if true, then B is redundant, eliminate,
+					 * else non redundant.
 					 */
-					Atom replacement = null;
 
-					for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
-						Atom tempatom = newbody.get(idx2);
-
-						if (tempatom.getPredicate().equals(newatom.getPredicate())) {
-
-							boolean redundant = true;
-							for (Integer termidx : pkey) {
-								if (!newatom.getTerm(termidx - 1).equals(tempatom.getTerm(termidx - 1))) {
-									redundant = false;
-									break;
-								}
-							}
-							if (redundant) {
-								/* found a replacement atom */
-								replacement = tempatom;
-								break;
-							}
-
-						}
-					}
-					if (replacement == null)
-						continue;
-
-					Map<Variable, Term> mgu = Unifier.getMGU(newatom, replacement);
-					pev = Unifier.applyUnifier(pev, mgu);
-					newbody = pev.getBody();
-					newbody.remove(newatomidx);
-					newatomidx -= 1;
+//					boolean redundant = false;
+//					List<Atom> body = pev.getBody();
+//					Map<Variable, Term> mgu = null;
+//					for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
+//
+//						Atom atom2 = body.get(idx2);
+//						Atom frozenAtom = atom2.clone();
+//						CQCUtilities.getCanonicalAtom(frozenAtom, 1, new HashMap<Variable, Term>());
+//						if (Unifier.getMGU(frozenAtom, newatom) != null) {
+//							System.out.println("Redundant");
+//							mgu = Unifier.getMGU(atom2, newatom);
+//							redundant = true;
+//							break;
+//						}
+//					}
+//					if (redundant) {
+//						pev = Unifier.applyUnifier(pev, mgu);
+//						newbody = pev.getBody();
+//						newbody.remove(newatomidx);
+//						newatomidx -= 1;
+//						continue;
+//					}
 
 				}
 
