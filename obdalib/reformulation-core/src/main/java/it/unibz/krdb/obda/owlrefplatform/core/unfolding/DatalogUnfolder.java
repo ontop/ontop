@@ -335,7 +335,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		QueryUtils.copyQueryModifiers(inputquery, dp);
 		dp.appendRule(partialEvaluation.getRules());
 
-		
 		long endtime = System.nanoTime();
 		long timeelapsedseconds = (endtime - startime) / 1000000;
 		log.debug("Unfolding size: {}   Time elapsed: {} ms", dp.getRules().size(), timeelapsedseconds);
@@ -432,6 +431,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						 */
 						Atom replacement = null;
 
+						Map<Variable, Term> mgu = null;
 						for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
 							Atom tempatom = newbody.get(idx2);
 
@@ -445,15 +445,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 									}
 								}
 								if (redundant) {
-									/* found a replacement atom */
-									replacement = tempatom;
-									break;
+									/* found a candidate replacement atom */
+									mgu = Unifier.getMGU(newatom, tempatom);
+									if (mgu != null) {
+										replacement = tempatom;
+										break;
+									}
 								}
 
 							}
 						}
 						if (replacement != null) {
-							Map<Variable, Term> mgu = Unifier.getMGU(newatom, replacement);
+
+							if (mgu == null)
+								throw new RuntimeException("Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
 							pev = Unifier.applyUnifier(pev, mgu);
 							newbody = pev.getBody();
 							newbody.remove(newatomidx);
@@ -490,28 +495,29 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					 * else non redundant.
 					 */
 
-//					boolean redundant = false;
-//					List<Atom> body = pev.getBody();
-//					Map<Variable, Term> mgu = null;
-//					for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
-//
-//						Atom atom2 = body.get(idx2);
-//						Atom frozenAtom = atom2.clone();
-//						CQCUtilities.getCanonicalAtom(frozenAtom, 1, new HashMap<Variable, Term>());
-//						if (Unifier.getMGU(frozenAtom, newatom) != null) {
-//							System.out.println("Redundant");
-//							mgu = Unifier.getMGU(atom2, newatom);
-//							redundant = true;
-//							break;
-//						}
-//					}
-//					if (redundant) {
-//						pev = Unifier.applyUnifier(pev, mgu);
-//						newbody = pev.getBody();
-//						newbody.remove(newatomidx);
-//						newatomidx -= 1;
-//						continue;
-//					}
+					// boolean redundant = false;
+					// List<Atom> body = pev.getBody();
+					// Map<Variable, Term> mgu = null;
+					// for (int idx2 = 0; idx2 <= oldatoms; idx2++) {
+					//
+					// Atom atom2 = body.get(idx2);
+					// Atom frozenAtom = atom2.clone();
+					// CQCUtilities.getCanonicalAtom(frozenAtom, 1, new
+					// HashMap<Variable, Term>());
+					// if (Unifier.getMGU(frozenAtom, newatom) != null) {
+					// System.out.println("Redundant");
+					// mgu = Unifier.getMGU(atom2, newatom);
+					// redundant = true;
+					// break;
+					// }
+					// }
+					// if (redundant) {
+					// pev = Unifier.applyUnifier(pev, mgu);
+					// newbody = pev.getBody();
+					// newbody.remove(newatomidx);
+					// newatomidx -= 1;
+					// continue;
+					// }
 
 				}
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY xsd: 'http://www.w3.org/2001/XMLSchema#'>
+   <!ENTITY join-elimination-test: 'http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#'>
+   <!ENTITY owl: 'http://www.w3.org/2002/07/owl#'>
+   <!ENTITY quest: 'http://obda.org/quest#'>
+   <!ENTITY : 'http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#'>
+   <!ENTITY rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+   <!ENTITY rdfs: 'http://www.w3.org/2000/01/rdf-schema#'>
+]>
+<OBDA version="1.0" xml:base="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#" xmlns="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#" xmlns::="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#" xmlns:join-elimination-test:="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#" xmlns:owl:="http://www.w3.org/2002/07/owl#" xmlns:quest:="http://obda.org/quest#" xmlns:rdf:="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs:="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd:="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="h2">
+    <mapping id="M:0">
+      <CQ string="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#A(http://obda.org/quest#uri(&quot;http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#object2-{}&quot;,$id)), http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#R(http://obda.org/quest#uri(&quot;http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#object1-{}&quot;,$id),http://obda.org/quest#uri(&quot;http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#object2-{}&quot;,$id))"/>
+      <SQLQuery string="select id from address where number = 1"/>
+    </mapping>
+    <mapping id="M:0(0)">
+      <CQ string="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#B(http://obda.org/quest#uri(&quot;http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#object2-{}&quot;,$id)), http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#R(http://obda.org/quest#uri(&quot;http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#object1-{}&quot;,$id),http://obda.org/quest#uri(&quot;http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#object2-{}&quot;,$id))"/>
+      <SQLQuery string="select id from address where number = 2"/>
+    </mapping>
+  </mappings>
+  <dataSource URI="h2" databaseDriver="org.h2.Driver" databasePassword="" databaseURL="jdbc:h2:mem:questjunitdb" databaseUsername="sa" isAboxDump="" ontouri="http://it.unibz.krdb/obda/ontologies/join-elimination-test.owl#"/>
+  <SavedQueries/>
+</OBDA>
