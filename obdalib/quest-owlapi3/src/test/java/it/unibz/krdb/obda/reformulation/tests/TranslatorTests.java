@@ -35,12 +35,15 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("A")));
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("prop1")));
+		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/prop1")));
+		
 		
 		OWLObjectPropertyRangeAxiom ax = factory.getOWLObjectPropertyRangeAxiom(prop, class1);
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI3Translator translator = new OWLAPI3Translator();
@@ -63,12 +66,14 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("A")));
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("prop1")));
+		OWLClass class1 = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/prop1")));
 		
 		OWLObjectPropertyDomainAxiom ax = factory.getOWLObjectPropertyDomainAxiom(prop, class1);
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
+		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(class1));
+		
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI3Translator translator = new OWLAPI3Translator();
@@ -92,12 +97,12 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("R")));
-		OWLObjectProperty invofprop =  factory.getOWLObjectProperty(IRI.create(URI.create("S")));
+		OWLObjectProperty prop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/R")));
+		OWLObjectProperty invofprop =  factory.getOWLObjectProperty(IRI.create(URI.create("http://example/S")));
 		
 		OWLInverseObjectPropertiesAxiom ax = factory.getOWLInverseObjectPropertiesAxiom(prop, invofprop);
 		
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI3Translator translator = new OWLAPI3Translator();
@@ -114,17 +119,17 @@ public class TranslatorTests extends TestCase {
 		
 		Property included = (Property) a.getSub();
 		assertEquals(false, included.isInverse());
-		assertEquals("R", included.getPredicate().getName().toString());
+		assertEquals("http://example/R", included.getPredicate().getName().toString());
 		Property indlucing = (Property) a.getSuper();
 		assertEquals(true, indlucing.isInverse());
-		assertEquals("S", indlucing.getPredicate().getName().toString());
+		assertEquals("http://example/S", indlucing.getPredicate().getName().toString());
 		
 		included = (Property) b.getSub();
 		assertEquals(false, included.isInverse());
-		assertEquals("S", included.getPredicate().getName().toString());
+		assertEquals("http://example/S", included.getPredicate().getName().toString());
 		indlucing = (Property) b.getSuper();
 		assertEquals(true, indlucing.isInverse());
-		assertEquals("R", indlucing.getPredicate().getName().toString());
+		assertEquals("http://example/R", indlucing.getPredicate().getName().toString());
 		
 	}
 	
@@ -133,12 +138,12 @@ public class TranslatorTests extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLDataFactory factory = manager.getOWLDataFactory(); 
 		
-		OWLClass clsA = factory.getOWLClass(IRI.create(URI.create("A")));
-		OWLClass clsB = factory.getOWLClass(IRI.create(URI.create("B")));
+		OWLClass clsA = factory.getOWLClass(IRI.create(URI.create("http://example/A")));
+		OWLClass clsB = factory.getOWLClass(IRI.create(URI.create("http://example/B")));
 		
 		OWLEquivalentClassesAxiom ax = factory.getOWLEquivalentClassesAxiom(clsA, clsB);
 				
-		OWLOntology onto = manager.createOntology(IRI.create(URI.create("testonto")));
+		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
 		manager.addAxiom(onto, ax);
 		
 		OWLAPI3Translator translator = new OWLAPI3Translator();
@@ -153,14 +158,14 @@ public class TranslatorTests extends TestCase {
 		SubClassAxiomImpl c2 = (SubClassAxiomImpl) assit.next();
 		
 		OClass included = (OClass) c1.getSub();
-		assertEquals("A", included.getPredicate().getName().toString());
+		assertEquals("http://example/A", included.getPredicate().getName().toString());
 		OClass indlucing = (OClass) c1.getSuper();
-		assertEquals("B", indlucing.getPredicate().getName().toString());
+		assertEquals("http://example/B", indlucing.getPredicate().getName().toString());
 		
 		included = (OClass) c2.getSub();
-		assertEquals("B", included.getPredicate().getName().toString());
+		assertEquals("http://example/B", included.getPredicate().getName().toString());
 		indlucing = (OClass) c2.getSuper();
-		assertEquals("A", indlucing.getPredicate().getName().toString());
+		assertEquals("http://example/A", indlucing.getPredicate().getName().toString());
 		
 	}
 	

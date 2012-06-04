@@ -68,127 +68,137 @@ public class MappingAnalyzer {
 		DatalogProgram datalog = dfac.getDatalogProgram();
 
 		for (OBDAMappingAxiom axiom : mappingList) {
-			// Obtain the target and source query from each mapping axiom in the model.
-			CQIE targetQuery = (CQIE) axiom.getTargetQuery();
-			OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
+			try {
+				// Obtain the target and source query from each mapping axiom in
+				// the model.
+				CQIE targetQuery = (CQIE) axiom.getTargetQuery();
+				OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
-			// Construct the SQL query tree from the source query
-			QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
-			
-			// Create a lookup table for variable swapping
-			LookupTable lookupTable = createLookupTable(queryTree);
+				// Construct the SQL query tree from the source query
+				QueryTree queryTree = translator.contructQueryTree(sourceQuery.toString());
 
-			// We can get easily the table from the SQL query tree
-			ArrayList<Relation> tableList = queryTree.getTableSet();
+				// Create a lookup table for variable swapping
+				LookupTable lookupTable = createLookupTable(queryTree);
 
-			// Construct the body from the source query
-			ArrayList<Atom> atoms = new ArrayList<Atom>();
-			for (Relation table : tableList) {
-				// Construct the URI from the table name
-				String tableName = table.getName();
-				URI predicateName = URI.create(tableName);
+				// We can get easily the table from the SQL query tree
+				ArrayList<Relation> tableList = queryTree.getTableSet();
 
-				// Construct the predicate using the table name
-				int arity = dbMetaData.getDefinition(tableName).countAttribute();
-				Predicate predicate = dfac.getPredicate(predicateName, arity);
+				// Construct the body from the source query
+				ArrayList<Atom> atoms = new ArrayList<Atom>();
+				for (Relation table : tableList) {
+					// Construct the URI from the table name
+					String tableName = table.getName();
+					URI predicateName = URI.create(tableName);
 
-				// Swap the column name with a new variable from the lookup table
-				List<Term> terms = new ArrayList<Term>();
-				for (int i = 1; i <= arity; i++) {
-					String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
-					String termName = lookupTable.lookup(columnName);
-					if (termName == null) {
-						throw new RuntimeException("Column was not found in the lookup table: " + columnName);
-					}
-					Term term = dfac.getVariable(termName);
-					terms.add(term);
-				}
-				// Create an atom for a particular table
-				Atom atom = dfac.getAtom(predicate, terms);
-				atoms.add(atom);
-			}
+					// Construct the predicate using the table name
+					int arity = dbMetaData.getDefinition(tableName).countAttribute();
+					Predicate predicate = dfac.getPredicate(predicateName, arity);
 
-			// For the join conditions
-			ArrayList<String> joinConditions = queryTree.getJoinCondition();
-			for (String predicate : joinConditions) {
-				String[] value = predicate.split("=");
-				String leftValue = value[0];
-				String rightValue = value[1];
-				Term t1 = dfac.getVariable(lookupTable.lookup(leftValue));
-				Term t2 = dfac.getVariable(lookupTable.lookup(rightValue));
-				Atom atom = dfac.getEQAtom(t1, t2);
-				atoms.add(atom);
-			}
-
-			// For the selection "where" clause conditions
-			Selection selection = queryTree.getSelection();
-			if (selection != null) {
-				// Filling up the OR stack
-				Stack<Function> stack = new Stack<Function>();
-				List<ICondition> conditions = selection.getRawConditions();
-				for (int i = 0; i < conditions.size(); i++) {
-					Object element = conditions.get(i);
-					if (element instanceof ComparisonPredicate) {
-						ComparisonPredicate pred = (ComparisonPredicate) element;
-						Function compOperator = getFunction(pred, lookupTable);
-						stack.push(compOperator);
-					} else if (element instanceof NullPredicate) {
-						NullPredicate pred = (NullPredicate) element;
-						Function nullOperator = getFunction(pred, lookupTable);
-						stack.push(nullOperator);
-					} else if (element instanceof LogicalOperator) {
-						// Check either it's AND or OR operator
-						if (element instanceof AndOperator) {
-							/*
-							 *  The AND operator has the expression: <condition> AND <condition>
-							 *  There are two types of conditions: (1) using the comparison predicate
-							 *  (such as EQ, LT, GT, etc.) and (2) using the null predicate (i.e.,
-							 *  IS NULL or IS NOT NULL). Each has a different way to handle.
-							 */
-							ICondition condition = conditions.get(i + 1); i++; // the right-hand condition
-							if (condition instanceof ComparisonPredicate) {							
-								ComparisonPredicate pred = (ComparisonPredicate) condition;
-								Term leftCondition = stack.pop();
-								Term rightCondition = getFunction(pred, lookupTable);
-								Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
-								stack.push(andOperator);
-							} else if (condition instanceof NullPredicate) {
-								NullPredicate pred = (NullPredicate) condition;
-								Term leftCondition = stack.pop();
-								Term rightCondition = getFunction(pred, lookupTable);
-								Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
-								stack.push(andOperator);
-							}
-						} else if (element instanceof OrOperator) {
-							// NO-OP
+					// Swap the column name with a new variable from the lookup
+					// table
+					List<Term> terms = new ArrayList<Term>();
+					for (int i = 1; i <= arity; i++) {
+						String columnName = dbMetaData.getFullQualifiedAttributeName(tableName, i);
+						String termName = lookupTable.lookup(columnName);
+						if (termName == null) {
+							throw new RuntimeException("Column '" + columnName + "'was not found in the lookup table: ");
 						}
-					} else {
-						/* Unsupported query */
-						return null;
+						Term term = dfac.getVariable(termName);
+						terms.add(term);
 					}
+					// Create an atom for a particular table
+					Atom atom = dfac.getAtom(predicate, terms);
+					atoms.add(atom);
 				}
 
-				// Collapsing into a single atom.
-				while (stack.size() > 1) {
-					Function orAtom = dfac.getORFunction(stack.pop(), stack.pop());
-					stack.push(orAtom);
+				// For the join conditions
+				ArrayList<String> joinConditions = queryTree.getJoinCondition();
+				for (String predicate : joinConditions) {
+					String[] value = predicate.split("=");
+					String leftValue = value[0];
+					String rightValue = value[1];
+					Term t1 = dfac.getVariable(lookupTable.lookup(leftValue));
+					Term t2 = dfac.getVariable(lookupTable.lookup(rightValue));
+					Atom atom = dfac.getEQAtom(t1, t2);
+					atoms.add(atom);
 				}
-				Function f = stack.pop();
-				Atom atom = dfac.getAtom(f.getFunctionSymbol(), f.getTerms());
-				atoms.add(atom);
-			}
 
-			// Construct the head from the target query.
-			List<Atom> atomList = targetQuery.getBody();
-			for (Atom atom : atomList) {
-				List<Term> terms = atom.getTerms();
-				List<Term> newterms = new LinkedList<Term>();
-				for (Term term : terms) {
-					newterms.add(updateTerm(term, lookupTable));
+				// For the selection "where" clause conditions
+				Selection selection = queryTree.getSelection();
+				if (selection != null) {
+					// Filling up the OR stack
+					Stack<Function> stack = new Stack<Function>();
+					List<ICondition> conditions = selection.getRawConditions();
+					for (int i = 0; i < conditions.size(); i++) {
+						Object element = conditions.get(i);
+						if (element instanceof ComparisonPredicate) {
+							ComparisonPredicate pred = (ComparisonPredicate) element;
+							Function compOperator = getFunction(pred, lookupTable);
+							stack.push(compOperator);
+						} else if (element instanceof NullPredicate) {
+							NullPredicate pred = (NullPredicate) element;
+							Function nullOperator = getFunction(pred, lookupTable);
+							stack.push(nullOperator);
+						} else if (element instanceof LogicalOperator) {
+							// Check either it's AND or OR operator
+							if (element instanceof AndOperator) {
+								/*
+								 * The AND operator has the expression:
+								 * <condition> AND <condition> There are two
+								 * types of conditions: (1) using the comparison
+								 * predicate (such as EQ, LT, GT, etc.) and (2)
+								 * using the null predicate (i.e., IS NULL or IS
+								 * NOT NULL). Each has a different way to
+								 * handle.
+								 */
+								ICondition condition = conditions.get(i + 1);
+								i++; // the right-hand condition
+								if (condition instanceof ComparisonPredicate) {
+									ComparisonPredicate pred = (ComparisonPredicate) condition;
+									Term leftCondition = stack.pop();
+									Term rightCondition = getFunction(pred, lookupTable);
+									Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
+									stack.push(andOperator);
+								} else if (condition instanceof NullPredicate) {
+									NullPredicate pred = (NullPredicate) condition;
+									Term leftCondition = stack.pop();
+									Term rightCondition = getFunction(pred, lookupTable);
+									Function andOperator = dfac.getANDFunction(leftCondition, rightCondition);
+									stack.push(andOperator);
+								}
+							} else if (element instanceof OrOperator) {
+								// NO-OP
+							}
+						} else {
+							/* Unsupported query */
+							return null;
+						}
+					}
+
+					// Collapsing into a single atom.
+					while (stack.size() > 1) {
+						Function orAtom = dfac.getORFunction(stack.pop(), stack.pop());
+						stack.push(orAtom);
+					}
+					Function f = stack.pop();
+					Atom atom = dfac.getAtom(f.getFunctionSymbol(), f.getTerms());
+					atoms.add(atom);
 				}
-				Atom newhead = dfac.getAtom(atom.getPredicate(), newterms);
-				CQIE rule = dfac.getCQIE(newhead, atoms);
-				datalog.appendRule(rule);
+
+				// Construct the head from the target query.
+				List<Atom> atomList = targetQuery.getBody();
+				for (Atom atom : atomList) {
+					List<Term> terms = atom.getTerms();
+					List<Term> newterms = new LinkedList<Term>();
+					for (Term term : terms) {
+						newterms.add(updateTerm(term, lookupTable));
+					}
+					Atom newhead = dfac.getAtom(atom.getPredicate(), newterms);
+					CQIE rule = dfac.getCQIE(newhead, atoms);
+					datalog.appendRule(rule);
+				}
+			} catch (Exception e) {
+				throw new RuntimeException("Error analyzing mapping with ID=" + axiom.getId() + " Description: " + e.getMessage());
 			}
 		}
 		return datalog;
@@ -196,18 +206,18 @@ public class MappingAnalyzer {
 
 	private Function getFunction(NullPredicate pred, LookupTable lookupTable) {
 		IValueExpression column = pred.getValueExpression();
-		
+
 		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
 		Term var = dfac.getVariable(variableName);
-		
+
 		if (pred.useIsNullOperator()) {
 			return dfac.getIsNullFunction(var);
 		} else {
 			return dfac.getIsNotNullFunction(var);
-		}		
+		}
 	}
-	
+
 	private Function getFunction(ComparisonPredicate pred, LookupTable lookupTable) {
 		IValueExpression left = pred.getValueExpressions()[0];
 		IValueExpression right = pred.getValueExpressions()[1];
@@ -224,7 +234,7 @@ public class MappingAnalyzer {
 			t2 = dfac.getVariable(termRightName);
 		} else if (right instanceof Literal) {
 			Literal literal = (Literal) right;
-			termRightName = literal.get().toString();			
+			termRightName = literal.get().toString();
 			if (literal instanceof StringLiteral) {
 				boolean isDateTime = containDateTimeString(termRightName);
 				if (isDateTime) {
@@ -272,21 +282,18 @@ public class MappingAnalyzer {
 	}
 
 	private boolean containDateTimeString(String value) {
-		final String[] formatStrings = {
-				"yyyy-MM-dd HH:mm:ss.SS",
-				"yyyy-MM-dd HH:mm:ss",
-				"yyyy-MM-dd",
-				"yyyy-MM-dd'T'HH:mm:ssZ",
-				"yyyy-MM-dd'T'HH:mm:ss.sZ"
-		};
-		
+		final String[] formatStrings = { "yyyy-MM-dd HH:mm:ss.SS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "yyyy-MM-dd'T'HH:mm:ssZ",
+				"yyyy-MM-dd'T'HH:mm:ss.sZ" };
+
 		for (String formatString : formatStrings) {
-	        try {
-	        	new SimpleDateFormat(formatString).parse(value);
-	        	return true;
-	        } catch (ParseException e) { }
-	    }
-    	return false; // the string doesn't contain date time info if none of the formats is suitable.
+			try {
+				new SimpleDateFormat(formatString).parse(value);
+				return true;
+			} catch (ParseException e) {
+			}
+		}
+		return false; // the string doesn't contain date time info if none of
+						// the formats is suitable.
 	}
 
 	/***
@@ -303,7 +310,10 @@ public class MappingAnalyzer {
 			String varName = var.getName();
 			String termName = lookupTable.lookup(varName);
 			if (termName == null) {
-				throw new RuntimeException(String.format("Variable %s not found. Make sure not to use wildecard in your SQL query, e.g., star *", var));
+				throw new RuntimeException(
+						String.format(
+								"Column %s not found. Hint: don't use wildecards in your SQL query, e.g., star *, and verify word-casing for case-sensitive database.",
+								var));
 			}
 			result = dfac.getVariable(termName);
 		} else if (term instanceof Function) {
@@ -329,14 +339,23 @@ public class MappingAnalyzer {
 			String tableName = table.getName();
 			DataDefinition def = dbMetaData.getDefinition(tableName);
 			if (def == null) {
-				throw new RuntimeException("Definition not found for table: " + tableName);
+				throw new RuntimeException("Definition not found for table '" + tableName + "'.");
 			}
 			int size = def.countAttribute();
 
 			String[] columnList = new String[2];
 			for (int i = 1; i <= size; i++) {
-				columnList[0] = dbMetaData.getAttributeName(tableName, i); // get the simple attribute name
-				columnList[1] = dbMetaData.getFullQualifiedAttributeName(tableName, i); // get the full qualified attribute name 
+				columnList[0] = dbMetaData.getAttributeName(tableName, i); // get
+																			// the
+																			// simple
+																			// attribute
+																			// name
+				columnList[1] = dbMetaData.getFullQualifiedAttributeName(tableName, i); // get
+																						// the
+																						// full
+																						// qualified
+																						// attribute
+																						// name
 				lookupTable.add(columnList);
 			}
 		}

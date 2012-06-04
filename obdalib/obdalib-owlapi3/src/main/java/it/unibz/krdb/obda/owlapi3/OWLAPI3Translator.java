@@ -77,6 +77,9 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
+import org.semanticweb.owlapi.profiles.OWL2QLProfile;
+import org.semanticweb.owlapi.profiles.OWLProfileReport;
+import org.semanticweb.owlapi.profiles.OWLProfileViolation;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,6 +177,18 @@ public class OWLAPI3Translator {
 		// ManchesterOWLSyntaxOWLObjectRendererImpl rend = new
 		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
+		OWL2QLProfile owlprofile = new OWL2QLProfile();
+		
+		OWLProfileReport report = owlprofile.checkOntology(owl);
+		Set<OWLAxiom> axiomIgnoresOWL2QL = new HashSet<OWLAxiom>();
+
+		if (!report.isInProfile()) {
+			log.warn("WARNING. The current ontology is not in the OWL 2 QL profile.");
+			log.warn(report.toString());
+//			for (OWLProfileViolation violation : report.getViolations())
+//				axiomIgnoresOWL2QL.add(violation.getAxiom());
+		}
+
 		Ontology dl_onto = ofac.createOntology(owl.getOntologyID().getOntologyIRI().toURI());
 
 		HashSet<String> objectproperties = new HashSet<String>();
@@ -219,7 +234,16 @@ public class OWLAPI3Translator {
 		Set<OWLAxiom> axioms = owl.getAxioms();
 		Iterator<OWLAxiom> it = axioms.iterator();
 		while (it.hasNext()) {
+
 			OWLAxiom axiom = it.next();
+			
+			if (axiomIgnoresOWL2QL.contains(axiom))
+			{
+				/*
+				 * This axiom is not part of OWL 2 QL according to the OWLAPI, we need to ignore it
+				 */
+				continue;
+			}
 
 			/***
 			 * Important to use the negated normal form of the axioms, and not
@@ -410,6 +434,11 @@ public class OWLAPI3Translator {
 					} else if (entity instanceof OWLDataProperty) {
 						String uri = entity.asOWLDataProperty().getIRI().toString();
 						dl_onto.addRole(dfac.getDataPropertyPredicate(uri));
+					} else if (entity instanceof OWLIndividual) {
+						/*
+						 * NO OP, individual declarations are ignored silently
+						 * during TBox translation
+						 */
 					} else {
 						log.warn("Ignoring declartion axiom: {}", axiom);
 					}
@@ -425,10 +454,10 @@ public class OWLAPI3Translator {
 				// */
 				// }
 				else {
-					log.warn("WARNING ignoring axiom: {}", axiom.toString());
+					log.warn("Axiom not yet supported by Quest: {}", axiom.toString());
 				}
 			} catch (TranslationException e) {
-				log.warn("WARNING ignoring axiom: {}", axiom.toString());
+				log.warn("Axiom not yet supported by Quest: {}", axiom.toString());
 			}
 		}
 		return dl_onto;

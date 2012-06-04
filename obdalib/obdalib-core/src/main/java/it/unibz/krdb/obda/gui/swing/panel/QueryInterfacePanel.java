@@ -19,15 +19,21 @@ import it.unibz.krdb.obda.gui.swing.utils.SPARQLQueryStyledDocument;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
-import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -52,22 +58,22 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	 * Variable currentGroup is the group's id to which belongs the selected
 	 * query Variable currentId is the query's id that is selected
 	 */
-	private static final long									serialVersionUID			= -5902798157183352944L;
-	private ResultViewTablePanel								viewpanel;
-	private SPARQLQueryStyledDocument							_styled_doc					= null;
-	private it.unibz.krdb.obda.gui.swing.OBDADataQueryAction	executeUCQAction			= null;
-	private OBDADataQueryAction									executeEQLAction			= null;
-	private OBDADataQueryAction									retrieveUCQExpansionAction	= null;
-	private OBDADataQueryAction									retrieveUCQUnfoldingAction	= null;
-	private OBDADataQueryAction									retrieveEQLUnfoldingAction	= null;
+	private static final long serialVersionUID = -5902798157183352944L;
+	private ResultViewTablePanel viewpanel;
+	private SPARQLQueryStyledDocument _styled_doc = null;
+	private it.unibz.krdb.obda.gui.swing.OBDADataQueryAction executeUCQAction = null;
+	private OBDADataQueryAction executeEQLAction = null;
+	private OBDADataQueryAction retrieveUCQExpansionAction = null;
+	private OBDADataQueryAction retrieveUCQUnfoldingAction = null;
+	private OBDADataQueryAction retrieveEQLUnfoldingAction = null;
 	// private GetDefaultSPARQLPrefixAction prefixAction = null;
-	private QueryController										qc							= null;
-	private QueryInterfacePanel									instance					= null;
-	private double												execTime					= 0;
-	private String												currentGroup				= null;
-	private String												currentId					= null;
-	private OBDAModel											apic						= null;
-	private URI													baseuri						= null;
+	private QueryController qc = null;
+	private QueryInterfacePanel instance = null;
+	private double execTime = 0;
+	private String currentGroup = null;
+	private String currentId = null;
+	private OBDAModel apic = null;
+	private URI baseuri = null;
 
 	/** Creates new form QueryInterfacePanel */
 	public QueryInterfacePanel(OBDAModel apic, URI baseuri) {
@@ -75,24 +81,20 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		instance = this;
 		this.apic = apic;
 		this.baseuri = baseuri;
-//		prefs.registerPreferenceChangedListener(this);
+		// prefs.registerPreferenceChangedListener(this);
 		initComponents();
-		
-        
 
-
-//		Font font = new Font("Dialog", Font.PLAIN, 14);
-//		queryTextPane.setFont(font);
+		// Font font = new Font("Dialog", Font.PLAIN, 14);
+		// queryTextPane.setFont(font);
 		StyleContext style = new StyleContext();
 		_styled_doc = new SPARQLQueryStyledDocument(style);
 
-		
 		queryTextPane.setDocument(_styled_doc);
 		queryTextPane.setBackground(Color.WHITE);
 		queryTextPane.setCaretColor(Color.BLACK);
-		
+
 		queryTextPane.addKeyListener(new CTRLEnterKeyListener());
-		
+
 	}
 
 	private class CTRLEnterKeyListener implements KeyListener {
@@ -114,11 +116,10 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		}
 	}
 
-
 	public void setOBDAModel(OBDAModel api) {
 		this.apic = api;
 	}
-	
+
 	public void setBaseURI(URI baseuri) {
 		this.baseuri = baseuri;
 	}
@@ -127,10 +128,11 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 		this.viewpanel = viewpanel;
 	}
 
-//	 public void setGetSPARQLDefaultPrefixAction(GetDefaultSPARQLPrefixAction action) {
-//		 prefixAction = action;
-//		 _styled_doc.setGetDefaultSPARQLPrefixAction(action);
-//	 }
+	// public void setGetSPARQLDefaultPrefixAction(GetDefaultSPARQLPrefixAction
+	// action) {
+	// prefixAction = action;
+	// _styled_doc.setGetDefaultSPARQLPrefixAction(action);
+	// }
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -283,12 +285,12 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void jCheckBoxShortActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jCheckBoxShortActionPerformed
-	// TODO add your handling code here:
+		// TODO add your handling code here:
 	}// GEN-LAST:event_jCheckBoxShortActionPerformed
 
 	private void getEQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getEQLSQLExpansionActionPerformed
-	// OBDADataQueryAction action = this.getRetrieveEQLUnfoldingAction();
-	// action.run(eqlTextPane.getText(), null);
+		// OBDADataQueryAction action = this.getRetrieveEQLUnfoldingAction();
+		// action.run(eqlTextPane.getText(), null);
 	}// GEN-LAST:event_getEQLSQLExpansionActionPerformed
 
 	private void getSPARQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
@@ -345,10 +347,11 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 			queryRunnerThread.start();
 
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			JOptionPane.showMessageDialog(null, e.getMessage());
+			DialogUtils.showQuickErrorDialog(this, e);
 		}
 	}// GEN-LAST:event_buttonExecuteActionPerformed
+
+
 
 	private void buttonSaveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
 
@@ -427,22 +430,22 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton		buttonAttachPrefix;
-	private javax.swing.JButton		buttonExecute;
-	private javax.swing.JButton		buttonSaveQuery;
-	private javax.swing.JPopupMenu	eqlPopupMenu;
-	private javax.swing.JMenuItem	getEQLSQLExpansion;
-	private javax.swing.JMenuItem	getSPARQLExpansion;
-	private javax.swing.JMenuItem	getSPARQLSQLExpansion;
-	private javax.swing.JCheckBox	jCheckBoxShort;
-	private javax.swing.JLabel		jLabelHeader;
-	private javax.swing.JLabel		jLabelStatus;
-	private javax.swing.JPanel		jPanelQueryPaneContainer;
-	private javax.swing.JPanel		jPanelStatusContainer;
-	private javax.swing.JScrollPane	jScrollQueryPane;
-	private javax.swing.JPanel		panel_query_buttons;
-	private javax.swing.JTextPane	queryTextPane;
-	private javax.swing.JPopupMenu	sparqlPopupMenu;
+	private javax.swing.JButton buttonAttachPrefix;
+	private javax.swing.JButton buttonExecute;
+	private javax.swing.JButton buttonSaveQuery;
+	private javax.swing.JPopupMenu eqlPopupMenu;
+	private javax.swing.JMenuItem getEQLSQLExpansion;
+	private javax.swing.JMenuItem getSPARQLExpansion;
+	private javax.swing.JMenuItem getSPARQLSQLExpansion;
+	private javax.swing.JCheckBox jCheckBoxShort;
+	private javax.swing.JLabel jLabelHeader;
+	private javax.swing.JLabel jLabelStatus;
+	private javax.swing.JPanel jPanelQueryPaneContainer;
+	private javax.swing.JPanel jPanelStatusContainer;
+	private javax.swing.JScrollPane jScrollQueryPane;
+	private javax.swing.JPanel panel_query_buttons;
+	private javax.swing.JTextPane queryTextPane;
+	private javax.swing.JPopupMenu sparqlPopupMenu;
 
 	// End of variables declaration//GEN-END:variables
 
@@ -466,6 +469,6 @@ public class QueryInterfacePanel extends javax.swing.JPanel implements SavedQuer
 	@Override
 	public void preferenceChanged() {
 		String query = queryTextPane.getText();
-		queryTextPane.setText(query);		
+		queryTextPane.setText(query);
 	}
 }

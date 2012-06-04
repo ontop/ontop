@@ -1,24 +1,52 @@
 package it.unibz.krdb.obda.gui.swing.utils;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
 public class DialogUtils {
 
+	public static void showQuickErrorDialog(Component parent, Exception e) {
+		// create and configure a text area - fill it with exception text.
+		final JTextArea textArea = new JTextArea();
+		textArea.setLineWrap(true);
+		textArea.setBackground(Color.WHITE);
+		textArea.setFont(new Font("Dialog", Font.PLAIN, 12));
+		textArea.setEditable(false);
+		textArea.setWrapStyleWord(true);
+		StringWriter writer = new StringWriter();
+		writer.write(e.getMessage());
+//		e.printStackTrace(new PrintWriter(writer));
+		textArea.setText(writer.toString());
+
+		// stuff it in a scrollpane with a controlled size.
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setPreferredSize(new Dimension(480, 150));
+
+		// pass the scrollpane to the joptionpane.
+		JOptionPane.showMessageDialog(parent, scrollPane, "An Error Has Occurred", JOptionPane.ERROR_MESSAGE);
+	}
+	
 	public static void centerDialogWRTParent(Component parent, Component dialog) {
 		int x;
 		int y;

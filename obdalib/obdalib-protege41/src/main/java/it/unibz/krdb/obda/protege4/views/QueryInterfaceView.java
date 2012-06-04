@@ -152,9 +152,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						panel.updateStatus(result);
 					}
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error while counting tuples.\n " + e.getMessage()
-							+ "\nPlease refer to the log file for more information.");
-					log.error("Error while counting tuples.", e);
+					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+
 				}
 			}
 
@@ -189,9 +188,11 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					long end = System.currentTimeMillis();
 					time = end - startTime;
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Error while executing query.\n " + e.getMessage()
-							+ "\nPlease refer to the log file for more information.");
-					log.error("Error while executing query.", e);
+					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+
+//					JOptionPane.showMessageDialog(null, "Error while executing query.\n " + e.getMessage()
+//							+ "\nPlease refer to the log file for more information.");
+//					log.error("Error while executing query.", e);
 				}
 
 			}
@@ -244,9 +245,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						panel.setVisible(true);
 					}
 				} catch (InterruptedException e) {
-					JOptionPane.showMessageDialog(null, "Error while expanding query.\n " + e.getMessage()
-							+ "\nPlease refer to the log file for more information.");
-					log.error("Error while expanding query.", e);
+					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+
 				}
 			}
 
@@ -300,9 +300,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						panel.setVisible(true);
 					}
 				} catch (InterruptedException e) {
-					JOptionPane.showMessageDialog(null, "Error while expanding query.\n " + e.getMessage()
-							+ "\nPlease refer to the log file for more information.");
-					log.error("Error while unfolding query.", e);
+					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+
 				}
 
 			}
@@ -540,8 +539,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						} catch (Exception e) {
 							latch.countDown();
 							log.error(e.getMessage(), e);
-							JOptionPane.showMessageDialog(null, "Error while executing query.\n " + e.getMessage()
-									+ "\nPlease refer to the log for more information.");
+							DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+
 						}
 
 					} else {
