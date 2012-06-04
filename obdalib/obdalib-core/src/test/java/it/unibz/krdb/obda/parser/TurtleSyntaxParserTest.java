@@ -185,11 +185,12 @@ public class TurtleSyntaxParserTest extends TestCase {
 	
 	private PrefixManager getPrefixManager() {
 		PrefixManager pm = new SimplePrefixManager();
-		pm.addUri("http://obda.inf.unibz.it/testcase#", ":");
-		pm.addUri("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf:");
-		pm.addUri("http://www.w3.org/2000/01/rdf-schema#", "rdfs:");
-		pm.addUri("http://www.w3.org/2001/XMLSchema#", "xsd:");
-		pm.addUri("http://www.example.org/", "ex:");
+		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
+		pm.addPrefix("ex:", "http://www.example.org/");
+		pm.addPrefix("rdf:", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		pm.addPrefix("rdfs:", "http://www.w3.org/2000/01/rdf-schema#");
+		pm.addPrefix("owl:", "http://www.w3.org/2002/07/owl#");	
+		pm.addPrefix("xsd:", "http://www.w3.org/2001/XMLSchema#");
 		return pm;
 	}
 }

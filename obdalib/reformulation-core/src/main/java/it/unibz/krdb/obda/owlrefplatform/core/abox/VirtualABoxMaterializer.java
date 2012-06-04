@@ -362,7 +362,7 @@ public class VirtualABoxMaterializer {
 		// SPARQL query generated from the predicate
 		private String createQuery() {
 			StringBuffer sb = new StringBuffer();
-			sb.append("PREFIX :	<" + model.getPrefixManager().getDefaultNamespace() + ">\n");
+			sb.append("PREFIX :	<" + model.getPrefixManager().getDefaultPrefix() + ">\n");
 						
 			if (predicate.getArity() == 1) {
 				sb.append("SELECT $x WHERE { $x a <" + predicate.getName() + "> . }");

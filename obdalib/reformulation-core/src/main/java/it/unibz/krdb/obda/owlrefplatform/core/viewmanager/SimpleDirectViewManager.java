@@ -57,7 +57,7 @@ public class SimpleDirectViewManager implements ViewManager {
 			String ontoname = u.substring(i+1,u.length()-4);
 			prefixMap.put(u, ontoname);
 		}
-		baseuri = man.getURIForPrefix("xml:base");
+		baseuri = man.getDefaultPrefix();
 	}
 	
 	/**

@@ -1,41 +1,35 @@
 package it.unibz.krdb.obda.io;
 
-import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Abstracts the prefix mapping mechanism.
- * 
- * @author Josef Hardi <josef.hardi@gmail.com>
  */
-public interface PrefixManager extends Serializable
-{
-  public void addUri(String uri, String prefix);
-  
-  public String getURIForPrefix(String prefix);
-  
-  public String getPrefixForURI(String uri);
-  
-  public Map<String, String> getPrefixMap();
-  
-  public String getDefaultNamespace();
-  
-  public void setDefaultNamespace(String uri);
-  
-  public String getShortForm(String uri, boolean useDefaultPrefix);
-  
-  public String getShortForm(String uri);
-  
-  public String getShortForm(String uri, boolean useDefaultPrefix, boolean isLiteral);
-  
-  public boolean contains(String prefix);
-  
-  /***
-   * Define a prefix (including ":"), e.g., mariano:, http://mariano.org#
-   * @param name
-   * @param uri
-   * @return
-   */
-  public void setPrefix(String name, String uri);
-  
+public interface PrefixManager {
+	
+	public static final String DEFAULT_PREFIX = ":";
+	
+	/**
+	 * Registers a prefix. Leave blank for BASE prefix.
+	 * 	 
+	 * @param name
+	 * 			The prefix name (without the colon).
+	 * @param uri
+	 * 			The URI definition for the given prefix.
+	 */
+	public void addPrefix(String prefix, String uri);
+
+	public String getURIDefinition(String prefix);
+
+	public String getPrefix(String uri);
+
+	public String getDefaultPrefix();
+	
+	public Map<String, String> getPrefixMap();
+
+	public String getShortForm(String uri);
+
+	public String getShortForm(String uri, boolean insideQuotes);
+
+	public boolean contains(String prefix);
 }

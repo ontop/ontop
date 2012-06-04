@@ -78,8 +78,8 @@ public class TargetQueryToTurtleCodec extends ObjectToTextCodec<OBDAQuery> {
 	 * Prints the short form of the predicate (by omitting the complete URI and
 	 * replacing it by a prefix name).
 	 */
-	private String getAbbreviatedName(String uri, boolean isLiteral) {
-		return prefMan.getShortForm(uri, true, isLiteral);
+	private String getAbbreviatedName(String uri, boolean insideQuotes) {
+		return prefMan.getShortForm(uri, insideQuotes);
 	}
 
 	/**

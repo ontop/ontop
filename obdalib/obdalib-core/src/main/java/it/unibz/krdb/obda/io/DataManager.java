@@ -67,41 +67,28 @@ import com.hp.hpl.jena.query.QueryParseException;
  */
 public class DataManager {
 
-	private static final String											FILE_VERSION_ATTRIBUTE			= "version";
-
-	public static int													CURRENT_OBDA_FILE_VERSION_MAJOR	= 1;
-	public static int													CURRENT_OBDA_FILE_VERSION_MINOR	= 0;
-
 	/** The XML codec to save/load data sources. */
-	private static DatasourceXMLCodec										dsCodec = new DatasourceXMLCodec();
+	private static DatasourceXMLCodec dsCodec = new DatasourceXMLCodec();
 
 	/** The XML codec to save/load mappings. */
-	protected MappingXMLCodec											mapCodec;
+	protected MappingXMLCodec mapCodec;
 
 	/** The XML codec to save queries. */
-	private static final  QueryGroupXMLRenderer												xmlRenderer = new QueryGroupXMLRenderer();
+	private static final QueryGroupXMLRenderer xmlRenderer = new QueryGroupXMLRenderer();
 
 	/** The XML codec to load queries. */
-	private static final  QueryGroupXMLReader													xmlReader = new QueryGroupXMLReader();
+	private static final QueryGroupXMLReader xmlReader = new QueryGroupXMLReader();
 
-	// protected PrefixManager prefixManager = null;
+	protected OBDAModel apic = null;
 
-	protected OBDAModel												apic							= null;
+	protected Element root;
 
-	protected Element													root;
-
-	private static final Logger												log								= LoggerFactory.getLogger(DataManager.class);
+	private static final Logger log = LoggerFactory.getLogger(DataManager.class);
 
 	public DataManager(OBDAModel apic) {
 		this.apic = apic;
-
-		
 		mapCodec = new MappingXMLCodec(apic);
-		
-		
 	}
-
-
 
 	public void saveMappingsToFile(File file) throws ParserConfigurationException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -121,11 +108,12 @@ public class DataManager {
 	 * If useTempFile is false, the procedure will attempt to directly save all
 	 * the data to the file.
 	 */
-	public void saveOBDAData(URI obdaFileURI, boolean useTempFile, PrefixManager prefixManager) throws IOException
-			 {
+	public void saveOBDAData(URI obdaFileURI, boolean useTempFile,
+			PrefixManager prefixManager) throws IOException {
+
 		File tempFile = null;
 		URI tempFileURI = null;
-		
+
 		File obdaFile = new File(obdaFileURI);
 
 		if (useTempFile) {
@@ -140,10 +128,10 @@ public class DataManager {
 			saveOBDAData(obdaFileURI, prefixManager);
 		}
 	}
-	
+
 	private void copyFile(File sourceFile, File destFile) throws IOException {
-		
-		if(!destFile.exists()) {
+
+		if (!destFile.exists()) {
 			destFile.createNewFile();
 		}
 
@@ -153,19 +141,18 @@ public class DataManager {
 			source = new FileInputStream(sourceFile).getChannel();
 			destination = new FileOutputStream(destFile).getChannel();
 			destination.transferFrom(source, 0, source.size());
-		}
-		finally {
-			if(source != null) {
+		} finally {
+			if (source != null) {
 				source.close();
 			}
-			if(destination != null) {
-			   destination.close();
+			if (destination != null) {
+				destination.close();
 			}
 		}
 	}
 
-	public void saveOBDAData(URI fileuri, PrefixManager prefixManager) throws FileNotFoundException,
-			IOException {
+	public void saveOBDAData(URI fileuri, PrefixManager prefixManager) throws FileNotFoundException, IOException {
+
 		File file = new File(fileuri);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db;
@@ -185,21 +172,18 @@ public class DataManager {
 		 * Creating namespaces (prefixes)
 		 */
 		root.setAttribute("version", "1.0");
-		if (prefixManager.getDefaultNamespace() != null) {
-			root.setAttribute("xmlns", prefixManager.getDefaultNamespace());
-			root.setAttribute("xml:base", prefixManager.getDefaultNamespace());
-		}
+		root.setAttribute("xml:base", prefixManager.getDefaultPrefix());
 
-		Map<String, String> prefixes = prefixManager.getPrefixMap();
-		Set<String> keys = prefixes.keySet();
-		Iterator<String> sit = keys.iterator();
-		while (sit.hasNext()) {
-			String key = sit.next();
-			root.setAttribute("xmlns:" + key, prefixManager.getURIForPrefix(key));
-
+		Map<String, String> prefixMap = prefixManager.getPrefixMap();
+		Set<String> prefixes = prefixMap.keySet();
+		for (String prefix : prefixes) {
+			if (prefix.equals(":")) {
+				continue; // skip it if it's a default prefix
+			}
+			root.setAttribute("xmlns:" + removeColon(prefix), prefixManager.getURIDefinition(prefix));
 		}
 		doc.appendChild(root);
-
+		
 		// Create the Mapping element
 		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings = apic.getMappings();
 		dumpMappingsToXML(mappings);
@@ -212,15 +196,19 @@ public class DataManager {
 		Vector<QueryControllerEntity> queries = apic.getQueryController().getElements();
 		dumpQueriesToXML(queries);
 
-		XMLUtils.saveDocumentToXMLFile(doc, prefixes, file.toString());
+		XMLUtils.saveDocumentToXMLFile(doc, prefixMap, file.toString());
+	}
+
+	private String removeColon(String prefix) {
+		return prefix.replace(":", "");
 	}
 
 	/***************************************************************************
 	 * loads ALL OBDA data from a file
 	 */
 	public void loadOBDADataFromURI(URI obdaFileURI, URI currentOntologyURI, PrefixManager prefixManager) throws IOException {
+		
 		File obdaFile = new File(obdaFileURI);
-		String version;
 
 		if (!obdaFile.exists()) {
 			String msg = String.format("File not found: %s", obdaFile.toString());
@@ -242,77 +230,69 @@ public class DataManager {
 			throw new IOException(msg);
 		}
 
+		/*
+		 * Processing the prefix definitions
+		 */
+		// TODO: Uncomment these lines after having this release out.
+		/*
+		DocumentType docType = doc.getDoctype();
+		NamedNodeMap entities = docType.getEntities();
+		for (int i = 0; i < entities.getLength(); i++) {
+			Entity node = (Entity) entities.item(i);
+			prefixManager.addPrefix(node.getNodeName(), node.getSystemId());
+		}		
+		addOBDADefaultPrefixes(prefixManager);
+		 */
+		
+		/*
+		 * Processing the OBDA elements
+		 */
 		Element root = doc.getDocumentElement();
 		if (root.getNodeName() != "OBDA") {
 			String msg = "The OBDA file must be enclosed with <OBDA> tag";
 			throw new IOException(msg);
 		}
-
+		
+		// TODO: Old way to get the prefixes. It has a severe misconception on using 'xmlns'
 		NamedNodeMap att = root.getAttributes();
-		if (att.getLength() > 1) {
-			for (int i = 0; i < att.getLength(); i++) {
-				Node n = att.item(i);
-				String name = n.getNodeName();
-				String value = n.getNodeValue();
-				if (name.equals("xml:base")) {
-					prefixManager.setDefaultNamespace(value);
-				} else if (name.equals("version")) {
-					version = value;
-				} else if (name.equals("xmlns")) {
-					prefixManager.setDefaultNamespace(value);
-				} else if (name.substring(0, 5).equals("xmlns:")) {
-					String[] aux = name.split(":");
-					prefixManager.addUri(value, aux[1]);
+		for (int i = 0; i < att.getLength(); i++) {
+			Node n = att.item(i);
+			String name = n.getNodeName();
+			String value = n.getNodeValue();
+			if (name.equals("xml:base")) {
+				prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, value);
+			} else if (name.contains("xmlns:")) {
+				String[] aux = name.split(":");
+				if (aux.length == 2) {
+					prefixManager.addPrefix(removeColon(aux[1]) + ":", value);
 				}
-			}
-		} else {
-			String ontoUrl = currentOntologyURI.toString();
-			int i = ontoUrl.lastIndexOf("/");
-			String ontoName = ontoUrl.substring(i+1, ontoUrl.length()-4); // remove the .owl extension
-			prefixManager.addUri(ontoUrl, "xml:base");
-			prefixManager.addUri(ontoUrl, "xmlns");
-			prefixManager.addUri(ontoUrl.concat("#"), ontoName);
+			}			
 		}
 		addOBDADefaultPrefixes(prefixManager);
-		
-		String file_version = root.getAttribute(FILE_VERSION_ATTRIBUTE);
-		int major = -1;
-		int minor = -1;
-		if ((file_version != null) && !file_version.equals("")) {
-			String[] split = file_version.split("[.]");
-			major = Integer.valueOf(split[0]);
-			minor = Integer.valueOf(split[1]);
-		}
 
 		NodeList children = root.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element node = (Element) children.item(i);
+
+				// Processing mapping elements
 				if (node.getNodeName().equals("mappings")) {
-					// Found mapping block
 					URI source = URI.create(node.getAttribute("sourceuri"));
 					importMappingsFromXML(source, node);
 				}
-				if ((major < 0) && (node.getNodeName().equals("datasource"))) {
-					// Found old data-source block
+				// Processing data source elements
+				if (node.getNodeName().equals("dataSource")) {
 					OBDADataSource source = dsCodec.decode(node);
-					apic.addSource(source);
-					
-					String msg = "WARNING: Loading a deprecated OBDA file.";
-					throw new IOException(msg + "Update it by selecting \"Save as...\" option");
-				}
-				String newDatasourceTag = dsCodec.getElementTag();
-				if ((major > 0) && (node.getNodeName().equals(newDatasourceTag))) {
-					// Found new data-source block
-					OBDADataSource source = dsCodec.decode(node);
-					URI uri = URI.create(prefixManager.getDefaultNamespace());
+					URI uri = URI.create(prefixManager.getDefaultPrefix());
 					if (uri != null) {
-						source.setParameter(RDBMSourceParameterConstants.ONTOLOGY_URI, uri.toString());
+						source.setParameter(
+								RDBMSourceParameterConstants.ONTOLOGY_URI,
+								uri.toString());
 					}
 					apic.addSource(source);
 				}
+				// Processing save queries elements
 				if (node.getNodeName().equals("SavedQueries")) {
-					// Found queries block
 					importQueriesFromXML(node);
 				}
 			}
@@ -323,8 +303,8 @@ public class DataManager {
 	 * Append here all default prefixes used by the system.
 	 */
 	private void addOBDADefaultPrefixes(PrefixManager prefixManager) {
-		if (!prefixManager.contains("quest")) {
-			prefixManager.addUri("http://obda.org/quest#", "quest");
+		if (!prefixManager.contains("quest:")) {
+			prefixManager.addPrefix("quest:", "http://obda.org/quest#");
 		}
 	}
 
@@ -348,7 +328,8 @@ public class DataManager {
 	 * @param mappings
 	 *            the hash table of the mapping data
 	 */
-	protected void dumpMappingsToXML(Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings) {
+	protected void dumpMappingsToXML(
+			Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings) {
 		Document doc = root.getOwnerDocument();
 		Enumeration<URI> datasourceUris = mappings.keys();
 		URI datasourceUri = null;
@@ -396,7 +377,7 @@ public class DataManager {
 	protected void dumpDatasourcesToXML(List<OBDADataSource> datasources) {
 		Document doc = root.getOwnerDocument();
 		Iterator<OBDADataSource> sources = datasources.iterator();
-//		URI datasourceUri = null;
+		// URI datasourceUri = null;
 		while (sources.hasNext()) {
 			OBDADataSource datasource = sources.next();
 
@@ -458,15 +439,23 @@ public class DataManager {
 					continue;
 				}
 				Element mapping = (Element) child;
-				RDBMSMappingAxiomImpl mappingAxiom = (RDBMSMappingAxiomImpl) mapCodec.decode(mapping);
+				RDBMSMappingAxiomImpl mappingAxiom = (RDBMSMappingAxiomImpl) mapCodec
+						.decode(mapping);
 				if (mappingAxiom == null) {
-					throw new Exception("Error while parsing the conjunctive query of " + "the mapping " + mapping.getAttribute("id"));
+					throw new Exception(
+							"Error while parsing the conjunctive query of "
+									+ "the mapping "
+									+ mapping.getAttribute("id"));
 				}
 				try {
 					apic.addMapping(datasource, mappingAxiom);
 				} catch (DuplicateMappingException e) {
-					log.warn("duplicate mapping detected while trying to load mappings " + "from file. Ignoring it. Datasource URI: "
-							+ datasource + " " + "Mapping ID: " + mappingAxiom.getId());
+					log.warn("duplicate mapping detected while trying to load mappings "
+							+ "from file. Ignoring it. Datasource URI: "
+							+ datasource
+							+ " "
+							+ "Mapping ID: "
+							+ mappingAxiom.getId());
 				}
 			} catch (Exception e) {
 				try {
@@ -499,13 +488,16 @@ public class DataManager {
 				Element element = (Element) node;
 				if (element.getNodeName().equals("Query")) {
 					QueryControllerQuery query = xmlReader.readQuery(element);
-					apic.getQueryController().addQuery(query.getQuery(), query.getID());
+					apic.getQueryController().addQuery(query.getQuery(),
+							query.getID());
 				} else if ((element.getNodeName().equals("QueryGroup"))) {
-					QueryControllerGroup group = xmlReader.readQueryGroup(element);
+					QueryControllerGroup group = xmlReader
+							.readQueryGroup(element);
 					apic.getQueryController().createGroup(group.getID());
 					Vector<QueryControllerQuery> queries = group.getQueries();
 					for (QueryControllerQuery query : queries) {
-						apic.getQueryController().addQuery(query.getQuery(), query.getID(), group.getID());
+						apic.getQueryController().addQuery(query.getQuery(),
+								query.getID(), group.getID());
 					}
 				}
 			}

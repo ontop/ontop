@@ -14,11 +14,7 @@ import java.util.Set;
 
 /**
  * Provides additional strings for constructing a proper datalog query.
- *
- * @author Josef Hardi <josef.hardi@gmail.com>
  */
-
-
 public class DatalogQueryHelper {
 
 	private final PrefixManager prefixManager;
@@ -35,9 +31,9 @@ public class DatalogQueryHelper {
 		String prefixString = "";
 		String baseString = "";
 
-		if (prefixManager.getDefaultNamespace() != null) {
-			prefixString += "BASE <"+ prefixManager.getDefaultNamespace() +">\n";
-			prefixString += "PREFIX : <"+ prefixManager.getDefaultNamespace() +">\n";
+		if (prefixManager.getDefaultPrefix() != null) {
+			prefixString += "BASE <"+ prefixManager.getDefaultPrefix() +">\n";
+			prefixString += "PREFIX : <"+ prefixManager.getDefaultPrefix() +">\n";
 		}
 		Map<String, String> prefixMapping = prefixManager.getPrefixMap();
 		Set<String> prefixes = prefixMapping.keySet();

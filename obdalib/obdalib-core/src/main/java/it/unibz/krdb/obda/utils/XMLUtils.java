@@ -16,7 +16,6 @@ package it.unibz.krdb.obda.utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,25 +30,19 @@ import org.w3c.dom.Document;
 
 public class XMLUtils {
 
-	private XMLUtils() {
-
-	}
-
-	public static void saveDocumentToXMLFile(Document doc, Map<String, String> prefixes, String filename)
-			throws FileNotFoundException, IOException {
+	public static void saveDocumentToXMLFile(Document doc, Map<String, String> prefixMap, String filename) throws IOException {
+		
 		File file = new File(filename);
-		saveDocumentToXMLFile(doc, prefixes, file);
+		saveDocumentToXMLFile(doc, prefixMap, file);
 	}
 
-	public static void saveDocumentToXMLFile(Document doc, Map<String, String> prefixes, File file)
-			throws FileNotFoundException, IOException {
+	public static void saveDocumentToXMLFile(Document doc, Map<String, String> prefixMap, File file) throws IOException {
 
 		File tmpFile = prepare(doc);
-		String entityFragment = prepare(prefixes);
+		String entityFragment = prepare(prefixMap);
 
 		// Input
-		BufferedReader in = new BufferedReader(
-				new InputStreamReader(new FileInputStream(tmpFile)));
+		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(tmpFile)));
 
 		// Output
 	    PrintWriter out = new PrintWriter(new FileOutputStream(file));
@@ -61,22 +54,17 @@ public class XMLUtils {
 			if (line == TARGET_LINE) {
 				out.println(entityFragment);
 			}
-
 		    out.println(cursor);
-
 		    line++;
 		}
-
 		out.flush();
 		out.close();
 		in.close();
-
 		tmpFile.delete();
 	}
 	
-	public static void saveDocumentToXMLFile(Document doc, File file)
-	throws FileNotFoundException, IOException {
-
+	public static void saveDocumentToXMLFile(Document doc, File file) throws IOException {
+		
 		saveDocumentToXMLFile(doc, new HashMap<String, String>(), file);
 	}
 
@@ -99,21 +87,13 @@ public class XMLUtils {
 		return fOut;
 	}
 
-	private static String prepare(Map<String, String> prefixes) {
+	private static String prepare(Map<String, String> prefixMap) {
 
 		String doctype = "<!DOCTYPE OBDA [\n";
-		Set<String> prefixIds = prefixes.keySet();
-		for (String id : prefixIds) {
-			if (!(id.equals("version") ||
-				  id.equals("xml:base") ||
-				  id.equals("xmlns") ||
-				  id.equals("rdf") ||
-				  id.equals("rdfs") ||
-				  id.equals("owl") ||
-				  id.equals("xsd"))) {
-				String uri = prefixes.get(id);
-				doctype += "   <!ENTITY " + id + " '" +  uri + "'>\n";
-			}
+		Set<String> prefixes = prefixMap.keySet();
+		for (String prefix : prefixes) {
+			String uri = prefixMap.get(prefix);
+			doctype += "   <!ENTITY " + prefix + " SYSTEM " + "'" +  uri + "'>\n";
 		}
 		doctype += "]>";
 

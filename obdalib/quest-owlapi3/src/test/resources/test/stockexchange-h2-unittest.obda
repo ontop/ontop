@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE OBDA [
-   <!ENTITY xsd: 'http://www.w3.org/2001/XMLSchema#'>
-   <!ENTITY owl: 'http://www.w3.org/2002/07/owl#'>
-   <!ENTITY owl2xml: 'http://www.w3.org/2006/12/owl2-xml#'>
-   <!ENTITY : 'http://www.owl-ontologies.com/Ontology1207768242.owl#'>
-   <!ENTITY rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
-   <!ENTITY rdfs: 'http://www.w3.org/2000/01/rdf-schema#'>
+   <!ENTITY : SYSTEM 'http://www.owl-ontologies.com/Ontology1207768242.owl#'>
+   <!ENTITY rdf: SYSTEM 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+   <!ENTITY rdfs: SYSTEM 'http://www.w3.org/2000/01/rdf-schema#'>
+   <!ENTITY owl: SYSTEM 'http://www.w3.org/2002/07/owl#'>
+   <!ENTITY xsd: SYSTEM 'http://www.w3.org/2001/XMLSchema#'>
 ]>
-<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns::="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:owl2xml:="http://www.w3.org/2006/12/owl2-xml#" xmlns:owl:="http://www.w3.org/2002/07/owl#" xmlns:rdf:="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs:="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd:="http://www.w3.org/2001/XMLSchema#">
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#">
   <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
     <mapping id="MAP1439641617459189">
       <CQ string="Address(getAddressObj($id)),addressID(getAddressObj($id),$id),inStreet(getAddressObj($id),$street),hasNumber(getAddressObj($id),$number),inCity(getAddressObj($id),$city),inState(getAddressObj($id),$state),inCountry(getAddressObj($id),$country)"/>
@@ -84,7 +83,6 @@
   </mappings>
   <dataSource URI="RandBStockExchange" databaseDriver="org.h2.Driver" databasePassword="" databaseURL="jdbc:h2:mem:questjunitdb" databaseUsername="sa" isAboxDump="" ontouri="http://www.owl-ontologies.com/Ontology1207768242.owl#"/>
   <SavedQueries>
-
     <QueryGroup id="Simple queries">
       <Query id="Addresses" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address ; &#xa;&#x9;&#x9; :addressID $id; &#xa;&#x9;&#x9; :inStreet $street; &#xa;&#x9;&#x9; :inCity $city;&#xa;&#x9;&#x9; :inCountry $country; &#xa;&#x9;&#x9; :inState $state;&#xa;&#x9;&#x9; :hasNumber $number.&#xa; } "/>
       <Query id="Addresses-id991" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet 'Via Marconi'. &#xa;&#x9;&#x9;$x :inCity 'Bolzano'. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa;} "/>
