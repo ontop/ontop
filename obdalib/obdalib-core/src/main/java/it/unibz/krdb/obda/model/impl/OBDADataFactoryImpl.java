@@ -362,7 +362,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Predicate getDataTypePredicateBoolean() {
 		return OBDAVocabulary.XSD_BOOLEAN;
-	}	
+	}
+	
+	@Override
+	public Predicate getUriTemplatePredicate(int arity) {
+		return new URITemplatePredicateImpl(arity);
+	}
 
 	@Override
 	public Function getEQFunction(Term firstTerm, Term secondTerm) {

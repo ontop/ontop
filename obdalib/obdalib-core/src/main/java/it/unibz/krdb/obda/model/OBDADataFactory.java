@@ -78,7 +78,13 @@ public interface OBDADataFactory extends Serializable {
 	public Predicate getDataTypePredicateDateTime();
 	
 	public Predicate getDataTypePredicateBoolean();
+	
+	/*
+	 * Built-in function predicates
+	 */
 
+	public Predicate getUriTemplatePredicate(int arity);
+	
 	/*
 	 * Boolean atoms
 	 */
@@ -287,5 +293,4 @@ public interface OBDADataFactory extends Serializable {
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String sql, OBDAQuery targetQuery);
 
 	public OBDASQLQuery getSQLQuery(String query);
-
 }
