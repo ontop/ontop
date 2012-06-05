@@ -13,26 +13,24 @@ import java.util.List;
 
 public interface OBDAModel extends Cloneable, Serializable {
 
-	public abstract QueryController getQueryController();
+	public QueryController getQueryController();
 
-	// public abstract OBDAModelImpl getDatasourcesController();
+	public String getVersion();
 
-	// public abstract OBDAModelImpl getMappingController();
+	public String getBuiltDate();
 
-	public abstract String getVersion();
+	public String getBuiltBy();
 
-	public abstract String getBuiltDate();
+	public void setPrefixManager(PrefixManager prefman);
 
-	public abstract String getBuiltBy();
+	public PrefixManager getPrefixManager();
+	
+	public OBDADataFactory getDataFactory();
 
-	public abstract void setPrefixManager(PrefixManager prefman);
-
-	public abstract PrefixManager getPrefixManager();
-
-	/***
-	 * DATASOURCES
+	/*
+	 * Methods related to data sources
 	 */
-
+	
 	public void addSourcesListener(OBDAModelListener listener);
 
 	public void removeSourcesListener(OBDAModelListener listener);
@@ -43,14 +41,11 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void fireSourceParametersUpdated();
 
-	// TODO remove
-	public void fireSourceNameUpdated(URI old, OBDADataSource neu);
+	public void fireSourceNameUpdated(URI old, OBDADataSource neu);	// TODO remove
 
-	/***
+	/**
 	 * Returns the list of all sources defined in this OBDA model. This list is
 	 * a non-modifiable copy of the internal list.
-	 * 
-	 * @return
 	 */
 	public List<OBDADataSource> getSources();
 
@@ -64,145 +59,92 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public boolean containsSource(URI name);
 
-	/***
-	 * 
-	 * MAPPINGS
-	 * 
+	/*
+	 * Methods related to mappings
 	 */
 
 	public void addMappingsListener(OBDAMappingListener listener);
 
 	public void removeMappingsListener(OBDAMappingListener listener);
 
-	/***************************************************************************
-	 * Deletes the mapping with ID id
-	 * 
-	 * @param sourceuri
-	 * @param mappingid
+	/**
+	 * Deletes the mapping given its id and data source.
 	 */
 	public void removeMapping(URI sourceuri, String mappingid);
 
-	/***************************************************************************
-	 * Deletes all the mappings for a given datasource
-	 * 
-	 * @param sourceuri
+	/**
+	 * Deletes all the mappings given the data source id
 	 */
 	public void removeAllMappings(URI sourceuri);
 
-	/***************************************************************************
-	 * Returns the object of the mapping with id ID for the datasource
-	 * source_uri
-	 * 
-	 * @param sourceuri
-	 * @param mappinid
-	 * @return
+	/**
+	 * Retrieves the mapping axiom given its id and data source.
 	 */
 	public OBDAMappingAxiom getMapping(URI sourceuri, String mappinid);
 
-	/***************************************************************************
-	 * Returns all the mappings hold by the controller. Warning. do not modify
-	 * this mappings manually, use the controllers methods.
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Hashtable<URI, ArrayList<OBDAMappingAxiom>> getMappings();
-
-	/***************************************************************************
-	 * Returns all the mappings for a given datasource identified by its uri.
-	 * 
-	 * @param sourceuri
-	 * @return
+	/**
+	 * Returns all the mappings the given data source id.
 	 */
 	public ArrayList<OBDAMappingAxiom> getMappings(URI sourceuri);
 
-	/***************************************************************************
-	 * Retrieves the position of the mapping identified by mapping_id in the
-	 * array of mappings for the given data source.
-	 * 
-	 * @param sourceuri
-	 *            The source to whom the mapping belongs.
-	 * @param mappingid
-	 *            The id of the mapping that is being searched.
-	 * @return The position of the mapping in the array OR -1 if the mapping is
-	 *         not found.
+	/**
+	 * Returns all the mappings in this model.
+	 */
+	public Hashtable<URI, ArrayList<OBDAMappingAxiom>> getMappings();
+	
+	/**
+	 * Retrieves the position of the mapping given its id and data source.
 	 */
 	@Deprecated
 	public int indexOf(URI sourceuri, String mappingid);
 
-	/***************************************************************************
-	 * Inserts a mappings into the mappings for a datasource. If the ID of the
-	 * mapping already exits it throws an exception.
-	 * 
-	 * @param sourceuri
-	 * @param mapping
-	 * @throws DuplicateMappingException
+	/**
+	 * Inserts a mappings into this model. If the mapping id already exits it 
+	 * throws an exception.
 	 */
 	public void addMapping(URI sourceuri, OBDAMappingAxiom mapping) throws DuplicateMappingException;
 
-	/***
-	 * @param sourceuri
-	 * @param mappings
-	 * @throws DuplicateMappingException
+	/**
+	 * Inserts a collection of mappings into this model. Any duplicates will be failed
+	 * and the system will report such duplication failures.
 	 */
 	public void addMappings(URI sourceuri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException;
 
 	/***
-	 * Removes all mappings
+	 * Removes all mappings in the model.
 	 */
 	public void removeAllMappings();
 
-	/***************************************************************************
-	 * Updates the indicated mapping and fires the appropiate event.
-	 * 
-	 * @param datasource_uri
-	 *            The datasource URI.
-	 * @param mapping_id
-	 *            The old mapping id.
-	 * @param new_mappingid
-	 *            The new mapping id to replace the old id.
-	 * @return Returns -1 if the update fails.
+	/**
+	 * Updates the mapping id.
 	 */
 	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid);
 
-	/***************************************************************************
-	 * Updates the indicated mapping and fires the appropiate event.
-	 * 
-	 * @param datasource_uri
-	 * @param mapping_id
-	 * @param head
+	/**
+	 * Replaces the old target query with the new one given its id.
 	 */
 	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, OBDAQuery targetQuery);
 
-	/***************************************************************************
-	 * Updates the indicated mapping and fires the appropiate event.
-	 * 
-	 * @param datasource_uri
-	 * @param mapping_id
-	 * @param body
+	/**
+	 * Replaces the old source query with the new one given its id.
 	 */
 	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery);
 
-	/***
+	/**
 	 * Refactors every mapping in this OBDA model by modifying each mapping of
-	 * the model by replacing each atom that use the predicate oldname, with a
+	 * the model by replacing each atom that use the predicate old name, with a
 	 * new atom that uses newName and has the same terms as the old atom.
-	 * 
-	 * @param oldname
-	 * @param newName
-	 * @return the number of mappings that have been modified.
 	 */
 	public int renamePredicate(Predicate oldname, Predicate newName);
 
-	/***
-	 * Removes all atoms that involve the given predicate in all mappings.
-	 * 
-	 * @param predicate
-	 * @return
+	/**
+	 * Removes all atoms that contain the given predicate in all mappings.
 	 */
 	public int deletePredicate(Predicate predicate);
 
 	public boolean containsMapping(URI datasourceUri, String mappingId);
 
 	public Object clone();
+	
+	public void reset();
 }

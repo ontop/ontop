@@ -11,7 +11,6 @@ import it.unibz.krdb.obda.utils.ListListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -24,9 +23,6 @@ import java.util.Set;
  */
 public class CQIEImpl implements CQIE, ListListener {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5789854661851692098L;
 	private Atom head = null;
 	private List<Atom> body = null;

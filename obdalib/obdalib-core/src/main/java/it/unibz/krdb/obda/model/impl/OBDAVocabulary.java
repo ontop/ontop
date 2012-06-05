@@ -76,12 +76,6 @@ public class OBDAVocabulary {
 	public static final String XSD_DATETIME_URI = "http://www.w3.org/2001/XMLSchema#dateTime";
 	
 	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
-		
-	// The name of the function that creates URI's in Quest
-	public static final String QUEST_URI = "http://obda.org/quest#uri";
-	
-	// The name of the function that creates URI's in Quest
-	public static final String QUEST_BNODE = "http://obda.org/quest#bnode";
 	
 	
 	/* Data type predicates */
@@ -102,4 +96,12 @@ public class OBDAVocabulary {
 	
 	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE, XSD_DATETIME, XSD_BOOLEAN};
 	
+	
+	/* Built-in function URIs */
+	
+	// The name of the function that creates URI's in Quest
+	public static final String QUEST_URI = "http://obda.org/quest#uri";
+	
+	// The name of the function that creates URI's in Quest
+	public static final String QUEST_BNODE = "http://obda.org/quest#bnode";
 }
