@@ -4,7 +4,9 @@ import it.unibz.krdb.obda.utils.VirtualABoxStatistics;
 
 import java.util.HashMap;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
 
@@ -35,7 +37,7 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
     		
     		final int row = mappingStat.size();
     		final int col = 2;    		
-    		final String[] columnNames = {"Mapping ID", "Triples"};
+    		final String[] columnNames = {"Mapping ID", "Number of Triples"};
     		
     		Object[][] rowData = new Object[row][col];
     		
@@ -44,10 +46,26 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
     			rowData[index][0] = mappingId;
     			rowData[index][1] = mappingStat.get(mappingId);
     			index++;
-    		}
-    		JTable tblTriplesCount = new JTable(rowData, columnNames);
-			tabDataSources.add(datasourceName, tblTriplesCount);
+    		}    		
+    		JTable tblTriplesCount = createStatisticTable(rowData, columnNames);
+			tabDataSources.add(datasourceName, new JScrollPane(tblTriplesCount));
     	}
+    }
+    
+    private JTable createStatisticTable(Object[][] rowData, String[] columnNames) {
+    	
+		DefaultTableModel model = new DefaultTableModel(rowData, columnNames);
+
+		@SuppressWarnings("serial")
+		JTable table = new JTable(model) {
+			// Create a model in which the cells can't be edited
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				// all cells false
+				return false;
+			}
+		};		
+		return table;
     }
     
     /** This method is called from within the constructor to
