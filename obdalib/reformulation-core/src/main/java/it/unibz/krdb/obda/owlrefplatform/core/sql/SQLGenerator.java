@@ -152,6 +152,7 @@ public class SQLGenerator implements SourceQueryGenerator {
 		 * BEFORE DOING ANytHING WE SHOULD NORMALIZE EQ ATOMS A(x), B(y),
 		 * EQ(x,y), should be transformed into A(x), B(x)
 		 */
+		
 
 		Object tempdist = query.getQueryModifiers().get("distinct");
 		boolean distinct = false;
@@ -160,6 +161,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 		/* Main loop, constructing the SPJ query for each CQ */
 
+		
+		int STRINGINDENT = 0;
+		
 		StringBuffer result = new StringBuffer();
 		boolean isMoreThanOne = false;
 		for (CQIE cq : cqs) {
@@ -320,12 +324,15 @@ public class SQLGenerator implements SourceQueryGenerator {
 					}
 				}
 			}
-
+			
+			
+			
 			/* Creating the FROM */
 			StringBuffer fromBf = new StringBuffer();
-			fromBf.append("FROM ");
+			fromBf.append("FROM");
 			boolean moreThanOne = false;
 			for (String tdefinition : fromTables) {
+				fromBf.append("\n    ");
 				if (moreThanOne)
 					fromBf.append(", ");
 				fromBf.append(tdefinition);
@@ -334,9 +341,10 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 			/* Creating the WHERE */
 			StringBuffer whereBf = new StringBuffer();
-			whereBf.append("WHERE ");
+			whereBf.append("WHERE");
 			moreThanOne = false;
 			for (String tdefinition : whereConditions) {
+				whereBf.append("\n    ");
 				if (moreThanOne)
 					whereBf.append(" AND ");
 				whereBf.append(tdefinition);
@@ -353,17 +361,17 @@ public class SQLGenerator implements SourceQueryGenerator {
 
 			StringBuffer sqlquery = new StringBuffer();
 			sqlquery.append(sb);
-			sqlquery.append(" ");
+			sqlquery.append("\n  ");
 			sqlquery.append(fromBf);
-			sqlquery.append(" ");
+			sqlquery.append("\n  ");
 			if (whereConditions.size() > 0)
 				sqlquery.append(whereBf);
 
 			if (isMoreThanOne) {
 				if (distinct) {
-					result.append("\nUNION \n");
+					result.append("\n\nUNION \n\n");
 				} else {
-					result.append("\nUNION ALL \n");
+					result.append("\n\nUNION ALL \n\n");
 				}
 			}
 			result.append(sqlquery);
@@ -384,9 +392,11 @@ public class SQLGenerator implements SourceQueryGenerator {
 		List<Term> headterms = head.getTerms();
 		StringBuilder sb = new StringBuilder();
 		if (headterms.size() > 0) {
+			
 			Iterator<Term> hit = headterms.iterator();
 			int hpos = 0;
 			while (hit.hasNext()) {
+				sb.append("\n    ");
 				Term ht = hit.next();
 				if (ht instanceof AnonymousVariable) {
 					throw new RuntimeException("ComplexMappingSQLGenerator: Found an non-distinguished variable in the head: " + ht);

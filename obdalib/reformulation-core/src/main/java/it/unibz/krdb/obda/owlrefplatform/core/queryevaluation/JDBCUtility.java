@@ -105,7 +105,7 @@ public class JDBCUtility implements Serializable {
 		case SQLSERVER:
 			sql = String.format("(%s", uribase);
 			for (int i = 0; i < list.size(); i++) {
-				sql += String.format(" + CAST(%s as varchar)", list.get(i));
+				sql += String.format(" + CAST(%s as varchar(8000))", list.get(i));
 			}
 			sql += ")";
 			break;
