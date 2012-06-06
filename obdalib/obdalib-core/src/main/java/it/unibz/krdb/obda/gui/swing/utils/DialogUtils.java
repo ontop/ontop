@@ -27,6 +27,10 @@ import javax.swing.KeyStroke;
 public class DialogUtils {
 
 	public static void showQuickErrorDialog(Component parent, Exception e) {
+		showQuickErrorDialog(parent, e, "An Error Has Ocurred");		
+	}
+	
+	public static void showQuickErrorDialog(Component parent, Exception e, String message) {
 		// create and configure a text area - fill it with exception text.
 		final JTextArea textArea = new JTextArea();
 		textArea.setLineWrap(true);
@@ -44,7 +48,7 @@ public class DialogUtils {
 		scrollPane.setPreferredSize(new Dimension(480, 150));
 
 		// pass the scrollpane to the joptionpane.
-		JOptionPane.showMessageDialog(parent, scrollPane, "An Error Has Occurred", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);
 	}
 	
 	public static void centerDialogWRTParent(Component parent, Component dialog) {

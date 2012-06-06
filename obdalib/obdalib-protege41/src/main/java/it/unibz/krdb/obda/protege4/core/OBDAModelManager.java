@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.protege4.core;
 
+import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -391,6 +392,9 @@ public class OBDAModelManager implements Disposable {
 					ioManager.saveOBDAData(URI.create(obdaFileLocation), true, activeOBDAModel.getPrefixManager());					
 				} catch (IOException e) {
 					log.error(e.getMessage());
+					Exception newException = new Exception("Error saving the OBDA file. Closing Protege now can result in losing changes in your data sources or mappings. Please resolve the issue that prevents saving in the current location, or do \"Save as..\" to save in an alternative location. \n\nThe error message was: \n" + e.getMessage());
+					DialogUtils.showQuickErrorDialog(owlEditorKit.getOWLWorkspace(), newException, "Error saving OBDA file");
+					triggerOntologyChanged();
 				}
 				break;
 
