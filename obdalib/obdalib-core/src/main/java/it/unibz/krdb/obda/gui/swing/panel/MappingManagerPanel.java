@@ -1,5 +1,5 @@
 /***
- * 
+ * Copyright (c) 2008, Mariano Rodriguez-Muro. All rights reserved.
  * 
  * The OBDA-API is licensed under the terms of the Lesser General Public License
  * v.3 (see OBDAAPI_LICENSE.txt for details). The components of this work
@@ -87,7 +87,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(OBDAModel apic,  TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
 
 		validatortrg = validator;
 		
@@ -157,17 +157,17 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		setOBDAModel(apic); // TODO Bad code! Change this later!
 	}
 
-	/***
+	/**
 	 * A listener to trigger the context meny of the mapping list.
-	 * 
-	 * @author mariano
-	 * 
 	 */
 	class PopupListener extends MouseAdapter {
+		
+		@Override
 		public void mousePressed(MouseEvent e) {
 			maybeShowPopup(e);
 		}
 
+		@Override
 		public void mouseReleased(MouseEvent e) {
 			maybeShowPopup(e);
 		}
@@ -180,6 +180,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 
 	public void setOBDAModel(OBDAModel omodel) {
+		
 		this.apic = omodel;
 		this.mapc = apic;
 		ListModel model = new SynchronizedMappingListModel(omodel);
@@ -229,7 +230,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		JMenuItem editMapping = new JMenuItem();
 		editMapping.setText("Edit mapping...");
 		editMapping.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				editMapping();
@@ -261,8 +261,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		menuMappings.add(menuExecuteBody);
 	}
 
-	protected void editMapping() {
-
+	public void editMapping() {
 		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
@@ -275,7 +274,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
-		dialog.setSize(600, 400);
+		dialog.setSize(600, 500);
 		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
 	}
@@ -510,7 +509,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 				applyFilters(new ArrayList<TreeModelFilter<OBDAMappingAxiom>>());
 				return;
 			}
-
 			try {
 				List<TreeModelFilter<OBDAMappingAxiom>> filters = parseSearchString(txtFilter.getText());
 				if (filters == null) {
@@ -525,10 +523,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 
 	/***
-	 * Action for the filter checkbox
-	 * 
-	 * @param evt
-	 * @throws Exception
+	 * Action for the filter check-box
 	 */
 	private void chkFilterItemStateChanged(java.awt.event.ItemEvent evt) {// GEN-FIRST:event_jCheckBox1ItemStateChanged
 		processFilterAction();
@@ -536,10 +531,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}// GEN-LAST:event_jCheckBox1ItemStateChanged
 
 	/***
-	 * Action for key's entered in the search textbox
-	 * 
-	 * @param evt
-	 * @throws Exception
+	 * Action for key's entered in the search text box.
 	 */
 	private void sendFilters(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_sendFilters
 		int key = evt.getKeyCode();
@@ -575,9 +567,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
 					long timestart = System.nanoTime();
 
-					if (canceled)
+					if (canceled) {
 						return;
-
+					}
 					if (validator.validate()) {
 						long timestop = System.nanoTime();
 						String output = " valid  \n";
@@ -590,9 +582,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 						outputField.addText(output, outputField.CRITICAL_ERROR);
 					}
 
-					if (canceled)
+					if (canceled) {
 						return;
-
+					}
 				}
 				outputField.setVisible(true);
 			}
@@ -633,8 +625,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private void menuExecuteBodyActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_menuExecuteBodyActionPerformed
 		OBDAMappingAxiom mapping = (OBDAMappingAxiom) mappingList.getSelectedValue();
-		if (mapping == null)
+		if (mapping == null) {
 			return;
+		}
 		final String sqlQuery = mapping.getSourceQuery().toString();
 
 		SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);
@@ -654,9 +647,13 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			JOptionPane.showMessageDialog(this, "No mappings have been selected", "ERROR", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		int confirm = JOptionPane.showConfirmDialog(this,
-				"This will create copies of the selected mappings. \nNumber of mappings selected = " + currentSelection.length
-						+ "\nContinue? ", "Copy confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int confirm = JOptionPane.showConfirmDialog(
+				this,
+				"This will create copies of the selected mappings. \nNumber of mappings selected = " 
+				+ currentSelection.length + "\nContinue? ", 
+				"Copy confirmation", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
@@ -668,8 +665,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 			String id = mapping.getId();
 
-			/* Computing the next available ID */
-
+			// Computing the next available ID
 			int new_index = -1;
 			for (int index = 0; index < 999999999; index++) {
 				if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
@@ -679,7 +675,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			}
 			String new_id = id + "(" + new_index + ")";
 
-			/* inserting the new mapping */
+			// inserting the new mapping
 			try {
 
 				OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
@@ -702,15 +698,18 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private void removeMapping() {
 		int[] indexes = mappingList.getSelectedIndices();
-		if (indexes == null)
+		if (indexes == null) {
 			return;
-		int confirm = JOptionPane.showConfirmDialog(this, "Proceed deleting " + indexes.length + " mappings?", "Conform",
+		}
+		int confirm = JOptionPane.showConfirmDialog(
+				this, 
+				"Proceed deleting " + indexes.length + " mappings?", "Conform",
 				JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION);
 		if (confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
+		
 		// The manager panel can handle multiple deletions.
-
 		Object[] values = mappingList.getSelectedValues();
 
 		OBDAModel controller = mapc;
@@ -736,8 +735,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 		URI sourceID = this.selectedSource.getSourceID();
 
-		/* Computing an ID for the new mapping */
-
+		// Computing an ID for the new mapping
 		int index = 0;
 		for (int i = 0; i < 99999999; i++) {
 			index = this.mapc.indexOf(sourceID, "M:" + Integer.toHexString(i));
@@ -762,11 +760,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 	
 	public void setFilter(String filter) {
-		
 		txtFilter.setText(filter);
-//		chkFilter.setSelected(true);
 		processFilterAction();
-	
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -793,9 +788,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * Parses the string in the search field.
 	 * 
 	 * @param textToParse
+	 *            The target text
 	 * @return A list of filter objects or null if the string was empty or
 	 *         erroneous
-	 * @throws Exception
 	 */
 	private List<TreeModelFilter<OBDAMappingAxiom>> parseSearchString(String textToParse) throws Exception {
 
@@ -831,8 +826,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		
 		if (newSource == null) {
 			return;
-		}
-		
+		}		
 		this.selectedSource = newSource;
 
 		// Update the mapping tree.
