@@ -26,6 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -327,7 +328,10 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 				qc.addQuery(query, currentId);
 			}
 		} else {
-			throw new RuntimeException("ERROR: The system cannot recognize the inserted query!");
+			JOptionPane.showMessageDialog(this,
+					"Please select first the query node that you would like to update",
+					"Warning",
+					JOptionPane.WARNING_MESSAGE);
 		}		
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
