@@ -121,7 +121,8 @@ public class SaveQueryPanel extends JPanel {
         pnlSaveForm.setPreferredSize(new Dimension(340, 120));
         pnlSaveForm.setLayout(new GridBagLayout());
 
-        lblDescription.setFont(new Font("Arial", 0, 11));         lblDescription.setText("<html>Insert an ID and group  for this query.</html>");
+        lblDescription.setFont(new Font("Arial", 0, 11));
+        lblDescription.setText("<html>Insert an ID and group  for this query.</html>");
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridwidth = 4;
@@ -129,21 +130,24 @@ public class SaveQueryPanel extends JPanel {
         gridBagConstraints.insets = new Insets(10, 0, 10, 0);
         pnlSaveForm.add(lblDescription, gridBagConstraints);
 
-        lblID.setFont(new Font("Arial", 0, 11));         lblID.setText("Query ID:");
+        lblID.setFont(new Font("Arial", 0, 11));
+        lblID.setText("Query ID:");
         lblID.setPreferredSize(new Dimension(100, 20));
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.insets = new Insets(0, 0, 4, 0);
         pnlSaveForm.add(lblID, gridBagConstraints);
 
-        lblGroup.setFont(new Font("Arial", 0, 11));         lblGroup.setText("Query Group:");
+        lblGroup.setFont(new Font("Arial", 0, 11));
+        lblGroup.setText("Query Group:");
         lblGroup.setPreferredSize(new Dimension(100, 20));
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.insets = new Insets(0, 0, 4, 0);
         pnlSaveForm.add(lblGroup, gridBagConstraints);
 
-        lblGroupName.setFont(new Font("Arial", 0, 11));         lblGroupName.setText("Group Name:");
+        lblGroupName.setFont(new Font("Arial", 0, 11));
+        lblGroupName.setText("Group Name:");
         lblGroupName.setPreferredSize(new Dimension(100, 20));
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;

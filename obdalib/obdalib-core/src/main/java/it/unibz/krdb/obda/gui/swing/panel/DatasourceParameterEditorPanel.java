@@ -263,7 +263,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         txtJdbcUrl.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtJdbcUrl.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtJdbcUrl.setNextFocusableComponent(txtDatabaseUsername);
         txtJdbcUrl.setPreferredSize(new java.awt.Dimension(180, 24));
         txtJdbcUrl.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -292,7 +291,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         txtDatabaseUsername.setFocusTraversalPolicy(getFocusTraversalPolicy());
         txtDatabaseUsername.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtDatabaseUsername.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtDatabaseUsername.setNextFocusableComponent(txtDatabasePassword);
         txtDatabaseUsername.setPreferredSize(new java.awt.Dimension(180, 24));
         txtDatabaseUsername.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -333,7 +331,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         txtJdbcDriver.setMaximumSize(new java.awt.Dimension(25, 2147483647));
         txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
-        txtJdbcDriver.setNextFocusableComponent(txtJdbcUrl);
         txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
