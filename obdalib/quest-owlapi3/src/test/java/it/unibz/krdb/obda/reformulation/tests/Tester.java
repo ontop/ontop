@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -118,8 +119,8 @@ public class Tester {
 		// reasoner.classify();
 
 		queryMap = new HashMap<String, String>();
-		Vector<QueryControllerEntity> vec = apic.getQueryController().getElements();
-		Iterator<QueryControllerEntity> it = vec.iterator();
+		List<QueryControllerEntity> entities = apic.getQueryController().getElements();
+		Iterator<QueryControllerEntity> it = entities.iterator();
 		while (it.hasNext()) {
 			QueryControllerEntity e = it.next();
 			if (e instanceof QueryControllerQuery) {

@@ -193,7 +193,7 @@ public class DataManager {
 		dumpDatasourcesToXML(datasources);
 
 		// Create the Query element
-		Vector<QueryControllerEntity> queries = apic.getQueryController().getElements();
+		List<QueryControllerEntity> queries = apic.getQueryController().getElements();
 		dumpQueriesToXML(queries);
 
 		XMLUtils.saveDocumentToXMLFile(doc, prefixMap, file.toString());
@@ -406,7 +406,7 @@ public class DataManager {
 	 * @param queries
 	 *            the vector of the query entities.
 	 */
-	protected void dumpQueriesToXML(Vector<QueryControllerEntity> queries) {
+	protected void dumpQueriesToXML(List<QueryControllerEntity> queries) {
 		Document doc = root.getOwnerDocument();
 		Element savedQueryElement = doc.createElement("SavedQueries");
 		for (QueryControllerEntity query : queries) {

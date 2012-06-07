@@ -9,23 +9,21 @@ import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 import java.awt.BorderLayout;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class QueryManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= 1L;
-	private static final Logger	log					= LoggerFactory.getLogger(AbstractOWLViewComponent.class.toString());
-	private SavedQueriesPanel	panel				= null;
-	private OBDAModelManager	obdaController;
+
+	private static final long serialVersionUID = 1L;
+	
+	private SavedQueriesPanel panel;
+	
+	private OBDAModelManager obdaController;
 
 	@Override
 	protected void disposeOWLView() {
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
-		if (queryManagerViews == null)
+		if (queryManagerViews == null) {
 			return;
+		}
 		queryManagerViews.remove(this);
 		obdaController.removeListener(this);
 	}
@@ -34,7 +32,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
-		
+
 		setLayout(new BorderLayout());
 		panel = new SavedQueriesPanel(obdaController.getActiveOBDAModel().getQueryController());
 
@@ -51,31 +49,23 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 		panel.removeQueryManagerListener(listener);
 	}
 
-	/***
-	 * 
-	 * TODO: Document
-	 * 
-	 */
 	public void registerInEditorKit() {
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if (queryManagerViews == null) {
 			queryManagerViews = new QueryManagerViewsList();
 			getOWLEditorKit().put(QueryManagerViewsList.class.getName(), queryManagerViews);
 		}
-
-		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) this.getOWLEditorKit().get(
-				QueryInterfaceViewsList.class.getName());
+		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
 		if ((queryInterfaceViews != null) && (!queryInterfaceViews.isEmpty())) {
 			for (QueryInterfaceView queryInterfaceView : queryInterfaceViews) {
 				this.addListener(queryInterfaceView);
 			}
 		}
-
 		queryManagerViews.add(this);
 	}
 
 	@Override
 	public void activeOntologyChanged() {
-		panel.setQueryController(obdaController.getActiveOBDAModel().getQueryController());
+		panel.changeQueryController(obdaController.getActiveOBDAModel().getQueryController());
 	}
 }

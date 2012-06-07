@@ -17,12 +17,8 @@ import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-public class QueryGroupTreeElement extends DefaultMutableTreeNode implements
-		TreeElement {
+public class QueryGroupTreeElement extends DefaultMutableTreeNode implements TreeElement {
 
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 7496292557025215559L;
 
 	private Vector<QueryTreeElement> queries = null;
@@ -31,7 +27,6 @@ public class QueryGroupTreeElement extends DefaultMutableTreeNode implements
 
 	public QueryGroupTreeElement(String group_id) {
 		this.setID(group_id);
-
 	}
 
 	public void setID(String group_id) {
@@ -54,12 +49,9 @@ public class QueryGroupTreeElement extends DefaultMutableTreeNode implements
 		queries.remove(query);
 	}
 
-	/***************************************************************************
+	/**
 	 * Removes a query from the group and returns the removed query, or null if
 	 * the query was not found in this group.
-	 * 
-	 * @param query_id
-	 * @return
 	 */
 	public QueryTreeElement removeQuery(String query_id) {
 		for (QueryTreeElement query : queries) {
@@ -76,10 +68,7 @@ public class QueryGroupTreeElement extends DefaultMutableTreeNode implements
 	}
 
 	/**
-	 * Searches a specific query and returns the object query else returns null
-	 * 
-	 * @param id
-	 * @return
+	 * Searches a specific query and returns the object query else returns null.
 	 */
 	public QueryTreeElement getQuery(String id) {
 		for (QueryTreeElement query : queries) {
@@ -98,5 +87,4 @@ public class QueryGroupTreeElement extends DefaultMutableTreeNode implements
 	public Object getUserObject() {
 		return getNodeName();
 	}
-
 }

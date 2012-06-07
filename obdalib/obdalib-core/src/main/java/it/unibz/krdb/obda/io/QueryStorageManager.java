@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -89,7 +90,7 @@ public class QueryStorageManager {
 			root = doc.createElement("OBDA");
 			doc.appendChild(root);
 			
-			Vector<QueryControllerEntity> queries =queryCon.getElements();
+			List<QueryControllerEntity> queries = queryCon.getElements();
 			dumpQueriesToXML(queries);
 			
 			XMLUtils.saveDocumentToXMLFile(doc, file);
@@ -127,7 +128,7 @@ public class QueryStorageManager {
 		}
 	}
 	
-	protected void dumpQueriesToXML(Vector<QueryControllerEntity> queries) {
+	protected void dumpQueriesToXML(List<QueryControllerEntity> queries) {
 	    Element savedQueryElement = doc.createElement("SavedQueries");
 	    for (QueryControllerEntity query : queries) {
 	      Element queryElement = xmlRenderer.render(savedQueryElement, query);

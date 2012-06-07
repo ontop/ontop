@@ -17,39 +17,22 @@ import it.unibz.krdb.obda.gui.swing.treemodel.QueryControllerTreeModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.QueryGroupTreeElement;
 import it.unibz.krdb.obda.gui.swing.treemodel.QueryTreeElement;
 import it.unibz.krdb.obda.gui.swing.treemodel.TreeElement;
+import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.io.QueryStorageManager;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
+import it.unibz.krdb.obda.querymanager.QueryControllerListener;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
-import java.awt.Point;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DragGestureEvent;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragGestureRecognizer;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceDragEvent;
-import java.awt.dnd.DragSourceDropEvent;
-import java.awt.dnd.DragSourceEvent;
-import java.awt.dnd.DragSourceListener;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetContext;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Dialog.ModalityType;
 import java.io.File;
-import java.io.IOException;
 import java.util.Vector;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JTree;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -57,125 +40,68 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
- * GUI for Managing queries.
- * 
- * @author mariano
+ * This class represents the display of stored queries using a tree structure.
  */
-public class SavedQueriesPanel extends javax.swing.JPanel {
+public class SavedQueriesPanel extends JPanel implements QueryControllerListener {
 
-	private static final long					serialVersionUID	= 6920100822784727963L;
-	public Vector<SavedQueriesPanelListener>	listeners;
-	private QueryController						queryController		= null;
-	private QueryControllerTreeModel			queryControllerModel;
-	private String								currentQuery		= null;
-	private QueryTreeElement					currentId			= null;
-	private QueryTreeElement					previousId			= null;
+	private static final long serialVersionUID = 6920100822784727963L;
+	
+	private Vector<SavedQueriesPanelListener> listeners = new Vector<SavedQueriesPanelListener>();
+	
+	private QueryControllerTreeModel queryControllerModel = new QueryControllerTreeModel();
 
-	/** Creates new form SavedQueriesPanel */
+	private QueryController queryController;
+		
+	private QueryTreeElement currentId;
+	private QueryTreeElement previousId;
 
+	/** 
+	 * Creates new form SavedQueriesPanel 
+	 */
 	public SavedQueriesPanel(QueryController queryController) {
+		
+		initComponents();		
 
-		initComponents();
-		addListenerToButtons();
-
-		// TreeDragSource ds = new TreeDragSource(treeSavedQueries,
-		// DnDConstants.ACTION_COPY_OR_MOVE);
-		// TreeDropTarget dt = new TreeDropTarget(treeSavedQueries);
-		listeners = new Vector<SavedQueriesPanelListener>();
-
-		queryControllerModel = new QueryControllerTreeModel();
-
-		treSavedQuery.setModel(queryControllerModel);
-		treSavedQuery.setCellRenderer(new SavedQueriesTreeCellRenderer());
-		treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		setQueryController(queryController);
+		this.queryController = queryController;
+		this.queryController.addListener(queryControllerModel);
+		this.queryController.addListener(this);
+		
+		// Fill the tree model with existing elements from the controller
+		queryControllerModel.synchronize(queryController.getElements());
+		queryControllerModel.reload();
 	}
 
-	public void setQueryController(QueryController qmodel) {
+	public void changeQueryController(QueryController newQueryController) {
+		// Reset and reload the current tree model
+		queryControllerModel.reset();
+		queryControllerModel.synchronize(queryController.getElements());
+		queryControllerModel.reload();
+
 		if (queryController != null) {
-			queryController.removeListener(queryControllerModel);
+			queryController.removeAllListeners();
 		}
-		this.queryController = qmodel;
+		queryController = newQueryController;
 		queryController.addListener(queryControllerModel);
-		refreshQueryControllerTreeM();
-	}
-
-	private void addListenerToButtons() {
-		cmdExport.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				JFileChooser fc = new JFileChooser();
-				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				fc.setMultiSelectionEnabled(false);
-				fc.setSelectedFile(new File("OBDAqueries.obda"));
-				fc.addChoosableFileFilter(new FileFilter() {
-
-					@Override
-					public String getDescription() {
-						return "obda files";
-					}
-
-					@Override
-					public boolean accept(File f) {
-						return f.isDirectory() || f.getName().toLowerCase().endsWith(".obda");
-					}
-				});
-				int returnVal = fc.showSaveDialog(SavedQueriesPanel.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					QueryStorageManager man = new QueryStorageManager(queryController);
-					man.saveQueries(file.toURI());
-				}
-
-			}
-		});
-
-		cmdImport.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser();
-				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				fc.setMultiSelectionEnabled(false);
-				fc.setSelectedFile(new File("OBDAqueries.obda"));
-				fc.addChoosableFileFilter(new FileFilter() {
-
-					@Override
-					public String getDescription() {
-						return "obda files";
-					}
-
-					@Override
-					public boolean accept(File f) {
-						return f.isDirectory() || f.getName().toLowerCase().endsWith(".obda");
-					}
-				});
-				int returnVal = fc.showOpenDialog(SavedQueriesPanel.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					QueryStorageManager man = new QueryStorageManager(queryController);
-					man.loadQueries(file.toURI());
-				}
-			}
-		});
+		queryController.addListener(this);
 	}
 
 	public void addQueryManagerListener(SavedQueriesPanelListener listener) {
-		if (listener == null)
+		if (listener == null) {
 			return;
-		if (listeners.contains(listener))
+		}
+		if (listeners.contains(listener)) {
 			return;
+		}
 		listeners.add(listener);
 	}
 
 	public void removeQueryManagerListener(SavedQueriesPanelListener listener) {
-		if (listener == null)
+		if (listener == null) {
 			return;
-		if (listeners.contains(listener))
+		}
+		if (listeners.contains(listener)) {
 			listeners.remove(listener);
+		}
 	}
 
 	/**
@@ -195,8 +121,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
         pnlCommandPanel = new javax.swing.JPanel();
         lblSavedQuery = new javax.swing.JLabel();
         cmdRemove = new javax.swing.JButton();
-        cmdImport = new javax.swing.JButton();
+        cmdAdd = new javax.swing.JButton();
         cmdExport = new javax.swing.JButton();
+        cmdImport = new javax.swing.JButton();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -209,6 +136,10 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 
         treSavedQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         treSavedQuery.setForeground(new java.awt.Color(51, 51, 51));
+        treSavedQuery.setModel(queryControllerModel);
+        treSavedQuery.setCellRenderer(new SavedQueriesTreeCellRenderer());
+		treSavedQuery.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        treSavedQuery.setMaximumSize(new java.awt.Dimension(5000, 5000));
         treSavedQuery.setRootVisible(false);
         treSavedQuery.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -226,7 +157,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 
         pnlCommandPanel.setLayout(new java.awt.GridBagLayout());
 
-        lblSavedQuery.setFont(new java.awt.Font("Arial", 1, 11));
+        lblSavedQuery.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
         lblSavedQuery.setForeground(new java.awt.Color(153, 153, 153));
         lblSavedQuery.setText("Stored Query:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -237,24 +168,65 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
         pnlCommandPanel.add(lblSavedQuery, gridBagConstraints);
 
         cmdRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
+        cmdRemove.setText("Remove");
         cmdRemove.setToolTipText("Remove the selected datasource");
         cmdRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdRemove.setContentAreaFilled(false);
-        cmdRemove.setIconTextGap(0);
+        cmdRemove.setIconTextGap(5);
         cmdRemove.setMaximumSize(new java.awt.Dimension(25, 25));
         cmdRemove.setMinimumSize(new java.awt.Dimension(25, 25));
-        cmdRemove.setPreferredSize(new java.awt.Dimension(25, 25));
+        cmdRemove.setPreferredSize(new java.awt.Dimension(80, 25));
         cmdRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRemoveActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        pnlCommandPanel.add(cmdRemove, gridBagConstraints);
+
+        cmdAdd.setIcon(IconLoader.getImageIcon("images/plus.png"));
+        cmdAdd.setText("Add");
+        cmdAdd.setToolTipText("Remove the selected datasource");
+        cmdAdd.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdAdd.setContentAreaFilled(false);
+        cmdAdd.setIconTextGap(4);
+        cmdAdd.setMaximumSize(new java.awt.Dimension(25, 25));
+        cmdAdd.setMinimumSize(new java.awt.Dimension(25, 25));
+        cmdAdd.setPreferredSize(new java.awt.Dimension(63, 25));
+        cmdAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdAddActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-        pnlCommandPanel.add(cmdRemove, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        pnlCommandPanel.add(cmdAdd, gridBagConstraints);
+
+        cmdExport.setText("Export");
+        cmdExport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdExport.setContentAreaFilled(false);
+        cmdExport.setEnabled(false);
+        cmdExport.setMaximumSize(new java.awt.Dimension(100, 25));
+        cmdExport.setMinimumSize(new java.awt.Dimension(50, 25));
+        cmdExport.setPreferredSize(new java.awt.Dimension(60, 25));
+        cmdExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdExportActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        pnlCommandPanel.add(cmdExport, gridBagConstraints);
 
         cmdImport.setText("Import");
         cmdImport.setToolTipText("Import queries from an obda file");
@@ -263,27 +235,18 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
         cmdImport.setEnabled(false);
         cmdImport.setMaximumSize(new java.awt.Dimension(100, 25));
         cmdImport.setMinimumSize(new java.awt.Dimension(25, 25));
-        cmdImport.setPreferredSize(new java.awt.Dimension(50, 25));
+        cmdImport.setPreferredSize(new java.awt.Dimension(60, 25));
+        cmdImport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdImportActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         pnlCommandPanel.add(cmdImport, gridBagConstraints);
-
-        cmdExport.setText("Export");
-        cmdExport.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmdExport.setContentAreaFilled(false);
-        cmdExport.setEnabled(false);
-        cmdExport.setMaximumSize(new java.awt.Dimension(100, 25));
-        cmdExport.setMinimumSize(new java.awt.Dimension(50, 25));
-        cmdExport.setPreferredSize(new java.awt.Dimension(50, 25));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
-        pnlCommandPanel.add(cmdExport, gridBagConstraints);
 
         pnlSavedQuery.add(pnlCommandPanel, java.awt.BorderLayout.NORTH);
 
@@ -291,9 +254,9 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
     
     private void selectQueryNode(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_selectQueryNode
-        TreePath path = evt.getPath();
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-
+    	String currentQuery = "";
+    	
+    	DefaultMutableTreeNode node = (DefaultMutableTreeNode) evt.getPath().getLastPathComponent();
         if (node instanceof QueryTreeElement) {
             QueryTreeElement queryElement = (QueryTreeElement)node;
             currentQuery = queryElement.getQuery();
@@ -301,7 +264,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
             
             TreeNode parent = queryElement.getParent();
             if (parent == null || parent.toString().equals("")) {
-                fireQueryChanged(null, currentQuery, currentId.getID());
+                fireQueryChanged("", currentQuery, currentId.getID());
             }
             else {
                 fireQueryChanged(parent.toString(), currentQuery, currentId.getID());
@@ -311,7 +274,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
             QueryGroupTreeElement groupElement = (QueryGroupTreeElement)node;
             currentId = null;
             currentQuery = null;
-            fireQueryChanged(groupElement.toString(), null, null);
+            fireQueryChanged(groupElement.toString(), "", "");
         }
         else if (node == null) {
             currentId = null;
@@ -323,7 +286,6 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		if (currentId == null) {
 			return;
 		}
-		
 		if (previousId == currentId) {
 			fireQueryChanged(currentId.getParent().toString(), currentId.getQuery(), currentId.getID());
 		}
@@ -331,6 +293,70 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 			previousId = currentId;
 		}
 	}//GEN-LAST:event_reselectQueryNode
+
+    private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
+    	// Open a save dialog if it is a new query
+		JDialog saveDialog = new JDialog();
+		saveDialog.setTitle("New Query");
+		saveDialog.setModalityType(ModalityType.MODELESS);
+		
+		SaveQueryPanel savePanel = new SaveQueryPanel("", saveDialog, queryController);
+		saveDialog.getContentPane().add(savePanel, java.awt.BorderLayout.CENTER);
+		saveDialog.pack();
+		
+		DialogUtils.centerDialogWRTParent(this, saveDialog);
+		DialogUtils.installEscapeCloseOperation(saveDialog);
+		
+		saveDialog.setVisible(true);
+    }//GEN-LAST:event_cmdAddActionPerformed
+
+    private void cmdExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdExportActionPerformed
+    	JFileChooser fc = new JFileChooser();
+		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fc.setMultiSelectionEnabled(false);
+		fc.setSelectedFile(new File("OBDAqueries.obda"));
+		
+		fc.addChoosableFileFilter(new FileFilter() {
+			@Override
+			public String getDescription() {
+				return "obda files";
+			}
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().toLowerCase().endsWith(".obda");
+			}
+		});
+		int returnVal = fc.showSaveDialog(SavedQueriesPanel.this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			QueryStorageManager man = new QueryStorageManager(queryController);
+			man.saveQueries(file.toURI());
+		}
+    }//GEN-LAST:event_cmdExportActionPerformed
+
+    private void cmdImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdImportActionPerformed
+    	JFileChooser fc = new JFileChooser();
+		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fc.setMultiSelectionEnabled(false);
+		fc.setSelectedFile(new File("OBDAqueries.obda"));
+		
+		fc.addChoosableFileFilter(new FileFilter() {
+			@Override
+			public String getDescription() {
+				return "obda files";
+			}
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().toLowerCase().endsWith(".obda");
+			}
+		});
+		int returnVal = fc.showOpenDialog(SavedQueriesPanel.this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			QueryStorageManager man = new QueryStorageManager(queryController);
+			man.loadQueries(file.toURI());
+		}
+    }//GEN-LAST:event_cmdImportActionPerformed
 
 	private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeQueryButtonActionPerformed
 		TreePath selected_path = treSavedQuery.getSelectionPath();
@@ -355,6 +381,7 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 	}// GEN-LAST:event_removeQueryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdAdd;
     private javax.swing.JButton cmdExport;
     private javax.swing.JButton cmdImport;
     private javax.swing.JButton cmdRemove;
@@ -371,286 +398,55 @@ public class SavedQueriesPanel extends javax.swing.JPanel {
 		}
 	}
 
-	/**
-	 * Selects the query or group added into the tree
-	 */
+	@Override
 	public void elementAdded(QueryControllerEntity element) {
-		if (element instanceof QueryControllerGroup) {
-			QueryControllerGroup elementGroup = (QueryControllerGroup) element;
-			String nodeId = elementGroup.getID();
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(nodeId);
+		String elementId = element.getID();
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(elementId);
 
-			treSavedQuery.requestFocus();
-			treSavedQuery.expandPath(new TreePath(node.getPath()));
-			treSavedQuery.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-			treSavedQuery.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-		}
-		if (element instanceof QueryControllerQuery) {
-			QueryControllerQuery elementQuery = (QueryControllerQuery) element;
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(elementQuery.getID());
-
-			treSavedQuery.requestFocus();
-			treSavedQuery.expandPath(new TreePath(node.getPath()));
-			treSavedQuery.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-			treSavedQuery.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-		}
+		// Select the new node in the JTree
+		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
+		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 
-	/**
-	 * Selects the new query added into a group
-	 */
+	@Override
 	public void elementAdded(QueryControllerQuery query, QueryControllerGroup group) {
-		QueryControllerQuery elementTreeQuery = (QueryControllerQuery) query;
-		QueryControllerGroup elementTreeGroup = (QueryControllerGroup) group;
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(elementTreeQuery.getID(),
-				elementTreeGroup.getID());
-
-		treSavedQuery.requestFocus();
+		String queryId = query.getID();
+		String groupId = group.getID();
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(queryId, groupId);
+				
+		// Select the new node in the JTree
 		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
-		treSavedQuery.expandPath(new TreePath(node.getPath()));
 		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 
+	@Override
 	public void elementRemoved(QueryControllerEntity element) {
+		// TODO: Implement later
 	}
 
+	@Override
 	public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group) {
+		// TODO: Implement later
 	}
 
-	/**
-	 * Selects the query that was moved using Drag&Drop into a group
-	 */
+	@Override
 	public void elementChanged(QueryControllerQuery query, QueryControllerGroup group) {
-		QueryControllerQuery elementTreeQuery = (QueryControllerQuery) query;
-		QueryControllerGroup elementTreeGroup = (QueryControllerGroup) group;
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(elementTreeQuery.getID(),
-				elementTreeGroup.getID());
-
-		treSavedQuery.requestFocus();
+		String queryId = query.getID();
+		String groupId = group.getID();
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getElementQuery(queryId, groupId);
+				
+		// Select the modified node in the JTree
 		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
-		treSavedQuery.expandPath(new TreePath(node.getPath()));
 		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 
-	/**
-	 * Selects the query moved using Drag&Drop
-	 */
+	@Override
 	public void elementChanged(QueryControllerQuery query) {
-		QueryControllerQuery elementQuery = (QueryControllerQuery) query;
-		String nodeId = elementQuery.getID();
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(nodeId);
-
-		treSavedQuery.requestFocus();
-		treSavedQuery.expandPath(new TreePath(node.getPath()));
-		treSavedQuery.setSelectionPath(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-		treSavedQuery.scrollPathToVisible(new TreePath(((DefaultMutableTreeNode) node).getPath()));
-	}
-
-	/**
-	 * This class can be used to make a rearrangeable DnD tree with the
-	 * TransferableTreeNode class as the transfer data type.
-	 */
-	class TreeDragSource implements DragSourceListener, DragGestureListener {
-		DragSource				source;
-		DragGestureRecognizer	recognizer;
-		TransferableTreeNode	transferable;
-		DefaultMutableTreeNode	oldNode;
-		JTree					sourceTree;
-
-		public TreeDragSource(JTree tree, int actions) {
-			sourceTree = tree;
-			source = new DragSource();
-			recognizer = source.createDefaultDragGestureRecognizer(sourceTree, actions, this);
-		}
-
-		/**
-		 * Drag Gesture Handler
-		 */
-		public void dragGestureRecognized(DragGestureEvent dge) {
-			TreePath path = sourceTree.getSelectionPath();
-			if ((path == null) || (path.getPathCount() <= 1)) {
-				return;
-			}
-			oldNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-			transferable = new TransferableTreeNode(path);
-			source.startDrag(dge, DragSource.DefaultCopyDrop, transferable, this);
-		}
-
-		/**
-		 * Drag Event Handlers
-		 */
-		public void dragEnter(DragSourceDragEvent dsde) {
-		}
-
-		public void dragExit(DragSourceEvent dse) {
-		}
-
-		public void dragOver(DragSourceDragEvent dsde) {
-		}
-
-		public void dropActionChanged(DragSourceDragEvent dsde) {
-		}
-
-		public void dragDropEnd(DragSourceDropEvent dsde) {
-		}
-	}
-
-	/**
-	 * Class TreeDropTarget
-	 */
-	class TreeDropTarget implements DropTargetListener {
-		DropTarget	target;
-		JTree		targetTree;
-
-		public TreeDropTarget(JTree tree) {
-			targetTree = tree;
-			target = new DropTarget(targetTree, this);
-		}
-
-		/**
-		 * Drop Event Handlers
-		 */
-		// private TreeNode getNodeForEvent(DropTargetDragEvent dtde) {
-		// Point p = dtde.getLocation();
-		// DropTargetContext dtc = dtde.getDropTargetContext();
-		// JTree tree = (JTree) dtc.getComponent();
-		// TreePath path = tree.getClosestPathForLocation(p.x, p.y);
-		// return (TreeNode) path.getLastPathComponent();
-		// }
-
-		public void dragEnter(DropTargetDragEvent dtde) {
-			// TreeNode node = getNodeForEvent(dtde);
-			dtde.acceptDrag(dtde.getDropAction());
-		}
-
-		public void dragOver(DropTargetDragEvent dtde) {
-			// TreeNode node = getNodeForEvent(dtde);
-			dtde.acceptDrag(dtde.getDropAction());
-		}
-
-		public void dragExit(DropTargetEvent dte) {
-		}
-
-		public void dropActionChanged(DropTargetDragEvent dtde) {
-		}
-
-		public void drop(DropTargetDropEvent dtde) {
-			Point pt = dtde.getLocation();
-			QueryControllerQuery queryChanged = null;
-			DropTargetContext dtc = dtde.getDropTargetContext();
-			JTree tree = (JTree) dtc.getComponent();
-
-			try {
-				DefaultMutableTreeNode parent;
-				TreePath parentpath = tree.getPathForLocation(pt.x, pt.y);
-				if (parentpath == (null)) {
-					parent = null;
-				} else {
-					parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
-				}
-				Transferable tr = dtde.getTransferable();
-				DataFlavor[] flavors = tr.getTransferDataFlavors();
-
-				for (int i = 0; i < flavors.length; i++) {
-					if (tr.isDataFlavorSupported(flavors[i])) {
-						dtde.acceptDrop(dtde.getDropAction());
-						TreePath p = (TreePath) tr.getTransferData(flavors[i]);
-						DefaultMutableTreeNode node = (DefaultMutableTreeNode) p.getLastPathComponent();
-						QueryTreeElement queryNode = (QueryTreeElement) node;
-
-						if ((parent instanceof QueryTreeElement) && (((DefaultMutableTreeNode) parent.getParent()).getLevel() == 1)) {
-							queryController.setEventsDisabled(true);
-							queryController.removeQuery(currentId.getID());
-							queryChanged = (queryController
-									.addQuery(queryNode.getQuery(), currentId.getID(), parent.getParent().toString()));
-							QueryControllerGroup group = queryController.getGroup(parent.getParent().toString());
-							queryController.setEventsDisabled(false);
-							dtde.dropComplete(true);
-							refreshQueryControllerTreeM();
-							queryController.fireElementChanged(queryChanged, group);
-
-							return;
-						}
-						if (parent instanceof QueryGroupTreeElement && parent.getLevel() == 1) {
-							if (!(currentId instanceof QueryTreeElement))
-								return;
-
-							queryController.setEventsDisabled(true);
-							queryController.removeQuery(currentId.getID());
-							queryChanged = queryController.addQuery(queryNode.getQuery(), currentId.getID(), parent.toString());
-							QueryControllerGroup group = queryController.getGroup(parent.toString());
-							queryController.setEventsDisabled(false);
-
-							dtde.dropComplete(true);
-
-							refreshQueryControllerTreeM();
-							queryController.fireElementChanged(queryChanged, group);
-
-							return;
-						}
-
-						if (parent == null) {
-							if (!(currentId instanceof QueryTreeElement))
-								return;
-							queryController.setEventsDisabled(true);
-							queryController.removeQuery(currentId.getID());
-							queryChanged = (queryController.addQuery(queryNode.getQuery(), currentId.getID()));
-							queryController.setEventsDisabled(false);
-
-							dtde.dropComplete(true);
-
-							refreshQueryControllerTreeM();
-							queryController.fireElementChanged(queryChanged);
-
-							return;
-						}
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				// Add a lock to register any exception
-				dtde.rejectDrop();
-			}
-		}
-	}
-
-	/**
-	 * Class TransferableTreeNode A Transferable TreePath to be used with Drag &
-	 * Drop applications.
-	 */
-	class TransferableTreeNode implements Transferable {
-		public DataFlavor	TREE_PATH_FLAVOR	= new DataFlavor(TreePath.class, "Tree Path");
-		DataFlavor			flavors[]			= { TREE_PATH_FLAVOR };
-		TreePath			path;
-
-		public TransferableTreeNode(TreePath tp) {
-			path = tp;
-		}
-
-		public synchronized DataFlavor[] getTransferDataFlavors() {
-			return flavors;
-		}
-
-		public boolean isDataFlavorSupported(DataFlavor flavor) {
-			return (flavor.getRepresentationClass() == TreePath.class);
-		}
-
-		public synchronized Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-			if (isDataFlavorSupported(flavor)) {
-				return (Object) path;
-			} else {
-				throw new UnsupportedFlavorException(flavor);
-			}
-		}
-	}
-
-	/**
-	 * Reset and reload the content of the tree
-	 */
-	public void refreshQueryControllerTreeM() {
-		queryControllerModel.reset();
-		queryControllerModel.synchronize(queryController.getElements());
-		queryControllerModel.reload();
-		treSavedQuery.setModel(queryControllerModel);
+		String queryId = query.getID();
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) queryControllerModel.getNode(queryId);
+		
+		// Select the modified node in the JTree
+		treSavedQuery.setSelectionPath(new TreePath(node.getPath()));
+		treSavedQuery.scrollPathToVisible(new TreePath(node.getPath()));
 	}
 }
