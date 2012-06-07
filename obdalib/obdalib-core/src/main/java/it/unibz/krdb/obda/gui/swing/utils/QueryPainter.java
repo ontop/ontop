@@ -60,9 +60,8 @@ public class QueryPainter {
 	private SimpleAttributeSet dataProp;
 	private SimpleAttributeSet objectProp;
 	private SimpleAttributeSet clazz;
-	
+
 	private SimpleAttributeSet individual;
-	
 
 	private Style invalidQuery;
 	private Border defaultBorder;
@@ -207,10 +206,13 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		final CQIE query = parse(text);
+		TurtleSyntaxParser textParser = new TurtleSyntaxParser(apic.getPrefixManager());
+		CQIE query = null;
+		query = textParser.parse(text);
+
 		if (query == null) {
 			invalid = true;
-			throw new Exception("Syntax error.");
+			throw parsingException;
 		}
 		if (!validator.validate(query)) {
 			Vector<String> invalidPredicates = validator.getInvalidPredicates();
@@ -292,7 +294,7 @@ public class QueryPainter {
 		plainStyle = doc.addStyle("PLAIN_STYLE", null);
 		// StyleConstants.setForeground(plainStyle, Color.BLACK);
 		StyleConstants.setItalic(plainStyle, false);
-//		StyleConstants.setSpaceAbove(plainStyle, 0);
+		// StyleConstants.setSpaceAbove(plainStyle, 0);
 
 		boldStyle = doc.addStyle("BOLD_STYLE", null);
 		StyleConstants.setBold(boldStyle, true);
@@ -320,23 +322,22 @@ public class QueryPainter {
 		Integer size = 14;
 
 		dataProp = new SimpleAttributeSet();
-		Color c_dp = new Color(41,167,121);
+		Color c_dp = new Color(41, 167, 121);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
 		objectProp = new SimpleAttributeSet();
-		Color c_op = new Color(41,119,167);
+		Color c_op = new Color(41, 119, 167);
 		objectProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_op);
 		objectProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
 		clazz = new SimpleAttributeSet();
-		Color c_clazz = new Color(199,155,41);
+		Color c_clazz = new Color(199, 155, 41);
 		clazz.addAttribute(StyleConstants.CharacterConstants.Foreground, c_clazz);
 		clazz.addAttribute(StyleConstants.CharacterConstants.Bold, true);
-		
-		
+
 		individual = new SimpleAttributeSet();
-		Color c_individual = new Color(83,24,82);
+		Color c_individual = new Color(83, 24, 82);
 		individual.addAttribute(StyleConstants.CharacterConstants.Foreground, c_individual);
 		individual.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
@@ -374,7 +375,8 @@ public class QueryPainter {
 
 	private int getFontSize() {
 		return 14;
-//		return Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+		// return
+		// Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
 	}
 
 	/***
@@ -391,7 +393,7 @@ public class QueryPainter {
 
 		if (current_query == null)
 			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
-		
+
 		input = doc.getText(0, doc.getLength());
 
 		int pos = input.indexOf("(", 0);
@@ -434,7 +436,7 @@ public class QueryPainter {
 				ColorTask task = new ColorTask(predicateName, dataProp);
 				tasks.add(task);
 			}
-			
+
 			Term term1 = null;
 			Term term2 = null;
 			term1 = atom.getTerm(0);
@@ -451,8 +453,7 @@ public class QueryPainter {
 				ColorTask task = new ColorTask(rendered, individual);
 				tasks.add(task);
 			}
-			
-			
+
 		}
 
 		ColorTask[] taskArray = order(tasks);
@@ -474,7 +475,7 @@ public class QueryPainter {
 			return textParser.parse(query);
 		} catch (RecognitionException e) {
 			parsingException = e;
-//			log.warn(e.getMessage(), e);
+			// log.warn(e.getMessage(), e);
 			return null;
 		} catch (Exception e) {
 			return null;

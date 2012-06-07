@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 
 public class TurtleSyntaxParser {
 
@@ -33,8 +32,9 @@ public class TurtleSyntaxParser {
 	}
 
 	/**
-	 * Sets the prefix manager to this parser object. This prefix manager is used
-	 * to construct the directive header. Set <i>null</i> to avoid such construction.
+	 * Sets the prefix manager to this parser object. This prefix manager is
+	 * used to construct the directive header. Set <i>null</i> to avoid such
+	 * construction.
 	 * 
 	 * @param manager
 	 *            The prefix manager.
@@ -44,19 +44,32 @@ public class TurtleSyntaxParser {
 	}
 
 	/**
-	 * Returns the CQIE object from the input string. If the input prefix manager
-	 * is null then no directive header will be appended.
+	 * Returns the CQIE object from the input string. If the input prefix
+	 * manager is null then no directive header will be appended.
 	 * 
 	 * @param input
 	 *            A target query string written in Turtle syntax.
 	 * @return A CQIE object.
 	 */
 	public CQIE parse(String input) throws Exception {
+
+		int querylines = input.split("\n").length;
+
+		StringBuffer bf = new StringBuffer(input.trim());
+
+		if (bf.charAt(bf.length()-1) != '.') {
+			bf.append(".");
+		}
+		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
+			bf.insert(bf.length() - 1, ' ');
+		}
+
 		if (prefMan != null) {
 			// Update the input by appending the directives
-			input = appendDirectives(input);
+			appendDirectives(bf);
 		}
-		ANTLRStringStream inputStream = new ANTLRStringStream(input);
+
+		ANTLRStringStream inputStream = new ANTLRStringStream(bf.toString());
 		TurtleLexer lexer = new TurtleLexer(inputStream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 		TurtleParser parser = new TurtleParser(tokenStream);
@@ -64,7 +77,8 @@ public class TurtleSyntaxParser {
 		CQIE output = parser.parse();
 
 		if (parser.getNumberOfSyntaxErrors() != 0) {
-			throw new RecognitionException();
+			throw new RuntimeException(parser.getError());
+			// throw new RuntimeException(parser.getError());
 		}
 		return output;
 	}
@@ -72,10 +86,12 @@ public class TurtleSyntaxParser {
 	/**
 	 * Adds directives to the query header from the PrefixManager.
 	 */
-	private String appendDirectives(String query) {
-		StringBuffer sb = new StringBuffer();
+	private void appendDirectives(StringBuffer query) {
+
 		Map<String, String> prefixMap = prefMan.getPrefixMap();
+		StringBuffer sb = new StringBuffer();
 		for (String prefix : prefixMap.keySet()) {
+
 			sb.append("@PREFIX");
 			sb.append(" ");
 			sb.append(prefix);
@@ -84,8 +100,9 @@ public class TurtleSyntaxParser {
 			sb.append(prefixMap.get(prefix));
 			sb.append(">");
 			sb.append(" .\n");
+
 		}
-		sb.append(query);
-		return sb.toString();
+		query.insert(0, sb);
+
 	}
 }

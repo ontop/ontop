@@ -417,9 +417,9 @@ public class Quest implements Serializable {
 
 				Collection<OBDADataSource> sources = this.inputOBDAModel.getSources();
 				if (sources == null || sources.size() == 0) {
-					throw new Exception("No datasource has been defined");
+					throw new Exception("No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
 				} else if (sources.size() > 1) {
-					throw new Exception("Currently the reasoner can only handle one datasource");
+					throw new Exception("Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains " + sources.size()+ " data sources. Please remove the aditional sources.");
 				} else {
 
 					/* Setting up the OBDA model */
@@ -572,6 +572,8 @@ public class Quest implements Serializable {
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 		} catch (SQLException e) {
+			throw new OBDAException(e.getMessage());
+		} catch (Exception e) {
 			throw new OBDAException(e.getMessage());
 		}
 

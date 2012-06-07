@@ -191,7 +191,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 		if (!questready)
 			throw new OWLReasonerRuntimeException(
 					"Quest is not ready. If you are getting this error it means there was a problem during initialization. This is generally due to connection problems, or errors in the mappings. \n\nError Message: \n" + questException.getMessage()) {
-			};
+				};
 		return owlconn.createStatement();
 	}
 
@@ -386,7 +386,6 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 			objectPropertyHierarchyInfo.computeHierarchy();
 			dataPropertyHierarchyInfo.computeHierarchy();
 
-			
 			questready = false;
 			questException = null;
 			errorMessage = "";

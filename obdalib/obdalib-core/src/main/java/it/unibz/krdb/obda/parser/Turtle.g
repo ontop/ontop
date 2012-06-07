@@ -63,20 +63,55 @@ import java.util.Vector;
 }
 
 @lexer::members {
-private List<String> errors = new Vector<String>();
-
-public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
-    String hdr = getErrorHeader(e);
-    String msg = getErrorMessage(e, tokenNames);
-    errors.add(hdr + " " + msg);
-}
-
-public List<String> getErrors() {
-    return errors;
-}   
 }
 
 @members {
+
+    String error = "";
+    
+    public String getError() {
+    	return error;
+    }
+
+    protected void mismatch(IntStream input, int ttype, BitSet follow)
+    throws RecognitionException
+    {
+    throw new MismatchedTokenException(ttype, input);
+    }
+
+    public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow)
+    throws RecognitionException
+    {
+    throw e;
+    }
+
+    @Override
+    public void recover(IntStream input, RecognitionException re) {
+    	throw new RuntimeException(error);
+    }
+
+    
+    @Override
+    public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
+    }
+    @Override
+    public void emitErrorMessage(	String 	msg	 ) 	{
+    	error = msg;
+    	    }
+    
+    @Override
+    public Object recoverFromMismatchedToken	(	IntStream 	input,
+    		int 	ttype,
+    		BitSet 	follow	 
+    		)			 throws RecognitionException {
+    	throw new RecognitionException(input);
+    }
+    
+
 /** Constants */
 private static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 private static final URI RDF_TYPE_URI = URI.create(RDF_TYPE);
@@ -123,7 +158,7 @@ directiveStatement
   ;
   
 triplesStatement returns [List<Atom> value]
-  : triples PERIOD { $value = $triples.value; }
+  : triples WS* PERIOD { $value = $triples.value; }
   ;
   
 directive
@@ -315,7 +350,7 @@ uriTemplateFunction returns [Function value]
         
         String uri = directives.get(prefix);        
         if (uri == null) {
-          throw new Exception("The prefix name is unknown: " + prefix); // the prefix is unknown.
+          throw new RuntimeException("The prefix name is unknown: " + prefix); // the prefix is unknown.
         }
         template = template.replaceFirst(prefixPlaceHolder, uri);
       }
@@ -333,11 +368,11 @@ uriTemplateFunction returns [Function value]
         try {
        	  String variableName = placeHolder.substring(2, placeHolder.length()-1);                    	
        	  if (variableName.equals("")) {
-       	    throw new Exception("Variable name has not been properly defined!");
+       	    throw new RuntimeException("Variable name must have at least 1 character");
        	  }
           terms.add(dfac.getVariable(variableName));
         } catch (IndexOutOfBoundsException e) {
-       	  throw new Exception("Variable name has not been properly defined!");
+       	  throw new RuntimeException("Variable name must have at least 1 character");
         }
       }
       // replace the placeholder string to the original. The current string becomes the template
@@ -404,7 +439,7 @@ dataTypeString returns [Term value]
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
       } else {
-        throw new Exception("Unknown datatype: " + functionName);
+        throw new RuntimeException("Unknown datatype: " + functionName);
       }
       $value = dfac.getFunctionalTerm(functionSymbol, constant);
     }
