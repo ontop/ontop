@@ -25,8 +25,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 
 	@Override
 	public void addPrefix(String prefix, String uri) {
-		prefixToURIMap.put(prefix, uri);
-		uriToPrefixMap.put(uri, prefix);
+		prefixToURIMap.put(prefix, getProperPrefixURI(uri));
+		uriToPrefixMap.put(getProperPrefixURI(uri), prefix);
 	}
 
 	/**

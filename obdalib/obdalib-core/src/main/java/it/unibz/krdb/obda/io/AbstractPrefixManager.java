@@ -28,6 +28,18 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	public String getDefaultPrefix() {
 		return getPrefixMap().get(DEFAULT_PREFIX);
 	}
+		
+	/**
+	 * A utility method to ensure a proper naming for prefix URI
+	 */
+	protected String getProperPrefixURI(String prefixUri) {
+		if (!prefixUri.endsWith("/")) {
+			if (!prefixUri.endsWith("#")) {
+				prefixUri += "#";
+			}
+		}
+		return prefixUri;
+	} 
 	
 	private String removeColon(String prefix) {
 		if (prefix.equals(PrefixManager.DEFAULT_PREFIX)) {
