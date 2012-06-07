@@ -16,7 +16,7 @@
 	
 	<extension id="MappingsManagerViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="Mappings editor"></label>
+		<label value="Mapping editor"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.views.MappingsManagerView">
 		</class>
@@ -37,7 +37,7 @@
 	
 	<extension id="SQLQueryInterfaceViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="SQL query interface"></label>
+		<label value="SQL query editor"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.views.SQLQueryInterfaceView">
 		</class>
@@ -61,12 +61,12 @@
 	
 	<extension id="QueryInterfaceViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
-		<label value="OBDA query interface"></label>
+		<label value="OBDA query editor"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.views.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
-		<category value="Data query"></category>
+		<category value="Data Query"></category>
 	</extension>
 	
 	
@@ -85,7 +85,7 @@
 	
 	<extension id="DatasourcesManagerTab"
 		point="org.protege.editor.core.application.WorkspaceTab">
-		<label value="OBDA model"></label>
+		<label value="OBDA Model"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.gui.tab.OBDATab">
 		</class>
@@ -97,7 +97,7 @@
 	
 	<extension id="IndividualsQueryTab"
 		point="org.protege.editor.core.application.WorkspaceTab">
-		<label value="OBDA query"></label>
+		<label value="OBDA Query"></label>
 		<class
 			value="it.unibz.krdb.obda.protege4.gui.tab.OBDAQueriesTab">
 		</class>

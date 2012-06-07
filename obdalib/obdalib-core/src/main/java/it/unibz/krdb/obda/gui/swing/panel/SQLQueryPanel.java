@@ -14,6 +14,7 @@
 
 package it.unibz.krdb.obda.gui.swing.panel;
 
+import it.unibz.krdb.obda.gui.swing.IconLoader;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
 import it.unibz.krdb.obda.gui.swing.utils.OBDAProgessMonitor;
@@ -62,87 +63,100 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 	 */
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-	// desc=" Generated Code ">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		splSqlQuery = new javax.swing.JSplitPane();
-		pnlSqlQuery = new javax.swing.JPanel();
-		scrSqlQuery = new javax.swing.JScrollPane();
-		txtSqlQuery = new javax.swing.JTextArea();
-		cmdExecute = new javax.swing.JButton();
-		pnlQueryResult = new javax.swing.JPanel();
-		scrQueryResult = new javax.swing.JScrollPane();
-		tblQueryResult = new javax.swing.JTable();
+        splSqlQuery = new javax.swing.JSplitPane();
+        pnlSqlQuery = new javax.swing.JPanel();
+        scrSqlQuery = new javax.swing.JScrollPane();
+        txtSqlQuery = new javax.swing.JTextArea();
+        cmdExecute = new javax.swing.JButton();
+        pnlQueryResult = new javax.swing.JPanel();
+        scrQueryResult = new javax.swing.JScrollPane();
+        tblQueryResult = new javax.swing.JTable();
 
-		setLayout(new java.awt.BorderLayout(5, 5));
+        setBorder(javax.swing.BorderFactory.createTitledBorder("SQL Query"));
+        setAlignmentX(5.0F);
+        setAlignmentY(5.0F);
+        setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        setPreferredSize(new java.awt.Dimension(640, 480));
+        setLayout(new java.awt.BorderLayout(5, 5));
 
-		setBorder(javax.swing.BorderFactory.createTitledBorder("SQL Query"));
-		setAlignmentX(5.0F);
-		setAlignmentY(5.0F);
-		setFont(new java.awt.Font("Arial", 0, 18));
-		setPreferredSize(new java.awt.Dimension(640, 480));
-		splSqlQuery.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-		splSqlQuery.setResizeWeight(0.3);
-		splSqlQuery.setNextFocusableComponent(cmdExecute);
-		pnlSqlQuery.setLayout(new java.awt.GridBagLayout());
+        splSqlQuery.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        splSqlQuery.setResizeWeight(0.3);
+        splSqlQuery.setNextFocusableComponent(cmdExecute);
 
-		pnlSqlQuery.setMinimumSize(new java.awt.Dimension(156, 100));
-		pnlSqlQuery.setPreferredSize(new java.awt.Dimension(156, 100));
-		scrSqlQuery.setPreferredSize(new java.awt.Dimension(600, 100));
-		txtSqlQuery.setColumns(20);
-		txtSqlQuery.setFont(new java.awt.Font("Dialog", 0, 12));
-		txtSqlQuery.setLineWrap(true);
-		txtSqlQuery.setRows(2);
-		txtSqlQuery.setBorder(null);
-		txtSqlQuery.setNextFocusableComponent(cmdExecute);
-		txtSqlQuery.setPreferredSize(new java.awt.Dimension(600, 100));
-		scrSqlQuery.setViewportView(txtSqlQuery);
+        pnlSqlQuery.setMinimumSize(new java.awt.Dimension(156, 100));
+        pnlSqlQuery.setPreferredSize(new java.awt.Dimension(156, 100));
+        pnlSqlQuery.setLayout(new java.awt.GridBagLayout());
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.gridwidth = 3;
-		gridBagConstraints.gridheight = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 2.0;
-		gridBagConstraints.weighty = 2.0;
-		pnlSqlQuery.add(scrSqlQuery, gridBagConstraints);
+        scrSqlQuery.setPreferredSize(new java.awt.Dimension(600, 100));
 
-		cmdExecute.setMnemonic('x');
-		cmdExecute.setText("Execute");
-		cmdExecute.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdExecuteActionPerformed(evt);
-			}
-		});
+        txtSqlQuery.setColumns(20);
+        txtSqlQuery.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+        txtSqlQuery.setLineWrap(true);
+        txtSqlQuery.setRows(2);
+        txtSqlQuery.setBorder(null);
+        txtSqlQuery.setNextFocusableComponent(cmdExecute);
+        txtSqlQuery.setPreferredSize(new java.awt.Dimension(600, 100));
+        scrSqlQuery.setViewportView(txtSqlQuery);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 2;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
-		gridBagConstraints.gridheight = java.awt.GridBagConstraints.RELATIVE;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-		pnlSqlQuery.add(cmdExecute, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 2.0;
+        gridBagConstraints.weighty = 2.0;
+        pnlSqlQuery.add(scrSqlQuery, gridBagConstraints);
 
-		splSqlQuery.setLeftComponent(pnlSqlQuery);
+        cmdExecute.setIcon(IconLoader.getImageIcon("images/execute.png"));
+        cmdExecute.setMnemonic('x');
+        cmdExecute.setText("Execute");
+        cmdExecute.setToolTipText("Execute the SQL query");
+        cmdExecute.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdExecute.setContentAreaFilled(false);
+        cmdExecute.setMargin(new java.awt.Insets(5, 14, 5, 14));
+        cmdExecute.setMaximumSize(new java.awt.Dimension(85, 25));
+        cmdExecute.setMinimumSize(new java.awt.Dimension(85, 25));
+        cmdExecute.setPreferredSize(new java.awt.Dimension(85, 25));
+        cmdExecute.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdExecuteActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
+        gridBagConstraints.gridheight = java.awt.GridBagConstraints.RELATIVE;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        pnlSqlQuery.add(cmdExecute, gridBagConstraints);
 
-		pnlQueryResult.setLayout(new java.awt.BorderLayout());
+        splSqlQuery.setLeftComponent(pnlSqlQuery);
 
-		tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
+        pnlQueryResult.setLayout(new java.awt.BorderLayout());
 
-		}, new String[] { "Results" }));
-		tblQueryResult.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-		scrQueryResult.setViewportView(tblQueryResult);
+        tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
 
-		pnlQueryResult.add(scrQueryResult, java.awt.BorderLayout.CENTER);
+            },
+            new String [] {
+                "Results"
+            }
+        ));
+        tblQueryResult.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        scrQueryResult.setViewportView(tblQueryResult);
 
-		splSqlQuery.setRightComponent(pnlQueryResult);
+        pnlQueryResult.add(scrQueryResult, java.awt.BorderLayout.CENTER);
 
-		add(splSqlQuery, java.awt.BorderLayout.CENTER);
+        splSqlQuery.setRightComponent(pnlQueryResult);
 
-	}// </editor-fold>//GEN-END:initComponents
+        add(splSqlQuery, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>//GEN-END:initComponents
 
 	private void cmdExecuteActionPerformed(java.awt.event.ActionEvent evt) {
 		releaseResultset();
@@ -194,17 +208,16 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 		releaseResultset();
 	}
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton cmdExecute;
-	private javax.swing.JPanel pnlQueryResult;
-	private javax.swing.JPanel pnlSqlQuery;
-	private javax.swing.JScrollPane scrQueryResult;
-	private javax.swing.JScrollPane scrSqlQuery;
-	private javax.swing.JSplitPane splSqlQuery;
-	private javax.swing.JTable tblQueryResult;
-	private javax.swing.JTextArea txtSqlQuery;
-
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdExecute;
+    private javax.swing.JPanel pnlQueryResult;
+    private javax.swing.JPanel pnlSqlQuery;
+    private javax.swing.JScrollPane scrQueryResult;
+    private javax.swing.JScrollPane scrSqlQuery;
+    private javax.swing.JSplitPane splSqlQuery;
+    private javax.swing.JTable tblQueryResult;
+    private javax.swing.JTextArea txtSqlQuery;
+    // End of variables declaration//GEN-END:variables
 
 	private class ExecuteSQLQueryAction implements OBDAProgressListener {
 

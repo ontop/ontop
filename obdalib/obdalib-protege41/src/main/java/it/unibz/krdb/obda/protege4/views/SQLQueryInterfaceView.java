@@ -9,7 +9,6 @@ import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -24,15 +23,14 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= 993255482453828915L;
-	private static final Logger	log					= Logger.getLogger(SQLQueryInterfaceView.class);
+	private static final long serialVersionUID = 993255482453828915L;
 
-	DatasourceSelector			datasourceSelector	= null;
-	OBDAModelManager			apic				= null;
+	DatasourceSelector datasourceSelector;
 
+	OBDAModelManager apic;
+
+	private static final Logger log = Logger.getLogger(SQLQueryInterfaceView.class);
+	
 	@Override
 	protected void disposeOWLView() {
 		apic.removeListener(this);
@@ -41,13 +39,10 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 	@Override
 	protected void initialiseOWLView() throws Exception {
 
-		apic = (OBDAModelManager)getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
 		OBDAModel dsController = apic.getActiveOBDAModel();
-
-		// Vector<DataSource> vecDatasource =
-		// new Vector<DataSource>(dsController.getAllSources());
 
 		SQLQueryPanel queryPanel = new SQLQueryPanel();
 		datasourceSelector = new DatasourceSelector(dsController);
@@ -57,14 +52,9 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		selectorPanel.setLayout(new GridBagLayout());
 
 		JLabel label = new JLabel("Select datasource: ");
-		
+
 		label.setFont(new Font("Dialog", Font.BOLD, 12));
-		label.setForeground(new Color(53,113,163));
-		
-//		label.setBackground(new java.awt.Color(153, 153, 153));
-//		label.setFont(new java.awt.Font("Arial", 1, 11));
-//		label.setForeground(new java.awt.Color(153, 153, 153));
-//		label.setPreferredSize(new Dimension(119, 14));
+		label.setForeground(new Color(53, 113, 163));
 
 		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
 		gridBagConstraints.gridx = 0;
@@ -94,6 +84,5 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 	@Override
 	public void activeOntologyChanged() {
 		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel());
-
 	}
 }

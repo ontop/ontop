@@ -11,38 +11,34 @@ import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 
 public class DatasourceParametersEditorView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
-	/**
-	 * 
-	 */
-	private static final long		serialVersionUID	= 1L;
-	private static final Logger		log					= Logger.getLogger(DatasourceParametersEditorView.class);
 
-	DatasourceParameterEditorPanel	panel				= null;
+	private static final long serialVersionUID = 1L;
+	
+	private static final Logger log = Logger.getLogger(DatasourceParametersEditorView.class);
 
-	OBDAModelManager				apic				= null;
+	private DatasourceParameterEditorPanel panel;
+
+	private OBDAModelManager apic;
 
 	@Override
 	protected void disposeOWLView() {
-		 apic.removeListener(this);
+		apic.removeListener(this);
 	}
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
 
-		apic = (OBDAModelManager)getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
 		panel = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel());
-
 		add(panel, BorderLayout.CENTER);
+		
 		log.debug("Datasource parameter view Component initialized");
-
 	}
 
 	@Override
 	public void activeOntologyChanged() {
 		panel.setDatasourcesController(apic.getActiveOBDAModel());
-
 	}
-
 }

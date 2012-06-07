@@ -2,13 +2,13 @@
 <layout>
 	<VSNode splits="0.25 0.75">
 		<CNode>
-			<Component label="Query manager">
+			<Component label="Query Manager">
 				<Property id="pluginId"
 					value="it.unibz.krdb.obda.protege4.QueryManagerViewComponent"/>
 			</Component>
 		</CNode>
 		<CNode>
-			<Component label="Query interface">
+			<Component label="Query Editor">
 				<Property id="pluginId"
 					value="it.unibz.krdb.obda.protege4.QueryInterfaceViewComponent"/>
 			</Component>

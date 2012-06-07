@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.codec.TargetQueryToTurtleCodec;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.gui.swing.IconLoader;
 import it.unibz.krdb.obda.gui.swing.treemodel.IncrementalResultSetTableModel;
 import it.unibz.krdb.obda.gui.swing.treemodel.TargetQueryVocabularyValidator;
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
@@ -20,7 +21,6 @@ import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
-import it.unibz.krdb.obda.utils.OBDAPreferences;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.awt.Font;
@@ -52,11 +52,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
-	private OBDAModel controller = null;
-//	private OBDAPreferences preferences = null;
-	private OBDADataSource dataSource = null;
-	private JDialog parent = null;
-	private TargetQueryVocabularyValidator validator = null;
+	private OBDAModel controller;
+	private OBDADataSource dataSource;
+	private JDialog parent;
+	private TargetQueryVocabularyValidator validator;
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 	/** Logger */
@@ -64,29 +63,19 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	/**
 	 * Create the dialog for inserting a new mapping.
-	 * 
-	 * @param controller
-	 * @param preference
-	 * @param parent
-	 * @param dataSource
-	 * @param ontology
 	 */
 	public NewMappingDialogPanel(OBDAModel controller, JDialog parent, OBDADataSource dataSource,
 			TargetQueryVocabularyValidator validator) {
+		
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.controller = controller;
-//		this.preferences = preference;
 		this.parent = parent;
 		this.dataSource = dataSource;
 		this.validator = validator;
 
-		// validator = new TargetQueryValidator(ontology);
-
 		initComponents();
 
-		/***
-		 * Formatting the src query
-		 */
+		// Formatting the src query
 		StyledDocument doc = txtSourceQuery.getStyledDocument();
 		Style plainStyle = doc.addStyle("PLAIN_STYLE", null);
 		StyleConstants.setItalic(plainStyle, false);
@@ -95,7 +84,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		StyleConstants.setFontFamily(plainStyle, new Font("Dialog", Font.PLAIN, 12).getFamily());
 		doc.setParagraphAttributes(0, doc.getLength(), plainStyle, true);
 
-		fieldID.setFont(new Font("Dialog", Font.BOLD, 12));
+		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		cmdInsertMapping.setEnabled(false);
 		QueryPainter painter = new QueryPainter(controller, txtTargetQuery, validator);
@@ -106,36 +95,23 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				cmdInsertMapping.setEnabled(result);
 			}
 		});
-
-		SQLQueryPainter sqlpainter = new SQLQueryPainter(txtSourceQuery);
-
+		
 		cmdInsertMapping.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				cmdInsertMappingActionPerformed(e);
-
 			}
 		});
 
 		txtTargetQuery.addKeyListener(new CTRLEnterKeyListener());
 		txtSourceQuery.addKeyListener(new CTRLEnterKeyListener());
-		fieldID.addKeyListener(new CTRLEnterKeyListener());
-
-		// jPanel1.setPreferredSize(new Dimension(Integer.MAX_VALUE,
-		// Integer.MAX_VALUE));
-		// jPanel2.setMinimumSize(new Dimension(0, 0));
-		// jPanel2.setPreferredSize(new Dimension(50,100));
-		// jSplitPane1.setDividerLocation(0.5);
-
+		txtMappingID.addKeyListener(new CTRLEnterKeyListener());
 	}
 
 	private class CTRLEnterKeyListener implements KeyListener {
-
 		@Override
 		public void keyTyped(KeyEvent e) {
 		}
-
 		@Override
 		public void keyPressed(KeyEvent e) {
 			if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
@@ -143,11 +119,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			}
 
 		}
-
 		@Override
 		public void keyReleased(KeyEvent e) {
 		}
-
 	}
 
 	private void insertMapping(String target, String source) {
@@ -160,23 +134,16 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					URI sourceID = dataSource.getSourceID();
 
 					OBDASQLQuery body = dataFactory.getSQLQuery(source);
-					OBDARDBMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(fieldID.getText().trim(), body, targetQuery);
+					OBDARDBMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
 
 					if (mapping == null) {
-						/***
-						 * Case when we are creating a new mapping
-						 */
-
+						// Case when we are creating a new mapping
 						mapcon.addMapping(sourceID, newmapping);
 					} else {
-						/***
-						 * Case when we are updating an existing mapping
-						 */
-
+						// Case when we are updating an existing mapping
 						mapcon.updateMappingsSourceQuery(sourceID, mapping.getId(), body);
 						mapcon.updateTargetQueryMapping(sourceID, mapping.getId(), targetQuery);
-						mapcon.updateMapping(sourceID, mapping.getId(), fieldID.getText().trim());
-
+						mapcon.updateMapping(sourceID, mapping.getId(), txtMappingID.getText().trim());
 					}
 				} catch (DuplicateMappingException e) {
 					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
@@ -190,8 +157,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				for (String predicate : invalidPredicates) {
 					invalidList += "- " + predicate + "\n";
 				}
-				JOptionPane.showMessageDialog(null, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping",
-						JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(
+						null,
+						"This list of predicates is unknown by the ontology: \n" + invalidList,
+						"New Mapping", JOptionPane.WARNING_MESSAGE);
 			}
 		}
 	}
@@ -207,189 +176,216 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
-	// desc=" Generated Code ">//GEN-BEGIN:initComponents
-	private void initComponents() {
-		java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-		labelID = new javax.swing.JLabel();
-		cmdTestQuery = new javax.swing.JButton();
-		pnlCommandButton = new javax.swing.JPanel();
-		cmdInsertMapping = new javax.swing.JButton();
-		cmdCancel = new javax.swing.JButton();
-		fieldID = new javax.swing.JTextField();
-		splitTargetSource = new javax.swing.JSplitPane();
-		panelTrg = new javax.swing.JPanel();
-		lblTargetQuery = new javax.swing.JLabel();
-		scrTargetQuery = new javax.swing.JScrollPane();
-		txtTargetQuery = new javax.swing.JTextPane();
-		splitSQL = new javax.swing.JSplitPane();
-		jPanel1 = new javax.swing.JPanel();
-		lblSourceQuery = new javax.swing.JLabel();
-		scrSourceQuery = new javax.swing.JScrollPane();
-		txtSourceQuery = new javax.swing.JTextPane();
-		jPanel2 = new javax.swing.JPanel();
-		jScrollPane1 = new javax.swing.JScrollPane();
-		jTable1 = new javax.swing.JTable();
+        lblMappingID = new javax.swing.JLabel();
+        cmdTestQuery = new javax.swing.JButton();
+        pnlCommandButton = new javax.swing.JPanel();
+        cmdInsertMapping = new javax.swing.JButton();
+        cmdCancel = new javax.swing.JButton();
+        txtMappingID = new javax.swing.JTextField();
+        splitTargetSource = new javax.swing.JSplitPane();
+        pnlTargetQueryEditor = new javax.swing.JPanel();
+        lblTargetQuery = new javax.swing.JLabel();
+        scrTargetQuery = new javax.swing.JScrollPane();
+        txtTargetQuery = new javax.swing.JTextPane();
+        splitSQL = new javax.swing.JSplitPane();
+        pnlSourceQueryEditor = new javax.swing.JPanel();
+        lblSourceQuery = new javax.swing.JLabel();
+        scrSourceQuery = new javax.swing.JScrollPane();
+        txtSourceQuery = new javax.swing.JTextPane();
+        pnlQueryResult = new javax.swing.JPanel();
+        scrQueryResult = new javax.swing.JScrollPane();
+        tblQueryResult = new javax.swing.JTable();
 
-		setLayout(new java.awt.GridBagLayout());
+        setFocusable(false);
+        setMinimumSize(new java.awt.Dimension(600, 500));
+        setPreferredSize(new java.awt.Dimension(600, 500));
+        setLayout(new java.awt.GridBagLayout());
 
-		setBorder(javax.swing.BorderFactory.createTitledBorder("Mapping Editor"));
-		setFocusable(false);
-		setMinimumSize(new java.awt.Dimension(600, 480));
-		setPreferredSize(new java.awt.Dimension(400, 300));
-		getAccessibleContext().setAccessibleName("Mapping editor");
-		labelID.setText("Mapping ID:");
-		labelID.setFocusable(false);
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		add(labelID, gridBagConstraints);
+        lblMappingID.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        lblMappingID.setText("Mapping ID:");
+        lblMappingID.setFocusable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(8, 10, 8, 0);
+        add(lblMappingID, gridBagConstraints);
 
-		cmdTestQuery.setText("Test SQL Query");
-		cmdTestQuery.setToolTipText("Execute the SQL query in the SQL query text pane<p> and display the results in the table bellow.");
-		cmdTestQuery.setActionCommand("Test SQL query");
-		cmdTestQuery.setNextFocusableComponent(cmdInsertMapping);
-		cmdTestQuery.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdTestQueryActionPerformed(evt);
-			}
-		});
+        cmdTestQuery.setIcon(IconLoader.getImageIcon("images/execute.png"));
+        cmdTestQuery.setText("Test SQL Query");
+        cmdTestQuery.setToolTipText("Execute the SQL query in the SQL query text pane<p> and display the results in the table bellow.");
+        cmdTestQuery.setActionCommand("Test SQL query");
+        cmdTestQuery.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdTestQuery.setContentAreaFilled(false);
+        cmdTestQuery.setIconTextGap(5);
+        cmdTestQuery.setMaximumSize(new java.awt.Dimension(115, 25));
+        cmdTestQuery.setMinimumSize(new java.awt.Dimension(115, 25));
+        cmdTestQuery.setPreferredSize(new java.awt.Dimension(115, 25));
+        cmdTestQuery.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdTestQueryActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.insets = new java.awt.Insets(4, 10, 4, 4);
+        add(cmdTestQuery, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 5;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(cmdTestQuery, gridBagConstraints);
+        pnlCommandButton.setFocusable(false);
+        pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-		pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        cmdInsertMapping.setIcon(IconLoader.getImageIcon("images/accept.png"));
+        cmdInsertMapping.setText("Accept");
+        cmdInsertMapping.setToolTipText("This will add/edit the current mapping into the OBDA model");
+        cmdInsertMapping.setActionCommand("OK");
+        cmdInsertMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdInsertMapping.setContentAreaFilled(false);
+        cmdInsertMapping.setIconTextGap(5);
+        cmdInsertMapping.setPreferredSize(new java.awt.Dimension(90, 25));
+        pnlCommandButton.add(cmdInsertMapping);
 
-		pnlCommandButton.setFocusable(false);
-		cmdInsertMapping.setText("Accept");
-		cmdInsertMapping.setToolTipText("This will add/edit the current mapping into the OBDA model");
-		cmdInsertMapping.setActionCommand("OK");
-		cmdInsertMapping.setNextFocusableComponent(cmdCancel);
-		pnlCommandButton.add(cmdInsertMapping);
+        cmdCancel.setIcon(IconLoader.getImageIcon("images/cancel.png"));
+        cmdCancel.setText("Cancel");
+        cmdCancel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdCancel.setContentAreaFilled(false);
+        cmdCancel.setIconTextGap(5);
+        cmdCancel.setPreferredSize(new java.awt.Dimension(90, 25));
+        cmdCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCancelActionPerformed(evt);
+            }
+        });
+        pnlCommandButton.add(cmdCancel);
 
-		cmdCancel.setText("Cancel");
-		cmdCancel.setNextFocusableComponent(fieldID);
-		cmdCancel.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				cmdCancelActionPerformed(evt);
-			}
-		});
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 4);
+        add(pnlCommandButton, gridBagConstraints);
 
-		pnlCommandButton.add(cmdCancel);
+        txtMappingID.setFocusCycleRoot(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 8, 10);
+        add(txtMappingID, gridBagConstraints);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridy = 7;
-		gridBagConstraints.gridwidth = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-		add(pnlCommandButton, gridBagConstraints);
+        splitTargetSource.setBorder(null);
+        splitTargetSource.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        splitTargetSource.setResizeWeight(0.5);
+        splitTargetSource.setDoubleBuffered(true);
+        splitTargetSource.setFocusable(false);
+        splitTargetSource.setMinimumSize(new java.awt.Dimension(600, 430));
+        splitTargetSource.setOneTouchExpandable(true);
+        splitTargetSource.setPreferredSize(new java.awt.Dimension(600, 430));
 
-		fieldID.setFocusCycleRoot(true);
-		fieldID.setNextFocusableComponent(txtTargetQuery);
-		fieldID.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				fieldIDActionPerformed(evt);
-			}
-		});
+        pnlTargetQueryEditor.setFocusable(false);
+        pnlTargetQueryEditor.setMinimumSize(new java.awt.Dimension(600, 180));
+        pnlTargetQueryEditor.setPreferredSize(new java.awt.Dimension(600, 180));
+        pnlTargetQueryEditor.setLayout(new java.awt.BorderLayout());
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.weightx = 1.0;
-		add(fieldID, gridBagConstraints);
+        lblTargetQuery.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        lblTargetQuery.setText("Target Query:");
+        lblTargetQuery.setFocusable(false);
+        pnlTargetQueryEditor.add(lblTargetQuery, java.awt.BorderLayout.NORTH);
 
-		splitTargetSource.setBorder(null);
-		splitTargetSource.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-		splitTargetSource.setResizeWeight(0.5);
-		splitTargetSource.setDoubleBuffered(true);
-		splitTargetSource.setFocusable(false);
-		splitTargetSource.setOneTouchExpandable(true);
-		panelTrg.setLayout(new java.awt.BorderLayout());
+        scrTargetQuery.setFocusable(false);
+        scrTargetQuery.setMinimumSize(new java.awt.Dimension(600, 170));
+        scrTargetQuery.setPreferredSize(new java.awt.Dimension(600, 170));
 
-		panelTrg.setFocusable(false);
-		panelTrg.setPreferredSize(new java.awt.Dimension(85, 200));
-		lblTargetQuery.setText("Target Query:");
-		lblTargetQuery.setFocusable(false);
-		panelTrg.add(lblTargetQuery, java.awt.BorderLayout.NORTH);
+        txtTargetQuery.setFocusCycleRoot(false);
+        txtTargetQuery.setMinimumSize(new java.awt.Dimension(600, 170));
+        txtTargetQuery.setPreferredSize(new java.awt.Dimension(600, 170));
+        txtTargetQuery.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                changeTargetQueryFocus(evt);
+            }
+        });
+        scrTargetQuery.setViewportView(txtTargetQuery);
 
-		scrTargetQuery.setFocusable(false);
-		txtTargetQuery.setFocusCycleRoot(false);
-		txtTargetQuery.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyPressed(java.awt.event.KeyEvent evt) {
-				changeTargetQueryFocus(evt);
-			}
-		});
+        pnlTargetQueryEditor.add(scrTargetQuery, java.awt.BorderLayout.CENTER);
 
-		scrTargetQuery.setViewportView(txtTargetQuery);
+        splitTargetSource.setLeftComponent(pnlTargetQueryEditor);
 
-		panelTrg.add(scrTargetQuery, java.awt.BorderLayout.CENTER);
+        splitSQL.setBorder(null);
+        splitSQL.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        splitSQL.setResizeWeight(0.8);
+        splitSQL.setFocusable(false);
+        splitSQL.setMinimumSize(new java.awt.Dimension(600, 280));
+        splitSQL.setOneTouchExpandable(true);
+        splitSQL.setPreferredSize(new java.awt.Dimension(600, 280));
 
-		splitTargetSource.setLeftComponent(panelTrg);
+        pnlSourceQueryEditor.setFocusable(false);
+        pnlSourceQueryEditor.setMinimumSize(new java.awt.Dimension(600, 150));
+        pnlSourceQueryEditor.setPreferredSize(new java.awt.Dimension(600, 150));
+        pnlSourceQueryEditor.setLayout(new java.awt.BorderLayout());
 
-		splitSQL.setBorder(null);
-		splitSQL.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-		splitSQL.setResizeWeight(0.8);
-		splitSQL.setFocusable(false);
-		splitSQL.setOneTouchExpandable(true);
-		jPanel1.setLayout(new java.awt.BorderLayout());
+        lblSourceQuery.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        lblSourceQuery.setText("Source Query:");
+        lblSourceQuery.setFocusable(false);
+        pnlSourceQueryEditor.add(lblSourceQuery, java.awt.BorderLayout.NORTH);
 
-		jPanel1.setFocusable(false);
-		lblSourceQuery.setText("Source Query:");
-		lblSourceQuery.setFocusable(false);
-		jPanel1.add(lblSourceQuery, java.awt.BorderLayout.NORTH);
+        scrSourceQuery.setFocusable(false);
 
-		scrSourceQuery.setFocusable(false);
-		txtSourceQuery.setFocusCycleRoot(false);
-		txtSourceQuery.setNextFocusableComponent(cmdTestQuery);
-		txtSourceQuery.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyPressed(java.awt.event.KeyEvent evt) {
-				changeSourceQueryFocus(evt);
-			}
-		});
+        txtSourceQuery.setFocusCycleRoot(false);
+        txtSourceQuery.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                changeSourceQueryFocus(evt);
+            }
+        });
+        scrSourceQuery.setViewportView(txtSourceQuery);
 
-		scrSourceQuery.setViewportView(txtSourceQuery);
+        pnlSourceQueryEditor.add(scrSourceQuery, java.awt.BorderLayout.CENTER);
 
-		jPanel1.add(scrSourceQuery, java.awt.BorderLayout.CENTER);
+        splitSQL.setTopComponent(pnlSourceQueryEditor);
 
-		splitSQL.setTopComponent(jPanel1);
+        pnlQueryResult.setFocusable(false);
+        pnlQueryResult.setMinimumSize(new java.awt.Dimension(600, 120));
+        pnlQueryResult.setPreferredSize(new java.awt.Dimension(600, 120));
+        pnlQueryResult.setLayout(new java.awt.BorderLayout());
 
-		jPanel2.setLayout(new java.awt.BorderLayout());
+        scrQueryResult.setFocusable(false);
+        scrQueryResult.setPreferredSize(new java.awt.Dimension(454, 70));
 
-		jPanel2.setFocusable(false);
-		jScrollPane1.setFocusable(false);
-		jScrollPane1.setPreferredSize(new java.awt.Dimension(454, 70));
-		jTable1.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
+        tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
 
-		}, new String[] {
+            },
+            new String [] {
 
-		}));
-		jScrollPane1.setViewportView(jTable1);
+            }
+        ));
+        tblQueryResult.setMinimumSize(new java.awt.Dimension(600, 180));
+        tblQueryResult.setPreferredSize(new java.awt.Dimension(600, 180));
+        scrQueryResult.setViewportView(tblQueryResult);
 
-		jPanel2.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        pnlQueryResult.add(scrQueryResult, java.awt.BorderLayout.CENTER);
 
-		splitSQL.setBottomComponent(jPanel2);
+        splitSQL.setBottomComponent(pnlQueryResult);
 
-		splitTargetSource.setRightComponent(splitSQL);
+        splitTargetSource.setRightComponent(splitSQL);
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 2;
-		gridBagConstraints.gridwidth = 2;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.weighty = 1.0;
-		add(splitTargetSource, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+        add(splitTargetSource, gridBagConstraints);
 
-	}// </editor-fold>//GEN-END:initComponents
-
-	private void fieldIDActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fieldIDActionPerformed
-		// TODO add your handling code here:
-	}// GEN-LAST:event_fieldIDActionPerformed
+        getAccessibleContext().setAccessibleName("Mapping editor");
+    }// </editor-fold>//GEN-END:initComponents
 
 	private void changeSourceQueryFocus(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_changeSourceQueryFocus
 		if (evt.getKeyCode() == KeyEvent.VK_TAB) {
@@ -414,7 +410,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}// GEN-LAST:event_changeTargetQueryFocus
 
 	private void releaseResultset() {
-		TableModel model = jTable1.getModel();
+		TableModel model = tblQueryResult.getModel();
 		if (model == null)
 			return;
 		if (!(model instanceof IncrementalResultSetTableModel))
@@ -425,8 +421,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void cmdTestQueryActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButtonTestActionPerformed
-
-		/* Cleaning the existing table and freeding resources */
+		// Cleaning the existing table and releasing resources
 		releaseResultset();
 
 		OBDAProgessMonitor progMonitor = new OBDAProgessMonitor("Executing query...");
@@ -440,38 +435,12 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			progMonitor.stop();
 			ResultSet set = action.getResult();
 			if (set != null) {
-
 				IncrementalResultSetTableModel model = new IncrementalResultSetTableModel(set);
-				jTable1.setModel(model);
-
-				// set.close();
+				tblQueryResult.setModel(model);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
-
-		// final JDialog resultquery = new JDialog();
-		// resultquery.setModal(true);
-		// SQLQueryPanel query_panel = new SQLQueryPanel(dataSource,
-		// txtSourceQuery.getText());
-		//
-		// JPanel panel = new JPanel();
-		// panel.setLayout(new GridBagLayout());
-		// GridBagConstraints gridBagConstraints = new
-		// java.awt.GridBagConstraints();
-		// gridBagConstraints.gridx = 0;
-		// gridBagConstraints.gridy = 0;
-		// gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		// gridBagConstraints.weightx = 1.0;
-		// gridBagConstraints.weighty = 1.0;
-		// gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		// panel.add(query_panel, gridBagConstraints);
-		//
-		// resultquery.setContentPane(panel);
-		// resultquery.pack();
-		// resultquery.setLocationRelativeTo(null);
-		// resultquery.setVisible(true);
-		// resultquery.setTitle("Query Results");
 	}// GEN-LAST:event_jButtonTestActionPerformed
 
 	private class ExecuteSQLQueryAction implements OBDAProgressListener {
@@ -505,7 +474,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			thread = new Thread() {
 				public void run() {
 					try {
-						TableModel oldmodel = jTable1.getModel();
+						TableModel oldmodel = tblQueryResult.getModel();
 
 						if ((oldmodel != null) && (oldmodel instanceof IncrementalResultSetTableModel)) {
 							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
@@ -536,7 +505,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		final String targetQueryString = txtTargetQuery.getText().trim();
 		final String sourceQueryString = txtSourceQuery.getText().trim();
 
-		if (fieldID.getText().trim().length() == 0) {
+		if (txtMappingID.getText().trim().length() == 0) {
 			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
@@ -557,27 +526,27 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		releaseResultset();
 	}// GEN-LAST:event_cmdCancelActionPerformed
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JButton cmdCancel;
-	private javax.swing.JButton cmdInsertMapping;
-	private javax.swing.JButton cmdTestQuery;
-	private javax.swing.JTextField fieldID;
-	private javax.swing.JPanel jPanel1;
-	private javax.swing.JPanel jPanel2;
-	private javax.swing.JScrollPane jScrollPane1;
-	private javax.swing.JTable jTable1;
-	private javax.swing.JLabel labelID;
-	private javax.swing.JLabel lblSourceQuery;
-	private javax.swing.JLabel lblTargetQuery;
-	private javax.swing.JPanel panelTrg;
-	private javax.swing.JPanel pnlCommandButton;
-	private javax.swing.JScrollPane scrSourceQuery;
-	private javax.swing.JScrollPane scrTargetQuery;
-	private javax.swing.JSplitPane splitSQL;
-	private javax.swing.JSplitPane splitTargetSource;
-	private javax.swing.JTextPane txtSourceQuery;
-	private javax.swing.JTextPane txtTargetQuery;
-	// End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdCancel;
+    private javax.swing.JButton cmdInsertMapping;
+    private javax.swing.JButton cmdTestQuery;
+    private javax.swing.JLabel lblMappingID;
+    private javax.swing.JLabel lblSourceQuery;
+    private javax.swing.JLabel lblTargetQuery;
+    private javax.swing.JPanel pnlCommandButton;
+    private javax.swing.JPanel pnlQueryResult;
+    private javax.swing.JPanel pnlSourceQueryEditor;
+    private javax.swing.JPanel pnlTargetQueryEditor;
+    private javax.swing.JScrollPane scrQueryResult;
+    private javax.swing.JScrollPane scrSourceQuery;
+    private javax.swing.JScrollPane scrTargetQuery;
+    private javax.swing.JSplitPane splitSQL;
+    private javax.swing.JSplitPane splitTargetSource;
+    private javax.swing.JTable tblQueryResult;
+    private javax.swing.JTextField txtMappingID;
+    private javax.swing.JTextPane txtSourceQuery;
+    private javax.swing.JTextPane txtTargetQuery;
+    // End of variables declaration//GEN-END:variables
 
 	private OBDAMappingAxiom mapping;
 
@@ -599,8 +568,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	public void setID(String id) {
-		this.fieldID.setText(id);
-
+		this.txtMappingID.setText(id);
 	}
 
 	@Override
@@ -612,13 +580,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * Sets the current mapping to the input. Note, if the current mapping is
 	 * set, this means that this dialog is "updating" a mapping, and not
 	 * creating a new one.
-	 * 
-	 * @param mapping
 	 */
 	public void setMapping(OBDAMappingAxiom mapping) {
 		cmdInsertMapping.setText("Update");
 		this.mapping = mapping;
-		fieldID.setText(mapping.getId());
+		txtMappingID.setText(mapping.getId());
 
 		txtSourceQuery.setText(mapping.getSourceQuery().toString());
 

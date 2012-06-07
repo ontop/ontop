@@ -7,7 +7,6 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.TargetQueryValidator;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
-import it.unibz.krdb.obda.utils.OBDAPreferences;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,7 +21,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.Logger;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
@@ -33,8 +31,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public class MappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener, Findable<OWLEntity> {
 
 	private static final long serialVersionUID = 1790921396564256165L;
-
-	private final Logger log = Logger.getLogger(MappingsManagerView.class);
 
 	OBDAModelManager controller = null;
 
@@ -49,6 +45,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
+		
 		// Retrieve the editor kit.
 		final OWLEditorKit editor = getOWLEditorKit();
 
@@ -58,11 +55,11 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		OWLOntology ontology = editor.getModelManager().getActiveOntology();
 
 		TargetQueryVocabularyValidator validator = new TargetQueryValidator(ontology);
+		
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(controller.getActiveOBDAModel(), validator);
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
-
 			@Override
 			public void selectionChanged() throws Exception {
 				OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
@@ -74,13 +71,10 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 						String iri = entity.getIRI().toString();
 						shortf = iri.substring(iri.lastIndexOf("/"));
 					}
-//					String shortf = editor.getOWLWorkspace().getOWLModelManager().getOWLEntityRenderer().getShortForm(entity);
-//					shortf = controller.getActiveOBDAModel().getPrefixManager().getShortForm(entity.toString());
 					mappingPanel.setFilter("pred:" + shortf);
 				} else {
 					mappingPanel.setFilter("");
 				}
-
 			}
 		});
 
@@ -120,8 +114,6 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		setLayout(new BorderLayout());
 		add(mappingPanel, BorderLayout.CENTER);
 		add(selectorPanel, BorderLayout.NORTH);
-
-		// log.debug("Mappings manager initialized");
 	}
 
 	@Override
@@ -143,6 +135,5 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 	@Override
 	public void show(OWLEntity owlEntity) {
 		System.out.println(owlEntity);
-
 	}
 }
