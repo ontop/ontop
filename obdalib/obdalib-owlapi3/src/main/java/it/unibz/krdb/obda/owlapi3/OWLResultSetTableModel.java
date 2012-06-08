@@ -3,8 +3,10 @@ package it.unibz.krdb.obda.owlapi3;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Constant;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.event.TableModelEvent;
@@ -71,6 +73,18 @@ public class OWLResultSetTableModel implements TableModel {
 
 	}
 
+	public List<String[]> getTabularData() {
+		List<String[]> tabularData = new ArrayList<String[]>();
+		try {
+			String[] columnName = results.getSignature().toArray(new String[results.getSignature().size()]);
+			tabularData.add(columnName);
+			tabularData.addAll(resultsTable);
+		} catch (OWLException e) {
+			e.printStackTrace();
+		}
+		return tabularData;
+	}
+	
 	/**
 	 * Call this when done with the table model. It closes the ResultSet and the
 	 * Statement object used to create it.

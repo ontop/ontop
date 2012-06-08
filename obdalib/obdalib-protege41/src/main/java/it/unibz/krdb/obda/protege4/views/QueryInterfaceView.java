@@ -13,6 +13,7 @@ import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.owlapi3.OWLQueryReasoner;
 import it.unibz.krdb.obda.owlapi3.OWLResultSet;
 import it.unibz.krdb.obda.owlapi3.OWLResultSetTableModel;
+import it.unibz.krdb.obda.owlapi3.OWLResultSetWriter;
 import it.unibz.krdb.obda.owlapi3.OWLStatement;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
@@ -21,7 +22,7 @@ import it.unibz.krdb.obda.protege4.core.OBDAModelManagerListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -51,6 +52,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	private OWLOntologyChangeListener ontologyListener;
 	
 	private OBDAModelManager obdaController;
+	
+	private List<String[]> resultSetTabularData = new ArrayList<String[]>(); // for caching
 
 	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
 	
@@ -75,7 +78,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	}
 
 	@Override
-	protected void initialiseOWLView() throws Exception {		
+	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);		
 		
@@ -143,6 +146,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
+		
 		queryEditorPanel.setExecuteUCQAction(new OBDADataQueryAction() {
 			private long time = 0;
 			private int rows = 0;
@@ -167,6 +171,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						model.addTableModelListener(panel);
 						rows = model.getRowCount();
 						resultTablePanel.setTableModel(model);
+						resultSetTabularData = model.getTabularData(); // cache the result data for exporting
 					}
 					long end = System.currentTimeMillis();
 					time = end - startTime;
@@ -279,25 +284,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		resultTablePanel.setOBDASaveQueryToFileAction(new OBDASaveQueryResultToFileAction() {
 			@Override
-			public void run(String query, File file) {
-//				try {
-//					OBDAProgessMonitor monitor = new OBDAProgessMonitor("Saving...");
-//					CountDownLatch latch = new CountDownLatch(1);
-//					ExecuteQueryAction action = new ExecuteQueryAction(latch, query);
-//					monitor.addProgressListener(action);
-//					monitor.start();
-//					action.run();
-//					latch.await();
-//					monitor.stop();
-//					OWLResultSet result = action.getResult();
-//					if (result != null) {
-//						ResultSetToFileWriter.saveResultSet(result, file);
-//					}
-//				} catch (Exception e) {
-//					JOptionPane.showMessageDialog(null, "Error while saving query results.\n " + e.getMessage()
-//							+ "\nPlease refer to the log file for more information.");
-//					log.error("Error while saving query results.", e);
-//				}
+			public void run(String fileLocation) {
+				try {
+					OWLResultSetWriter.writeCSV(resultSetTabularData, fileLocation);
+				} catch (Exception e) {
+					DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+				}
 			}
 		});
 		log.debug("Query Manager view initialized");
