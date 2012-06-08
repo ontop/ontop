@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.protege4.gui.action;
 
 import it.unibz.krdb.obda.gui.swing.panel.OBDAModelStatisticsPanel;
+import it.unibz.krdb.obda.gui.swing.utils.DialogUtils;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
@@ -54,8 +55,11 @@ public class ABoxStatisticsAction extends ProtegeAction {
 		dialog.add(pnlStatistics, BorderLayout.CENTER);
 		dialog.add(pnlCommandButton, BorderLayout.SOUTH);
 		
+		DialogUtils.installEscapeCloseOperation(dialog);
+		
 		dialog.pack();
 		dialog.setVisible(true);
+		
 	}
 	
 	private JPanel createButtonPanel(final JDialog parent) {
