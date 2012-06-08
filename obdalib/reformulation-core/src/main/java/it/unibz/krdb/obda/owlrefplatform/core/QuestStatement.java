@@ -102,10 +102,12 @@ public class QuestStatement implements OBDAStatement {
 	public OBDAResultSet execute(String strquery) throws OBDAException {
 
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
-			return executeEpistemicQuery(strquery);
+			throw new OBDAException("ETable queries are currently disabled");
+//			return executeEpistemicQuery(strquery);
 		}
 		if (strquery.contains("/*direct*/")) {
-			return executeDirectQuery(strquery);
+			throw new OBDAException("Direct sql queries are currently disabled");
+//			return executeDirectQuery(strquery);
 		} else {
 			return executeConjunctiveQuery(strquery);
 		}
@@ -247,13 +249,43 @@ public class QuestStatement implements OBDAStatement {
 
 	private OBDAResultSet executeConjunctiveQuery(String strquery) throws OBDAException {
 		List<String> signature = getSignature(strquery);
-		DatalogProgram program = translateAndPreProcess(strquery);
+		DatalogProgram program;
+		try {
+			program = translateAndPreProcess(strquery);
+		} catch (Exception e1) {
+			OBDAException obdaException = new OBDAException("Error parsing SPARQL query: " + e1.getMessage());
+			obdaException.setStackTrace(e1.getStackTrace());
+			throw obdaException;
+		}
 
 		log.debug("Start the rewriting process...");
-		DatalogProgram rewriting = getRewriting(program);
+		DatalogProgram rewriting;
+		try {
+			rewriting = getRewriting(program);
+		} catch (Exception e1) {
+			OBDAException obdaException = new OBDAException("Error rewriting query: " + e1.getMessage());
+			obdaException.setStackTrace(e1.getStackTrace());
+			throw obdaException;
+		}
 
-		DatalogProgram unfolding = getUnfolding(rewriting);
-		String sql = getSQL(unfolding, signature);
+		DatalogProgram unfolding;
+		try {
+			unfolding = getUnfolding(rewriting);
+		} catch (Exception e1) {
+			OBDAException obdaException = new OBDAException("Error unfolding query: " + e1.getMessage());
+			obdaException.setStackTrace(e1.getStackTrace());
+			throw obdaException;
+		}
+		
+		
+		String sql;
+		try {
+			sql = getSQL(unfolding, signature);
+		} catch (Exception e1) {
+			OBDAException obdaException = new OBDAException("Error generating SQL query: " + e1.getMessage());
+			obdaException.setStackTrace(e1.getStackTrace());
+			throw obdaException;
+		}
 
 		OBDAResultSet result;
 
@@ -271,7 +303,7 @@ public class QuestStatement implements OBDAStatement {
 			try {
 				set = sqlstatement.executeQuery(sql);
 			} catch (SQLException e) {
-				throw new OBDAException(e.getMessage());
+				throw new OBDAException("Error executing SQL query: " + e.getMessage() + "\nSQL query:\n " + sql);
 			}
 			if (isDPBoolean(program)) {
 				result = new BooleanOWLOBDARefResultSet(set, this);

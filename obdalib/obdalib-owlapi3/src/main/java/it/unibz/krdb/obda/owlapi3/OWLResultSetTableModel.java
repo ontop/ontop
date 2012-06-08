@@ -124,7 +124,7 @@ public class OWLResultSetTableModel implements TableModel {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return "NULL";
+			return "ERROR";
 		}
 	}
 

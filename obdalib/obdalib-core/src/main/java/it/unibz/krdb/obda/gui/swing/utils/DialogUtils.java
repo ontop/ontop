@@ -45,7 +45,7 @@ public class DialogUtils {
 
 		// stuff it in a scrollpane with a controlled size.
 		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setPreferredSize(new Dimension(480, 150));
+		scrollPane.setPreferredSize(new Dimension(540, 150));
 
 		// pass the scrollpane to the joptionpane.
 		JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);

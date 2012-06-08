@@ -356,7 +356,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.error(e.getMessage(), e);
+							log.debug(e.getMessage());
 							JOptionPane.showMessageDialog(
 									null, 
 									"Error while unfolding query.\n " + e.getMessage()
@@ -388,7 +388,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						null, 
 						"Error while canceling unfolding action.\n " + e.getMessage()
 						+ "\nPlease refer to the log file for more information.");
-				log.error("Error while canceling unfolding action.", e);
+				log.debug("Error while canceling unfolding action.", e);
 			}
 		}
 	}
@@ -423,7 +423,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.error(e.getMessage(), e);
+							log.debug(e.getMessage(), e);
 							JOptionPane.showMessageDialog(
 									null, 
 									"Error while expanding query.\n " + e.getMessage()
@@ -455,7 +455,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						null, 
 						"Error while counting.\n " + e.getMessage()
 						+ "\nPlease refer to the log file for more information.");
-				log.error("Error while counting.", e);
+				log.debug("Error while counting.", e);
 			}
 		}
 	}
@@ -490,7 +490,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.error(e.getMessage(), e);
+							log.debug(e.getMessage());
 							DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
 						}
 					} else {
@@ -518,7 +518,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						null, 
 						"Error while counting.\n " + e.getMessage()
 						+ "\nPlease refer to the log file for more information.");
-				log.error("Error while counting.", e);
+				log.debug("Error while counting: {}", e.getMessage());
 			}
 		}
 
@@ -554,7 +554,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.error(e.getMessage(), e);
+							log.debug(e.getMessage());
 							JOptionPane.showMessageDialog(
 									null, 
 									"Error while counting tuples.\n " + e.getMessage()
@@ -585,7 +585,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 						null, 
 						"Error while counting.\n " + e.getMessage()
 						+ "\nPlease refer to the log file for more information.");
-				log.error("Error while counting.", e);
+				log.debug("Error while counting.", e);
 			}
 		}
 	}

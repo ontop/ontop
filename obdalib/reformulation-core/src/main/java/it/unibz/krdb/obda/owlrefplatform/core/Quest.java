@@ -198,15 +198,17 @@ public class Quest implements Serializable {
 
 	public void dispose() {
 		try {
-			this.evaluationEngine.dispose();
+			if (evaluationEngine != null)
+				this.evaluationEngine.dispose();
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.debug("Error during disconnect: " + e.getMessage());
 		}
 
 		try {
-			disconnect();
+			if (localConnection != null && !localConnection.isClosed())
+				disconnect();
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.debug("Error during disconnect: " + e.getMessage());
 		}
 	}
 
@@ -241,11 +243,21 @@ public class Quest implements Serializable {
 			aboxJdbcDriver = preferences.getProperty(QuestPreferences.JDBC_DRIVER);
 		}
 
-		log.debug("Active preferences:");
-
-		for (Object key : preferences.keySet()) {
-			log.info("{} = {}", key, preferences.get(key));
+		log.info("Quest configuration:");
+		log.info("Reformulation technique: {}", reformulationTechnique);
+		log.info("Optimize equivalences: {}", bOptimizeEquivalences);
+		log.info("Optimize TBox: {}", bOptimizeTBoxSigma);
+		log.info("ABox mode: {}", unfoldingMode);
+		if (!unfoldingMode.equals("virtual")) {
+			log.info("Use in-memory database: {}", inmemory);
+			log.info("Schema configuration: {}", dbType);
+			log.info("Get ABox assertions from OBDA models: {}", bObtainFromMappings);
+			log.info("Get ABox assertions from ontology: {}", bObtainFromOntology);
 		}
+
+		// for (Object key : preferences.keySet()) {
+		// log.info("{} = {}", key, preferences.get(key));
+		// }
 	}
 
 	/***
@@ -296,7 +308,7 @@ public class Quest implements Serializable {
 
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-		log.debug("Initializing Quest's query answering engine...");
+		log.debug("Initializing Quest...");
 
 		/*
 		 * Input checking (we need to extend this)
@@ -310,7 +322,7 @@ public class Quest implements Serializable {
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
 
-		log.debug("Fixing vocabulary typing");
+		// log.debug("Fixing vocabulary typing");
 
 		if (inputOBDAModel != null) {
 			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
@@ -325,7 +337,8 @@ public class Quest implements Serializable {
 		 */
 
 		if (bOptimizeEquivalences) {
-			log.debug("Equivalence optimization. Input ontology: {}", inputTBox.toString());
+			// log.debug("Equivalence optimization. Input ontology: {}",
+			// inputTBox.toString());
 			EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(inputTBox);
 			equiOptimizer.optimize();
 
@@ -337,7 +350,8 @@ public class Quest implements Serializable {
 			 * mappings
 			 */
 			equivalenceMaps = equiOptimizer.getEquivalenceMap();
-			log.debug("Equivalence optimization. Output ontology: {}", reformulationOntology.toString());
+			// log.debug("Equivalence optimization. Output ontology: {}",
+			// reformulationOntology.toString());
 		} else {
 			reformulationOntology = inputTBox;
 			equivalenceMaps = new HashMap<Predicate, Description>();
@@ -351,12 +365,12 @@ public class Quest implements Serializable {
 
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
 
-				log.debug("Working in classic mode");
+				// log.debug("Working in classic mode");
 
 				// if (bUseInMemoryDB || createMappings) {
 
 				if (inmemory) {
-					log.debug("Using in an memory database");
+					// log.debug("Using in an memory database");
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis();
 					String username = "sa";
@@ -413,13 +427,16 @@ public class Quest implements Serializable {
 
 			} else if (unfoldingMode.equals(QuestConstants.VIRTUAL)) {
 
-				log.debug("Working in virtual mode");
+				// log.debug("Working in virtual mode");
 
 				Collection<OBDADataSource> sources = this.inputOBDAModel.getSources();
 				if (sources == null || sources.size() == 0) {
-					throw new Exception("No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
+					throw new Exception(
+							"No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
 				} else if (sources.size() > 1) {
-					throw new Exception("Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains " + sources.size()+ " data sources. Please remove the aditional sources.");
+					throw new Exception(
+							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
+									+ sources.size() + " data sources. Please remove the aditional sources.");
 				} else {
 
 					/* Setting up the OBDA model */
@@ -431,7 +448,7 @@ public class Quest implements Serializable {
 					String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 					String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-					log.debug("Establishing an internal connection for house-keeping");
+					log.debug("Testing DB connection...");
 					connect();
 
 					unfoldingOBDAModel.addSource(obdaSource);
@@ -464,10 +481,11 @@ public class Quest implements Serializable {
 			 */
 			if (unfoldingMode.equals(QuestConstants.VIRTUAL)
 					|| (unfoldingMode.equals(QuestConstants.CLASSIC) && dbType.equals(QuestConstants.DIRECT))) {
-				log.debug("Setting up T-Mappings");
+				// log.debug("Setting up T-Mappings");
 				TMappingProcessor tmappingProc = new TMappingProcessor(reformulationOntology);
 				unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram);
-				log.debug("Resulting mappings: {}", unfoldingProgram.getRules().size());
+				// log.debug("Resulting mappings: {}",
+				// unfoldingProgram.getRules().size());
 				sigma.addEntities(tmappingProc.getABoxDependencies().getVocabulary());
 				sigma.addAssertions(tmappingProc.getABoxDependencies().getAssertions());
 			}
@@ -479,7 +497,8 @@ public class Quest implements Serializable {
 
 			int unprsz = unfoldingProgram.getRules().size();
 			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
-			log.debug("Optimizing unfolding program. Initial size: {} Final size: {}", unprsz, unfoldingProgram.getRules().size());
+			// log.debug("Optimizing unfolding program. Initial size: {} Final size: {}",
+			// unprsz, unfoldingProgram.getRules().size());
 
 			/*
 			 * Adding data typing on the mapping axioms.
@@ -521,12 +540,12 @@ public class Quest implements Serializable {
 			 */
 			vocabularyValidator = new QueryVocabularyValidator(reformulationOntology, equivalenceMaps);
 
-			log.debug("... Quest has been setup and is ready for querying");
+			log.debug("... Quest has been initialized.");
 			isClassified = true;
 
 		} catch (Exception e) {
 
-//			log.error(e.getMessage(), e);
+			// log.error(e.getMessage(), e);
 			OBDAException ex = new OBDAException(e.getMessage());
 			if (e instanceof SQLException) {
 				SQLException sqle = (SQLException) e;

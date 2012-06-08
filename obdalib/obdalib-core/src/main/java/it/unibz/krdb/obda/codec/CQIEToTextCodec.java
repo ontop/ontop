@@ -47,28 +47,29 @@ public class CQIEToTextCodec extends ObjectToTextCodec<CQIE> {
 	 */
 	@Override
 	public String encode(CQIE input) {
-		PrefixManager pm = apic.getPrefixManager();
-		StringBuffer sb = new StringBuffer();
-		Atom head =input.getHead();
-		StringBuffer headString = renderAtom(head, pm);
-		headString.append(" :- ");
-		
-		
-		List<Atom> body = input.getBody();
-		StringBuffer bodyString = new StringBuffer();
-		Iterator<Atom> bit = body.iterator();
-		while(bit.hasNext()){
-			Atom a = (Atom) bit.next();
-			if(bodyString.length() > 0){
-				bodyString.append(", ");
-			}
-			StringBuffer atomString = renderAtom(a, pm);
-			bodyString.append(atomString);
-		}
-		
-		sb.append(headString);
-		sb.append(bodyString);
-		return sb.toString();
+//		PrefixManager pm = apic.getPrefixManager();
+//		StringBuffer sb = new StringBuffer();
+//		Atom head =input.getHead();
+//		StringBuffer headString = renderAtom(head, pm);
+//		headString.append(" :- ");
+//		
+//		
+//		List<Atom> body = input.getBody();
+//		StringBuffer bodyString = new StringBuffer();
+//		Iterator<Atom> bit = body.iterator();
+//		while(bit.hasNext()){
+//			Atom a = (Atom) bit.next();
+//			if(bodyString.length() > 0){
+//				bodyString.append(", ");
+//			}
+//			StringBuffer atomString = renderAtom(a, pm);
+//			bodyString.append(atomString);
+//		}
+//		
+//		sb.append(headString);
+		return input.toString();
+//		sb.append(bodyString);
+//		return sb.toString();
 	}
 	
 	private StringBuffer renderAtom(Atom a, PrefixManager pm) {
