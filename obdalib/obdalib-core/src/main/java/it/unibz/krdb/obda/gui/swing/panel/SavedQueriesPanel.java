@@ -378,6 +378,8 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 				qc.removeGroup(element.getID());
 			}
 		}
+		
+		
 	}// GEN-LAST:event_removeQueryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -421,12 +423,12 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
 	@Override
 	public void elementRemoved(QueryControllerEntity element) {
-		// TODO: Implement later
+		fireQueryChanged("", "", "");
 	}
 
 	@Override
 	public void elementRemoved(QueryControllerQuery query, QueryControllerGroup group) {
-		// TODO: Implement later
+		fireQueryChanged("", "", "");
 	}
 
 	@Override
