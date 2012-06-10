@@ -105,6 +105,7 @@ public class QueryPainter {
 	JTextPane parent = null;
 
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
+	private TurtleSyntaxParser textParser;
 
 	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
@@ -112,6 +113,8 @@ public class QueryPainter {
 		this.validator = validator;
 		this.doc = parent.getStyledDocument();
 		this.parent = parent;
+		textParser = new TurtleSyntaxParser(apic.getPrefixManager());
+
 
 		prepareStyles();
 		setupFont();
@@ -206,7 +209,6 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		TurtleSyntaxParser textParser = new TurtleSyntaxParser(apic.getPrefixManager());
 		CQIE query = null;
 		query = textParser.parse(text);
 
@@ -252,8 +254,22 @@ public class QueryPainter {
 			ToolTipManager.sharedInstance().setDismissDelay(ERROR_TOOL_TIP_DISMISS_DELAY);
 			if (e instanceof IllegalArgumentException)
 				parent.setToolTipText("Syntax error");
-			else
-				parent.setToolTipText(getHTMLErrorMessage(e.getMessage()));
+			else {
+				String errorstring = e.getMessage();
+				int index = errorstring.indexOf("Location: line");
+				if (index != -1) {
+					String location = errorstring.substring(index + 15);
+					int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
+					String[] coordinates = location.split(":");
+					
+					int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
+					int errorcol = Integer.valueOf(coordinates[1]);
+					errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
+				}
+				
+				
+				parent.setToolTipText(getHTMLErrorMessage(errorstring));
+			}
 			setStateBorder(errorBorder);
 			// setErrorRange(e.getStartIndex(), e.getEndIndex());
 		} else {

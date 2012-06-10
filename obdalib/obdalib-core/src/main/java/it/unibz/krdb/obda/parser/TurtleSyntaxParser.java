@@ -5,6 +5,8 @@ import it.unibz.krdb.obda.model.CQIE;
 
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -57,9 +59,9 @@ public class TurtleSyntaxParser {
 
 		StringBuffer bf = new StringBuffer(input.trim());
 
-		if (bf.charAt(bf.length()-1) != '.') {
-			bf.append(".");
-		}
+//		if (bf.charAt(bf.length()-1) != '.') {
+//			bf.append(".");
+//		}
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
 		}
@@ -70,8 +72,14 @@ public class TurtleSyntaxParser {
 		}
 
 		ANTLRStringStream inputStream = new ANTLRStringStream(bf.toString());
-		TurtleLexer lexer = new TurtleLexer(inputStream);
-		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+		TurtleLexer lexer= new TurtleLexer(inputStream);;
+		CommonTokenStream tokenStream;
+		try {
+			
+			tokenStream = new CommonTokenStream(lexer);
+		} catch (Exception e) {
+			throw new RuntimeException(lexer.getError());
+		}
 		TurtleParser parser = new TurtleParser(tokenStream);
 
 		CQIE output = parser.parse();
@@ -83,6 +91,8 @@ public class TurtleSyntaxParser {
 		return output;
 	}
 
+	
+	
 	/**
 	 * Adds directives to the query header from the PrefixManager.
 	 */

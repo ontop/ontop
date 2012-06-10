@@ -69,7 +69,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 				log.debug(debugMsg);
 			} else {
 				invalidPredicates.add(predicateUri.toString());
-				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
+//				log.warn("WARNING: " + debugMsg + " is missing in the ontology!");
 			}
 		}
 		boolean isValid = true;

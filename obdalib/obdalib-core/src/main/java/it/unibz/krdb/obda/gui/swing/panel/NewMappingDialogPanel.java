@@ -490,7 +490,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					} catch (Exception e) {
 						latch.countDown();
 						JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-						log.error("Error while executing query.", e);
+//						log.error("Error while executing query.", e);
 					}
 				}
 			};

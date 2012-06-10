@@ -63,6 +63,48 @@ import java.util.Vector;
 }
 
 @lexer::members {
+String error = "";
+    
+    public String getError() {
+    	return error;
+    }
+
+    
+
+    @Override
+    public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow)
+    throws RecognitionException
+    {
+    throw e;
+    }
+
+    @Override
+    public void recover(IntStream input, RecognitionException re) {
+    	throw new RuntimeException(error);
+    }
+
+    
+    @Override
+    public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        
+        emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
+    }
+    @Override
+    public void emitErrorMessage(	String 	msg	 ) 	{
+    	error = msg;
+    	throw new RuntimeException(error);
+    	    }
+    
+    @Override
+    public Object recoverFromMismatchedToken	(	IntStream 	input,
+    		int 	ttype,
+    		BitSet 	follow	 
+    		)			 throws RecognitionException {
+    	throw new RecognitionException(input);
+    }
 }
 
 @members {

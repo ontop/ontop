@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g 2012-06-07 12:53:37
+// $ANTLR 3.4 /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g 2012-06-10 22:56:22
 
 package it.unibz.krdb.obda.parser;
 
@@ -87,6 +87,48 @@ public class TurtleLexer extends Lexer {
     public static final int VARNAME=73;
     public static final int WS=74;
 
+    String error = "";
+        
+        public String getError() {
+        	return error;
+        }
+
+        
+
+        @Override
+        public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow)
+        throws RecognitionException
+        {
+        throw e;
+        }
+
+        @Override
+        public void recover(IntStream input, RecognitionException re) {
+        	throw new RuntimeException(error);
+        }
+
+        
+        @Override
+        public void displayRecognitionError(String[] tokenNames,
+                                            RecognitionException e) {
+            String hdr = getErrorHeader(e);
+            String msg = getErrorMessage(e, tokenNames);
+            
+            emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
+        }
+        @Override
+        public void emitErrorMessage(	String 	msg	 ) 	{
+        	error = msg;
+        	throw new RuntimeException(error);
+        	    }
+        
+        @Override
+        public Object recoverFromMismatchedToken	(	IntStream 	input,
+        		int 	ttype,
+        		BitSet 	follow	 
+        		)			 throws RecognitionException {
+        	throw new RecognitionException(input);
+        }
 
 
     // delegates
@@ -109,8 +151,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = T__75;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:11:7: ( 'a' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:11:9: 'a'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:53:7: ( 'a' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:53:9: 'a'
             {
             match('a'); 
 
@@ -130,8 +172,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = BASE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:505:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:505:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:547:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:547:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
                 input.consume();
@@ -189,8 +231,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = PREFIX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:507:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:507:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:549:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:549:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
             {
             if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
                 input.consume();
@@ -268,8 +310,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = FALSE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:509:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:509:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:551:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:551:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -337,8 +379,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = TRUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:511:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:511:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:553:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:553:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                 input.consume();
@@ -396,8 +438,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = REFERENCE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:513:10: ( '^^' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:513:16: '^^'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:555:10: ( '^^' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:555:16: '^^'
             {
             match("^^"); 
 
@@ -419,8 +461,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = LTSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:514:7: ( '<\"' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:514:16: '<\"'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:556:7: ( '<\"' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:556:16: '<\"'
             {
             match("<\""); 
 
@@ -442,8 +484,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = RTSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:515:7: ( '\">' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:515:16: '\">'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:557:7: ( '\">' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:557:16: '\">'
             {
             match("\">"); 
 
@@ -465,8 +507,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:516:5: ( ';' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:516:16: ';'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:558:5: ( ';' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:558:16: ';'
             {
             match(';'); 
 
@@ -486,8 +528,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = PERIOD;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:517:7: ( '.' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:517:16: '.'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:559:7: ( '.' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:559:16: '.'
             {
             match('.'); 
 
@@ -507,8 +549,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:518:6: ( ',' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:518:16: ','
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:560:6: ( ',' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:560:16: ','
             {
             match(','); 
 
@@ -528,8 +570,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = LSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:519:12: ( '[' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:519:16: '['
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:561:12: ( '[' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:561:16: '['
             {
             match('['); 
 
@@ -549,8 +591,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = RSQ_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:520:12: ( ']' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:520:16: ']'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:562:12: ( ']' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:562:16: ']'
             {
             match(']'); 
 
@@ -570,8 +612,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = LCR_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:521:12: ( '{' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:521:16: '{'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:563:12: ( '{' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:563:16: '{'
             {
             match('{'); 
 
@@ -591,8 +633,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = RCR_BRACKET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:522:12: ( '}' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:522:16: '}'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:564:12: ( '}' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:564:16: '}'
             {
             match('}'); 
 
@@ -612,8 +654,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:523:7: ( '(' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:523:16: '('
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:565:7: ( '(' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:565:16: '('
             {
             match('('); 
 
@@ -633,8 +675,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:524:7: ( ')' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:524:16: ')'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:566:7: ( ')' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:566:16: ')'
             {
             match(')'); 
 
@@ -654,8 +696,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:525:9: ( '?' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:525:16: '?'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:567:9: ( '?' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:567:16: '?'
             {
             match('?'); 
 
@@ -675,8 +717,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DOLLAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:526:7: ( '$' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:526:16: '$'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:568:7: ( '$' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:568:16: '$'
             {
             match('$'); 
 
@@ -696,8 +738,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:527:13: ( '\"' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:527:16: '\"'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:569:13: ( '\"' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:569:16: '\"'
             {
             match('\"'); 
 
@@ -717,8 +759,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = QUOTE_SINGLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:528:13: ( '\\'' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:528:16: '\\''
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:570:13: ( '\\'' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:570:16: '\\''
             {
             match('\''); 
 
@@ -738,8 +780,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = APOSTROPHE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:529:11: ( '`' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:529:16: '`'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:571:11: ( '`' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:571:16: '`'
             {
             match('`'); 
 
@@ -759,8 +801,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = UNDERSCORE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:530:11: ( '_' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:530:16: '_'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:572:11: ( '_' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:572:16: '_'
             {
             match('_'); 
 
@@ -780,8 +822,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = MINUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:531:6: ( '-' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:531:16: '-'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:573:6: ( '-' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:573:16: '-'
             {
             match('-'); 
 
@@ -801,8 +843,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = ASTERISK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:532:9: ( '*' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:532:16: '*'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:574:9: ( '*' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:574:16: '*'
             {
             match('*'); 
 
@@ -822,8 +864,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = AMPERSAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:533:10: ( '&' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:533:16: '&'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:575:10: ( '&' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:575:16: '&'
             {
             match('&'); 
 
@@ -843,8 +885,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = AT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:534:3: ( '@' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:534:16: '@'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:3: ( '@' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:16: '@'
             {
             match('@'); 
 
@@ -864,8 +906,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = EXCLAMATION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:535:12: ( '!' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:535:16: '!'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:577:12: ( '!' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:577:16: '!'
             {
             match('!'); 
 
@@ -885,8 +927,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = HASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:536:5: ( '#' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:536:16: '#'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:578:5: ( '#' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:578:16: '#'
             {
             match('#'); 
 
@@ -906,8 +948,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = PERCENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:537:8: ( '%' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:537:16: '%'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:579:8: ( '%' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:579:16: '%'
             {
             match('%'); 
 
@@ -927,8 +969,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:538:5: ( '+' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:538:16: '+'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:580:5: ( '+' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:580:16: '+'
             {
             match('+'); 
 
@@ -948,8 +990,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:539:7: ( '=' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:539:16: '='
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:581:7: ( '=' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:581:16: '='
             {
             match('='); 
 
@@ -969,8 +1011,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:540:6: ( ':' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:540:16: ':'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:582:6: ( ':' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:582:16: ':'
             {
             match(':'); 
 
@@ -990,8 +1032,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = LESS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:541:5: ( '<' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:541:16: '<'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:583:5: ( '<' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:583:16: '<'
             {
             match('<'); 
 
@@ -1011,8 +1053,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = GREATER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:542:8: ( '>' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:542:16: '>'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:584:8: ( '>' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:584:16: '>'
             {
             match('>'); 
 
@@ -1032,8 +1074,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:543:6: ( '/' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:543:16: '/'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:585:6: ( '/' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:585:16: '/'
             {
             match('/'); 
 
@@ -1053,8 +1095,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DOUBLE_SLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:544:13: ( '//' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:544:16: '//'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:586:13: ( '//' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:586:16: '//'
             {
             match("//"); 
 
@@ -1076,8 +1118,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:545:10: ( '\\\\' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:545:16: '\\\\'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:587:10: ( '\\\\' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:587:16: '\\\\'
             {
             match('\\'); 
 
@@ -1097,8 +1139,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = BLANK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:546:6: ( '[]' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:546:15: '[]'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:588:6: ( '[]' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:588:15: '[]'
             {
             match("[]"); 
 
@@ -1120,8 +1162,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = BLANK_PREFIX;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:547:13: ( '_:' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:547:16: '_:'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:589:13: ( '_:' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:589:16: '_:'
             {
             match("_:"); 
 
@@ -1143,8 +1185,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:548:6: ( '~' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:548:16: '~'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:590:6: ( '~' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:590:16: '~'
             {
             match('~'); 
 
@@ -1164,8 +1206,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = CARET;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:549:6: ( '^' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:549:16: '^'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:591:6: ( '^' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:591:16: '^'
             {
             match('^'); 
 
@@ -1183,7 +1225,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "ALPHA"
     public final void mALPHA() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:552:3: ( 'a' .. 'z' | 'A' .. 'Z' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:594:3: ( 'a' .. 'z' | 'A' .. 'Z' )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1209,7 +1251,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:557:3: ( '0' .. '9' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:599:3: ( '0' .. '9' )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -1235,7 +1277,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "ALPHANUM"
     public final void mALPHANUM() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:561:3: ( ALPHA | DIGIT )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:603:3: ( ALPHA | DIGIT )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1261,7 +1303,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "CHAR"
     public final void mCHAR() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:566:3: ( ALPHANUM | UNDERSCORE | MINUS )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:608:3: ( ALPHANUM | UNDERSCORE | MINUS )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( input.LA(1)=='-'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -1289,10 +1331,10 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = INTEGER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:572:3: ( ( DIGIT )+ )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:572:5: ( DIGIT )+
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:614:3: ( ( DIGIT )+ )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:614:5: ( DIGIT )+
             {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:572:5: ( DIGIT )+
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:614:5: ( DIGIT )+
             int cnt1=0;
             loop1:
             do {
@@ -1347,14 +1389,14 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? )
             int alt9=3;
             alt9 = dfa9.predict(input);
             switch (alt9) {
                 case 1 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )?
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )?
                     {
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:5: ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:5: ( DIGIT )+
                     int cnt2=0;
                     loop2:
                     do {
@@ -1396,7 +1438,7 @@ public class TurtleLexer extends Lexer {
                     mPERIOD(); 
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:19: ( DIGIT )*
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:19: ( DIGIT )*
                     loop3:
                     do {
                         int alt3=2;
@@ -1440,7 +1482,7 @@ public class TurtleLexer extends Lexer {
                     }
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:576:36: ( '-' | '+' )?
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:36: ( '-' | '+' )?
                     int alt4=2;
                     int LA4_0 = input.LA(1);
 
@@ -1470,12 +1512,12 @@ public class TurtleLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:577:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )?
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:619:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )?
                     {
                     mPERIOD(); 
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:577:12: ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:619:12: ( DIGIT )+
                     int cnt5=0;
                     loop5:
                     do {
@@ -1524,7 +1566,7 @@ public class TurtleLexer extends Lexer {
                     }
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:577:29: ( '-' | '+' )?
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:619:29: ( '-' | '+' )?
                     int alt6=2;
                     int LA6_0 = input.LA(1);
 
@@ -1554,9 +1596,9 @@ public class TurtleLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:578:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )?
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:620:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )?
                     {
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:578:5: ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:620:5: ( DIGIT )+
                     int cnt7=0;
                     loop7:
                     do {
@@ -1605,7 +1647,7 @@ public class TurtleLexer extends Lexer {
                     }
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:578:22: ( '-' | '+' )?
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:620:22: ( '-' | '+' )?
                     int alt8=2;
                     int LA8_0 = input.LA(1);
 
@@ -1650,7 +1692,7 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DECIMAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:582:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:624:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
             int alt13=2;
             int LA13_0 = input.LA(1);
 
@@ -1669,9 +1711,9 @@ public class TurtleLexer extends Lexer {
             }
             switch (alt13) {
                 case 1 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:582:5: ( DIGIT )+ PERIOD ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:624:5: ( DIGIT )+ PERIOD ( DIGIT )+
                     {
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:582:5: ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:624:5: ( DIGIT )+
                     int cnt10=0;
                     loop10:
                     do {
@@ -1713,7 +1755,7 @@ public class TurtleLexer extends Lexer {
                     mPERIOD(); 
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:582:19: ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:624:19: ( DIGIT )+
                     int cnt11=0;
                     loop11:
                     do {
@@ -1755,12 +1797,12 @@ public class TurtleLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:583:5: PERIOD ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:625:5: PERIOD ( DIGIT )+
                     {
                     mPERIOD(); 
 
 
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:583:12: ( DIGIT )+
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:625:12: ( DIGIT )+
                     int cnt12=0;
                     loop12:
                     do {
@@ -1817,8 +1859,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = INTEGER_POSITIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:587:3: ( PLUS INTEGER )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:587:5: PLUS INTEGER
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:629:3: ( PLUS INTEGER )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:629:5: PLUS INTEGER
             {
             mPLUS(); 
 
@@ -1842,8 +1884,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = INTEGER_NEGATIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:591:3: ( MINUS INTEGER )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:591:5: MINUS INTEGER
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:633:3: ( MINUS INTEGER )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:633:5: MINUS INTEGER
             {
             mMINUS(); 
 
@@ -1867,8 +1909,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DOUBLE_POSITIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:595:3: ( PLUS DOUBLE )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:595:5: PLUS DOUBLE
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:637:3: ( PLUS DOUBLE )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:637:5: PLUS DOUBLE
             {
             mPLUS(); 
 
@@ -1892,8 +1934,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DOUBLE_NEGATIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:599:3: ( MINUS DOUBLE )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:599:5: MINUS DOUBLE
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:641:3: ( MINUS DOUBLE )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:641:5: MINUS DOUBLE
             {
             mMINUS(); 
 
@@ -1917,8 +1959,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DECIMAL_POSITIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:603:3: ( PLUS DECIMAL )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:603:5: PLUS DECIMAL
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:645:3: ( PLUS DECIMAL )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:645:5: PLUS DECIMAL
             {
             mPLUS(); 
 
@@ -1942,8 +1984,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = DECIMAL_NEGATIVE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:607:3: ( MINUS DECIMAL )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:607:5: MINUS DECIMAL
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:649:3: ( MINUS DECIMAL )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:649:5: MINUS DECIMAL
             {
             mMINUS(); 
 
@@ -1967,13 +2009,13 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = VARNAME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:611:3: ( ALPHA ( CHAR )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:611:5: ALPHA ( CHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:653:3: ( ALPHA ( CHAR )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:653:5: ALPHA ( CHAR )*
             {
             mALPHA(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:611:11: ( CHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:653:11: ( CHAR )*
             loop14:
             do {
                 int alt14=2;
@@ -2021,8 +2063,8 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "ECHAR"
     public final void mECHAR() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:615:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:615:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:657:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:657:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
             {
             match('\\'); 
 
@@ -2049,13 +2091,13 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "SCHEMA"
     public final void mSCHEMA() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:660:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:660:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
             {
             mALPHA(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:618:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:660:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
             loop15:
             do {
                 int alt15=2;
@@ -2102,7 +2144,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "URI_PATH"
     public final void mURI_PATH() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:620:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:662:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2128,7 +2170,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "ID_START"
     public final void mID_START() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:622:18: ( ( ALPHA | UNDERSCORE ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:664:18: ( ( ALPHA | UNDERSCORE ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2154,7 +2196,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "ID_CORE"
     public final void mID_CORE() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:624:17: ( ( ID_START | DIGIT ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:666:17: ( ( ID_START | DIGIT ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2180,13 +2222,13 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "ID"
     public final void mID() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:626:12: ( ID_START ( ID_CORE )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:626:14: ID_START ( ID_CORE )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:668:12: ( ID_START ( ID_CORE )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:668:14: ID_START ( ID_CORE )*
             {
             mID_START(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:626:23: ( ID_CORE )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:668:23: ( ID_CORE )*
             loop16:
             do {
                 int alt16=2;
@@ -2233,7 +2275,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "NAME_START_CHAR"
     public final void mNAME_START_CHAR() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:628:25: ( ( ALPHA | UNDERSCORE ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:670:25: ( ( ALPHA | UNDERSCORE ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2259,7 +2301,7 @@ public class TurtleLexer extends Lexer {
     // $ANTLR start "NAME_CHAR"
     public final void mNAME_CHAR() throws RecognitionException {
         try {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:630:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH ) )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:672:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH ) )
             // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:
             {
             if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -2287,13 +2329,13 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = NCNAME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:633:3: ( NAME_START_CHAR ( NAME_CHAR )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:633:5: NAME_START_CHAR ( NAME_CHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:675:3: ( NAME_START_CHAR ( NAME_CHAR )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:675:5: NAME_START_CHAR ( NAME_CHAR )*
             {
             mNAME_START_CHAR(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:633:21: ( NAME_CHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:675:21: ( NAME_CHAR )*
             loop17:
             do {
                 int alt17=2;
@@ -2343,13 +2385,13 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = NAMESPACE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:636:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:636:5: NAME_START_CHAR ( NAME_CHAR )* COLON
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:678:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:678:5: NAME_START_CHAR ( NAME_CHAR )* COLON
             {
             mNAME_START_CHAR(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:636:21: ( NAME_CHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:678:21: ( NAME_CHAR )*
             loop18:
             do {
                 int alt18=2;
@@ -2402,10 +2444,10 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = PREFIXED_NAME;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:640:3: ( ( NCNAME )? COLON NCNAME )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:640:5: ( NCNAME )? COLON NCNAME
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:682:3: ( ( NCNAME )? COLON NCNAME )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:682:5: ( NCNAME )? COLON NCNAME
             {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:640:5: ( NCNAME )?
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:682:5: ( NCNAME )?
             int alt19=2;
             int LA19_0 = input.LA(1);
 
@@ -2414,7 +2456,7 @@ public class TurtleLexer extends Lexer {
             }
             switch (alt19) {
                 case 1 :
-                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:640:5: NCNAME
+                    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:682:5: NCNAME
                     {
                     mNCNAME(); 
 
@@ -2447,12 +2489,12 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:644:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:644:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:686:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:686:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
             {
             match('\''); 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:644:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:686:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop20:
             do {
                 int alt20=3;
@@ -2471,7 +2513,7 @@ public class TurtleLexer extends Lexer {
 
                 switch (alt20) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:644:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:686:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -2486,7 +2528,7 @@ public class TurtleLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:644:87: ECHAR
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:686:87: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -2518,12 +2560,12 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = STRING_WITH_QUOTE_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:648:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:648:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:690:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:690:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
             {
             match('\"'); 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:648:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:690:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop21:
             do {
                 int alt21=3;
@@ -2542,7 +2584,7 @@ public class TurtleLexer extends Lexer {
 
                 switch (alt21) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:648:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:690:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -2557,7 +2599,7 @@ public class TurtleLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:648:87: ECHAR
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:690:87: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -2589,14 +2631,14 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = STRING_WITH_TEMPLATE_SIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:652:3: ( '<\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\">' )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:652:5: '<\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\">'
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:694:3: ( '<\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\">' )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:694:5: '<\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\">'
             {
             match("<\""); 
 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:652:11: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:694:11: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
             loop22:
             do {
                 int alt22=3;
@@ -2615,7 +2657,7 @@ public class TurtleLexer extends Lexer {
 
                 switch (alt22) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:652:41: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:694:41: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
             	    {
             	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
@@ -2630,7 +2672,7 @@ public class TurtleLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:652:88: ECHAR
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:694:88: ECHAR
             	    {
             	    mECHAR(); 
 
@@ -2664,8 +2706,8 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = STRING_URI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:656:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:656:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:698:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:698:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
             {
             mSCHEMA(); 
 
@@ -2676,7 +2718,7 @@ public class TurtleLexer extends Lexer {
             mDOUBLE_SLASH(); 
 
 
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:656:31: ( URI_PATH )*
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:698:31: ( URI_PATH )*
             loop23:
             do {
                 int alt23=2;
@@ -2726,10 +2768,10 @@ public class TurtleLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             {
-            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
             int cnt25=0;
             loop25:
             do {
@@ -2756,23 +2798,23 @@ public class TurtleLexer extends Lexer {
 
                 switch (alt25) {
             	case 1 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:6: ' '
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:6: ' '
             	    {
             	    match(' '); 
 
             	    }
             	    break;
             	case 2 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:10: '\\t'
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:10: '\\t'
             	    {
             	    match('\t'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    {
-            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:15: ( '\\n' | '\\r' ( '\\n' ) )
+            	    // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:15: ( '\\n' | '\\r' ( '\\n' ) )
             	    int alt24=2;
             	    int LA24_0 = input.LA(1);
 
@@ -2791,19 +2833,19 @@ public class TurtleLexer extends Lexer {
             	    }
             	    switch (alt24) {
             	        case 1 :
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:16: '\\n'
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:16: '\\n'
             	            {
             	            match('\n'); 
 
             	            }
             	            break;
             	        case 2 :
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:21: '\\r' ( '\\n' )
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:21: '\\r' ( '\\n' )
             	            {
             	            match('\r'); 
 
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:25: ( '\\n' )
-            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:659:26: '\\n'
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:25: ( '\\n' )
+            	            // /Users/mariano/Code/obda_eclipse_workspace_release/obdalib-parent/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:701:26: '\\n'
             	            {
             	            match('\n'); 
 
@@ -3385,7 +3427,7 @@ public class TurtleLexer extends Lexer {
             this.transition = DFA9_transition;
         }
         public String getDescription() {
-            return "575:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? );";
+            return "617:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? );";
         }
     }
     static final String DFA26_eotS =

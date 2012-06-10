@@ -332,9 +332,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 			fromBf.append("FROM");
 			boolean moreThanOne = false;
 			for (String tdefinition : fromTables) {
-				fromBf.append("\n    ");
 				if (moreThanOne)
 					fromBf.append(", ");
+				fromBf.append("\n    ");				
 				fromBf.append(tdefinition);
 				moreThanOne = true;
 			}
