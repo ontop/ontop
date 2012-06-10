@@ -410,7 +410,7 @@ public class OBDAModelManager implements Disposable {
 				break;
 
 			case REASONER_CHANGED:
-				log.info("REASONER CHANGED");
+				log.debug("REASONER CHANGED");
 				
 				// Get the active OBDA model
 				activeOBDAModel = getActiveOBDAModel();

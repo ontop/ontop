@@ -62,6 +62,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 	public DatasourceSelector(OBDAModel model) {
 		setDatasourceController(model);		
 		initComponents();
+		cboDatasource.setFocusable(false);
 	}
 
 	public void setDatasourceController(OBDAModel model) {
@@ -138,15 +139,15 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
         cboDatasource = new JComboBox();
 
-        setMinimumSize(new Dimension(28, 25));
-        setPreferredSize(new Dimension(28, 25));
+        setMinimumSize(new Dimension(23, 21));
+        setPreferredSize(new Dimension(28, 21));
         setLayout(new BorderLayout());
 
         cboDatasource.setModel(cboModelDatasource);
-        cboDatasource.setMinimumSize(new Dimension(28, 25));
-        cboDatasource.setPreferredSize(new Dimension(28, 25));
+        cboDatasource.setMinimumSize(new Dimension(23, 23));
+        cboDatasource.setNextFocusableComponent(cboDatasource);
+        cboDatasource.setPreferredSize(new Dimension(28, 23));
         cboDatasource.setRenderer(cboRendererDatasource);
-        cboDatasource.setSelectedIndex(-1);
         cboDatasource.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 cboDatasourceSelected(evt);
