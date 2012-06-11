@@ -13,13 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-/*
- * DatasourceListSelector.java
- * 
- * Created on Feb 23, 2011, 2:32:23 PM
- */
-
 package it.unibz.krdb.obda.gui.swing.panel;
 
 import it.unibz.krdb.obda.gui.swing.utils.DatasourceSelectorListener;
@@ -42,8 +35,6 @@ import javax.swing.ListCellRenderer;
 
 /**
  * A combo box component to select a data source.
- * 
- * @author Josef Hardi <josef.hardi@gmail.com>
  */
 public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelListener {
 
@@ -148,6 +139,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
         cboDatasource.setNextFocusableComponent(cboDatasource);
         cboDatasource.setPreferredSize(new Dimension(28, 23));
         cboDatasource.setRenderer(cboRendererDatasource);
+        cboDatasource.setSelectedIndex(-1);
         cboDatasource.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 cboDatasourceSelected(evt);
