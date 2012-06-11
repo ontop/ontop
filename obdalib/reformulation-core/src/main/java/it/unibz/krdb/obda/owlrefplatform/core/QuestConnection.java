@@ -37,7 +37,7 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public QuestStatement createStatement() throws OBDAException {
 		try {
-			QuestStatement st = new QuestStatement(this.questinstance, this, conn.createStatement());
+			QuestStatement st = new QuestStatement(this.questinstance, this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY));
 			return st;
 		} catch (Exception e) {
 			throw new OBDAException(e);

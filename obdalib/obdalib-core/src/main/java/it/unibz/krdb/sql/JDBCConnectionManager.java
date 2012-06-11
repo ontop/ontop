@@ -122,6 +122,9 @@ public class JDBCConnectionManager {
 		}
 
 		Connection conn = DriverManager.getConnection(url, username, password);
+		
+//		if (driver.equals("com.mysql.jdbc.Driver"))
+//			conn.setAutoCommit(false);
 
 //		boolean bAutoCommit = ((Boolean) properties.get(JDBC_AUTOCOMMIT)).booleanValue();
 //		conn.setAutoCommit(bAutoCommit);
