@@ -58,6 +58,7 @@ public class ProgressPanel extends javax.swing.JPanel {
         add(barProgressActivity, gridBagConstraints);
 
         cmdCancelOperation.setText("Cancel Operation");
+        cmdCancelOperation.setEnabled(false);
         cmdCancelOperation.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
             	cmdCancelOperationActionPerformed(evt);
