@@ -269,15 +269,15 @@
 						<!-- <Embed-Dependency>*;groupId=inf.unibz.it.obda;inline=true,obdalib*;groupId=inf.unibz.it*;inline=true,*;groupId=!it.unibz.krdb;scope=compile|runtime</Embed-Dependency> -->
 						<Embed-Dependency>*;groupId=inf.unibz.it.obda.*;inline=true,*;groupId=!inf.unibz.it.obda;scope=compile|runtime</Embed-Dependency>
 
+						<Bundle-Name>-ontopPro-</Bundle-Name>
 						<!-- necessary for protege 4 plugins -->
 						<Bundle-Category>protege</Bundle-Category>
 
 						<!-- general information -->
 						<Bundle-ContactAddress>rodriguez@inf.unibz.it</Bundle-ContactAddress>
 						<Bundle-DocURL>http://obda.inf.unibz.it</Bundle-DocURL>
-						<Bundle-Description>The OBDA plugin for Protege 4.1</Bundle-Description>
-						<Bundle-Vendor>Free University of Bozen-Bolzano. KRDB Research
-							Centre</Bundle-Vendor>
+						<Bundle-Description>-ontopPro- Protege 4</Bundle-Description>
+						<Bundle-Vendor>Free University of Bozen-Bolzano. KRDB Research Centre</Bundle-Vendor>
 						<Implementation-Version>${project.version}.b1479</Implementation-Version>
 
 						<!-- Required. Remember to use the proper version for dependencies -->
