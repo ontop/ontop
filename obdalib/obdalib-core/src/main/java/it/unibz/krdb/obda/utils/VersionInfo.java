@@ -43,6 +43,6 @@ public class VersionInfo {
 	
 	@Override
 	public String toString() {
-		return "OBDAlib API version " + version;
+		return "Using -ontopCore- API v" + version;
 	}
 }
