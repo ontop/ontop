@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 public class VersionInfo {
 	
 	private static VersionInfo instance;
@@ -7,12 +11,17 @@ public class VersionInfo {
 	private String version;
 
 	private VersionInfo() {
-		String v = VersionInfo.class.getPackage().getImplementationVersion();
-		if (v != null) {
-			version = v;
-		} else {
-			version = "[Not Released]";
-		}
+		Properties prop = new Properties();
+    	try {
+            // Load the properties file
+    		InputStream inputStream = VersionInfo.class.getResourceAsStream("version.properties");
+    		prop.load(inputStream);
+ 
+            // Get the property value
+            version = prop.getProperty("pluginVersion"); 
+    	} catch (IOException ex) {
+    		ex.printStackTrace();
+        }
 	}
 
 	public synchronized static VersionInfo getVersionInfo() {
