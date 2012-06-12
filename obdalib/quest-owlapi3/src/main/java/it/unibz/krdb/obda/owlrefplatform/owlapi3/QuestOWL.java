@@ -188,10 +188,18 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 
 	@Override
 	public OWLStatement getStatement() throws OWLException {
-		if (!questready)
-			throw new OWLReasonerRuntimeException(
+		if (!questready) {
+			OWLReasonerRuntimeException owlReasonerRuntimeException = new OWLReasonerRuntimeException(
 					"Quest is not ready. If you are getting this error it means there was a problem during initialization. This is generally due to connection problems, or errors in the mappings. \n\nError Message: \n" + questException.getMessage()) {
+
+						/**
+						 * 
+						 */
+				private static final long serialVersionUID = 1L;
 				};
+				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
+			throw owlReasonerRuntimeException;
+		}
 		return owlconn.createStatement();
 	}
 

@@ -40,7 +40,8 @@ public class DialogUtils {
 		textArea.setWrapStyleWord(true);
 		StringWriter writer = new StringWriter();
 		writer.write(e.getMessage());
-//		e.printStackTrace(new PrintWriter(writer));
+		writer.write("\n\nStack trace:\n");
+		e.printStackTrace(new PrintWriter(writer));
 		textArea.setText(writer.toString());
 
 		// stuff it in a scrollpane with a controlled size.

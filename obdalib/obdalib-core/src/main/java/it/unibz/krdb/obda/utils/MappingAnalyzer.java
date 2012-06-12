@@ -117,8 +117,18 @@ public class MappingAnalyzer {
 					String[] value = predicate.split("=");
 					String leftValue = value[0];
 					String rightValue = value[1];
-					Term t1 = dfac.getVariable(lookupTable.lookup(leftValue));
-					Term t2 = dfac.getVariable(lookupTable.lookup(rightValue));
+					String lookup1 = lookupTable.lookup(leftValue);
+					String lookup2 = lookupTable.lookup(rightValue);
+					if (lookup1 == null)
+						throw new RuntimeException("Unable to get column name for variable: " + leftValue);
+					if (lookup2 == null)
+						throw new RuntimeException("Unable to get column name for variable: " + rightValue);
+					
+					Term t1 = dfac.getVariable(lookup1);
+					Term t2 = dfac.getVariable(lookup2);
+					
+					
+					
 					Atom atom = dfac.getEQAtom(t1, t2);
 					atoms.add(atom);
 				}
@@ -198,7 +208,9 @@ public class MappingAnalyzer {
 					datalog.appendRule(rule);
 				}
 			} catch (Exception e) {
-				throw new RuntimeException("Error analyzing mapping with ID=" + axiom.getId() + " Description: " + e.getMessage());
+				RuntimeException r = new RuntimeException("Error analyzing mapping [" + axiom.toString() + "] Error description: " + e.getMessage());
+				r.setStackTrace(e.getStackTrace());
+				throw r; 
 			}
 		}
 		return datalog;
@@ -209,6 +221,10 @@ public class MappingAnalyzer {
 
 		String columnName = column.toString();
 		String variableName = lookupTable.lookup(columnName);
+		
+		if (variableName == null)
+			throw new RuntimeException("Unable to find column name for variable: " + columnName);
+		
 		Term var = dfac.getVariable(variableName);
 
 		if (pred.useIsNullOperator()) {
@@ -224,6 +240,10 @@ public class MappingAnalyzer {
 
 		String leftValueName = left.toString();
 		String termLeftName = lookupTable.lookup(leftValueName);
+		
+		if (termLeftName == null)
+			throw new RuntimeException("Unable to find column name for variable: " + leftValueName);
+		
 		Term t1 = dfac.getVariable(termLeftName);
 
 		String termRightName = "";
@@ -231,6 +251,10 @@ public class MappingAnalyzer {
 		if (right instanceof ReferenceValueExpression) {
 			String rightValueName = right.toString();
 			termRightName = lookupTable.lookup(rightValueName);
+			
+			if (termRightName == null)
+				throw new RuntimeException("Unable to find column name for variable: " + rightValueName);
+			
 			t2 = dfac.getVariable(termRightName);
 		} else if (right instanceof Literal) {
 			Literal literal = (Literal) right;

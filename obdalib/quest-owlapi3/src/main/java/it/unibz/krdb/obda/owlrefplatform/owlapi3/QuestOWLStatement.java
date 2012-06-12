@@ -23,8 +23,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			st.cancel();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -34,8 +36,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			st.close();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -45,8 +49,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return new QuestOWLResultSet(st.execute(query), this);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -56,8 +62,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.executeUpdate(query);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -72,8 +80,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.getFetchSize();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -83,8 +93,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.getMaxRows();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -94,8 +106,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			st.cancel();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -105,8 +119,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return new QuestOWLResultSet(st.getResultSet(), this);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -116,8 +132,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.getQueryTimeout();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -127,8 +145,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			st.setFetchSize(rows);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -138,8 +158,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			st.setMaxRows(max);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -149,8 +171,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.isClosed();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -160,8 +184,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			st.setQueryTimeout(seconds);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 
 	}
@@ -171,8 +197,10 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.getTupleCount(query);
 		} catch (Exception e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 	}
 
@@ -180,17 +208,21 @@ public class QuestOWLStatement implements OWLStatement {
 		try {
 			return st.getRewriting(query);
 		} catch (Exception e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 	}
 
-	public String getUnfolding(String query)  throws OWLException  {
+	public String getUnfolding(String query) throws OWLException {
 		try {
 			return st.getUnfolding(query);
 		} catch (Exception e) {
-			throw new OWLException(e) {
+			OWLException owlException = new OWLException(e) {
 			};
+			owlException.setStackTrace(e.getStackTrace());
+			throw owlException;
 		}
 	}
 }

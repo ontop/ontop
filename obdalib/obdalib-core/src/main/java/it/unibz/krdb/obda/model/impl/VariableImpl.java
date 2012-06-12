@@ -21,6 +21,8 @@ public class VariableImpl implements Variable {
 	private final int identifier;
 
 	protected VariableImpl(String name, XSDatatype type) {
+		if (name == null)
+			throw new RuntimeException("Variable name cannot be null");
 		this.name = name;
 		this.type = type;
 		this.identifier = name.hashCode();

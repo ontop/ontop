@@ -29,7 +29,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			this.conn.close();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 
 	}
@@ -37,10 +39,13 @@ public class QuestConnection implements OBDAConnection {
 	@Override
 	public QuestStatement createStatement() throws OBDAException {
 		try {
-			QuestStatement st = new QuestStatement(this.questinstance, this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY));
+			QuestStatement st = new QuestStatement(this.questinstance, this, conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+					java.sql.ResultSet.CONCUR_READ_ONLY));
 			return st;
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 
 	}
@@ -50,7 +55,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			conn.commit();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 	}
 
@@ -59,7 +66,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			conn.setAutoCommit(autocommit);
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 
 	}
@@ -69,7 +78,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			return conn.getAutoCommit();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 	}
 
@@ -78,7 +89,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			return conn.isClosed();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 	}
 
@@ -89,7 +102,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			return conn.isReadOnly();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 	}
 
@@ -98,7 +113,9 @@ public class QuestConnection implements OBDAConnection {
 		try {
 			conn.rollback();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			OBDAException obdaException = new OBDAException(e.getMessage());
+			obdaException.setStackTrace(e.getStackTrace());
+			throw obdaException;
 		}
 	}
 
