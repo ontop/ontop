@@ -115,8 +115,8 @@ public class DBMetadata implements Serializable {
 	}
 
 	/**
-	 * Returns the attribute full-qualified name based on the table/view name
-	 * and its position in the meta data.
+	 * Returns the attribute full-qualified name using the table/view name:
+	 * [TABLE_NAME].[ATTRIBUTE_NAME]
 	 * 
 	 * @param name
 	 *            Can be a table name or a view name.
@@ -126,6 +126,23 @@ public class DBMetadata implements Serializable {
 	 */
 	public String getFullQualifiedAttributeName(String name, int pos) {
 		String value = String.format("%s.%s", name, getAttributeName(name, pos));
+		return value;
+	}
+	
+	/**
+	 * Returns the attribute full-qualified name using the table/view ALIAS name.
+	 * [ALIAS_NAME].[ATTRIBUTE_NAME]
+	 * 
+	 * @param name
+	 *            Can be a table name or a view name.
+	 * @param alias
+	 * 			  The table or view alias name.
+	 * @param pos
+	 *            The index position.
+	 * @return
+	 */
+	public String getFullQualifiedAttributeName(String name, String alias, int pos) {
+		String value = String.format("%s.%s", alias, getAttributeName(name, pos));
 		return value;
 	}
 
