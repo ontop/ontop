@@ -39,16 +39,19 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 	private static final long serialVersionUID = 3506358479342412849L;
 
-	private OBDADataSource selectedDataSource = null;
+	private OBDADataSource selectedDataSource;
 
-	private OBDAModel obdaModel = null;
+	private OBDAModel obdaModel;
 
-	private DatasourceSelector selector = null;
+	private DatasourceSelector selector;
 
 	private ComboBoxItemListener comboListener;
 
-	/** Creates new form DatasourceParameterEditorPanel */
+	/** 
+	 * Creates new form DatasourceParameterEditorPanel 
+	 */
 	public DatasourceParameterEditorPanel(OBDAModel model) {
+		
 		initComponents();
 
 		this.comboListener = new ComboBoxItemListener();
@@ -68,58 +71,45 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		
 		lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
 		model.addSourcesListener(new OBDAModelListener() {
-
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = -415753131971100104L;
 
 			@Override
 			public void datasourceUpdated(String oldname, OBDADataSource currendata) {
 				// NO OP
-
 			}
-
 			@Override
 			public void datasourceDeleted(OBDADataSource source) {
 				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-
 			}
-
 			@Override
 			public void datasourceAdded(OBDADataSource source) {
 				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-
 			}
-
 			@Override
 			public void datasourcParametersUpdated() {
 				// NO OP
-
 			}
-
 			@Override
 			public void alldatasourcesDeleted() {
 				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-
 			}
 		});
 	}
 
 	private class ComboBoxItemListener implements ItemListener {
-
+		
 		private boolean notify = false;
 
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			if (notify)
+			if (notify) {
 				fieldChangeHandler(null);
+			}
 		}
 
 		public void setNotify(boolean notify) {
 			this.notify = notify;
 		}
-
 	}
 
 	public void setDatasourcesController(OBDAModel model) {
@@ -573,7 +563,6 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	}
 
 	private void fieldChangeHandler(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_fieldChangeHandler
-
 		if (selectedDataSource == null) {
 			JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
 			return;
@@ -587,18 +576,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		} catch (SQLException e) {
 			// do nothing
 		}
-
-		// currentsrc.setUri(fieldURI.getText());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, txtDatabaseUsername.getText());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, new String(txtDatabasePassword.getPassword()));
-		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, txtJdbcDriver.getSelectedItem() == null ? ""
-				: (String) txtJdbcDriver.getSelectedItem());
+		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, txtJdbcDriver.getSelectedItem() == null ? "" : (String) txtJdbcDriver.getSelectedItem());
 		selectedDataSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, txtJdbcUrl.getText());
-		// currentDS.setParameter(RDBMSsourceParameterConstants.ONTOLOGY_URI,
-		// apic.getCurrentOntologyURI().toString());
 		obdaModel.fireSourceParametersUpdated();
-
-		return;
 	}// GEN-LAST:event_fieldChangeHandler
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
@@ -630,15 +612,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 		comboListener.setNotify(false);
 		if (currentsource == null) {
-			// lblDataSourceTypeValue.setText("");
-			// lblMappingTypeValue.setText("");
 			selectedDataSource = null;
 			txtJdbcDriver.setSelectedIndex(0);
 			txtDatabaseUsername.setText("");
 			txtDatabasePassword.setText("");
 			txtJdbcUrl.setText("");
-			// lblDataSourceTypeValue.setEnabled(false);
-			// lblMappingTypeValue.setEnabled(false);
 			txtJdbcDriver.setEnabled(false);
 			txtDatabaseUsername.setEnabled(false);
 			txtDatabasePassword.setEnabled(false);
@@ -646,26 +624,16 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			lblConnectionStatus.setText("");
 
 		} else {
-
-			/*******************************************************************
-			 * Updating the GUI fields with the sources info
-			 * 
-			 */
-			// lblDataSourceTypeValue.setText("Relational Database");
-			// lblMappingTypeValue.setText("OBDA Mappings");
 			selectedDataSource = currentsource;
 			txtJdbcDriver.setSelectedItem(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			txtDatabaseUsername.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME));
 			txtDatabasePassword.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
 			txtJdbcUrl.setText(currentsource.getParameter(RDBMSourceParameterConstants.DATABASE_URL));
-			// lblDataSourceTypeValue.setEnabled(true);
-			// lblMappingTypeValue.setEnabled(true);
 			txtJdbcDriver.setEnabled(true);
 			txtDatabaseUsername.setEnabled(true);
 			txtDatabasePassword.setEnabled(true);
 			txtJdbcUrl.setEnabled(true);
 			lblConnectionStatus.setText("");
-
 		}
 		comboListener.setNotify(true);
 	}
@@ -673,10 +641,10 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
 		currentDatasourceChange(oldSource, newSource);
-		if (newSource == null)
+		if (newSource == null) {
 			enableFields(false);
-		else
+		} else {
 			enableFields(true);
-
+		}
 	}
 }
