@@ -46,6 +46,7 @@ public class MappingVocabularyRepair {
 			model.removeAllMappings(source.getSourceID());
 			try {
 				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
+				
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -85,8 +86,7 @@ public class MappingVocabularyRepair {
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
-
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
 		}
 		log.debug("Repair done. Returning {} mappings", result.size());
 		return result;

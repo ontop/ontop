@@ -49,7 +49,7 @@ public class MappingVocabularyTranslator {
 			Map<Predicate, Description> equivalencesMap) {
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
-
+			
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			List<Atom> body = targetQuery.getBody();
 			List<Atom> newbody = new LinkedList<Atom>();
@@ -83,7 +83,7 @@ public class MappingVocabularyTranslator {
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
 
 		}
 		return result;

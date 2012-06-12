@@ -33,20 +33,23 @@ public class DialogUtils {
 	public static void showQuickErrorDialog(Component parent, Exception e, String message) {
 		// create and configure a text area - fill it with exception text.
 		final JTextArea textArea = new JTextArea();
-		textArea.setLineWrap(true);
+//		textArea.setLineWrap(true);
 		textArea.setBackground(Color.WHITE);
-		textArea.setFont(new Font("Dialog", Font.PLAIN, 12));
+		textArea.setFont(new Font("Courier New", Font.BOLD, 12));
 		textArea.setEditable(false);
 		textArea.setWrapStyleWord(true);
 		StringWriter writer = new StringWriter();
 		writer.write(e.getMessage());
-		writer.write("\n\nStack trace:\n");
+		writer.write("\n\n");
+		writer.write("#######################\n");
+		writer.write("##    Stack trace    ##\n");
+		writer.write("#######################\n\n");
 		e.printStackTrace(new PrintWriter(writer));
 		textArea.setText(writer.toString());
 
 		// stuff it in a scrollpane with a controlled size.
 		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setPreferredSize(new Dimension(540, 150));
+		scrollPane.setPreferredSize(new Dimension(640, 150));
 
 		// pass the scrollpane to the joptionpane.
 		JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);

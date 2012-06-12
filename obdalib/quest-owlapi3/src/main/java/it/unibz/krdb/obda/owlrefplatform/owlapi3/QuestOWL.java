@@ -190,7 +190,7 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 	public OWLStatement getStatement() throws OWLException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new OWLReasonerRuntimeException(
-					"Quest is not ready. If you are getting this error it means there was a problem during initialization. This is generally due to connection problems, or errors in the mappings. \n\nError Message: \n" + questException.getMessage()) {
+					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) {
 
 						/**
 						 * 
