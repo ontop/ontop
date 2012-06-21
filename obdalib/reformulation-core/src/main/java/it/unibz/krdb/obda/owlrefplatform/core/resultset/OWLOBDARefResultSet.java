@@ -17,6 +17,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -254,6 +255,12 @@ public class OWLOBDARefResultSet implements OBDAResultSet {
 					result = fac.getValueConstant(set.getString(name), type);
 				}
 			}
+		} catch (IllegalArgumentException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof URISyntaxException) {
+				throw new OBDAException("Error creating an object's URI. This is often due to mapping with URI templates that refer to columns in which illegal values may appear, e.g., white spaces and special characters. To avoid this error do not use these columns for URI templates in your mappings, or process them using SQL functions (e.g., string replacement) in the SQL queries of your mappings. Note that this last option can be bad for performance, future versions of Quest will allow to string manipulation functions in URI templates to avoid these performance problems." + "\n\nDetailed message: " + cause.getMessage());
+			}
+			throw e;			
 		} catch (SQLException e) {
 			throw new OBDAException(e.getMessage());
 		}

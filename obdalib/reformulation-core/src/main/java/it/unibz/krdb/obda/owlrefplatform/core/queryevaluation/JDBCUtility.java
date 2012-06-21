@@ -63,9 +63,8 @@ public class JDBCUtility implements Serializable {
 			driver = Driver.SQLSERVER;
 		} else {
 			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Quest.");
-			log.warn("WARNING: If you database is not fully compliant with SQL 99 you might experience problems using Quest.");
 			log.warn("WARNING: Contact the authors for further support.");
-			throw new Exception("Unsupported database!");
+			throw new Exception("The specified JDBC driver '" + className + "' is not supported by Quest. Verify you are using a supported DB and the correct JDBC driver string. For more information see: https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibPluginJDBC");
 		}
 	}
 
@@ -298,7 +297,7 @@ public class JDBCUtility implements Serializable {
 		}
 		return sql;
 	}
-	
+
 	public String getTableName(String tablename, String viewname) {
 		String sql = "";
 		switch (driver) {
@@ -315,7 +314,7 @@ public class JDBCUtility implements Serializable {
 		}
 		return sql;
 	}
-	
+
 	public String quote(String name) {
 		String str = "";
 		switch (driver) {
