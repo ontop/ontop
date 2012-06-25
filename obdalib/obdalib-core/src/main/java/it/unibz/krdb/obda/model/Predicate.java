@@ -13,8 +13,10 @@ import java.net.URI;
  */
 public interface Predicate extends Cloneable, Serializable {
 
-	public enum COL_TYPE {OBJECT, BNODE, LITERAL, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN};
-	
+	public enum COL_TYPE {
+		OBJECT, BNODE, LITERAL, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN
+	};
+
 	/**
 	 * Get the name of the predicate. In practice, the predicate name is
 	 * constructed as a URI to indicate a unique resource.
@@ -37,7 +39,6 @@ public interface Predicate extends Cloneable, Serializable {
 	 * @param column
 	 */
 	public COL_TYPE getType(int column);
-	
 
 	/**
 	 * Duplicate the object by performing a deep cloning.
@@ -45,5 +46,11 @@ public interface Predicate extends Cloneable, Serializable {
 	 * @return the copy of the object.
 	 */
 	public Predicate clone();
+
+	boolean isClass();
+
+	boolean isObjectProperty();
+
+	boolean isDataProperty();
 
 }
