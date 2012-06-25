@@ -404,7 +404,9 @@ uriTemplateFunction returns [Function value]
         
         // extract the whole placeholder, e.g., "{?var}"
         String placeHolder = template.substring(start, end+1);
-        template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
+        
+        template = template.substring(0,start) + "[]" + template.substring(end+1);
+        //template = template.replace(placeHolder, "[]"); // change the placeholder string temporarly
         
         // extract the variable name only, e.g., "{?var}" --> "var"
         try {
