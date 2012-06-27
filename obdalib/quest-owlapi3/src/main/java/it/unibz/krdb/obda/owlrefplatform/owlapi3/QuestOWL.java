@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OBDAOWLReasoner;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
@@ -256,7 +257,11 @@ public class QuestOWL extends OWLReasonerBase implements OBDAOWLReasoner, OWLQue
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
 
-					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(questInstance.getOBDAModel());
+					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
+						obdaModelForMaterialization.declarePredicate(p);
+					}
+					VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(obdaModelForMaterialization);
 					VirtualTriplePredicateIterator assertionIter = (VirtualTriplePredicateIterator) materializer.getAssertionIterator();
 					st.insertData(assertionIter, 5000, 500);
 					assertionIter.disconnect();

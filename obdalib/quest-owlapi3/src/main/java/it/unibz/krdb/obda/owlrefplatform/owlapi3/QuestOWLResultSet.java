@@ -90,7 +90,7 @@ public class QuestOWLResultSet implements OWLResultSet {
 		try {
 			return translator.translate(res.getConstant(column));
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			throw new OWLException(e + " Column: " + column) {
 			};
 		}
 	}
@@ -100,7 +100,7 @@ public class QuestOWLResultSet implements OWLResultSet {
 		try {
 			return translator.translate(res.getConstant(column));
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
+			throw new OWLException(e + " Column: " + column) {
 			};
 		}
 	}
