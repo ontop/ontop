@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -87,6 +88,10 @@ public class VirtualABoxMaterializer {
 	public VirtualABoxMaterializer(OBDAModel model) throws Exception {
 		this.model = model;
 		
+		for (Predicate p: model.getDeclaredPredicates()) {
+			vocabulary.add(p);
+		}
+		
 		for (OBDADataSource source : model.getSources()) {
 			// For each data source in the model
 			URI sourceUri = source.getSourceID();
@@ -109,10 +114,17 @@ public class VirtualABoxMaterializer {
 	        OBDAModel newModel = dfac.getOBDAModel();
 	        newModel.addSource(source);
 	        newModel.addMappings(sourceUri, mappingList);
+	        for (Predicate p: model.getDeclaredPredicates()) {
+	        	newModel.declarePredicate(p);
+			}
 	        
 	        Quest questInstance = new Quest();
 	        questInstance.setPreferences(getDefaultPreference());		
-			questInstance.loadTBox(ofac.createOntology()); // create an empty ontology	
+			Ontology ontology = ofac.createOntology();		
+			ontology.addEntities((Set<Predicate>)model.getDeclaredPredicates());
+			
+			
+			questInstance.loadTBox(ontology); // create an empty ontology	
 			questInstance.loadOBDAModel(newModel);
 			questInstance.setupRepository();
 	        
@@ -123,9 +135,11 @@ public class VirtualABoxMaterializer {
 				Predicate predicate = rule.getHead().getPredicate();
 				vocabulary.add(predicate);
 			}
+			
+			
 		}
 	}
-	
+
 	private QuestPreferences getDefaultPreference() {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -134,23 +148,24 @@ public class VirtualABoxMaterializer {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		return p;
 	}
-	
+
 	private void setupConnection(OBDADataSource datasource) throws SQLException {
 		// Validate if the connection is already existed or not
-	    if (conn == null || conn.isClosed()) {
-            String url = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-            String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-            String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-            String driver = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-    
-            try {
-                Class.forName(driver);
-            } catch (ClassNotFoundException e1) {
-                // Does nothing because the SQLException handles this problem also.
-            }
-            conn = DriverManager.getConnection(url, username, password);
-	    }      
-    }
+		if (conn == null || conn.isClosed()) {
+			String url = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+			String username = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+			String password = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+			String driver = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+
+			try {
+				Class.forName(driver);
+			} catch (ClassNotFoundException e1) {
+				// Does nothing because the SQLException handles this problem
+				// also.
+			}
+			conn = DriverManager.getConnection(url, username, password);
+		}
+	}
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		return new VirtualTriplePredicateIterator(vocabulary.iterator(), model.getSources(), questInstanceMap);
@@ -224,7 +239,8 @@ public class VirtualABoxMaterializer {
 	}
 
 	/**
-	 * This iterator iterates through all the vocabulary (i.e., the predicates) that the OBDA mappings have.
+	 * This iterator iterates through all the vocabulary (i.e., the predicates)
+	 * that the OBDA mappings have.
 	 */
 	public class VirtualTriplePredicateIterator implements Iterator<Assertion> {
 
@@ -235,7 +251,7 @@ public class VirtualABoxMaterializer {
 		private Predicate currentPredicate = null;
 		private VirtualTripleIterator currentIterator = null;
 
-		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources, 
+		public VirtualTriplePredicateIterator(Iterator<Predicate> predicates, Collection<OBDADataSource> sources,
 				Map<OBDADataSource, Quest> questInstances) throws SQLException {
 			this.predicates = predicates;
 			this.sources = sources;
@@ -247,8 +263,9 @@ public class VirtualABoxMaterializer {
 			}
 		}
 
-		/** 
-		 * Iterate to the next predicate to be unfolded and generated the SQL string 
+		/**
+		 * Iterate to the next predicate to be unfolded and generated the SQL
+		 * string
 		 */
 		private void advanceToNextPredicate() throws NoSuchElementException, SQLException {
 			try {
@@ -259,7 +276,7 @@ public class VirtualABoxMaterializer {
 			currentPredicate = predicates.next();
 			currentIterator = new VirtualTripleIterator(currentPredicate, sources, questInstances);
 		}
-		
+
 		/**
 		 * Release the connection resources in the VirtualTripleIterator.
 		 */
@@ -267,7 +284,7 @@ public class VirtualABoxMaterializer {
 			try {
 				currentIterator.disconnect();
 			} catch (Exception e) {
-				
+
 			}
 		}
 
@@ -276,10 +293,12 @@ public class VirtualABoxMaterializer {
 			if (currentIterator == null) {
 				return false;
 			}
-			boolean hasnext = currentIterator.hasNext(); // Check if there is more assertions
+			boolean hasnext = currentIterator.hasNext(); // Check if there is
+															// more assertions
 			while (!hasnext) {
 				try {
-					advanceToNextPredicate(); // if not, let's check the next predicate
+					advanceToNextPredicate(); // if not, let's check the next
+												// predicate
 					hasnext = currentIterator.hasNext();
 				} catch (Exception e) {
 					return false;
@@ -293,10 +312,12 @@ public class VirtualABoxMaterializer {
 			if (currentIterator == null) {
 				throw new NoSuchElementException();
 			}
-			boolean hasnext = currentIterator.hasNext(); // Check if there is more assertions
+			boolean hasnext = currentIterator.hasNext(); // Check if there is
+															// more assertions
 			while (!hasnext) {
 				try {
-					advanceToNextPredicate(); // if not, let's check the next predicate
+					advanceToNextPredicate(); // if not, let's check the next
+												// predicate
 					hasnext = currentIterator.hasNext();
 				} catch (Exception e) {
 					throw new NoSuchElementException();
@@ -340,14 +361,14 @@ public class VirtualABoxMaterializer {
 
 		private QuestConnection conn;
 		private QuestStatement st;
-		
+
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
-		
-		public VirtualTripleIterator(Predicate predicate, Collection<OBDADataSource> sources, 
-				Map<OBDADataSource, Quest> questInstances) throws SQLException {
+
+		public VirtualTripleIterator(Predicate predicate, Collection<OBDADataSource> sources, Map<OBDADataSource, Quest> questInstances)
+				throws SQLException {
 			this.predicate = predicate;
 			this.questInstances = questInstances;
-			
+
 			currentQuery = createQuery();
 			sourceIterator = sources.iterator();
 
@@ -358,21 +379,21 @@ public class VirtualABoxMaterializer {
 				throw new RuntimeException(e);
 			}
 		}
-		
+
 		// SPARQL query generated from the predicate
 		private String createQuery() {
 			StringBuffer sb = new StringBuffer();
 			sb.append("PREFIX :	<" + model.getPrefixManager().getDefaultPrefix() + ">\n");
-						
+
 			if (predicate.getArity() == 1) {
 				sb.append("SELECT $x WHERE { $x a <" + predicate.getName() + "> . }");
 			} else {
 				sb.append("SELECT $x $y WHERE { $x <" + predicate.getName() + "> $y . }");
 			}
-			
+
 			return sb.toString();
 		}
-		
+
 		/**
 		 * Releases all the connection resources
 		 */
@@ -384,7 +405,7 @@ public class VirtualABoxMaterializer {
 					// NO-OP
 				}
 			}
-			
+
 			if (conn != null) {
 				try {
 					conn.close();
@@ -398,30 +419,31 @@ public class VirtualABoxMaterializer {
 		 * Advances to the next sources, configures an unfolder using the
 		 * mappings for the source and executes the query related to the
 		 * predicate
+		 * 
 		 * @throws NoSuchElementException
 		 * @throws Exception
 		 */
 		private void advanceToNextSource() throws Exception {
 			disconnect(); // disconnect from the current source
-			
+
 			currentSource = sourceIterator.next();
 			Quest questInstance = questInstances.get(currentSource);
-			
+
 			conn = questInstance.getConnection();
 			st = conn.createStatement();
 		}
-		
+
 		/**
-		 * Advances to the next query rule such that it generates the SQL query and produces
-		 * a result set that contains database records.
+		 * Advances to the next query rule such that it generates the SQL query
+		 * and produces a result set that contains database records.
 		 * 
 		 * @throws OBDAException
 		 * @throws SQLException
 		 */
-		private void advanceToNextQuery() throws OBDAException, SQLException {			
+		private void advanceToNextQuery() throws OBDAException, SQLException {
 			currentResults = st.execute(currentQuery);
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			try {
@@ -477,7 +499,7 @@ public class VirtualABoxMaterializer {
 				}
 			} catch (OBDAException e) {
 				throw new RuntimeException(e);
-			} 
+			}
 		}
 
 		/***
@@ -485,10 +507,10 @@ public class VirtualABoxMaterializer {
 		 * set.
 		 * 
 		 * @return
-		 * @throws URISyntaxException 
+		 * @throws URISyntaxException
 		 */
 		private Assertion constructAssertion() throws OBDAException {
-			Assertion assertion = null;			
+			Assertion assertion = null;
 			int arity = predicate.getArity();
 			if (arity == 1) {
 				Constant value = currentResults.getConstant(1);
@@ -523,7 +545,7 @@ public class VirtualABoxMaterializer {
 			}
 			return assertion;
 		}
-		
+
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
