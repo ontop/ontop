@@ -29,8 +29,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
 import org.slf4j.LoggerFactory;
 
@@ -152,11 +150,7 @@ public class SQLGeneratorNonNested implements SourceQueryGenerator {
 		 * BEFORE DOING ANytHING WE SHOULD NORMALIZE EQ ATOMS A(x), B(y),
 		 * EQ(x,y), should be transformed into A(x), B(x)
 		 */
-
-		Object tempdist = query.getQueryModifiers().get("distinct");
-		boolean distinct = false;
-		if (tempdist != null)
-			distinct = (Boolean) tempdist;
+		boolean distinct = query.getQueryModifiers().isDistinct();
 
 		/* Main loop, constructing the SPJ query for each CQ */
 
@@ -403,7 +397,7 @@ public class SQLGeneratorNonNested implements SourceQueryGenerator {
 					String column = getSQLString(ht, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
 					sb.append(column);
 				} else if (ht instanceof Function) {
-					Vector<String> vex = new Vector<String>();
+//					Vector<String> vex = new Vector<String>();
 					Function ov = (Function) ht;
 					Predicate functionSymbol = ov.getFunctionSymbol();
 					String functionString = functionSymbol.toString();

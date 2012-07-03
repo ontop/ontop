@@ -226,8 +226,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 
 		DatalogProgram datalog = ofac.getDatalogProgram();
-		if (distinct)
-			datalog.getQueryModifiers().put("distinct", true);
+		if (distinct) {
+			datalog.getQueryModifiers().setDistinct();
+		}
 		datalog.appendRule(queries);
 
 		return datalog;

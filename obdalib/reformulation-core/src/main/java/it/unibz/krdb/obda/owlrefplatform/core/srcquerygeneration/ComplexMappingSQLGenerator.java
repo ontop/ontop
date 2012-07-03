@@ -163,10 +163,7 @@ public class ComplexMappingSQLGenerator implements SourceQueryGenerator {
 
 		sqlqueries = new Vector<String>();
 
-		Object tempdist = query.getQueryModifiers().get("distinct");
-		boolean distinct = false;
-		if (tempdist != null)
-			distinct = (Boolean) tempdist;
+		boolean distinct = query.getQueryModifiers().isDistinct();
 
 		StringBuilder finalquery = new StringBuilder();
 		while (it.hasNext()) {

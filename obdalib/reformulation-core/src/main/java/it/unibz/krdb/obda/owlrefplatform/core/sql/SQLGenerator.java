@@ -152,17 +152,9 @@ public class SQLGenerator implements SourceQueryGenerator {
 		 * BEFORE DOING ANytHING WE SHOULD NORMALIZE EQ ATOMS A(x), B(y),
 		 * EQ(x,y), should be transformed into A(x), B(x)
 		 */
+		boolean distinct = query.getQueryModifiers().isDistinct();
 		
-
-		Object tempdist = query.getQueryModifiers().get("distinct");
-		boolean distinct = false;
-		if (tempdist != null)
-			distinct = (Boolean) tempdist;
-
 		/* Main loop, constructing the SPJ query for each CQ */
-
-		
-		int STRINGINDENT = 0;
 		
 		StringBuffer result = new StringBuffer();
 		boolean isMoreThanOne = false;
