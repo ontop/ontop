@@ -278,7 +278,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
 				subjectUri = URI.create(subject.getURI());
-				terms.add(ofac.getURIConstant(subjectUri));
+				terms.add(ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri)));
 			}
 
 			// Object node
@@ -329,7 +329,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				Node_URI subject = (Node_URI) s;
 				subjectType = COL_TYPE.OBJECT;
 				subjectUri = URI.create(subject.getURI());
-				terms.add(ofac.getURIConstant(subjectUri));
+				terms.add(ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(subjectUri)));
 			}
 
 			// Object node
@@ -363,7 +363,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				Node_URI object = (Node_URI) o;
 				objectType = COL_TYPE.OBJECT;
 				objectUri = URI.create(object.getURI());
-				terms.add(ofac.getURIConstant(objectUri));
+				terms.add(ofac.getFunctionalTerm(ofac.getUriTemplatePredicate(1), ofac.getURIConstant(objectUri)));
 			}
 			// Construct the predicate
 			URI predicateUri = URI.create(p.getURI());

@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Manfred Gerstgrasser
  * 
  */
-
+@Deprecated
 public class ComplexMappingUnfolder implements UnfoldingMechanism {
 
 	/**

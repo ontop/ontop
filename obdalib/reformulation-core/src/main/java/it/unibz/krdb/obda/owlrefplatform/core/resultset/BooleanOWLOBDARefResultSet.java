@@ -42,8 +42,18 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet {
 		}
 	}
 
+	public BooleanOWLOBDARefResultSet(boolean value, OBDAStatement st) {
+		this.set = null;
+		this.st = st;
+
+		isTrue = value;
+
+	}
+
 	@Override
 	public void close() throws OBDAException {
+		if (set == null)
+			return;
 		try {
 			set.close();
 		} catch (SQLException e) {
@@ -129,14 +139,19 @@ public class BooleanOWLOBDARefResultSet implements OBDAResultSet {
 
 	@Override
 	public List<String> getSignature() throws OBDAException {
-		int i = getColumCount();
 		Vector<String> signature = new Vector<String>();
-		for (int j = 1; j <= i; j++) {
-			try {
-				signature.add(set.getMetaData().getColumnLabel(j));
-			} catch (SQLException e) {
-				throw new OBDAException(e.getMessage());
+		if (set != null) {
+			int i = getColumCount();
+
+			for (int j = 1; j <= i; j++) {
+				try {
+					signature.add(set.getMetaData().getColumnLabel(j));
+				} catch (SQLException e) {
+					throw new OBDAException(e.getMessage());
+				}
 			}
+		} else {
+			signature.add("value");
 		}
 		return signature;
 	}

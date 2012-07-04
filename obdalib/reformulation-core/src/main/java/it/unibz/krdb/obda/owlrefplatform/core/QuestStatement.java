@@ -22,8 +22,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyVal
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.OWLOBDARefResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
@@ -58,7 +58,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private UnfoldingMechanism unfoldingmechanism = null;
 
-	private SourceQueryGenerator querygenerator = null;
+	private SQLQueryGenerator querygenerator = null;
 
 	private QueryVocabularyValidator validator = null;
 
@@ -134,8 +134,8 @@ public class QuestStatement implements OBDAStatement {
 			for (int i = 1; i <= columnCount; i++) {
 				signature.add(set.getMetaData().getColumnLabel(i));
 			}
-			List<Term> typing = getDefaultTypingSignature(columnCount);
-			result = new OWLOBDARefResultSet(set, signature, typing, this);
+			
+			result = new QuestResultset(set, signature, this);
 
 			return result;
 		} catch (Exception e) {
@@ -153,8 +153,7 @@ public class QuestStatement implements OBDAStatement {
 			for (int i = 1; i <= columnCount; i++) {
 				signature.add(set.getMetaData().getColumnLabel(i));
 			}
-			List<Term> typing = getDefaultTypingSignature(columnCount);
-			result = new OWLOBDARefResultSet(set, signature, typing, this);
+			result = new QuestResultset(set, signature, this);
 			return result;
 		} catch (Exception e) {
 			throw new OBDAException(e);
@@ -289,8 +288,9 @@ public class QuestStatement implements OBDAStatement {
 
 		OBDAResultSet result;
 
+		boolean isBoolean = isDPBoolean(program);
 		log.debug("Executing the query and get the result...");
-		if (sql.equals("")) {
+		if (sql.equals("") && !isBoolean) {
 			/***
 			 * Empty unfolding, constructing an empty result set
 			 */
@@ -298,20 +298,25 @@ public class QuestStatement implements OBDAStatement {
 				throw new OBDAException("Error, invalid query");
 			}
 			result = new EmptyQueryResultSet(signature, this);
-		} else {
+		} else if (sql.equals("")) {
+			/***
+			 * Empty unfolding, constructing an false result set
+			 */
+			if (program.getRules().size() < 1) {
+				throw new OBDAException("Error, invalid query");
+			}
+			result = new BooleanOWLOBDARefResultSet(false, this);
+		}  else {
 			ResultSet set;
 			try {
 				set = sqlstatement.executeQuery(sql);
 			} catch (SQLException e) {
 				throw new OBDAException("Error executing SQL query: " + e.getMessage() + "\nSQL query:\n " + sql);
 			}
-			if (isDPBoolean(program)) {
+			if (isBoolean) {
 				result = new BooleanOWLOBDARefResultSet(set, this);
 			} else {
-				List<Term> typingSignature = unfolding.getRules().get(0).getHead().getTerms();
-
-				result = new OWLOBDARefResultSet(set, signature, typingSignature, this);
-
+				result = new QuestResultset(set, signature, this);
 			}
 		}
 

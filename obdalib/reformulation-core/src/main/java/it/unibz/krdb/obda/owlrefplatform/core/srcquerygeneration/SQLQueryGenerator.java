@@ -14,7 +14,7 @@ import java.util.List;
  * 
  */
 
-public interface SourceQueryGenerator extends Serializable {
+public interface SQLQueryGenerator extends Serializable {
 
 	/**
 	 * Translates the given datalog program into a source query, which can later

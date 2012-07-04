@@ -649,6 +649,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		while (data.hasNext()) {
 			Assertion ax = data.next();
+			
+			System.out.println(ax);
+			
 			batchCount += 1;
 			commitCount += 1;
 
@@ -1286,9 +1289,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				Atom bodyequi = null;
 				if (!equiproperty.isInverse()) {
-					bodyequi = dfac.getAtom(equiproperty.getPredicate(), dfac.getVariable("X"), dfac.getVariable("Y"));
+					bodyequi = dfac.getAtom(equiproperty.getPredicate(), dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")), dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y")));
 				} else {
-					bodyequi = dfac.getAtom(equiproperty.getPredicate(), dfac.getVariable("Y"), dfac.getVariable("X"));
+					bodyequi = dfac.getAtom(equiproperty.getPredicate(), dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y")), dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 				}
 
 				CQIE targetQueryEqui = dfac.getCQIE(headequi, bodyequi);
@@ -1317,7 +1320,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Mapping head
 
 			Atom head = dfac.getAtom(dfac.getPredicate(URI.create("m"), 1), dfac.getVariable("X"));
-			Atom body = dfac.getAtom(classuri, dfac.getVariable("X"));
+			Atom body = dfac.getAtom(classuri, dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
 			/*
 			 * This target query is shared by all mappings for this class
@@ -1444,7 +1447,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				OClass equiclass = (OClass) equivalent.getDescription();
 				Atom headequi = dfac.getAtom(dfac.getPredicate(URI.create("m"), 1),
 						dfac.getVariable("X"));
-				Atom bodyequi = dfac.getAtom(equiclass.getPredicate(), dfac.getVariable("X"));
+				Atom bodyequi = dfac.getAtom(equiclass.getPredicate(), dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 
 				CQIE targetQueryEqui = dfac.getCQIE(headequi, bodyequi);
 
@@ -1511,8 +1514,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			headTerms.add(dfac.getVariable("Y"));				
 
 			bodyPredicate = predicate; // the body
-			bodyTerms.add(dfac.getVariable("X"));
-			bodyTerms.add(dfac.getVariable("Y"));
+			bodyTerms.add(dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
+			bodyTerms.add(dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y")));
+					
 		} else {
 			// If the predicate is a Data Property
 			if (isLiteralDataProperty(predicate)) {		
@@ -1523,7 +1527,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				headTerms.add(dfac.getVariable("Z"));
 	
 				bodyPredicate = predicate; // the body
-				bodyTerms.add(dfac.getVariable("X"));
+				bodyTerms.add(dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 				bodyTerms.add(dfac.getFunctionalTerm(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z")));
 			} else {
 				// If the property has other types.
@@ -1532,7 +1536,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				headPredicate = dfac.getPredicate(URI.create("m"), 2, new COL_TYPE[] { COL_TYPE.STRING, getAttributeType(predicate) });
 	
 				bodyPredicate = predicate; // the body
-				bodyTerms.add(dfac.getVariable("X"));
+				bodyTerms.add(dfac.getFunctionalTerm(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
 				bodyTerms.add(dfac.getVariable("Y"));
 			}						
 		}

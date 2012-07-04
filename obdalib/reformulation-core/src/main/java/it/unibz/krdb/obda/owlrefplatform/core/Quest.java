@@ -24,11 +24,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabular
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SourceQueryGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
@@ -80,7 +82,7 @@ public class Quest implements Serializable {
 	protected UnfoldingMechanism unfolder = null;
 
 	/* The active SQL generator */
-	protected SourceQueryGenerator datasourceQueryGenerator = null;
+	protected SQLQueryGenerator datasourceQueryGenerator = null;
 
 	/* The active query evaluation engine */
 	protected EvaluationEngine evaluationEngine = null;
@@ -511,7 +513,8 @@ public class Quest implements Serializable {
 			 */
 			unfolder = new DatalogUnfolder(unfoldingProgram, metadata);
 			JDBCUtility jdbcutil = new JDBCUtility(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil);
+			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,sqladapter);
 
 			/*
 			 * Setting up the TBox we will use for the reformulation
