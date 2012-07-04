@@ -286,6 +286,7 @@
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
 						<Import-Package>!org.json, javax.xml.datatype, javax.swing.*,
+							!org.w3c.dom.traversal,
 							javax.accessibility, javax.naming.*,javax.management.*,
 							javax.xml.parsers.*,org.xml.sax.*,
 							it.unibz.krdb.obda.*,
