@@ -40,7 +40,7 @@ public class SQLQueryTranslator {
 		}
 		
 		if (parser.getNumberOfSyntaxErrors() != 0) {
-			log.debug("Creating a view for query: {}", query);
+			log.warn("The following query couldn't be parsed. This means Quest will need to use nested subqueries (views) to use this mappings. This is not good for SQL performance, specially in MySQL. Try to simplify your query to allow Quest to parse it. If you think this query is already simple and should be parsed by Quest, please contact the authors. \nQuery: '{}'", query);
 			queryTree = createView(query);
 		}		
 		return queryTree;

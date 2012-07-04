@@ -54,9 +54,106 @@ import it.unibz.krdb.sql.api.DateTimeLiteral;
 
 @lexer::header {
 package it.unibz.krdb.obda.parser;
+
+import java.util.List;
+import java.util.Vector;
+
 }
 
+
+@lexer::members {
+String error = "";
+    
+    public String getError() {
+    	return error;
+    }
+
+    
+
+    //@Override
+    //public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow)
+    //throws RecognitionException
+    //{
+    //throw e;
+    //}
+
+  //  @Override
+  //  public void recover(IntStream input, RecognitionException re) {
+  //  	throw new RuntimeException(error);
+  //  }
+
+    
+    @Override
+    public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        
+        emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
+    }
+    @Override
+    public void emitErrorMessage(	String 	msg	 ) 	{
+    	error = msg;
+    	throw new RuntimeException(error);
+    	    }
+    
+//    @Override
+ //   public Object recoverFromMismatchedToken	(	IntStream 	input,
+  //  		int 	ttype,
+  //  		BitSet 	follow	 
+   // 		)			 throws RecognitionException {
+  //  	throw new RecognitionException(input);
+  //  }
+}
+
+
 @members {
+
+    String error = "";
+    
+    public String getError() {
+    	return error;
+    }
+
+    //protected void mismatch(IntStream input, int ttype, BitSet follow)
+    //throws RecognitionException
+    //{
+    //throw new MismatchedTokenException(ttype, input);
+    //}
+
+    //public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow)
+    //throws RecognitionException
+   // {
+    //throw e;
+    //}
+
+  //  @Override
+  //  public void recover(IntStream input, RecognitionException re) {
+  //  	throw new RuntimeException(error);
+  //  }
+
+    
+    @Override
+    public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
+    }
+    @Override
+    public void emitErrorMessage(	String 	msg	 ) 	{
+    	error = msg;
+    	    }
+    
+  //  @Override
+ //   public Object recoverFromMismatchedToken	(	IntStream 	input,
+ //   		int 	ttype,
+ //   		BitSet 	follow	 
+ //   		)			 throws RecognitionException {
+ //   	throw new RecognitionException(input);
+ //   }
+    
+
 /** Global stack for keeping the projection column list */
 private Stack<Projection> projectionStack = new Stack<Projection>();
 
