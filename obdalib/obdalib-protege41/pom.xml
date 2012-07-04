@@ -285,8 +285,7 @@
 						<Build-Number>1517</Build-Number>
 						<!-- <Private-Package>!osgi.wiring.package, !org.w3c.dom.ranges, !org.w3c.dom.traversal*</Private-Package> -->
 						<Export-Package>it.unibz.krdb.obda.protege4.*</Export-Package>
-						<Import-Package>!org.json, javax.xml.datatype, javax.swing.*,
-							!org.w3c.dom.traversal,
+						<Import-Package>it.unibz.krdb.obda.protege4.*,!org.json, javax.xml.datatype, javax.swing.*,
 							javax.accessibility, javax.naming.*,javax.management.*,
 							javax.xml.parsers.*,org.xml.sax.*,
 							it.unibz.krdb.obda.*,
@@ -304,7 +303,7 @@
 							!arq*, !antlr*,
 							!EDU.oswego.cs.dl.util.concurrent,
 							!osgi.wiring.package,
-							!org.w3c.dom.ranges, *</Import-Package>
+							!org.w3c.dom.ranges,!org.w3c.dom.traversal, *</Import-Package>
 						<Eclipse-LazyStart>false</Eclipse-LazyStart>
 
 						<!-- The name of the plugin for OSGi dependencies. It has to be singleton 
