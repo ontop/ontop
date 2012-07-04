@@ -625,70 +625,70 @@ public class TestFileGenerator {
 			out.append("    }\n");
 
 
-			for (int i = 0; i < tests.size(); i++) {
-				out.append("\tpublic void " + tests.get(i) + "DirectNoEqNoSig() throws Exception {");
-				out.newLine();
-				out.append("QuestPreferences pref = new QuestPreferences();\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
-				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-				out.append("\t\ttest_function(ontoname,pref);\n");
-				out.append("\t}");
-				out.newLine();
-			}
-			for (int i = 0; i < tests.size(); i++) {
-
-				out.append("\tpublic void " + tests.get(i) + "DirectEqNoSig() throws Exception {");
-				out.newLine();
-				out.append("QuestPreferences pref = new QuestPreferences();\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
-				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-				out.append("\t\ttest_function(ontoname,pref);\n");
-				out.append("\t}");
-				out.newLine();
-			}
-			
-			for (int i = 0; i < tests.size(); i++) {
-				
-				out.append("\tpublic void " + tests.get(i) + "DirectNoEqSigma() throws Exception {");
-				out.newLine();
-				out.append("QuestPreferences pref = new QuestPreferences();\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
-				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-				out.append("\t\ttest_function(ontoname,pref);\n");
-				out.append("\t}");
-				out.newLine();
-			}
-			for (int i = 0; i < tests.size(); i++) {
-
-				out.append("\tpublic void " + tests.get(i) + "DirectEqSigma() throws Exception {");
-				out.newLine();
-				out.append("QuestPreferences pref = new QuestPreferences();\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
-				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
-				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
-				out.append("\t\ttest_function(ontoname,pref);\n");
-				out.append("\t}");
-				out.newLine();
-			}
+//			for (int i = 0; i < tests.size(); i++) {
+//				out.append("\tpublic void " + tests.get(i) + "DirectNoEqNoSig() throws Exception {");
+//				out.newLine();
+//				out.append("QuestPreferences pref = new QuestPreferences();\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+//				out.append("\t\ttest_function(ontoname,pref);\n");
+//				out.append("\t}");
+//				out.newLine();
+//			}
+//			for (int i = 0; i < tests.size(); i++) {
+//
+//				out.append("\tpublic void " + tests.get(i) + "DirectEqNoSig() throws Exception {");
+//				out.newLine();
+//				out.append("QuestPreferences pref = new QuestPreferences();\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"false\");\n");
+//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+//				out.append("\t\ttest_function(ontoname,pref);\n");
+//				out.append("\t}");
+//				out.newLine();
+//			}
+//			
+//			for (int i = 0; i < tests.size(); i++) {
+//				
+//				out.append("\tpublic void " + tests.get(i) + "DirectNoEqSigma() throws Exception {");
+//				out.newLine();
+//				out.append("QuestPreferences pref = new QuestPreferences();\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"false\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+//				out.append("\t\ttest_function(ontoname,pref);\n");
+//				out.append("\t}");
+//				out.newLine();
+//			}
+//			for (int i = 0; i < tests.size(); i++) {
+//
+//				out.append("\tpublic void " + tests.get(i) + "DirectEqSigma() throws Exception {");
+//				out.newLine();
+//				out.append("QuestPreferences pref = new QuestPreferences();\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, \"true\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, \"true\");\n");
+//				out.append("pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, \"true\");\n");
+//				out.append("\t\tString ontoname = \"" + tests.get(i) + "\";\n");
+//				out.append("\t\ttest_function(ontoname,pref);\n");
+//				out.append("\t}");
+//				out.newLine();
+//			}
 			
 			for (int i = 0; i < tests.size(); i++) {
 		

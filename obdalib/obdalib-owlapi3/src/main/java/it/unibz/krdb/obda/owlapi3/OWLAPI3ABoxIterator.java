@@ -154,7 +154,9 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 
 		currentABoxAssertion = owlaxiomiterator.next();
 
+		
 		while (true) {
+			System.out.println(currentABoxAssertion);
 			if ((currentABoxAssertion instanceof OWLIndividualAxiom)
 					&& (translator.translate((OWLIndividualAxiom) currentABoxAssertion) != null)) {
 				return (OWLIndividualAxiom) currentABoxAssertion;
