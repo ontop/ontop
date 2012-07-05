@@ -115,12 +115,12 @@
 
     <owl:ObjectProperty rdf:about="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2"/>
     <rdf:Description>
-        <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2"/>
-        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3"/>
-    </rdf:Description>
-    <rdf:Description>
         <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"/>
         <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2"/>
+    </rdf:Description>
+    <rdf:Description>
+        <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2"/>
+        <rdfs:subPropertyOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3"/>
     </rdf:Description>
     
 

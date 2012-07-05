@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE OBDA [
 ]>
-<OBDA version="1.0">
+<OBDA version="1.0" xml:base="">
   <SavedQueries>
     <Query id="e" text="ASK WHERE {:r1 dllite:R:r2}"/>
     <Query id="a" text="SELECT $x WHERE {$x dllite:R:r2}"/>

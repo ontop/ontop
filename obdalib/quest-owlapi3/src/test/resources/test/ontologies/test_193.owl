@@ -85,7 +85,12 @@
      -->
 
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <owl:onProperty>
             <rdf:Description>
                 <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R"/>
@@ -94,12 +99,7 @@
         <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     </owl:Restriction>
     <owl:Restriction>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R"/>
-                <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A"/>
         <owl:onProperty>
             <rdf:Description>
                 <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#R"/>

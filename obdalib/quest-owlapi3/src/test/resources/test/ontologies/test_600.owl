@@ -108,15 +108,6 @@
 
     <owl:Restriction>
         <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#Transaction"/>
-        <owl:onProperty>
-            <rdf:Description>
-                <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#isTradedIn"/>
-            </rdf:Description>
-        </owl:onProperty>
-        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-    </owl:Restriction>
-    <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#Transaction"/>
         <owl:onProperty rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#involvesInstrument"/>
         <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     </owl:Restriction>
@@ -125,6 +116,15 @@
         <owl:onProperty>
             <rdf:Description>
                 <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#involvesInstrument"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#Transaction"/>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#isTradedIn"/>
             </rdf:Description>
         </owl:onProperty>
         <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE OBDA [
 ]>
-<OBDA version="1.0">
+<OBDA version="1.0" xml:base="">
   <SavedQueries>
     <Query id="a" text="ASK WHERE {:b rdf:type dllite:A}"/>
     <Query id="b" text="ASK WHERE {:b rdf:type dllite:B}"/>
