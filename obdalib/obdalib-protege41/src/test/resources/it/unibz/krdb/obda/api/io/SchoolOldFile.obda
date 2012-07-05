@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OBDA [
+   <!ENTITY xsd: SYSTEM 'http://www.w3.org/2001/XMLSchema#'>
+   <!ENTITY owl: SYSTEM 'http://www.w3.org/2002/07/owl#'>
+   <!ENTITY quest: SYSTEM 'http://obda.org/quest#'>
+   <!ENTITY : SYSTEM 'http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#'>
+   <!ENTITY rdf: SYSTEM 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+   <!ENTITY rdfs: SYSTEM 'http://www.w3.org/2000/01/rdf-schema#'>
+]>
+<OBDA version="1.0" xml:base="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:quest="http://obda.org/quest#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="ncasp-it-project">
+    <mapping id="M1">
+      <CQ string="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#Student(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id)), http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#firstname(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id),$fname), http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#lastname(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id),$lname)"/>
+      <SQLQuery string="select id, fname, lname, age from student"/>
+    </mapping>
+    <mapping id="M2">
+      <CQ string="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#Course(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#C{}&quot;,$id)), http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#title(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#C{}&quot;,$id), $title), http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#hasLecturer(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#C{}&quot;,$id),http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#L{}&quot;,$id))"/>
+      <SQLQuery string="select id, title, lecturer, description from course"/>
+    </mapping>
+    <mapping id="M3">
+      <CQ string="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#hasEnrollment(http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#P{}&quot;,$id),http://obda.org/quest#uri(&quot;http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#C{}&quot;,$id))"/>
+      <SQLQuery string="select sid, cid from enrollment"/>
+    </mapping>
+  </mappings>
+  <dataSource URI="http://www.example.org/db/dummy/" databaseDriver="org.postgresql.Driver" databasePassword="dummy" databaseURL="jdbc:postgresql://www.example.org/dummy" databaseUsername="dummy" isAboxDump="" ontouri="http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#"/>
+</OBDA>

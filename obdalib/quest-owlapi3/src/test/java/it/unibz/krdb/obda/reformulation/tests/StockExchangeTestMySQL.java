@@ -140,7 +140,7 @@ public class StockExchangeTestMySQL extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		DataManager ioManager = new DataManager(obdaModel);
+		DataManager ioManager = new DataManager(obdaModel, new QueryController());
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(), obdaModel.getPrefixManager());
 	}
 
@@ -208,7 +208,7 @@ public class StockExchangeTestMySQL extends TestCase {
 
 		factory.setPreferenceHolder(p);
 
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 		reasoner.loadOBDAModel(obdaModel);
 

@@ -317,6 +317,8 @@ object_term returns [Function value]
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
+      } else if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
+        functionSymbol = dfac.getUriTemplatePredicate(arity);
       } else {
         functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
       }

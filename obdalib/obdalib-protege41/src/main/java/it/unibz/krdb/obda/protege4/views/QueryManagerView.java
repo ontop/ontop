@@ -34,7 +34,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 		obdaController.addListener(this);
 
 		setLayout(new BorderLayout());
-		panel = new SavedQueriesPanel(obdaController.getActiveOBDAModel().getQueryController());
+		panel = new SavedQueriesPanel(obdaController.getQueryController());
 
 		add(panel, BorderLayout.CENTER);
 
@@ -66,6 +66,6 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 
 	@Override
 	public void activeOntologyChanged() {
-		panel.changeQueryController(obdaController.getActiveOBDAModel().getQueryController());
+		// NO-OP
 	}
 }

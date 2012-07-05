@@ -61,10 +61,11 @@ public class DialogUtils {
 		writer.write("#######################\n\n");
 		e.printStackTrace(new PrintWriter(writer));
 		textArea.setText(writer.toString());
+		textArea.setCaretPosition(0);
 
 		// stuff it in a scrollpane with a controlled size.
 		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setPreferredSize(new Dimension(640, 150));
+		scrollPane.setPreferredSize(new Dimension(800, 450));
 
 		// pass the scrollpane to the joptionpane.
 		JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);
@@ -161,6 +162,7 @@ public class DialogUtils {
 
 	public static void installEscapeCloseOperation(final JDialog dialog) {
 		Action dispatchClosing = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent event) {
 				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING));
 			}

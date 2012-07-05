@@ -143,7 +143,7 @@ public class StockExchangeTestPostgres extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		DataManager ioManager = new DataManager(obdaModel);
+		DataManager ioManager = new DataManager(obdaModel, new QueryController());
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
 				obdaModel.getPrefixManager());
 	}

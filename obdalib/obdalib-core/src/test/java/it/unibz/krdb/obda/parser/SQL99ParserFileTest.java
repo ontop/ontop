@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 
 public class SQL99ParserFileTest extends TestCase
@@ -125,14 +127,14 @@ public class SQL99ParserFileTest extends TestCase
 
     OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
     OBDAModel model = factory.getOBDAModel();
-
-    DataManager dataManager = new DataManager(model);
+    DataManager dataManager = new DataManager(model, new QueryController());
     PrefixManager prefixManager = model.getPrefixManager();
     try {
-      dataManager.loadOBDADataFromURI(obdaUri, ontologyUri, prefixManager);
-    }
-    catch (IOException e) {
-      log.debug(e.toString());
+        dataManager.loadOBDADataFromURI(obdaUri, ontologyUri, prefixManager);
+    } catch (IOException e) {
+        log.debug(e.toString());
+    } catch (SAXException e) {
+        log.debug(e.toString());
     }
     return model;
   }

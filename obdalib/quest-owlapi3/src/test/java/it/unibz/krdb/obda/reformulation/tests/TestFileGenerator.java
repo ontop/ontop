@@ -4,6 +4,7 @@ import it.unibz.krdb.obda.io.DataManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -60,7 +61,7 @@ public class TestFileGenerator {
 
 	private int																			linenr								= 1;
 
-	private boolean																		GENERATE_ALTERNATIVES_FOR_EXISTS	= false;
+//	private boolean																		GENERATE_ALTERNATIVES_FOR_EXISTS	= false;
 
 	Logger																				log									= LoggerFactory
 																																	.getLogger(this
@@ -180,6 +181,7 @@ public class TestFileGenerator {
 
 			OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 			apic = obdafac.getOBDAModel();
+			QueryController controller = new QueryController();
 
 			OWLOntology onto = null;
 			try {
@@ -216,13 +218,13 @@ public class TestFileGenerator {
 					throw e;
 				}
 
-				apic.getQueryController().addQuery(genQuery, ids.get(query));
+				controller.addQuery(genQuery, ids.get(query));
 				String[] queryhead = getQueryHead(query);
 				String[] results = getResults(queriesMap.get(query));
 				writer.addResult(ids.get(query), queryhead, results);
 			}
 			String loc = obdalocation + ontoname + ".obda";
-			DataManager ioManager = new DataManager(apic);
+			DataManager ioManager = new DataManager(apic, controller);
 			ioManager.saveOBDAData(URI.create(loc), apic.getPrefixManager());
 
 			/* we start from 7 because the location must start with file:// */

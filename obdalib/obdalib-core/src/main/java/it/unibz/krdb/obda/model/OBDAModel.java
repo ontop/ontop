@@ -42,8 +42,7 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void fireSourceParametersUpdated();
 
-	public void fireSourceNameUpdated(URI old, OBDADataSource neu); // TODO
-																	// remove
+	public void fireSourceNameUpdated(URI old, OBDADataSource neu);	// TODO remove
 
 	/**
 	 * Returns the list of all sources defined in this OBDA model. This list is

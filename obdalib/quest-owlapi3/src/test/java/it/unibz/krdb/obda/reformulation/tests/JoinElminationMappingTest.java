@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.File;
 import java.io.FileReader;
@@ -53,6 +54,7 @@ public class JoinElminationMappingTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
+	private QueryController controller;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.owl";
@@ -77,7 +79,7 @@ public class JoinElminationMappingTest extends TestCase {
 				+ "   \"number\" integer," + "  \"city\" character varying(100)," + " \"state\" character varying(100),"
 				+ "\"country\" character varying(100), PRIMARY KEY(\"id\")" + ");";
 
-		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-h2.sql");
+//		FileReader reader = new FileReader("src/test/resources/test/stockexchange-create-h2.sql");
 
 		st.executeUpdate(createStr);
 		conn.commit();
@@ -88,7 +90,8 @@ public class JoinElminationMappingTest extends TestCase {
 
 		// Loading the OBDA data
 		obdaModel = fac.getOBDAModel();
-		DataManager ioManager = new DataManager(obdaModel);
+		controller = new QueryController();
+		DataManager ioManager = new DataManager(obdaModel, controller);
 		ioManager.loadOBDADataFromURI(new File(obdafile).toURI(), ontology.getOntologyID().getOntologyIRI().toURI(),
 				obdaModel.getPrefixManager());
 	}

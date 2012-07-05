@@ -26,7 +26,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	@Override
 	public String getPrefix(String uri) {
 		for (String prefix : owlmapper.getPrefixName2PrefixMap().keySet()) {
-			if (owlmapper.getPrefixName2PrefixMap().get(prefix).equals(uri)) {
+			if (owlmapper.getPrefixName2PrefixMap().get(prefix).contains(uri)) {
 				return prefix;
 			}
 		}
@@ -49,7 +49,7 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	}
 
 	@Override
-	public void addPrefix(String name, String uri) {		
+	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, getProperPrefixURI(uri));
 	}
 }

@@ -21,11 +21,9 @@ import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 
 import java.awt.Color;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
@@ -66,9 +64,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	/** 
 	 * Creates new form QueryInterfacePanel
 	 */
-	public QueryInterfacePanel(OBDAModel apic) {
+	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
 		
-		this.qc = apic.getQueryController();
+		this.qc = qc;
 		this.apic = apic;
 		
 		initComponents();

@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener, OBDAModelManagerListener {
 
-	private static final long serialVersionUID = -4025510147015656993L;
+	private static final long serialVersionUID = 1L;
 
 	private QueryInterfacePanel queryEditorPanel;
 
@@ -61,14 +61,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	protected void disposeOWLView() {
 		this.getOWLModelManager().removeOntologyChangeListener(ontologyListener);
 
-		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) 
-				this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
+		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
 		if ((queryInterfaceViews != null)) {
 			queryInterfaceViews.remove(this);
 		}
 
-		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) 
-				this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
+		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
 			for (QueryManagerView queryInterfaceView : queryManagerViews) {
 				queryInterfaceView.removeListener(this);
@@ -80,9 +78,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	@Override
 	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
-		obdaController.addListener(this);		
+		obdaController.addListener(this);
 		
-		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel());
+		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
 		queryEditorPanel.setPreferredSize(new Dimension(400, 250));
 		queryEditorPanel.setMinimumSize(new Dimension(400, 250));
 		
@@ -95,7 +93,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		splQueryInterface.setResizeWeight(0.5);
 		splQueryInterface.setDividerLocation(0.5);
 		splQueryInterface.setOneTouchExpandable(true);
-		splQueryInterface.setTopComponent(queryEditorPanel);		
+		splQueryInterface.setTopComponent(queryEditorPanel);
 		splQueryInterface.setBottomComponent(resultTablePanel);
 		
 		JPanel pnlQueryInterfacePane = new JPanel();
@@ -307,8 +305,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	public void setupListeners() {
 		
 		// Getting the list of views
-		QueryInterfaceViewsList queryInterfaceViews = 
-				(QueryInterfaceViewsList) this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
+		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
 		if ((queryInterfaceViews == null)) {
 			queryInterfaceViews = new QueryInterfaceViewsList();
 			getOWLEditorKit().put(QueryInterfaceViewsList.class.getName(), queryInterfaceViews);
@@ -318,8 +315,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		queryInterfaceViews.add(this);
 
 		// Registring the current query view with all existing query manager views
-		QueryManagerViewsList queryManagerViews = 
-				(QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
+		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {
 			for (QueryManagerView queryInterfaceView : queryManagerViews) {
 				queryInterfaceView.addListener(this);
@@ -356,13 +352,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.debug(e.getMessage());
-							JOptionPane.showMessageDialog(
-									null, 
-									"Error while unfolding query.\n " + e.getMessage()
-									+ "\nPlease refer to the log for more information.");
+							log.error(e.getMessage(), e);
+							DialogUtils.showQuickErrorDialog(null, e, "Error while unfolding query.");
 						}
-
 					} else {
 						latch.countDown();
 						JOptionPane.showMessageDialog(
@@ -384,11 +376,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(
-						null, 
-						"Error while canceling unfolding action.\n " + e.getMessage()
-						+ "\nPlease refer to the log file for more information.");
-				log.debug("Error while canceling unfolding action.", e);
+				log.error("Error while canceling unfolding action.", e);
+				DialogUtils.showQuickErrorDialog(null, e, "Error while canceling unfolding action.");
 			}
 		}
 	}
@@ -451,11 +440,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(
-						null, 
-						"Error while counting.\n " + e.getMessage()
-						+ "\nPlease refer to the log file for more information.");
-				log.debug("Error while counting.", e);
+				log.error("Error while counting.", e);
+				DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
 			}
 		}
 	}
@@ -490,8 +476,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.debug(e.getMessage());
-							DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
+							log.error(e.getMessage(), e);
+							DialogUtils.showQuickErrorDialog(null, e);
 						}
 					} else {
 						latch.countDown();
@@ -514,11 +500,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(
-						null, 
-						"Error while counting.\n " + e.getMessage()
-						+ "\nPlease refer to the log file for more information.");
-				log.debug("Error while counting: {}", e.getMessage());
+				log.error("Error while counting.", e);
+				DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
 			}
 		}
 
@@ -581,11 +564,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				latch.countDown();
 			} catch (Exception e) {
 				latch.countDown();
-				JOptionPane.showMessageDialog(
-						null, 
-						"Error while counting.\n " + e.getMessage()
-						+ "\nPlease refer to the log file for more information.");
-				log.debug("Error while counting.", e);
+				log.error("Error while counting.", e);
+				DialogUtils.showQuickErrorDialog(null, e, "Error while counting.");
 			}
 		}
 	}

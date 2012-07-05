@@ -5,8 +5,6 @@ import it.unibz.krdb.obda.model.CQIE;
 
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
-
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
@@ -55,13 +53,8 @@ public class TurtleSyntaxParser {
 	 */
 	public CQIE parse(String input) throws Exception {
 
-		int querylines = input.split("\n").length;
-
 		StringBuffer bf = new StringBuffer(input.trim());
 
-//		if (bf.charAt(bf.length()-1) != '.') {
-//			bf.append(".");
-//		}
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
 		}
@@ -75,7 +68,6 @@ public class TurtleSyntaxParser {
 		TurtleLexer lexer= new TurtleLexer(inputStream);;
 		CommonTokenStream tokenStream;
 		try {
-			
 			tokenStream = new CommonTokenStream(lexer);
 		} catch (Exception e) {
 			throw new RuntimeException(lexer.getError());
@@ -86,7 +78,6 @@ public class TurtleSyntaxParser {
 
 		if (parser.getNumberOfSyntaxErrors() != 0) {
 			throw new RuntimeException(parser.getError());
-			// throw new RuntimeException(parser.getError());
 		}
 		return output;
 	}
