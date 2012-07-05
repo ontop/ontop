@@ -35,4 +35,20 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		return String.format("`%s`", name);
 	}
 
+	@Override
+	public String sqlSlice(long limit, long offset) {
+		if (limit == Long.MIN_VALUE || limit == 0) {
+			/* If the limit is not specified then put a big number as suggested 
+			 * in http://dev.mysql.com/doc/refman/5.0/en/select.html
+			 */
+			return String.format("LIMIT %d,18446744073709551615", offset);
+		} else {
+			if (offset == Long.MIN_VALUE) {
+				// If the offset is not specified
+				return String.format("LIMIT %d", limit);
+			} else {
+				return String.format("LIMIT %d,%d", offset, limit);
+			}
+		}
+	}
 }

@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
+import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
@@ -31,13 +32,17 @@ import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryException;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.sparql.algebra.Algebra;
 import com.hp.hpl.jena.sparql.algebra.Op;
 import com.hp.hpl.jena.sparql.algebra.op.OpBGP;
 import com.hp.hpl.jena.sparql.algebra.op.OpDistinct;
+import com.hp.hpl.jena.sparql.algebra.op.OpExtend;
 import com.hp.hpl.jena.sparql.algebra.op.OpFilter;
 import com.hp.hpl.jena.sparql.algebra.op.OpJoin;
+import com.hp.hpl.jena.sparql.algebra.op.OpOrder;
 import com.hp.hpl.jena.sparql.algebra.op.OpProject;
+import com.hp.hpl.jena.sparql.algebra.op.OpSlice;
 import com.hp.hpl.jena.sparql.algebra.op.OpUnion;
 import com.hp.hpl.jena.sparql.core.BasicPattern;
 import com.hp.hpl.jena.sparql.core.Var;
@@ -70,7 +75,7 @@ import com.hp.hpl.jena.sparql.expr.nodevalue.NodeValueString;
 public class SparqlAlgebraToDatalogTranslator {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
+	
 	public static List<List<Atom>> translate(Op op, Map<Variable, Term> mgu) {
 		List<List<Atom>> result = new LinkedList<List<Atom>>();
 		if (op instanceof OpFilter) {
@@ -94,17 +99,18 @@ public class SparqlAlgebraToDatalogTranslator {
 					result.add(joinedList);
 				}
 			}
+			
 		} else if (op instanceof OpUnion) {
-			OpUnion join = (OpUnion) op;
-			List<List<Atom>> left = translate(join.getLeft(), mgu);
-			List<List<Atom>> right = translate(join.getRight(), mgu);
+			OpUnion union = (OpUnion) op;
+			List<List<Atom>> left = translate(union.getLeft(), mgu);
+			List<List<Atom>> right = translate(union.getRight(), mgu);
 
 			result.addAll(left);
 			result.addAll(right);
+			
 		} else {
 			throw new QueryException("Operation not supported: " + op.toString());
 		}
-
 		return result;
 	}
 
@@ -115,8 +121,9 @@ public class SparqlAlgebraToDatalogTranslator {
 	public static DatalogProgram translate(String strquery) {
 		Query arqQuery = QueryFactory.create(strquery);
 		boolean isBoolean = arqQuery.isAskType();
-		if (arqQuery.isConstructType() || arqQuery.isDescribeType())
+		if (arqQuery.isConstructType() || arqQuery.isDescribeType()) {
 			throw new QueryException("Only SELECT and ASK queries are supported.");
+		}
 		Op op = Algebra.compile(arqQuery);
 		return SparqlAlgebraToDatalogTranslator.translate(op, isBoolean, arqQuery.getResultVars());
 	}
@@ -159,80 +166,77 @@ public class SparqlAlgebraToDatalogTranslator {
 			// Construct the boolean atom
 			return getBooleanAtom(function, term1, term2);
 		}
-
 	}
 
 	public static DatalogProgram translate(Op query, boolean isBoolean, List<String> signature) {
 
+		DatalogProgram datalog = ofac.getDatalogProgram();
+		
 		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
-		boolean distinct = false;
+		
+		// Add LIMIT and OFFSET modifiers, if any
+		if (query instanceof OpSlice) { 
+			OpSlice sliceOp = (OpSlice) query;
+			datalog.getQueryModifiers().setOffset(sliceOp.getStart());
+			datalog.getQueryModifiers().setLimit(sliceOp.getLength());
+			query = sliceOp.getSubOp(); // narrow down the query
+		}
+		
+		// Add DISTINCT modifier, if any
 		if (query instanceof OpDistinct) {
-			query = ((OpDistinct) query).getSubOp();
-			distinct = true;
-		}
+			OpDistinct distinctOp = (OpDistinct) query;
+			datalog.getQueryModifiers().setDistinct();
+			query = distinctOp.getSubOp(); // narrow down the query
+		} 
 
-		Atom head = null;
-		boolean isProject = false;
+		// Add PROJECTION modifier, if any
 		if (query instanceof OpProject) {
-			List<Var> termNames = ((OpProject) query).getVars();
-			List<Term> headTerms = new LinkedList<Term>();
-			isProject = true;
-
-			int termSize = termNames.size();
-			for (Var var : termNames) { // iterate the projectors
-				if (!var.isNamedVar())
-					throw new QueryException("Unsupported expression: " + var.toString());
-				Term term = ofac.getVariable(var.getName());
-				headTerms.add(term);
-			}
-			Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, termSize);
-			head = ofac.getAtom(predicate, headTerms);
-			query = ((OpProject) query).getSubOp();
+			OpProject projectOp = (OpProject) query;
+			// NO-OP
+			query = projectOp.getSubOp(); // narrow down the query
+		}
+		
+		// Add ALIAS modifier, if any
+		if (query instanceof OpExtend) {
+			OpExtend extendOp = (OpExtend) query;
+			query =  extendOp.getSubOp(); // narrow down the query
 		}
 
-		List<List<Atom>> bodies = translate(query, mgu);
+		// Add ORDER BY modifier, if any
+		if (query instanceof OpOrder) { 
+			OpOrder orderOp = (OpOrder) query;
+			for (SortCondition c : orderOp.getConditions()) {
+				Variable var = ofac.getVariable(c.getExpression().getVarName());
+				int direction = (c.direction == Query.ORDER_DESCENDING ? OrderCondition.ORDER_DESCENDING : OrderCondition.ORDER_ASCENDING);
+				datalog.getQueryModifiers().addOrderCondition(var, direction);
+			}
+			query =  orderOp.getSubOp(); // narrow down the query
+		}
+		
+		Atom head = null;
+		List<Term> headVars = new LinkedList<Term>();
+		if (isBoolean) {
+			@SuppressWarnings("deprecation")
+			Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 0);
+			head = ofac.getAtom(predicate, headVars);
+		} else {
+			for (String varName : signature) {
+				headVars.add(ofac.getVariable(varName));
+			}
+			@SuppressWarnings("deprecation")
+			Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, headVars.size());
+			head = ofac.getAtom(predicate, headVars);
+		}
 
 		List<CQIE> queries = new LinkedList<CQIE>();
-
-		if (isBoolean) {
-			Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, 0);
-			head = ofac.getAtom(predicate, new LinkedList<Term>());
-		}
-
+		List<List<Atom>> bodies = translate(query, mgu);
 		for (List<Atom> body : bodies) {
-			CQIE cq = null;
-			if (isProject || isBoolean)
-				cq = ofac.getCQIE(head, body);
-			else {
-				/*
-				 * Its not a select *, so getting all the variables in the query
-				 */
-				List<Term> headVars = new LinkedList<Term>();
-				for (String varName : signature)
-					headVars.add(ofac.getVariable(varName));
-				// Set<Variable> vars = new LinkedHashSet<Variable>();
-				// for (Atom atom : body)
-				// for (Term t : atom.getTerms()) {
-				// for (Variable v : t.getReferencedVariables())
-				// vars.add(v);
-				// }
-				// headVars.addAll(vars);
-				Predicate predicate = ofac.getPredicate(OBDALibConstants.QUERY_HEAD_URI, headVars.size());
-				head = ofac.getAtom(predicate, headVars);
-				cq = ofac.getCQIE(head, body);
-			}
-
+			CQIE cq = ofac.getCQIE(head, body);
 			queries.add(Unifier.applyUnifier(cq, mgu));
-		}
-
-		DatalogProgram datalog = ofac.getDatalogProgram();
-		if (distinct) {
-			datalog.getQueryModifiers().setDistinct();
 		}
 		datalog.appendRule(queries);
 
 		return datalog;
-
 	}
 
 	public static List<Atom> translate(BasicPattern bp) {

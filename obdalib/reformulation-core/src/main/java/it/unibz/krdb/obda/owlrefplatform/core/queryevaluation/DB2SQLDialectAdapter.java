@@ -19,8 +19,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public String sqlLimit(int limit) {
-		return String.format("FETCH FIRST %s ROWS ONLY", limit);
+	public String sqlSlice(long limit, long offset) {
+		return String.format("OFFSET %d ROWS\nFETCH FIRST %d ROWS ONLY", offset, limit);
 	}
-
 }

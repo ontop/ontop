@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
+import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
+
+import java.util.List;
+
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
@@ -64,10 +68,29 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String sqlQuote(String name) {
 		return String.format("\"%s\"", name);
 	}
-
+	
 	@Override
-	public String sqlLimit(int limit) {
-		return String.format("LIMIT %s", limit);
+	public String sqlSlice(long limit, long offset) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
+	@Override
+	public String sqlOrderBy(List<OrderCondition> conditions, String viewname) {
+		String sql = "ORDER BY ";
+		boolean needComma = false;
+		for (OrderCondition c : conditions) {
+			if (needComma) {
+				sql += ", ";
+			}
+			sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
+			if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
+				sql += " DESC";
+			}
+			sql += ", ";
+			sql += sqlQualifiedColumn(viewname, c.getVariable().getName() + "QuestType");
+			needComma = true;
+		}
+		return sql;
+	}
 }

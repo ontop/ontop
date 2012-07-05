@@ -21,8 +21,17 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 	
 	@Override
-	public String sqlLimit(int limit) {
-		return String.format("OFFSET %s ROWS\nFETCH NEXT %s ROWS ONLY ", limit, limit);
+	public String sqlSlice(long limit, long offset) {
+		if (limit == Long.MIN_VALUE || limit == 0) {
+			// if the limit is not specified
+			return String.format("OFFSET %d ROW", offset);
+		} else {
+			if (offset == Long.MIN_VALUE) {
+				// If the offset is not specified
+				return String.format("FETCH FIRST %d ROW ONLY", limit);
+			} else {
+				return String.format("OFFSET %d ROW\nFETCH NEXT %d ROW ONLY", offset, limit);
+			}
+		}
 	}
-
 }
