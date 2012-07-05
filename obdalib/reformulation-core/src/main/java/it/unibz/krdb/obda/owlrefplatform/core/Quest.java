@@ -171,7 +171,7 @@ public class Quest implements Serializable {
 	}
 
 	public Ontology getOntology() {
-		return this.inputTBox;
+		return inputTBox;
 	}
 
 	/***
@@ -328,7 +328,7 @@ public class Quest implements Serializable {
 
 		if (inputOBDAModel != null) {
 			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-			repairmodel.fixOBDAModel(inputOBDAModel, this.inputTBox.getVocabulary());
+			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
 		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();

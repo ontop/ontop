@@ -491,7 +491,7 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public Set<? extends Predicate> getDeclaredPredicates() {
+	public Set<Predicate> getDeclaredPredicates() {
 		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
 		result.addAll(declaredClasses);
 		result.addAll(declaredObjectProperties);
@@ -501,21 +501,21 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public Set<? extends Predicate> getDeclaredClasses() {
+	public Set<Predicate> getDeclaredClasses() {
 		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
 		result.addAll(declaredClasses);
 		return result;
 	}
 
 	@Override
-	public Set<? extends Predicate> getDeclaredObjectProperties() {
+	public Set<Predicate> getDeclaredObjectProperties() {
 		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
 		result.addAll(declaredObjectProperties);
 		return result;
 	}
 
 	@Override
-	public Set<? extends Predicate> getDeclaredDataProperties() {
+	public Set<Predicate> getDeclaredDataProperties() {
 		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
 		result.addAll(declaredDataProperties);
 		return result;

@@ -102,41 +102,37 @@ public class VirtualABoxMaterializer {
 			
 			// Construct the datalog program from the OBDA mappings
 			DBMetadata metadata = JDBCConnectionManager.getMetaData(conn);
-	        MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, metadata);
-	        DatalogProgram datalog = analyzer.constructDatalogProgram();
-	        
-	        // Insert the data type information
-	        MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
-	        typeRepair.insertDataTyping(datalog);
-	        
-	        // TODO: Design redundancy!
-	        // For each data source, construct a new OBDA model!
-	        OBDAModel newModel = dfac.getOBDAModel();
-	        newModel.addSource(source);
-	        newModel.addMappings(sourceUri, mappingList);
-	        for (Predicate p: model.getDeclaredPredicates()) {
-	        	newModel.declarePredicate(p);
+			MappingAnalyzer analyzer = new MappingAnalyzer(mappingList, metadata);
+			DatalogProgram datalog = analyzer.constructDatalogProgram();
+
+			// Insert the data type information
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+			typeRepair.insertDataTyping(datalog);
+
+			// TODO: Design redundancy!
+			// For each data source, construct a new OBDA model!
+			OBDAModel newModel = dfac.getOBDAModel();
+			newModel.addSource(source);
+			newModel.addMappings(sourceUri, mappingList);
+			for (Predicate p : model.getDeclaredPredicates()) {
+				newModel.declarePredicate(p);
 			}
-	        
-	        Quest questInstance = new Quest();
-	        questInstance.setPreferences(getDefaultPreference());		
-			Ontology ontology = ofac.createOntology();		
-			ontology.addEntities((Set<Predicate>)model.getDeclaredPredicates());
-			
-			
-			questInstance.loadTBox(ontology); // create an empty ontology	
+
+			Quest questInstance = new Quest();
+			questInstance.setPreferences(getDefaultPreference());
+			Ontology ontology = ofac.createOntology();
+			ontology.addEntities(model.getDeclaredPredicates());
+			questInstance.loadTBox(ontology);
 			questInstance.loadOBDAModel(newModel);
 			questInstance.setupRepository();
-	        
+			
 			questInstanceMap.put(source, questInstance);
-
+			
 			// Collecting the vocabulary of the mappings
 			for (CQIE rule : datalog.getRules()) {
 				Predicate predicate = rule.getHead().getPredicate();
 				vocabulary.add(predicate);
 			}
-			
-			
 		}
 	}
 

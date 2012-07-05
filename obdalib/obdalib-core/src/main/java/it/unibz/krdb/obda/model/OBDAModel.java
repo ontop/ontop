@@ -150,13 +150,13 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void reset();
 
-	public Set<? extends Predicate> getDeclaredPredicates();
+	public Set<Predicate> getDeclaredPredicates();
 
-	public Set<? extends Predicate> getDeclaredClasses();
+	public Set<Predicate> getDeclaredClasses();
 
-	public Set<? extends Predicate> getDeclaredObjectProperties();
+	public Set<Predicate> getDeclaredObjectProperties();
 
-	public Set<? extends Predicate> getDeclaredDataProperties();
+	public Set<Predicate> getDeclaredDataProperties();
 
 	public boolean declarePredicate(Predicate predicate);
 

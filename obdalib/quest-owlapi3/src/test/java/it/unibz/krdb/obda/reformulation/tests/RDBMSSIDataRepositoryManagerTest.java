@@ -34,6 +34,9 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -105,6 +108,16 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		conn.commit();
 
 		OBDAModel model = fac.getOBDAModel();
+		
+		for (OWLClass c : ontology.getClassesInSignature()) {
+			model.declareClass(fac.getClassPredicate(c.getIRI().toString()));
+		}
+		for (OWLDataProperty a : ontology.getDataPropertiesInSignature()) {
+			model.declareDataProperty(fac.getDataPropertyPredicate(a.getIRI().toString()));
+		}
+		for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
+			model.declareObjectProperty(fac.getObjectPropertyPredicate(r.getIRI().toString()));
+		}
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
@@ -162,9 +175,6 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 
 		dbman.setTBox(trans.translate(ontology));
 
-		
-		Statement st = conn.createStatement();
-
 		dbman.createDBSchema(conn,false);
 		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.insertMetadata(conn);
@@ -173,6 +183,16 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		conn.commit();
 
 		OBDAModel model = fac.getOBDAModel();
+		
+		for (OWLClass c : ontology.getClassesInSignature()) {
+			model.declareClass(fac.getClassPredicate(c.getIRI().toString()));
+		}
+		for (OWLDataProperty a : ontology.getDataPropertiesInSignature()) {
+			model.declareDataProperty(fac.getDataPropertyPredicate(a.getIRI().toString()));
+		}
+		for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
+			model.declareObjectProperty(fac.getObjectPropertyPredicate(r.getIRI().toString()));
+		}
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
@@ -225,8 +245,6 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Statement st = conn.createStatement();
-
 		log.debug("Creating schema and loading data...");
 
 		dbman.createDBSchema(conn,false);
@@ -240,6 +258,16 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		log.debug("Executing tests...");
 
 		OBDAModel model = fac.getOBDAModel();
+		
+		for (OWLClass c : ontology.getClassesInSignature()) {
+			model.declareClass(fac.getClassPredicate(c.getIRI().toString()));
+		}
+		for (OWLDataProperty a : ontology.getDataPropertiesInSignature()) {
+			model.declareDataProperty(fac.getDataPropertyPredicate(a.getIRI().toString()));
+		}
+		for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
+			model.declareObjectProperty(fac.getObjectPropertyPredicate(r.getIRI().toString()));
+		}
 		model.addSource(source);
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
@@ -292,8 +320,6 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		dbman.setVocabulary(preds);
 		dbman.setTBox(trans.translate(ontology));
 
-		Statement st = conn.createStatement();
-
 		dbman.createDBSchema(conn,false);
 		OWLAPI3ABoxIterator ait = new OWLAPI3ABoxIterator(ontology);
 		dbman.insertMetadata(conn);
@@ -309,8 +335,17 @@ public class RDBMSSIDataRepositoryManagerTest extends TestCase {
 		dbman.loadMetadata(conn);
 
 		OBDAModel model = fac.getOBDAModel();
+		
+		for (OWLClass c : ontology.getClassesInSignature()) {
+			model.declareClass(fac.getClassPredicate(c.getIRI().toString()));
+		}
+		for (OWLDataProperty a : ontology.getDataPropertiesInSignature()) {
+			model.declareDataProperty(fac.getDataPropertyPredicate(a.getIRI().toString()));
+		}
+		for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
+			model.declareObjectProperty(fac.getObjectPropertyPredicate(r.getIRI().toString()));
+		}
 		model.addSource(source);
-
 		model.addMappings(source.getSourceID(), dbman.getMappings());
 
 		VirtualABoxMaterializer materializer = new VirtualABoxMaterializer(model);
