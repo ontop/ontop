@@ -82,7 +82,9 @@ public class StockExchangeTestMySQL extends TestCase {
         2, 0, 0, 2, 0, 2,					    // FILTER: Double (EQ, NEQ, GT, GTE, LT, LTE)
         1, 3, 2, 3, 1, 2,					    // FILTER: Date Time (EQ, NEQ, GT, GTE, LT, LTE)
         5, 5,								    // FILTER: Boolean (EQ, NEQ)
-        10										// FILTER: LangMatches
+        10,										// FILTER: LangMatches
+        1, 2, 1, 3, 2,							// Nested boolean expression
+		3, 3, 5, 5, 3, 7, 7, 7, 3, 10			// Query modifiers: LIMIT, OFFSET, and ORDER BY
 	};
 	
 	public class TestQuery {

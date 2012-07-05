@@ -89,6 +89,7 @@ public class StockExchangeTestH2 extends TestCase {
         5, 5,								    // FILTER: Boolean (EQ, NEQ)
         10,										// FILTER: LangMatches
 		1, 2, 1, 3, 2,							// Nested boolean expression
+		3, 3, 5, 5, 3, 7, 7, 7, 3, 10			// Query modifiers: LIMIT, OFFSET, and ORDER BY
 	};
 	
 	public class TestQuery {

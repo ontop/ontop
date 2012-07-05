@@ -1,83 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE OBDA [
+   <!ENTITY xsd: SYSTEM 'http://www.w3.org/2001/XMLSchema#'>
+   <!ENTITY owl: SYSTEM 'http://www.w3.org/2002/07/owl#'>
+   <!ENTITY owl2xml: SYSTEM 'http://www.w3.org/2006/12/owl2-xml#'>
+   <!ENTITY quest: SYSTEM 'http://obda.org/quest#'>
    <!ENTITY : SYSTEM 'http://www.owl-ontologies.com/Ontology1207768242.owl#'>
    <!ENTITY rdf: SYSTEM 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
    <!ENTITY rdfs: SYSTEM 'http://www.w3.org/2000/01/rdf-schema#'>
-   <!ENTITY owl: SYSTEM 'http://www.w3.org/2002/07/owl#'>
-   <!ENTITY xsd: SYSTEM 'http://www.w3.org/2001/XMLSchema#'>
 ]>
-<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#">
+<OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#" xmlns:quest="http://obda.org/quest#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
   <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
     <mapping id="MAP1439641617459189">
-      <CQ string="Address(getAddressObj($id)),addressID(getAddressObj($id),$id),inStreet(getAddressObj($id),$street),hasNumber(getAddressObj($id),$number),inCity(getAddressObj($id),$city),inState(getAddressObj($id),$state),inCountry(getAddressObj($id),$country)"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Address(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id)), http://www.owl-ontologies.com/Ontology1207768242.owl#addressID(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id),$id), http://www.owl-ontologies.com/Ontology1207768242.owl#inStreet(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id),$street), http://www.owl-ontologies.com/Ontology1207768242.owl#hasNumber(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id),$number), http://www.owl-ontologies.com/Ontology1207768242.owl#inCity(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id),$city), http://www.owl-ontologies.com/Ontology1207768242.owl#inState(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id),$state), http://www.owl-ontologies.com/Ontology1207768242.owl#inCountry(http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($id),$country)"/>
       <SQLQuery string="select id, street, number, city, state, country from address"/>
     </mapping>
     <mapping id="MAP1439641617482739">
-      <CQ string="StockBroker(getPersonObj($id)),firstName(getPersonObj($id),$name),lastName(getPersonObj($id),$lastname),dateOfBirth(getPersonObj($id),$dateofbirth),ssn(getPersonObj($id),$ssn)"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#StockBroker(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id)), http://www.owl-ontologies.com/Ontology1207768242.owl#firstName(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$name), http://www.owl-ontologies.com/Ontology1207768242.owl#lastName(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$lastname), http://www.owl-ontologies.com/Ontology1207768242.owl#dateOfBirth(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$dateofbirth), http://www.owl-ontologies.com/Ontology1207768242.owl#ssn(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$ssn)"/>
       <SQLQuery string="select id, name, lastname, dateofbirth, ssn from broker"/>
     </mapping>
     <mapping id="MAP1439641617498681">
-      <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#hasAddress(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($addressid))"/>
       <SQLQuery string="select id, addressid from broker"/>
     </mapping>
     <mapping id="MAP1439641617520782">
-      <CQ string="Investor(getPersonObj($id)),firstName(getPersonObj($id),$name),lastName(getPersonObj($id),$lastname),dateOfBirth(getPersonObj($id),$dateofbirth),ssn(getPersonObj($id),$ssn)"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Investor(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id)), http://www.owl-ontologies.com/Ontology1207768242.owl#firstName(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$name), http://www.owl-ontologies.com/Ontology1207768242.owl#lastName(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$lastname), http://www.owl-ontologies.com/Ontology1207768242.owl#dateOfBirth(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$dateofbirth), http://www.owl-ontologies.com/Ontology1207768242.owl#ssn(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),$ssn)"/>
       <SQLQuery string="select id, name, lastname, dateofbirth, ssn from client"/>
     </mapping>
     <mapping id="MAP1439641617529115">
-      <CQ string="hasAddress(getPersonObj($id),getAddressObj($addressid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#hasAddress(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($addressid))"/>
       <SQLQuery string="select id, name, lastname, addressid from client"/>
     </mapping>
     <mapping id="MAP1439641617545419">
-      <CQ string="Company(getCompanyObj($id)),companyName(getCompanyObj($id),$name),marketShares(getCompanyObj($id),$marketshares),netWorth(getCompanyObj($id),$networth)"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Company(http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($id)), http://www.owl-ontologies.com/Ontology1207768242.owl#companyName(http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($id),$name), http://www.owl-ontologies.com/Ontology1207768242.owl#marketShares(http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($id),$marketshares), http://www.owl-ontologies.com/Ontology1207768242.owl#netWorth(http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($id),$networth)"/>
       <SQLQuery string="select id, name, marketshares, networth from company"/>
     </mapping>
     <mapping id="MAP1439641617553028">
-      <CQ string="hasAddress(getCompanyObj($id),getAddressObj($addressid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#hasAddress(http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getAddressObj($addressid))"/>
       <SQLQuery string="select id, addressid from company"/>
     </mapping>
     <mapping id="MAP1439641617570056">
-      <CQ string="Stock(getStockObj($id)),financialInstrumentID(getStockObj($id),$id),amountOfShares(getStockObj($id),$numberofshares),typeOfShares(getStockObj($id),$sharetype),stockDescription(getStockObj($id),http://www.w3.org/2000/01/rdf-schema#Literal($description,'en-US'))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Stock(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($id)), http://www.owl-ontologies.com/Ontology1207768242.owl#financialInstrumentID(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($id),$id), http://www.owl-ontologies.com/Ontology1207768242.owl#amountOfShares(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($id),$numberofshares), http://www.owl-ontologies.com/Ontology1207768242.owl#typeOfShares(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($id),$sharetype), http://www.owl-ontologies.com/Ontology1207768242.owl#stockDescription(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($id),http://www.w3.org/2000/01/rdf-schema#Literal($description,&quot;en-US&quot;))"/>
       <SQLQuery string="select id, numberofshares, sharetype, description from stockinformation"/>
     </mapping>
     <mapping id="MAP1439641617581288">
-      <CQ string="StockExchangeList(getStockBookObj($date)),listdate(getStockBookObj($date),$date)"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#StockExchangeList(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockBookObj($date)), http://www.owl-ontologies.com/Ontology1207768242.owl#listdate(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockBookObj($date),$date)"/>
       <SQLQuery string="select distinct date from stockbooklist "/>
     </mapping>
     <mapping id="MAP1439641617589621">
-      <CQ string="tradesOnBehalfOf(getPersonObj($brokerid),getPersonObj($clientid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#tradesOnBehalfOf(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($brokerid),http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($clientid))"/>
       <SQLQuery string="select brokerid, clientid from brokerworksfor where clientid IS NOT NULL"/>
     </mapping>
     <mapping id="MAP1439641617597230">
-      <CQ string="tradesOnBehalfOf(getPersonObj($brokerid),getCompanyObj($companyid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#tradesOnBehalfOf(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($brokerid),http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($companyid))"/>
       <SQLQuery string="select brokerid, companyid from brokerworksfor where companyid IS NOT NULL"/>
     </mapping>
     <mapping id="MAP1439641617611360">
-      <CQ string="Transaction(getTransactionObj($id)),transactionID(getTransactionObj($id),$id),transactionDate(getTransactionObj($id),$date),amountOfTransaction(getTransactionObj($id),$amount)"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Transaction(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id)), http://www.owl-ontologies.com/Ontology1207768242.owl#transactionID(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),$id), http://www.owl-ontologies.com/Ontology1207768242.owl#transactionDate(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),$date), http://www.owl-ontologies.com/Ontology1207768242.owl#amountOfTransaction(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),$amount)"/>
       <SQLQuery string="select id, date, amount from transaction"/>
     </mapping>
     <mapping id="MAP1439641617626577">
-      <CQ string="isExecutedBy(getTransactionObj($id),getPersonObj($brokerid)),isExecutedFor(getTransactionObj($id),getPersonObj($forclientid)),involvesInstrument(getTransactionObj($id),getStockObj($stockid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#isExecutedBy(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($brokerid)), http://www.owl-ontologies.com/Ontology1207768242.owl#isExecutedFor(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($forclientid)), http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($stockid))"/>
       <SQLQuery string="select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL"/>
     </mapping>
     <mapping id="MAP1439641617642881">
-      <CQ string="isExecutedBy(getTransactionObj($id),getPersonObj($brokerid)),isExecutedFor(getTransactionObj($id),getCompanyObj($forcompanyid)),involvesInstrument(getTransactionObj($id),getStockObj($stockid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#isExecutedBy(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($brokerid)), http://www.owl-ontologies.com/Ontology1207768242.owl#isExecutedFor(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($forcompanyid)), http://www.owl-ontologies.com/Ontology1207768242.owl#involvesInstrument(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($stockid))"/>
       <SQLQuery string="select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL"/>
     </mapping>
     <mapping id="MAP1439641617651577">
-      <CQ string="belongsToCompany(getStockObj($id),getCompanyObj($companyid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#belongsToCompany(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($id),http://www.owl-ontologies.com/Ontology1207768242.owl#getCompanyObj($companyid))"/>
       <SQLQuery string="select id, companyid from stockinformation"/>
     </mapping>
     <mapping id="MAP1439641617659548">
-      <CQ string="listsStock(getStockBookObj($date),getStockObj($stockid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#listsStock(http://www.owl-ontologies.com/Ontology1207768242.owl#getStockBookObj($date),http://www.owl-ontologies.com/Ontology1207768242.owl#getStockObj($stockid))"/>
       <SQLQuery string="select date, stockid from stockbooklist"/>
     </mapping>
     <mapping id="MAP1439641617667156">
-      <CQ string="Dealer(getPersonObj($clientid))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Dealer(http://www.owl-ontologies.com/Ontology1207768242.owl#getPersonObj($clientid))"/>
       <SQLQuery string="select clientid from broker,client,brokerworksfor where client.id = broker.id and brokerid=broker.id and client.id=clientid"/>
     </mapping>
     <mapping id="MAP1439641617675489">
-      <CQ string="Offer(getTransactionObj($id))"/>
+      <CQ string="http://www.owl-ontologies.com/Ontology1207768242.owl#Offer(http://www.owl-ontologies.com/Ontology1207768242.owl#getTransactionObj($id))"/>
       <SQLQuery string="SELECT id FROM transaction WHERE type=true"/>
     </mapping>
   </mappings>
@@ -190,6 +192,18 @@
       <Query id="Boolean_Nested_1" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet $street. &#xa;&#x9;&#x9;$x :inCity $city. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa; FILTER ( $street = &quot;Via Marconi&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> &amp;&amp; ( $city = &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> || $street = &quot;Romer Street&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> )).} "/>
       <Query id="Boolean_Nested_2" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet $street. &#xa;&#x9;&#x9;$x :inCity $city. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa; FILTER ( $country = &quot;Italy&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> || ( $street = &quot;Via Marconi&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> &amp;&amp; ( $city = &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> || $street = &quot;Romer Street&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> ) ) ).} "/>
       <Query id="Boolean-Nested_3" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * WHERE {      $x a :Address . &#xa;&#x9;&#x9;$x :addressID $id. &#xa;&#x9;&#x9;$x :inStreet $street. &#xa;&#x9;&#x9;$x :inCity $city. &#xa;&#x9;&#x9;$x :inCountry $country. &#xa;&#x9;&#x9;$x :inState $state. &#xa;&#x9;&#x9;$x :hasNumber $number.&#xa; FILTER ( ( $country = &quot;Italy&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> &amp;&amp; $number = 3 ) || ( $street = &quot;Via Marconi&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> &amp;&amp; ( $city = &quot;Bolzano&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> || $street = &quot;Romer Street&quot;^^&lt;http://www.w3.org/2001/XMLSchema#string> ) ) ).} "/>
+    </QueryGroup>
+    <QueryGroup id="Modifiers">
+      <Query id="SliceTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;LIMIT 3&#xa;OFFSET 2"/>
+      <Query id="LimitTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;LIMIT 3"/>
+      <Query id="OffsetTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;OFFSET 2"/>
+      <Query id="Limit0_OffsetN" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;LIMIT 0&#xa;OFFSET 2"/>
+      <Query id="LimitN_Offset0" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;LIMIT 3&#xa;OFFSET 0"/>
+      <Query id="OrderByTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;ORDER BY ?city"/>
+      <Query id="OrderByDescTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;ORDER BY DESC(?city)"/>
+      <Query id="OrderByCombinedTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;ORDER BY ?city DESC(?country)"/>
+      <Query id="SliceAndOrderBy" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Address; :addressID ?id; :inStreet ?street; :inCity ?city; :inCountry ?country; :inState ?state; :hasNumber ?number.&#xa; }&#xa;ORDER BY ?city&#xa;LIMIT 3&#xa;OFFSET 2"/>
+      <Query id="OrderByLiteralTest" text="PREFIX : &lt;http://www.owl-ontologies.com/Ontology1207768242.owl#>&#xa;SELECT DISTINCT * &#xa;WHERE {&#xa;   ?x a :Stock; :financialInstrumentID ?id; :amountOfShares ?numberofshares; :typeOfShares ?sharetype; :stockDescription ?description .&#xa; }&#xa;ORDER BY ?description"/>
     </QueryGroup>
   </SavedQueries>
 </OBDA>
