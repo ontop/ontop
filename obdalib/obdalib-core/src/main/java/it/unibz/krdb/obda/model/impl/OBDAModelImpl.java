@@ -518,40 +518,66 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public boolean declarePredicate(Predicate predicate) {
-		if (predicate.isClass())
+		if (predicate.isClass()) {
 			return declaredClasses.add(predicate);
-		else if (predicate.isObjectProperty())
+		}
+		else if (predicate.isObjectProperty()) {
 			return declaredObjectProperties.add(predicate);
-		else if (predicate.isDataProperty())
+		}
+		else if (predicate.isDataProperty()) {
 			return declaredDataProperties.add(predicate);
-		else
+		}
+		else {
 			return declaredPredicates.add(predicate);
+		}
 
 	}
 
 	@Override
 	public boolean declareClass(Predicate classname) {
-		if (!classname.isClass())
+		if (!classname.isClass()) {
 			throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + classname);
+		}
 		return declaredClasses.add(classname);
 	}
 
 	@Override
 	public boolean declareObjectProperty(Predicate property) {
-		if (!property.isObjectProperty())
-			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: "
-					+ property);
+		if (!property.isObjectProperty()) {
+			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
+		}
 		return declaredObjectProperties.add(property);
 
 	}
 
 	@Override
 	public boolean declareDataProperty(Predicate property) {
-		if (!property.isDataProperty())
+		if (!property.isDataProperty()) {
 			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
+		}
 		return declaredDataProperties.add(property);
 	}
 
+	@Override
+	public boolean unDeclarePredicate(Predicate predicate) {
+		return declaredPredicates.remove(predicate);
+	}
+
+	@Override
+	public boolean unDeclareClass(Predicate classname) {
+		return declaredClasses.remove(classname);
+	}
+
+	@Override
+	public boolean unDeclareObjectProperty(Predicate property) {
+		return declaredObjectProperties.remove(property);
+	}
+
+	@Override
+	public boolean unDeclareDataProperty(Predicate property) {
+		return declaredDataProperties.remove(property);
+	}
+	
 	@Override
 	public boolean isDeclaredClass(Predicate classname) {
 		return declaredClasses.contains(classname);
@@ -569,7 +595,6 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public boolean isDeclared(Predicate predicate) {
-		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate) || declaredPredicates
-				.contains(predicate));
+		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate) || declaredPredicates.contains(predicate));
 	}
 }

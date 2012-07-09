@@ -164,6 +164,14 @@ public interface OBDAModel extends Cloneable, Serializable {
 	public boolean declareObjectProperty(Predicate property);
 
 	public boolean declareDataProperty(Predicate property);
+	
+	public boolean unDeclarePredicate(Predicate predicate);
+
+	public boolean unDeclareClass(Predicate classname);
+
+	public boolean unDeclareObjectProperty(Predicate property);
+
+	public boolean unDeclareDataProperty(Predicate property);
 
 	public boolean isDeclaredClass(Predicate classname);
 
