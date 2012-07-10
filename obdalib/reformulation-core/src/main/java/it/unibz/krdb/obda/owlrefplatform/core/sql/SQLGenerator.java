@@ -476,13 +476,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
 				 */
+				String langStr = "%s AS \"%sLang\", ";
 				if (function == OBDAVocabulary.RDFS_LITERAL) {
 
 					/*
 					 * Case for rdf:literal s with a language, we need to select
 					 * 2 terms from ".., rdf:literal(?x,"en"),
 					 * 
-					 * and signatrure "name" * we will generate a select with
+					 * and signature "name" * we will generate a select with
 					 * the projection of 2 columns
 					 * 
 					 * , 'en' as nameqlang, view.colforx as name,
@@ -490,21 +491,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 					/*
 					 * first we add the column for language, we have two cases,
-					 * where the language is already in the funciton as a
+					 * where the language is already in the function as a
 					 * constant, e.g,. "en" or where the language is a variable
 					 * that must be obtained from a column in the query
 					 */
 					String lang = "''";
 					if (ov.getTerms().size() > 1) {
 						Term langTerm = ov.getTerms().get(1);
-
 						if (langTerm instanceof ValueConstant) {
 							lang = jdbcutil.getSQLLexicalForm((ValueConstant) langTerm);
 						} else {
 							lang = getSQLString(langTerm, body, tableName, viewName, varAtomIndex, varAtomTermIndex, false);
 						}
 					}
-					String langStr = "%s AS \"%sLang\", ";
 					sb.append(String.format(langStr, lang, signature.get(hpos)));
 
 					Term term = ov.getTerms().get(0);
@@ -517,10 +516,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					sb.append(termStr);
 
 				} else {
-					/*
-					 * Case for all simple datatypes, we only select one column
-					 * from the table
-					 */
+					// The default value for language column: NULL
+					sb.append(String.format(langStr, "''", signature.get(hpos)));
+					
+					// The column name
 					Term term = ov.getTerms().get(0);
 					if (term instanceof Variable) {
 						Variable v = (Variable) term;
