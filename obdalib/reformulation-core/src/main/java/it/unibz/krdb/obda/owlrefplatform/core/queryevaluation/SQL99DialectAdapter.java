@@ -87,8 +87,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
 				sql += " DESC";
 			}
-			sql += ", ";
-			sql += sqlQualifiedColumn(viewname, c.getVariable().getName() + "QuestType");
 			needComma = true;
 		}
 		return sql;
