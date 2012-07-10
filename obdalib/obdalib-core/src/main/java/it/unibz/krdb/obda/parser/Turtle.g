@@ -153,7 +153,6 @@ public void emitErrorMessage(	String 	msg	 ) 	{
 	error = msg;
 }
     
-@Override
 public Object recoverFromMismatchedTokenrecoverFromMismatchedToken(IntStream input, int ttype, BitSet follow)
 	throws RecognitionException {
     throw new RecognitionException(input);
@@ -598,6 +597,7 @@ fragment CHAR
   : ALPHANUM
   | UNDERSCORE
   | MINUS
+  | PERIOD
   ;
 
 INTEGER
