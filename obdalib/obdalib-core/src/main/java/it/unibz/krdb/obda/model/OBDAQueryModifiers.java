@@ -60,7 +60,7 @@ public class OBDAQueryModifiers {
 	}
 	
 	public boolean hasModifiers() {
-		return !isDistinct || limit != -1 || offset != -1 || !orderConditions.isEmpty();
+		return limit != -1 || offset != -1 || !orderConditions.isEmpty();
 	}
 	
 	/**
