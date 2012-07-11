@@ -6,41 +6,50 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A utility class to map database column names to new variables. The map ignores
- * the letter case of the column names when retrieving the new variables. To implement
- * this, the HashMap will operate on one single case (i.e., lower case). Thus, all
- * input strings that arrive to methods related to HashMap will always be overwritten
- * to lower case.
+ * A utility class to map database column names to new variables. The map
+ * ignores the letter case of the column names when retrieving the new
+ * variables. To implement this, the HashMap will operate on one single case
+ * (i.e., lower case). Thus, all input strings that arrive to methods related to
+ * HashMap will always be overwritten to lower case.
  */
 public class LookupTable {
-	
-	private static final String DEFAULT_NAME_FORMAT = "t%s";  // e.g., t1, t2, ...
-	
+
+	private static final String DEFAULT_NAME_FORMAT = "t%s"; // e.g., t1, t2,
+																// ...
+
 	/**
 	 * Map of entries that have an alternative name.
 	 */
 	private HashMap<String, Integer> log = new HashMap<String, Integer>();
-	
+
 	/**
 	 * Map of alternative names.
 	 */
 	private HashMap<Integer, String> master = new HashMap<Integer, String>();
-	
+
 	/**
-	 * A special number that connects one or more entries to its alternative name.
+	 * Set with all unsafe names, names with multiple columns (not qulaified)
+	 * use for excption trowing
+	 */
+	private HashSet<String> unsafeEntries = new HashSet<String>();
+
+	/**
+	 * A special number that connects one or more entries to its alternative
+	 * name.
 	 */
 	private int index = 1;
-	
+
 	public LookupTable() {
 		// NO-OP
 	}
-	
+
 	/**
-	 * Adds a string entry to this lookup table. A special index will be assigned
-	 * to this entry which points to a alternative name defined by the system.
+	 * Adds a string entry to this lookup table. A special index will be
+	 * assigned to this entry which points to a alternative name defined by the
+	 * system.
 	 * 
 	 * @param entry
-	 * 			Any string.
+	 *            Any string.
 	 */
 	public void add(String entry) {
 		if (entry == null) {
@@ -50,13 +59,13 @@ public class LookupTable {
 		register();
 		increaseIndex();
 	}
-	
+
 	/**
 	 * Adds a collection of strings to this lookup table. All those strings will
 	 * point to a same alternative name defined by the system.
 	 * 
 	 * @param entries
-	 * 			An array of strings.
+	 *            An array of strings.
 	 */
 	public void add(String[] entries) {
 		for (int i = 0; i < entries.length; i++) {
@@ -67,55 +76,62 @@ public class LookupTable {
 		register();
 		increaseIndex();
 	}
-	
+
 	/**
 	 * Adds a string entry to this lookup table with a reference of an existing
-	 * entry. This method is used when users want to insert a new entry that 
-	 * has a similarity to the existing one, so both have a same alternative
-	 * name. For example, consider the initial lookup table has:
-	 * <pre>
-	 * "Employee.id" --> "t1"
-	 * "Employee.name" --> "t2"</pre>
-	 * Calling the method add("id_number", "Employee.id") will give you the 
-	 * result:
+	 * entry. This method is used when users want to insert a new entry that has
+	 * a similarity to the existing one, so both have a same alternative name.
+	 * For example, consider the initial lookup table has:
+	 * 
 	 * <pre>
 	 * "Employee.id" --> "t1"
 	 * "Employee.name" --> "t2"
-	 * "id_number" --> "t1" </pre>
+	 * </pre>
+	 * 
+	 * Calling the method add("id_number", "Employee.id") will give you the
+	 * result:
+	 * 
+	 * <pre>
+	 * "Employee.id" --> "t1"
+	 * "Employee.name" --> "t2"
+	 * "id_number" --> "t1"
+	 * </pre>
 	 * 
 	 * @param entry
-	 * 			A new entry.
+	 *            A new entry.
 	 * @param reference
-	 * 			An entry that exists already in the lookup table. The method
-	 * 			will get its index and assign it to the new entry. If the 
-	 * 			reference is not existed yet, then the new entry will get
-	 * 			a new index.
+	 *            An entry that exists already in the lookup table. The method
+	 *            will get its index and assign it to the new entry. If the
+	 *            reference is not existed yet, then the new entry will get a
+	 *            new index.
 	 */
 	public void add(String entry, String reference) {
 		if (entry == null) {
 			return;
 		}
-		
+
 		if (!exist(reference)) {
 			add(entry);
-		}
-		else {
+		} else {
 			Integer index = getEntry(reference);
 			putEntry(entry, index);
 		}
 	}
-	
+
 	/**
 	 * Returns the alternative name for the given entry.
 	 */
 	public String lookup(String entry) {
 		if (exist(entry)) {
+			if (unsafeEntries.contains(entry.toLowerCase()))
+				throw new RuntimeException("The column name '" + entry
+						+ "' is ambiguous. Use a fully qualified name to solve this issue. E.g., table.column");
 			Integer index = getEntry(entry);
 			return retrieve(index);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Removes the given entry from the lookup table. This action follows the
 	 * removal of the alternative name, if necessary.
@@ -124,7 +140,7 @@ public class LookupTable {
 		removeEntry(entry);
 		unregister();
 	}
-	
+
 	/**
 	 * Removes more than one entry from the lookup table. This action follows
 	 * the removal of the alternative name, if necessary.
@@ -135,22 +151,27 @@ public class LookupTable {
 		}
 		unregister();
 	}
-	
+
 	/**
 	 * Updates the alternative name for the given entry to be the same as the
 	 * reference entry. The method returns false if either one or both entry
-	 * values are not in the lookup table. For example, consider the initial 
+	 * values are not in the lookup table. For example, consider the initial
 	 * lookup table has:
+	 * 
 	 * <pre>
 	 * "Employee.id" --> "t1"
 	 * "Employee.name" --> "t2"
-	 * "Salary.pid" --> "t3" </pre>
-	 * Calling the method asEqualTo("Salary.pid", "Employee.id") will give you the 
-	 * result:
+	 * "Salary.pid" --> "t3"
+	 * </pre>
+	 * 
+	 * Calling the method asEqualTo("Salary.pid", "Employee.id") will give you
+	 * the result:
+	 * 
 	 * <pre>
 	 * "Employee.id" --> "t1"
 	 * "Employee.name" --> "t2"
-	 * "Salary.pid" --> "t1" </pre>
+	 * "Salary.pid" --> "t1"
+	 * </pre>
 	 */
 	public boolean asEqualTo(String entry, String reference) {
 		if (!exist(entry) || !exist(reference)) {
@@ -159,15 +180,15 @@ public class LookupTable {
 		String name = lookup(reference);
 		Integer index = getEntry(entry);
 		update(index, name);
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		final String printFormat = "%s --> %s";
-		
-		String str = "";		
+
+		String str = "";
 		for (String entry : log.keySet()) {
 			String name = lookup(entry);
 			str += String.format(printFormat, entry, name);
@@ -175,52 +196,75 @@ public class LookupTable {
 		}
 		return str;
 	}
-	
-	/* Utility method to check if the entry exists already in the table or not. 
-	 * Input string will be written in lower case. 
+
+	/*
+	 * Utility method to check if the entry exists already in the table or not.
+	 * Input string will be written in lower case.
 	 */
 	private boolean exist(String entry) {
 		final String sourceEntry = entry.toLowerCase();
 		return log.containsKey(sourceEntry);
 	}
-	
-	/* Utility method to add an entry in the lookup table. 
-	 * Input string will be written in lower case.
+
+	/*
+	 * Utility method to add an entry in the lookup table. Input string will be
+	 * written in lower case.
 	 */
 	private void putEntry(String entry, Integer index) {
 		final String insertedEntry = entry.toLowerCase();
+
+		/*
+		 * looking for repeated entries, if they exists they are unsafe
+		 * (generally unqualified names) and they are marked as unsafe.
+		 */
+		Integer currentIndex = log.get(insertedEntry);
+		if (currentIndex != null) {
+			unsafeEntries.add(insertedEntry);
+		}
+
 		log.put(insertedEntry, index);
 	}
-	
-	/* Utility method to get an entry from the lookup table. 
-	 * Input string will be written in lower case.
+
+	/*
+	 * Utility method to get an entry from the lookup table. Input string will
+	 * be written in lower case.
 	 */
 	private Integer getEntry(String entry) {
 		final String sourceEntry = entry.toLowerCase();
+		
+		if (unsafeEntries.contains(entry))
+			throw new RuntimeException("The column reference '" + entry
+					+ "' is ambiguous. Use a fully qualified name to solve this issue. E.g., table.column");
+		// Integer location = log.get(sourceEntry);
+
 		return log.get(sourceEntry);
 	}
-	
-	/* Utility method to remove an entry from the lookup table. 
-	 * Input string will be written in lower case. 
+
+	/*
+	 * Utility method to remove an entry from the lookup table. Input string
+	 * will be written in lower case.
 	 */
 	private void removeEntry(String entry) {
 		final String sourceEntry = entry.toLowerCase();
 		log.remove(sourceEntry);
 	}
-	
-	/* Retrieves the alternative name given the index number
+
+	/*
+	 * Retrieves the alternative name given the index number
 	 */
 	private String retrieve(int index) {
 		return master.get(index);
 	}
-	
-	/* Changes the alternative in the given index number
+
+	/*
+	 * Changes the alternative in the given index number
 	 */
 	private void update(int index, String value) {
 		master.put(index, value);
 	}
-	
-	/* Assigns the newly added entry to an alternative name. 
+
+	/*
+	 * Assigns the newly added entry to an alternative name.
 	 */
 	private void register() {
 		if (!master.containsKey(index)) {
@@ -228,16 +272,17 @@ public class LookupTable {
 			master.put(index, name);
 		}
 	}
-	
-	/* Removes the alternative name if the index is no longer available
-	 * in the lookup table.
+
+	/*
+	 * Removes the alternative name if the index is no longer available in the
+	 * lookup table.
 	 */
 	private void unregister() {
 		Set<Integer> set = new HashSet<Integer>();
 		Collections.addAll(set, log.values().toArray(new Integer[0]));
-		Integer[] logIndex = set.toArray(new Integer[0]);		
+		Integer[] logIndex = set.toArray(new Integer[0]);
 		Integer[] masterIndex = master.keySet().toArray(new Integer[0]);
-		
+
 		for (int i = 0; i < masterIndex.length; i++) {
 			boolean bExist = false;
 			for (int j = 0; j < logIndex.length; j++) {
@@ -251,7 +296,7 @@ public class LookupTable {
 			}
 		}
 	}
-	
+
 	/* Advances by one the index number. */
 	private void increaseIndex() {
 		index++;
