@@ -412,11 +412,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 							latch.countDown();
 						} catch (Exception e) {
 							latch.countDown();
-							log.debug(e.getMessage(), e);
-							JOptionPane.showMessageDialog(
-									null, 
-									"Error while expanding query.\n " + e.getMessage()
-									+ "\nPlease refer to the log for more information.");
+//							log.debug(e.getMessage(), e);
+							DialogUtils.showQuickErrorDialog(null, e, "Error computing query rewriting");
+//							JOptionPane.showMessageDialog(
+//									null, 
+//									"Error while expanding query.\n " + e.getMessage()
+//									+ "\nPlease refer to the log for more information.");
 						}
 
 					} else {
