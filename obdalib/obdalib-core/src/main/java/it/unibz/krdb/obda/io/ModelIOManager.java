@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.io;
 
+import it.unibz.krdb.obda.codec.TargetQueryToTurtleCodec;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.gui.swing.exception.Indicator;
 import it.unibz.krdb.obda.gui.swing.exception.InvalidMappingException;
@@ -59,6 +60,9 @@ public class ModelIOManager {
     
     private List<Indicator> invalidPredicateIndicators = new ArrayList<Indicator>();
     private List<Indicator> invalidMappingIndicators = new ArrayList<Indicator>();
+    
+    TargetQueryToTurtleCodec turtleRenderer = null;
+
 
     /**
      * Create an IO manager for saving/loading the OBDA model.
@@ -68,6 +72,8 @@ public class ModelIOManager {
      */
     public ModelIOManager(OBDAModel model) {
         this.model = model;
+        turtleRenderer = new TargetQueryToTurtleCodec(model);
+
         prefixManager = model.getPrefixManager();
         dataFactory = model.getDataFactory();
         conjunctiveQueryParser = new TurtleSyntaxParser(model.getPrefixManager());
@@ -252,7 +258,7 @@ public class ModelIOManager {
 
     private void writeMappingDeclaration(OBDADataSource source, BufferedWriter writer) throws IOException {
         final URI sourceUri = source.getSourceID();
-        CQFormatter formatter = new TurtleFormatter(model.getPrefixManager());
+//        CQFormatter formatter = new TurtleFormatter(model.getPrefixManager());
 
         writer.write(MAPPING_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
         writer.write("\n");
@@ -263,7 +269,7 @@ public class ModelIOManager {
                 writer.write("\n");
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
-            writer.write(Label.targetQuery.name() + "\t" + formatter.print((CQIE) mapping.getTargetQuery()) + "\n");
+            writer.write(Label.targetQuery.name() + "\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
             writer.write(Label.sourceQuery.name() + "\t" + mapping.getSourceQuery() + "\n");
             needLineBreak = true;
         }
