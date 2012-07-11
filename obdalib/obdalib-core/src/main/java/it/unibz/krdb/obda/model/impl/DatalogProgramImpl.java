@@ -6,6 +6,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Predicate;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,11 +19,11 @@ public class DatalogProgramImpl implements DatalogProgram {
 	 */
 	private static final long serialVersionUID = -1644491423712454150L;
 
-	private List<CQIE>					rules			= null;
+	private List<CQIE> rules = null;
 
-	private Map<Predicate, List<CQIE>>	predicateIndex	= null;
+	private Map<Predicate, List<CQIE>> predicateIndex = null;
 
-	private OBDAQueryModifiers				modifiers;
+	private OBDAQueryModifiers modifiers;
 
 	protected DatalogProgramImpl() {
 		modifiers = new OBDAQueryModifiers();
@@ -34,18 +35,22 @@ public class DatalogProgramImpl implements DatalogProgram {
 		if (rule == null) {
 			throw new IllegalArgumentException("DatalogProgram: Recieved a null rule.");
 		}
-		
+
 		if (rules.contains(rule)) {
 			// Skip if the rule already exists!
 			return;
 		}
-		
+
 		rules.add(rule);
 
 		Atom head = rule.getHead();
 		if (head != null) {
 			Predicate predicate = rule.getHead().getPredicate();
-			List<CQIE> indexedRules = this.getRules(predicate);
+			List<CQIE> indexedRules = predicateIndex.get(predicate);
+			if (indexedRules == null) {
+				indexedRules = new LinkedList<CQIE>();
+				predicateIndex.put(predicate, indexedRules);
+			}
 			indexedRules.add(rule);
 		}
 	}
@@ -96,7 +101,7 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	public List<CQIE> getRules() {
-		return rules;
+		return Collections.unmodifiableList(rules);
 	}
 
 	public String toString() {
@@ -113,9 +118,9 @@ public class DatalogProgramImpl implements DatalogProgram {
 		List<CQIE> rules = this.predicateIndex.get(headPredicate);
 		if (rules == null) {
 			rules = new LinkedList<CQIE>();
-			predicateIndex.put(headPredicate, rules);
+			// predicateIndex.put(headPredicate, rules);
 		}
-		return rules;
+		return Collections.unmodifiableList(rules);
 	}
 
 	@Override
