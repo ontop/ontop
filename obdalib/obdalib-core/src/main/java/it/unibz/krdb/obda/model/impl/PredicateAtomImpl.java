@@ -3,12 +3,16 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Atom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /***
  * The implentation of an Atom. This implementation is aware of changes in the
@@ -211,4 +215,15 @@ public class PredicateAtomImpl implements Atom, ListListener, Cloneable {
 		this.predicate = predicate;
 		listChanged();
 	}
+
+	@Override
+	public Set<Variable> getVariables() {
+		HashSet<Variable> variables = new LinkedHashSet<Variable>();
+		for (Term t : terms) {
+			for (Variable v : t.getReferencedVariables())
+				variables.add(v);
+		}
+		return variables;
+	}
+	
 }

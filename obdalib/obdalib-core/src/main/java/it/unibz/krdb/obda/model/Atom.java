@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 public interface Atom extends Cloneable, Serializable {
 	
@@ -28,4 +29,6 @@ public interface Atom extends Cloneable, Serializable {
 	public void updateTerms(List<Term> terms);
 	
 	public int getFirstOcurrance(Term term, int i);
+	
+	public Set<Variable> getVariables(); 
 }

@@ -54,11 +54,11 @@ public class DialogUtils {
 		textArea.setEditable(false);
 		textArea.setWrapStyleWord(true);
 		StringWriter writer = new StringWriter();
-		writer.write(e.getMessage());
+		writer.write(e.getLocalizedMessage());
 		writer.write("\n\n");
-		writer.write("#######################\n");
-		writer.write("##    Stack trace    ##\n");
-		writer.write("#######################\n\n");
+		writer.write("###################################################\n");
+		writer.write("##    Debugging information (for the authors)    ##\n");
+		writer.write("###################################################\n\n");
 
 		StackTraceElement[] elemnts = e.getStackTrace();
 		for (int i = 0; i < elemnts.length; i++) {

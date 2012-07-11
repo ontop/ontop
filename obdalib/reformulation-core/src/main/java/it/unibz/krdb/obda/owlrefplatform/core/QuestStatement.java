@@ -12,6 +12,7 @@ import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
@@ -27,6 +28,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerat
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.parser.DatalogProgramParser;
+import it.unibz.krdb.obda.utils.QueryValidator;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -36,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -103,11 +106,11 @@ public class QuestStatement implements OBDAStatement {
 
 		if (strquery.split("[eE][tT][aA][bB][lL][eE]").length > 1) {
 			throw new OBDAException("ETable queries are currently disabled");
-//			return executeEpistemicQuery(strquery);
+			// return executeEpistemicQuery(strquery);
 		}
 		if (strquery.contains("/*direct*/")) {
 			throw new OBDAException("Direct sql queries are currently disabled");
-//			return executeDirectQuery(strquery);
+			// return executeDirectQuery(strquery);
 		} else {
 			return executeConjunctiveQuery(strquery);
 		}
@@ -134,7 +137,7 @@ public class QuestStatement implements OBDAStatement {
 			for (int i = 1; i <= columnCount; i++) {
 				signature.add(set.getMetaData().getColumnLabel(i));
 			}
-			
+
 			result = new QuestResultset(set, signature, this);
 
 			return result;
@@ -220,8 +223,28 @@ public class QuestStatement implements OBDAStatement {
 				for (String predicate : invalidList) {
 					msg += "- " + predicate + "\n";
 				}
-				throw new OBDAException("Found an unknown classes/properties in the query. Make sure all classes/properties in your query have been defined in the ontology. Offending entities: \n" + msg);
+				throw new OBDAException(
+						"Found an unknown classes/properties in the query. \nMake sure all classes/properties in your query have been defined in the ontology. \nOffending entities: \n"
+								+ msg);
 			}
+
+			/*
+			 * Validating variables in the head
+			 */
+			Set<Variable> missingVariables = QueryValidator.getUnboundHeadVariables(program);
+			if (missingVariables.size() != 0) {
+				StringBuffer bf = new StringBuffer();
+				boolean comma = false;
+				for (Variable v : missingVariables) {
+					if (comma)
+						bf.append(", ");
+					bf.append(v.getName());
+					comma = true;
+				}
+				throw new OBDAException("Found variable(s) in SELECT clause that is not metioned in the WHERE clause. \nOffending variables: "
+						+ bf.toString());
+			}
+
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
@@ -252,7 +275,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			program = translateAndPreProcess(strquery);
 		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error parsing SPARQL query: " + e1.getMessage());
+			OBDAException obdaException = new OBDAException("Error in SPARQL query. \n" + e1.getLocalizedMessage());
 			obdaException.setStackTrace(e1.getStackTrace());
 			throw obdaException;
 		}
@@ -262,7 +285,7 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			rewriting = getRewriting(program);
 		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error rewriting query: " + e1.getMessage());
+			OBDAException obdaException = new OBDAException("Error rewriting query. \n" + e1.getMessage());
 			obdaException.setStackTrace(e1.getStackTrace());
 			throw obdaException;
 		}
@@ -271,17 +294,16 @@ public class QuestStatement implements OBDAStatement {
 		try {
 			unfolding = getUnfolding(rewriting);
 		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error unfolding query: " + e1.getMessage());
+			OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
 			obdaException.setStackTrace(e1.getStackTrace());
 			throw obdaException;
 		}
-		
-		
+
 		String sql;
 		try {
 			sql = getSQL(unfolding, signature);
 		} catch (Exception e1) {
-			OBDAException obdaException = new OBDAException("Error generating SQL query: " + e1.getMessage());
+			OBDAException obdaException = new OBDAException("Error generating SQL. \n" + e1.getMessage());
 			obdaException.setStackTrace(e1.getStackTrace());
 			throw obdaException;
 		}
@@ -306,12 +328,12 @@ public class QuestStatement implements OBDAStatement {
 				throw new OBDAException("Error, invalid query");
 			}
 			result = new BooleanOWLOBDARefResultSet(false, this);
-		}  else {
+		} else {
 			ResultSet set;
 			try {
 				set = sqlstatement.executeQuery(sql);
 			} catch (SQLException e) {
-				throw new OBDAException("Error executing SQL query: " + e.getMessage() + "\nSQL query:\n " + sql);
+				throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql);
 			}
 			if (isBoolean) {
 				result = new BooleanOWLOBDARefResultSet(set, this);
