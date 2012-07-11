@@ -649,9 +649,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		while (data.hasNext()) {
 			Assertion ax = data.next();
-			
-			System.out.println(ax);
-			
+
 			batchCount += 1;
 			commitCount += 1;
 

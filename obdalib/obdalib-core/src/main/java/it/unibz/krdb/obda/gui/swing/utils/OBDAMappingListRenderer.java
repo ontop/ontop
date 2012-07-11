@@ -487,7 +487,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 			sqlpainter.recolorQuery();
 		} catch (Exception e) {
 				e.printStackTrace();
-			 System.out.println(e.getLocalizedMessage());
+//			 System.out.println(e.getLocalizedMessage());
 		}
 		trgQueryTextPane.setBorder(null);
 

@@ -1942,7 +1942,7 @@ public class DatalogParser extends Parser {
                   else
                     uriref = directives.get(OBDA_DEFAULT_URI);
                   if (uriref == null) {
-                  	  System.out.println("Unknown prefix");          
+//                  	  System.out.println("Unknown prefix");          
                       throw new RecognitionException();
                   }
                   
