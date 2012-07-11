@@ -220,7 +220,7 @@ public class QuestStatement implements OBDAStatement {
 				for (String predicate : invalidList) {
 					msg += "- " + predicate + "\n";
 				}
-				throw new OBDAException("Unknown Classes/Properties in the query: \n" + msg);
+				throw new OBDAException("Found an unknown classes/properties in the query. Make sure all classes/properties in your query have been defined in the ontology. Offending entities: \n" + msg);
 			}
 		}
 		log.debug("Replacing equivalences...");

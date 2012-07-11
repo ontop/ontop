@@ -737,8 +737,14 @@ public class CQCUtilities {
 
 	}
 
-	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses) {
-		removeContainedQueriesSorted(program.getRules(), twopasses, null);
+	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses) {
+		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
+		result.setQueryModifiers(program.getQueryModifiers());
+		LinkedList<CQIE> rules = new LinkedList<CQIE>();
+		rules.addAll(program.getRules());
+		removeContainedQueriesSorted(rules, twopasses, null);
+		result.appendRule(rules);
+		return result;
 	}
 
 	public static void removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, Ontology sigma) {

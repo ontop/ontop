@@ -228,7 +228,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		log.debug("Initial unfolding size: {} cqs", resultdp.getRules().size());
 		// TODO make this a switch
-		CQCUtilities.removeContainedQueriesSorted(resultdp, true);
+		resultdp = CQCUtilities.removeContainedQueriesSorted(resultdp, true);
 		log.debug("Resulting unfolding size: {} cqs", resultdp.getRules().size());
 
 		log.debug(resultdp.toString());

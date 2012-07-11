@@ -66,10 +66,10 @@ public class QueryVocabularyValidator implements Serializable {
 	}
 	
 	private void validate(CQIE query) {
-		if (isEmptyOntology()) {
-			// Skip if the input ontology is empty.
-			return;
-		}
+//		if (isEmptyOntology()) {
+//			// Skip if the input ontology is empty.
+//			return;
+//		}
 		
 		// Get the predicates in the target query.
 		Iterator<Atom> iterAtom = query.getBody().iterator();
