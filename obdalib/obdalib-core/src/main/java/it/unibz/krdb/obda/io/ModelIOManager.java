@@ -63,7 +63,6 @@ public class ModelIOManager {
     
     TargetQueryToTurtleCodec turtleRenderer = null;
 
-
     /**
      * Create an IO manager for saving/loading the OBDA model.
      * 
@@ -77,7 +76,6 @@ public class ModelIOManager {
         prefixManager = model.getPrefixManager();
         dataFactory = model.getDataFactory();
         conjunctiveQueryParser = new TurtleSyntaxParser(model.getPrefixManager());
-
     }
 
     /**
@@ -205,7 +203,10 @@ public class ModelIOManager {
     private void writeClassEntityDeclaration(BufferedWriter writer) throws IOException {
         writer.write(CLASS_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
         writer.write("\n");
-        writeEntities(model.getDeclaredClasses(), writer);
+        Set<Predicate> declaredClasses = model.getDeclaredClasses();
+        if (!declaredClasses.isEmpty()) {
+            writeEntities(declaredClasses, writer);
+        }
         writer.write(END_COLLECTION_SYMBOL);
         writer.write("\n\n");
     }
@@ -213,7 +214,10 @@ public class ModelIOManager {
     private void writeObjectPropertyDeclaration(BufferedWriter writer) throws IOException {
         writer.write(OBJECT_PROPERTY_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
         writer.write("\n");
-        writeEntities(model.getDeclaredObjectProperties(), writer);
+        Set<Predicate> declaredRoles = model.getDeclaredObjectProperties();
+        if (!declaredRoles.isEmpty()) {
+            writeEntities(declaredRoles, writer);
+        }
         writer.write(END_COLLECTION_SYMBOL);
         writer.write("\n\n");
     }
@@ -221,7 +225,10 @@ public class ModelIOManager {
     private void writeDataPropertyDeclaration(BufferedWriter writer) throws IOException {
         writer.write(DATA_PROPERTY_DECLARATION_TAG + " " + START_COLLECTION_SYMBOL);
         writer.write("\n");
-        writeEntities(model.getDeclaredDataProperties(), writer);
+        Set<Predicate> declaredAttributes = model.getDeclaredDataProperties();
+        if (!declaredAttributes.isEmpty()) {
+            writeEntities(declaredAttributes, writer);
+        }
         writer.write(END_COLLECTION_SYMBOL);
         writer.write("\n\n");
     }
