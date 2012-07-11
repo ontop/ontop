@@ -50,7 +50,7 @@ public class DialogUtils {
 		final JTextArea textArea = new JTextArea();
 		// textArea.setLineWrap(true);
 		textArea.setBackground(Color.WHITE);
-		textArea.setFont(new Font("Courier New", Font.BOLD, 12));
+		textArea.setFont(new Font("Monaco", Font.PLAIN, 11));
 		textArea.setEditable(false);
 		textArea.setWrapStyleWord(true);
 		StringWriter writer = new StringWriter();
@@ -59,7 +59,12 @@ public class DialogUtils {
 		writer.write("#######################\n");
 		writer.write("##    Stack trace    ##\n");
 		writer.write("#######################\n\n");
-		e.printStackTrace(new PrintWriter(writer));
+
+		StackTraceElement[] elemnts = e.getStackTrace();
+		for (int i = 0; i < elemnts.length; i++) {
+			writer.write("\tat " + elemnts[i].toString() + "\n");
+		}
+
 		textArea.setText(writer.toString());
 		textArea.setCaretPosition(0);
 
@@ -163,6 +168,7 @@ public class DialogUtils {
 	public static void installEscapeCloseOperation(final JDialog dialog) {
 		Action dispatchClosing = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
+
 			public void actionPerformed(ActionEvent event) {
 				dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING));
 			}
