@@ -67,6 +67,8 @@ public class MappingAnalyzer {
 
 		DatalogProgram datalog = dfac.getDatalogProgram();
 
+		LinkedList<String> errorMessage = new LinkedList<String>();
+		
 		for (OBDAMappingAxiom axiom : mappingList) {
 			try {
 				// Obtain the target and source query from each mapping axiom in
@@ -206,11 +208,17 @@ public class MappingAnalyzer {
 					datalog.appendRule(rule);
 				}
 			} catch (Exception e) {
-				RuntimeException r = new RuntimeException("Error analyzing mapping with id: " + axiom.getId() + " \nDescription: "
+				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \nDescription: "
 						+ e.getMessage() + " \nMapping: [" + axiom.toString() + "]");
-				r.setStackTrace(e.getStackTrace());
-				throw r;
+				
 			}
+		}
+		if (errorMessage.size() > 0) {
+			StringBuffer errors = new StringBuffer();
+			for (String error: errorMessage)
+				errors.append(error + "\n");
+			RuntimeException r = new RuntimeException("There was an error analyzing the following mappings. Please correct the issue(s) to continue.\n" + errors.toString());
+			throw r;
 		}
 		return datalog;
 	}
