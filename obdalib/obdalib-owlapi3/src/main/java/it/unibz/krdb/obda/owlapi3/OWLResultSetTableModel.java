@@ -58,8 +58,10 @@ public class OWLResultSetTableModel implements TableModel {
 				String[] crow = new String[numcols];
 				for (int j = 0; j < numcols; j++) {
 					OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
-
-					crow[j] = constant.toString();
+					if (constant != null)
+						crow[j] = constant.toString();
+					else
+						crow[j] = "";
 
 				}
 				resultsTable.add(crow);
@@ -84,7 +86,7 @@ public class OWLResultSetTableModel implements TableModel {
 		}
 		return tabularData;
 	}
-	
+
 	/**
 	 * Call this when done with the table model. It closes the ResultSet and the
 	 * Statement object used to create it.

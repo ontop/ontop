@@ -42,7 +42,7 @@ public class OWLAPI3IndividualTranslator {
 			OWLIndividual object = (OWLNamedIndividual) translate(ca.getObject());
 
 			return dataFactory.getOWLClassAssertionAxiom(description, object);
-		
+
 		} else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
 			IRI roleIRI = IRI.create(opa.getRole().getName());
@@ -52,7 +52,7 @@ public class OWLAPI3IndividualTranslator {
 			OWLIndividual object = (OWLNamedIndividual) translate(opa.getSecondObject());
 
 			return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
-		
+
 		} else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
 			IRI attributeIRI = IRI.create(dpa.getAttribute().getName());
@@ -73,31 +73,37 @@ public class OWLAPI3IndividualTranslator {
 	 * @return
 	 */
 	public OWLPropertyAssertionObject translate(Constant constant) {
+
 		OWLPropertyAssertionObject result = null;
 		if (constant instanceof URIConstant) {
+
 			result = dataFactory.getOWLNamedIndividual(IRI.create(((URIConstant) constant).getURI()));
 		} else if (constant instanceof BNode) {
 			result = dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
 		} else if (constant instanceof ValueConstant) {
 			ValueConstant v = (ValueConstant) constant;
-			if (v.getType() == COL_TYPE.BOOLEAN) {
-				result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.XSD_BOOLEAN);
+
+			String value = v.getValue();
+			if (value == null) {
+				result = null;
+			} else if (v.getType() == COL_TYPE.BOOLEAN) {
+				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_BOOLEAN);
 			} else if (v.getType() == COL_TYPE.DATETIME) {
-				result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.XSD_DATE_TIME);
+				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
 			} else if (v.getType() == COL_TYPE.DECIMAL) {
-				result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.XSD_DECIMAL);
+				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DECIMAL);
 			} else if (v.getType() == COL_TYPE.DOUBLE) {
-				result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.XSD_DOUBLE);
+				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DOUBLE);
 			} else if (v.getType() == COL_TYPE.INTEGER) {
-				result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.XSD_INTEGER);
+				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_INTEGER);
 			} else if (v.getType() == COL_TYPE.LITERAL) {
 				if (v.getLanguage() == null || !v.getLanguage().equals("")) {
-					result = dataFactory.getOWLLiteral(v.getValue(), v.getLanguage());
+					result = dataFactory.getOWLLiteral(value, v.getLanguage());
 				} else {
-					result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.RDF_PLAIN_LITERAL);
+					result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
 				}
 			} else if (v.getType() == COL_TYPE.STRING) {
-				result = dataFactory.getOWLLiteral(v.getValue(), OWL2Datatype.XSD_STRING);
+				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_STRING);
 			} else {
 				throw new IllegalArgumentException(v.getType().toString());
 			}
@@ -106,5 +112,4 @@ public class OWLAPI3IndividualTranslator {
 		}
 		return result;
 	}
-
 }
