@@ -61,7 +61,7 @@ public class ModelIOManager {
 
     private List<Predicate> predicateDeclarations = new ArrayList<Predicate>();
     
-    private List<Indicator> invalidPredicateIndicators = new ArrayList<Indicator>();
+//    private List<Indicator> invalidPredicateIndicators = new ArrayList<Indicator>();
     private List<Indicator> invalidMappingIndicators = new ArrayList<Indicator>();
     
     private TargetQueryToTurtleCodec turtleRenderer;
@@ -142,7 +142,7 @@ public class ModelIOManager {
      * @throws InvalidPredicateDeclarationException
      * @throws InvalidMappingException 
      */
-    public void load(File file) throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    public void load(File file) throws IOException, InvalidMappingException {
         if (!file.exists()) {
             // NO-OP: Users may not have the OBDA file
             log.warn("WARNING: Cannot locate OBDA file at: " + file.getPath());
@@ -179,9 +179,6 @@ public class ModelIOManager {
         }
         
         // Throw some validation exceptions
-        if (!invalidPredicateIndicators.isEmpty()) {
-            throw new InvalidPredicateDeclarationException(invalidPredicateIndicators);
-        }
         if (!invalidMappingIndicators.isEmpty()) {
             throw new InvalidMappingException(invalidMappingIndicators);
         }
@@ -376,11 +373,12 @@ public class ModelIOManager {
        return fullName;
     }
     
-    private URI readSourceDeclaration(BufferedReader reader) throws IOException {
+    private URI readSourceDeclaration(LineNumberReader reader) throws IOException {
         String line = "";
         URI sourceUri = null;
         OBDADataSource datasource = null;
         while (!(line = reader.readLine()).isEmpty()) {
+            int lineNumber = reader.getLineNumber();
             String[] tokens = line.split("[\t| ]+", 2);
             if (tokens[0].equals(Label.sourceUri.name())) {
                 sourceUri = URI.create(tokens[1]);
@@ -394,6 +392,9 @@ public class ModelIOManager {
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, tokens[1]);
             } else if (tokens[0].equals(Label.driverClass.name())) {
                 datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, tokens[1]);
+            } else {
+                String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);
+                throw new IOException(msg);
             }
         }
         // Save the source to the model.
@@ -458,6 +459,9 @@ public class ModelIOManager {
                     saveMapping(dataSourceUri, mappingId, sourceQuery, targetQuery);
                 }
                 isMappingValid = true; // reset the flag
+            } else {
+                String msg = String.format("Unknown parameter name \"%s\" at line: %d.", tokens[0], lineNumber);
+                throw new IOException(msg);
             }
         }
     }
