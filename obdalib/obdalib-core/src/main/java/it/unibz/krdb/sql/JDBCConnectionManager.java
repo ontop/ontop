@@ -105,7 +105,7 @@ public class JDBCConnectionManager {
 	 */
 	public Connection createConnection(OBDADataSource dataSource) throws SQLException {
 
-		if (connectionPool.get(dataSource) != null && connectionPool.get(dataSource).isClosed())
+		if (connectionPool.get(dataSource) != null && !connectionPool.get(dataSource).isClosed())
 			return connectionPool.get(dataSource);
 
 		String url = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
@@ -118,16 +118,16 @@ public class JDBCConnectionManager {
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
 		}
 
 		Connection conn = DriverManager.getConnection(url, username, password);
-		
-//		if (driver.equals("com.mysql.jdbc.Driver"))
-//			conn.setAutoCommit(false);
 
-//		boolean bAutoCommit = ((Boolean) properties.get(JDBC_AUTOCOMMIT)).booleanValue();
-//		conn.setAutoCommit(bAutoCommit);
+		// if (driver.equals("com.mysql.jdbc.Driver"))
+		// conn.setAutoCommit(false);
+
+		// boolean bAutoCommit = ((Boolean)
+		// properties.get(JDBC_AUTOCOMMIT)).booleanValue();
+		// conn.setAutoCommit(bAutoCommit);
 
 		connectionPool.put(dataSource, conn);
 
@@ -178,11 +178,13 @@ public class JDBCConnectionManager {
 		Connection existing = connectionPool.get(source);
 		if (existing == null)
 			throw new OBDAException("There is connection for such source");
-		if (existing.isClosed())
+		if (existing.isClosed()) {
+			connectionPool.remove(source);
 			throw new OBDAException("Connection is already close");
+		}
 		try {
 			connectionPool.remove(source);
-			existing.close();			
+			existing.close();
 		} catch (SQLException e) {
 			log.error(e.getMessage());
 		}
@@ -201,7 +203,7 @@ public class JDBCConnectionManager {
 	 */
 	public boolean isConnectionAlive(OBDADataSource sourceId) throws SQLException {
 		Connection conn = connectionPool.get(sourceId);
-		if (conn == null) {
+		if (conn == null || conn.isClosed()) {
 			return false;
 		}
 		return !conn.isClosed();
@@ -282,15 +284,16 @@ public class JDBCConnectionManager {
 			} else {
 				// For other database engines
 				metadata = getOtherMetaData(md);
-			}			
+			}
 			return metadata;
 		} catch (Exception e) {
 			throw new RuntimeException("Errors on collecting database metadata: " + e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * Retrieve metadata for most of the database engine, e.g., MySQL, PostgreSQL, SQL server
+	 * Retrieve metadata for most of the database engine, e.g., MySQL,
+	 * PostgreSQL, SQL server
 	 */
 	private static DBMetadata getOtherMetaData(DatabaseMetaData md) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
@@ -307,7 +310,7 @@ public class JDBCConnectionManager {
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
-				
+
 				ResultSet rsColumns = null;
 				try {
 					rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null);
@@ -315,10 +318,11 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
-						final int isNullable = rsColumns.getInt("NULLABLE");						
+						final int isNullable = rsColumns.getInt("NULLABLE");
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isNullable));
-						
-						// Check if the columns are unique regardless their letter cases
+
+						// Check if the columns are unique regardless their
+						// letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
 							throw new RuntimeException("The system cannot process duplicate table columns!");
@@ -335,18 +339,19 @@ public class JDBCConnectionManager {
 		}
 		return metadata;
 	}
-	
+
 	/**
 	 * Retrieve metadata for Oracle database engine
 	 */
 	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
-		
+
 		Statement stmt = null;
 		ResultSet rsTables = null;
 		try {
 			stmt = conn.createStatement();
-			rsTables = stmt.executeQuery("select object_name from user_objects where object_type = 'TABLE' and NOT object_name LIKE 'BIN$%'");
+			rsTables = stmt
+					.executeQuery("select object_name from user_objects where object_type = 'TABLE' and NOT object_name LIKE 'BIN$%'");
 			while (rsTables.next()) {
 				Set<String> tableColumns = new HashSet<String>();
 
@@ -354,7 +359,7 @@ public class JDBCConnectionManager {
 				final ArrayList<String> primaryKeys = getPrimaryKey(md, null, null, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
-				
+
 				ResultSet rsColumns = null;
 				try {
 					rsColumns = md.getColumns(null, null, tblName, null);
@@ -362,10 +367,11 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
-						final int isNullable = rsColumns.getInt("NULLABLE");						
+						final int isNullable = rsColumns.getInt("NULLABLE");
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, isNullable));
-						
-						// Check if the columns are unique regardless their letter cases
+
+						// Check if the columns are unique regardless their
+						// letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
 							throw new RuntimeException("The system cannot process duplicate table columns!");
@@ -377,14 +383,13 @@ public class JDBCConnectionManager {
 					rsColumns.close(); // close existing open cursor
 				}
 			}
-		}
-		finally {
+		} finally {
 			rsTables.close();
 			stmt.close();
 		}
 		return metadata;
 	}
-	
+
 	/* Retrives the primary key(s) from a table */
 	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		ArrayList<String> pk = new ArrayList<String>();
