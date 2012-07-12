@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class manages saving and loading an OBDA file.
  */
@@ -35,7 +38,7 @@ public class ModelIOManager {
 
     private enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
-        /* Mapping decl.: */mappingId, targetQuery, sourceQuery
+        /* Mapping decl.: */mappingId, target, source
     }
 
     private static final String PREFIX_DECLARATION_TAG = "[PrefixDeclaration]";
@@ -61,8 +64,10 @@ public class ModelIOManager {
     private List<Indicator> invalidPredicateIndicators = new ArrayList<Indicator>();
     private List<Indicator> invalidMappingIndicators = new ArrayList<Indicator>();
     
-    TargetQueryToTurtleCodec turtleRenderer = null;
+    private TargetQueryToTurtleCodec turtleRenderer;
 
+    private static final Logger log = LoggerFactory.getLogger(DataManager.class);
+    
     /**
      * Create an IO manager for saving/loading the OBDA model.
      * 
@@ -140,6 +145,8 @@ public class ModelIOManager {
     public void load(File file) throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         if (!file.exists()) {
             // NO-OP: Users may not have the OBDA file
+            log.warn("WARNING: Cannot locate OBDA file at: " + file.getPath());
+            return;
         }
         if (!file.canRead()) {
             throw new IOException(String.format("Error while reading the file located at %s.\n" +
@@ -276,8 +283,8 @@ public class ModelIOManager {
                 writer.write("\n");
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
-            writer.write(Label.targetQuery.name() + "\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
-            writer.write(Label.sourceQuery.name() + "\t" + mapping.getSourceQuery() + "\n");
+            writer.write(Label.target.name() + "\t" + turtleRenderer.encode((CQIE) mapping.getTargetQuery()) + "\n");
+            writer.write(Label.source.name() + "\t" + mapping.getSourceQuery() + "\n");
             needLineBreak = true;
         }
         writer.write(END_COLLECTION_SYMBOL);
@@ -426,7 +433,7 @@ public class ModelIOManager {
                     register(invalidMappingIndicators, new Indicator(lineNumber, Label.mappingId, InvalidMappingException.MAPPING_ID_IS_BLANK));
                     isMappingValid = false;
                 }
-            } else if (tokens[0].equals(Label.targetQuery.name())) {
+            } else if (tokens[0].equals(Label.target.name())) {
                 String targetString = tokens[1];
                 if (targetString.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.TARGET_QUERY_IS_BLANK));
@@ -453,7 +460,7 @@ public class ModelIOManager {
                         isMappingValid = false;
                     }
                 }
-            } else if (tokens[0].equals(Label.sourceQuery.name())) {
+            } else if (tokens[0].equals(Label.source.name())) {
                 sourceQuery = tokens[1];
                 if (sourceQuery.isEmpty()) { // empty or not
                     register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.SOURCE_QUERY_IS_BLANK));
