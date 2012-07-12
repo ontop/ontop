@@ -36,7 +36,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Vector;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
@@ -564,7 +568,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 						selector.set(source);
 						return;
 					} else {
-						JOptionPane.showMessageDialog(this, "The data source ID is already taken!", "Warning", JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(this, "The specified data source ID already exists. \nPlease provide a different one.", "Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}
 			} else {
@@ -595,17 +599,34 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 			return;
 		}
 
-		JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
-		try {
-			Connection conn = connm.getConnection(selectedDataSource);
-			if (conn == null)
-				throw new SQLException("Error connecting to the database");
-			lblConnectionStatus.setForeground(Color.GREEN);
-			lblConnectionStatus.setText("Connection is OK");
-		} catch (SQLException e) { // if fails
-			lblConnectionStatus.setForeground(Color.RED);
-			lblConnectionStatus.setText(String.format("%s (ERR-CODE: %s)", e.getMessage(), e.getErrorCode()));
-		}
+		lblConnectionStatus.setText("Establishing connection...");
+		lblConnectionStatus.setForeground(Color.BLACK);
+		
+		Runnable run = new Runnable() {
+			
+			@Override
+			public void run() {
+				JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
+				try {
+						try {
+							connm.closeConnection(selectedDataSource);
+						} catch (Exception e) {
+							
+						}
+					Connection conn = connm.getConnection(selectedDataSource);
+					if (conn == null)
+						throw new SQLException("Error connecting to the database");
+					lblConnectionStatus.setForeground(Color.GREEN);
+					lblConnectionStatus.setText("Connection is OK");
+				} catch (SQLException e) { // if fails
+					lblConnectionStatus.setForeground(Color.RED);
+					lblConnectionStatus.setText(String.format("%s (ERR-CODE: %s)", e.getMessage(), e.getErrorCode()));
+				} 
+				
+			}
+		};
+		SwingUtilities.invokeLater(run);
+		
 	}// GEN-LAST:event_cmdTestConnectionActionPerformed
 
 	private URI createUri(String name) {
