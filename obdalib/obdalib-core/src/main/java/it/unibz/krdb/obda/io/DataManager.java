@@ -212,8 +212,9 @@ public class DataManager {
         File obdaFile = new File(obdaFileURI);
 
         if (!obdaFile.exists()) {
-            String msg = String.format("File not found: %s", obdaFile.toString());
-            throw new IOException(msg);
+            // NO-OP: Users may not have the OBDA file
+            log.warn("WARNING: Cannot locate OBDA file at: " + obdaFile.getPath());
+            return;
         }
         if (!obdaFile.canRead()) {
             String msg = String.format("Error while reading the file %s", obdaFile.toString());
