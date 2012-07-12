@@ -480,9 +480,9 @@ public class OBDAModelImpl implements OBDAModel {
 	public void reset() {
 		log.debug("OBDA model is reset");
 
-		prefixManager = new SimplePrefixManager();
-		datasources = new HashMap<URI, OBDADataSource>();
-		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
+		prefixManager.clear();
+		datasources.clear();
+		mappings.clear();
 	}
 
 	@Override

@@ -52,4 +52,9 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, getProperPrefixURI(uri));
 	}
+
+	@Override
+	public void clear() {
+		owlmapper.clearPrefixes();
+	}
 }

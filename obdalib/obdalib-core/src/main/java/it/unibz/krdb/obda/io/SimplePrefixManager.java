@@ -71,4 +71,10 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 		Set<String> prefixes = prefixToURIMap.keySet();
 		return prefixes.contains(prefix);
 	}
+
+	@Override
+	public void clear() {
+		prefixToURIMap.clear();
+		uriToPrefixMap.clear();
+	}
 }

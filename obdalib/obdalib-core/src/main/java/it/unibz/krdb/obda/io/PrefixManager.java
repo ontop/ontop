@@ -32,4 +32,6 @@ public interface PrefixManager {
 	public String getShortForm(String uri, boolean insideQuotes);
 
 	public boolean contains(String prefix);
+	
+	public void clear();
 }

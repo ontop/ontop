@@ -319,12 +319,7 @@ public class ModelIOManager {
                 Predicate predicate = dataFactory.getClassPredicate(className);
                 predicateDeclarations.add(predicate);
                
-                // Check the validity
-                if (!model.isDeclaredClass(predicate)) {
-                    int lineNumber = reader.getLineNumber();
-                    int columnNumber = i + 1;
-                    register(invalidPredicateIndicators, new Indicator(lineNumber, columnNumber, predicate, InvalidPredicateDeclarationException.UNKNOWN_PREDICATE));
-                }
+                model.declareClass(predicate);
             }
         }
     }
@@ -344,12 +339,7 @@ public class ModelIOManager {
                 Predicate predicate = dataFactory.getObjectPropertyPredicate(propertyName);
                 predicateDeclarations.add(predicate);
                
-                // Check the validity
-                if (!model.isDeclaredObjectProperty(predicate)) {
-                    int lineNumber = reader.getLineNumber();
-                    int columnNumber = i + 1;
-                    register(invalidPredicateIndicators, new Indicator(lineNumber, columnNumber, predicate, InvalidPredicateDeclarationException.UNKNOWN_PREDICATE));
-                }
+                model.declareObjectProperty(predicate);
             }
         }
     }
@@ -369,12 +359,8 @@ public class ModelIOManager {
                 Predicate predicate = dataFactory.getDataPropertyPredicate(propertyName);
                 predicateDeclarations.add(predicate);
                
-                // Check the validity
-                if (!model.isDeclaredDataProperty(predicate)) {
-                    int lineNumber = reader.getLineNumber();
-                    int columnNumber = i + 1;
-                    register(invalidPredicateIndicators, new Indicator(lineNumber, columnNumber, predicate, InvalidPredicateDeclarationException.UNKNOWN_PREDICATE));
-                }
+                model.declareDataProperty(predicate);
+
             }
         }
     }
